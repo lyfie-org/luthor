@@ -1,1 +1,2 @@
-export * from "./LuthorEditor";
+export * from "./core";
+export * from "./extensions";

@@ -1,9 +1,10 @@
-import { LuthorEditor } from "@lyfie/luthor";
+import { DefaultTemplate } from "./luthor/LuthorDemoEditor";
 
 function App() {
+  
   return (
-    <div style={{ padding: 40 }}>
-      <LuthorEditor />
+    <div className="p-4" style={{ margin: "50px" }}>
+      <DefaultTemplate />
     </div>
   );
 }
