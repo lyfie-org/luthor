@@ -1,0 +1,30 @@
+{
+  "name": "luthor",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build:luthor": "npm run build -w package",
+    "dev:demo": "npm run dev -w demo",
+    "dev": "npm run dev -w demo",
+    "build": "npm run build --workspace=package",
+    "build:all": "npm run build --workspaces"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lyfie-app/luthor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lyfie-app/luthor/issues"
+  },
+  "homepage": "https://github.com/lyfie-app/luthor#readme"
+}

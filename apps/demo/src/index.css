@@ -1,0 +1,20 @@
+
+:root {
+  line-height: 1.5;
+  font-weight: 400;
+  color: #1b1a18;
+  background-color: #f4f1ec;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}

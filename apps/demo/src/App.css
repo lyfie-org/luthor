@@ -1,0 +1,251 @@
+/* ======================================================
+   Luthor Playground Layout
+   ====================================================== */
+
+:root {
+  --play-bg: #f4f1ec;
+  --play-surface: #ffffff;
+  --play-ink: #1b1a18;
+  --play-muted: #6e6a64;
+  --play-accent: #e0572d;
+  --play-accent-strong: #b93e1d;
+  --play-line: rgba(22, 20, 17, 0.12);
+  --play-shadow: 0 25px 60px rgba(21, 17, 10, 0.12);
+  --play-radius: 18px;
+}
+
+.playground {
+  min-height: 100vh;
+  color: var(--play-ink);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(224, 87, 45, 0.08), transparent 45%),
+    radial-gradient(circle at 90% 20%, rgba(76, 132, 206, 0.12), transparent 42%),
+    linear-gradient(180deg, #f8f5f1, #f3eee8 55%, #f7f4ef 100%);
+  padding: 28px clamp(18px, 3vw, 40px) 48px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto 28px;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-mark {
+  height: 44px;
+  width: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f06f45, #d04622);
+  color: #fffaf5;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 10px 30px rgba(223, 82, 40, 0.3);
+}
+
+.brand-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.brand-subtitle {
+  color: var(--play-muted);
+  font-size: 13px;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.ghost-btn,
+.primary-btn {
+  border-radius: 999px;
+  padding: 10px 18px;
+  border: 1px solid var(--play-line);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #f06f45, #d04622);
+  color: #fffdfb;
+  border: none;
+  box-shadow: 0 10px 25px rgba(223, 82, 40, 0.3);
+}
+
+.ghost-btn:hover,
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(21, 17, 10, 0.15);
+}
+
+.layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 24px;
+}
+
+.editor-shell {
+  background: var(--play-surface);
+  border-radius: var(--play-radius);
+  box-shadow: var(--play-shadow);
+  border: 1px solid rgba(22, 20, 17, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--play-line);
+  background: linear-gradient(90deg, #fffaf5, #fff6ef);
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 8px;
+}
+
+.toolbar-btn {
+  border: 1px solid rgba(22, 20, 17, 0.12);
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: border 0.2s ease, transform 0.2s ease;
+}
+
+.toolbar-btn:hover {
+  border-color: rgba(224, 87, 45, 0.5);
+  transform: translateY(-1px);
+}
+
+.editor-frame {
+  padding: clamp(28px, 4vw, 48px) clamp(26px, 5vw, 64px) 56px;
+  min-height: 520px;
+  display: flex;
+  position: relative;
+}
+
+.statusbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 18px 14px;
+  font-size: 12px;
+  color: var(--play-muted);
+  border-top: 1px solid var(--play-line);
+  background: #fffdfa;
+}
+
+.side-panel {
+  display: flex;
+}
+
+.panel-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 22px;
+  border: 1px solid rgba(22, 20, 17, 0.08);
+  box-shadow: 0 15px 40px rgba(21, 17, 10, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.panel-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.panel-text {
+  color: var(--play-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.panel-divider {
+  height: 1px;
+  width: 100%;
+  background: var(--play-line);
+  margin: 16px 0;
+}
+
+.panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  color: var(--play-muted);
+  font-size: 13px;
+}
+
+.luthor-editor {
+  position: relative;
+  flex: 1;
+  height: 100%;
+}
+
+.luthor-content-editable {
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+  padding-bottom: 48px;
+  outline: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.luthor-placeholder {
+  top: 0;
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .side-panel {
+    order: 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .editor-frame {
+    padding: 26px 22px 40px;
+  }
+}
