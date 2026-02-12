@@ -7,22 +7,23 @@ export const injectEditorStyles = () => {
   const style = document.createElement('style');
   style.id = styleId;
   style.innerHTML = `
-    .fs-bold { font-weight: bold; }
-    .fs-italic { font-style: italic; }
-    .fs-underline { text-decoration: underline; }
-    .fs-strikethrough { text-decoration: line-through; }
-    .fs-highlight { margin: 0 5px; }
-    .fs-code { 
+    .lfs-bold { font-weight: bold; }
+    .lfs-italic { font-style: italic; }
+    .lfs-underline { text-decoration: underline; }
+    .lfs-strikethrough { text-decoration: line-through; }
+    .lfs-highlight { margin: 0 5px; }
+    .lfs-code { 
       background-color: rgba(0,0,0,0.05); 
       padding: 2px 4px; 
       font-family: monospace; 
     }
-    .fs-subscript { 
+    .lfs-subscript { 
       vertical-align: sub; 
     }
-    .fs-superscript { 
+    .lfs-superscript { 
       vertical-align: super;
     }
   `;
-  document.head.appendChild(style);
+
+  document.head.insertBefore(style, document.head.firstChild);
 };
