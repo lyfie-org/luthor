@@ -1,0 +1,184 @@
+/* Themed editor styles for dark theme */
+.themed-editor {
+  border: 1px solid #374151;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1f2937;
+}
+
+.themed-editor-container {
+  background: #1f2937;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.themed-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid #374151;
+  background: #111827;
+  flex-wrap: wrap;
+}
+
+.themed-toolbar > div {
+  display: flex;
+  gap: 4px;
+}
+
+.themed-toolbar button {
+  padding: 6px 12px;
+  border: 1px solid #4b5563;
+  background: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  color: #f9fafb;
+}
+
+.themed-toolbar button:hover {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+.themed-toolbar button:active {
+  background: #6b7280;
+}
+
+.themed-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.themed-content {
+  padding: 16px;
+  outline: none;
+  min-height: 300px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #f9fafb;
+  background: #1f2937;
+}
+
+.themed-placeholder {
+  color: #6b7280;
+  padding: 16px;
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  font-size: 16px;
+}
+
+/* Themed element styling */
+
+.themed-heading-h1 {
+  color: #f9fafb !important;
+  font-size: 2em;
+  font-weight: bold;
+  margin: 0.67em 0;
+}
+
+.themed-heading-h2 {
+  color: #f9fafb !important;
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0.83em 0;
+}
+
+.themed-heading-h3 {
+  color: #f9fafb !important;
+  font-size: 1.17em;
+  font-weight: bold;
+  margin: 1em 0;
+}
+
+.themed-list-ul {
+  color: #f9fafb !important;
+  padding-left: 2rem;
+  margin: 1rem 0;
+  list-style-type: disc;
+}
+
+.themed-list-ol {
+  color: #f9fafb !important;
+  padding-left: 2rem;
+  margin: 1rem 0;
+  list-style-type: decimal;
+}
+
+.themed-list-li {
+  color: #f9fafb !important;
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+/* Enhanced nested list styles */
+.themed-content ul ul {
+  list-style-type: circle;
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.themed-content ol ol {
+  list-style-type: lower-alpha;
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.themed-content ul ul ul {
+  list-style-type: square;
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.themed-content ol ol ol {
+  list-style-type: lower-roman;
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.luthor-link {
+  color: #3b82f6 !important;
+  text-decoration: underline;
+}
+
+.luthor-link:hover {
+  color: #60a5fa !important;
+}
+
+.luthor-text-bold {
+  font-weight: bold;
+}
+
+.luthor-text-italic {
+  font-style: italic;
+}
+
+.luthor-text-underline {
+  text-decoration: underline;
+}
+
+.themed-toolbar button.active {
+  background: #4b5563 !important;
+}
+
+.themed-toolbar button.active:nth-child(1) {
+  font-weight: bold;
+}
+
+.themed-toolbar button.active:nth-child(2) {
+  font-style: italic;
+}
+
+.themed-toolbar button.active:nth-child(3) {
+  text-decoration: underline;
+}
+
+.themed-toolbar button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

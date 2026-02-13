@@ -1,0 +1,34 @@
+# Source files - not needed in production package
+src/
+docs/
+
+# Build artifacts and cache
+.turbo/
+node_modules/
+
+# Development files
+tsconfig.json
+tsup.config.ts
+.DS_Store
+
+# Git files
+.git/
+.gitignore
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+
+# Include only what we need
+!dist/
+!dist/index.js
+!dist/index.d.ts
+!package.json
+!README.md

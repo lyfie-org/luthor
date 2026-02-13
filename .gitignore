@@ -159,3 +159,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# docs_repo_arch folder
+docs_repo_arch
+
+# turbo folder
+.turbo

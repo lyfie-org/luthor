@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Homepage -->
+  <url>
+    <loc>https://luthor.lyfie.app/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Main Pages -->
+  <url>
+    <loc>https://luthor.lyfie.app/docs/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/demo/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Getting Started -->
+  <url>
+    <loc>https://luthor.lyfie.app/docs/introduction/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/docs/installation/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/docs/get-started/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Core Concepts -->
+  <url>
+    <loc>https://luthor.lyfie.app/docs/extensions/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/docs/theming/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Templates -->
+  <url>
+    <loc>https://luthor.lyfie.app/docs/templates/default/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/docs/templates/shadcn/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Extensions -->
+  <url>
+    <loc>https://luthor.lyfie.app/docs/extensions/ContextMenuExtension/</loc>
+    <lastmod>2025-09-18T12:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/docs/extensions/LinkExtension/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/docs/extensions/DraggableBlockExtension/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- API Documentation -->
+  <url>
+    <loc>https://luthor.lyfie.app/docs/api/create-editor-system/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/docs/api/extensions/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/docs/api/type-definitions/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+  <url>
+    <loc>https://luthor.lyfie.app/docs/contributing/</loc>
+    <lastmod>2025-09-18T00:00:00+00:00</lastmod>
+  </url>
+</urlset>

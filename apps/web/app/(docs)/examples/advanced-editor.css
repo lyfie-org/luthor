@@ -1,0 +1,215 @@
+/* Advanced editor styling tuned for Next.js colors */
+
+/* CSS variables for Next.js theming */
+.advanced-editor {
+  --advanced-bg: var(--background, #ffffff);
+  --advanced-fg: var(--foreground, #0f172a);
+  --advanced-border: var(--border, #e2e8f0);
+  --advanced-border-hover: var(--border, #cbd5e1);
+  --advanced-accent: var(--primary, #3b82f6);
+  --advanced-accent-hover: var(--primary, #2563eb);
+  --advanced-muted: var(--muted, #f8fafc);
+  --advanced-muted-fg: var(--muted-foreground, #64748b);
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] .advanced-editor {
+  --advanced-bg: var(--background, #0f172a);
+  --advanced-fg: var(--foreground, #f8fafc);
+  --advanced-border: var(--border, #334155);
+  --advanced-border-hover: var(--border, #475569);
+  --advanced-accent: var(--primary, #60a5fa);
+  --advanced-accent-hover: var(--primary, #3b82f6);
+  --advanced-muted: var(--muted, #1e293b);
+  --advanced-muted-fg: var(--muted-foreground, #94a3b8);
+}
+
+/* Primary editor container styles */
+.advanced-editor {
+  border: 1px solid var(--advanced-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--advanced-bg);
+  color: var(--advanced-fg);
+}
+
+/* Toolbar layout */
+.advanced-editor-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--advanced-border);
+  background: var(--advanced-muted);
+  flex-wrap: wrap;
+}
+
+.advanced-editor-toolbar-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Editor content surface */
+.advanced-editor-content {
+  padding: 16px;
+  outline: none;
+  min-height: 300px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--advanced-fg);
+  background: var(--advanced-bg);
+}
+
+.advanced-editor-placeholder {
+  color: var(--advanced-muted-fg);
+  padding: 16px;
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  font-size: 16px;
+  background: var(--advanced-bg);
+}
+
+/* List styles */
+.advanced-editor-content ul {
+  list-style-type: disc;
+  padding-left: 2rem;
+  margin: 1rem 0;
+  color: var(--advanced-fg);
+}
+
+.advanced-editor-content ol {
+  list-style-type: decimal;
+  padding-left: 2rem;
+  margin: 1rem 0;
+  color: var(--advanced-fg);
+}
+
+.advanced-editor-content li {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+  color: var(--advanced-fg);
+}
+
+.advanced-editor-content ul ul {
+  list-style-type: circle;
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.advanced-editor-content ol ol {
+  list-style-type: lower-alpha;
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.advanced-editor-content ul ul ul {
+  list-style-type: square;
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.advanced-editor-content ol ol ol {
+  list-style-type: lower-roman;
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+/* Heading styles */
+.advanced-editor .luthor-heading-h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 0.67em 0;
+  line-height: 1.2;
+  color: var(--advanced-fg);
+}
+
+.advanced-editor .luthor-heading-h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0.83em 0;
+  line-height: 1.3;
+  color: var(--advanced-fg);
+}
+
+.advanced-editor .luthor-heading-h3 {
+  font-size: 1.17em;
+  font-weight: bold;
+  margin: 1em 0;
+  line-height: 1.4;
+  color: var(--advanced-fg);
+}
+
+/* Quote styles */
+.advanced-editor .luthor-quote {
+  margin: 1em 0;
+  padding: 1em;
+  border-left: 4px solid var(--advanced-accent);
+  background-color: var(--advanced-muted);
+  font-style: italic;
+  color: var(--advanced-muted-fg);
+}
+
+/* Table styles */
+.advanced-editor .luthor-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  border: 1px solid var(--advanced-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.advanced-editor .luthor-table-cell {
+  border: 1px solid var(--advanced-border);
+  padding: 8px 12px;
+  text-align: left;
+  min-width: 80px;
+  position: relative;
+  background-color: var(--advanced-bg);
+  color: var(--advanced-fg);
+}
+
+.advanced-editor .luthor-table-cell-header {
+  background-color: var(--advanced-muted);
+  font-weight: 600;
+  color: var(--advanced-fg);
+  border: 1px solid var(--advanced-border);
+  padding: 8px 12px;
+  text-align: left;
+  min-width: 80px;
+  position: relative;
+}
+
+.advanced-editor .luthor-table-cell:focus,
+.advanced-editor .luthor-table-cell-header:focus {
+  outline: 2px solid var(--advanced-accent);
+  outline-offset: -2px;
+}
+
+/* Table selection styles */
+.advanced-editor table[data-lexical-table-selection] {
+  box-shadow: 0 0 0 2px var(--advanced-accent);
+}
+
+.advanced-editor table td[data-lexical-table-cell-selection] {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .advanced-editor-toolbar {
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .advanced-editor-content {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .advanced-editor-placeholder {
+    padding: 12px;
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,31 @@
+/* Shadcn editor styling - essentials only */
+
+/* ===== CORE MOTION ===== */
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes drop-indicator-pulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1.2);
+  }
+}
+
+/* Remove textarea focus outlines that clash with the theme */
+textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}

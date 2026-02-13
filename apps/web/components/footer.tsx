@@ -1,0 +1,169 @@
+import Link from "next/link";
+import { Coffee, Heart, Github } from "lucide-react";
+import { Button } from "@repo/ui/components/button";
+import Image from "next/image";
+
+export function Footer() {
+  return (
+    <footer className="border-t bg-muted/50">
+      <div className="py-8 px-8 md:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand summary */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Image
+                src={'/images/LUTHOR.svg'}
+                width={100}
+                height={32}
+                alt="Luthor Logo"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              A headless, extensible rich text editor built on Lexical. <br />
+              Use the power of Lexical out of the box with better developer experience.
+            </p>
+          </div>
+
+          {/* Documentation links */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold">Documentation</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link
+                  href="/docs/introduction"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Introduction
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/installation"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Installation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/get-started"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Quick Start
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/extensions"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Extensions
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Resource shortcuts */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold">Resources</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link
+                  href="/demo"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Demo
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="https://stackblitz.com/edit/vitejs-vite-bpg2kpze?file=src%2FEditor.tsx"
+                  target="_blank"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Playground
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="https://github.com/novincode/luthor"
+                  target="_blank"
+                  className="hover:text-foreground transition-colors"
+                >
+                  GitHub
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support shortcuts */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold">Support the Project</h4>
+            <div className="space-y-3">
+              <Button asChild size="sm" className="w-full">
+                <Link
+                  href="https://github.com/sponsors/novincode"
+                  target="_blank"
+                  className="flex items-center gap-2"
+                >
+                  <Coffee className="h-4 w-4" />
+                  Buy me a coffee
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild className="w-full">
+                <Link
+                  href="https://github.com/novincode/luthor"
+                  target="_blank"
+                  className="flex items-center gap-2"
+                >
+                  <Github className="h-4 w-4" />
+                  Star on GitHub
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 pt-8 border-t">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              © 2025 Luthor. Built with{" "}
+              <Heart className="inline h-3 w-3 text-red-500" /> by a solo dev
+              (but open to collab :D)
+            </p>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <Link
+                href="/docs"
+                className="hover:text-foreground transition-colors"
+              >
+                Docs
+              </Link>
+              <Link
+                href="https://github.com/novincode/luthor"
+                target="_blank"
+                className="hover:text-foreground transition-colors"
+              >
+                GitHub
+              </Link>
+              <Link
+                href="https://discord.gg/RAMYSDRag7"
+                target="_blank"
+                className="hover:text-foreground transition-colors"
+              >
+                Discord
+              </Link>
+              <Link
+                href="https://codeideal.com"
+                target="_blank"
+                className="hover:text-foreground transition-colors font-medium"
+              >
+                By CodeIdeal
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

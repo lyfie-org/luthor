@@ -20,31 +20,47 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org/"
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build package
-        run: npm run build -w @lyfie/luthor
+        run: npx turbo build --filter=@lyfie/luthor
 
-      - name: Bump patch version
-        run: npm version patch -w @lyfie/luthor --no-git-tag-version
+      - name: Bump version from commit message
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          if echo "$COMMIT_MESSAGE" | grep -qi "\[major\]"; then
+            BUMP=major
+          elif echo "$COMMIT_MESSAGE" | grep -qi "\[minor\]"; then
+            BUMP=minor
+          else
+            BUMP=patch
+          fi
+          echo "Using bump: $BUMP"
+          pnpm version "$BUMP" --filter=@lyfie/luthor --no-git-tag-version
 
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish -w @lyfie/luthor --access public
+        run: pnpm publish --filter=@lyfie/luthor --access public --no-git-checks
 
       - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add packages/luthor/package.json package-lock.json
+          git add packages/luthor/package.json pnpm-lock.yaml
           git commit -m "chore: bump luthor version [skip ci]"
           git push

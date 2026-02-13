@@ -1,0 +1,262 @@
+/* Basic editor styling */
+.basic-editor {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  color:black
+}
+
+.basic-editor-container {
+  background: white;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.basic-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-wrap: wrap;
+}
+
+.basic-toolbar button {
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.basic-toolbar button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.basic-toolbar button:active {
+  background: #e5e7eb;
+}
+
+.basic-toolbar button.active {
+  background: #f3f4f6;
+  font-weight: bold;
+}
+
+.basic-toolbar button.active:nth-child(1) {
+  font-weight: bold;
+}
+
+.basic-toolbar button.active:nth-child(2) {
+  font-style: italic;
+}
+
+.basic-toolbar button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.basic-toolbar button.active {
+  background: #f3f4f6;
+  font-weight: bold;
+}
+
+.basic-toolbar button.active:nth-child(1) {
+  font-weight: bold;
+}
+
+.basic-toolbar button.active:nth-child(2) {
+  font-style: italic;
+}
+
+/* Toolbar divider styling */
+.toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background: #e5e7eb;
+  margin: 0 8px;
+}
+
+/* Link styles */
+.basic-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.basic-content a:hover {
+  color: #1d4ed8;
+  text-decoration-thickness: 2px;
+}
+
+.basic-content a:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Link nodes inside the editor content */
+.luthor-link {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 2px !important;
+  cursor: pointer;
+}
+
+.luthor-link:hover {
+  color: #1d4ed8 !important;
+  text-decoration-thickness: 2px !important;
+}
+
+.luthor-link:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Paragraph styles */
+.luthor-paragraph {
+  margin: 0;
+  padding: 0;
+}
+
+/* Content styles */
+.basic-content {
+  padding: 16px;
+  outline: none;
+  min-height: 200px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #111827;
+  background: white;
+}
+
+.basic-placeholder {
+  color: #9ca3af;
+  padding: 16px;
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  font-size: 14px;
+  background: transparent;
+}
+
+/* List styles */
+.basic-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.basic-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.basic-content li {
+  margin: 0.25rem 0;
+  line-height: 1.5;
+}
+
+.basic-content ul ul {
+  list-style-type: circle;
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+
+.basic-content ol ol {
+  list-style-type: lower-alpha;
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+
+.basic-content ul ul ul {
+  list-style-type: square;
+  margin: 0.125rem 0;
+  padding-left: 1rem;
+}
+
+.basic-content ol ol ol {
+  list-style-type: lower-roman;
+  margin: 0.125rem 0;
+  padding-left: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .basic-toolbar {
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .basic-toolbar button {
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+
+  .basic-content {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .basic-placeholder {
+    padding: 12px;
+    font-size: 13px;
+  }
+}
+
+/* Table styles */
+.luthor-table {
+  border-collapse: collapse;
+  border: 1px solid #d1d5db;
+  margin: 1rem 0;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.luthor-table-row {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.luthor-table-row:hover {
+  background-color: #f9fafb;
+}
+
+.luthor-table-cell {
+  border: 1px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.luthor-table-cell:last-child {
+  border-right: none;
+}
+
+.luthor-table-cell-header {
+  border: 1px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  background-color: #f3f4f6;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.luthor-table-cell-header:last-child {
+  border-right: none;
+}

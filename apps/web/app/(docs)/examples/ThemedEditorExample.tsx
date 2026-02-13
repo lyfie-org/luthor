@@ -1,0 +1,183 @@
+"use client";
+
+// Themed Editor Example - Shows how to customize editor appearance
+// This example demonstrates theming and dark mode support
+import React from "react";
+import { Button } from "@repo/ui/components/button";
+import {
+  createEditorSystem,
+  boldExtension,
+  italicExtension,
+  underlineExtension,
+  listExtension,
+  linkExtension,
+  historyExtension,
+  RichText,
+} from "@lyfie/luthor";
+import { LuthorTheme } from "@lyfie/luthor";
+import "./themed-editor.css";
+
+// Define a custom theme with classnames
+const simpleTheme: LuthorTheme = {
+  // Editor content styles
+  paragraph: "luthor-paragraph",
+  heading: {
+    h1: "themed-heading-h1",
+    h2: "themed-heading-h2",
+    h3: "themed-heading-h3",
+  },
+  list: {
+    ul: "themed-list-ul",
+    ol: "themed-list-ol",
+    listitem: "themed-list-li",
+  },
+  quote: "luthor-quote",
+  link: "luthor-link",
+  text: {
+    bold: "luthor-text-bold",
+    italic: "luthor-text-italic",
+    underline: "luthor-text-underline",
+  },
+};
+
+// Define extensions as const for type safety
+const extensions = [
+  boldExtension,
+  italicExtension,
+  underlineExtension,
+  listExtension,
+  linkExtension.configure({ pasteListener: { insert: true, replace: true } }),
+  historyExtension,
+] as const;
+
+// Create typed editor system
+const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+
+// Themed Toolbar Component
+function ThemedToolbar() {
+  const { commands, activeStates } = useEditor();
+
+  return (
+    <div className="themed-toolbar">
+      <div>
+        <button
+          onClick={() => commands.toggleBold()}
+          style={{
+            fontWeight: activeStates.bold ? "bold" : "normal",
+            background: activeStates.bold ? "#4b5563" : "#374151",
+            color: activeStates.bold ? "#f9fafb" : "#f9fafb",
+          }}
+        >
+          Bold
+        </button>
+
+        <button
+          onClick={() => commands.toggleItalic()}
+          style={{
+            fontStyle: activeStates.italic ? "italic" : "normal",
+            background: activeStates.italic ? "#4b5563" : "#374151",
+            color: activeStates.italic ? "#f9fafb" : "#f9fafb",
+          }}
+        >
+          Italic
+        </button>
+
+        <button
+          onClick={() => commands.toggleUnderline()}
+          style={{
+            textDecoration: activeStates.underline ? "underline" : "none",
+            background: activeStates.underline ? "#4b5563" : "#374151",
+            color: activeStates.underline ? "#f9fafb" : "#f9fafb",
+          }}
+        >
+          Underline
+        </button>
+      </div>
+
+      <div>
+        <button
+          onClick={() => commands.toggleUnorderedList()}
+          className={activeStates.unorderedList ? "active" : ""}
+        >
+          • List
+        </button>
+
+        <button
+          onClick={() => commands.toggleOrderedList()}
+          className={activeStates.orderedList ? "active" : ""}
+        >
+          1. List
+        </button>
+      </div>
+
+      <div>
+        <button
+          onClick={() => {
+            const url = prompt("Enter link URL:");
+            const text = prompt("Enter link text:");
+            if (url && text) {
+              commands.insertLink(url, text);
+            }
+          }}
+        >
+          🔗 Link
+        </button>
+      </div>
+
+      <div>
+        <button
+          onClick={() => commands.undo()}
+          disabled={!activeStates.canUndo}
+          className={!activeStates.canUndo ? "disabled" : ""}
+        >
+          ↶ Undo
+        </button>
+
+        <button
+          onClick={() => commands.redo()}
+          disabled={!activeStates.canRedo}
+          className={!activeStates.canRedo ? "disabled" : ""}
+        >
+          ↷ Redo
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Themed Editor Component
+function ThemedEditor() {
+  return (
+    <div className="themed-editor">
+      <ThemedToolbar />
+      <RichText
+        placeholder="Experience the power of theming! This editor uses custom CSS classes for complete control over appearance."
+        classNames={{
+          container: "themed-editor-container",
+          contentEditable: "themed-content",
+          placeholder: "themed-placeholder",
+        }}
+      />
+    </div>
+  );
+}
+
+export function ThemedEditorExample() {
+  return (
+    <div className="space-y-4">
+      <Provider extensions={extensions} config={{ theme: simpleTheme }}>
+        <ThemedEditor />
+      </Provider>
+
+      <div className="flex items-center gap-2">
+        <Button
+          onClick={() => window.location.reload()}
+          variant="outline"
+          size="sm"
+        >
+          Reset Editor
+        </Button>
+      </div>
+    </div>
+  );
+}
