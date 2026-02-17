@@ -1,4 +1,3 @@
-import React from "react";
 import {
   ALL_MARKDOWN_TRANSFORMERS,
   MarkdownExtension,
@@ -56,22 +55,34 @@ const htmlEmbedExt = new HTMLEmbedExtension();
 type FloatingToolbarContext = {
   commands: any;
   activeStates: any;
+  editorTheme: "light" | "dark";
 };
 
 const floatingToolbarContext: FloatingToolbarContext = {
   commands: {},
   activeStates: {},
+  editorTheme: "light",
 };
 
-export function setFloatingToolbarContext(commands: any, activeStates: any) {
+export function setFloatingToolbarContext(
+  commands: any,
+  activeStates: any,
+  editorTheme: "light" | "dark",
+) {
   floatingToolbarContext.commands = commands;
   floatingToolbarContext.activeStates = activeStates;
+  floatingToolbarContext.editorTheme = editorTheme;
 }
 
 const floatingToolbarExt = new FloatingToolbarExtension();
 (floatingToolbarExt as any).config = {
   ...(floatingToolbarExt as any).config,
-  render: (props: any) => <FloatingToolbar {...props} />,
+  render: (props: any) => (
+    <FloatingToolbar
+      {...props}
+      editorTheme={floatingToolbarContext.editorTheme}
+    />
+  ),
   getCommands: () => floatingToolbarContext.commands,
   getActiveStates: () => floatingToolbarContext.activeStates,
 };

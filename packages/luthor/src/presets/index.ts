@@ -40,8 +40,8 @@ export {
 	codePreset,
 	defaultPreset,
 	extensivePreset,
-  ExtensiveEditor,
-  extensiveExtensions,
+	ExtensiveEditor,
+	extensiveExtensions,
 };
 
 export const presetRegistry: Record<string, EditorPreset> = {

@@ -205,16 +205,12 @@
 }
 
 .luthor-select-dropdown {
-	position: absolute;
-	top: 100%;
-	left: 0;
-	right: 0;
-	z-index: 50;
+	position: fixed;
+	z-index: 10000;
 	background-color: var(--luthor-bg);
 	border: 1px solid var(--luthor-border);
 	border-radius: 6px;
 	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-	margin-top: 4px;
 	max-height: 200px;
 	overflow-y: auto;
 }
@@ -337,7 +333,6 @@
 	min-height: 280px;
 	padding: 12px;
 	border: 1px solid var(--luthor-border);
-	border-radius: 8px;
 	font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Consolas', 'Courier New', monospace;
 	font-size: 14px;
 	line-height: 1.6;
@@ -850,20 +845,58 @@
 }
 
 .luthor-floating-toolbar {
+	--luthor-floating-bg: #ffffff;
+	--luthor-floating-fg: #0f172a;
+	--luthor-floating-border: #e2e8f0;
+	--luthor-floating-shadow: rgba(0, 0, 0, 0.08);
+	--luthor-floating-muted: #f8fafc;
+	--luthor-floating-border-hover: #cbd5e1;
+	--luthor-floating-border-active: #94a3b8;
+	--luthor-floating-accent: #0f172a;
+	--luthor-floating-accent-fg: #ffffff;
 	display: flex;
 	align-items: center;
 	gap: 4px;
 	padding: 6px;
-	background-color: var(--luthor-bg);
-	border: 1px solid var(--luthor-border);
+	background-color: var(--luthor-floating-bg);
+	color: var(--luthor-floating-fg);
+	border: 1px solid var(--luthor-floating-border);
 	border-radius: 8px;
-	box-shadow: 0 8px 24px var(--luthor-shadow);
+	box-shadow: 0 8px 24px var(--luthor-floating-shadow);
+}
+
+.luthor-floating-toolbar[data-theme="dark"] {
+	--luthor-floating-bg: #0a0a0a;
+	--luthor-floating-fg: #ededed;
+	--luthor-floating-border: #262626;
+	--luthor-floating-shadow: rgba(0, 0, 0, 0.5);
+	--luthor-floating-muted: #171717;
+	--luthor-floating-border-hover: #404040;
+	--luthor-floating-border-active: #525252;
+	--luthor-floating-accent: #ededed;
+	--luthor-floating-accent-fg: #0a0a0a;
+}
+
+.luthor-floating-toolbar .luthor-toolbar-button {
+	color: var(--luthor-floating-fg);
+	border-color: transparent;
+}
+
+.luthor-floating-toolbar .luthor-toolbar-button:hover {
+	background-color: var(--luthor-floating-muted);
+	border-color: var(--luthor-floating-border-hover);
+}
+
+.luthor-floating-toolbar .luthor-toolbar-button.active {
+	background-color: var(--luthor-floating-accent);
+	border-color: var(--luthor-floating-accent);
+	color: var(--luthor-floating-accent-fg);
 }
 
 .luthor-floating-toolbar-separator {
 	width: 1px;
 	height: 18px;
-	background-color: var(--luthor-border);
+	background-color: var(--luthor-floating-border);
 	margin: 0 4px;
 }
 

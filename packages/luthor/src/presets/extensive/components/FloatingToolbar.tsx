@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import {
   AlignCenterIcon,
   AlignLeftIcon,
@@ -17,11 +17,38 @@ import {
 import { IconButton } from "./ui";
 
 export function FloatingToolbar(props: any) {
-  const { isVisible, selectionRect, commands, activeStates } = props;
+  const {
+    isVisible,
+    selectionRect,
+    commands,
+    activeStates,
+    editorTheme = "light",
+    hide,
+  } = props;
+  const toolbarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (toolbarRef.current?.contains(target)) return;
+      hide?.();
+    };
+
+    document.addEventListener("mousedown", handlePointerDown, true);
+    document.addEventListener("touchstart", handlePointerDown, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown, true);
+      document.removeEventListener("touchstart", handlePointerDown, true);
+    };
+  }, [isVisible, hide]);
 
   if (!isVisible || !selectionRect) return null;
 
-  const style: React.CSSProperties = {
+  const style: CSSProperties = {
     position: "absolute",
     top: selectionRect.y,
     left: selectionRect.positionFromRight ? "auto" : selectionRect.x,
@@ -32,7 +59,12 @@ export function FloatingToolbar(props: any) {
 
   if (activeStates?.imageSelected) {
     return (
-      <div className="luthor-floating-toolbar" style={style}>
+      <div
+        className="luthor-floating-toolbar"
+        data-theme={editorTheme}
+        ref={toolbarRef}
+        style={style}
+      >
         <IconButton
           onClick={() => commands.setImageAlignment("left")}
           active={activeStates.isImageAlignedLeft}
@@ -66,7 +98,12 @@ export function FloatingToolbar(props: any) {
   }
 
   return (
-    <div className="luthor-floating-toolbar" style={style}>
+    <div
+      className="luthor-floating-toolbar"
+      data-theme={editorTheme}
+      ref={toolbarRef}
+      style={style}
+    >
       <IconButton onClick={() => commands.toggleBold()} active={activeStates.bold} title="Bold">
         <BoldIcon size={14} />
       </IconButton>
@@ -86,6 +123,9 @@ export function FloatingToolbar(props: any) {
       <div className="luthor-floating-toolbar-separator" />
       <IconButton onClick={() => commands.formatText("code")} active={activeStates.code} title="Inline Code">
         <CodeIcon size={14} />
+      </IconButton>
+      <IconButton onClick={() => commands.toggleQuote()} active={activeStates.isQuote} title="Quote">
+        <QuoteIcon size={14} />
       </IconButton>
       <IconButton
         onClick={() => (activeStates.isLink ? commands.removeLink() : commands.insertLink())}

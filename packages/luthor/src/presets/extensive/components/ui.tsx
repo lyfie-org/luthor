@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronDownIcon, CloseIcon } from "./icons";
 
 export function IconButton({
@@ -10,7 +10,7 @@ export function IconButton({
   className,
   type = "button",
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick?: () => void;
   title?: string;
   active?: boolean;
@@ -38,7 +38,7 @@ export function Button({
   type = "button",
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick?: () => void;
   variant?: "primary" | "secondary";
   type?: "button" | "submit" | "reset";
@@ -65,7 +65,34 @@ export function Select({
   placeholder?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<CSSProperties | undefined>(undefined);
   const selectRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const updatePosition = () => {
+      const triggerEl = selectRef.current?.querySelector(".luthor-select-trigger") as HTMLElement | null;
+      if (!triggerEl) return;
+
+      const rect = triggerEl.getBoundingClientRect();
+      setDropdownStyle({
+        position: "fixed",
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -90,7 +117,7 @@ export function Select({
         <ChevronDownIcon size={14} />
       </button>
       {isOpen && (
-        <div className="luthor-select-dropdown">
+        <div className="luthor-select-dropdown" style={dropdownStyle}>
           {options.map((option) => (
             <button
               key={option.value}
@@ -116,8 +143,8 @@ export function Dropdown({
   isOpen,
   onOpenChange,
 }: {
-  trigger: React.ReactNode;
-  children: React.ReactNode;
+  trigger: ReactNode;
+  children: ReactNode;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -150,7 +177,7 @@ export function Dialog({
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
 

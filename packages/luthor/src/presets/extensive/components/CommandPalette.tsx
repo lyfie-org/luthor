@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CommandPaletteItem } from "@lyfie/luthor-headless";
 import { SearchIcon, CommandIcon } from "./icons";
 

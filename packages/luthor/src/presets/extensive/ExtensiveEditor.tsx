@@ -1,6 +1,5 @@
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { createEditorSystem, RichText } from "@lyfie/luthor-headless";
-import type { LexicalEditor } from "lexical";
 import { extensiveExtensions, setFloatingToolbarContext } from "./extensions";
 import { commandsToCommandPaletteItems, registerKeyboardShortcuts } from "./commands";
 import { Toolbar } from "./components/Toolbar";
@@ -11,7 +10,6 @@ import "./styles.css";
 const { Provider, useEditor } = createEditorSystem<typeof extensiveExtensions>();
 
 type EditorCommands = Record<string, any>;
-type EditorStateQueries = Record<string, any>;
 
 export type ExtensiveEditorMode = "visual" | "html" | "markdown";
 
@@ -65,12 +63,10 @@ function SourceView({
 }
 
 function ExtensiveEditorContent({
-  className,
   isDark,
   toggleTheme,
   onReady,
 }: {
-  className?: string;
   isDark: boolean;
   toggleTheme: () => void;
   onReady?: (methods: ExtensiveEditorRef) => void;
@@ -90,8 +86,8 @@ function ExtensiveEditorContent({
   }, [commands]);
 
   useEffect(() => {
-    setFloatingToolbarContext(commands, activeStates);
-  }, [commands, activeStates]);
+    setFloatingToolbarContext(commands, activeStates, isDark ? "dark" : "light");
+  }, [commands, activeStates, isDark]);
 
   const methods = useMemo<ExtensiveEditorRef>(
     () => ({
@@ -189,7 +185,6 @@ function ExtensiveEditorContent({
             isDark={isDark}
             toggleTheme={toggleTheme}
             onCommandPaletteOpen={() => commands.showCommandPalette()}
-            editor={editor as LexicalEditor | null}
           />
         )}
       </div>
@@ -240,7 +235,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     const toggleTheme = () => setEditorTheme(isDark ? "light" : "dark");
 
     const [methods, setMethods] = useState<ExtensiveEditorRef | null>(null);
-    React.useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);
+    useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);
 
     const welcomeContent = `# (Default Content) Welcome to Luthor Editor
 
@@ -273,7 +268,7 @@ Start typing or use the toolbar above to format your text. Press \`Cmd+K\` (Mac)
     return (
       <div className={`luthor-preset luthor-preset-extensive luthor-editor-wrapper ${className || ""}`} data-editor-theme={editorTheme}>
         <Provider extensions={extensiveExtensions}>
-          <ExtensiveEditorContent className={className} isDark={isDark} toggleTheme={toggleTheme} onReady={handleReady} />
+          <ExtensiveEditorContent isDark={isDark} toggleTheme={toggleTheme} onReady={handleReady} />
         </Provider>
       </div>
     );

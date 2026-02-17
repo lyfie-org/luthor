@@ -9,27 +9,7 @@ function App() {
   // Handle when editor is ready - inject content immediately
   const handleEditorReady = React.useCallback((methods: ExtensiveEditorRef) => {
     console.log("🎯 Editor ready - injecting content immediately");
-    methods.injectMarkdown(`# Welcome to Luthor
-
-**Build amazing React-based rich text editors with ease**
-
-Luthor is a modern, type-safe React framework built on top of Meta's Lexical that makes creating powerful text editors simple and enjoyable.
-
-## ✨ Key Features
-
-- 🚀 **Lightning Fast** - Optimized performance with minimal bundle size
-- 🛡️ **Type-Safe** - Full TypeScript support with auto-completion
-- 🧩 **Extensible** - 25+ built-in extensions for common features
-- 🎨 **Customizable** - Framework-agnostic styling with CSS custom properties
-- 📱 **Responsive** - Works perfectly on all devices
-
-## 🏁 Quick Start
-
-\`\`\`bash
-npm install @lyfie/luthor-headless lexical @lexical/react
-\`\`\`
-
-That's it! You're ready to build something amazing.`);
+    methods.injectMarkdown(`# Welcome to the Luthor Demo!`);
   }, []);
 
   return (

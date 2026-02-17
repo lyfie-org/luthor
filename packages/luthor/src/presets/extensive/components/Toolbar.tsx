@@ -1,5 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
-import type { LexicalEditor } from "lexical";
+import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import {
   AlignCenterIcon,
   AlignLeftIcon,
@@ -17,7 +16,6 @@ import {
   MinusIcon,
   MoonIcon,
   PencilIcon,
-  QuoteIcon,
   RedoIcon,
   UndoIcon,
   SunIcon,
@@ -29,6 +27,7 @@ import {
   EyeIcon,
   IndentIcon,
   OutdentIcon,
+  QuoteIcon,
   StrikethroughIcon,
 } from "./icons";
 import { Button, Dialog, Dropdown, IconButton, Select } from "./ui";
@@ -43,7 +42,7 @@ type TableConfig = {
   includeHeaders?: boolean;
 };
 
-function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null) {
+function useImageHandlers(commands: EditorCommands) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageConfig = (extensiveImageExtension as any).config as {
     uploadHandler?: (file: File) => Promise<string>;
@@ -59,14 +58,14 @@ function useImageHandlers(commands: EditorCommands, editor: LexicalEditor | null
         commands.insertImage({ src, alt, caption });
       },
       insertFromFile: () => fileInputRef.current?.click(),
-      handleUpload: async (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleUpload: async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         let src: string;
         if (imageConfig.uploadHandler) {
           try {
             src = await imageConfig.uploadHandler(file);
-          } catch (error) {
+          } catch {
             alert("Failed to upload image");
             return;
           }
@@ -97,7 +96,6 @@ export function Toolbar({
   isDark,
   toggleTheme,
   onCommandPaletteOpen,
-  editor,
 }: {
   commands: EditorCommands;
   hasExtension: (name: string) => boolean;
@@ -105,9 +103,8 @@ export function Toolbar({
   isDark: boolean;
   toggleTheme: () => void;
   onCommandPaletteOpen: () => void;
-  editor: LexicalEditor | null;
 }) {
-  const { handlers, fileInputRef } = useImageHandlers(commands, editor);
+  const { handlers, fileInputRef } = useImageHandlers(commands);
   const [showImageDropdown, setShowImageDropdown] = useState(false);
   const [showAlignDropdown, setShowAlignDropdown] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
@@ -125,7 +122,6 @@ export function Toolbar({
     { value: "h4", label: "Heading 4" },
     { value: "h5", label: "Heading 5" },
     { value: "h6", label: "Heading 6" },
-    { value: "quote", label: "Quote" },
   ];
 
   const currentBlockFormat =
@@ -135,13 +131,11 @@ export function Toolbar({
     activeStates.isH4 ? "h4" :
     activeStates.isH5 ? "h5" :
     activeStates.isH6 ? "h6" :
-    activeStates.isQuote ? "quote" :
     "p";
 
   const handleBlockFormatChange = (value: string) => {
     if (value === "p") commands.toggleParagraph();
     else if (value.startsWith("h")) commands.toggleHeading(value as "h1" | "h2" | "h3" | "h4" | "h5" | "h6");
-    else if (value === "quote") commands.toggleQuote();
   };
 
   return (
@@ -175,6 +169,9 @@ export function Toolbar({
         {hasExtension("blockFormat") && (
           <div className="luthor-toolbar-section">
             <Select value={currentBlockFormat} onValueChange={handleBlockFormatChange} options={blockFormatOptions} placeholder="Format" />
+            <IconButton onClick={() => commands.toggleQuote()} active={activeStates.isQuote} title="Quote">
+              <QuoteIcon size={16} />
+            </IconButton>
             {hasExtension("code") && (
               <IconButton onClick={() => commands.toggleCodeBlock()} active={activeStates.isInCodeBlock} title="Code Block">
                 <CodeBlockIcon size={16} />
