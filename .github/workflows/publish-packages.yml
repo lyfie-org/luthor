@@ -1,0 +1,64 @@
+name: Publish Packages
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/**"
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+      id-token: write # Required for NPM provenance
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org/"
+          cache: "pnpm"
+      
+      # ... (Insert your Resolve Release Metadata script here) ...
+
+      - name: Process Releases
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          TARGET="${{ steps.release_meta.outputs.target }}"
+          BUMP="${{ steps.release_meta.outputs.bump }}"
+          
+          # Function to build/bump/publish
+          publish_pkg() {
+            local dir=$1
+            local name=$2
+            echo "Processing $name..."
+            npx turbo build --filter=$name
+            cd $dir
+            pnpm version $BUMP --no-git-tag-version
+            pnpm publish --access public --no-git-checks --provenance
+            cd -
+          }
+
+          if [[ "$TARGET" == "luthor" || "$TARGET" == "both" ]]; then
+            publish_pkg "packages/luthor" "@lyfie/luthor"
+          fi
+
+          if [[ "$TARGET" == "headless" || "$TARGET" == "both" ]]; then
+            publish_pkg "packages/headless" "@lyfie/luthor-headless"
+          fi
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if ! git diff --cached --exit-code; then
+            git commit -m "chore: release version(s) [skip ci]"
+            git push origin main
+          fi
