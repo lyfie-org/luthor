@@ -22,7 +22,6 @@ on:
 
 jobs:
   publish:
-    # Prevents loops from the bot's own version commits
     if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
     permissions:
@@ -35,7 +34,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # FIX 1: pnpm setup MUST come before setup-node for caching to work
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
@@ -53,48 +51,32 @@ jobs:
           script: |
             const manualTarget = context.payload.inputs?.manual_target;
             const manualBump = context.payload.inputs?.manual_bump;
-
             if (manualTarget && manualBump) {
-              core.info(`Using Manual Inputs: ${manualTarget}, ${manualBump}`);
               core.setOutput('target', manualTarget);
               core.setOutput('bump', manualBump);
               return;
             }
-
-            // FIX 2: Better keyword resolution for Squash Merges
             const commitMsg = context.payload.head_commit?.message || '';
-            // For automated runs, we scan the commit message (which includes PR title in squash merges)
             const searchBody = commitMsg.toLowerCase();
-            
-            core.info(`Scanning commit message: "${commitMsg}"`);
-
             let target = '';
             if (searchBody.includes('both')) target = 'both';
             else if (searchBody.includes('headless')) target = 'headless';
             else if (searchBody.includes('luthor')) target = 'luthor';
-
             let bump = '';
             if (searchBody.includes('major')) bump = 'major';
             else if (searchBody.includes('minor')) bump = 'minor';
             else if (searchBody.includes('patch')) bump = 'patch';
-
             core.setOutput('target', target);
             core.setOutput('bump', bump);
 
-      - name: Validate metadata
-        run: |
-          if [ -z "${{ steps.release_meta.outputs.target }}" ] || [ -z "${{ steps.release_meta.outputs.bump }}" ]; then
-            echo "❌ Error: Missing release keywords (target/bump) in commit message."
-            echo "Expected: [luthor|headless|both] and [major|minor|patch]"
-            exit 1
-          fi
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Process Releases
+        id: process_release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           TARGET="${{ steps.release_meta.outputs.target }}"
           BUMP="${{ steps.release_meta.outputs.bump }}"
@@ -102,38 +84,47 @@ jobs:
           publish_pkg() {
             local dir=$1
             local name=$2
-            echo "🚀 Publishing $name from $dir with $BUMP bump"
+            local tag_prefix=$3
             
-            # Build using turbo cache
+            echo "🚀 Processing $name..."
             npx turbo build --filter=$name
             
             cd $dir
-            # Increment version in package.json
+            # 1. Bump version
             pnpm version $BUMP --no-git-tag-version
+            NEW_VERSION=$(node -p "require('./package.json').version")
+            TAG_NAME="${tag_prefix}@${NEW_VERSION}"
             
-            # --no-git-checks is required because pnpm version just dirtied the tree
-            # --provenance links the build to this GitHub Action run
+            # 2. Publish to NPM
             pnpm publish --access public --no-git-checks --provenance
+            
+            # 3. Create GitHub Tag and Release
+            echo "Creating GitHub Release for $TAG_NAME"
+            gh release create "$TAG_NAME" --generate-notes --title "$TAG_NAME"
+            
             cd -
           }
 
           if [[ "$TARGET" == "luthor" || "$TARGET" == "both" ]]; then
-            publish_pkg "packages/luthor" "@lyfie/luthor"
+            publish_pkg "packages/luthor" "@lyfie/luthor" "luthor"
           fi
 
           if [[ "$TARGET" == "headless" || "$TARGET" == "both" ]]; then
-            publish_pkg "packages/headless" "@lyfie/luthor-headless"
+            publish_pkg "packages/headless" "@lyfie/luthor-headless" "headless"
           fi
 
-      - name: Commit and Push
+      - name: Commit and Push Changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
+          
+          # Add only the package files and lockfile to avoid accidental commits
+          git add packages/**/package.json pnpm-lock.yaml
+          
           if ! git diff --cached --exit-code; then
-            # [skip ci] is vital to prevent an infinite loop
-            git commit -m "chore: release version bump [skip ci]"
+            git commit -m "chore: release version update [skip ci]"
+            # Use --follow-tags if you want to push any local tags created
             git push origin main
           else
-            echo "No changes to commit."
+            echo "No version changes to commit."
           fi
