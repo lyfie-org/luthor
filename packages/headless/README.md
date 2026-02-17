@@ -1,4 +1,4 @@
-# Luthor
+# Luthor-Headless
 
 **Type-safe rich text editor for React developers**
 

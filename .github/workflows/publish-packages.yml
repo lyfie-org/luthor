@@ -4,10 +4,29 @@ on:
     branches: [main]
     paths:
       - "packages/**"
+  workflow_dispatch:
+    inputs:
+      manual_target:
+        description: 'Package to publish'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - luthor
+          - headless
+          - both
+      manual_bump:
+        description: 'Version bump level'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   publish:
-    if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
