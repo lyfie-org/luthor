@@ -109,18 +109,35 @@ jobs:
             publish_pkg "packages/headless" "@lyfie/luthor-headless" "headless"
           fi
 
-      - name: Commit and Push Changes
+      - name: Commit and Sync Branches
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Add only the package files and lockfile to avoid accidental commits
+          # 1. Stage the version changes
           git add packages/**/package.json pnpm-lock.yaml
           
           if ! git diff --cached --exit-code; then
+            # 2. Commit and push to main
             git commit -m "chore: release version update [skip ci]"
-            # Use --follow-tags if you want to push any local tags created
             git push origin main
+            
+            # 3. Sync with development
+            echo "Syncing version bump to development branch..."
+            git fetch origin development
+            git checkout development
+            
+            # Merge the commit we just made on main into development
+            # 'main' is the branch we were just on (HEAD@{1} or simply main)
+            git merge main --no-edit
+            
+            # Push back to development
+            git push origin development
+            
+            # Optional: Switch back to main just for runner cleanliness
+            git checkout main
           else
-            echo "No version changes to commit."
+            echo "No version changes detected. Skipping sync."
           fi
