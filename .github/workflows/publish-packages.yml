@@ -1,4 +1,5 @@
 name: Publish Packages
+
 on:
   push:
     branches: [main]
@@ -11,39 +12,87 @@ on:
         required: true
         default: 'both'
         type: choice
-        options:
-          - luthor
-          - headless
-          - both
+        options: [luthor, headless, both]
       manual_bump:
         description: 'Version bump level'
         required: true
         default: 'patch'
         type: choice
-        options:
-          - patch
-          - minor
-          - major
+        options: [patch, minor, major]
 
 jobs:
   publish:
+    # Prevents loops from the bot's own version commits
+    if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: read
-      id-token: write # Required for NPM provenance
+      id-token: write 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+
+      # FIX 1: pnpm setup MUST come before setup-node for caching to work
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org/"
           cache: "pnpm"
-      
-      # ... (Insert your Resolve Release Metadata script here) ...
+
+      - name: Resolve release metadata
+        id: release_meta
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const manualTarget = context.payload.inputs?.manual_target;
+            const manualBump = context.payload.inputs?.manual_bump;
+
+            if (manualTarget && manualBump) {
+              core.info(`Using Manual Inputs: ${manualTarget}, ${manualBump}`);
+              core.setOutput('target', manualTarget);
+              core.setOutput('bump', manualBump);
+              return;
+            }
+
+            // FIX 2: Better keyword resolution for Squash Merges
+            const commitMsg = context.payload.head_commit?.message || '';
+            // For automated runs, we scan the commit message (which includes PR title in squash merges)
+            const searchBody = commitMsg.toLowerCase();
+            
+            core.info(`Scanning commit message: "${commitMsg}"`);
+
+            let target = '';
+            if (searchBody.includes('both')) target = 'both';
+            else if (searchBody.includes('headless')) target = 'headless';
+            else if (searchBody.includes('luthor')) target = 'luthor';
+
+            let bump = '';
+            if (searchBody.includes('major')) bump = 'major';
+            else if (searchBody.includes('minor')) bump = 'minor';
+            else if (searchBody.includes('patch')) bump = 'patch';
+
+            core.setOutput('target', target);
+            core.setOutput('bump', bump);
+
+      - name: Validate metadata
+        run: |
+          if [ -z "${{ steps.release_meta.outputs.target }}" ] || [ -z "${{ steps.release_meta.outputs.bump }}" ]; then
+            echo "❌ Error: Missing release keywords (target/bump) in commit message."
+            echo "Expected: [luthor|headless|both] and [major|minor|patch]"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Process Releases
         env:
@@ -52,14 +101,20 @@ jobs:
           TARGET="${{ steps.release_meta.outputs.target }}"
           BUMP="${{ steps.release_meta.outputs.bump }}"
           
-          # Function to build/bump/publish
           publish_pkg() {
             local dir=$1
             local name=$2
-            echo "Processing $name..."
+            echo "🚀 Publishing $name from $dir with $BUMP bump"
+            
+            # Build using turbo cache
             npx turbo build --filter=$name
+            
             cd $dir
+            # Increment version in package.json
             pnpm version $BUMP --no-git-tag-version
+            
+            # --no-git-checks is required because pnpm version just dirtied the tree
+            # --provenance links the build to this GitHub Action run
             pnpm publish --access public --no-git-checks --provenance
             cd -
           }
@@ -78,6 +133,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           if ! git diff --cached --exit-code; then
-            git commit -m "chore: release version(s) [skip ci]"
+            # [skip ci] is vital to prevent an infinite loop
+            git commit -m "chore: release version bump [skip ci]"
             git push origin main
+          else
+            echo "No changes to commit."
           fi
