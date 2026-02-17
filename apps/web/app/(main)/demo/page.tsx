@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/card";
-import { Palette, Code } from "lucide-react";
+import { Palette, Code } from "@/components/icons";
 
 const page = () => {
   return (

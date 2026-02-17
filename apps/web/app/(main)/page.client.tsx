@@ -33,7 +33,7 @@ import {
   BookOpen,
   Play,
   ChevronDown,
-} from "lucide-react";
+} from "@/components/icons";
 import { InstallCommand } from "@/components/install-command";
 
 export function HomePageClient() {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@repo/ui/components/button";
 import { ScrollArea } from "@repo/ui/components/scroll-area";
-import { Copy, Check, Maximize } from "lucide-react";
+import { Copy, Check, Maximize } from "@/components/icons";
 import { cn } from "@repo/ui/lib/utils";
 
 interface SimpleCodeBlockProps {

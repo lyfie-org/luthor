@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Github, ExternalLink, Menu, X } from "lucide-react";
+import { Github, ExternalLink, Menu, X } from "@/components/icons";
 import { Button } from "@repo/ui/components/button";
 import { ThemeToggle } from "./theme-toggle";
 import { useState, useEffect } from "react";

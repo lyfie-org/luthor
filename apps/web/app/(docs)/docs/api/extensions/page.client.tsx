@@ -30,7 +30,7 @@ import {
   FileText,
   Type,
   FunctionSquare,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   Table,
   TableBody,

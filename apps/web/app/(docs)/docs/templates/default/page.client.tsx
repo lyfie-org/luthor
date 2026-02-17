@@ -39,7 +39,7 @@ import {
   Moon,
   Sun,
   Command,
-} from "lucide-react";
+} from "@/components/icons";
 
 export default function DefaultTemplatePageClient() {
   const editorRef = useRef<DefaultTemplateRef>(null);

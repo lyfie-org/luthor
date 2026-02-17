@@ -43,7 +43,7 @@ import {
   MousePointer,
   Move,
   Menu,
-} from "lucide-react";
+} from "@/components/icons";
 
 export default function ShadcnTemplatePageClient() {
   const editorRef = useRef<ShadcnTemplateRef>(null);

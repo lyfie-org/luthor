@@ -1,7 +1,7 @@
 "use client";
 import { TopNavigation } from "@/components/top-navigation";
 import { Button } from "@repo/ui/components/button";
-import { Sidebar } from "lucide-react";
+import { Sidebar } from "@/components/icons";
 import { useState } from "react";
 import "./docs.css";
 import "./styles/prism.css";

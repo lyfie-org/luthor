@@ -11,7 +11,7 @@ import { Button } from "@repo/ui/components/button";
 import { ScrollArea } from "@repo/ui/components/scroll-area";
 import { cn } from "@repo/ui/lib/utils";
 import { getRawCode, getHighlightedCode } from "@/lib/generated/code-registry";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check } from "@/components/icons";
 
 interface DynamicCodeExampleProps {
   codes: string[];

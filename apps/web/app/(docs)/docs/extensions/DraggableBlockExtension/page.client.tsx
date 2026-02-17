@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/card";
-import { MousePointer, Zap, Settings, Code, Move, Palette } from "lucide-react";
+import { MousePointer, Zap, Settings, Code, Move, Palette } from "@/components/icons";
 import {
   Table,
   TableBody,

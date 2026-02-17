@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Coffee, Heart, Github } from "lucide-react";
+import { Coffee, Heart, Github } from "@/components/icons";
 import { Button } from "@repo/ui/components/button";
 import Image from "next/image";
 

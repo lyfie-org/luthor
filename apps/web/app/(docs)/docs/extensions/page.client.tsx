@@ -30,7 +30,7 @@ import {
   Lightbulb,
   Target,
   Sparkles,
-} from "lucide-react";
+} from "@/components/icons";
 
 export default function ExtensionsPageClient() {
   return (

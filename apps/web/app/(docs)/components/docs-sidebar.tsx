@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Github, ExternalLink } from "lucide-react";
+import { BookOpen, Github, ExternalLink } from "@/components/icons";
 import { Badge } from "@repo/ui/components/badge";
 import { ScrollArea } from "@repo/ui/components/scroll-area";
 import {

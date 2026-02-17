@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check } from "@/components/icons";
 import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { useStore, type PackageManager } from "@/lib/store";

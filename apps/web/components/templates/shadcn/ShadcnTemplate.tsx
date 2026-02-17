@@ -39,7 +39,7 @@ import {
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalEditor } from "lexical";
-import { Bold, Italic, Underline, Strikethrough, List, ListOrdered, Undo, Redo, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, Upload, Link as LinkIcon, Unlink, Minus, Code, Terminal, Table as TableIcon, FileCode, Eye, Pencil, Command as CommandIcon, Type, Quote, FileText, Hash, X, CloudUpload, Globe, ChevronDown, Indent, Outdent } from "lucide-react";
+import { Bold, Italic, Underline, Strikethrough, List, ListOrdered, Undo, Redo, ImageIcon, AlignLeft, AlignCenter, AlignRight, Upload, LinkIcon, Unlink, Minus, Code, Terminal, TableIcon, FileCode, Eye, Pencil, CommandIcon, Type, Quote, FileText, Hash, X, CloudUpload, Globe, ChevronDown, Indent, Outdent } from "@/components/icons";
 import { Button } from "@repo/ui/components/button";
 import { Toggle } from "@repo/ui/components/toggle";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut } from "@repo/ui/components/command";

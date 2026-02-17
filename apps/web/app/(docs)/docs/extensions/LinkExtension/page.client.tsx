@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/card";
-import { Link, Zap, Settings, Code, Target, Sparkles } from "lucide-react";
+import { Link, Zap, Settings, Code, Target, Sparkles } from "@/components/icons";
 import {
   Table,
   TableBody,

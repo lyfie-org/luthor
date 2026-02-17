@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { CommandPaletteItem } from "@lyfie/luthor/extensions/core";
-import { Search, Command } from "lucide-react";
+import { Search, Command } from "@/components/icons";
 
 interface CommandPaletteProps {
   isOpen: boolean;

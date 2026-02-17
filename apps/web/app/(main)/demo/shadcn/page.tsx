@@ -4,7 +4,7 @@ import React from "react";
 import { ShadcnTemplate } from "../../../../components/templates/shadcn";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card";
 import { Button } from "@repo/ui/components/button";
-import { ExternalLink, Github } from "lucide-react";
+import { ExternalLink, Github } from "@/components/icons";
 
 export default function ShadcnTemplatePage() {
   return (

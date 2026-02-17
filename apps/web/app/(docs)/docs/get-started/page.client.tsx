@@ -26,7 +26,7 @@ import {
   Lightbulb,
   Package,
   BookOpen,
-} from "lucide-react";
+} from "@/components/icons";
 import { InstallCommand } from "@/components/install-command";
 import { DynamicCodeExample } from "../../components/dynamic-code-example";
 import { BasicEditorExample } from "../../examples/BasicEditorExample";

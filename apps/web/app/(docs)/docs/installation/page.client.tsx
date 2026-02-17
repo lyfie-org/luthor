@@ -26,7 +26,7 @@ import {
   Layers,
   Shield,
   Package,
-} from "lucide-react";
+} from "@/components/icons";
 
 export function InstallationPageClient() {
   return (

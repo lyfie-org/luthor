@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@repo/ui/components/button";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy } from "@/components/icons";
 import { cn } from "@repo/ui/lib/utils";
 import { createHighlighter, type Highlighter } from "shiki";
 

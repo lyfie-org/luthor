@@ -27,7 +27,7 @@ import {
   FileText,
   Terminal,
   Settings,
-} from "lucide-react";
+} from "@/components/icons";
 
 export default function ContributingPageClient() {
   return (

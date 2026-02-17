@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/card";
-import { MousePointer, Zap, Settings, Palette } from "lucide-react";
+import { MousePointer, Zap, Settings, Palette } from "@/components/icons";
 
 export default function ContextMenuExtensionPageClient() {
   return (

@@ -33,7 +33,7 @@ import {
   Database,
   Cpu,
   Braces,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   Table,
   TableBody,

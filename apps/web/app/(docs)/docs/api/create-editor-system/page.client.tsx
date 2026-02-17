@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/card";
-import { Code, Zap, Shield, Layers, Target, Sparkles } from "lucide-react";
+import { Code, Zap, Shield, Layers, Target, Sparkles } from "@/components/icons";
 import {
   Table,
   TableBody,

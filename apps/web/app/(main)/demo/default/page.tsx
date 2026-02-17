@@ -3,7 +3,7 @@ import React from "react";
 import { DefaultTemplate } from "@/components/templates/default/DefaultTemplate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/card";
 import { Button } from "@repo/ui/components/button";
-import { ExternalLink, Github } from "lucide-react";
+import { ExternalLink, Github } from "@/components/icons";
 
 const page = () => {
   return (

@@ -48,7 +48,7 @@ import {
   Link,
   Undo,
   Redo,
-} from "lucide-react";
+} from "@/components/icons";
 import "./advanced-editor.css";
 
 // 1. Define your extensions (as const for type safety)

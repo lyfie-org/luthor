@@ -28,7 +28,7 @@ import {
   Rocket,
   Github,
   BookOpen,
-} from "lucide-react";
+} from "@/components/icons";
 import { Button } from "@repo/ui/components/button";
 import { InstallCommand } from "@/components/install-command";
 import { DynamicCodeExample } from "../../components/dynamic-code-example";
