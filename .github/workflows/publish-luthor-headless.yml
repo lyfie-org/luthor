@@ -1,4 +1,4 @@
-name: Publish Luthor
+name: Publish Luthor Headless
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "packages/headless/**"
-      - ".github/workflows/publish-luthor.yml"
+      - ".github/workflows/publish-luthor-headless.yml"
 
 jobs:
   publish:

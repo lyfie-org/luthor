@@ -1,1 +1,0 @@
-export { docsPreset } from "./preset";

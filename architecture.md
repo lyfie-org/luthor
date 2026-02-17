@@ -12,6 +12,7 @@ luthor/
 │   └── web/                 # Next.js documentation and demo site
 ├── packages/
 │   ├── headless/            # Core @lyfie/luthor-headless package
+│   ├── luthor/              # Presets package @lyfie/luthor
 │   ├── ui/                  # Shared UI components (@repo/ui)
 │   ├── eslint-config/       # Shared ESLint configurations
 │   └── typescript-config/   # Shared TypeScript configurations

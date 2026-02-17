@@ -1,1 +1,0 @@
-export { cmsPreset } from "./preset";

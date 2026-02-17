@@ -1,0 +1,69 @@
+{
+  "name": "@lyfie/luthor",
+  "version": "1.0.0",
+  "description": "Luthor presets and plug-and-play configuration for the headless editor",
+  "type": "module",
+  "private": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint . --max-warnings 0",
+    "dev": "tsup --watch"
+  },
+  "keywords": [
+    "editor",
+    "rich-text",
+    "lexical",
+    "react",
+    "typescript",
+    "wysiwyg",
+    "presets"
+  ],
+  "author": "Luthor Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lyfie-app/luthor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lyfie-app/luthor/issues"
+  },
+  "homepage": "https://github.com/lyfie-app/luthor#readme",
+  "dependencies": {
+    "@lyfie/luthor-headless": "workspace:*"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.19.9",
+    "@types/react": "^19.1.1",
+    "@types/react-dom": "^19.1.1",
+    "eslint": "^9.32.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.3"
+  },
+  "peerDependencies": {
+    "@lexical/code": ">=0.34.0",
+    "@lexical/html": ">=0.34.0",
+    "@lexical/link": ">=0.34.0",
+    "@lexical/list": ">=0.34.0",
+    "@lexical/markdown": ">=0.34.0",
+    "@lexical/react": ">=0.34.0",
+    "@lexical/rich-text": ">=0.34.0",
+    "@lexical/selection": ">=0.34.0",
+    "@lexical/table": ">=0.34.0",
+    "@lexical/utils": ">=0.34.0",
+    "lexical": ">=0.34.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  }
+}

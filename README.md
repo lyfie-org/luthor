@@ -8,6 +8,7 @@ If you want a shorter, architecture-only summary, see [architecture.md](architec
 
 - [apps/web](apps/web): Next.js 15 site for docs, demos, and examples.
 - [packages/headless](packages/headless): Core editor library published as `@lyfie/luthor-headless`.
+- [packages/luthor](packages/luthor): Presets and plug-and-play configs published as `@lyfie/luthor`.
 - [packages/ui](packages/ui): Shared UI component library used by the site.
 - [packages/eslint-config](packages/eslint-config): Shared ESLint configs for the workspace.
 - [packages/typescript-config](packages/typescript-config): Shared TypeScript configs for the workspace.
@@ -19,6 +20,7 @@ If you want a shorter, architecture-only summary, see [architecture.md](architec
 
 - The web app in [apps/web](apps/web) consumes `@lyfie/luthor-headless` and `@repo/ui` via workspace dependencies.
 - The editor library in [packages/headless](packages/headless) is headless and provides the core extension system; the web app builds UI around it.
+- The presets package in [packages/luthor](packages/luthor) provides ready-to-use preset definitions for plug-and-play setups.
 - The UI library in [packages/ui](packages/ui) hosts reusable React components (Radix UI based) and is used by the web app.
 - Shared linting and TypeScript configs in [packages/eslint-config](packages/eslint-config) and [packages/typescript-config](packages/typescript-config) are imported by app and package tsconfig/eslint config files.
 - Turbo in [turbo.json](turbo.json) orchestrates builds and caches outputs across all packages.
@@ -59,6 +61,18 @@ Key folders and what they do:
 Build output:
 
 - Bundled via `tsup` to [packages/headless/dist](packages/headless/dist).
+
+### Presets Package (packages/luthor)
+
+Presets and plug-and-play configurations published as `@lyfie/luthor`.
+
+Key folders and what they do:
+
+- [packages/luthor/src/presets](packages/luthor/src/presets): Preset definitions and registry.
+
+Build output:
+
+- Bundled via `tsup` to [packages/luthor/dist](packages/luthor/dist).
 
 ### UI Library (packages/ui)
 

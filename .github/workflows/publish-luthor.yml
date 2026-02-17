@@ -1,0 +1,78 @@
+name: Publish Luthor
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/luthor/**"
+      - ".github/workflows/publish-luthor.yml"
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org/"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: npx turbo build --filter=@lyfie/luthor
+
+      - name: Bump version from commit message
+        id: bump_logic
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          # Default to patch if no keyword is found
+          BUMP=patch
+          if echo "$COMMIT_MESSAGE" | grep -qi "\[major\]"; then
+            BUMP=major
+          elif echo "$COMMIT_MESSAGE" | grep -qi "\[minor\]"; then
+            BUMP=minor
+          fi
+          
+          echo "Bumping version as: $BUMP"
+          
+          cd packages/luthor
+          
+          pnpm version $BUMP --no-git-tag-version
+          
+          NEW_VER=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VER" >> $GITHUB_OUTPUT
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --filter=@lyfie/luthor --access public --no-git-checks
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add packages/luthor/package.json pnpm-lock.yaml
+          
+          if ! git diff --cached --exit-code; then
+            git commit -m "chore: bump luthor to ${{ steps.bump_logic.outputs.new_version }} [skip ci]"
+            git push origin main
+          else
+            echo "No version change detected. Skipping commit."
+          fi
