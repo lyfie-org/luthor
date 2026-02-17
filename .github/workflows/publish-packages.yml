@@ -38,8 +38,6 @@ jobs:
       # FIX 1: pnpm setup MUST come before setup-node for caching to work
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node
         uses: actions/setup-node@v4
