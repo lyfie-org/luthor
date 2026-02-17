@@ -184,7 +184,7 @@ function ExtensiveEditorContent({
         {mode === "visual" && (
           <Toolbar
             commands={commands}
-            hasExtension={hasExtension}
+            hasExtension={(name: string) => hasExtension(name as any)}
             activeStates={activeStates}
             isDark={isDark}
             toggleTheme={toggleTheme}

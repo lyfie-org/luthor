@@ -41,6 +41,24 @@ function MyEditor() {
 
 ## Quick Start
 
+### Installation
+
+Luthor-Headless is designed to be lightweight with Lexical packages as **peer dependencies**.
+
+```bash
+npm install @lyfie/luthor-headless
+```
+
+Install the required Lexical peer dependencies:
+
+```bash
+npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list @lexical/rich-text @lexical/selection @lexical/utils @lexical/code @lexical/link @lexical/table
+```
+
+> **💡 Want a simpler setup?** Check out [@lyfie/luthor](../luthor/README.md) which bundles all Lexical dependencies for you.
+
+### Basic Usage
+
 ```bash
 npm install @lyfie/luthor-headless
 ```
@@ -105,6 +123,46 @@ export default function App() {
 ```
 
 **That's it.** You now have a fully functional, type-safe rich text editor.
+
+## Installation Options
+
+### Option 1: Headless Package (This Package)
+
+For maximum control and flexibility:
+
+```bash
+# Install headless package
+npm install @lyfie/luthor-headless
+
+# Manually install Lexical peer dependencies
+npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list @lexical/rich-text @lexical/selection @lexical/utils @lexical/code @lexical/link @lexical/table
+```
+
+**Use this when:**
+- You want complete control over Lexical versions
+- Building a custom editor UI from scratch
+- Need minimum bundle size
+- Want to manage dependencies yourself
+
+### Option 2: Full Package (Recommended for Quick Start)
+
+For a batteries-included experience:
+
+```bash
+# Install both packages
+npm install @lyfie/luthor-headless
+npm install @lyfie/luthor
+
+# That's it! All Lexical dependencies included
+```
+
+**Use this when:**
+- You want ready-to-use editor presets
+- Don't want to manage Lexical dependencies
+- Need a working editor quickly
+- Want plug-and-play components
+
+[📖 See @lyfie/luthor documentation](../luthor/README.md)
 
 ## Features
 

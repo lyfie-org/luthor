@@ -1,8 +1,78 @@
 # Luthor Monorepo
 
-Luthor-Headless is a pnpm + Turbo monorepo for a headless, type-safe rich text editor built on Lexical. It contains the core editor library, a Next.js documentation/demo site, shared UI components, and shared tooling configs.
+Luthor is a pnpm + Turbo monorepo for a headless, type-safe rich text editor built on Lexical. It contains the core editor library, a Next.js documentation/demo site, shared UI components, and shared tooling configs.
 
 If you want a shorter, architecture-only summary, see [architecture.md](architecture.md).
+
+## 📦 Published Packages
+
+Luthor provides two npm packages designed to work together:
+
+### 1. **@lyfie/luthor-headless** - Lightweight & Flexible
+
+The core headless editor library for developers who want complete control.
+
+- **Fully headless** - Build any UI you want
+- **Type-safe** - Commands and states inferred from extensions
+- **Modular** - Only include what you need
+- **Lightweight** - No bundled dependencies
+
+**📖 [View Full Documentation](packages/headless/README.md)**
+
+**Installation:**
+```bash
+npm install @lyfie/luthor-headless
+# Install peer dependencies
+npm install lexical @lexical/react @lexical/html @lexical/markdown @lexical/list @lexical/rich-text @lexical/selection @lexical/utils @lexical/code @lexical/link @lexical/table
+```
+
+### 2. **@lyfie/luthor** - Batteries Included
+
+Ready-to-use presets and configurations built on top of luthor-headless.
+
+- **Zero additional setup** - All Lexical dependencies included
+- **Multiple presets** - Minimal, Classic, Blog, CMS, Docs, and more
+- **Plug-and-play** - Ready-to-use editor components
+- **Extensible** - Customize any preset to your needs
+
+**📖 [View Full Documentation](packages/luthor/README.md)**
+
+**Installation:**
+```bash
+npm install @lyfie/luthor-headless
+npm install @lyfie/luthor
+# That's it! All dependencies are included
+```
+
+## 🚀 Quick Start
+
+### Option 1: Headless (Maximum Control)
+
+Perfect when you want to build your own UI from scratch:
+
+```tsx
+import { createEditorSystem, boldExtension, italicExtension } from "@lyfie/luthor-headless";
+
+const extensions = [boldExtension, italicExtension] as const;
+const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+// Build your custom UI...
+```
+
+[→ See headless package documentation](packages/headless/README.md)
+
+### Option 2: Presets (Quick Setup)
+
+Perfect when you want a ready-to-use editor:
+
+```tsx
+import { ExtensiveEditor } from "@lyfie/luthor";
+
+function App() {
+  return <ExtensiveEditor placeholder="Start writing..." />;
+}
+```
+
+[→ See luthor package documentation](packages/luthor/README.md)
 
 ## Repository Map
 
@@ -20,10 +90,29 @@ If you want a shorter, architecture-only summary, see [architecture.md](architec
 
 - The web app in [apps/web](apps/web) consumes `@lyfie/luthor-headless` and `@repo/ui` via workspace dependencies.
 - The editor library in [packages/headless](packages/headless) is headless and provides the core extension system; the web app builds UI around it.
-- The presets package in [packages/luthor](packages/luthor) provides ready-to-use preset definitions for plug-and-play setups.
+- The presets package in [packages/luthor](packages/luthor) depends on luthor-headless and provides all required Lexical dependencies plus ready-to-use preset definitions for plug-and-play setups.
 - The UI library in [packages/ui](packages/ui) hosts reusable React components (Radix UI based) and is used by the web app.
 - Shared linting and TypeScript configs in [packages/eslint-config](packages/eslint-config) and [packages/typescript-config](packages/typescript-config) are imported by app and package tsconfig/eslint config files.
 - Turbo in [turbo.json](turbo.json) orchestrates builds and caches outputs across all packages.
+
+### Package Dependency Flow
+
+```
+@lyfie/luthor
+    ├─> @lyfie/luthor-headless (dependency)
+    ├─> lexical + @lexical/* packages (bundled as dependencies)
+    └─> react + react-dom (peer dependency - user provides)
+
+@lyfie/luthor-headless
+    ├─> lexical + @lexical/* packages (peer dependencies - user provides)
+    └─> react + react-dom (peer dependency - user provides)
+```
+
+When users install `@lyfie/luthor`, npm automatically:
+1. Installs `@lyfie/luthor-headless`
+2. Installs all Lexical packages
+3. These satisfy the peer dependencies of luthor-headless
+4. **Zero additional installations needed** ✅
 
 ## Apps
 
