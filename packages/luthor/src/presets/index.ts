@@ -14,6 +14,7 @@ import { emailPreset } from "./email";
 import { extensivePreset, ExtensiveEditor, extensiveExtensions } from "./extensive";
 import { markdownPreset } from "./markdown";
 import { minimalPreset } from "./minimal";
+export { createPresetEditorConfig } from "./shared/preset-config";
 
 export interface EditorPreset {
 	id: string;

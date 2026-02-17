@@ -1,1 +1,12 @@
-/* Blog preset styles placeholder. */
+@import "../shared/preset-base.css";
+
+.luthor-preset-blog {
+	--luthor-preset-content-padding: 24px;
+	--luthor-preset-content-min-height: 320px;
+	--luthor-preset-accent: #7c2d12;
+}
+
+.luthor-preset-blog .luthor-content-editable {
+	font-size: 18px;
+	line-height: 1.8;
+}

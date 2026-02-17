@@ -1,0 +1,54 @@
+.luthor-preset {
+  --luthor-preset-bg: #ffffff;
+  --luthor-preset-fg: #0f172a;
+  --luthor-preset-border: #dbe2ea;
+  --luthor-preset-muted: #f8fafc;
+  --luthor-preset-muted-fg: #64748b;
+  --luthor-preset-accent: #2563eb;
+  --luthor-preset-radius: 10px;
+  --luthor-preset-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --luthor-preset-content-padding: 16px;
+  --luthor-preset-content-min-height: 180px;
+
+  position: relative;
+  border: 1px solid var(--luthor-preset-border);
+  border-radius: var(--luthor-preset-radius);
+  background: var(--luthor-preset-bg);
+  color: var(--luthor-preset-fg);
+  box-shadow: var(--luthor-preset-shadow);
+  overflow: hidden;
+}
+
+.luthor-preset .luthor-content-editable {
+  min-height: var(--luthor-preset-content-min-height);
+  padding: var(--luthor-preset-content-padding);
+  color: var(--luthor-preset-fg);
+  background: var(--luthor-preset-bg);
+  line-height: 1.65;
+}
+
+.luthor-preset .luthor-content-editable:focus {
+  outline: 2px solid color-mix(in srgb, var(--luthor-preset-accent) 25%, transparent);
+  outline-offset: -2px;
+}
+
+.luthor-preset .luthor-placeholder {
+  color: var(--luthor-preset-muted-fg);
+}
+
+.luthor-preset .luthor-content-editable a {
+  color: var(--luthor-preset-accent);
+}
+
+.luthor-preset .luthor-content-editable blockquote {
+  margin: 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--luthor-preset-accent);
+  background: var(--luthor-preset-muted);
+}
+
+.luthor-preset .luthor-content-editable code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--luthor-preset-muted);
+}

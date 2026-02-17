@@ -1,1 +1,12 @@
-/* Minimal preset styles placeholder. */
+@import "../shared/preset-base.css";
+
+.luthor-preset-minimal {
+	--luthor-preset-content-padding: 12px;
+	--luthor-preset-content-min-height: 120px;
+	--luthor-preset-radius: 8px;
+	--luthor-preset-accent: #334155;
+}
+
+.luthor-preset-minimal .luthor-content-editable {
+	font-size: 14px;
+}

@@ -10,6 +10,7 @@ export default defineConfig({
   external: [
     "react",
     "react-dom",
+    "lucide-react",
     "@lyfie/luthor-headless",
     "lexical",
     "@lexical/code",

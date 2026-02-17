@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "@lyfie/luthor-headless": "workspace:*",
+    "@lyfie/luthor": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

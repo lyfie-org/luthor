@@ -1,1 +1,11 @@
-/* Email preset styles placeholder. */
+@import "../shared/preset-base.css";
+
+.luthor-preset-email {
+	--luthor-preset-content-padding: 16px;
+	--luthor-preset-content-min-height: 200px;
+	--luthor-preset-accent: #0369a1;
+}
+
+.luthor-preset-email .luthor-content-editable {
+	font-family: Arial, Helvetica, sans-serif;
+}

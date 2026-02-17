@@ -1,1 +1,11 @@
-/* Classic preset styles placeholder. */
+@import "../shared/preset-base.css";
+
+.luthor-preset-classic {
+	--luthor-preset-content-padding: 18px;
+	--luthor-preset-content-min-height: 220px;
+	--luthor-preset-accent: #1d4ed8;
+}
+
+.luthor-preset-classic .luthor-content-editable {
+	font-size: 16px;
+}

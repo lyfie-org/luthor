@@ -1,4 +1,5 @@
 import type { EditorPreset } from "..";
+import { createPresetEditorConfig } from "../shared/preset-config";
 
 export const classicPreset: EditorPreset = {
   id: "classic",
@@ -16,8 +17,6 @@ export const classicPreset: EditorPreset = {
     "bulletedList",
     "numberedList",
   ],
-  config: {
-    placeholder: "Start writing...",
-  },
+  config: createPresetEditorConfig("classic", "Start writing..."),
   css: "classic/styles.css",
 };

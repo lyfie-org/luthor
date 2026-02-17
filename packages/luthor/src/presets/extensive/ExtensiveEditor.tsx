@@ -198,9 +198,9 @@ function ExtensiveEditorContent({
           <RichText
             placeholder="Write anything..."
             classNames={{
-              container: "luthor-richtext-container",
-              contentEditable: "luthor-content-editable",
-              placeholder: "luthor-placeholder",
+              container: "luthor-richtext-container luthor-preset-extensive__container",
+              contentEditable: "luthor-content-editable luthor-preset-extensive__content",
+              placeholder: "luthor-placeholder luthor-preset-extensive__placeholder",
             }}
           />
         )}
@@ -228,10 +228,12 @@ export interface ExtensiveEditorProps {
   className?: string;
   onReady?: (methods: ExtensiveEditorRef) => void;
   initialTheme?: "light" | "dark";
+  defaultContent?: string;
+  showDefaultContent?: boolean;
 }
 
 export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorProps>(
-  ({ className, onReady, initialTheme = "light" }, ref) => {
+  ({ className, onReady, initialTheme = "light", defaultContent, showDefaultContent = true }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
     const isDark = editorTheme === "dark";
 
@@ -240,13 +242,36 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     const [methods, setMethods] = useState<ExtensiveEditorRef | null>(null);
     React.useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);
 
+    const welcomeContent = `# (Default Content) Welcome to Luthor Editor
+
+**Build amazing React-based rich text editors with ease**
+
+Luthor is a modern, type-safe React framework built on top of Meta's Lexical that makes creating powerful text editors simple and enjoyable.
+
+## ✨ Quick Start
+
+- 🚀 Lightning Fast - Optimized performance with minimal bundle size
+- 🛡️ Type-Safe - Full TypeScript support with auto-completion
+- 🧩 Extensible - 25+ built-in extensions for common features
+- 🎨 Customizable - Framework-agnostic styling with CSS custom properties
+
+## 📝 Try It Out
+
+Start typing or use the toolbar above to format your text. Press \`Cmd+K\` (Mac) or \`Ctrl+K\` (Windows/Linux) to open the command palette.`;
+
     const handleReady = (m: ExtensiveEditorRef) => {
       setMethods(m);
+      // Auto-inject default welcome content if enabled
+      if (showDefaultContent && defaultContent === undefined) {
+        m.injectMarkdown(welcomeContent);
+      } else if (defaultContent) {
+        m.injectMarkdown(defaultContent);
+      }
       onReady?.(m);
     };
 
     return (
-      <div className={`luthor-editor-wrapper ${className || ""}`} data-editor-theme={editorTheme}>
+      <div className={`luthor-preset luthor-preset-extensive luthor-editor-wrapper ${className || ""}`} data-editor-theme={editorTheme}>
         <Provider extensions={extensiveExtensions}>
           <ExtensiveEditorContent className={className} isDark={isDark} toggleTheme={toggleTheme} onReady={handleReady} />
         </Provider>

@@ -1,4 +1,5 @@
 import type { EditorPreset } from "..";
+import { createPresetEditorConfig } from "../shared/preset-config";
 
 export const blogPreset: EditorPreset = {
   id: "blog",
@@ -14,8 +15,6 @@ export const blogPreset: EditorPreset = {
     "bulletedList",
     "numberedList",
   ],
-  config: {
-    placeholder: "Tell your story...",
-  },
+  config: createPresetEditorConfig("blog", "Tell your story..."),
   css: "blog/styles.css",
 };

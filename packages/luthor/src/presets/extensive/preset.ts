@@ -1,6 +1,7 @@
 import type { EditorPreset } from "..";
 import { extensiveExtensions } from "./extensions";
 import { ExtensiveEditor } from "./ExtensiveEditor";
+import { createPresetEditorConfig } from "../shared/preset-config";
 
 export const extensivePreset: EditorPreset = {
   id: "extensive",
@@ -27,8 +28,6 @@ export const extensivePreset: EditorPreset = {
     "bulletedList",
     "numberedList",
   ],
-  config: {
-    placeholder: "Write anything...",
-  },
+  config: createPresetEditorConfig("extensive", "Write anything..."),
   css: "extensive/styles.css",
 };

@@ -1,1 +1,13 @@
-/* Chat preset styles placeholder. */
+@import "../shared/preset-base.css";
+
+.luthor-preset-chat {
+	--luthor-preset-bg: #f8fafc;
+	--luthor-preset-content-padding: 10px 12px;
+	--luthor-preset-content-min-height: 92px;
+	--luthor-preset-radius: 14px;
+	--luthor-preset-accent: #0ea5e9;
+}
+
+.luthor-preset-chat .luthor-content-editable {
+	font-size: 14px;
+}

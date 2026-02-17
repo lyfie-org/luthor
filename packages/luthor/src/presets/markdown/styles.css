@@ -1,1 +1,13 @@
-/* Markdown preset styles placeholder. */
+@import "../shared/preset-base.css";
+
+.luthor-preset-markdown {
+	--luthor-preset-bg: #f8fafc;
+	--luthor-preset-content-padding: 14px;
+	--luthor-preset-content-min-height: 200px;
+	--luthor-preset-accent: #4f46e5;
+}
+
+.luthor-preset-markdown .luthor-content-editable {
+	font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+	font-size: 14px;
+}

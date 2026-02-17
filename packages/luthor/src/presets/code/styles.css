@@ -1,1 +1,17 @@
-/* Code preset styles placeholder. */
+@import "../shared/preset-base.css";
+
+.luthor-preset-code {
+	--luthor-preset-bg: #0b1020;
+	--luthor-preset-fg: #dbeafe;
+	--luthor-preset-border: #1e293b;
+	--luthor-preset-muted: #111827;
+	--luthor-preset-muted-fg: #93c5fd;
+	--luthor-preset-accent: #38bdf8;
+	--luthor-preset-content-padding: 14px;
+	--luthor-preset-content-min-height: 220px;
+}
+
+.luthor-preset-code .luthor-content-editable {
+	font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+	font-size: 13px;
+}
