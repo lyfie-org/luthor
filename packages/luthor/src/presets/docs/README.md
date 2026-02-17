@@ -1,17 +1,44 @@
 # Docs preset
 
-## Purpose
-Optimized for technical documentation and product docs.
+Preset tailored for technical documentation content.
 
-## Features
-- Headings with consistent hierarchy
-- Code blocks and inline code
-- Callouts, notes, and warnings
-- Tables and definition lists
-- TOC friendly structure
+## Export
 
-## Customizability
-- Toggle callout types and styles
-- Configure code block languages
-- Control allowed heading levels
-- Theme for docs typography and spacing
+- `docsPreset` from `@lyfie/luthor`
+- Source export: `src/presets/docs/index.ts`
+
+## Preset metadata
+
+- `id`: `docs`
+- `label`: `Docs`
+- `description`: `Documentation focused with code and callouts.`
+- `css`: `docs/styles.css`
+- `default placeholder`: `Write documentation...`
+
+## Default toolbar
+
+`heading`, `bold`, `italic`, `code`, `codeBlock`, `link`
+
+## Usage
+
+```tsx
+import { docsPreset } from "@lyfie/luthor";
+import { createEditorSystem, RichText } from "@lyfie/luthor-headless";
+
+const extensions = (docsPreset.extensions ?? []) as const;
+const { Provider } = createEditorSystem<typeof extensions>();
+
+export function DocsEditor() {
+  return (
+    <Provider extensions={extensions}>
+      <RichText placeholder={docsPreset.config?.placeholder} />
+    </Provider>
+  );
+}
+```
+
+## Related docs
+
+- Package README: [../../../README.md](../../../README.md)
+- Monorepo README: [../../../../../README.md](../../../../../README.md)
+- Docs hub: [../../../../../documentation/README.md](../../../../../documentation/README.md)

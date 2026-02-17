@@ -1,17 +1,44 @@
 # Chat preset
 
-## Purpose
-Fast input for messaging, comments, and support chat.
+Compact composer preset optimized for chat and messaging UX.
 
-## Features
-- Mentions, emoji, and autocomplete
-- Compact toolbar or none by default
-- Link detection and quick insert
-- Limited formatting for speed
-- Small payload output
+## Export
 
-## Customizability
-- Mention and emoji providers
-- Slash command menu and triggers
-- Disable heavy blocks like tables
-- Placeholder and input height rules
+- `chatPreset` from `@lyfie/luthor`
+- Source export: `src/presets/chat/index.ts`
+
+## Preset metadata
+
+- `id`: `chat`
+- `label`: `Chat`
+- `description`: `Compact composer with mentions and quick formatting.`
+- `css`: `chat/styles.css`
+- `default placeholder`: `Write a message...`
+
+## Default toolbar
+
+`bold`, `italic`, `link`, `emoji`, `mention`
+
+## Usage
+
+```tsx
+import { chatPreset } from "@lyfie/luthor";
+import { createEditorSystem, RichText } from "@lyfie/luthor-headless";
+
+const extensions = (chatPreset.extensions ?? []) as const;
+const { Provider } = createEditorSystem<typeof extensions>();
+
+export function ChatComposer() {
+  return (
+    <Provider extensions={extensions}>
+      <RichText placeholder={chatPreset.config?.placeholder} />
+    </Provider>
+  );
+}
+```
+
+## Related docs
+
+- Package README: [../../../README.md](../../../README.md)
+- Monorepo README: [../../../../../README.md](../../../../../README.md)
+- Docs hub: [../../../../../documentation/README.md](../../../../../documentation/README.md)

@@ -4,7 +4,7 @@
 
 ```bash
 # Install the main package (recommended)
-npm install luthor
+npm install @lyfie/luthor
 
 # Or install the core editor package
 npm install @lyfie/luthor-headless
@@ -148,5 +148,5 @@ imageExtension.configure({
 - [API Reference](./api-reference.md) - Complete API documentation
 - [Extensions Guide](./extensions.md) - Available extensions and how to use them
 - [Styling Guide](./styling.md) - Customize the editor appearance
-- [Examples](../../examples) - More complete examples
+- [Examples](../../../apps/web/app) - Documentation app source and examples
 

@@ -1,17 +1,44 @@
 # Minimal preset
 
-## Purpose
-A tiny editor for embeds, comments, and lightweight forms.
+Lightweight preset for short content and simple formatting.
 
-## Features
-- Paragraphs and soft breaks
-- Bold, italic, underline
-- Links
-- Bulleted and numbered lists
-- Undo and redo
+## Export
 
-## Customizability
-- Toolbar: trim to icon-only or hide entirely
-- Extensions: add mentions, emoji, or autocomplete
-- Output: HTML or JSON only, no complex blocks
-- Styling: compact spacing and smaller type scale
+- `minimalPreset` from `@lyfie/luthor`
+- Source export: `src/presets/minimal/index.ts`
+
+## Preset metadata
+
+- `id`: `minimal`
+- `label`: `Minimal`
+- `description`: `Lightweight editor for short text and embeds.`
+- `css`: `minimal/styles.css`
+- `default placeholder`: `Write something...`
+
+## Default toolbar
+
+`bold`, `italic`, `link`
+
+## Usage
+
+```tsx
+import { minimalPreset } from "@lyfie/luthor";
+import { createEditorSystem, RichText } from "@lyfie/luthor-headless";
+
+const extensions = (minimalPreset.extensions ?? []) as const;
+const { Provider } = createEditorSystem<typeof extensions>();
+
+export function MinimalEditor() {
+  return (
+    <Provider extensions={extensions}>
+      <RichText placeholder={minimalPreset.config?.placeholder} />
+    </Provider>
+  );
+}
+```
+
+## Related docs
+
+- Package README: [../../../README.md](../../../README.md)
+- Monorepo README: [../../../../../README.md](../../../../../README.md)
+- Docs hub: [../../../../../documentation/README.md](../../../../../documentation/README.md)

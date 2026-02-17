@@ -1,17 +1,44 @@
 # Email preset
 
-## Purpose
-Email safe markup with strict styling rules.
+Preset focused on email-friendly authoring and markup constraints.
 
-## Features
-- Inline styles only
-- Tables and buttons
-- Image sizing with fallbacks
-- Link and typography controls
-- Sanitization tailored to email clients
+## Export
 
-## Customizability
-- Allowed tags and attributes list
-- Button and table presets
-- Image constraints and alignment
-- Export to HTML with inline CSS
+- `emailPreset` from `@lyfie/luthor`
+- Source export: `src/presets/email/index.ts`
+
+## Preset metadata
+
+- `id`: `email`
+- `label`: `Email`
+- `description`: `Email safe markup with stricter rules.`
+- `css`: `email/styles.css`
+- `default placeholder`: `Write an email...`
+
+## Default toolbar
+
+`bold`, `italic`, `link`, `button`, `table`
+
+## Usage
+
+```tsx
+import { emailPreset } from "@lyfie/luthor";
+import { createEditorSystem, RichText } from "@lyfie/luthor-headless";
+
+const extensions = (emailPreset.extensions ?? []) as const;
+const { Provider } = createEditorSystem<typeof extensions>();
+
+export function EmailEditor() {
+  return (
+    <Provider extensions={extensions}>
+      <RichText placeholder={emailPreset.config?.placeholder} />
+    </Provider>
+  );
+}
+```
+
+## Related docs
+
+- Package README: [../../../README.md](../../../README.md)
+- Monorepo README: [../../../../../README.md](../../../../../README.md)
+- Docs hub: [../../../../../documentation/README.md](../../../../../documentation/README.md)
