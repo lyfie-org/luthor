@@ -1,6 +1,6 @@
 {
   "name": "@lyfie/luthor",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Luthor presets and plug-and-play configuration for the headless editor",
   "type": "module",
   "private": false,
