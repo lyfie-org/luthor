@@ -29,6 +29,7 @@
     "@lexical/table": "^0.35.0",
     "@lexical/utils": "^0.35.0",
     "@lyfie/luthor-headless": "workspace:*",
+    "@lyfie/luthor": "workspace:*",
     "@repo/ui": "workspace:*",
     "@shikijs/rehype": "^3.12.2",
     "lexical": "^0.35.0",

@@ -1,9 +1,15 @@
 import type { EditorPreset } from "..";
+import { extensiveExtensions } from "./extensions";
+import { ExtensiveEditor } from "./ExtensiveEditor";
 
 export const extensivePreset: EditorPreset = {
   id: "extensive",
   label: "Extensive",
   description: "All features enabled for power users.",
+  extensions: [...extensiveExtensions],
+  components: {
+    Editor: ExtensiveEditor,
+  },
   toolbar: [
     "undo",
     "redo",

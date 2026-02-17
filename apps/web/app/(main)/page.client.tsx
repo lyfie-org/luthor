@@ -6,6 +6,8 @@ import {
   DefaultTemplate,
   DefaultTemplateRef,
 } from "@/components/templates/default/DefaultTemplate";
+import { ExtensiveEditor } from "@lyfie/luthor/presets/extensive";
+import { ExtensiveEditorRef } from "@lyfie/luthor/presets/extensive/ExtensiveEditor";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -137,6 +139,7 @@ That's it! You're ready to build something amazing.`);
             <div className="relative w-full max-w-4xl text-left">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-3xl blur-3xl" />
               <div className="relative">
+                <ExtensiveEditor ref={editorRef} onReady={handleEditorReady} />
                 <DefaultTemplate ref={editorRef} onReady={handleEditorReady} />
               </div>
             </div>

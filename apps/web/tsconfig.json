@@ -7,7 +7,9 @@
       "@repo/ui": ["../../packages/ui/src"],
       "@repo/ui/*": ["../../packages/ui/src/*"],
       "@lyfie/luthor-headless": ["../../packages/headless/src"],
-      "@lyfie/luthor-headless/*": ["../../packages/headless/src/*"]
+      "@lyfie/luthor-headless/*": ["../../packages/headless/src/*"],
+      "@lyfie/luthor": ["../../packages/luthor/src"],
+      "@lyfie/luthor/*": ["../../packages/luthor/src/*"]
     },
     "plugins": [
       {

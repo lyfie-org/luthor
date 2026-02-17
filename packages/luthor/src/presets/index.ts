@@ -11,7 +11,7 @@ import { codePreset } from "./code";
 import { defaultPreset } from "./default";
 import { docsPreset } from "./docs";
 import { emailPreset } from "./email";
-import { extensivePreset } from "./extensive";
+import { extensivePreset, ExtensiveEditor, extensiveExtensions } from "./extensive";
 import { markdownPreset } from "./markdown";
 import { minimalPreset } from "./minimal";
 
@@ -39,6 +39,8 @@ export {
 	codePreset,
 	defaultPreset,
 	extensivePreset,
+  ExtensiveEditor,
+  extensiveExtensions,
 };
 
 export const presetRegistry: Record<string, EditorPreset> = {
