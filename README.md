@@ -1,6 +1,6 @@
 # Luthor Monorepo
 
-Luthor is a pnpm + Turbo monorepo for a headless, type-safe rich text editor built on Lexical. It contains the core editor library, a Next.js documentation/demo site, shared UI components, and shared tooling configs.
+Luthor-Headless is a pnpm + Turbo monorepo for a headless, type-safe rich text editor built on Lexical. It contains the core editor library, a Next.js documentation/demo site, shared UI components, and shared tooling configs.
 
 If you want a shorter, architecture-only summary, see [architecture.md](architecture.md).
 
