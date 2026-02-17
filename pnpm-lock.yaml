@@ -65,6 +65,9 @@ importers:
       '@lexical/utils':
         specifier: ^0.35.0
         version: 0.35.0
+      '@lyfie/luthor':
+        specifier: workspace:*
+        version: link:../../packages/luthor
       '@lyfie/luthor-headless':
         specifier: workspace:*
         version: link:../../packages/headless
