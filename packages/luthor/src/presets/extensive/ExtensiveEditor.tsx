@@ -16,6 +16,80 @@ export interface ExtensiveEditorRef {
   getHTML: () => string;
 }
 
+const HEADLESS_FEATURE_GROUPS = [
+  {
+    title: "Formatting",
+    items: ["bold", "italic", "underline", "strikethrough", "link", "code"],
+  },
+  {
+    title: "Structure",
+    items: ["blockFormat", "list", "table", "horizontalRule", "codeFormat"],
+  },
+  {
+    title: "Media",
+    items: ["image", "htmlEmbed", "floatingToolbar"],
+  },
+  {
+    title: "Workflow",
+    items: ["history", "commandPalette", "contextMenu", "draggableBlock"],
+  },
+  {
+    title: "Export & Custom",
+    items: ["html", "markdown", "featureCard"],
+  },
+] as const;
+
+const FEATURE_DEMO_MARKDOWN = `# Extensive Preset – Full Feature Showcase
+
+This preset demonstrates all capabilities from **@lyfie/luthor-headless**.
+
+## Text Formatting
+
+Use **bold**, *italic*, <u>underline</u>, ~~strikethrough~~, [links](https://lexical.dev), and \
+\`inline code\`.
+
+## Block Features
+
+> Convert this paragraph to quote, heading, paragraph, or code block from the toolbar.
+
+---
+
+## Lists
+
+- Bulleted item 1
+- Bulleted item 2
+
+1. Numbered item 1
+2. Numbered item 2
+
+## Code Block
+
+\`\`\`ts
+const showcase = "Headless features";
+console.log(showcase);
+\`\`\`
+
+## Table (insert from toolbar)
+
+Use the table button to insert and edit a table with context menu actions.
+
+## Media
+
+Insert images and HTML embeds from the toolbar, then select them for floating controls.
+
+## Command Palette & Source Modes
+
+- Open command palette: **Ctrl+Shift+P**
+- Toggle HTML/Markdown tabs to test import/export round trips
+`;
+
+function titleFromExtensionKey(key: string): string {
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (char) => char.toUpperCase())
+    .trim();
+}
+
 function ExtensiveEditorContent({
   isDark,
   toggleTheme,
@@ -128,8 +202,59 @@ function ExtensiveEditorContent({
     }
   };
 
+  const insertCustomFeatureCard = () => {
+    const customCommands = commands as CoreEditorCommands & {
+      insertCustomNode?: (payload: Record<string, unknown>) => void;
+    };
+
+    customCommands.insertCustomNode?.({
+      tag: "Custom",
+      title: "Reusable Callout Block",
+      description: "Inserted via createCustomNodeExtension and fully managed by headless commands.",
+    });
+  };
+
   return (
     <>
+      <section className="luthor-extensive-showcase" aria-label="Headless feature coverage">
+        <div className="luthor-extensive-showcase__header">
+          <h3>Headless Feature Coverage</h3>
+          <p>Everything from formatting and media to command palette, draggable blocks, and custom nodes.</p>
+        </div>
+        <div className="luthor-extensive-showcase__actions" role="group" aria-label="Showcase actions">
+          <button className="luthor-showcase-action" onClick={() => commands.importFromMarkdown(FEATURE_DEMO_MARKDOWN, { immediate: true })} type="button">
+            Load Full Demo Content
+          </button>
+          <button className="luthor-showcase-action" onClick={() => commands.showCommandPalette()} type="button">
+            Open Command Palette
+          </button>
+          <button
+            className="luthor-showcase-action"
+            onClick={insertCustomFeatureCard}
+            type="button"
+            disabled={!hasExtension("featureCard" as any)}
+          >
+            Insert Custom Node
+          </button>
+        </div>
+        <div className="luthor-extensive-showcase__groups">
+          {HEADLESS_FEATURE_GROUPS.map((group) => (
+            <article key={group.title} className="luthor-extensive-showcase__group">
+              <h4>{group.title}</h4>
+              <div className="luthor-extensive-showcase__chips">
+                {group.items.map((item) => {
+                  const enabled = hasExtension(item as any);
+                  return (
+                    <span key={item} className={`luthor-extensive-showcase__chip${enabled ? " is-enabled" : ""}`}>
+                      {titleFromExtensionKey(item)}
+                    </span>
+                  );
+                })}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
       <div className="luthor-editor-header">
         <ModeTabs mode={mode} onModeChange={handleModeChange} />
         {mode === "visual" && (
@@ -193,22 +318,31 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     const [methods, setMethods] = useState<ExtensiveEditorRef | null>(null);
     useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);
 
-    const welcomeContent = `# (Default Content) Welcome to Luthor Editor
+    const welcomeContent = `# Extensive Preset: Complete Headless Demo
 
 **Build amazing React-based rich text editors with ease**
 
 Luthor is a modern, type-safe React framework built on top of Meta's Lexical that makes creating powerful text editors simple and enjoyable.
 
-## ✨ Quick Start
+## ✅ Included Feature Surface
 
 - 🚀 Lightning Fast - Optimized performance with minimal bundle size
 - 🛡️ Type-Safe - Full TypeScript support with auto-completion
-- 🧩 Extensible - 25+ built-in extensions for common features
+- 🧩 Extensible - built-in extensions + custom nodes
 - 🎨 Customizable - Framework-agnostic styling with CSS custom properties
+
+### Try these in the canvas
+
+- Select text to trigger floating toolbar
+- Right-click in the editor for context menu
+- Drag blocks using drag handles
+- Insert image, table, HTML embed, and custom feature card
+- Open Command Palette with Ctrl+Shift+P
+- Switch between Visual, HTML, and Markdown tabs to verify import/export
 
 ## 📝 Try It Out
 
-Start typing or use the toolbar above to format your text. Press \`Cmd+K\` (Mac) or \`Ctrl+K\` (Windows/Linux) to open the command palette.`;
+Start typing or use the toolbar above to format your text. Press \`Cmd+Shift+P\` (Mac) or \`Ctrl+Shift+P\` (Windows/Linux) to open the command palette.`;
 
     const handleReady = (m: ExtensiveEditorRef) => {
       setMethods(m);

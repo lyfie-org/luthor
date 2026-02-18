@@ -8,6 +8,7 @@ import {
   CommandPaletteExtension,
   DraggableBlockExtension,
   LinkExtension,
+  createCustomNodeExtension,
   boldExtension,
   italicExtension,
   underlineExtension,
@@ -80,6 +81,25 @@ const linkExt = new LinkExtension();
   autoLinkUrls: true,
 };
 
+const { extension: featureCardExtension } = createCustomNodeExtension({
+  nodeType: "featureCard",
+  defaultPayload: {
+    title: "Headless Custom Node",
+    description:
+      "This block is rendered by createCustomNodeExtension from @lyfie/luthor-headless.",
+    tag: "Custom",
+  },
+  render: ({ payload, isSelected }) => (
+    <aside className={`luthor-extensive-feature-card${isSelected ? " is-selected" : ""}`}>
+      <div className="luthor-extensive-feature-card__tag">{payload.tag ?? "Custom"}</div>
+      <h4 className="luthor-extensive-feature-card__title">{payload.title ?? "Custom Node"}</h4>
+      <p className="luthor-extensive-feature-card__description">
+        {payload.description ?? "Insert strongly typed custom content blocks."}
+      </p>
+    </aside>
+  ),
+});
+
 export const extensiveExtensions = [
   boldExtension,
   italicExtension,
@@ -101,6 +121,7 @@ export const extensiveExtensions = [
   contextMenuExt,
   commandPaletteExt,
   draggableBlockExt,
+  featureCardExtension,
 ] as const;
 
 export type ExtensiveExtensions = typeof extensiveExtensions;
