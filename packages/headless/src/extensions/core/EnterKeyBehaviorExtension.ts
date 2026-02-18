@@ -1,9 +1,8 @@
 import {
   $createParagraphNode,
   $getSelection,
+  $isParagraphNode,
   $isRangeSelection,
-  COMMAND_PRIORITY_CRITICAL,
-  KEY_ENTER_COMMAND,
   LexicalEditor,
 } from "lexical";
 import { $isCodeNode } from "@lexical/code";
@@ -35,62 +34,113 @@ export class EnterKeyBehaviorExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
-    return editor.registerCommand(
-      KEY_ENTER_COMMAND,
-      (event: KeyboardEvent | null) => {
-        let handled = false;
+    let cleanupRootListener: (() => void) | undefined;
 
-        editor.update(() => {
-          const selection = $getSelection();
-          if (!$isRangeSelection(selection)) {
-            return;
-          }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Enter") {
+        return;
+      }
 
-          const anchorNode = selection.anchor.getNode();
+      let handled = false;
 
+      editor.update(() => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) {
+          return;
+        }
+
+        const anchorNode = selection.anchor.getNode();
+
+        if (event.shiftKey) {
           const tableCellNode = $findCellNode(anchorNode);
           if ($isTableCellNode(tableCellNode)) {
-            if (event?.shiftKey) {
-              const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode);
-              const paragraphNode = $createParagraphNode();
-              tableNode.insertAfter(paragraphNode);
-              paragraphNode.selectStart();
-              handled = true;
-            }
+            const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode);
+            const paragraphNode = $createParagraphNode();
+            tableNode.insertAfter(paragraphNode);
+            paragraphNode.selectStart();
+            handled = true;
             return;
           }
 
           const quoteNode = this.findQuoteNode(anchorNode);
           if (quoteNode) {
-            if (event?.shiftKey) {
-              const paragraphNode = $createParagraphNode();
-              quoteNode.insertAfter(paragraphNode);
-              paragraphNode.selectStart();
-            } else {
-              selection.insertLineBreak();
-            }
+            const paragraphNode = $createParagraphNode();
+            quoteNode.insertAfter(paragraphNode);
+            paragraphNode.selectStart();
             handled = true;
             return;
           }
 
           const codeNode = this.findCodeNode(anchorNode);
-          if (codeNode && event?.shiftKey) {
+          if (codeNode) {
             const paragraphNode = $createParagraphNode();
             codeNode.insertAfter(paragraphNode);
             paragraphNode.selectStart();
             handled = true;
             return;
           }
-        });
 
-        if (handled) {
-          event?.preventDefault();
+          return;
         }
 
-        return handled;
+        const quoteNode = this.findQuoteNode(anchorNode);
+        if (!quoteNode || !selection.isCollapsed()) {
+          return;
+        }
+
+        const currentParagraph = this.findParagraphNode(anchorNode);
+        if (!currentParagraph || currentParagraph.getParent() !== quoteNode) {
+          return;
+        }
+
+        const currentIsEmpty = currentParagraph.getTextContent().trim() === "";
+        const previousSibling = currentParagraph.getPreviousSibling();
+        const previousIsEmpty =
+          $isParagraphNode(previousSibling) &&
+          previousSibling.getTextContent().trim() === "";
+
+        if (currentIsEmpty && previousIsEmpty) {
+          const paragraphNode = $createParagraphNode();
+          quoteNode.insertAfter(paragraphNode);
+          paragraphNode.selectStart();
+          handled = true;
+          return;
+        }
+
+        const nextQuoteParagraph = $createParagraphNode();
+        currentParagraph.insertAfter(nextQuoteParagraph);
+        nextQuoteParagraph.selectStart();
+        handled = true;
+      });
+
+      if (handled) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    const unregisterRootListener = editor.registerRootListener(
+      (rootElement, prevRootElement) => {
+        cleanupRootListener?.();
+        cleanupRootListener = undefined;
+
+        if (prevRootElement) {
+          prevRootElement.removeEventListener("keydown", handleKeyDown, true);
+        }
+
+        if (rootElement) {
+          rootElement.addEventListener("keydown", handleKeyDown, true);
+          cleanupRootListener = () => {
+            rootElement.removeEventListener("keydown", handleKeyDown, true);
+          };
+        }
       },
-      COMMAND_PRIORITY_CRITICAL,
     );
+
+    return () => {
+      cleanupRootListener?.();
+      unregisterRootListener();
+    };
   }
 
   private findQuoteNode(node: any) {
@@ -108,6 +158,17 @@ export class EnterKeyBehaviorExtension extends BaseExtension<
     let current = node;
     while (current) {
       if ($isCodeNode(current)) {
+        return current;
+      }
+      current = current.getParent();
+    }
+    return null;
+  }
+
+  private findParagraphNode(node: any) {
+    let current = node;
+    while (current) {
+      if ($isParagraphNode(current)) {
         return current;
       }
       current = current.getParent();
