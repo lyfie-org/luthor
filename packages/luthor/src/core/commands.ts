@@ -255,6 +255,15 @@ export function generateCommands(): CommandConfig[] {
       keywords: ["list", "numbered"],
     },
     {
+      id: "list.check",
+      label: "Checklist",
+      description: "Create or toggle checklist",
+      category: "List",
+      action: (commands) => commands.toggleCheckList(),
+      shortcuts: [{ key: "x", ctrlKey: true, shiftKey: true }],
+      keywords: ["list", "check", "todo", "task"],
+    },
+    {
       id: "link.insert",
       label: "Insert Link",
       description: "Insert or edit a link",

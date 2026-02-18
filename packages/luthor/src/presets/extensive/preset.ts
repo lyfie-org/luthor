@@ -36,6 +36,7 @@ export const extensivePreset: EditorPreset = {
     "codeBlock",
     "bulletedList",
     "numberedList",
+    "checkList",
     "commandPalette",
     "floatingToolbar",
     "contextMenu",

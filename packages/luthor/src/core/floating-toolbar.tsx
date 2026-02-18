@@ -8,6 +8,7 @@ import {
   ItalicIcon,
   LinkIcon,
   ListIcon,
+  ListCheckIcon,
   ListOrderedIcon,
   QuoteIcon,
   StrikethroughIcon,
@@ -126,6 +127,9 @@ export function FloatingToolbar({
       </IconButton>
       <IconButton onClick={() => commands.toggleOrderedList()} active={activeStates.orderedList} title="Numbered List">
         <ListOrderedIcon size={14} />
+      </IconButton>
+      <IconButton onClick={() => commands.toggleCheckList()} active={activeStates.checkList} title="Checklist">
+        <ListCheckIcon size={14} />
       </IconButton>
     </div>
   );

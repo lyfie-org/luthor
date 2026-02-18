@@ -1,7 +1,7 @@
 import {
   INSERT_UNORDERED_LIST_COMMAND,
   INSERT_ORDERED_LIST_COMMAND,
-  REMOVE_LIST_COMMAND,
+  INSERT_CHECK_LIST_COMMAND,
 } from "@lexical/list";
 import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from "lexical";
 import { $setBlocksType } from "@lexical/selection";
@@ -11,6 +11,7 @@ import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
 import { ListNode, ListItemNode, $isListNode, $isListItemNode } from "@lexical/list";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
 import React from "react";
 
 /**
@@ -21,6 +22,8 @@ export type ListCommands = {
   toggleUnorderedList: () => void;
   /** Toggle a numbered list for the current selection */
   toggleOrderedList: () => void;
+  /** Toggle a checklist for the current selection */
+  toggleCheckList: () => void;
   /** Indent the current list item (nest deeper) */
   indentList: () => void;
   /** Outdent the current list item (unnest) */
@@ -72,6 +75,7 @@ export class ListExtension extends BaseExtension<
   {
     unorderedList: () => Promise<boolean>;
     orderedList: () => Promise<boolean>;
+    checkList: () => Promise<boolean>;
   },
   ReactNode[]
 > {
@@ -108,7 +112,7 @@ export class ListExtension extends BaseExtension<
    * @returns Array containing the ListPlugin component
    */
   getPlugins(): React.ReactNode[] {
-    return [<ListPlugin key="list-plugin" />];
+    return [<ListPlugin key="list-plugin" />, <CheckListPlugin key="check-list-plugin" />];
   }
 
   /**
@@ -199,6 +203,41 @@ export class ListExtension extends BaseExtension<
           }
         });
       },
+      toggleCheckList: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            const anchorNode = selection.anchor.getNode();
+            let parent = anchorNode.getParent();
+            let listNode: any = null;
+            let listItemNode: any = null;
+            while (parent) {
+              if ($isListItemNode(parent)) {
+                listItemNode = parent;
+              }
+              if ($isListNode(parent)) {
+                listNode = parent;
+                break;
+              }
+              parent = parent.getParent();
+            }
+
+            if (listNode) {
+              if (listNode.getListType() === "check") {
+                if (listItemNode && listItemNode.getIndent() > 0) {
+                  editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
+                } else {
+                  $setBlocksType(selection, $createParagraphNode);
+                }
+              } else {
+                editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
+              }
+            } else {
+              editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined);
+            }
+          }
+        });
+      },
       indentList: () => {
         editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
       },
@@ -229,6 +268,7 @@ export class ListExtension extends BaseExtension<
   getStateQueries(editor: LexicalEditor): {
     unorderedList: () => Promise<boolean>;
     orderedList: () => Promise<boolean>;
+    checkList: () => Promise<boolean>;
   } {
     return {
       unorderedList: () =>
@@ -262,6 +302,25 @@ export class ListExtension extends BaseExtension<
             while (node) {
               if ($isListNode(node)) {
                 resolve(node.getListType() === "number");
+                return;
+              }
+              node = node.getParent();
+            }
+            resolve(false);
+          });
+        }),
+      checkList: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if (!$isRangeSelection(selection)) {
+              resolve(false);
+              return;
+            }
+            let node: any = selection.anchor.getNode();
+            while (node) {
+              if ($isListNode(node)) {
+                resolve(node.getListType() === "check");
                 return;
               }
               node = node.getParent();

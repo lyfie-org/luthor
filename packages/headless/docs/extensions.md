@@ -240,9 +240,11 @@ const extensions = [listExtension] as const;
 
 commands.toggleUnorderedList(); // • Bullet list
 commands.toggleOrderedList(); // 1. Numbered list
+commands.toggleCheckList(); // ☑ Checklist
 
 activeStates.unorderedList;
 activeStates.orderedList;
+activeStates.checkList;
 ```
 
 ### Block Format Extension

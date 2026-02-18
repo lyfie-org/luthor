@@ -24,6 +24,7 @@ import {
   ItalicIcon,
   LinkIcon,
   ListIcon,
+  ListCheckIcon,
   ListOrderedIcon,
   MinusIcon,
   MoonIcon,
@@ -813,7 +814,10 @@ export function Toolbar({
             <IconButton onClick={() => commands.toggleOrderedList()} active={activeStates.orderedList} title="Numbered List">
               <ListOrderedIcon size={16} />
             </IconButton>
-            {(activeStates.unorderedList || activeStates.orderedList) && (
+            <IconButton onClick={() => commands.toggleCheckList()} active={activeStates.checkList} title="Checklist">
+              <ListCheckIcon size={16} />
+            </IconButton>
+            {(activeStates.unorderedList || activeStates.orderedList || activeStates.checkList) && (
               <>
                 <IconButton onClick={() => commands.indentList()} title="Indent List">
                   <IndentIcon size={14} />

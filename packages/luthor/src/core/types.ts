@@ -85,6 +85,7 @@ export interface CoreEditorCommands {
   getCodeLanguageOptions?: () => string[];
   toggleUnorderedList: () => void;
   toggleOrderedList: () => void;
+  toggleCheckList: () => void;
   indentList: () => void;
   outdentList: () => void;
   insertHorizontalRule: () => void;
@@ -124,6 +125,7 @@ export interface CoreEditorActiveStates {
   isInCodeBlock?: boolean;
   unorderedList?: boolean;
   orderedList?: boolean;
+  checkList?: boolean;
   isH1?: boolean;
   isH2?: boolean;
   isH3?: boolean;

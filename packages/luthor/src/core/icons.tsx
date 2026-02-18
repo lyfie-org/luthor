@@ -17,6 +17,7 @@ import {
   Italic,
   Link,
   List,
+  ListChecks,
   ListOrdered,
   Minus,
   Moon,
@@ -47,6 +48,7 @@ export const CodeBlockIcon = Code2;
 export const LinkIcon = Link;
 export const UnlinkIcon = Unlink;
 export const ListIcon = List;
+export const ListCheckIcon = ListChecks;
 export const ListOrderedIcon = ListOrdered;
 export const UndoIcon = Undo2;
 export const RedoIcon = Redo2;

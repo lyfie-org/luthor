@@ -123,6 +123,8 @@ export const defaultLuthorTheme: LuthorTheme = {
     ul: "luthor-list-ul",
     ol: "luthor-list-ol",
     listitem: "luthor-list-li",
+    listitemChecked: "luthor-list-item-checked",
+    listitemUnchecked: "luthor-list-item-unchecked",
     nested: {
       list: "luthor-list-nested",
       listitem: "luthor-list-nested-item",

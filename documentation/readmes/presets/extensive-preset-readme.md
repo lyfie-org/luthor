@@ -20,7 +20,7 @@ All-features preset for advanced authoring and power-user workflows.
 
 ## Default toolbar
 
-`undo`, `redo`, `heading`, `fontFamily`, `bold`, `italic`, `underline`, `strikethrough`, `link`, `image`, `table`, `horizontalRule`, `htmlEmbed`, `blockquote`, `code`, `codeBlock`, `bulletedList`, `numberedList`, `commandPalette`, `floatingToolbar`, `contextMenu`, `draggableBlock`, `customNode`, `sourceMode`, `themeToggle`
+`undo`, `redo`, `heading`, `fontFamily`, `bold`, `italic`, `underline`, `strikethrough`, `link`, `image`, `table`, `horizontalRule`, `htmlEmbed`, `blockquote`, `code`, `codeBlock`, `bulletedList`, `numberedList`, `checkList`, `commandPalette`, `floatingToolbar`, `contextMenu`, `draggableBlock`, `customNode`, `sourceMode`, `themeToggle`
 
 ## Horizontal rule shortcut
 

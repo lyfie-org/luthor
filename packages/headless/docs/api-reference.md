@@ -77,6 +77,7 @@ Commands are functions that modify the editor state. Available commands depend o
 - `setTextAlignment(alignment)`: Set block text alignment (`left`, `center`, `right`, `justify`)
 - `toggleUnorderedList()`: Toggle bullet list
 - `toggleOrderedList()`: Toggle numbered list
+- `toggleCheckList()`: Toggle checklist
 
 #### History
 
@@ -110,6 +111,7 @@ State queries are async functions that return the current editor state.
 - `isLink`: Boolean - Current selection is a link
 - `unorderedList`: Boolean - Unordered list is active
 - `orderedList`: Boolean - Ordered list is active
+- `checkList`: Boolean - Checklist is active
 - `isH1`, `isH2`, etc.: Boolean - Current block is heading
 - `isQuote`: Boolean - Current block is quote
 - `canUndo`: Boolean - Undo is available
