@@ -39,12 +39,6 @@ function debounce<T extends (...args: any[]) => any>(
 export interface DraggableConfig extends BaseExtensionConfig {
   /** Portal anchor element (default: document.body) */
   anchorElem?: HTMLElement;
-  /** Show move buttons */
-  showMoveButtons?: boolean;
-  /** Show the up button */
-  showUpButton?: boolean;
-  /** Show the down button */
-  showDownButton?: boolean;
   /** Show the add button near the drag handle */
   showAddButton?: boolean;
   /** Button stack position relative to blocks */
@@ -61,8 +55,6 @@ export interface DraggableConfig extends BaseExtensionConfig {
     handleActive?: string;
     blockDragging?: string;
     dropIndicator?: string;
-    upButton?: string;
-    downButton?: string;
     addButton?: string;
     buttonStack?: string;
   };
@@ -72,8 +64,6 @@ export interface DraggableConfig extends BaseExtensionConfig {
     handleActive?: React.CSSProperties;
     blockDragging?: React.CSSProperties;
     dropIndicator?: React.CSSProperties;
-    upButton?: React.CSSProperties;
-    downButton?: React.CSSProperties;
     addButton?: React.CSSProperties;
     buttonStack?: React.CSSProperties;
   };
@@ -320,12 +310,6 @@ function DraggableBlockPlugin({
       backgroundColor: "var(--luthor-accent, #3b82f6)",
       borderRadius: "2px",
     },
-    upButton: {
-      cursor: "pointer",
-    },
-    downButton: {
-      cursor: "pointer",
-    },
     addButton: {
       cursor: "pointer",
     },
@@ -353,16 +337,6 @@ function DraggableBlockPlugin({
       ...defaultStyles.dropIndicator,
       ...globalDraggableTheme.styles?.dropIndicator,
       ...draggableConfig?.styles?.dropIndicator,
-    },
-    upButton: {
-      ...defaultStyles.upButton,
-      ...globalDraggableTheme.styles?.upButton,
-      ...draggableConfig?.styles?.upButton,
-    },
-    downButton: {
-      ...defaultStyles.downButton,
-      ...globalDraggableTheme.styles?.downButton,
-      ...draggableConfig?.styles?.downButton,
     },
     addButton: {
       ...defaultStyles.addButton,
@@ -394,14 +368,6 @@ function DraggableBlockPlugin({
       draggableConfig?.theme?.dropIndicator ||
       globalDraggableTheme.dropIndicator ||
       "luthor-draggable-drop-indicator",
-    upButton:
-      draggableConfig?.theme?.upButton ||
-      globalDraggableTheme.upButton ||
-      "luthor-draggable-up-button",
-    downButton:
-      draggableConfig?.theme?.downButton ||
-      globalDraggableTheme.downButton ||
-      "luthor-draggable-down-button",
     addButton:
       draggableConfig?.theme?.addButton ||
       globalDraggableTheme.addButton ||
@@ -816,39 +782,6 @@ function DraggableBlockPlugin({
     },
     [editor, isDragging, cleanupDragState],
   );
-
-  // Move handlers
-  const handleMoveUp = useCallback(() => {
-    const targetBlock = hoveredBlockRef.current;
-    if (!targetBlock) return;
-
-    editor.update(() => {
-      const node = $getNearestNodeFromDOMNode(targetBlock);
-      if (node) {
-        const prevSibling = node.getPreviousSibling();
-        if (prevSibling) {
-          node.remove();
-          prevSibling.insertBefore(node);
-        }
-      }
-    });
-  }, [editor]);
-
-  const handleMoveDown = useCallback(() => {
-    const targetBlock = hoveredBlockRef.current;
-    if (!targetBlock) return;
-
-    editor.update(() => {
-      const node = $getNearestNodeFromDOMNode(targetBlock);
-      if (node) {
-        const nextSibling = node.getNextSibling();
-        if (nextSibling) {
-          node.remove();
-          nextSibling.insertAfter(node);
-        }
-      }
-    });
-  }, [editor]);
 
   // Drag event handlers (desktop)
   useEffect(() => {
@@ -1281,7 +1214,6 @@ function DraggableBlockPlugin({
     ) || 40;
   const showAddButton =
     (draggableConfig?.showAddButton ?? config.showAddButton) !== false;
-  const dragColumnOffset = showAddButton ? 12 : 0;
   const buttonStackWidth = showAddButton ? 52 : 24;
   const fixedGutterLeft =
     layoutRect.left +
@@ -1301,20 +1233,8 @@ function DraggableBlockPlugin({
           window.scrollX +
           (draggableConfig?.offsetLeft || config.offsetLeft || -40);
 
-  const showMoveButtons =
-    (draggableConfig?.showMoveButtons ?? config.showMoveButtons) !== false;
-  const showUpControl =
-    showMoveButtons &&
-    (draggableConfig?.showUpButton ?? config.showUpButton) !== false;
-  const showDownControl =
-    showMoveButtons &&
-    (draggableConfig?.showDownButton ?? config.showDownButton) !== false;
-
   const iconSize = 24;
-  const verticalControlGap = 4;
-  const handleCenterOffset =
-    (showUpControl ? iconSize + verticalControlGap : 0) + iconSize / 2;
-  const bottomReserve = showDownControl ? iconSize + verticalControlGap : 0;
+  const handleCenterOffset = iconSize / 2;
 
   const blockTopPage = rect.top + window.scrollY;
   const blockBottomPage = rect.bottom + window.scrollY;
@@ -1330,7 +1250,7 @@ function DraggableBlockPlugin({
   const minStackTopPage = blockTopPage;
   const maxStackTopPage = Math.max(
     minStackTopPage,
-    blockBottomPage - (handleCenterOffset + iconSize / 2 + bottomReserve),
+    blockBottomPage - (handleCenterOffset + iconSize / 2),
   );
   const pageTop = Math.min(
     maxStackTopPage,
@@ -1370,54 +1290,15 @@ function DraggableBlockPlugin({
             ...mergedStyles.buttonStack,
           }}
         >
-          {/* Move button cluster */}
+          {/* Button row: add button + drag handle */}
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              gap: "4px",
+              flexDirection: "row",
               alignItems: "center",
+              gap: "4px",
             }}
           >
-            {/* Move up control */}
-            {(draggableConfig?.showMoveButtons ?? config.showMoveButtons) !==
-              false &&
-              (draggableConfig?.showUpButton ?? config.showUpButton) !==
-                false &&
-              (draggableConfig?.buttonsRenderer || config.buttonsRenderer ? (
-                (draggableConfig?.buttonsRenderer || config.buttonsRenderer)!({
-                  rect,
-                  onMoveUp: handleMoveUp,
-                  onMoveDown: handleMoveDown,
-                  showUp: true,
-                  showDown: false,
-                  upClassName: `luthor-drag-button ${mergedThemeClasses.upButton}`,
-                  downClassName: `luthor-drag-button ${mergedThemeClasses.downButton}`,
-                })
-              ) : (
-                <button
-                  className={`luthor-drag-button ${mergedThemeClasses.upButton}`}
-                  onClick={handleMoveUp}
-                  style={{
-                    transform:
-                      dragColumnOffset > 0
-                        ? `translateX(${dragColumnOffset}px)`
-                        : undefined,
-                    ...mergedStyles.upButton,
-                  }}
-                >
-                  ↑
-                </button>
-              ))}
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
               {showAddButton && (
                 <button
                   type="button"
@@ -1460,38 +1341,6 @@ function DraggableBlockPlugin({
                 </div>
               )}
             </div>
-
-            {/* Move down control */}
-            {(draggableConfig?.showMoveButtons ?? config.showMoveButtons) !==
-              false &&
-              (draggableConfig?.showDownButton ?? config.showDownButton) !==
-                false &&
-              (draggableConfig?.buttonsRenderer || config.buttonsRenderer ? (
-                (draggableConfig?.buttonsRenderer || config.buttonsRenderer)!({
-                  rect,
-                  onMoveUp: handleMoveUp,
-                  onMoveDown: handleMoveDown,
-                  showUp: false,
-                  showDown: true,
-                  upClassName: `luthor-drag-button ${mergedThemeClasses.upButton}`,
-                  downClassName: `luthor-drag-button ${mergedThemeClasses.downButton}`,
-                })
-              ) : (
-                <button
-                  className={`luthor-drag-button ${mergedThemeClasses.downButton}`}
-                  onClick={handleMoveDown}
-                  style={{
-                    transform:
-                      dragColumnOffset > 0
-                        ? `translateX(${dragColumnOffset}px)`
-                        : undefined,
-                    ...mergedStyles.downButton,
-                  }}
-                >
-                  ↓
-                </button>
-              ))}
-          </div>
         </div>,
         anchorElem,
       )}

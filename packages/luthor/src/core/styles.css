@@ -1621,8 +1621,6 @@
 }
 
 .luthor-draggable-handle,
-.luthor-draggable-up-button,
-.luthor-draggable-down-button,
 .luthor-draggable-add-button {
 	width: 24px;
 	height: 24px;
@@ -1648,9 +1646,7 @@
 	padding: 0;
 }
 
-.luthor-draggable-handle svg,
-.luthor-draggable-up-button svg,
-.luthor-draggable-down-button svg {
+.luthor-draggable-handle svg {
 	width: 14px;
 	height: 14px;
 	stroke: currentColor;
@@ -1658,16 +1654,12 @@
 }
 
 .luthor-draggable-handle:hover,
-.luthor-draggable-up-button:hover,
-.luthor-draggable-down-button:hover,
 .luthor-draggable-add-button:hover {
 	color: var(--luthor-fg);
 	transform: scale(1.04);
 }
 
 .luthor-draggable-handle:active,
-.luthor-draggable-up-button:active,
-.luthor-draggable-down-button:active,
 .luthor-draggable-add-button:active,
 .luthor-draggable-handle-active {
 	background: transparent;

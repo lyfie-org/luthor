@@ -252,9 +252,6 @@ const commandPaletteExt = new CommandPaletteExtension();
 const draggableBlockExt = new DraggableBlockExtension();
 (draggableBlockExt as any).config = {
   ...(draggableBlockExt as any).config,
-  showMoveButtons: true,
-  showUpButton: true,
-  showDownButton: true,
   buttonStackPosition: "left",
 };
 
