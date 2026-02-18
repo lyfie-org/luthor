@@ -273,14 +273,17 @@ function ExtensiveEditorContent({
       </div>
       <div className="luthor-editor" data-mode={mode}>
         {mode === "visual" && (
-          <RichText
-            placeholder="Write anything..."
-            classNames={{
-              container: "luthor-richtext-container luthor-preset-extensive__container",
-              contentEditable: "luthor-content-editable luthor-preset-extensive__content",
-              placeholder: "luthor-placeholder luthor-preset-extensive__placeholder",
-            }}
-          />
+          <>
+            <div className="luthor-editor-visual-gutter" aria-hidden="true" />
+            <RichText
+              placeholder="Write anything..."
+              classNames={{
+                container: "luthor-richtext-container luthor-preset-extensive__container",
+                contentEditable: "luthor-content-editable luthor-preset-extensive__content",
+                placeholder: "luthor-placeholder luthor-preset-extensive__placeholder",
+              }}
+            />
+          </>
         )}
         {mode !== "visual" && (
           <div className="luthor-source-panel">

@@ -284,8 +284,13 @@ function DraggableBlockPlugin({
 
   // SSR safety
   if (typeof document === "undefined") return null;
+  const editorRootElement = editor.getRootElement();
+  const defaultAnchorElem =
+    ((editorRootElement?.closest?.(".luthor-editor") as HTMLElement | null) ||
+      editorRootElement?.parentElement ||
+      document.body) as HTMLElement;
   const anchorElem =
-    draggableConfig?.anchorElem || config.anchorElem || document.body;
+    draggableConfig?.anchorElem || config.anchorElem || defaultAnchorElem;
 
   // Default styles for UI elements - minimal and functional
   const defaultStyles = {
@@ -1137,6 +1142,49 @@ function DraggableBlockPlugin({
     return null;
   }
 
+  const editorLayoutElement =
+    (editorRootElement?.closest?.(".luthor-editor") as HTMLElement | null) ||
+    null;
+  const layoutReferenceElement = editorLayoutElement || editorRootElement;
+
+  if (!layoutReferenceElement) {
+    return null;
+  }
+
+  const layoutRect = layoutReferenceElement.getBoundingClientRect();
+  const layoutStyles = window.getComputedStyle(layoutReferenceElement);
+  const gutterWidth =
+    Number.parseFloat(
+      layoutStyles.getPropertyValue("--luthor-drag-gutter-width"),
+    ) || 40;
+  const buttonStackWidth = 28;
+  const fixedGutterLeft =
+    layoutRect.left +
+    window.scrollX +
+    Math.max(0, (gutterWidth - buttonStackWidth) / 2);
+
+  const buttonStackPosition =
+    draggableConfig?.buttonStackPosition || config.buttonStackPosition;
+  const pageLeft =
+    buttonStackPosition === "right"
+      ? rect.right +
+        window.scrollX +
+        (draggableConfig?.offsetRight || config.offsetRight || 10)
+      : editorLayoutElement
+        ? fixedGutterLeft
+        : rect.left +
+          window.scrollX +
+          (draggableConfig?.offsetLeft || config.offsetLeft || -40);
+  const pageTop = rect.top + window.scrollY;
+
+  const anchorRect = anchorElem.getBoundingClientRect();
+  const anchorOffsetLeft =
+    anchorElem === document.body ? 0 : anchorRect.left + window.scrollX;
+  const anchorOffsetTop =
+    anchorElem === document.body ? 0 : anchorRect.top + window.scrollY;
+  const portalLeft = pageLeft - anchorOffsetLeft;
+  const portalTop = pageTop - anchorOffsetTop;
+
   return (
     <>
       {/* Button stack */}
@@ -1145,16 +1193,8 @@ function DraggableBlockPlugin({
           className={`${mergedThemeClasses.buttonStack} ${!isVisible ? "fade-out" : ""}`}
           style={{
             position: "absolute",
-            left:
-              (draggableConfig?.buttonStackPosition ||
-                config.buttonStackPosition) === "right"
-                ? rect.right +
-                  window.scrollX +
-                  (draggableConfig?.offsetRight || config.offsetRight || 10)
-                : rect.left +
-                  window.scrollX +
-                  (draggableConfig?.offsetLeft || config.offsetLeft || -40),
-            top: rect.top + window.scrollY,
+            left: portalLeft,
+            top: portalTop,
             zIndex: 40,
             display: "flex",
             flexDirection: "row",
@@ -1270,8 +1310,8 @@ function DraggableBlockPlugin({
                 className={mergedThemeClasses.dropIndicator}
                 style={{
                   position: "absolute",
-                  top: dropIndicator.top - 4,
-                  left: dropIndicator.left,
+                  top: dropIndicator.top - 4 - anchorOffsetTop,
+                  left: dropIndicator.left - anchorOffsetLeft,
                   width: dropIndicator.width,
                   height: "8px",
                   pointerEvents: "none",

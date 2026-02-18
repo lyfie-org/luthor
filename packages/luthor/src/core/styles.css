@@ -490,11 +490,30 @@
 	flex-direction: column;
 	min-height: 400px;
 	position: relative;
+	--luthor-drag-gutter-width: 36px;
+}
+
+.luthor-editor[data-mode="visual"] {
+	display: grid;
+	grid-template-columns: var(--luthor-drag-gutter-width) minmax(0, 1fr);
+	grid-template-rows: minmax(0, 1fr);
+}
+
+.luthor-editor-visual-gutter {
+	grid-column: 1;
+	grid-row: 1;
+	pointer-events: none;
 }
 
 .luthor-richtext-container {
 	position: relative;
 	flex: 1;
+}
+
+.luthor-editor[data-mode="visual"] .luthor-richtext-container {
+	grid-column: 2;
+	grid-row: 1;
+	min-width: 0;
 }
 
 .luthor-content-editable {
@@ -1610,11 +1629,21 @@
 	border: 1px solid var(--luthor-border);
 	background: var(--luthor-muted);
 	color: var(--luthor-muted-fg);
+	fill: currentColor;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
 	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.luthor-draggable-handle svg,
+.luthor-draggable-up-button svg,
+.luthor-draggable-down-button svg {
+	width: 14px;
+	height: 14px;
+	stroke: currentColor;
+	fill: none;
 }
 
 .luthor-draggable-handle:hover,
