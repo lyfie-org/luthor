@@ -1,4 +1,13 @@
-import { LexicalEditor, $getSelection, $isRangeSelection } from "lexical";
+import {
+  LexicalEditor,
+  $getSelection,
+  $isRangeSelection,
+  $isTextNode,
+  $isParagraphNode,
+  $isRootOrShadowRoot,
+  KEY_ENTER_COMMAND,
+  COMMAND_PRIORITY_LOW,
+} from "lexical";
 import {
   INSERT_HORIZONTAL_RULE_COMMAND,
   $isHorizontalRuleNode,
@@ -6,6 +15,7 @@ import {
   HorizontalRuleNode,
 } from "@lexical/react/LexicalHorizontalRuleNode";
 import { HorizontalRulePlugin } from "@lexical/react/LexicalHorizontalRulePlugin";
+import { registerMarkdownShortcuts, type Transformer } from "@lexical/markdown";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
 import React from "react";
@@ -13,7 +23,7 @@ import type { LexicalNode, ElementNode } from "lexical";
 
 /**
  * Horizontal rule transformer for Markdown
- * Supports --- / *** / ___ syntax
+ * Supports --- / ___ syntax
  */
 export const HORIZONTAL_RULE_TRANSFORMER = {
   dependencies: [HorizontalRuleNode],
@@ -21,17 +31,29 @@ export const HORIZONTAL_RULE_TRANSFORMER = {
     if (!$isHorizontalRuleNode(node)) return null;
     return "---";
   },
-  regExp: /^(?:---|\*\*\*|___)\s*$/,
+  regExp: /^(?:---|___)\s*$/,
   replace: (
     parentNode: ElementNode,
     children: LexicalNode[],
     match: string[],
+    isImport: boolean,
   ) => {
+    void children;
+    void match;
     const hrNode = $createHorizontalRuleNode();
     parentNode.replace(hrNode);
+    if (!isImport) {
+      hrNode.selectNext();
+    }
   },
   type: "element" as const,
 };
+
+const HORIZONTAL_RULE_SHORTCUT_TRANSFORMERS: Transformer[] = [
+  HORIZONTAL_RULE_TRANSFORMER,
+];
+
+const HORIZONTAL_RULE_ENTER_PATTERN = /^(?:---|___)$/;
 
 /**
  * Commands exposed by the horizontal rule extension.
@@ -88,7 +110,57 @@ export class HorizontalRuleExtension extends BaseExtension<
    * @returns Cleanup function
    */
   register(editor: LexicalEditor): () => void {
-    return () => {};
+    const unregisterMarkdownShortcuts = registerMarkdownShortcuts(
+      editor,
+      HORIZONTAL_RULE_SHORTCUT_TRANSFORMERS,
+    );
+
+    const unregisterEnterCommand = editor.registerCommand(
+      KEY_ENTER_COMMAND,
+      () => {
+        let shouldHandle = false;
+
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!selection || !$isRangeSelection(selection) || !selection.isCollapsed()) {
+            return;
+          }
+
+          const anchorNode = selection.anchor.getNode();
+          if (!$isTextNode(anchorNode)) {
+            return;
+          }
+
+          const parentNode = anchorNode.getParent();
+          if (!parentNode || !$isParagraphNode(parentNode)) {
+            return;
+          }
+
+          const grandParentNode = parentNode.getParent();
+          if (!$isRootOrShadowRoot(grandParentNode)) {
+            return;
+          }
+
+          const content = anchorNode.getTextContent().trim();
+          if (!HORIZONTAL_RULE_ENTER_PATTERN.test(content)) {
+            return;
+          }
+
+          shouldHandle = true;
+          const hrNode = $createHorizontalRuleNode();
+          parentNode.replace(hrNode);
+          hrNode.selectNext();
+        });
+
+        return shouldHandle;
+      },
+      COMMAND_PRIORITY_LOW,
+    );
+
+    return () => {
+      unregisterMarkdownShortcuts();
+      unregisterEnterCommand();
+    };
   }
 
   /**

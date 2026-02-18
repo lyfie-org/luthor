@@ -252,7 +252,7 @@ export function generateCommands(): CommandConfig[] {
       description: "Insert a horizontal line separator",
       category: "Insert",
       action: (commands) => commands.insertHorizontalRule(),
-      keywords: ["horizontal", "rule"],
+      keywords: ["horizontal", "rule", "hr", "divider", "separator"],
     },
     {
       id: "insert.image",

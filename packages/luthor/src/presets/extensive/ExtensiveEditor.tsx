@@ -52,6 +52,8 @@ Use **bold**, *italic*, <u>underline</u>, ~~strikethrough~~, [links](https://lex
 
 > Convert this paragraph to quote, heading, paragraph, or code block from the toolbar.
 
+Type \`---\` or \`___\` then press space/enter to insert a horizontal rule.
+
 ---
 
 ## Lists
@@ -337,6 +339,7 @@ Luthor is a modern, type-safe React framework built on top of Meta's Lexical tha
 - Right-click in the editor for context menu
 - Drag blocks using drag handles
 - Insert image, table, HTML embed, and custom feature card
+- Insert a horizontal rule from toolbar or type --- then space
 - Open Command Palette with Ctrl+Shift+P
 - Switch between Visual, HTML, and Markdown tabs to verify import/export
 

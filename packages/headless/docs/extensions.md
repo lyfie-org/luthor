@@ -197,6 +197,19 @@ commands.toggleCodeBlock();
 activeStates.isInCodeBlock;
 ```
 
+### Horizontal Rule Extension
+
+```tsx
+import { horizontalRuleExtension } from "@lyfie/luthor-headless";
+
+const extensions = [horizontalRuleExtension] as const;
+
+commands.insertHorizontalRule();
+```
+
+Markdown shortcuts for horizontal rules are supported when markdown shortcuts are enabled in your stack.
+Supported shortcut inputs: `---`, `___`.
+
 ## Media Extensions
 
 ### Image Extension

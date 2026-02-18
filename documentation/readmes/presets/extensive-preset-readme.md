@@ -20,7 +20,15 @@ All-features preset for advanced authoring and power-user workflows.
 
 ## Default toolbar
 
-`undo`, `redo`, `heading`, `bold`, `italic`, `underline`, `strikethrough`, `link`, `image`, `table`, `blockquote`, `code`, `codeBlock`, `bulletedList`, `numberedList`
+`undo`, `redo`, `heading`, `fontFamily`, `bold`, `italic`, `underline`, `strikethrough`, `link`, `image`, `table`, `horizontalRule`, `htmlEmbed`, `blockquote`, `code`, `codeBlock`, `bulletedList`, `numberedList`, `commandPalette`, `floatingToolbar`, `contextMenu`, `draggableBlock`, `customNode`, `sourceMode`, `themeToggle`
+
+## Horizontal rule shortcut
+
+Horizontal rules are available out of the box in the extensive preset.
+
+- Toolbar action: `horizontalRule`
+- Command palette action: `Insert Horizontal Rule`
+- Markdown shortcuts while typing (then press space/enter): `---`, `___`
 
 ## Usage
 

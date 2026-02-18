@@ -5,7 +5,10 @@ import {
   normalizeCodeLang,
 } from "@lexical/code";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { registerMarkdownShortcuts, TRANSFORMERS } from "@lexical/markdown";
+import {
+  registerMarkdownShortcuts,
+  TRANSFORMERS,
+} from "@lexical/markdown";
 import { createPortal } from "react-dom";
 import type { LexicalEditor, LexicalNode } from "lexical";
 import {
