@@ -1,4 +1,4 @@
-@import "../shared/preset-base.css";
+@import "../../core/preset-base.css";
 
 .luthor-preset-email {
 	--luthor-preset-content-padding: 16px;

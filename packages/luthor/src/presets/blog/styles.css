@@ -1,4 +1,4 @@
-@import "../shared/preset-base.css";
+@import "../../core/preset-base.css";
 
 .luthor-preset-blog {
 	--luthor-preset-content-padding: 24px;

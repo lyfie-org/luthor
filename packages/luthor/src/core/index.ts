@@ -4,6 +4,7 @@ export * from "./extensions";
 export * from "./floating-toolbar";
 export * from "./icons";
 export * from "./layout";
+export * from "./preset-config";
 export * from "./toolbar";
 export * from "./types";
 export * from "./ui";

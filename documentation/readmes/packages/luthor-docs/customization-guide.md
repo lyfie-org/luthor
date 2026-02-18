@@ -87,6 +87,7 @@ You can reuse core modules and wire a custom editor shell:
 - `FloatingToolbar` via `createFloatingToolbarExtension` + `setFloatingToolbarContext`.
 - `CommandPalette` plus `commandsToCommandPaletteItems` and `registerKeyboardShortcuts`.
 - `ModeTabs` + `SourceView` for visual/source layout switching.
+- `createPresetEditorConfig` for consistent classNames/placeholder wiring in custom preset definitions.
 
 ### Example composition flow
 

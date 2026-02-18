@@ -1,5 +1,5 @@
 import type { EditorPreset } from "..";
-import { createPresetEditorConfig } from "../shared/preset-config";
+import { createPresetEditorConfig } from "../../core/preset-config";
 
 export const defaultPreset: EditorPreset = {
   id: "default",

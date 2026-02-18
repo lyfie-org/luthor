@@ -1,7 +1,7 @@
 import type { EditorPreset } from "..";
 import { extensiveExtensions } from "./extensions";
 import { ExtensiveEditor } from "./ExtensiveEditor";
-import { createPresetEditorConfig } from "../shared/preset-config";
+import { createPresetEditorConfig } from "../../core/preset-config";
 
 export const extensivePreset: EditorPreset = {
   id: "extensive",

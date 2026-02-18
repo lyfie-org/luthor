@@ -13,6 +13,8 @@ The `extensive` preset is the flagship implementation and consumes all currently
 src/
   core/
     index.ts
+    preset-config.ts
+    preset-base.css
     types.ts
     commands.ts
     extensions.tsx
@@ -35,6 +37,8 @@ src/
 
 ## Relationship Model
 
+- `core/preset-config.ts`, `core/preset-base.css`
+  - Shared preset foundation moved from `presets/shared` (config factory + base preset styling).
 - `core/types.ts`
   - Shared strict TypeScript contracts for command APIs, active states, theme modes, and reusable UI props.
 - `core/ui.tsx`, `core/icons.tsx`, `core/layout.tsx`
@@ -60,3 +64,4 @@ src/
 - Reduces preset-local duplication.
 - Keeps core modules composable for future presets.
 - Preserves functional output of `extensive` while making the architecture extensible.
+- Keeps preset foundation files out of `src/presets/*` so new developers have one canonical place (`src/core`) for shared building blocks.
