@@ -39,6 +39,8 @@ export function CmsEditor() {
 
 ## Related docs
 
-- Package README: [../../../README.md](../../../README.md)
-- Monorepo README: [../../../../../README.md](../../../../../README.md)
-- Docs hub: [../../../../../documentation/README.md](../../../../../documentation/README.md)
+- Package README: [../../../packages/luthor/README.md](../../../packages/luthor/README.md)
+- Monorepo README: [../../../README.md](../../../README.md)
+- Docs hub: [../../documentation-hub.md](../../documentation-hub.md)
+
+

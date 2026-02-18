@@ -14,5 +14,7 @@ In a package `eslint.config.js`, import and apply one of the shared presets.
 
 ## Related Docs
 
-- Monorepo overview: [../../README.md](../../README.md)
-- Documentation hub: [../../documentation/README.md](../../documentation/README.md)
+- Monorepo overview: [../../../README.md](../../../README.md)
+- Documentation hub: [../../documentation-hub.md](../../documentation-hub.md)
+
+

@@ -74,8 +74,8 @@ If you want a faster plug-and-play setup with bundled Lexical dependencies and r
 
 - Headless deep docs: [docs/getting-started.md](docs/getting-started.md)
 - Monorepo root docs: [../../README.md](../../README.md)
-- Central docs index: [../../documentation/README.md](../../documentation/README.md)
-- Developer README map: [../../documentation/developer_notes/README.md](../../documentation/developer_notes/README.md)
+- Central docs index: [../../documentation/documentation-hub.md](../../documentation/documentation-hub.md)
+- Developer README map: [../../documentation/developer_notes/readme-map.md](../../documentation/developer_notes/readme-map.md)
 
 ## Development (Workspace)
 

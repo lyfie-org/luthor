@@ -9,7 +9,7 @@ Current Markdown inventory for this repository.
 
 ## Apps
 
-- [../apps/demo/README.md](../apps/demo/README.md)
+- [readmes/apps/demo-readme.md](readmes/apps/demo-readme.md)
 
 ## Packages: Headless
 
@@ -25,24 +25,24 @@ Current Markdown inventory for this repository.
 ## Packages: Luthor
 
 - [../packages/luthor/README.md](../packages/luthor/README.md)
-- [../packages/luthor/src/presets/blog/README.md](../packages/luthor/src/presets/blog/README.md)
-- [../packages/luthor/src/presets/chat/README.md](../packages/luthor/src/presets/chat/README.md)
-- [../packages/luthor/src/presets/classic/README.md](../packages/luthor/src/presets/classic/README.md)
-- [../packages/luthor/src/presets/cms/README.md](../packages/luthor/src/presets/cms/README.md)
-- [../packages/luthor/src/presets/code/README.md](../packages/luthor/src/presets/code/README.md)
-- [../packages/luthor/src/presets/default/README.md](../packages/luthor/src/presets/default/README.md)
-- [../packages/luthor/src/presets/docs/README.md](../packages/luthor/src/presets/docs/README.md)
-- [../packages/luthor/src/presets/email/README.md](../packages/luthor/src/presets/email/README.md)
-- [../packages/luthor/src/presets/extensive/README.md](../packages/luthor/src/presets/extensive/README.md)
-- [../packages/luthor/src/presets/markdown/README.md](../packages/luthor/src/presets/markdown/README.md)
-- [../packages/luthor/src/presets/minimal/README.md](../packages/luthor/src/presets/minimal/README.md)
+- [readmes/presets/blog-preset-readme.md](readmes/presets/blog-preset-readme.md)
+- [readmes/presets/chat-preset-readme.md](readmes/presets/chat-preset-readme.md)
+- [readmes/presets/classic-preset-readme.md](readmes/presets/classic-preset-readme.md)
+- [readmes/presets/cms-preset-readme.md](readmes/presets/cms-preset-readme.md)
+- [readmes/presets/code-preset-readme.md](readmes/presets/code-preset-readme.md)
+- [readmes/presets/default-preset-readme.md](readmes/presets/default-preset-readme.md)
+- [readmes/presets/docs-preset-readme.md](readmes/presets/docs-preset-readme.md)
+- [readmes/presets/email-preset-readme.md](readmes/presets/email-preset-readme.md)
+- [readmes/presets/extensive-preset-readme.md](readmes/presets/extensive-preset-readme.md)
+- [readmes/presets/markdown-preset-readme.md](readmes/presets/markdown-preset-readme.md)
+- [readmes/presets/minimal-preset-readme.md](readmes/presets/minimal-preset-readme.md)
 
 ## Packages: Tooling
 
-- [../packages/eslint-config/README.md](../packages/eslint-config/README.md)
-- [../packages/typescript-config/README.md](../packages/typescript-config/README.md)
+- [readmes/packages/eslint-config-readme.md](readmes/packages/eslint-config-readme.md)
+- [readmes/packages/typescript-config-readme.md](readmes/packages/typescript-config-readme.md)
 
 ## Documentation Folder
 
-- [README.md](README.md)
-- [developer_notes/README.md](developer_notes/README.md)
+- [documentation-hub.md](documentation-hub.md)
+- [developer_notes/readme-map.md](developer_notes/readme-map.md)

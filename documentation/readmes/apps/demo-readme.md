@@ -24,7 +24,8 @@ pnpm build --filter demo
 
 ## Related Docs
 
-- Monorepo root README: [../../README.md](../../README.md)
-- Documentation hub: [../../documentation/README.md](../../documentation/README.md)
-- `@lyfie/luthor` docs: [../../packages/luthor/README.md](../../packages/luthor/README.md)
-- `@lyfie/luthor-headless` docs: [../../packages/headless/README.md](../../packages/headless/README.md)
+- Monorepo root README: [../../../README.md](../../../README.md)
+- Documentation hub: [../../documentation-hub.md](../../documentation-hub.md)
+- `@lyfie/luthor` docs: [../../../packages/luthor/README.md](../../../packages/luthor/README.md)
+- `@lyfie/luthor-headless` docs: [../../../packages/headless/README.md](../../../packages/headless/README.md)
+

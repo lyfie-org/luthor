@@ -43,8 +43,8 @@ From `src/presets/index.ts`, this package exports:
 
 - Headless core package docs: [../headless/README.md](../headless/README.md)
 - Monorepo root docs: [../../README.md](../../README.md)
-- Central docs index: [../../documentation/README.md](../../documentation/README.md)
-- Developer README map: [../../documentation/developer_notes/README.md](../../documentation/developer_notes/README.md)
+- Central docs index: [../../documentation/documentation-hub.md](../../documentation/documentation-hub.md)
+- Developer README map: [../../documentation/developer_notes/readme-map.md](../../documentation/developer_notes/readme-map.md)
 
 ## Development (Workspace)
 

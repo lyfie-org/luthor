@@ -9,7 +9,7 @@ Luthor is a pnpm + Turbo monorepo for a type-safe rich text editor system built 
 
 - Headless package (`@lyfie/luthor-headless`): [packages/headless/README.md](packages/headless/README.md)
 - Preset package (`@lyfie/luthor`): [packages/luthor/README.md](packages/luthor/README.md)
-- Central documentation index: [documentation/README.md](documentation/README.md)
+- Central documentation index: [documentation/documentation-hub.md](documentation/documentation-hub.md)
 
 ## Repository Structure
 
@@ -37,4 +37,4 @@ High-level architecture notes live in [architecture.md](architecture.md).
 
 ## Developer Documentation Hub
 
-All Markdown docs are cataloged under [documentation/README.md](documentation/README.md), and all README references for contributors are grouped in [documentation/developer_notes/README.md](documentation/developer_notes/README.md).
+All Markdown docs are cataloged under [documentation/documentation-hub.md](documentation/documentation-hub.md), and all README references for contributors are grouped in [documentation/developer_notes/readme-map.md](documentation/developer_notes/readme-map.md).

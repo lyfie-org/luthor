@@ -41,6 +41,6 @@ luthor/
 ## Documentation Topology
 
 - Root entrypoint: [README.md](README.md)
-- Central catalog: [documentation/README.md](documentation/README.md)
-- Developer notes and README mapping: [documentation/developer_notes/README.md](documentation/developer_notes/README.md)
+- Central catalog: [documentation/documentation-hub.md](documentation/documentation-hub.md)
+- Developer notes and README mapping: [documentation/developer_notes/readme-map.md](documentation/developer_notes/readme-map.md)
 - Headless package docs: [packages/headless/docs](packages/headless/docs)
