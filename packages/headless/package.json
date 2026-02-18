@@ -6,6 +6,11 @@
   "private": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
