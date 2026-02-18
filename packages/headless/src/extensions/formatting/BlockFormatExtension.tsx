@@ -7,6 +7,8 @@ import {
   COMMAND_PRIORITY_EDITOR,
   KEY_ENTER_COMMAND,
   INSERT_PARAGRAPH_COMMAND,
+  FORMAT_ELEMENT_COMMAND,
+  type ElementFormatType,
 } from "lexical";
 import { $setBlocksType } from "@lexical/selection"; // Key import!
 import { $createParagraphNode, $isParagraphNode, ParagraphNode } from "lexical";
@@ -38,6 +40,8 @@ export type BlockFormatCommands = {
   toggleHeading: (tag: HeadingTagType) => void;
   /** Switch to quote format */
   toggleQuote: () => void;
+  /** Set text alignment for selected blocks */
+  setTextAlignment: (alignment: "left" | "center" | "right" | "justify") => void;
   /** Return the current block type as a string ('p', 'h1', 'h2', etc.) */
   getCurrentBlockType: () => BlockFormat;
 };
@@ -62,6 +66,14 @@ export type BlockFormatStateQueries = {
   isH6: () => Promise<boolean>;
   /** Check whether the selection is in a quote block */
   isQuote: () => Promise<boolean>;
+  /** Check whether selected blocks are left-aligned */
+  isTextAlignedLeft: () => Promise<boolean>;
+  /** Check whether selected blocks are center-aligned */
+  isTextAlignedCenter: () => Promise<boolean>;
+  /** Check whether selected blocks are right-aligned */
+  isTextAlignedRight: () => Promise<boolean>;
+  /** Check whether selected blocks are justified */
+  isTextAlignedJustify: () => Promise<boolean>;
 };
 
 /**
@@ -185,8 +197,24 @@ export class BlockFormatExtension extends BaseExtension<
       toggleHeading: (tag: HeadingTagType) =>
         this.toggleBlockFormat(editor, tag),
       toggleQuote: () => this.toggleBlockFormat(editor, "quote"),
+      setTextAlignment: (alignment) => this.setTextAlignment(editor, alignment),
       getCurrentBlockType: () => this.getCurrentFormat(editor) || "p",
     };
+  }
+
+  /**
+   * Set element alignment for selected blocks
+   * @param editor - Lexical editor instance
+   * @param alignment - Target text alignment
+   */
+  private setTextAlignment(
+    editor: LexicalEditor,
+    alignment: "left" | "center" | "right" | "justify",
+  ) {
+    editor.dispatchCommand(
+      FORMAT_ELEMENT_COMMAND,
+      alignment as ElementFormatType,
+    );
   }
 
   /**
@@ -230,7 +258,58 @@ export class BlockFormatExtension extends BaseExtension<
       isH5: () => Promise.resolve(this.isFormat("h5", editor)),
       isH6: () => Promise.resolve(this.isFormat("h6", editor)),
       isQuote: () => Promise.resolve(this.isFormat("quote", editor)),
+      isTextAlignedLeft: () => Promise.resolve(this.isAlignment("left", editor)),
+      isTextAlignedCenter: () => Promise.resolve(this.isAlignment("center", editor)),
+      isTextAlignedRight: () => Promise.resolve(this.isAlignment("right", editor)),
+      isTextAlignedJustify: () => Promise.resolve(this.isAlignment("justify", editor)),
     };
+  }
+
+  /**
+   * Check whether all selected blocks match the specified alignment
+   * @param alignment - Alignment to check
+   * @param editor - Lexical editor instance
+   * @returns True if all selected blocks match the alignment
+   */
+  private isAlignment(
+    alignment: "left" | "center" | "right" | "justify",
+    editor: LexicalEditor,
+  ): boolean {
+    let matches = true;
+
+    editor.getEditorState().read(() => {
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) {
+        matches = false;
+        return;
+      }
+
+      const nodes = selection.getNodes();
+      for (const node of nodes) {
+        const block = this.getBlockNode(node);
+        if (!block) {
+          matches = false;
+          break;
+        }
+
+        const blockAlignment = this.normalizeAlignment(
+          block.getFormatType() as ElementFormatType,
+        );
+        if (blockAlignment !== alignment) {
+          matches = false;
+          break;
+        }
+      }
+    });
+
+    return matches;
+  }
+
+  private normalizeAlignment(formatType: ElementFormatType): "left" | "center" | "right" | "justify" {
+    if (formatType === "center" || formatType === "right" || formatType === "justify") {
+      return formatType;
+    }
+    return "left";
   }
 
   /**

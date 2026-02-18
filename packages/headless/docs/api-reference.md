@@ -70,6 +70,7 @@ Commands are functions that modify the editor state. Available commands depend o
 - `toggleHeading(level)`: Toggle heading (h1-h6)
 - `toggleParagraph()`: Convert to paragraph
 - `toggleQuote()`: Toggle blockquote
+- `setTextAlignment(alignment)`: Set block text alignment (`left`, `center`, `right`, `justify`)
 - `toggleUnorderedList()`: Toggle bullet list
 - `toggleOrderedList()`: Toggle numbered list
 
@@ -156,7 +157,7 @@ const configuredLinkExtension = linkExtension.configure({
 
 #### BlockFormatExtension
 
-Provides heading, paragraph, and quote formatting.
+Provides heading, paragraph, quote formatting, and block text alignment.
 
 #### ListExtension
 

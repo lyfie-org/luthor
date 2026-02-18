@@ -8,6 +8,8 @@ export type BlockFormat = "p" | BlockHeadingLevel;
 
 export type ImageAlignment = "left" | "center" | "right" | "none";
 
+export type TextAlignment = "left" | "center" | "right" | "justify";
+
 export interface InsertTableConfig {
   rows?: number;
   columns?: number;
@@ -32,6 +34,7 @@ export interface CoreEditorCommands {
   toggleParagraph: () => void;
   toggleHeading: (heading: BlockHeadingLevel) => void;
   toggleQuote: () => void;
+  setTextAlignment: (alignment: TextAlignment) => void;
   toggleCodeBlock: () => void;
   setCodeLanguage?: (language: string) => void;
   autoDetectCodeLanguage?: () => Promise<string | null>;
@@ -77,6 +80,10 @@ export interface CoreEditorActiveStates {
   isH4?: boolean;
   isH5?: boolean;
   isH6?: boolean;
+  isTextAlignedLeft?: boolean;
+  isTextAlignedCenter?: boolean;
+  isTextAlignedRight?: boolean;
+  isTextAlignedJustify?: boolean;
   imageSelected?: boolean;
   isImageAlignedLeft?: boolean;
   isImageAlignedCenter?: boolean;

@@ -1,5 +1,6 @@
 import {
   AlignCenter,
+  AlignJustify,
   AlignLeft,
   AlignRight,
   Bold,
@@ -48,6 +49,7 @@ export const RedoIcon = Redo2;
 export const ImageIcon = Image;
 export const AlignLeftIcon = AlignLeft;
 export const AlignCenterIcon = AlignCenter;
+export const AlignJustifyIcon = AlignJustify;
 export const AlignRightIcon = AlignRight;
 export const UploadIcon = Upload;
 export const MinusIcon = Minus;

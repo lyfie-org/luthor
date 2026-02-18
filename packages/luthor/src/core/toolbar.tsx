@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import {
   AlignCenterIcon,
+  AlignJustifyIcon,
   AlignLeftIcon,
   AlignRightIcon,
   BoldIcon,
@@ -165,6 +166,18 @@ export function Toolbar({
             <Select value={currentBlockFormat} onValueChange={handleBlockFormatChange} options={blockFormatOptions} placeholder="Format" />
             <IconButton onClick={() => commands.toggleQuote()} active={activeStates.isQuote} title="Quote">
               <QuoteIcon size={16} />
+            </IconButton>
+            <IconButton onClick={() => commands.setTextAlignment("left")} active={activeStates.isTextAlignedLeft} title="Align Left">
+              <AlignLeftIcon size={16} />
+            </IconButton>
+            <IconButton onClick={() => commands.setTextAlignment("center")} active={activeStates.isTextAlignedCenter} title="Align Center">
+              <AlignCenterIcon size={16} />
+            </IconButton>
+            <IconButton onClick={() => commands.setTextAlignment("right")} active={activeStates.isTextAlignedRight} title="Align Right">
+              <AlignRightIcon size={16} />
+            </IconButton>
+            <IconButton onClick={() => commands.setTextAlignment("justify")} active={activeStates.isTextAlignedJustify} title="Justify">
+              <AlignJustifyIcon size={16} />
             </IconButton>
             {hasExtension("code") && (
               <IconButton onClick={() => commands.toggleCodeBlock()} active={activeStates.isInCodeBlock} title="Code Block">

@@ -140,10 +140,18 @@ const extensions = [blockFormatExtension] as const;
 commands.toggleHeading("h1"); // H1 heading
 commands.toggleHeading("h2"); // H2 heading
 commands.toggleQuote(); // Blockquote
+commands.setTextAlignment("left"); // Align left
+commands.setTextAlignment("center"); // Align center
+commands.setTextAlignment("right"); // Align right
+commands.setTextAlignment("justify"); // Justify
 
 activeStates.isH1;
 activeStates.isH2;
 activeStates.isQuote;
+activeStates.isTextAlignedLeft;
+activeStates.isTextAlignedCenter;
+activeStates.isTextAlignedRight;
+activeStates.isTextAlignedJustify;
 ```
 
 ### Code Block Extension
