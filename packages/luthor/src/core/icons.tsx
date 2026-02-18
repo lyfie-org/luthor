@@ -10,6 +10,7 @@ import {
   Command,
   Eye,
   FileCode,
+  Highlighter,
   Image,
   IndentIncrease,
   IndentDecrease,
@@ -22,6 +23,7 @@ import {
   Pencil,
   Quote,
   Redo2,
+  Palette,
   Search,
   Subscript,
   Strikethrough,
@@ -58,8 +60,10 @@ export const MinusIcon = Minus;
 export const TableIcon = Table;
 export const FileCodeIcon = FileCode;
 export const EyeIcon = Eye;
+export const HighlighterIcon = Highlighter;
 export const PencilIcon = Pencil;
 export const CommandIcon = Command;
+export const PaletteIcon = Palette;
 export const TypeIcon = Type;
 export const QuoteIcon = Quote;
 export const IndentIcon = IndentIncrease;

@@ -60,8 +60,14 @@ export class TextHighlightExtension extends BaseExtension<
     return {
       setTextHighlight: (highlightValue: string) => {
         const option = this.findOption(highlightValue);
-        if (!option) return;
-        this.applyHighlight(editor, option.backgroundColor);
+        if (option) {
+          this.applyHighlight(editor, option.backgroundColor);
+          return;
+        }
+
+        if (this.isValidCssColor(highlightValue)) {
+          this.applyHighlight(editor, highlightValue);
+        }
       },
       clearTextHighlight: () => {
         this.applyHighlight(editor, "");
@@ -82,8 +88,14 @@ export class TextHighlightExtension extends BaseExtension<
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) return;
 
+      const hasHighlight = this.normalizeValue(backgroundColor).length > 0;
+
       $patchStyleText(selection, {
         "background-color": backgroundColor,
+        "padding-left": hasHighlight ? "0.1em" : "",
+        "padding-right": hasHighlight ? "0.1em" : "",
+        "box-decoration-break": hasHighlight ? "clone" : "",
+        "-webkit-box-decoration-break": hasHighlight ? "clone" : "",
       });
     });
   }
@@ -135,7 +147,7 @@ export class TextHighlightExtension extends BaseExtension<
         );
       });
 
-      currentValue = matched?.value ?? null;
+      currentValue = matched?.value ?? current;
     });
 
     return currentValue;
@@ -150,6 +162,17 @@ export class TextHighlightExtension extends BaseExtension<
 
   private normalizeValue(value: string): string {
     return value.trim().toLowerCase().replace(/\s+/g, "");
+  }
+
+  private isValidCssColor(value: string): boolean {
+    const candidate = value.trim();
+    if (!candidate) return false;
+
+    if (typeof CSS !== "undefined" && typeof CSS.supports === "function") {
+      return CSS.supports("color", candidate);
+    }
+
+    return /^#([\da-f]{3}|[\da-f]{6})$/i.test(candidate);
   }
 }
 

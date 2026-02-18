@@ -61,8 +61,14 @@ export class TextColorExtension extends BaseExtension<
     return {
       setTextColor: (colorValue: string) => {
         const option = this.findOption(colorValue);
-        if (!option) return;
-        this.applyColor(editor, option.color);
+        if (option) {
+          this.applyColor(editor, option.color);
+          return;
+        }
+
+        if (this.isValidCssColor(colorValue)) {
+          this.applyColor(editor, colorValue);
+        }
       },
       clearTextColor: () => {
         this.applyColor(editor, "");
@@ -124,7 +130,7 @@ export class TextColorExtension extends BaseExtension<
         return this.normalizeValue(option.color) === normalizedCurrent;
       });
 
-      currentValue = matched?.value ?? null;
+      currentValue = matched?.value ?? current;
     });
 
     return currentValue;
@@ -139,6 +145,17 @@ export class TextColorExtension extends BaseExtension<
 
   private normalizeValue(value: string): string {
     return value.trim().toLowerCase().replace(/\s+/g, "");
+  }
+
+  private isValidCssColor(value: string): boolean {
+    const candidate = value.trim();
+    if (!candidate) return false;
+
+    if (typeof CSS !== "undefined" && typeof CSS.supports === "function") {
+      return CSS.supports("color", candidate);
+    }
+
+    return /^#([\da-f]{3}|[\da-f]{6})$/i.test(candidate);
   }
 }
 

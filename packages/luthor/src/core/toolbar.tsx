@@ -1,4 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import {
   AlignCenterIcon,
   AlignJustifyIcon,
@@ -28,8 +39,10 @@ import {
   UnlinkIcon,
   UploadIcon,
   EyeIcon,
+  HighlighterIcon,
   IndentIcon,
   OutdentIcon,
+  PaletteIcon,
   QuoteIcon,
   StrikethroughIcon,
 } from "./icons";
@@ -40,6 +53,302 @@ type SelectOption = {
   value: string;
   label: string;
 };
+
+type ColorOption = {
+  value: string;
+  label: string;
+  color: string;
+};
+
+const RECENT_COLORS_LIMIT = 6;
+const EXTENSIVE_SWATCH_COLORS: readonly string[] = [
+  "#ffffff", "#f2f2f2", "#d9d9d9", "#bfbfbf", "#808080", "#404040",
+  "#000000", "#fbe5d6", "#f8cbad", "#f4b183", "#ed7d31", "#c55a11",
+  "#fff2cc", "#ffe699", "#ffd966", "#ffc000", "#bf9000", "#7f6000",
+  "#e2f0d9", "#c6e0b4", "#a9d18e", "#70ad47", "#548235", "#375623",
+  "#ddebf7", "#bdd7ee", "#9dc3e6", "#5b9bd5", "#2f75b5", "#1f4e78",
+  "#e4dfec", "#d9c2e9", "#b4a7d6", "#8e7cc3", "#674ea7", "#351c75",
+];
+
+function normalizeColorValue(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, "");
+}
+
+function findColorByValue(options: readonly ColorOption[], value: string): string | null {
+  const normalizedValue = normalizeColorValue(value);
+
+  for (const option of options) {
+    if (normalizeColorValue(option.value) === normalizedValue) {
+      return option.color;
+    }
+  }
+
+  return null;
+}
+
+function resolveCurrentColor(value: string, options: readonly ColorOption[], fallback: string): string {
+  if (!value || value === "default") {
+    return fallback;
+  }
+
+  const optionColor = findColorByValue(options, value);
+  if (optionColor) {
+    return optionColor;
+  }
+
+  return value;
+}
+
+function toHexColorForInput(color: string, fallback: string): string {
+  const normalized = color.trim();
+  if (/^#([\da-f]{6})$/i.test(normalized)) {
+    return normalized;
+  }
+
+  if (/^#([\da-f]{3})$/i.test(normalized)) {
+    const chars = normalized.slice(1).split("");
+    return `#${chars.map((char) => `${char}${char}`).join("")}`;
+  }
+
+  return fallback;
+}
+
+interface ColorPickerButtonProps {
+  title: string;
+  value: string;
+  options: readonly ColorOption[];
+  recentColors: readonly string[];
+  active?: boolean;
+  fallbackColor: string;
+  highlight?: boolean;
+  onChange: (value: string) => void;
+  onClear: () => void;
+  onAddRecent: (color: string) => void;
+}
+
+function ColorPickerButton({
+  title,
+  value,
+  options,
+  recentColors,
+  active,
+  fallbackColor,
+  highlight,
+  onChange,
+  onClear,
+  onAddRecent,
+}: ColorPickerButtonProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const customColorInputRef = useRef<HTMLInputElement>(null);
+  const frameRef = useRef<number | null>(null);
+  const pendingPreviewColorRef = useRef<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<CSSProperties | undefined>(undefined);
+  const currentColor = resolveCurrentColor(value, options, fallbackColor);
+
+  const presetColors = useMemo(() => {
+    return EXTENSIVE_SWATCH_COLORS;
+  }, []);
+
+  const recentSwatches = useMemo(() => {
+    const recent = [...recentColors].slice(0, RECENT_COLORS_LIMIT);
+    while (recent.length < RECENT_COLORS_LIMIT) {
+      recent.push("");
+    }
+    return recent;
+  }, [recentColors]);
+
+  useEffect(() => {
+    return () => {
+      if (frameRef.current) {
+        window.cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, []);
+
+  const schedulePreview = useCallback((color: string) => {
+    pendingPreviewColorRef.current = color;
+
+    if (frameRef.current) return;
+
+    frameRef.current = window.requestAnimationFrame(() => {
+      frameRef.current = null;
+      if (!pendingPreviewColorRef.current) return;
+      onChange(pendingPreviewColorRef.current);
+      pendingPreviewColorRef.current = null;
+    });
+  }, [onChange]);
+
+  const updatePanelPosition = useCallback((isVisible: boolean) => {
+    const trigger = buttonRef.current;
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    setPanelStyle({
+      position: "fixed",
+      top: rect.bottom + 6,
+      left: rect.left,
+      width: 230,
+      visibility: isVisible ? "visible" : "hidden",
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    updatePanelPosition(false);
+
+    const frame = window.requestAnimationFrame(() => {
+      updatePanelPosition(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [isOpen, updatePanelPosition]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (buttonRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      setIsOpen(false);
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    const handleReposition = () => updatePanelPosition(true);
+
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, updatePanelPosition]);
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        className={`luthor-toolbar-button luthor-color-button${active ? " active" : ""}${highlight ? " is-highlight" : ""}`}
+        title={title}
+        aria-label={title}
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
+        {highlight ? (
+          <HighlighterIcon size={15} className="luthor-color-button-highlighter" />
+        ) : (
+          <span className="luthor-color-button-letter">A</span>
+        )}
+        <span
+          className="luthor-color-button-indicator"
+          style={{ backgroundColor: currentColor }}
+        />
+      </button>
+
+      {isOpen && (
+        <div ref={panelRef} className="luthor-color-picker" style={panelStyle}>
+          <div className="luthor-color-picker-header">
+            <span className="luthor-color-picker-title">{title}</span>
+          </div>
+
+          <div className="luthor-color-picker-section">
+            <p className="luthor-color-picker-label">Colors</p>
+            <div className="luthor-color-swatch-grid">
+              {presetColors.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  className="luthor-color-swatch"
+                  style={{ backgroundColor: color }}
+                  aria-label={`Use color ${color}`}
+                  onClick={() => {
+                    onChange(color);
+                    onAddRecent(color);
+                    setIsOpen(false);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="luthor-color-picker-section">
+            <p className="luthor-color-picker-label">Recent colors</p>
+            <div className="luthor-color-swatch-row">
+              {recentSwatches.map((color, index) => (
+                <button
+                  key={`${color || "empty"}-${index}`}
+                  type="button"
+                  className="luthor-color-swatch"
+                  style={{ backgroundColor: color || "transparent" }}
+                  aria-label={color ? `Use recent color ${color}` : "Empty recent color slot"}
+                  disabled={!color}
+                  onClick={() => {
+                    if (!color) return;
+                    onChange(color);
+                    onAddRecent(color);
+                    setIsOpen(false);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="luthor-color-picker-footer">
+            <button
+              type="button"
+              className="luthor-color-picker-clear"
+              onClick={() => {
+                onClear();
+                setIsOpen(false);
+              }}
+            >
+              Reset to Default
+            </button>
+
+            <button
+              type="button"
+              className="luthor-color-picker-custom"
+              onClick={() => customColorInputRef.current?.click()}
+            >
+              <PaletteIcon size={14} />
+              <span>Custom Color</span>
+            </button>
+
+            <input
+              ref={customColorInputRef}
+              type="color"
+              className="luthor-color-picker-native luthor-color-picker-native-hidden"
+              value={toHexColorForInput(currentColor, fallbackColor)}
+              onInput={(event) => {
+                schedulePreview((event.target as HTMLInputElement).value);
+              }}
+              onChange={(event) => {
+                const next = (event.target as HTMLInputElement).value;
+                onChange(next);
+                onAddRecent(next);
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 function useImageHandlers(commands: CoreEditorCommands, imageUploadHandler?: (file: File) => Promise<string>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -123,13 +432,15 @@ export function Toolbar({
     { value: "default", label: "Default" },
   ]);
   const [textColorValue, setTextColorValue] = useState("default");
-  const [textColorOptions, setTextColorOptions] = useState<SelectOption[]>([
-    { value: "default", label: "Default" },
+  const [textColorOptions, setTextColorOptions] = useState<ColorOption[]>([
+    { value: "default", label: "Default", color: "inherit" },
   ]);
+  const [recentTextColors, setRecentTextColors] = useState<string[]>([]);
   const [textHighlightValue, setTextHighlightValue] = useState("default");
-  const [textHighlightOptions, setTextHighlightOptions] = useState<SelectOption[]>([
-    { value: "default", label: "Default" },
+  const [textHighlightOptions, setTextHighlightOptions] = useState<ColorOption[]>([
+    { value: "default", label: "Default", color: "transparent" },
   ]);
+  const [recentHighlightColors, setRecentHighlightColors] = useState<string[]>([]);
   const [tableConfig, setTableConfig] = useState<InsertTableConfig>({
     rows: 3,
     columns: 3,
@@ -240,6 +551,7 @@ export function Toolbar({
     const options = commands.getTextColorOptions().map((option) => ({
       value: option.value,
       label: option.label,
+      color: option.color,
     }));
 
     if (options.length > 0) {
@@ -272,6 +584,7 @@ export function Toolbar({
     const options = commands.getTextHighlightOptions().map((option) => ({
       value: option.value,
       label: option.label,
+      color: option.backgroundColor,
     }));
 
     if (options.length > 0) {
@@ -347,21 +660,33 @@ export function Toolbar({
     setLineHeightValue(value);
   };
 
+  const pushRecentColor = (setter: Dispatch<SetStateAction<string[]>>, color: string) => {
+    setter((prev) => {
+      const normalized = normalizeColorValue(color);
+      const deduped = prev.filter((entry) => normalizeColorValue(entry) !== normalized);
+      return [color, ...deduped].slice(0, RECENT_COLORS_LIMIT);
+    });
+  };
+
   const handleTextColorChange = (value: string) => {
     if (value === "default") {
       commands.clearTextColor?.();
-    } else {
-      commands.setTextColor?.(value);
+      setTextColorValue("default");
+      return;
     }
+
+    commands.setTextColor?.(value);
     setTextColorValue(value);
   };
 
   const handleTextHighlightChange = (value: string) => {
     if (value === "default") {
       commands.clearTextHighlight?.();
-    } else {
-      commands.setTextHighlight?.(value);
+      setTextHighlightValue("default");
+      return;
     }
+
+    commands.setTextHighlight?.(value);
     setTextHighlightValue(value);
   };
 
@@ -394,19 +719,30 @@ export function Toolbar({
             />
           )}
           {hasExtension("textColor") && (
-            <Select
+            <ColorPickerButton
+              title="Text Color"
               value={textColorValue}
-              onValueChange={handleTextColorChange}
               options={textColorOptions}
-              placeholder="Color"
+              recentColors={recentTextColors}
+              active={activeStates.hasCustomTextColor}
+              fallbackColor="#0f172a"
+              onChange={handleTextColorChange}
+              onClear={() => handleTextColorChange("default")}
+              onAddRecent={(color) => pushRecentColor(setRecentTextColors, color)}
             />
           )}
           {hasExtension("textHighlight") && (
-            <Select
+            <ColorPickerButton
+              title="Text Highlight"
               value={textHighlightValue}
-              onValueChange={handleTextHighlightChange}
               options={textHighlightOptions}
-              placeholder="Highlight"
+              recentColors={recentHighlightColors}
+              active={activeStates.hasTextHighlight}
+              fallbackColor="#fef08a"
+              highlight
+              onChange={handleTextHighlightChange}
+              onClear={() => handleTextHighlightChange("default")}
+              onAddRecent={(color) => pushRecentColor(setRecentHighlightColors, color)}
             />
           )}
           <IconButton onClick={() => commands.toggleBold()} active={activeStates.bold} title="Bold (Ctrl+B)">
