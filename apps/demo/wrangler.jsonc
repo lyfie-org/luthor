@@ -1,0 +1,7 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "luthor-demo",
+  // Set this to today's date
+  "compatibility_date": "2026-02-18",
+  "main": "./src/index.ts"
+}
