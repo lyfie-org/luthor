@@ -481,6 +481,8 @@ type CodeBlockControlModel = {
   width: number;
 };
 
+const CODEBLOCK_HEADER_HEIGHT = 34;
+
 function CodeBlockControlsPlugin({
   extension,
 }: {
@@ -502,6 +504,12 @@ function CodeBlockControlsPlugin({
   }, [extension]);
 
   const buildControlModels = useCallback((): CodeBlockControlModel[] => {
+    const portalRoot = getCodeblockControlsPortalRoot(editor);
+    if (!portalRoot) {
+      return [];
+    }
+
+    const portalRect = portalRoot.getBoundingClientRect();
     const snapshots = extension.getCodeBlocksSnapshot(editor);
     const models: CodeBlockControlModel[] = [];
 
@@ -514,8 +522,11 @@ function CodeBlockControlsPlugin({
       codeElement.classList.add("luthor-code-block--interactive");
       const rect = codeElement.getBoundingClientRect();
       const width = Math.max(120, Math.round(rect.width));
-      const top = Math.max(8, Math.round(rect.top - 34));
-      const left = Math.round(rect.left);
+      const top = Math.max(
+        0,
+        Math.round(rect.top - portalRect.top - CODEBLOCK_HEADER_HEIGHT),
+      );
+      const left = Math.max(0, Math.round(rect.left - portalRect.left));
 
       models.push({
         key: block.key,
@@ -610,6 +621,18 @@ function CodeBlockControlsPlugin({
   useEffect(() => {
     scheduleSyncControls();
 
+    let initialFrameCount = 0;
+    let initialFrameId: number | null = null;
+    const syncAcrossInitialFrames = () => {
+      scheduleSyncControls();
+      initialFrameCount += 1;
+      if (initialFrameCount >= 20) {
+        return;
+      }
+      initialFrameId = requestAnimationFrame(syncAcrossInitialFrames);
+    };
+    initialFrameId = requestAnimationFrame(syncAcrossInitialFrames);
+
     const unregisterUpdate = editor.registerUpdateListener(() => {
       scheduleSyncControls();
     });
@@ -618,16 +641,14 @@ function CodeBlockControlsPlugin({
       scheduleSyncControls();
     };
 
-    window.addEventListener("scroll", onViewportChange, {
-      capture: true,
-      passive: true,
-    });
     window.addEventListener("resize", onViewportChange, { passive: true });
 
     return () => {
       unregisterUpdate();
-      window.removeEventListener("scroll", onViewportChange, true);
       window.removeEventListener("resize", onViewportChange);
+      if (initialFrameId !== null) {
+        cancelAnimationFrame(initialFrameId);
+      }
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
@@ -662,6 +683,12 @@ function CodeBlockControlsPlugin({
     return null;
   }
 
+  const portalRoot = getCodeblockControlsPortalRoot(editor);
+
+  if (!portalRoot) {
+    return null;
+  }
+
   return createPortal(
     createElement(
       "div",
@@ -690,7 +717,7 @@ function CodeBlockControlsPlugin({
             className: "luthor-codeblock-controls",
             "data-code-node-key": control.key,
             style: {
-              position: "fixed",
+              position: "absolute",
               top: `${control.top}px`,
               left: `${control.left}px`,
               width: `${control.width}px`,
@@ -738,7 +765,7 @@ function CodeBlockControlsPlugin({
         );
       }),
     ),
-    document.body,
+    portalRoot,
   );
 }
 
@@ -805,6 +832,29 @@ async function writeTextToClipboard(text: string): Promise<boolean> {
   } finally {
     textarea.remove();
   }
+}
+
+function getCodeblockControlsPortalRoot(editor: LexicalEditor): HTMLElement | null {
+  const rootElement = editor.getRootElement() as HTMLElement | null;
+  if (!rootElement) {
+    return null;
+  }
+
+  const richTextContainer = rootElement.closest(
+    ".luthor-richtext-container",
+  ) as HTMLElement | null;
+  if (richTextContainer) {
+    return richTextContainer;
+  }
+
+  const editorContainer = rootElement.closest(
+    ".luthor-editor-container",
+  ) as HTMLElement | null;
+  if (editorContainer) {
+    return editorContainer;
+  }
+
+  return rootElement.parentElement as HTMLElement | null;
 }
 
 function resolveLanguageFamily(language: string): string {

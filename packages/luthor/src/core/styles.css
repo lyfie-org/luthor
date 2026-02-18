@@ -713,17 +713,18 @@
 	margin-top: 40px;
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
+	border-top: 0;
 }
 
 .luthor-codeblock-controls-layer {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	pointer-events: none;
 	z-index: 25;
 }
 
 .luthor-codeblock-controls {
-	position: fixed;
+	position: absolute;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -736,7 +737,8 @@
 	border-top-left-radius: 8px;
 	border-top-right-radius: 8px;
 	border-bottom: 1px solid var(--luthor-border);
-	background: var(--luthor-bg);
+	background: var(--luthor-muted);
+	box-shadow: 0 2px 8px var(--luthor-shadow);
 }
 
 .luthor-codeblock-controls-left,
@@ -760,6 +762,12 @@
 
 .luthor-codeblock-language {
 	min-width: 88px;
+	appearance: none;
+}
+
+.luthor-codeblock-language option {
+	background: var(--luthor-bg);
+	color: var(--luthor-fg);
 }
 
 .luthor-codeblock-copy {
@@ -772,6 +780,7 @@
 	align-items: center;
 	justify-content: center;
 	position: relative;
+	background: var(--luthor-bg);
 }
 
 .luthor-codeblock-copy svg {
