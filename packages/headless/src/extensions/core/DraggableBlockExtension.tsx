@@ -443,6 +443,17 @@ function DraggableBlockPlugin({
     [mergedThemeClasses, mergedStyles.blockDragging],
   );
 
+  const focusEditorWithoutScroll = useCallback(() => {
+    const editorElement = editor.getRootElement();
+    if (!editorElement) return;
+
+    try {
+      editorElement.focus({ preventScroll: true });
+    } catch {
+      editorElement.focus();
+    }
+  }, [editor]);
+
   // Clean up drag state
   const cleanupDragState = useCallback(() => {
     if (draggedElementRef.current) {
@@ -452,18 +463,15 @@ function DraggableBlockPlugin({
     setIsDragging(false);
     setDropIndicator(null);
 
-    // Restore editor focus
-    const editorElement = editor.getRootElement();
-    if (editorElement) {
-      editorElement.focus();
-    }
+    // Restore editor focus without forcing viewport scroll
+    focusEditorWithoutScroll();
 
     // Don't clear refs immediately - let the UI update
     setTimeout(() => {
       draggedElementRef.current = null;
       draggedKeyRef.current = null;
     }, 100);
-  }, [cleanupDragClasses, editor]);
+  }, [cleanupDragClasses, focusEditorWithoutScroll]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -601,6 +609,7 @@ function DraggableBlockPlugin({
       event.stopPropagation();
 
       setIsDragging(true);
+      setDropIndicator(null);
       draggedElementRef.current = element;
 
       // Add drag styling
@@ -632,11 +641,6 @@ function DraggableBlockPlugin({
       event.dataTransfer!.setDragImage(clone, 0, 0);
       setTimeout(() => document.body.removeChild(clone), 0);
 
-      // Ensure editor retains focus
-      const editorElement = editor.getRootElement();
-      if (editorElement) {
-        editorElement.focus();
-      }
     },
     [editor, applyDragClasses],
   );
@@ -903,6 +907,7 @@ function DraggableBlockPlugin({
 
       // Set dragging state
       setIsDragging(true);
+      setDropIndicator(null);
       draggedElementRef.current = blockElement;
       applyDragClasses(blockElement);
       draggedKeyRef.current = key;
@@ -1021,11 +1026,8 @@ function DraggableBlockPlugin({
               console.warn("Error finding moved element:", error);
             }
           }
-          // Restore editor focus after drop
-          const editorElement = editor.getRootElement();
-          if (editorElement) {
-            editorElement.focus();
-          }
+          // Restore editor focus without forcing viewport scroll
+          focusEditorWithoutScroll();
         }, 50);
       }
 
@@ -1047,9 +1049,47 @@ function DraggableBlockPlugin({
     editor,
     cleanupDragState,
     applyDragClasses,
+    focusEditorWithoutScroll,
     draggableConfig?.enableTextSelectionDrag,
     config.enableTextSelectionDrag,
   ]);
+
+  // Global drag safety net: handle cancel/escape/drop outside editor when handle is portaled.
+  useEffect(() => {
+    if (!isDragging) {
+      return;
+    }
+
+    const handleGlobalDragEnd = () => {
+      cleanupDragState();
+    };
+
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        cleanupDragState();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        cleanupDragState();
+      }
+    };
+
+    window.addEventListener("dragend", handleGlobalDragEnd);
+    window.addEventListener("drop", handleGlobalDragEnd);
+    window.addEventListener("blur", handleGlobalDragEnd);
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("dragend", handleGlobalDragEnd);
+      window.removeEventListener("drop", handleGlobalDragEnd);
+      window.removeEventListener("blur", handleGlobalDragEnd);
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isDragging, cleanupDragState]);
 
   // Touch event handlers for long press on text (mobile)
   useEffect(() => {
@@ -1341,6 +1381,7 @@ function DraggableBlockPlugin({
                   className={`luthor-drag-button ${mergedThemeClasses.handle} ${isDragging ? mergedThemeClasses.handleActive : ""}`.trim()}
                   draggable={true}
                   onDragStart={(e) => handleDragStart(e, currentElement)}
+                  onDragEnd={cleanupDragState}
                   onTouchStart={(e) => handleTouchStart(e, currentElement)}
                   style={
                     isDragging
