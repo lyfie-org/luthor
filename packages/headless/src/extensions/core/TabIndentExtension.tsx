@@ -8,6 +8,7 @@ import {
   OUTDENT_CONTENT_COMMAND,
 } from "lexical";
 import { $isCodeNode } from "@lexical/code";
+import { $isListNode } from "@lexical/list";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
 import { ReactNode } from "react";
@@ -58,6 +59,12 @@ export class TabIndentExtension extends BaseExtension<
           return false;
         }
 
+        // Checklist items are flat by design: block Tab indentation.
+        if (!event.shiftKey && this.isInCheckList(anchorNode)) {
+          event.preventDefault();
+          return true;
+        }
+
         event.preventDefault();
 
         // Shift+Tab = outdent, Tab = indent
@@ -87,6 +94,20 @@ export class TabIndentExtension extends BaseExtension<
     while (current) {
       if ($isCodeNode(current)) {
         return true;
+      }
+      current = current.getParent();
+    }
+    return false;
+  }
+
+  /**
+   * Check if a node is within a checklist list item.
+   */
+  private isInCheckList(node: any): boolean {
+    let current = node;
+    while (current) {
+      if ($isListNode(current)) {
+        return current.getListType() === "check";
       }
       current = current.getParent();
     }

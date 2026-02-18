@@ -144,6 +144,33 @@ export function Dropdown({
   onOpenChange: (open: boolean) => void;
 }) {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<CSSProperties | undefined>(undefined);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const updatePosition = () => {
+      const triggerEl = triggerRef.current;
+      if (!triggerEl) return;
+
+      const rect = triggerEl.getBoundingClientRect();
+      setDropdownStyle({
+        position: "fixed",
+        top: rect.bottom + 4,
+        left: rect.left,
+      });
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -157,8 +184,8 @@ export function Dropdown({
 
   return (
     <div className="luthor-dropdown" ref={dropdownRef}>
-      <div onClick={() => onOpenChange(!isOpen)}>{trigger}</div>
-      {isOpen && <div className="luthor-dropdown-content">{children}</div>}
+      <div ref={triggerRef} onClick={() => onOpenChange(!isOpen)}>{trigger}</div>
+      {isOpen && <div className="luthor-dropdown-content" style={dropdownStyle}>{children}</div>}
     </div>
   );
 }

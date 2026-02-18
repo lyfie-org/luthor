@@ -114,6 +114,45 @@ function toHexColorForInput(color: string, fallback: string): string {
   return fallback;
 }
 
+type ComputedTypography = {
+  fontFamilyLabel: string;
+  fontSizeLabel: string;
+  lineHeightLabel: string;
+};
+
+function getSelectionTypography(): ComputedTypography {
+  const fallback: ComputedTypography = {
+    fontFamilyLabel: "Default",
+    fontSizeLabel: "Default",
+    lineHeightLabel: "Default",
+  };
+
+  if (typeof window === "undefined") return fallback;
+
+  const selection = window.getSelection();
+  const anchorNode = selection?.anchorNode;
+  if (!anchorNode) return fallback;
+
+  const element =
+    anchorNode.nodeType === Node.ELEMENT_NODE
+      ? (anchorNode as Element)
+      : anchorNode.parentElement;
+  if (!element) return fallback;
+
+  const host = element.closest(".luthor-content-editable");
+  if (!host) return fallback;
+
+  const computed = window.getComputedStyle(element as HTMLElement);
+  const rawFontFamily = computed.fontFamily || "";
+  const primaryFont = rawFontFamily.split(",")[0]?.replace(/["']/g, "").trim();
+
+  return {
+    fontFamilyLabel: primaryFont ? `Default (${primaryFont})` : "Default",
+    fontSizeLabel: computed.fontSize ? `Default (${computed.fontSize})` : "Default",
+    lineHeightLabel: computed.lineHeight ? `Default (${computed.lineHeight})` : "Default",
+  };
+}
+
 interface ColorPickerButtonProps {
   title: string;
   value: string;
@@ -448,6 +487,8 @@ export function Toolbar({
     includeHeaders: false,
   });
 
+  const computedTypography = useMemo(() => getSelectionTypography(), [activeStates]);
+
   useEffect(() => {
     if (!hasExtension("fontFamily") || typeof commands.getFontFamilyOptions !== "function") {
       return;
@@ -455,13 +496,13 @@ export function Toolbar({
 
     const options = commands.getFontFamilyOptions().map((option) => ({
       value: option.value,
-      label: option.label,
+      label: option.value === "default" ? computedTypography.fontFamilyLabel : option.label,
     }));
 
     if (options.length > 0) {
       setFontFamilyOptions(options);
     }
-  }, [commands, hasExtension]);
+  }, [commands, computedTypography.fontFamilyLabel, hasExtension]);
 
   useEffect(() => {
     if (!hasExtension("fontFamily") || typeof commands.getCurrentFontFamily !== "function") {
@@ -487,13 +528,13 @@ export function Toolbar({
 
     const options = commands.getFontSizeOptions().map((option) => ({
       value: option.value,
-      label: option.label,
+      label: option.value === "default" ? computedTypography.fontSizeLabel : option.label,
     }));
 
     if (options.length > 0) {
       setFontSizeOptions(options);
     }
-  }, [commands, hasExtension]);
+  }, [commands, computedTypography.fontSizeLabel, hasExtension]);
 
   useEffect(() => {
     if (!hasExtension("fontSize") || typeof commands.getCurrentFontSize !== "function") {
@@ -519,13 +560,13 @@ export function Toolbar({
 
     const options = commands.getLineHeightOptions().map((option) => ({
       value: option.value,
-      label: option.label,
+      label: option.value === "default" ? computedTypography.lineHeightLabel : option.label,
     }));
 
     if (options.length > 0) {
       setLineHeightOptions(options);
     }
-  }, [commands, hasExtension]);
+  }, [commands, computedTypography.lineHeightLabel, hasExtension]);
 
   useEffect(() => {
     if (!hasExtension("lineHeight") || typeof commands.getCurrentLineHeight !== "function") {
@@ -817,16 +858,20 @@ export function Toolbar({
             <IconButton onClick={() => commands.toggleCheckList()} active={activeStates.checkList} title="Checklist">
               <ListCheckIcon size={16} />
             </IconButton>
-            {(activeStates.unorderedList || activeStates.orderedList || activeStates.checkList) && (
-              <>
-                <IconButton onClick={() => commands.indentList()} title="Indent List">
-                  <IndentIcon size={14} />
-                </IconButton>
-                <IconButton onClick={() => commands.outdentList()} title="Outdent List">
-                  <OutdentIcon size={14} />
-                </IconButton>
-              </>
-            )}
+            <IconButton
+              onClick={() => commands.indentList()}
+              title="Indent List"
+              disabled={activeStates.checkList}
+            >
+              <IndentIcon size={14} />
+            </IconButton>
+            <IconButton
+              onClick={() => commands.outdentList()}
+              title="Outdent List"
+              disabled={activeStates.checkList}
+            >
+              <OutdentIcon size={14} />
+            </IconButton>
           </div>
         )}
 

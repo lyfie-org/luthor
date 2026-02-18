@@ -239,7 +239,25 @@ export class ListExtension extends BaseExtension<
         });
       },
       indentList: () => {
-        editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) {
+            return;
+          }
+
+          let node: any = selection.anchor.getNode();
+          while (node) {
+            if ($isListNode(node)) {
+              if (node.getListType() === "check") {
+                return;
+              }
+              break;
+            }
+            node = node.getParent();
+          }
+
+          editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
+        });
       },
       outdentList: () => {
         editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
