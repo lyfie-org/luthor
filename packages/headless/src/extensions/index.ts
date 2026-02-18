@@ -25,6 +25,13 @@ export {
   horizontalRuleExtension,
 } from "./formatting/HorizontalRuleExtension";
 export {
+  FontFamilyExtension,
+  fontFamilyExtension,
+  type FontFamilyConfig,
+  type FontFamilyOption,
+  type FontCssLoadStrategy,
+} from "./formatting/FontFamilyExtension";
+export {
   TableExtension,
   tableExtension,
   type TableConfig,

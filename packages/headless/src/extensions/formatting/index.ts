@@ -12,6 +12,13 @@ export {
 } from "./BlockFormatExtension";
 export { CodeExtension, codeExtension } from "./CodeExtension";
 export {
+  FontFamilyExtension,
+  fontFamilyExtension,
+  type FontFamilyConfig,
+  type FontFamilyOption,
+  type FontCssLoadStrategy,
+} from "./FontFamilyExtension";
+export {
   CodeFormatExtension,
   codeFormatExtension,
 } from "./CodeFormatExtension";

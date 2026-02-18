@@ -29,6 +29,15 @@ export interface CoreEditorCommands {
   toggleUnderline: () => void;
   toggleStrikethrough: () => void;
   formatText: (format: "code") => void;
+  setFontFamily?: (fontValue: string) => void;
+  clearFontFamily?: () => void;
+  getCurrentFontFamily?: () => Promise<string | null>;
+  getFontFamilyOptions?: () => readonly {
+    value: string;
+    label: string;
+    fontFamily: string;
+    cssImportUrl?: string;
+  }[];
   insertLink: () => void;
   removeLink: () => void;
   toggleParagraph: () => void;
@@ -69,6 +78,7 @@ export interface CoreEditorActiveStates {
   underline?: boolean;
   strikethrough?: boolean;
   code?: boolean;
+  hasCustomFontFamily?: boolean;
   isLink?: boolean;
   isQuote?: boolean;
   isInCodeBlock?: boolean;

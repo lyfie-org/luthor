@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import {
   AlignCenterIcon,
   AlignJustifyIcon,
@@ -103,11 +103,47 @@ export function Toolbar({
   const [showImageDropdown, setShowImageDropdown] = useState(false);
   const [showAlignDropdown, setShowAlignDropdown] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
+  const [fontFamilyValue, setFontFamilyValue] = useState("default");
+  const [fontFamilyOptions, setFontFamilyOptions] = useState<Array<{ value: string; label: string }>>([
+    { value: "default", label: "Default" },
+  ]);
   const [tableConfig, setTableConfig] = useState<InsertTableConfig>({
     rows: 3,
     columns: 3,
     includeHeaders: false,
   });
+
+  useEffect(() => {
+    if (!hasExtension("fontFamily") || typeof commands.getFontFamilyOptions !== "function") {
+      return;
+    }
+
+    const options = commands.getFontFamilyOptions().map((option) => ({
+      value: option.value,
+      label: option.label,
+    }));
+
+    if (options.length > 0) {
+      setFontFamilyOptions(options);
+    }
+  }, [commands, hasExtension]);
+
+  useEffect(() => {
+    if (!hasExtension("fontFamily") || typeof commands.getCurrentFontFamily !== "function") {
+      return;
+    }
+
+    let isCancelled = false;
+
+    void commands.getCurrentFontFamily().then((value) => {
+      if (isCancelled) return;
+      setFontFamilyValue(value ?? "default");
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeStates, commands, hasExtension]);
 
   const blockFormatOptions = [
     { value: "p", label: "Paragraph" },
@@ -133,10 +169,27 @@ export function Toolbar({
     else if (value.startsWith("h")) commands.toggleHeading(value as "h1" | "h2" | "h3" | "h4" | "h5" | "h6");
   };
 
+  const handleFontFamilyChange = (value: string) => {
+    if (value === "default") {
+      commands.clearFontFamily?.();
+    } else {
+      commands.setFontFamily?.(value);
+    }
+    setFontFamilyValue(value);
+  };
+
   return (
     <>
       <div className={classNames?.toolbar ?? "luthor-toolbar"}>
         <div className={classNames?.section ?? "luthor-toolbar-section"}>
+          {hasExtension("fontFamily") && (
+            <Select
+              value={fontFamilyValue}
+              onValueChange={handleFontFamilyChange}
+              options={fontFamilyOptions}
+              placeholder="Font"
+            />
+          )}
           <IconButton onClick={() => commands.toggleBold()} active={activeStates.bold} title="Bold (Ctrl+B)">
             <BoldIcon size={16} />
           </IconButton>

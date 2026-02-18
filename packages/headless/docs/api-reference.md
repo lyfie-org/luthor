@@ -62,6 +62,10 @@ Commands are functions that modify the editor state. Available commands depend o
 - `toggleItalic()`: Toggle italic formatting
 - `toggleUnderline()`: Toggle underline formatting
 - `toggleStrikethrough()`: Toggle strikethrough formatting
+- `setFontFamily(value)`: Apply a whitelisted font-family by option value
+- `clearFontFamily()`: Remove custom font-family styling
+- `getCurrentFontFamily()`: Get the current whitelisted font option value
+- `getFontFamilyOptions()`: Return configured font options
 - `insertLink(url?, text?)`: Insert or edit a link
 - `removeLink()`: Remove a link
 
@@ -102,6 +106,7 @@ State queries are async functions that return the current editor state.
 - `italic`: Boolean - Italic formatting is active
 - `underline`: Boolean - Underline formatting is active
 - `strikethrough`: Boolean - Strikethrough formatting is active
+- `hasCustomFontFamily`: Boolean - Selection has a custom font family style
 - `isLink`: Boolean - Current selection is a link
 - `unorderedList`: Boolean - Unordered list is active
 - `orderedList`: Boolean - Ordered list is active
@@ -135,6 +140,28 @@ Provides underline text formatting.
 #### StrikethroughExtension
 
 Provides strikethrough text formatting.
+
+#### FontFamilyExtension
+
+Provides controlled font-family text styling.
+
+**Configuration:**
+
+```tsx
+const configuredFontFamilyExtension = fontFamilyExtension.configure({
+  options: [
+    { value: "default", label: "Default", fontFamily: "inherit" },
+    {
+      value: "inter",
+      label: "Inter",
+      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
+      cssImportUrl:
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+    },
+  ],
+  cssLoadStrategy: "on-demand", // "none" | "preload-all"
+});
+```
 
 #### LinkExtension
 

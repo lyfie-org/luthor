@@ -79,6 +79,37 @@ commands.formatText("code"); // Inline code
 activeStates.code;
 ```
 
+### Font Family Extension
+
+```tsx
+import { fontFamilyExtension } from "@lyfie/luthor-headless";
+
+const configuredFontFamilyExtension = fontFamilyExtension.configure({
+  options: [
+    { value: "default", label: "Default", fontFamily: "inherit" },
+    {
+      value: "inter",
+      label: "Inter",
+      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
+      cssImportUrl:
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+    },
+  ],
+  cssLoadStrategy: "on-demand", // or "none" | "preload-all"
+});
+
+const extensions = [configuredFontFamilyExtension] as const;
+
+commands.setFontFamily("inter");
+commands.clearFontFamily();
+
+const current = await commands.getCurrentFontFamily();
+const options = commands.getFontFamilyOptions();
+activeStates.hasCustomFontFamily;
+```
+
+`setFontFamily` only accepts configured `options`, so the font list stays controlled.
+
 ### Link Extension
 
 ```tsx

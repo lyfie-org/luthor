@@ -19,7 +19,7 @@ export interface ExtensiveEditorRef {
 const HEADLESS_FEATURE_GROUPS = [
   {
     title: "Formatting",
-    items: ["bold", "italic", "underline", "strikethrough", "link", "code"],
+    items: ["bold", "italic", "underline", "strikethrough", "fontFamily", "link", "code"],
   },
   {
     title: "Structure",

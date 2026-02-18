@@ -15,6 +15,7 @@ export const extensivePreset: EditorPreset = {
     "undo",
     "redo",
     "heading",
+    "fontFamily",
     "bold",
     "italic",
     "underline",

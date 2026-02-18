@@ -99,3 +99,29 @@ You can reuse core modules and wire a custom editor shell:
 6. Share theme/active state with floating toolbar bridge using `setFloatingToolbarContext(...)`.
 
 This gives preset authors full control over feature mix while reusing a stable, typed core implementation.
+
+## 4) Font Select (whitelist + loading strategy)
+
+`fontFamilyExtension` supports a controlled font whitelist and optional CSS loading.
+
+```tsx
+import { fontFamilyExtension } from "@lyfie/luthor-headless";
+
+const configuredFontExtension = fontFamilyExtension.configure({
+  options: [
+    { value: "default", label: "Default", fontFamily: "inherit" },
+    {
+      value: "inter",
+      label: "Inter",
+      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
+      cssImportUrl:
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+    },
+  ],
+  cssLoadStrategy: "on-demand", // "none" | "preload-all"
+});
+```
+
+- `options` is the source of truth for selectable fonts.
+- `cssLoadStrategy: "on-demand"` injects `cssImportUrl` only when a font is used.
+- `cssLoadStrategy: "preload-all"` eagerly loads all configured font CSS at startup.

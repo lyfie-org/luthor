@@ -13,6 +13,7 @@ import {
   italicExtension,
   underlineExtension,
   strikethroughExtension,
+  fontFamilyExtension,
   horizontalRuleExtension,
   listExtension,
   historyExtension,
@@ -83,6 +84,34 @@ const linkExt = new LinkExtension();
   autoLinkUrls: true,
 };
 
+const fontFamilyExt = fontFamilyExtension.configure({
+  options: [
+    { value: "default", label: "Default", fontFamily: "inherit" },
+    {
+      value: "inter",
+      label: "Inter",
+      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
+      cssImportUrl:
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+    },
+    {
+      value: "merriweather",
+      label: "Merriweather",
+      fontFamily: "'Merriweather', Georgia, 'Times New Roman', serif",
+      cssImportUrl:
+        "https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap",
+    },
+    {
+      value: "jetbrains-mono",
+      label: "JetBrains Mono",
+      fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+      cssImportUrl:
+        "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap",
+    },
+  ],
+  cssLoadStrategy: "on-demand",
+});
+
 const { extension: featureCardExtension } = createCustomNodeExtension({
   nodeType: "featureCard",
   defaultPayload: {
@@ -107,6 +136,7 @@ export const extensiveExtensions = [
   italicExtension,
   underlineExtension,
   strikethroughExtension,
+  fontFamilyExt,
   linkExt,
   horizontalRuleExtension,
   tableExt,
