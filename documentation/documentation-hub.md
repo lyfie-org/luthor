@@ -42,7 +42,6 @@ This folder is the single source of truth for project documentation.
 ## Additional Package and Workspace Docs
 
 - Demo app: [readmes/apps/demo-readme.md](readmes/apps/demo-readme.md)
-- Content conversion V2 architecture: [implementation-notes/content-conversion-v2-architecture.md](implementation-notes/content-conversion-v2-architecture.md)
 - Luthor package architecture docs: [readmes/packages/luthor-docs/README.md](readmes/packages/luthor-docs/README.md)
 - Preset docs: [readmes/presets/extensive-preset-readme.md](readmes/presets/extensive-preset-readme.md)
 - Tooling docs:

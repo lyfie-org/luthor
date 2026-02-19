@@ -19,7 +19,6 @@ This is the canonical documentation root for the monorepo.
 - Demo architecture: [developer/demo/architecture.md](developer/demo/architecture.md)
 - Demo source file reference: [developer/demo/source-file-reference.md](developer/demo/source-file-reference.md)
 - Demo maintainer notes: [developer/demo/maintainer-notes.md](developer/demo/maintainer-notes.md)
-- Content conversion V2 architecture: [implementation-notes/content-conversion-v2-architecture.md](implementation-notes/content-conversion-v2-architecture.md)
 - Luthor architecture: [developer/luthor/architecture.md](developer/luthor/architecture.md)
 - Luthor file-by-file reference: [developer/luthor/source-file-reference.md](developer/luthor/source-file-reference.md)
 - Luthor maintainer notes: [developer/luthor/maintainer-notes.md](developer/luthor/maintainer-notes.md)
