@@ -1019,7 +1019,6 @@
 	background-color: var(--luthor-muted);
 	border: 1px solid var(--luthor-border);
 	color: var(--luthor-syntax-string);
-	padding: 2px 6px;
 	border-radius: 4px;
 }
 
@@ -1076,7 +1075,6 @@
 	border-top-right-radius: 8px;
 	border-bottom: 1px solid var(--luthor-border);
 	background: var(--luthor-muted);
-	box-shadow: 0 2px 8px var(--luthor-shadow);
 }
 
 .luthor-codeblock-controls-left,
