@@ -506,6 +506,7 @@ function YouTubeEmbedComponent({
   };
 
   const wrapperStyle = useMemo(() => getAlignmentStyles(payload.alignment), [payload.alignment]);
+  const showResizeHandles = isSelected && !isResizing;
 
   return (
     <div style={wrapperStyle}>
@@ -533,22 +534,24 @@ function YouTubeEmbedComponent({
           }}
         />
 
-        {isSelected ? (
-          <>
-            <button
-              type="button"
-              className="luthor-media-embed-resize-handle-width"
-              aria-label="Resize YouTube embed width"
-              onMouseDown={resizeFromHandle("width")}
-            />
-            <button
-              type="button"
-              className="luthor-media-embed-resize-handle-height"
-              aria-label="Resize YouTube embed height"
-              onMouseDown={resizeFromHandle("height")}
-            />
-          </>
-        ) : null}
+        <button
+          type="button"
+          className="luthor-media-embed-resize-handle-width"
+          aria-label="Resize YouTube embed width"
+          aria-hidden={!showResizeHandles}
+          tabIndex={showResizeHandles ? 0 : -1}
+          style={{ opacity: showResizeHandles ? 1 : 0, pointerEvents: showResizeHandles ? "auto" : "none" }}
+          onMouseDown={resizeFromHandle("width")}
+        />
+        <button
+          type="button"
+          className="luthor-media-embed-resize-handle-height"
+          aria-label="Resize YouTube embed height"
+          aria-hidden={!showResizeHandles}
+          tabIndex={showResizeHandles ? 0 : -1}
+          style={{ opacity: showResizeHandles ? 1 : 0, pointerEvents: showResizeHandles ? "auto" : "none" }}
+          onMouseDown={resizeFromHandle("height")}
+        />
       </div>
     </div>
   );
