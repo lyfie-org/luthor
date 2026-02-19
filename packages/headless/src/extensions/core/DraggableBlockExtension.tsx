@@ -1,7 +1,9 @@
 import {
+  $createParagraphNode,
   LexicalEditor,
   $getNearestNodeFromDOMNode,
   $getNodeByKey,
+  $getRoot,
   $isElementNode,
   $getSelection,
   $isRangeSelection,
@@ -502,6 +504,51 @@ function DraggableBlockPlugin({
     });
   }, []);
 
+  const insertParagraphBelowBlock = useCallback(
+    (element: HTMLElement) => {
+      let insertedParagraphKey: string | null = null;
+
+      editor.update(() => {
+        const paragraphNode = $createParagraphNode();
+        const blockNode = $getNearestNodeFromDOMNode(element);
+
+        if (blockNode) {
+          try {
+            const topLevelElement = blockNode.getTopLevelElementOrThrow();
+            topLevelElement.insertAfter(paragraphNode);
+          } catch {
+            $getRoot().append(paragraphNode);
+          }
+        } else {
+          $getRoot().append(paragraphNode);
+        }
+
+        paragraphNode.selectStart();
+        insertedParagraphKey = paragraphNode.getKey();
+      });
+
+      if (insertedParagraphKey) {
+        setTimeout(() => {
+          const insertedElement = editor.getElementByKey(insertedParagraphKey!);
+          if (
+            insertedElement &&
+            insertedElement instanceof HTMLElement &&
+            typeof insertedElement.getBoundingClientRect === "function"
+          ) {
+            queueHoveredBlock(insertedElement);
+            const insertedRect = insertedElement.getBoundingClientRect();
+            queuePointerPageY(
+              insertedRect.top + window.scrollY + insertedRect.height / 2,
+            );
+          }
+        }, 0);
+      }
+
+      focusEditorWithoutScroll();
+    },
+    [editor, focusEditorWithoutScroll, queueHoveredBlock, queuePointerPageY],
+  );
+
   // Manage visibility for smooth animations
   useEffect(() => {
     if (hoveredBlock || draggedElementRef.current) {
@@ -529,7 +576,9 @@ function DraggableBlockPlugin({
         target &&
         target.closest &&
         (target.closest(".drag-handle-area") ||
-          target.closest('[draggable="true"]'));
+          target.closest('[draggable="true"]') ||
+          target.closest(".luthor-drag-button") ||
+          target.closest(".luthor-draggable-button-stack"));
 
       // Check if there's a text selection - don't show handle if text is selected
       const selection = window.getSelection();
@@ -1274,7 +1323,7 @@ function DraggableBlockPlugin({
       {/* Button stack */}
       {createPortal(
         <div
-          className={`${mergedThemeClasses.buttonStack} ${!isVisible ? "fade-out" : ""}`}
+          className={`luthor-draggable-button-stack ${mergedThemeClasses.buttonStack} ${!isVisible ? "fade-out" : ""}`}
           style={{
             position: "absolute",
             left: 0,
@@ -1309,9 +1358,19 @@ function DraggableBlockPlugin({
                   aria-label="Add block"
                   title="Add"
                   className={`luthor-drag-button ${mergedThemeClasses.addButton}`}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }}
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
+
+                    if (!currentElement || isDragging) {
+                      return;
+                    }
+
+                    insertParagraphBelowBlock(currentElement);
                   }}
                   style={mergedStyles.addButton}
                 >
