@@ -269,16 +269,7 @@ function App() {
   }, []);
 
   const handleThemeToggle = React.useCallback(() => {
-    const editor = editorRef.current;
-    if (editor) {
-      pendingDocumentRef.current = {
-        jsonb: editor.getJSONB(),
-        markdown: editor.getMarkdown(),
-      };
-    }
-
     setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
-    setEditorInstanceKey((currentKey) => currentKey + 1);
   }, []);
 
   const copyButtonLabel = copiedState === "done" ? "Copied" : copiedState === "error" ? "Copy failed" : "Copy Markdown";

@@ -297,6 +297,10 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
 
     const toggleTheme = () => setEditorTheme(isDark ? "light" : "dark");
 
+    useEffect(() => {
+      setEditorTheme(initialTheme);
+    }, [initialTheme]);
+
     const [methods, setMethods] = useState<ExtensiveEditorRef | null>(null);
     useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);
 
