@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { createEditorSystem, RichText } from "@lyfie/luthor-headless";
+import { createEditorSystem, RichText, lexicalNodesToEnhancedMarkdown, enhancedMarkdownToLexicalJSON } from "@lyfie/luthor-headless";
 import { extensiveExtensions, setFloatingToolbarContext } from "./extensions";
 import {
   CommandPalette,
@@ -31,6 +31,38 @@ export interface ExtensiveEditorRef {
   getJSONB: () => string;
 }
 
+/**
+ * Helper function to export editor state to enhanced markdown
+ * Uses the enhanced markdown convertor to preserve all extension metadata
+ */
+function exportToEnhancedMarkdown(editorStateJson: any): string {
+  try {
+    const nodes = editorStateJson?.root?.children || [];
+    const enhancedMarkdown = lexicalNodesToEnhancedMarkdown(nodes);
+    return formatMarkdownSource(enhancedMarkdown);
+  } catch (error) {
+    console.error("Error exporting to enhanced markdown:", error);
+    return "";
+  }
+}
+
+/**
+ * Helper function to import from enhanced markdown
+ * Reconstructs Lexical JSON from enhanced markdown with embedded metadata
+ * This preserves all extension node properties (embeds, images, etc.)
+ */
+function importFromEnhancedMarkdown(markdown: string, importApi: any): void {
+  try {
+    // Convert enhanced markdown directly back to Lexical JSON
+    // This preserves all metadata from LUTHOR_BLOCK comments
+    const lexicalJson = enhancedMarkdownToLexicalJSON(markdown);
+    importApi.fromJSON(lexicalJson);
+  } catch (error) {
+    console.error("Error parsing enhanced markdown:", error);
+    throw error;
+  }
+}
+
 function ExtensiveEditorContent({
   isDark,
   toggleTheme,
@@ -57,6 +89,8 @@ function ExtensiveEditorContent({
   } = useEditor();
   const [mode, setMode] = useState<ExtensiveEditorMode>(initialMode);
   const [content, setContent] = useState({ html: "", markdown: "", jsonb: "" });
+  const [convertingMode, setConvertingMode] = useState<ExtensiveEditorMode | null>(null);
+  const [sourceError, setSourceError] = useState<{ mode: ExtensiveEditorMode; error: string } | null>(null);
   const [commandPaletteState, setCommandPaletteState] = useState({
     isOpen: false,
     commands: [] as ReturnType<typeof commandsToCommandPaletteItems>,
@@ -69,6 +103,10 @@ function ExtensiveEditorContent({
   });
   const commandsRef = useRef<CoreEditorCommands>(commands as CoreEditorCommands);
   const readyRef = useRef(false);
+  
+  // Lazy conversion state: track which formats are valid cache
+  const cacheValidRef = useRef<Set<ExtensiveEditorMode>>(new Set(["visual"]));
+  const editorChangeCountRef = useRef(0);
 
   useEffect(() => {
     commandsRef.current = commands as CoreEditorCommands;
@@ -83,9 +121,11 @@ function ExtensiveEditorContent({
       injectMarkdown: (value: string) => {
         setTimeout(() => {
           if (editor) {
-            editor.update(() => {
-              commandsRef.current.importFromMarkdown(value, { immediate: true, preventFocus: true });
-            });
+            try {
+              importFromEnhancedMarkdown(value, importApi);
+            } catch (error) {
+              console.error("Failed to inject markdown:", error);
+            }
           }
         }, 100);
       },
@@ -108,7 +148,11 @@ function ExtensiveEditorContent({
           }
         }, 100);
       },
-      getMarkdown: () => commandsRef.current.exportToMarkdown(),
+      getMarkdown: () => {
+        // Use enhanced markdown convertor to preserve all extension metadata
+        const editorStateJson = exportApi.toJSON();
+        return exportToEnhancedMarkdown(editorStateJson);
+      },
       getHTML: () => commandsRef.current.exportToHTML(),
       getJSONB: () => formatJSONBSource(JSON.stringify(exportApi.toJSON())),
     }),
@@ -167,55 +211,114 @@ function ExtensiveEditorContent({
     });
   }, [extensions]);
 
+  useEffect(() => {
+    if (!editor || !exportApi) return;
+
+    const unsubscribe = editor.registerUpdateListener(({ editorState }: any) => {
+      // When visual editor changes, mark all cached formats as stale
+      // This prevents stale cache but doesn't do any actual export work
+      editorChangeCountRef.current += 1;
+      cacheValidRef.current.clear();
+      cacheValidRef.current.add("visual"); // visual is always valid (it IS the editor state)
+    });
+
+    return unsubscribe;
+  }, [editor, exportApi]);
+
   const handleModeChange = async (newMode: ExtensiveEditorMode) => {
     if (!availableModes.includes(newMode)) {
       return;
     }
 
-    if (mode === "markdown" && newMode !== "markdown" && hasExtension("markdown")) {
-      await commands.importFromMarkdown(content.markdown, { immediate: true });
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-    if (mode === "html" && newMode !== "html" && hasExtension("html")) {
-      await commands.importFromHTML(content.html);
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-    if (mode === "jsonb" && newMode !== "jsonb") {
-      try {
+    try {
+      // Clear any previous errors when attempting to switch modes
+      setSourceError(null);
+
+      // Step 1: Import edited content from source tabs
+      if (mode === "markdown" && newMode !== "markdown" && hasExtension("markdown")) {
+        // Import from enhanced markdown to reconstruct all extension nodes with metadata
+        importFromEnhancedMarkdown(content.markdown, importApi);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      if (mode === "html" && newMode !== "html" && hasExtension("html")) {
+        await commands.importFromHTML(content.html);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      if (mode === "jsonb" && newMode !== "jsonb") {
         const parsed = JSON.parse(content.jsonb);
         importApi.fromJSON(parsed);
-      } catch {
-        return;
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
 
-    if (newMode === "markdown" && mode !== "markdown" && hasExtension("markdown")) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      const markdown = formatMarkdownSource(commands.exportToMarkdown());
-      setContent((prev) => ({ ...prev, markdown }));
-    }
-    if (newMode === "html" && mode !== "html" && hasExtension("html")) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      const html = formatHTMLSource(commands.exportToHTML());
-      setContent((prev) => ({ ...prev, html }));
-    }
-    if (newMode === "jsonb" && mode !== "jsonb") {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      const jsonb = formatJSONBSource(JSON.stringify(exportApi.toJSON()));
-      setContent((prev) => ({ ...prev, jsonb }));
-    }
+      // Immediately switch mode so UI shows new view
+      setMode(newMode);
 
-    setMode(newMode);
-    if (newMode === "visual") {
-      setTimeout(() => editor?.focus(), 100);
+      // Step 2: Lazy export - only convert format if not cached
+      // This ensures smooth tab switching with progressive conversion
+      if (newMode === "markdown" && mode !== "markdown" && hasExtension("markdown")) {
+        if (!cacheValidRef.current.has("markdown")) {
+          setConvertingMode("markdown");
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          try {
+            // Use enhanced markdown convertor to preserve all extension metadata
+            const editorStateJson = exportApi.toJSON();
+            const markdown = exportToEnhancedMarkdown(editorStateJson);
+            setContent((prev) => ({ ...prev, markdown }));
+            cacheValidRef.current.add("markdown");
+          } finally {
+            setConvertingMode(null);
+          }
+        }
+      }
+
+      if (newMode === "html" && mode !== "html" && hasExtension("html")) {
+        if (!cacheValidRef.current.has("html")) {
+          setConvertingMode("html");
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          try {
+            const html = formatHTMLSource(commands.exportToHTML());
+            setContent((prev) => ({ ...prev, html }));
+            cacheValidRef.current.add("html");
+          } finally {
+            setConvertingMode(null);
+          }
+        }
+      }
+
+      if (newMode === "jsonb" && mode !== "jsonb") {
+        if (!cacheValidRef.current.has("jsonb")) {
+          setConvertingMode("jsonb");
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          try {
+            const jsonb = formatJSONBSource(JSON.stringify(exportApi.toJSON()));
+            setContent((prev) => ({ ...prev, jsonb }));
+            cacheValidRef.current.add("jsonb");
+          } finally {
+            setConvertingMode(null);
+          }
+        }
+      }
+
+      if (newMode === "visual") {
+        setTimeout(() => editor?.focus(), 100);
+      }
+    } catch (error) {
+      // If an error occurs while importing, show it and keep the user in the current mode
+      const errorMessage = error instanceof Error ? error.message : "Invalid format - could not parse content";
+      setSourceError({ mode: mode, error: errorMessage });
+      // Don't change mode if import fails
     }
   };
 
   return (
     <>
       <div className="luthor-editor-header">
-        <ModeTabs mode={mode} onModeChange={handleModeChange} availableModes={availableModes} />
+        <ModeTabs 
+          mode={mode} 
+          onModeChange={handleModeChange} 
+          availableModes={availableModes}
+          isConverting={convertingMode}
+        />
         {mode === "visual" && (
           <Toolbar
             commands={commands as CoreEditorCommands}
@@ -244,6 +347,16 @@ function ExtensiveEditorContent({
         )}
         {mode !== "visual" && (
           <div className="luthor-source-panel">
+            {sourceError && sourceError.mode === mode && (
+              <div className="luthor-source-error">
+                <div className="luthor-source-error-icon">⚠️</div>
+                <div className="luthor-source-error-message">
+                  <strong>Invalid {mode.toUpperCase()}</strong>
+                  <p>{sourceError.error}</p>
+                  <small>Fix the errors above and try switching modes again</small>
+                </div>
+              </div>
+            )}
             {mode === "html" && (
               <SourceView value={content.html} onChange={(value) => setContent((prev) => ({ ...prev, html: value }))} placeholder="Enter HTML content..." />
             )}

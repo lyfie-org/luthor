@@ -98,6 +98,27 @@
 	background-color: rgba(15, 23, 42, 0.05);
 }
 
+.luthor-tab-converting-spinner {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	margin-left: 6px;
+	border: 2px solid var(--luthor-muted-fg);
+	border-top-color: var(--luthor-accent);
+	border-radius: 50%;
+	animation: luthor-spin 0.6s linear infinite;
+	vertical-align: middle;
+}
+
+@keyframes luthor-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 .luthor-toolbar {
 	display: flex;
 	align-items: center;
@@ -584,6 +605,55 @@
 	white-space: pre;
 	tab-size: 2;
 	transition: background-color var(--luthor-theme-transition), color var(--luthor-theme-transition), border-color var(--luthor-theme-transition);
+}
+
+.luthor-source-error {
+	display: flex;
+	gap: 12px;
+	padding: 12px;
+	margin-bottom: 12px;
+	background-color: rgba(220, 38, 38, 0.1);
+	border: 1px solid rgba(220, 38, 38, 0.3);
+	border-radius: 6px;
+	color: #dc2626;
+	transition: background-color var(--luthor-theme-transition), border-color var(--luthor-theme-transition), color var(--luthor-theme-transition);
+}
+
+.luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="dark"] .luthor-source-error {
+	background-color: rgba(239, 68, 68, 0.15);
+	border-color: rgba(239, 68, 68, 0.4);
+	color: #fca5a5;
+}
+
+.luthor-source-error-icon {
+	flex-shrink: 0;
+	font-size: 18px;
+	line-height: 1;
+}
+
+.luthor-source-error-message {
+	flex: 1;
+}
+
+.luthor-source-error-message strong {
+	display: block;
+	margin-bottom: 4px;
+	font-weight: 600;
+}
+
+.luthor-source-error-message p {
+	margin: 4px 0;
+	font-size: 13px;
+	line-height: 1.4;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.luthor-source-error-message small {
+	display: block;
+	margin-top: 6px;
+	font-size: 12px;
+	opacity: 0.7;
 }
 
 /* Command palette presentation */
