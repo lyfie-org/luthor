@@ -73,6 +73,47 @@ export function FloatingToolbar({
     pointerEvents: "auto",
   };
 
+  const iframeEmbedSelected = !!activeStates.isIframeEmbedSelected;
+  const youTubeEmbedSelected = !!activeStates.isYouTubeEmbedSelected;
+  const embedSelected = iframeEmbedSelected || youTubeEmbedSelected;
+
+  if (embedSelected) {
+    const setAlignment = (alignment: "left" | "center" | "right") => {
+      if (iframeEmbedSelected) {
+        commands.setIframeEmbedAlignment?.(alignment);
+        return;
+      }
+
+      if (youTubeEmbedSelected) {
+        commands.setYouTubeEmbedAlignment?.(alignment);
+      }
+    };
+
+    const isLeftAligned = iframeEmbedSelected
+      ? activeStates.isIframeEmbedAlignedLeft
+      : activeStates.isYouTubeEmbedAlignedLeft;
+    const isCenterAligned = iframeEmbedSelected
+      ? activeStates.isIframeEmbedAlignedCenter
+      : activeStates.isYouTubeEmbedAlignedCenter;
+    const isRightAligned = iframeEmbedSelected
+      ? activeStates.isIframeEmbedAlignedRight
+      : activeStates.isYouTubeEmbedAlignedRight;
+
+    return (
+      <div className="luthor-floating-toolbar" data-theme={editorTheme} ref={toolbarRef} style={style}>
+        <IconButton onClick={() => setAlignment("left")} active={isLeftAligned} title="Align Left">
+          <AlignLeftIcon size={14} />
+        </IconButton>
+        <IconButton onClick={() => setAlignment("center")} active={isCenterAligned} title="Align Center">
+          <AlignCenterIcon size={14} />
+        </IconButton>
+        <IconButton onClick={() => setAlignment("right")} active={isRightAligned} title="Align Right">
+          <AlignRightIcon size={14} />
+        </IconButton>
+      </div>
+    );
+  }
+
   if (activeStates.imageSelected) {
     return (
       <div className="luthor-floating-toolbar" data-theme={editorTheme} ref={toolbarRef} style={style}>

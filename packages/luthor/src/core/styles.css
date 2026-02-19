@@ -1637,20 +1637,20 @@
 
 .luthor-media-embed-shell {
 	position: relative;
-	border: 1px solid var(--luthor-border);
-	border-radius: 10px;
+	border: 2px solid var(--luthor-border);
+	border-radius: 12px;
 	overflow: hidden;
 	background: var(--luthor-bg);
-	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	transition: border-color var(--luthor-theme-transition), box-shadow var(--luthor-theme-transition), background-color var(--luthor-theme-transition);
 }
 
 .luthor-media-embed-shell:hover {
-	border-color: var(--luthor-border-hover);
+	border-color: var(--luthor-border-active);
 }
 
 .luthor-media-embed-shell.is-selected {
 	border-color: var(--luthor-accent);
-	box-shadow: 0 0 0 2px color-mix(in srgb, var(--luthor-accent) 35%, transparent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--luthor-accent) 28%, transparent);
 }
 
 .luthor-media-embed-shell.is-resizing {
@@ -1691,17 +1691,50 @@
 	color: var(--luthor-bg);
 }
 
-.luthor-media-embed-resize-handle {
+.luthor-media-embed-resize-handle-width,
+.luthor-media-embed-resize-handle-height {
 	position: absolute;
-	right: 6px;
-	bottom: 6px;
-	width: 12px;
-	height: 12px;
 	border: 1px solid var(--luthor-accent);
-	background: var(--luthor-bg);
-	border-radius: 3px;
-	cursor: nwse-resize;
+	background: color-mix(in srgb, var(--luthor-muted) 85%, var(--luthor-bg) 15%);
+	border-radius: 999px;
 	z-index: 2;
+	opacity: 0.95;
+	transition: background-color var(--luthor-theme-transition), border-color var(--luthor-theme-transition), transform 0.12s ease;
+}
+
+.luthor-media-embed-resize-handle-width {
+	top: 50%;
+	right: -7px;
+	transform: translateY(-50%);
+	width: 14px;
+	height: 30px;
+	cursor: ew-resize;
+	border-radius: 999px;
+}
+
+.luthor-media-embed-resize-handle-height {
+	left: 50%;
+	bottom: -7px;
+	transform: translateX(-50%);
+	width: 30px;
+	height: 14px;
+	cursor: ns-resize;
+	border-radius: 999px;
+}
+
+.luthor-media-embed-resize-handle-width:hover,
+.luthor-media-embed-resize-handle-height:hover {
+	transform: translateY(-50%) scale(1.06);
+}
+
+.luthor-media-embed-resize-handle-height:hover {
+	transform: translateX(-50%) scale(1.06);
+}
+
+.luthor-media-embed-shell.is-resizing .luthor-media-embed-resize-handle-width,
+.luthor-media-embed-shell.is-resizing .luthor-media-embed-resize-handle-height {
+	background: color-mix(in srgb, var(--luthor-accent) 28%, var(--luthor-bg) 72%);
+	border: 1px solid var(--luthor-accent);
 }
 
 .luthor-draggable-handle,

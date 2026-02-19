@@ -385,6 +385,8 @@ function YouTubeEmbedComponent({
   const widthRef = useRef(payload.width);
   const heightRef = useRef(payload.height);
   const shellRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const resizeFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     setLocalWidth(payload.width);
@@ -392,6 +394,16 @@ function YouTubeEmbedComponent({
     widthRef.current = payload.width;
     heightRef.current = payload.height;
   }, [payload.width, payload.height]);
+
+  useEffect(() => {
+    return () => {
+      if (resizeFrameRef.current != null) {
+        window.cancelAnimationFrame(resizeFrameRef.current);
+      }
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+    };
+  }, []);
 
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
@@ -427,7 +439,9 @@ function YouTubeEmbedComponent({
     });
   };
 
-  const resizeFromHandle = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const resizeFromHandle =
+    (axis: "width" | "height") =>
+    (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -441,20 +455,48 @@ function YouTubeEmbedComponent({
     const startWidth = localWidth;
     const startHeight = localHeight;
 
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = axis === "width" ? "ew-resize" : "ns-resize";
     setIsResizing(true);
 
+    const applyPreviewSize = () => {
+      resizeFrameRef.current = null;
+      if (shellRef.current) {
+        shellRef.current.style.width = `${widthRef.current}px`;
+      }
+      if (iframeRef.current) {
+        iframeRef.current.style.height = `${heightRef.current}px`;
+      }
+    };
+
     const onMove = (moveEvent: MouseEvent) => {
-      const nextWidth = clampSize(startWidth + (moveEvent.clientX - startX), MIN_EMBED_WIDTH, MAX_EMBED_WIDTH);
-      const nextHeight = clampSize(startHeight + (moveEvent.clientY - startY), MIN_EMBED_HEIGHT, MAX_EMBED_HEIGHT);
-      setLocalWidth(nextWidth);
-      setLocalHeight(nextHeight);
+      const nextWidth =
+        axis === "width"
+          ? clampSize(startWidth + (moveEvent.clientX - startX), MIN_EMBED_WIDTH, MAX_EMBED_WIDTH)
+          : widthRef.current;
+      const nextHeight =
+        axis === "height"
+          ? clampSize(startHeight + (moveEvent.clientY - startY), MIN_EMBED_HEIGHT, MAX_EMBED_HEIGHT)
+          : heightRef.current;
       widthRef.current = nextWidth;
       heightRef.current = nextHeight;
+
+      if (resizeFrameRef.current == null) {
+        resizeFrameRef.current = window.requestAnimationFrame(applyPreviewSize);
+      }
     };
 
     const onUp = () => {
+      if (resizeFrameRef.current != null) {
+        window.cancelAnimationFrame(resizeFrameRef.current);
+        resizeFrameRef.current = null;
+      }
       setIsResizing(false);
+      setLocalWidth(widthRef.current);
+      setLocalHeight(heightRef.current);
       updatePayload({ width: widthRef.current, height: heightRef.current });
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onUp);
     };
@@ -473,36 +515,8 @@ function YouTubeEmbedComponent({
         style={{ width: localWidth, maxWidth: "100%" }}
         onClick={selectNode}
       >
-        {isSelected ? (
-          <div className="luthor-media-embed-controls" role="toolbar" aria-label="YouTube embed controls">
-            <button
-              type="button"
-              className={`luthor-media-embed-control${payload.alignment === "left" ? " is-active" : ""}`}
-              onClick={() => updatePayload({ alignment: "left" })}
-              title="Align left"
-            >
-              Left
-            </button>
-            <button
-              type="button"
-              className={`luthor-media-embed-control${payload.alignment === "center" ? " is-active" : ""}`}
-              onClick={() => updatePayload({ alignment: "center" })}
-              title="Align center"
-            >
-              Center
-            </button>
-            <button
-              type="button"
-              className={`luthor-media-embed-control${payload.alignment === "right" ? " is-active" : ""}`}
-              onClick={() => updatePayload({ alignment: "right" })}
-              title="Align right"
-            >
-              Right
-            </button>
-          </div>
-        ) : null}
-
         <iframe
+          ref={iframeRef}
           src={payload.src}
           title="YouTube video player"
           loading="lazy"
@@ -514,17 +528,25 @@ function YouTubeEmbedComponent({
             height: `${localHeight}px`,
             border: "0",
             display: "block",
-            pointerEvents: isSelected ? "auto" : "none",
+            pointerEvents: isSelected && !isResizing ? "auto" : "none",
           }}
         />
 
         {isSelected ? (
-          <button
-            type="button"
-            className="luthor-media-embed-resize-handle"
-            aria-label="Resize YouTube embed"
-            onMouseDown={resizeFromHandle}
-          />
+          <>
+            <button
+              type="button"
+              className="luthor-media-embed-resize-handle-width"
+              aria-label="Resize YouTube embed width"
+              onMouseDown={resizeFromHandle("width")}
+            />
+            <button
+              type="button"
+              className="luthor-media-embed-resize-handle-height"
+              aria-label="Resize YouTube embed height"
+              onMouseDown={resizeFromHandle("height")}
+            />
+          </>
         ) : null}
       </div>
     </div>
