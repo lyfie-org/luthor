@@ -70,6 +70,10 @@ function supportsYouTubeEmbed(commands: CoreEditorCommands): boolean {
   return typeof commands.insertYouTubeEmbed === "function";
 }
 
+function supportsEmoji(commands: CoreEditorCommands): boolean {
+  return typeof commands.insertEmoji === "function";
+}
+
 export function generateCommands(): CommandConfig[] {
   return [
     {
@@ -310,6 +314,45 @@ export function generateCommands(): CommandConfig[] {
         }
       },
       keywords: ["image", "photo"],
+    },
+    {
+      id: "insert.gif",
+      label: "Insert GIF",
+      description: "Insert an animated GIF from URL",
+      category: "Insert",
+      action: (commands) => {
+        const src = prompt("Enter GIF URL:");
+        if (!src) {
+          return;
+        }
+        commands.insertImage({ src, alt: "GIF" });
+      },
+      keywords: ["gif", "animated", "image"],
+    },
+    {
+      id: "insert.emoji",
+      label: "Insert Emoji",
+      description: "Insert an emoji character",
+      category: "Insert",
+      action: (commands) => {
+        const value = prompt("Enter emoji or shortcode (example :sparkles:):")?.trim();
+        if (!value || typeof commands.insertEmoji !== "function") {
+          return;
+        }
+
+        const shortcodeMatch = value.match(/^:([a-z0-9_+-]+):$/i);
+        if (shortcodeMatch && typeof commands.getEmojiSuggestions === "function") {
+          const [match] = commands.getEmojiSuggestions(shortcodeMatch[1]);
+          if (match?.emoji) {
+            commands.insertEmoji(match.emoji);
+            return;
+          }
+        }
+
+        commands.insertEmoji(value);
+      },
+      keywords: ["emoji", "reaction", "symbol", "smile"],
+      condition: supportsEmoji,
     },
     {
       id: "insert.table",

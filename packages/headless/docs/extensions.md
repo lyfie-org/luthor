@@ -353,11 +353,40 @@ commands.insertImage({
   caption: "Optional caption",
 });
 
+// GIF is supported by the same image pipeline
+commands.insertImage({
+  src: "https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif",
+  alt: "Animated GIF",
+});
+
 commands.setImageAlignment("center");
 commands.setImageCaption("New caption");
 
 activeStates.imageSelected;
 ```
+
+## Emoji Extension
+
+### Emoji picker, symbol conversion, and :suggestions
+
+```tsx
+import { EmojiExtension } from "@lyfie/luthor-headless";
+
+const emojiExtension = new EmojiExtension({
+  autoReplaceSymbols: true,
+  maxSuggestions: 8,
+});
+
+const extensions = [emojiExtension] as const;
+
+commands.insertEmoji("🎉");
+commands.getEmojiSuggestions("spark");
+commands.executeEmojiSuggestion("✨");
+
+activeStates.isEmojiSuggestionOpen;
+```
+
+When `autoReplaceSymbols` is enabled, common patterns like `:)`, `:D`, and `<3` are converted to emoji while typing and for plain-text paste.
 
 ## History Extension
 

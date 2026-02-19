@@ -8,6 +8,7 @@ import {
   ContextMenuExtension,
   CommandPaletteExtension,
   SlashCommandExtension,
+  EmojiExtension,
   DraggableBlockExtension,
   LinkExtension,
   createCustomNodeExtension,
@@ -264,6 +265,7 @@ const contextMenuExt = new ContextMenuExtension();
 
 const commandPaletteExt = new CommandPaletteExtension();
 const slashCommandExt = new SlashCommandExtension();
+const emojiExt = new EmojiExtension();
 
 const draggableBlockExt = new DraggableBlockExtension();
 (draggableBlockExt as any).config = {
@@ -405,6 +407,7 @@ export const extensiveExtensions = [
   contextMenuExt,
   commandPaletteExt,
   slashCommandExt,
+  emojiExt,
   draggableBlockExt,
   featureCardExtension,
 ] as const;

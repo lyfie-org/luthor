@@ -26,6 +26,7 @@ import {
   Redo2,
   Palette,
   Search,
+  Smile,
   Subscript,
   Strikethrough,
   Superscript,
@@ -73,6 +74,7 @@ export const OutdentIcon = IndentDecrease;
 export const SunIcon = Sun;
 export const MoonIcon = Moon;
 export const SearchIcon = Search;
+export const EmojiIcon = Smile;
 export const SubscriptIcon = Subscript;
 export const SuperscriptIcon = Superscript;
 export const ChevronDownIcon = ChevronDown;

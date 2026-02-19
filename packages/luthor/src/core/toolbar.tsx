@@ -19,6 +19,7 @@ import {
   CodeBlockIcon,
   CodeIcon,
   CommandIcon,
+  EmojiIcon,
   FileCodeIcon,
   ImageIcon,
   ItalicIcon,
@@ -57,6 +58,13 @@ type ColorOption = {
   value: string;
   label: string;
   color: string;
+};
+
+type EmojiOption = {
+  emoji: string;
+  label: string;
+  shortcodes: string[];
+  keywords?: string[];
 };
 
 const RECENT_COLORS_LIMIT = 6;
@@ -484,6 +492,7 @@ function ColorPickerButton({
 
 function useImageHandlers(commands: CoreEditorCommands, imageUploadHandler?: (file: File) => Promise<string>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const gifInputRef = useRef<HTMLInputElement>(null);
 
   const handlers = useMemo(
     () => ({
@@ -495,6 +504,13 @@ function useImageHandlers(commands: CoreEditorCommands, imageUploadHandler?: (fi
         commands.insertImage({ src, alt, caption });
       },
       insertFromFile: () => fileInputRef.current?.click(),
+      insertGifFromUrl: () => {
+        const src = prompt("Enter GIF URL:");
+        if (!src) return;
+        const alt = prompt("Enter alt text (optional):") || "GIF";
+        commands.insertImage({ src, alt });
+      },
+      insertGifFromFile: () => gifInputRef.current?.click(),
       handleUpload: async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -512,6 +528,32 @@ function useImageHandlers(commands: CoreEditorCommands, imageUploadHandler?: (fi
         commands.insertImage({ src, alt: file.name, file });
         event.target.value = "";
       },
+      handleGifUpload: async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const isGif = file.type === "image/gif" || file.name.toLowerCase().endsWith(".gif");
+        if (!isGif) {
+          alert("Please select a GIF file.");
+          event.target.value = "";
+          return;
+        }
+
+        let src: string;
+        if (imageUploadHandler) {
+          try {
+            src = await imageUploadHandler(file);
+          } catch {
+            alert("Failed to upload GIF");
+            return;
+          }
+        } else {
+          src = URL.createObjectURL(file);
+        }
+
+        commands.insertImage({ src, alt: file.name || "GIF", file });
+        event.target.value = "";
+      },
       setAlignment: (alignment: ImageAlignment) => {
         commands.setImageAlignment(alignment);
       },
@@ -523,7 +565,7 @@ function useImageHandlers(commands: CoreEditorCommands, imageUploadHandler?: (fi
     [commands, imageUploadHandler],
   );
 
-  return { handlers, fileInputRef };
+  return { handlers, fileInputRef, gifInputRef };
 }
 
 function useEmbedHandlers(commands: CoreEditorCommands) {
@@ -575,13 +617,14 @@ export function Toolbar({
   imageUploadHandler,
   classNames,
 }: ToolbarProps) {
-  const { handlers, fileInputRef } = useImageHandlers(commands, imageUploadHandler);
+  const { handlers, fileInputRef, gifInputRef } = useImageHandlers(commands, imageUploadHandler);
   const embedHandlers = useEmbedHandlers(commands);
   const hasAnyEmbedExtension = hasExtension("iframeEmbed") || hasExtension("youtubeEmbed");
   const isAnyEmbedSelected =
     activeStates.isIframeEmbedSelected ||
     activeStates.isYouTubeEmbedSelected;
   const [showImageDropdown, setShowImageDropdown] = useState(false);
+  const [showEmojiDropdown, setShowEmojiDropdown] = useState(false);
   const [showAlignDropdown, setShowAlignDropdown] = useState(false);
   const [showEmbedDropdown, setShowEmbedDropdown] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
@@ -612,6 +655,22 @@ export function Toolbar({
     columns: 3,
     includeHeaders: false,
   });
+
+  const emojiOptions = useMemo<EmojiOption[]>(() => {
+    if (!hasExtension("emoji")) {
+      return [];
+    }
+
+    if (typeof commands.getEmojiSuggestions === "function") {
+      return commands.getEmojiSuggestions("");
+    }
+
+    if (typeof commands.getEmojiCatalog === "function") {
+      return commands.getEmojiCatalog();
+    }
+
+    return [];
+  }, [commands, hasExtension]);
 
   useEffect(() => {
     if (!hasExtension("fontFamily") || typeof commands.getFontFamilyOptions !== "function") {
@@ -1086,6 +1145,14 @@ export function Toolbar({
                 <UploadIcon size={16} />
                 <span>Upload File</span>
               </button>
+              <button className="luthor-dropdown-item" onClick={() => { handlers.insertGifFromUrl(); setShowImageDropdown(false); }}>
+                <EmojiIcon size={16} />
+                <span>Insert GIF URL</span>
+              </button>
+              <button className="luthor-dropdown-item" onClick={() => { handlers.insertGifFromFile(); setShowImageDropdown(false); }}>
+                <UploadIcon size={16} />
+                <span>Upload GIF</span>
+              </button>
             </Dropdown>
             {activeStates.imageSelected && (
               <Dropdown
@@ -1116,6 +1183,38 @@ export function Toolbar({
               </Dropdown>
             )}
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handlers.handleUpload} className="luthor-file-input" />
+            <input ref={gifInputRef} type="file" accept="image/gif" onChange={handlers.handleGifUpload} className="luthor-file-input" />
+          </div>
+        )}
+
+        {hasExtension("emoji") && emojiOptions.length > 0 && (
+          <div className={classNames?.section ?? "luthor-toolbar-section"}>
+            <Dropdown
+              trigger={
+                <button className="luthor-toolbar-button" title="Insert Emoji">
+                  <EmojiIcon size={16} />
+                </button>
+              }
+              isOpen={showEmojiDropdown}
+              onOpenChange={setShowEmojiDropdown}
+            >
+              <div className="luthor-emoji-picker-grid" role="listbox" aria-label="Emoji picker">
+                {emojiOptions.map((item) => (
+                  <button
+                    key={`${item.emoji}-${item.label}`}
+                    type="button"
+                    className="luthor-emoji-picker-item"
+                    title={item.shortcodes[0] ? `${item.label} (:${item.shortcodes[0]}:)` : item.label}
+                    onClick={() => {
+                      commands.insertEmoji?.(item.emoji);
+                      setShowEmojiDropdown(false);
+                    }}
+                  >
+                    {item.emoji}
+                  </button>
+                ))}
+              </div>
+            </Dropdown>
           </div>
         )}
 

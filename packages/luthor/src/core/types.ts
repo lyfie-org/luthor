@@ -91,6 +91,21 @@ export interface CoreEditorCommands {
   insertHorizontalRule: () => void;
   insertTable: (config: InsertTableConfig) => void;
   insertImage: (config: InsertImageConfig) => void;
+  insertEmoji?: (emoji: string) => void;
+  executeEmojiSuggestion?: (emoji: string) => boolean;
+  closeEmojiSuggestions?: () => void;
+  getEmojiSuggestions?: (query?: string) => {
+    emoji: string;
+    label: string;
+    shortcodes: string[];
+    keywords?: string[];
+  }[];
+  getEmojiCatalog?: () => {
+    emoji: string;
+    label: string;
+    shortcodes: string[];
+    keywords?: string[];
+  }[];
   setImageAlignment: (alignment: ImageAlignment) => void;
   setImageCaption: (caption: string) => void;
   insertIframeEmbed?: (inputUrl: string, width?: number, height?: number, title?: string) => void;

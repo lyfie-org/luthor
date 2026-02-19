@@ -4,6 +4,7 @@ import { extensiveExtensions, setFloatingToolbarContext } from "./extensions";
 import {
   CommandPalette,
   SlashCommandMenu,
+  EmojiSuggestionMenu,
   commandsToCommandPaletteItems,
   commandsToSlashCommandItems,
   formatHTMLSource,
@@ -15,7 +16,7 @@ import {
   Toolbar,
   type CoreEditorCommands,
 } from "../../core";
-import type { CommandPaletteExtension, SlashCommandExtension } from "@lyfie/luthor-headless";
+import type { CommandPaletteExtension, SlashCommandExtension, EmojiExtension, EmojiCatalogItem } from "@lyfie/luthor-headless";
 import "./styles.css";
 
 const { Provider, useEditor } = createEditorSystem<typeof extensiveExtensions>();
@@ -115,6 +116,12 @@ function ExtensiveEditorContent({
     query: "",
     position: null as { x: number; y: number } | null,
     commands: [] as ReturnType<typeof commandsToSlashCommandItems>,
+  });
+  const [emojiSuggestionState, setEmojiSuggestionState] = useState({
+    isOpen: false,
+    query: "",
+    position: null as { x: number; y: number } | null,
+    suggestions: [] as EmojiCatalogItem[],
   });
   const commandsRef = useRef<CoreEditorCommands>(commands as CoreEditorCommands);
   const readyRef = useRef(false);
@@ -223,6 +230,23 @@ function ExtensiveEditorContent({
         query: state.query,
         position: state.position,
         commands: state.commands,
+      });
+    });
+  }, [extensions]);
+
+  useEffect(() => {
+    const emojiExtension = extensions.find(
+      (ext: any) => ext.name === "emoji",
+    ) as EmojiExtension | undefined;
+
+    if (!emojiExtension || !emojiExtension.subscribe) return;
+
+    return emojiExtension.subscribe((state) => {
+      setEmojiSuggestionState({
+        isOpen: state.isOpen,
+        query: state.query,
+        position: state.position,
+        suggestions: state.suggestions,
       });
     });
   }, [extensions]);
@@ -399,6 +423,16 @@ function ExtensiveEditorContent({
         onClose={() => commands.closeSlashMenu?.()}
         onExecute={(commandId) => {
           commands.executeSlashCommand?.(commandId);
+        }}
+      />
+      <EmojiSuggestionMenu
+        isOpen={emojiSuggestionState.isOpen}
+        query={emojiSuggestionState.query}
+        position={emojiSuggestionState.position}
+        suggestions={emojiSuggestionState.suggestions}
+        onClose={() => commands.closeEmojiSuggestions?.()}
+        onExecute={(emoji) => {
+          commands.executeEmojiSuggestion?.(emoji);
         }}
       />
     </>

@@ -14,6 +14,10 @@ export {
   SlashCommandExtension,
   slashCommandExtension,
 } from "./SlashCommandExtension";
+export {
+  EmojiExtension,
+  emojiExtension,
+} from "./EmojiExtension";
 export { richTextExtension, type RichTextConfig } from "./RichTextExtension";
 export {
   TabIndentExtension,
@@ -55,6 +59,14 @@ export type {
   SlashCommandCommands,
   SlashCommandStateQueries,
 } from "./SlashCommandExtension";
+
+export type {
+  EmojiCatalogItem,
+  EmojiSuggestionState,
+  EmojiConfig,
+  EmojiCommands,
+  EmojiStateQueries,
+} from "./EmojiExtension";
 
 export type {
   DraggableCommands,

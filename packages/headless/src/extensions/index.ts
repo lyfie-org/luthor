@@ -128,6 +128,15 @@ export {
   TabIndentExtension,
   tabIndentExtension,
 } from "./core/TabIndentExtension";
+export {
+  EmojiExtension,
+  emojiExtension,
+  type EmojiCatalogItem,
+  type EmojiSuggestionState,
+  type EmojiConfig,
+  type EmojiCommands,
+  type EmojiStateQueries,
+} from "./core/EmojiExtension";
 export * from "./core";
 
 // Base classes and types
