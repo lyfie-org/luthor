@@ -80,13 +80,20 @@
   transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.app-shell[data-theme="dark"] .demo-button {
-  color: #0b1220;
-}
-
 .demo-button:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
+}
+
+.demo-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  outline-offset: 1px;
+}
+
+.demo-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .demo-button--ghost {

@@ -73,11 +73,11 @@ Use Tab / Shift+Tab to validate indentation behavior in and out of code blocks.
 
 ### Iframe Embed (preset visible)
 
-Use the embed menu to insert an iframe block (for example, a Vimeo URL).
+Use "Load Journal Scenario" in the JSONB persistence panel to load a real iframe embed component.
 
 ### YouTube Embed (preset visible)
 
-Use the embed menu to insert a YouTube video block by URL.
+Use "Load Journal Scenario" in the JSONB persistence panel to load a real YouTube embed component.
 
 ## 6) Workflow + Productivity
 
@@ -147,8 +147,131 @@ export const CATEGORY_ORDER = [
 ] as const;
 
 export const SHOWCASE_HIGHLIGHTS = [
-  "Visual + HTML + Markdown mode switching",
+  "Visual + HTML + Markdown + JSONB mode switching",
   "Command palette, slash menu, and context menu workflows",
   "Media tooling: image, iframe, and YouTube embeds",
   "Formatting depth: text, structure, code, and custom cards",
 ];
+
+export const JOURNAL_SCENARIO_JSONB = {
+  root: {
+    type: "root",
+    version: 1,
+    format: "",
+    indent: 0,
+    direction: null,
+    children: [
+      {
+        type: "heading",
+        version: 1,
+        tag: "h1",
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "text",
+            version: 1,
+            text: "Daily Journal — Product Deep Work",
+            detail: 0,
+            format: 0,
+            mode: "normal",
+            style: "",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "text",
+            version: 1,
+            text: "Long-form entry with structured media components and typed rich-text content.",
+            detail: 0,
+            format: 0,
+            mode: "normal",
+            style: "",
+          },
+        ],
+      },
+      {
+        type: "heading",
+        version: 1,
+        tag: "h2",
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "text",
+            version: 1,
+            text: "Inspiration Video (YouTube Component)",
+            detail: 0,
+            format: 0,
+            mode: "normal",
+            style: "",
+          },
+        ],
+      },
+      {
+        type: "youtube-embed",
+        version: 1,
+        src: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        width: 720,
+        height: 405,
+        alignment: "center",
+        start: 0,
+      },
+      {
+        type: "heading",
+        version: 1,
+        tag: "h2",
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "text",
+            version: 1,
+            text: "Reference Frame (Iframe Component)",
+            detail: 0,
+            format: 0,
+            mode: "normal",
+            style: "",
+          },
+        ],
+      },
+      {
+        type: "iframe-embed",
+        version: 1,
+        src: "https://player.vimeo.com/video/76979871",
+        width: 720,
+        height: 405,
+        alignment: "center",
+        title: "Reference iframe embed",
+      },
+      {
+        type: "paragraph",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "text",
+            version: 1,
+            text: "This document is seeded directly from JSONB-style node data without HTML tags.",
+            detail: 0,
+            format: 0,
+            mode: "normal",
+            style: "",
+          },
+        ],
+      },
+    ],
+  },
+} as const;

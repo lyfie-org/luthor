@@ -7,6 +7,7 @@ import {
   commandsToCommandPaletteItems,
   commandsToSlashCommandItems,
   formatHTMLSource,
+  formatJSONBSource,
   formatMarkdownSource,
   ModeTabs,
   registerKeyboardShortcuts,
@@ -19,13 +20,15 @@ import "./styles.css";
 
 const { Provider, useEditor } = createEditorSystem<typeof extensiveExtensions>();
 
-export type ExtensiveEditorMode = "visual" | "html" | "markdown";
+export type ExtensiveEditorMode = "visual" | "html" | "markdown" | "jsonb";
 
 export interface ExtensiveEditorRef {
   injectMarkdown: (content: string) => void;
   injectHTML: (content: string) => void;
+  injectJSONB: (content: string) => void;
   getMarkdown: () => string;
   getHTML: () => string;
+  getJSONB: () => string;
 }
 
 function ExtensiveEditorContent({
@@ -43,9 +46,17 @@ function ExtensiveEditorContent({
   availableModes: readonly ExtensiveEditorMode[];
   onReady?: (methods: ExtensiveEditorRef) => void;
 }) {
-  const { commands, hasExtension, activeStates, lexical: editor, extensions } = useEditor();
+  const {
+    commands,
+    hasExtension,
+    activeStates,
+    lexical: editor,
+    extensions,
+    export: exportApi,
+    import: importApi,
+  } = useEditor();
   const [mode, setMode] = useState<ExtensiveEditorMode>(initialMode);
-  const [content, setContent] = useState({ html: "", markdown: "" });
+  const [content, setContent] = useState({ html: "", markdown: "", jsonb: "" });
   const [commandPaletteState, setCommandPaletteState] = useState({
     isOpen: false,
     commands: [] as ReturnType<typeof commandsToCommandPaletteItems>,
@@ -87,10 +98,21 @@ function ExtensiveEditorContent({
           }
         }, 100);
       },
+      injectJSONB: (value: string) => {
+        setTimeout(() => {
+          try {
+            const parsed = JSON.parse(value);
+            importApi.fromJSON(parsed);
+          } catch {
+            return;
+          }
+        }, 100);
+      },
       getMarkdown: () => commandsRef.current.exportToMarkdown(),
       getHTML: () => commandsRef.current.exportToHTML(),
+      getJSONB: () => formatJSONBSource(JSON.stringify(exportApi.toJSON())),
     }),
-    [editor],
+    [editor, exportApi, importApi],
   );
 
   useEffect(() => {
@@ -158,6 +180,15 @@ function ExtensiveEditorContent({
       await commands.importFromHTML(content.html);
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
+    if (mode === "jsonb" && newMode !== "jsonb") {
+      try {
+        const parsed = JSON.parse(content.jsonb);
+        importApi.fromJSON(parsed);
+      } catch {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
 
     if (newMode === "markdown" && mode !== "markdown" && hasExtension("markdown")) {
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -168,6 +199,11 @@ function ExtensiveEditorContent({
       await new Promise((resolve) => setTimeout(resolve, 50));
       const html = formatHTMLSource(commands.exportToHTML());
       setContent((prev) => ({ ...prev, html }));
+    }
+    if (newMode === "jsonb" && mode !== "jsonb") {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      const jsonb = formatJSONBSource(JSON.stringify(exportApi.toJSON()));
+      setContent((prev) => ({ ...prev, jsonb }));
     }
 
     setMode(newMode);
@@ -214,6 +250,9 @@ function ExtensiveEditorContent({
             {mode === "markdown" && (
               <SourceView value={content.markdown} onChange={(value) => setContent((prev) => ({ ...prev, markdown: value }))} placeholder="Enter Markdown content..." />
             )}
+            {mode === "jsonb" && (
+              <SourceView value={content.jsonb} onChange={(value) => setContent((prev) => ({ ...prev, jsonb: value }))} placeholder="Enter JSONB document content..." />
+            )}
           </div>
         )}
       </div>
@@ -249,7 +288,7 @@ export interface ExtensiveEditorProps {
 }
 
 export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorProps>(
-  ({ className, onReady, initialTheme = "light", defaultContent, showDefaultContent = true, placeholder = "Write anything...", initialMode = "visual", availableModes = ["visual", "html", "markdown"], variantClassName }, ref) => {
+  ({ className, onReady, initialTheme = "light", defaultContent, showDefaultContent = true, placeholder = "Write anything...", initialMode = "visual", availableModes = ["visual", "html", "markdown", "jsonb"], variantClassName }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
     const isDark = editorTheme === "dark";
     const resolvedInitialMode = availableModes.includes(initialMode)

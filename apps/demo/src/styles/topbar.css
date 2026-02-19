@@ -62,6 +62,7 @@
 }
 
 .demo-select {
+  appearance: none;
   border: 1px solid var(--border);
   background: var(--surface-elevated);
   color: var(--text);
@@ -71,6 +72,12 @@
   font-size: 12px;
   font-weight: 600;
   min-width: 176px;
+  line-height: 1;
+}
+
+.demo-select option {
+  background: var(--surface-elevated);
+  color: var(--text);
 }
 
 .demo-select:focus-visible {

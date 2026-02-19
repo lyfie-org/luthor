@@ -75,6 +75,48 @@
   line-height: 1.25;
 }
 
+.persistence-panel {
+  padding: 16px;
+}
+
+.persistence-panel__top {
+  margin-bottom: 12px;
+}
+
+.persistence-panel__status {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.persistence-panel__label {
+  display: inline-block;
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.persistence-panel__textarea {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-elevated);
+  color: var(--text);
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  resize: vertical;
+}
+
+.persistence-panel__textarea:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  outline-offset: 1px;
+}
+
 @media (max-width: 920px) {
   .feature-panel__top {
     flex-direction: column;

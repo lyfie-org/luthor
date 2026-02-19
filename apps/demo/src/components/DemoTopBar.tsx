@@ -1,4 +1,4 @@
-type DemoPresetId = "chat" | "email" | "markdownVisual" | "htmlVisual" | "themed" | "notion";
+type DemoPresetId = "chat" | "email" | "markdownVisual" | "htmlVisual" | "themed" | "notion" | "extensive";
 
 interface DemoTopBarProps {
   theme: "light" | "dark";

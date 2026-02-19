@@ -12,11 +12,12 @@ export function ModeTabs({
   labels?: Partial<Record<CoreEditorMode, string>>;
   availableModes?: readonly CoreEditorMode[];
 }) {
-  const modes = availableModes ?? ["visual", "html", "markdown"];
+  const modes = availableModes ?? ["visual", "html", "markdown", "jsonb"];
   const tabLabels: Record<CoreEditorMode, string> = {
     visual: labels?.visual ?? "Visual",
     html: labels?.html ?? "HTML",
     markdown: labels?.markdown ?? "Markdown",
+    jsonb: labels?.jsonb ?? "JSONB",
   };
 
   return (
@@ -34,6 +35,11 @@ export function ModeTabs({
       {modes.includes("markdown") && (
         <button className={`luthor-mode-tab ${mode === "markdown" ? "active" : ""}`} onClick={() => onModeChange("markdown")}>
           {tabLabels.markdown}
+        </button>
+      )}
+      {modes.includes("jsonb") && (
+        <button className={`luthor-mode-tab ${mode === "jsonb" ? "active" : ""}`} onClick={() => onModeChange("jsonb")}>
+          {tabLabels.jsonb}
         </button>
       )}
     </div>
