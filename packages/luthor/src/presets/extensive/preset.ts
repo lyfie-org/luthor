@@ -31,6 +31,8 @@ export const extensivePreset: EditorPreset = {
     "table",
     "horizontalRule",
     "htmlEmbed",
+    "iframeEmbed",
+    "youtubeEmbed",
     "blockquote",
     "code",
     "codeBlock",

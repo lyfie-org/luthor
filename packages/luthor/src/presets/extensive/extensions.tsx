@@ -3,6 +3,8 @@ import {
   MarkdownExtension,
   TableExtension,
   HTMLEmbedExtension,
+  IframeEmbedExtension,
+  YouTubeEmbedExtension,
   ImageExtension,
   ContextMenuExtension,
   CommandPaletteExtension,
@@ -239,6 +241,25 @@ const htmlEmbedExt = new HTMLEmbedExtension();
   markdownExtension: markdownExt,
 };
 
+const iframeEmbedExt = new IframeEmbedExtension();
+(iframeEmbedExt as any).config = {
+  ...(iframeEmbedExt as any).config,
+  defaultWidth: 720,
+  defaultHeight: 405,
+  defaultAlignment: "center",
+};
+
+const youTubeEmbedExt = new YouTubeEmbedExtension();
+(youTubeEmbedExt as any).config = {
+  ...(youTubeEmbedExt as any).config,
+  defaultWidth: 720,
+  defaultHeight: 405,
+  defaultAlignment: "center",
+  nocookie: true,
+  controls: true,
+  rel: 1,
+};
+
 const floatingToolbarExt = createFloatingToolbarExtension();
 
 const contextMenuExt = new ContextMenuExtension();
@@ -384,6 +405,8 @@ export const extensiveExtensions = [
   tabIndentExtension,
   enterKeyBehaviorExtension,
   htmlEmbedExt,
+  iframeEmbedExt,
+  youTubeEmbedExt,
   floatingToolbarExt,
   contextMenuExt,
   commandPaletteExt,

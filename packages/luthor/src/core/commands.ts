@@ -1,10 +1,5 @@
 import type { CommandPaletteItem } from "@lyfie/luthor-headless";
 import type { CoreEditorCommands } from "./types";
-import {
-  buildIframeEmbedHtml,
-  buildTweetEmbedHtml,
-  buildYouTubeEmbedHtml,
-} from "./embed-templates";
 
 export type KeyboardShortcut = {
   key: string;
@@ -69,6 +64,14 @@ function supportsSuperscript(commands: CoreEditorCommands): boolean {
 
 function supportsHtmlEmbed(commands: CoreEditorCommands): boolean {
   return typeof commands.insertHTMLEmbed === "function";
+}
+
+function supportsIframeEmbed(commands: CoreEditorCommands): boolean {
+  return typeof commands.insertIframeEmbed === "function";
+}
+
+function supportsYouTubeEmbed(commands: CoreEditorCommands): boolean {
+  return typeof commands.insertYouTubeEmbed === "function";
 }
 
 export function generateCommands(): CommandConfig[] {
@@ -335,19 +338,17 @@ export function generateCommands(): CommandConfig[] {
       description: "Insert an iframe embed from URL",
       category: "Insert",
       action: (commands) => {
-        const inputUrl = prompt("Enter iframe URL:");
-        if (!inputUrl) return;
-
-        const result = buildIframeEmbedHtml(inputUrl);
-        if ("error" in result) {
-          alert(result.error);
+        if (typeof commands.insertIframeEmbed !== "function") {
           return;
         }
 
-        commands.insertHTMLEmbed(result.html);
+        const inputUrl = prompt("Enter iframe URL:");
+        if (!inputUrl) return;
+
+        commands.insertIframeEmbed(inputUrl);
       },
       keywords: ["iframe", "embed", "url"],
-      condition: supportsHtmlEmbed,
+      condition: supportsIframeEmbed,
     },
     {
       id: "insert.youtube",
@@ -355,39 +356,17 @@ export function generateCommands(): CommandConfig[] {
       description: "Insert an embedded YouTube video",
       category: "Insert",
       action: (commands) => {
+        if (typeof commands.insertYouTubeEmbed !== "function") {
+          return;
+        }
+
         const inputUrl = prompt("Enter YouTube URL:");
         if (!inputUrl) return;
 
-        const result = buildYouTubeEmbedHtml(inputUrl);
-        if ("error" in result) {
-          alert(result.error);
-          return;
-        }
-
-        commands.insertHTMLEmbed(result.html);
+        commands.insertYouTubeEmbed(inputUrl);
       },
       keywords: ["youtube", "video", "embed"],
-      condition: supportsHtmlEmbed,
-    },
-    {
-      id: "insert.tweet",
-      label: "Insert Tweet",
-      description: "Insert an embedded Tweet/X post",
-      category: "Insert",
-      action: (commands) => {
-        const inputUrl = prompt("Enter Tweet/X URL:");
-        if (!inputUrl) return;
-
-        const result = buildTweetEmbedHtml(inputUrl);
-        if ("error" in result) {
-          alert(result.error);
-          return;
-        }
-
-        commands.insertHTMLEmbed(result.html);
-      },
-      keywords: ["tweet", "x", "twitter", "embed"],
-      condition: supportsHtmlEmbed,
+      condition: supportsYouTubeEmbed,
     },
     {
       id: "edit.undo",

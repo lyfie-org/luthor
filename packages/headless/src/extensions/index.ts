@@ -109,6 +109,14 @@ export {
   HTMLEmbedExtension,
   htmlEmbedExtension,
 } from "./media/HTMLEmbedExtension";
+export {
+  IframeEmbedExtension,
+  iframeEmbedExtension,
+} from "./media/IframeEmbedExtension";
+export {
+  YouTubeEmbedExtension,
+  youTubeEmbedExtension,
+} from "./media/YouTubeEmbedExtension";
 
 // Custom extensions
 export { createCustomNodeExtension } from "./custom/CustomNodeExtension";

@@ -49,11 +49,6 @@ import {
 } from "./icons";
 import { Button, Dialog, Dropdown, IconButton, Select } from "./ui";
 import type { CoreEditorActiveStates, CoreEditorCommands, CoreToolbarClassNames, InsertTableConfig, ImageAlignment } from "./types";
-import {
-  buildIframeEmbedHtml,
-  buildTweetEmbedHtml,
-  buildYouTubeEmbedHtml,
-} from "./embed-templates";
 
 type SelectOption = {
   value: string;
@@ -540,37 +535,21 @@ function useEmbedHandlers(commands: CoreEditorCommands) {
         const inputUrl = prompt("Enter iframe URL:");
         if (!inputUrl) return;
 
-        const result = buildIframeEmbedHtml(inputUrl);
-        if ("error" in result) {
-          alert(result.error);
+        if (typeof commands.insertIframeEmbed !== "function") {
           return;
         }
 
-        commands.insertHTMLEmbed(result.html);
+        commands.insertIframeEmbed(inputUrl);
       },
       insertYouTube: () => {
         const inputUrl = prompt("Enter YouTube URL:");
         if (!inputUrl) return;
 
-        const result = buildYouTubeEmbedHtml(inputUrl);
-        if ("error" in result) {
-          alert(result.error);
+        if (typeof commands.insertYouTubeEmbed !== "function") {
           return;
         }
 
-        commands.insertHTMLEmbed(result.html);
-      },
-      insertTweet: () => {
-        const inputUrl = prompt("Enter Tweet/X URL:");
-        if (!inputUrl) return;
-
-        const result = buildTweetEmbedHtml(inputUrl);
-        if ("error" in result) {
-          alert(result.error);
-          return;
-        }
-
-        commands.insertHTMLEmbed(result.html);
+        commands.insertYouTubeEmbed(inputUrl);
       },
     }),
     [commands],
@@ -600,6 +579,11 @@ export function Toolbar({
 }: ToolbarProps) {
   const { handlers, fileInputRef } = useImageHandlers(commands, imageUploadHandler);
   const embedHandlers = useEmbedHandlers(commands);
+  const hasAnyEmbedExtension = hasExtension("htmlEmbed") || hasExtension("iframeEmbed") || hasExtension("youtubeEmbed");
+  const isAnyEmbedSelected =
+    activeStates.isHTMLEmbedSelected ||
+    activeStates.isIframeEmbedSelected ||
+    activeStates.isYouTubeEmbedSelected;
   const [showImageDropdown, setShowImageDropdown] = useState(false);
   const [showAlignDropdown, setShowAlignDropdown] = useState(false);
   const [showEmbedDropdown, setShowEmbedDropdown] = useState(false);
@@ -1138,33 +1122,35 @@ export function Toolbar({
           </div>
         )}
 
-        {hasExtension("htmlEmbed") && (
+        {hasAnyEmbedExtension && (
           <div className={classNames?.section ?? "luthor-toolbar-section"}>
             <Dropdown
               trigger={
-                <button className={`luthor-toolbar-button ${activeStates.isHTMLEmbedSelected ? "active" : ""}`} title="Insert Embed">
+                <button className={`luthor-toolbar-button ${isAnyEmbedSelected ? "active" : ""}`} title="Insert Embed">
                   <FileCodeIcon size={16} />
                 </button>
               }
               isOpen={showEmbedDropdown}
               onOpenChange={setShowEmbedDropdown}
             >
-              <button className="luthor-dropdown-item" onClick={() => { commands.insertHTMLEmbed(); setShowEmbedDropdown(false); }}>
-                <FileCodeIcon size={16} />
-                <span>Custom HTML Embed</span>
-              </button>
-              <button className="luthor-dropdown-item" onClick={() => { embedHandlers.insertIframe(); setShowEmbedDropdown(false); }}>
-                <LinkIcon size={16} />
-                <span>Embed iframe</span>
-              </button>
-              <button className="luthor-dropdown-item" onClick={() => { embedHandlers.insertYouTube(); setShowEmbedDropdown(false); }}>
-                <ImageIcon size={16} />
-                <span>Embed YouTube Video</span>
-              </button>
-              <button className="luthor-dropdown-item" onClick={() => { embedHandlers.insertTweet(); setShowEmbedDropdown(false); }}>
-                <QuoteIcon size={16} />
-                <span>Embed Tweet/X Post</span>
-              </button>
+              {hasExtension("htmlEmbed") ? (
+                <button className="luthor-dropdown-item" onClick={() => { commands.insertHTMLEmbed(); setShowEmbedDropdown(false); }}>
+                  <FileCodeIcon size={16} />
+                  <span>Custom HTML Embed</span>
+                </button>
+              ) : null}
+              {hasExtension("iframeEmbed") ? (
+                <button className="luthor-dropdown-item" onClick={() => { embedHandlers.insertIframe(); setShowEmbedDropdown(false); }}>
+                  <LinkIcon size={16} />
+                  <span>Embed iframe</span>
+                </button>
+              ) : null}
+              {hasExtension("youtubeEmbed") ? (
+                <button className="luthor-dropdown-item" onClick={() => { embedHandlers.insertYouTube(); setShowEmbedDropdown(false); }}>
+                  <ImageIcon size={16} />
+                  <span>Embed YouTube Video</span>
+                </button>
+              ) : null}
             </Dropdown>
             {activeStates.isHTMLEmbedSelected && (
               <IconButton onClick={() => commands.toggleHTMLPreview()} title="Toggle Preview/Edit">

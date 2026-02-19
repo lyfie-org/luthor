@@ -93,6 +93,12 @@ export interface CoreEditorCommands {
   insertImage: (config: InsertImageConfig) => void;
   setImageAlignment: (alignment: ImageAlignment) => void;
   setImageCaption: (caption: string) => void;
+  insertIframeEmbed?: (inputUrl: string, width?: number, height?: number, title?: string) => void;
+  setIframeEmbedAlignment?: (alignment: ImageAlignment) => void;
+  resizeIframeEmbed?: (width: number, height: number) => void;
+  insertYouTubeEmbed?: (inputUrl: string, width?: number, height?: number, start?: number) => void;
+  setYouTubeEmbedAlignment?: (alignment: ImageAlignment) => void;
+  resizeYouTubeEmbed?: (width: number, height: number) => void;
   insertHTMLEmbed: (html?: string) => void;
   toggleHTMLPreview: () => void;
   undo: () => void;
@@ -140,6 +146,14 @@ export interface CoreEditorActiveStates {
   isImageAlignedLeft?: boolean;
   isImageAlignedCenter?: boolean;
   isImageAlignedRight?: boolean;
+  isIframeEmbedSelected?: boolean;
+  isIframeEmbedAlignedLeft?: boolean;
+  isIframeEmbedAlignedCenter?: boolean;
+  isIframeEmbedAlignedRight?: boolean;
+  isYouTubeEmbedSelected?: boolean;
+  isYouTubeEmbedAlignedLeft?: boolean;
+  isYouTubeEmbedAlignedCenter?: boolean;
+  isYouTubeEmbedAlignedRight?: boolean;
   isHTMLEmbedSelected?: boolean;
   isHTMLPreviewMode?: boolean;
   canUndo?: boolean;
