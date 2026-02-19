@@ -239,6 +239,7 @@ const tableExt = new TableExtension();
 const htmlEmbedExt = new HTMLEmbedExtension();
 (htmlEmbedExt as any).config = {
   ...(htmlEmbedExt as any).config,
+  defaultPreview: true,
   markdownExtension: markdownExt,
 };
 

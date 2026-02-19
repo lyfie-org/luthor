@@ -1,9 +1,8 @@
-import { LexicalEditor, $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW } from "lexical";
+import { LexicalEditor, $getSelection } from "lexical";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { ExtensionCategory, BaseExtensionConfig } from "@lyfie/luthor-headless/extensions/types";
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Extension } from "../types";
 import { useBaseEditor as useEditor } from "../../core/createEditorSystem";
 
 /**
@@ -423,6 +422,7 @@ export class ContextMenuExtension extends BaseExtension<
   }
 
   getStateQueries(editor: LexicalEditor): ContextMenuStateQueries {
+    void editor;
     return {
       isContextMenuOpen: () => Promise.resolve(this.manager?.getCurrentMenu() !== null),
     };

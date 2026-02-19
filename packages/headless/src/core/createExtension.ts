@@ -1,4 +1,4 @@
-import { LexicalEditor } from "lexical";
+import { LexicalEditor, TextFormatType } from "lexical";
 import { ReactNode } from "react";
 import { BaseExtension } from "../extensions/base/BaseExtension";
 import { BaseExtensionConfig, ExtensionCategory } from "../extensions/types";
@@ -9,8 +9,11 @@ import { BaseExtensionConfig, ExtensionCategory } from "../extensions/types";
 export interface CreateExtensionConfig<
   Name extends string,
   Config extends BaseExtensionConfig = BaseExtensionConfig,
-  Commands extends Record<string, any> = {},
-  StateQueries extends Record<string, () => Promise<boolean>> = {},
+  Commands extends Record<string, unknown> = Record<string, never>,
+  StateQueries extends Record<string, () => Promise<boolean>> = Record<
+    string,
+    never
+  >,
   Plugins extends ReactNode[] = ReactNode[],
 > {
   /** Unique name for the extension */
@@ -35,10 +38,10 @@ export interface CreateExtensionConfig<
   initialize?: (editor: LexicalEditor) => (() => void) | void;
 
   /** Custom Lexical nodes */
-  nodes?: any[];
+  nodes?: unknown[];
 
   /** Text formats supported by this extension */
-  supportedFormats?: readonly any[];
+  supportedFormats?: readonly TextFormatType[];
 }
 
 /**
@@ -76,8 +79,11 @@ export interface CreateExtensionConfig<
 export function createExtension<
   Name extends string,
   Config extends BaseExtensionConfig = BaseExtensionConfig,
-  Commands extends Record<string, any> = {},
-  StateQueries extends Record<string, () => Promise<boolean>> = {},
+  Commands extends Record<string, unknown> = Record<string, never>,
+  StateQueries extends Record<string, () => Promise<boolean>> = Record<
+    string,
+    never
+  >,
   Plugins extends ReactNode[] = ReactNode[],
 >(
   config: CreateExtensionConfig<Name, Config, Commands, StateQueries, Plugins>,
@@ -90,7 +96,7 @@ export function createExtension<
     Plugins
   > {
     private _plugins: Plugins = [] as unknown as Plugins;
-    private _nodes: any[] = [];
+    private _nodes: unknown[] = [];
     private _initialize?: (editor: LexicalEditor) => (() => void) | void;
 
     constructor() {
@@ -132,7 +138,7 @@ export function createExtension<
       };
     }
 
-    getNodes(): any[] {
+    getNodes(): unknown[] {
       return this._nodes;
     }
 

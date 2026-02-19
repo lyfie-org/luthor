@@ -28,7 +28,6 @@ import {
   $unmergeCell,
 } from "@lexical/table";
 import {
-  INSERT_TABLE_COMMAND,
   $isTableSelection,
   $insertTableRowAtSelection,
   $insertTableColumnAtSelection,
@@ -40,7 +39,6 @@ import {
   ContextMenuItem,
   ContextMenuProvider,
   ContextMenuRenderer,
-  ContextMenuExtension,
   contextMenuExtension
 } from "@lyfie/luthor-headless/extensions/core/ContextMenuExtension";
 
@@ -662,7 +660,8 @@ export class TableExtension extends BaseExtension<
           }
         });
       },
-      showTableContextMenu: (position: { x: number; y: number }) => {
+      showTableContextMenu: (_position: { x: number; y: number }) => {
+        void _position;
         // This will be implemented when the extension system allows cross-extension commands
         // For now, this is a placeholder
       },
@@ -762,7 +761,8 @@ export const TABLE_MARKDOWN_TRANSFORMER = {
     optional: true as const,
     regExp: /^$/
   },
-  replace: (rootNode: any, children: any, startMatch: any, endMatch: any, linesInBetween: any, isImport: boolean) => {
+  replace: (rootNode: any, children: any, startMatch: any, endMatch: any, linesInBetween: any, _isImport: boolean) => {
+    void _isImport;
     // Combine the start line with lines in between to get all table lines
     const allLines = [startMatch[0], ...(linesInBetween || [])];
     

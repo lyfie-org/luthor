@@ -33,7 +33,7 @@ export type MarkdownCommands = {
 	registerMarkdownTransformer: (transformer: Transformer) => void;
 };
 
-export type MarkdownStateQueries = {};
+export type MarkdownStateQueries = Record<string, never>;
 
 class MarkdownManager {
 	private editor: LexicalEditor;
@@ -135,6 +135,7 @@ export class MarkdownExtension extends BaseExtension<
 	}
 
 	getCommands(editor: LexicalEditor): MarkdownCommands {
+		void editor;
 		return {
 			exportToMarkdown: () => {
 				if (!this.manager) return '';
@@ -173,6 +174,7 @@ export class MarkdownExtension extends BaseExtension<
 	}
 
 	getStateQueries(editor: LexicalEditor): MarkdownStateQueries {
+		void editor;
 		return {};
 	}
 }

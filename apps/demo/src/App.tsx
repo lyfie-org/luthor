@@ -36,12 +36,12 @@ const PRESET_OPTIONS: { id: DemoPresetId; label: string }[] = [
 ];
 
 const PRESET_DEMO_MARKDOWN: Record<DemoPresetId, string> = {
-  chat: `# Chat Composer Demo\n\nUse this preset for conversation-first input with compact formatting.\n\n- Quick messages and responses\n- Mentions, links, and lightweight structure\n- Seamless visual/markdown switching`,
-  email: `# Email Composer Demo\n\nDraft email-ready content with visual editing and HTML source support.\n\n- Subject-ready copy blocks\n- CTA links and media-ready layout\n- Easy source cleanup in HTML mode`,
-  markdownVisual: `# Markdown / Visual Demo\n\nStart in markdown mode and round-trip into visual editing.\n\n## Why it works\n- Predictable markdown output\n- Visual QA for final formatting\n- Fast import/export iteration`,
-  htmlVisual: `# HTML / Visual Demo\n\nStart in HTML mode and verify rendering instantly in visual mode.\n\n- Source-first authoring\n- Visual validation pass\n- Export-ready markup workflows`,
-  themed: `# Themed Preset Demo\n\nThis preset is tuned for easy runtime theming via CSS variables.\n\n- Brand your editor surface\n- Override accent and muted tokens\n- Keep full feature parity`,
-  notion: `# Notion-Style Demo\n\nUse slash commands, spacious layout, and block-first flow.\n\n- Type / to insert content blocks\n- Document-oriented writing rhythm\n- Full rich-text and embed tooling`,
+  chat: EXTENSIVE_DEMO_MARKDOWN,
+  email: EXTENSIVE_DEMO_MARKDOWN,
+  markdownVisual: EXTENSIVE_DEMO_MARKDOWN,
+  htmlVisual: EXTENSIVE_DEMO_MARKDOWN,
+  themed: EXTENSIVE_DEMO_MARKDOWN,
+  notion: EXTENSIVE_DEMO_MARKDOWN,
 };
 
 function getInitialTheme(): DemoTheme {

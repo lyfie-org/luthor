@@ -85,6 +85,7 @@ export class CommandPaletteExtension extends BaseExtension<
   }
 
   getCommands(editor: LexicalEditor): CommandPaletteCommands {
+    void editor;
     return {
       showCommandPalette: () => this.showCommandPalette(),
       hideCommandPalette: () => this.hideCommandPalette(),
@@ -94,6 +95,7 @@ export class CommandPaletteExtension extends BaseExtension<
   }
 
   getStateQueries(editor: LexicalEditor): CommandPaletteStateQueries {
+    void editor;
     return {
       isCommandPaletteOpen: () => Promise.resolve(this.isOpen),
     };
@@ -125,6 +127,7 @@ export class CommandPaletteExtension extends BaseExtension<
   }
 
   private registerTableCommands(editor: LexicalEditor) {
+    void editor;
     // These would be registered automatically when table extension is loaded
     const tableCommands: CommandPaletteItem[] = [
       {

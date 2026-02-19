@@ -144,6 +144,7 @@ export class HistoryExtension extends BaseExtension<
     canUndo: () => Promise<boolean>;
     canRedo: () => Promise<boolean>;
   } {
+    void editor;
     return {
       canUndo: async () => this.canUndoState,
       canRedo: async () => this.canRedoState,

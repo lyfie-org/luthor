@@ -41,8 +41,11 @@ export interface ToolbarItem {
 export interface Extension<
   Name extends string = string,
   Config extends BaseExtensionConfig = BaseExtensionConfig,
-  Commands extends Record<string, any> = {},
-  StateQueries extends Record<string, () => Promise<boolean>> = {},
+  Commands extends Record<string, any> = Record<string, never>,
+  StateQueries extends Record<string, () => Promise<boolean>> = Record<
+    string,
+    never
+  >,
   Plugins extends ReactNode[] = ReactNode[],
 > {
   /** Unique identifier for this extension */
@@ -116,13 +119,6 @@ export type ExtractCommands<Exts extends readonly Extension[]> = MergeCommands<
 export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<
   Exts[number]["getPlugins"]
 >[number];
-
-// Helper: union to intersection for flat types
-type UnionToIntersection<U> = (U extends any
-  ? (k: U) => void
-  : never)[any] extends (k: infer I) => void
-  ? I
-  : never;
 
 // Helper for union keys
 type UnionKeys<T> = T extends unknown ? keyof T : never;

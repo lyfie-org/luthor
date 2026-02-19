@@ -4,11 +4,8 @@ import {
   EditorConfig,
   LexicalNode,
   ElementNode,
-  SerializedLexicalNode,
-  Spread,
   createCommand,
   COMMAND_PRIORITY_EDITOR,
-  $insertNodes,
   $isNodeSelection,
   $getSelection,
   $getRoot,
@@ -37,7 +34,6 @@ import { LexicalEditor } from "lexical";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import {
   ExtensionCategory,
-  BaseExtensionConfig,
 } from "@lyfie/luthor-headless/extensions/types";
 import {
   ImagePayload,
@@ -50,10 +46,6 @@ import {
 } from "./types";
 import {
   ImageTranslator,
-  importImageDOM,
-  exportImageDOM,
-  importImageJSON,
-  exportImageJSON,
 } from "./ImageTranslator";
 
 /**
@@ -95,7 +87,6 @@ function ImageComponent({
 }: ImageComponentProps): ReactNode {
   const [editor] = useLexicalComposerContext();
   const imageRef = useRef<HTMLImageElement>(null);
-  const resizerRef = useRef<HTMLDivElement>(null);
   const [isSelected, setIsSelected] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [aspectRatio, setAspectRatio] = useState(1);
@@ -241,6 +232,7 @@ function ImageComponent({
     margin: 0,
     display: "block",
     position: "relative",
+    ...style,
   };
 
   const imgStyle: React.CSSProperties = {
@@ -696,7 +688,7 @@ export class ImageExtension extends BaseExtension<
       (payload) => {
         editor.update(() => {
           try {
-            let src =
+            const src =
               payload.src ||
               (payload.file ? URL.createObjectURL(payload.file) : "");
             if (!src) throw new Error("No src for image");
@@ -1139,6 +1131,7 @@ export const IMAGE_MARKDOWN_TRANSFORMER = {
     match: string[],
     isImport: boolean,
   ) => {
+    void isImport;
     const [, alt, src, caption, alignment] = match;
 
     if (!src) return;

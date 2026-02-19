@@ -1,10 +1,4 @@
 import { TextFormatExtension } from "@lyfie/luthor-headless/extensions/base";
-import {
-  FORMAT_TEXT_COMMAND,
-  LexicalEditor,
-  $getSelection,
-  $isRangeSelection,
-} from "lexical";
 
 /**
  * Custom underline transformer for Markdown
@@ -43,7 +37,7 @@ export class UnderlineExtension extends TextFormatExtension<"underline"> {
    *
   * @returns An array containing the underline transformer
    */
-  getMarkdownTransformers(): any[] {
+  getMarkdownTransformers(): readonly typeof UNDERLINE_TRANSFORMER[] {
     return [UNDERLINE_TRANSFORMER];
   }
 }

@@ -1,7 +1,7 @@
 // HTMLEmbedExtension.tsx
 // Clean, scalable, headless HTML embed extension that works across all tabs
 
-import React, { useState, ReactNode, useRef } from "react";
+import React, { ReactNode, useRef } from "react";
 import {
   LexicalEditor,
   DecoratorNode,
@@ -17,7 +17,6 @@ import {
 } from "lexical";
 import { BaseExtension } from "../base/BaseExtension";
 import { ExtensionCategory, BaseExtensionConfig } from "../types";
-import { LuthorTheme } from "../../core/theme";
 import { useBaseEditor as useEditor } from "../../core/createEditorSystem"; // Use base for untyped access
 import { markdownExtension } from "../export/MarkdownExtension";
 
@@ -456,7 +455,6 @@ const HTMLEmbedComponent: React.FC<{
 
   const defaultEditorRenderer = ({
     html,
-    onTogglePreview,
     onSave,
     className,
     style,
@@ -466,7 +464,6 @@ const HTMLEmbedComponent: React.FC<{
     toggleStyle,
   }: {
     html: string;
-    onTogglePreview: () => void;
     onSave: () => void;
     className: string;
     style?: React.CSSProperties;
@@ -563,6 +560,7 @@ export class HTMLEmbedExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
+    void editor;
     // Register its markdown transformer with markdown extension
     const mdExtension = this.config.markdownExtension || markdownExtension;
     try {
@@ -681,7 +679,8 @@ export const HTML_EMBED_MARKDOWN_TRANSFORMER = {
     optional: true as const,
     regExp: /^```$/
   },
-  replace: (rootNode: any, children: any, startMatch: any, endMatch: any, linesInBetween: any, isImport: boolean) => {
+  replace: (rootNode: any, children: any, startMatch: any, endMatch: any, linesInBetween: any, _isImport: boolean) => {
+    void _isImport;
     // Combine the lines in between to get the HTML content
     const html = linesInBetween.join('\n');
     

@@ -218,7 +218,7 @@ export class LinkExtension extends BaseExtension<
     if (this.config.autoLinkText) {
       const urlMatcher = (text: string) => {
         const urlRegex =
-          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
+          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_.+~#?&//=]*)/g;
         const match = urlRegex.exec(text);
         if (match && this.config.validateUrl!(match[0])) {
           return {

@@ -29,9 +29,9 @@ import { ReactNode } from "react";
  */
 export class TabIndentExtension extends BaseExtension<
   "tabIndent",
-  {},
-  {},
-  {},
+  Record<string, never>,
+  Record<string, never>,
+  Record<string, never>,
   ReactNode[]
 > {
   constructor() {

@@ -71,9 +71,9 @@ const DEFAULT_LANGUAGE_OPTIONS = [
 
 export class CodeIntelligenceExtension extends BaseExtension<
   "codeIntelligence",
-  {},
+  Record<string, never>,
   CodeIntelligenceCommands,
-  {},
+  Record<string, never>,
   ReactNode[]
 > {
   private autoModeNodeKeys = new Set<string>();
@@ -644,6 +644,8 @@ function CodeBlockControlsPlugin({
       scheduleSyncControls();
     };
 
+    const feedbackTimers = feedbackTimersRef.current;
+
     window.addEventListener("resize", onViewportChange, { passive: true });
 
     return () => {
@@ -656,8 +658,8 @@ function CodeBlockControlsPlugin({
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
       }
-      feedbackTimersRef.current.forEach((timer) => clearTimeout(timer));
-      feedbackTimersRef.current.clear();
+      feedbackTimers.forEach((timer) => clearTimeout(timer));
+      feedbackTimers.clear();
     };
   }, [editor, scheduleSyncControls]);
 
@@ -807,6 +809,7 @@ async function writeTextToClipboard(text: string): Promise<boolean> {
       await navigator.clipboard.writeText(text);
       return true;
     } catch {
+      void 0;
     }
   }
 

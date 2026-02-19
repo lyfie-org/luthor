@@ -59,7 +59,7 @@ export type CodeStateQueries = {
  */
 export class CodeExtension extends BaseExtension<
   "code",
-  {},
+  Record<string, never>,
   CodeCommands,
   CodeStateQueries,
   ReactNode[]

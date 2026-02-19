@@ -33,7 +33,7 @@ export interface RichTextConfig
     BaseRichTextProps {}
 
 // Shared component props - extends base props
-interface SharedRichTextProps extends BaseRichTextProps {}
+type SharedRichTextProps = BaseRichTextProps;
 
 const SharedRichText: React.FC<SharedRichTextProps> = (props) => {
   const {
@@ -110,10 +110,6 @@ const SharedRichText: React.FC<SharedRichTextProps> = (props) => {
   );
 };
 
-export interface RichTextConfig
-  extends BaseExtensionConfig,
-    BaseRichTextProps {}
-
 /**
  * RichTextExtension - Provides core rich text editing functionality
  * Extends BaseExtension to stay consistent with other extensions
@@ -121,8 +117,8 @@ export interface RichTextConfig
 export class RichTextExtension extends BaseExtension<
   "richText",
   RichTextConfig,
-  {}, // No commands
-  {}, // No state queries
+  Record<string, never>,
+  Record<string, never>,
   ReactNode[] // Plugins
 > {
   constructor(config: RichTextConfig = {}) {
@@ -135,6 +131,7 @@ export class RichTextExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
+    void editor;
     // No registration needed for RichTextPlugin
     return () => {};
   }
@@ -148,7 +145,7 @@ export class RichTextExtension extends BaseExtension<
 export const richTextExtension = new RichTextExtension();
 
 // Standalone RichText component for flexible usage
-export interface RichTextComponentProps extends SharedRichTextProps {}
+export type RichTextComponentProps = SharedRichTextProps;
 
 export const RichText: React.FC<RichTextComponentProps> = (props) => {
   return <SharedRichText {...props} />;

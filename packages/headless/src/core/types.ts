@@ -30,7 +30,7 @@ export interface EditorConfig {
   /** Placeholder text to display when editor is empty */
   placeholder?: string;
   /** Additional configuration options */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -49,15 +49,17 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
   /** Array of registered extensions */
   extensions: Exts;
   /** Dynamic commands aggregated from all extensions */
-  commands: any;
+  commands: Record<string, (...args: unknown[]) => unknown>;
   /** Dynamic active states from all extensions */
-  activeStates: any;
+  activeStates: Record<string, boolean>;
   /** Event listeners for editor updates */
   listeners: {
     /** Register a listener for editor state updates */
-    registerUpdate: (listener: (state: any) => void) => () => void;
+    registerUpdate: (listener: (state: unknown) => void) => () => void;
     /** Register a listener for node mutations (optional) */
-    registerMutation?: (listener: (mutations: any) => void) => () => void;
+    registerMutation?:
+      | ((listener: (mutations: unknown) => void) => () => void)
+      | undefined;
     /** Register a listener for paste events */
     registerPaste: (listener: (event: ClipboardEvent) => boolean) => () => void;
   };
@@ -68,7 +70,7 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
     /** Export editor content to Markdown */
     toMarkdown: () => Promise<string>;
     /** Export editor content to JSON */
-    toJSON: () => any;
+    toJSON: () => unknown;
   };
   /** Import functionality */
   import: {
@@ -77,7 +79,7 @@ export interface EditorContextType<Exts extends readonly Extension[]> {
     /** Import Markdown content into the editor */
     fromMarkdown: (md: string) => Promise<void>;
     /** Import JSON content into the editor */
-    fromJSON: (json: any) => void;
+    fromJSON: (json: unknown) => void;
   };
   /** Direct access to the Lexical editor instance */
   lexical: LexicalEditor | null;

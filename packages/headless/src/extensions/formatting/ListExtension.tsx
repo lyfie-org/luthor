@@ -5,14 +5,13 @@ import {
 } from "@lexical/list";
 import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from "lexical";
 import { $setBlocksType } from "@lexical/selection";
-import { ComponentType, CSSProperties, ReactNode } from "react";
+import { ReactNode } from "react";
 import { LexicalEditor, $getSelection, $isRangeSelection, $createParagraphNode } from "lexical";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
 import { ListNode, ListItemNode, $isListNode, $isListItemNode } from "@lexical/list";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
-import React from "react";
 
 /**
  * Commands exposed by the list extension.
@@ -94,6 +93,7 @@ export class ListExtension extends BaseExtension<
    * @returns Cleanup function (no-op for lists)
    */
   register(editor: LexicalEditor): () => void {
+    void editor;
     return () => {};
   }
 
@@ -102,7 +102,7 @@ export class ListExtension extends BaseExtension<
    *
    * @returns Array containing ListNode and ListItemNode
    */
-  getNodes(): any[] {
+  getNodes() {
     return [ListNode, ListItemNode];
   }
 
@@ -111,7 +111,7 @@ export class ListExtension extends BaseExtension<
    *
    * @returns Array containing the ListPlugin component
    */
-  getPlugins(): React.ReactNode[] {
+  getPlugins(): ReactNode[] {
     return [<ListPlugin key="list-plugin" />, <CheckListPlugin key="check-list-plugin" />];
   }
 

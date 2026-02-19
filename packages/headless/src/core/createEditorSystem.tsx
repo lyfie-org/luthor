@@ -10,7 +10,10 @@ import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   FORMAT_TEXT_COMMAND,
+  COMMAND_PRIORITY_EDITOR,
   PASTE_COMMAND,
+  SerializedEditorState,
+  SerializedLexicalNode,
   TextFormatType,
 } from "lexical";
 import {
@@ -24,7 +27,9 @@ import {
 import { defaultLuthorTheme } from "./theme";
 
 // Shared context to avoid mismatches between typed/untyped usage
-export const EditorContext = createContext<EditorContextType<any> | null>(null);
+export const EditorContext = createContext<
+  EditorContextType<readonly Extension[]> | null
+>(null);
 
 interface ProviderProps<Exts extends readonly Extension[]> {
   children: ReactNode;
@@ -56,7 +61,7 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
   function useEditor(): EditorContextType<Exts> {
     const ctx = useContext(EditorContext);
     if (!ctx) throw new Error("useEditor must be used within Provider");
-    return ctx as EditorContextType<Exts>;
+    return ctx as unknown as EditorContextType<Exts>;
   }
 
   /**
@@ -71,22 +76,30 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     const [editor] = useLexicalComposerContext();
 
     // Lazy commands from extensions + base
-    const baseCommands: BaseCommands = {
-      formatText: (format: TextFormatType, value?: boolean | string) => {
-        void value;
-        return editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format);
-      },
-    };
-    const extensionCommands = useMemo(
-      () =>
-        extensions.reduce(
-          (acc, ext) => ({ ...acc, ...ext.getCommands(editor!) }),
-          {},
-        ),
-      [extensions, editor],
+    const baseCommands = useMemo<BaseCommands>(
+      () => ({
+        formatText: (format: TextFormatType, value?: boolean | string) => {
+          void value;
+          return editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format);
+        },
+      }),
+      [editor],
     );
-    const commands = { ...baseCommands, ...extensionCommands } as BaseCommands &
-      ExtractCommands<Exts>;
+    const extensionCommands = useMemo(() => {
+      if (!editor) {
+        return {} as ExtractCommands<Exts>;
+      }
+
+      return extensions.reduce(
+        (acc, ext) => ({ ...acc, ...ext.getCommands(editor) }),
+        {} as ExtractCommands<Exts>,
+      );
+    }, [extensions, editor]);
+
+    const commands = useMemo(
+      () => ({ ...baseCommands, ...extensionCommands }),
+      [baseCommands, extensionCommands],
+    ) as BaseCommands & ExtractCommands<Exts>;
 
     // Plugins: Collect and separate by position
     const plugins = useMemo(
@@ -124,17 +137,19 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     }, [editor, extensions]);
 
     // Collect state queries (now all Promise-based)
-    const stateQueries = useMemo(
-      () =>
-        extensions.reduce(
-          (acc, ext) => ({
-            ...acc,
-            ...(ext.getStateQueries ? ext.getStateQueries(editor!) : {}),
-          }),
-          {} as Record<string, () => Promise<boolean>>,
-        ),
-      [extensions, editor],
-    );
+    const stateQueries = useMemo(() => {
+      if (!editor) {
+        return {} as Record<string, () => Promise<boolean>>;
+      }
+
+      return extensions.reduce(
+        (acc, ext) => ({
+          ...acc,
+          ...(ext.getStateQueries ? ext.getStateQueries(editor) : {}),
+        }),
+        {} as Record<string, () => Promise<boolean>>,
+      );
+    }, [extensions, editor]);
 
     // Batched active states
     const [activeStates, setActiveStates] = useState<ExtractStateQueries<Exts>>(
@@ -145,42 +160,112 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       },
     );
 
+    useEffect(() => {
+      const stateKeys = Object.keys(stateQueries);
+
+      setActiveStates((previousStates) => {
+        const nextStates = {} as ExtractStateQueries<Exts>;
+
+        for (const key of stateKeys) {
+          const previousValue = (previousStates as Record<string, boolean>)[key];
+          (nextStates as Record<string, boolean>)[key] = previousValue ?? false;
+        }
+
+        const previousKeys = Object.keys(previousStates as Record<string, boolean>);
+        if (previousKeys.length !== stateKeys.length) {
+          return nextStates;
+        }
+
+        for (const key of stateKeys) {
+          if (
+            (previousStates as Record<string, boolean>)[key] !==
+            (nextStates as Record<string, boolean>)[key]
+          ) {
+            return nextStates;
+          }
+        }
+
+        return previousStates;
+      });
+    }, [stateQueries]);
+
     // Reactive state management
     useEffect(() => {
       if (!editor) return;
 
+      let isActive = true;
+      let updateVersion = 0;
+
       const updateStates = async () => {
-        const promises = Object.entries(stateQueries).map(([key, queryFn]) =>
-          queryFn().then((value) => [key, value] as [string, boolean]),
-        );
+        const currentVersion = ++updateVersion;
+        const queryEntries = Object.entries(stateQueries);
+
+        const promises = queryEntries.map(async ([key, queryFn]) => {
+          try {
+            const value = await queryFn();
+            return [key, value] as [string, boolean];
+          } catch {
+            return [key, false] as [string, boolean];
+          }
+        });
 
         const results = await Promise.all(promises);
-        const newStates = Object.fromEntries(results);
-        setActiveStates(newStates as ExtractStateQueries<Exts>);
+
+        if (!isActive || currentVersion !== updateVersion) {
+          return;
+        }
+
+        const nextStates = Object.fromEntries(results) as ExtractStateQueries<Exts>;
+
+        setActiveStates((previousStates) => {
+          const previousMap = previousStates as Record<string, boolean>;
+          const nextMap = nextStates as Record<string, boolean>;
+          const previousKeys = Object.keys(previousMap);
+          const nextKeys = Object.keys(nextMap);
+
+          if (previousKeys.length !== nextKeys.length) {
+            return nextStates;
+          }
+
+          for (const key of nextKeys) {
+            if (previousMap[key] !== nextMap[key]) {
+              return nextStates;
+            }
+          }
+
+          return previousStates;
+        });
       };
 
       // Initial update
-      updateStates();
+      void updateStates();
 
       // Listen to editor updates for standard state queries
       const unregisterEditor = editor.registerUpdateListener(() => {
-        updateStates();
+        void updateStates();
       });
 
       // Listen to extension state changes for reactive extensions
       const unregisterExtensions = extensions
         .map((ext) => {
-          if (
-            "onStateChange" in ext &&
-            typeof ext.onStateChange === "function"
-          ) {
-            return (ext as any).onStateChange(updateStates);
+          const maybeReactiveExtension = ext as Extension & {
+            onStateChange?: (listener: () => void) => () => void;
+          };
+
+          if (typeof maybeReactiveExtension.onStateChange === "function") {
+            return maybeReactiveExtension.onStateChange(() => {
+              void updateStates();
+            });
           }
-          return () => {};
+
+          return undefined;
         })
-        .filter(Boolean);
+        .filter((unregister): unregister is () => void =>
+          typeof unregister === "function",
+        );
 
       return () => {
+        isActive = false;
         unregisterEditor();
         unregisterExtensions.forEach((unreg) => unreg());
       };
@@ -198,10 +283,21 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       activeStates: activeStates as ExtractStateQueries<Exts>,
       stateQueries, // Add stateQueries to context
       listeners: {
-        registerUpdate: (listener: (state: any) => void) =>
+        registerUpdate: (
+          listener: Parameters<Extension["register"]>[0]["registerUpdateListener"] extends (
+            callback: infer T,
+            ...args: never[]
+          ) => unknown
+            ? T
+            : never,
+        ) =>
           editor?.registerUpdateListener(listener) || (() => {}),
         registerPaste: (listener: (event: ClipboardEvent) => boolean) =>
-          editor?.registerCommand(PASTE_COMMAND, listener, 4) || (() => {}),
+          editor?.registerCommand(
+            PASTE_COMMAND,
+            listener,
+            COMMAND_PRIORITY_EDITOR,
+          ) || (() => {}),
       },
       export: {
         toHTML: async () => "",
@@ -211,8 +307,19 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       import: {
         fromHTML: async () => {},
         fromMarkdown: async () => {},
-        fromJSON: (json: any) =>
-          editor?.setEditorState(editor.parseEditorState(json)),
+        fromJSON: (json: unknown) => {
+          if (!editor) {
+            return;
+          }
+
+          if (typeof json === "string" || (typeof json === "object" && json !== null)) {
+            editor.setEditorState(
+              editor.parseEditorState(
+                json as string | SerializedEditorState<SerializedLexicalNode>,
+              ),
+            );
+          }
+        },
       },
       lexical: editor,
       extensionsAPI: {
@@ -232,7 +339,11 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
     };
 
     return (
-      <EditorContext.Provider value={contextValue}>
+      <EditorContext.Provider
+        value={
+          contextValue as unknown as EditorContextType<readonly Extension[]>
+        }
+      >
         {pluginsBefore}
         {children}
         {pluginsAfter}

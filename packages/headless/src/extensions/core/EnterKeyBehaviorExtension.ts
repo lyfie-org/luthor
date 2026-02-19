@@ -13,13 +13,14 @@ import {
 import { $isQuoteNode } from "@lexical/rich-text";
 import { BaseExtension } from "../base/BaseExtension";
 import { ExtensionCategory } from "../types";
+import type { BaseExtensionConfig } from "../types";
 
 type EnterKeyBehaviorCommands = Record<string, never>;
 type EnterKeyBehaviorStateQueries = Record<string, never>;
 
 export class EnterKeyBehaviorExtension extends BaseExtension<
   "enterKeyBehavior",
-  {},
+  BaseExtensionConfig,
   EnterKeyBehaviorCommands,
   EnterKeyBehaviorStateQueries
 > {

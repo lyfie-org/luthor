@@ -2,7 +2,6 @@ import {
   LexicalEditor,
   $getSelection,
   $isRangeSelection,
-  COMMAND_PRIORITY_LOW,
   COMMAND_PRIORITY_NORMAL,
   COMMAND_PRIORITY_EDITOR,
   KEY_ENTER_COMMAND,
@@ -21,7 +20,6 @@ import {
 import { $createQuoteNode, $isQuoteNode, QuoteNode } from "@lexical/rich-text";
 import { BaseExtension } from "../base/BaseExtension";
 import { ExtensionCategory } from "../types";
-import { $getNearestNodeOfType } from "@lexical/utils"; // For better state queries
 
 /**
  * Supported block formats for BlockFormatExtension
@@ -102,7 +100,7 @@ export type BlockFormatStateQueries = {
  */
 export class BlockFormatExtension extends BaseExtension<
   "blockFormat",
-  {}, // No extra config needed
+  Record<string, never>,
   BlockFormatCommands,
   BlockFormatStateQueries
 > {

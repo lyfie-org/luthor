@@ -3,12 +3,7 @@ import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
 import { ReactNode } from "react";
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
-import {
-  $getRoot,
-  $createParagraphNode,
-  $getSelection,
-  $isRangeSelection,
-} from "lexical";
+import { $getRoot, $createParagraphNode } from "lexical";
 
 /**
  * Commands exposed by the HTML extension.
@@ -61,7 +56,7 @@ export type HTMLStateQueries = {
  */
 export class HTMLExtension extends BaseExtension<
   "html",
-  {},
+  Record<string, never>,
   HTMLCommands,
   HTMLStateQueries,
   ReactNode[]
@@ -81,6 +76,7 @@ export class HTMLExtension extends BaseExtension<
    * @returns Cleanup function
    */
   register(editor: LexicalEditor): () => void {
+    void editor;
     return () => {
       // Cleanup if needed
     };
@@ -153,6 +149,7 @@ export class HTMLExtension extends BaseExtension<
    * @returns Object containing state query functions
    */
   getStateQueries(editor: LexicalEditor): HTMLStateQueries {
+    void editor;
     return {
       canExportHTML: async () => true,
     };

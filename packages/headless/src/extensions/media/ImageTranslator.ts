@@ -2,8 +2,6 @@ import {
   DOMConversionMap,
   DOMConversionOutput,
   DOMExportOutput,
-  LexicalNode,
-  NodeKey,
   SerializedLexicalNode,
   Spread,
 } from "lexical";
@@ -123,10 +121,10 @@ export class ImageTranslator {
               );
 
               return { node };
-            } catch (error) {
+            } catch {
               return null;
             }
-          } catch (error) {
+          } catch {
             return null;
           }
         },
@@ -163,10 +161,10 @@ export class ImageTranslator {
               );
 
               return { node };
-            } catch (error) {
+            } catch {
               return null;
             }
-          } catch (error) {
+          } catch {
             return null;
           }
         },
@@ -347,7 +345,7 @@ export class ImageTranslator {
         }
       }
       return Object.keys(styleObj).length > 0 ? styleObj : undefined;
-    } catch (error) {
+    } catch {
       return undefined;
     }
   }

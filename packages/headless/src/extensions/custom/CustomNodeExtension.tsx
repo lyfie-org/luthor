@@ -14,7 +14,6 @@ import {
   $getSelection,
   $isRangeSelection,
   $isNodeSelection,
-  $insertNodes,
   $getRoot,
   LexicalEditor,
   DOMConversionMap,
@@ -129,8 +128,11 @@ interface CustomNodeConfig<CustomCommands, CustomStateQueries> {
  */
 export function createCustomNodeExtension<
   Name extends string,
-  Commands extends Record<string, any> = {},
-  StateQueries extends Record<string, () => Promise<boolean>> = {},
+  Commands extends Record<string, any> = Record<string, never>,
+  StateQueries extends Record<string, () => Promise<boolean>> = Record<
+    string,
+    never
+  >,
 >(
   userConfig: CustomNodeConfig<Commands, StateQueries>,
 ): {
@@ -228,7 +230,7 @@ export function createCustomNodeExtension<
     }
 
     static importJSON(serialized: SerializedCustomNode): CustomElementNode {
-      const { payload, children } = serialized;
+      const { payload } = serialized;
       const node = new CustomElementNode(payload, serialized.type);
       return node;
     }
@@ -425,7 +427,6 @@ export function createCustomNodeExtension<
           node={this}
           payload={this.__payload}
           nodeKey={this.__key}
-          children={undefined}
         />
       );
     }
@@ -499,7 +500,7 @@ export function createCustomNodeExtension<
 
       /* Handle selection updates for ElementNodes */
       const unregisterUpdate = editor.registerUpdateListener(
-        ({ editorState, prevEditorState }) => {
+        ({ editorState }) => {
           if (isContainer) {
             /* For containers, update DOM styling based on selection */
             editorState.read(() => {
