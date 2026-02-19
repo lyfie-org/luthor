@@ -568,6 +568,12 @@
 	background-color: var(--luthor-bg);
 }
 
+.luthor-content-editable a,
+.luthor-content-editable a:hover,
+.luthor-content-editable a:focus-visible {
+	cursor: pointer;
+}
+
 .luthor-placeholder {
 	color: var(--luthor-muted-fg);
 	pointer-events: none;

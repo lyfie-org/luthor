@@ -19,6 +19,7 @@ import {
 } from "@lyfie/luthor-headless/extensions/types";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
+import { ClickableLinkPlugin } from "@lexical/react/LexicalClickableLinkPlugin";
 import React from "react";
 
 /**
@@ -43,6 +44,10 @@ export interface LinkConfig extends BaseExtensionConfig {
   linkSelectedTextOnPaste?: boolean;
   /** URL validation function (default: basic URL regex) */
   validateUrl?: (url: string) => boolean;
+  /** Enable click navigation on links rendered inside the editor. Default: true */
+  clickableLinks?: boolean;
+  /** Open clicked links in a new tab when click navigation is enabled. Default: true */
+  openLinksInNewTab?: boolean;
 }
 
 /**
@@ -112,6 +117,8 @@ export class LinkExtension extends BaseExtension<
     super("link", [ExtensionCategory.Toolbar]);
     this.config = {
       autoLinkText: false,
+      clickableLinks: true,
+      openLinksInNewTab: true,
       linkSelectedTextOnPaste: true, // Link selected text when pasting URLs
       validateUrl: (url: string) => {
         try {
@@ -213,6 +220,15 @@ export class LinkExtension extends BaseExtension<
     plugins.push(
       <LinkPlugin key="link-plugin" validateUrl={this.config.validateUrl} />,
     );
+
+    if (this.config.clickableLinks !== false) {
+      plugins.push(
+        <ClickableLinkPlugin
+          key="clickable-link"
+          newTab={this.config.openLinksInNewTab !== false}
+        />,
+      );
+    }
 
     // Optional: Auto-link as you type
     if (this.config.autoLinkText) {
