@@ -54,7 +54,7 @@ Updated `packages/headless/src/index.ts` to include utils in top-level exports.
 ## 📚 Documentation
 
 ### 1. Format Specification
-**Location**: `packages/headless/docs/enhanced-markdown.md`
+**Location**: `documentation/user/headless/import-export.md`
 
 Detailed specification of:
 - Metadata comment structure
@@ -238,10 +238,9 @@ packages/headless/src/utils/
 
 ### Documentation Files
 ```
-packages/headless/docs/
-  └── enhanced-markdown.md               ~250 lines  Format spec
-
 documentation/
+  ├── user/headless/
+  │   └── import-export.md                            Format spec and workflows
   ├── readmes/packages/
   │   └── custom-markdown-convertor-readme.md      ~450 lines  Guide
   ├── tutorials/

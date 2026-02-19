@@ -1,6 +1,13 @@
 # Customization Guide
 
-This guide shows how to compose `@lyfie/luthor` core modules when creating custom presets.
+This page is retained for compatibility. Canonical docs:
+
+- User configuration guide: [../../../user/luthor/presets-and-configuration.md](../../../user/luthor/presets-and-configuration.md)
+- Extensive editor guide: [../../../user/luthor/extensive-editor.md](../../../user/luthor/extensive-editor.md)
+- Developer architecture: [../../../developer/luthor/architecture.md](../../../developer/luthor/architecture.md)
+- Developer source map: [../../../developer/luthor/source-file-reference.md](../../../developer/luthor/source-file-reference.md)
+
+This guide still includes practical customization patterns.
 
 ## 1) Layout Manipulation
 

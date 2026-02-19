@@ -14,7 +14,7 @@ A production-ready **Enhanced Markdown Convertor** system for Luthor that preser
   - `index.ts` - Public exports
 
 ### Documentation
-- **API Guide**: `packages/headless/docs/enhanced-markdown.md`
+- **API Guide**: `documentation/user/headless/import-export.md`
 - **Implementation Guide**: `documentation/readmes/packages/custom-markdown-convertor-readme.md`
 
 ### Exports

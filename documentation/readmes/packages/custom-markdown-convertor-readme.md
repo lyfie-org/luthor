@@ -54,7 +54,7 @@ For maximum flexibility, store three formats in parallel:
 ### Location
 
 - **Core Logic**: `packages/headless/src/utils/EnhancedMarkdownConvertor.ts`
-- **Documentation**: `packages/headless/docs/enhanced-markdown.md`
+- **Documentation**: `documentation/user/headless/import-export.md`
 - **Exports**: Available from `@lyfie/luthor-headless`
 
 ### Key Functions

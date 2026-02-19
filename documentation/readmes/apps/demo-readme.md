@@ -1,31 +1,18 @@
-# Demo App (`apps/demo`)
+# Demo App Documentation Redirect
 
-This is a lightweight Vite + React sandbox for quickly testing editor behavior during development.
+This page is retained for link compatibility.
 
-## Run Demo
+Canonical demo documentation now lives here:
 
-From repo root:
+- User getting started: [../../user/demo/getting-started.md](../../user/demo/getting-started.md)
+- User usage and persistence: [../../user/demo/usage-and-persistence.md](../../user/demo/usage-and-persistence.md)
+- Developer architecture: [../../developer/demo/architecture.md](../../developer/demo/architecture.md)
+- Developer source-file reference: [../../developer/demo/source-file-reference.md](../../developer/demo/source-file-reference.md)
+- Developer maintainer notes: [../../developer/demo/maintainer-notes.md](../../developer/demo/maintainer-notes.md)
 
-```bash
-pnpm dev --filter demo
-```
+Related package docs:
 
-## Build Demo
-
-```bash
-pnpm build --filter demo
-```
-
-## Purpose
-
-- Fast local experimentation outside the Next.js docs site
-- Verify package exports and visual behavior quickly
-- Reproduce editor issues in a minimal app context
-
-## Related Docs
-
-- Monorepo root README: [../../../README.md](../../../README.md)
-- Documentation hub: [../../documentation-hub.md](../../documentation-hub.md)
-- `@lyfie/luthor` docs: [../../../packages/luthor/README.md](../../../packages/luthor/README.md)
-- `@lyfie/luthor-headless` docs: [../../../packages/headless/README.md](../../../packages/headless/README.md)
+- Monorepo README: [../../../README.md](../../../README.md)
+- `@lyfie/luthor` README: [../../../packages/luthor/README.md](../../../packages/luthor/README.md)
+- `@lyfie/luthor-headless` README: [../../../packages/headless/README.md](../../../packages/headless/README.md)
 

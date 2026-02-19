@@ -1,26 +1,27 @@
 # @lyfie/luthor
 
-Batteries-included presets and UI-ready editor experience built on top of `@lyfie/luthor-headless`.
+Plug-and-play preset package built on top of `@lyfie/luthor-headless`.
 
-## Package Responsibility
+## Package scope
 
-- `@lyfie/luthor-headless` owns all Lexical-derived editor features and extension internals.
-- `@lyfie/luthor` composes presets, UI, and ready-to-use editor experiences on top of headless.
-- `@lyfie/luthor` re-exports headless APIs via a namespace export so consumers can access core capabilities from one package.
+- Provides out-of-the-box editor presets and pre-composed UX.
+- Depends on and composes `@lyfie/luthor-headless`.
+- Re-exports headless capabilities for teams that want one package entrypoint.
+
+## Version and compatibility
+
+- Package version: `2.2.0`
+- React peer dependencies: `^18.0.0 || ^19.0.0`
+- Lexical dependencies are included directly in this package (`^0.40.0` family).
+- Icon dependency: `lucide-react ^0.475.0`
 
 ## Installation
 
 ```bash
-# npm
-npm install @lyfie/luthor
-
-# pnpm
-pnpm add @lyfie/luthor
+pnpm add @lyfie/luthor react react-dom
 ```
 
-`@lyfie/luthor` includes Lexical packages as dependencies, so you do not need to install `lexical` and `@lexical/*` separately when using this package.
-
-## Quick Start
+## Quick start
 
 ```tsx
 import { ExtensiveEditor } from "@lyfie/luthor";
@@ -31,7 +32,16 @@ export function App() {
 }
 ```
 
-### Accessing headless APIs through `@lyfie/luthor`
+## Primary exports
+
+- Presets: `extensivePreset`
+- Preset registry: `presetRegistry`
+- Ready component: `ExtensiveEditor`
+- Shared extension bundle: `extensiveExtensions`
+- Preset config helper: `createPresetEditorConfig`
+- Headless passthrough namespace: `headless`
+
+## Headless access from this package
 
 ```tsx
 import { headless } from "@lyfie/luthor";
@@ -39,35 +49,49 @@ import { headless } from "@lyfie/luthor";
 const { createEditorSystem, boldExtension } = headless;
 ```
 
-## Exports
+## Extensive preset capabilities
 
-From `src/presets/index.ts`, this package exports:
+- rich text and formatting controls
+- command palette and slash commands
+- floating toolbar and context-aware actions
+- media support (image, iframe, YouTube)
+- visual/source modes with conversions (`visual`, `html`, `markdown`, `jsonb`)
 
-- Presets: `extensivePreset`
-- Registry: `presetRegistry`
-- Preset editors: `ExtensiveEditor`
-- Shared extensions: `extensiveExtensions`
-- Helpers: `createPresetEditorConfig`
+## Which package should you use?
 
-## React Peer Dependencies
+- Use `@lyfie/luthor` if you want fast setup and opinionated defaults.
+- Use `@lyfie/luthor-headless` if you want full control over extension selection and UI composition.
 
-- `react`: `^18.0.0 || ^19.0.0`
-- `react-dom`: `^18.0.0 || ^19.0.0`
+## Documentation
 
-## Package Links
+Canonical docs root: [../../documentation/index.md](../../documentation/index.md)
 
-- Headless core package docs: [../headless/README.md](../headless/README.md)
-- Package architecture docs: [../../documentation/readmes/packages/luthor-docs/README.md](../../documentation/readmes/packages/luthor-docs/README.md)
-- Monorepo root docs: [../../README.md](../../README.md)
-- Central docs index: [../../documentation/documentation-hub.md](../../documentation/documentation-hub.md)
-- Developer README map: [../../documentation/developer_notes/readme-map.md](../../documentation/developer_notes/readme-map.md)
+### User docs
 
-## Development (Workspace)
+- Luthor getting started: [../../documentation/user/luthor/getting-started.md](../../documentation/user/luthor/getting-started.md)
+- Presets and configuration: [../../documentation/user/luthor/presets-and-configuration.md](../../documentation/user/luthor/presets-and-configuration.md)
+- Extensive editor guide: [../../documentation/user/luthor/extensive-editor.md](../../documentation/user/luthor/extensive-editor.md)
 
-From repo root:
+### Developer docs
+
+- Luthor architecture: [../../documentation/developer/luthor/architecture.md](../../documentation/developer/luthor/architecture.md)
+- Luthor source-file reference: [../../documentation/developer/luthor/source-file-reference.md](../../documentation/developer/luthor/source-file-reference.md)
+- Luthor maintainer notes: [../../documentation/developer/luthor/maintainer-notes.md](../../documentation/developer/luthor/maintainer-notes.md)
+
+### Related docs
+
+- Monorepo README: [../../README.md](../../README.md)
+- Headless package README: [../headless/README.md](../headless/README.md)
+- Legacy luthor docs redirects: [../../documentation/readmes/packages/luthor-docs/README.md](../../documentation/readmes/packages/luthor-docs/README.md)
+- Demo getting started: [../../documentation/user/demo/getting-started.md](../../documentation/user/demo/getting-started.md)
+- Demo architecture: [../../documentation/developer/demo/architecture.md](../../documentation/developer/demo/architecture.md)
+
+## Workspace development
+
+From repository root:
 
 ```bash
-pnpm dev --filter @lyfie/luthor
-pnpm build --filter @lyfie/luthor
-pnpm lint --filter @lyfie/luthor
+pnpm --filter @lyfie/luthor dev
+pnpm --filter @lyfie/luthor build
+pnpm --filter @lyfie/luthor lint
 ```
