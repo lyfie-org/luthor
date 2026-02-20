@@ -3,7 +3,7 @@
 Concatenated markdown corpus for AI ingestion.
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\documentation
-Generated at: 2026-02-20T15:31:37.623Z
+Generated at: 2026-02-20T16:19:55.298Z
 
 ---
 ## FILE: demo-app/website-development-phased-plan.md

@@ -16,6 +16,7 @@ import {
   type CoreEditorCommands,
   type ToolbarLayout,
 } from "../../core";
+import { EXTENSIVE_WELCOME_CONTENT_JSONB as extensiveWelcomeContent } from "./welcomeContent";
 import type { CommandPaletteExtension, SlashCommandExtension, EmojiExtension, EmojiCatalogItem } from "@lyfie/luthor-headless";
 import "./styles.css";
 
@@ -421,39 +422,11 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     const [methods, setMethods] = useState<ExtensiveEditorRef | null>(null);
     useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);
 
-    const welcomeContent = `# Extensive Preset: Complete Headless Demo
-
-**Build amazing React-based rich text editors with ease**
-
-Luthor is a modern, type-safe React framework built on top of Meta's Lexical that makes creating powerful text editors simple and enjoyable.
-
-## ✅ Included Feature Surface
-
-- 🚀 Lightning Fast - Optimized performance with minimal bundle size
-- 🛡️ Type-Safe - Full TypeScript support with auto-completion
-- 🧩 Extensible - built-in extensions + custom nodes
-- 🎨 Customizable - Framework-agnostic styling with CSS custom properties
-
-### Try these in the canvas
-
-- Select text to trigger floating toolbar
-- Right-click in the editor for context menu
-- Drag blocks using drag handles
-- Insert image, table, iframe/YouTube embeds, and custom feature card
-- Insert a horizontal rule from toolbar or type --- then space
-- Open Command Palette with Ctrl+Shift+P
-- Type / in the editor to open the slash command block menu
-- Switch between Visual and JSONB tabs to verify reversible editing
-
-## 📝 Try It Out
-
-Start typing or use the toolbar above to format your text. Press \`Cmd+Shift+P\` (Mac) or \`Ctrl+Shift+P\` (Windows/Linux) to open the command palette.`;
-
     const handleReady = (m: ExtensiveEditorRef) => {
       setMethods(m);
       // Auto-inject default welcome content if enabled
       if (showDefaultContent && defaultContent === undefined) {
-        m.injectJSONB(JSON.stringify(createJSONBDocumentFromText(welcomeContent)));
+        m.injectJSONB(JSON.stringify(extensiveWelcomeContent));
       } else if (defaultContent) {
         m.injectJSONB(toJSONBInput(defaultContent));
       }
