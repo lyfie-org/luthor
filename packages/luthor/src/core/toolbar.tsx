@@ -1,4 +1,4 @@
-import {
+import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -1441,8 +1441,31 @@ export function Toolbar({
     <>
       <div className={classNames?.toolbar ?? "luthor-toolbar"}>
         {activeLayout.sections.map((section, sectionIndex) => {
+          // Flatten and assign unique keys to all toolbar items, even if renderToolbarItem returns a fragment or array
           const renderedItems = section.items
-            .map((itemType) => renderToolbarItem(itemType))
+            .map((itemType, itemIndex) => {
+              const element = renderToolbarItem(itemType);
+              if (!element) return null;
+              // If element is an array, wrap each with a unique key
+              if (Array.isArray(element)) {
+                return element.map((el, idx) =>
+                  el && typeof el === 'object' && 'key' in el && el.key != null
+                    ? el
+                    : <span key={`toolbar-item-${sectionIndex}-${itemIndex}-${idx}`}>{el}</span>
+                );
+              }
+              // If element is a fragment, wrap with a unique key
+              if (element.type === React.Fragment) {
+                return <span key={`toolbar-item-${sectionIndex}-${itemIndex}`}>{element}</span>;
+              }
+              // If element already has a key, return as is
+              if (element && typeof element === 'object' && 'key' in element && element.key != null) {
+                return element;
+              }
+              // Otherwise, wrap with a unique key
+              return <span key={`toolbar-item-${sectionIndex}-${itemIndex}`}>{element}</span>;
+            })
+            .flat()
             .filter((item): item is ReactElement => item !== null);
 
           // Only render section if it has at least one item
