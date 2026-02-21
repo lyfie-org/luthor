@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import type { EmojiCatalogItem } from "@lyfie/luthor-headless";
+import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
 
 export function EmojiSuggestionMenu({
   isOpen,
@@ -80,10 +82,10 @@ export function EmojiSuggestionMenu({
     return null;
   }
 
-  return (
+  const menu = (
     <div
       className="luthor-emoji-menu"
-      style={{ left: position.x, top: position.y }}
+      style={{ left: position.x, top: position.y, ...getOverlayThemeStyleFromSelection() }}
       onPointerDown={(event) => {
         event.stopPropagation();
       }}
@@ -135,4 +137,10 @@ export function EmojiSuggestionMenu({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") {
+    return menu;
+  }
+
+  return createPortal(menu, document.body);
 }

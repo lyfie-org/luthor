@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDownIcon, CloseIcon } from "./icons";
+import { getOverlayThemeStyleFromElement } from "./overlay-theme";
 
 export function IconButton({
   children,
@@ -66,6 +68,7 @@ export function Select({
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties | undefined>(undefined);
   const selectRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -80,6 +83,7 @@ export function Select({
         top: rect.bottom + 4,
         left: rect.left,
         width: rect.width,
+        ...getOverlayThemeStyleFromElement(triggerEl),
       });
     };
 
@@ -95,9 +99,10 @@ export function Select({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
+      const target = event.target as Node;
+      if (selectRef.current?.contains(target)) return;
+      if (dropdownRef.current?.contains(target)) return;
+      setIsOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -111,8 +116,8 @@ export function Select({
         <span>{selectedOption?.label || placeholder}</span>
         <ChevronDownIcon size={14} />
       </button>
-      {isOpen && (
-        <div className="luthor-select-dropdown" style={dropdownStyle}>
+      {isOpen && typeof document !== "undefined" && createPortal(
+        <div ref={dropdownRef} className="luthor-select-dropdown" style={dropdownStyle}>
           {options.map((option) => (
             <button
               key={option.value}
@@ -126,7 +131,8 @@ export function Select({
               {option.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
@@ -145,6 +151,7 @@ export function Dropdown({
 }) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties | undefined>(undefined);
 
   useEffect(() => {
@@ -159,6 +166,7 @@ export function Dropdown({
         position: "fixed",
         top: rect.bottom + 4,
         left: rect.left,
+        ...getOverlayThemeStyleFromElement(triggerEl),
       });
     };
 
@@ -174,9 +182,10 @@ export function Dropdown({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        onOpenChange(false);
-      }
+      const target = event.target as Node;
+      if (dropdownRef.current?.contains(target)) return;
+      if (contentRef.current?.contains(target)) return;
+      onOpenChange(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -185,7 +194,10 @@ export function Dropdown({
   return (
     <div className="luthor-dropdown" ref={dropdownRef}>
       <div ref={triggerRef} onClick={() => onOpenChange(!isOpen)}>{trigger}</div>
-      {isOpen && <div className="luthor-dropdown-content" style={dropdownStyle}>{children}</div>}
+      {isOpen && typeof document !== "undefined" && createPortal(
+        <div ref={contentRef} className="luthor-dropdown-content" style={dropdownStyle}>{children}</div>,
+        document.body,
+      )}
     </div>
   );
 }

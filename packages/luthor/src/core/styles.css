@@ -257,8 +257,8 @@
 
 .luthor-color-picker {
 	z-index: 10050;
-	background-color: var(--luthor-bg);
-	border: 1px solid var(--luthor-border);
+	background-color: var(--luthor-bg, #ffffff);
+	border: 1px solid var(--luthor-border, #e2e8f0);
 	border-radius: 10px;
 	box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
 	padding: 10px;
@@ -266,7 +266,7 @@
 	gap: 9px;
 	max-width: 90vw;
 	width: 248px;
-	color: var(--luthor-fg);
+	color: var(--luthor-fg, #0f172a);
 }
 
 .luthor-color-picker-header {
@@ -443,8 +443,8 @@
 .luthor-select-dropdown {
 	position: fixed;
 	z-index: 10000;
-	background-color: var(--luthor-bg);
-	border: 1px solid var(--luthor-border);
+	background-color: var(--luthor-bg, #ffffff);
+	border: 1px solid var(--luthor-border, #e2e8f0);
 	border-radius: 6px;
 	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 	max-height: 200px;
@@ -482,8 +482,8 @@
 .luthor-dropdown-content {
 	position: fixed;
 	z-index: 10000;
-	background-color: var(--luthor-bg);
-	border: 1px solid var(--luthor-border);
+	background-color: var(--luthor-bg, #ffffff);
+	border: 1px solid var(--luthor-border, #e2e8f0);
 	border-radius: 4px;
 	box-shadow: 0 4px 6px -1px var(--luthor-shadow);
 	margin-top: 2px;
@@ -687,8 +687,8 @@
 }
 
 .luthor-command-palette {
-	background: var(--luthor-bg);
-	border: 1px solid var(--luthor-border);
+	background: var(--luthor-bg, #ffffff);
+	border: 1px solid var(--luthor-border, #e2e8f0);
 	border-radius: 12px;
 	box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
 	width: min(640px, 100%);
@@ -835,8 +835,8 @@
 .luthor-slash-menu {
 	position: fixed;
 	z-index: 10000;
-	background: var(--luthor-bg);
-	border: 1px solid var(--luthor-border);
+	background: var(--luthor-bg, #ffffff);
+	border: 1px solid var(--luthor-border, #e2e8f0);
 	border-radius: 10px;
 	box-shadow: 0 12px 36px rgba(0, 0, 0, 0.14);
 	width: min(420px, calc(100vw - 24px));
@@ -978,8 +978,8 @@
 .luthor-emoji-menu {
 	position: fixed;
 	z-index: 10000;
-	background: var(--luthor-bg);
-	border: 1px solid var(--luthor-border);
+	background: var(--luthor-bg, #ffffff);
+	border: 1px solid var(--luthor-border, #e2e8f0);
 	border-radius: 10px;
 	box-shadow: 0 12px 36px rgba(0, 0, 0, 0.14);
 	width: min(320px, calc(100vw - 24px));

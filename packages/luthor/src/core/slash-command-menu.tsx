@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import type { SlashCommandItem } from "@lyfie/luthor-headless";
+import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
 
 export function SlashCommandMenu({
   isOpen,
@@ -96,10 +98,10 @@ export function SlashCommandMenu({
     return null;
   }
 
-  return (
+  const menu = (
     <div
       className="luthor-slash-menu"
-      style={{ left: position.x, top: position.y }}
+      style={{ left: position.x, top: position.y, ...getOverlayThemeStyleFromSelection() }}
       onPointerDown={(event) => {
         event.stopPropagation();
       }}
@@ -154,4 +156,10 @@ export function SlashCommandMenu({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") {
+    return menu;
+  }
+
+  return createPortal(menu, document.body);
 }

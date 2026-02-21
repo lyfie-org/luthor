@@ -11,6 +11,7 @@ import React, {
   type ReactElement,
   type SetStateAction,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   AlignCenterIcon,
   AlignJustifyIcon,
@@ -48,6 +49,7 @@ import {
   StrikethroughIcon,
 } from "./icons";
 import { Button, Dialog, Dropdown, IconButton, Select } from "./ui";
+import { getOverlayThemeStyleFromElement } from "./overlay-theme";
 import type { CoreEditorActiveStates, CoreEditorCommands, CoreToolbarClassNames, InsertTableConfig, ImageAlignment, ToolbarLayout, ToolbarItemType } from "./types";
 import { TRADITIONAL_TOOLBAR_LAYOUT } from "./types";
 
@@ -333,6 +335,7 @@ function ColorPickerButton({
       left: rect.left,
       width: 230,
       visibility: isVisible ? "visible" : "hidden",
+      ...getOverlayThemeStyleFromElement(trigger),
     });
   }, []);
 
@@ -402,7 +405,7 @@ function ColorPickerButton({
         />
       </button>
 
-      {isOpen && (
+      {isOpen && typeof document !== "undefined" && createPortal(
         <div ref={panelRef} className="luthor-color-picker" style={panelStyle}>
           <div className="luthor-color-picker-header">
             <span className="luthor-color-picker-title">{title}</span>
@@ -486,7 +489,8 @@ function ColorPickerButton({
               }}
             />
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

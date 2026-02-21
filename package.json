@@ -6,7 +6,8 @@
     "build": "turbo build",
     "dev": "turbo dev --ui=stream",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "deploy": "pnpm run -C apps/web deploy"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
