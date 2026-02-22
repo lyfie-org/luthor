@@ -224,6 +224,8 @@ export type ToolbarItemType =
   | "commandPalette"
   | "themeToggle";
 
+export type ToolbarVisibility = Partial<Record<ToolbarItemType, boolean>>;
+
 export type ToolbarSection = {
   items: readonly ToolbarItemType[];
 };

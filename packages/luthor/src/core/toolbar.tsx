@@ -50,7 +50,7 @@ import {
 } from "./icons";
 import { Button, Dialog, Dropdown, IconButton, Select } from "./ui";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
-import type { CoreEditorActiveStates, CoreEditorCommands, CoreToolbarClassNames, InsertTableConfig, ImageAlignment, ToolbarLayout, ToolbarItemType } from "./types";
+import type { CoreEditorActiveStates, CoreEditorCommands, CoreToolbarClassNames, InsertTableConfig, ImageAlignment, ToolbarLayout, ToolbarItemType, ToolbarVisibility } from "./types";
 import { TRADITIONAL_TOOLBAR_LAYOUT } from "./types";
 
 type SelectOption = {
@@ -602,16 +602,93 @@ function useEmbedHandlers(commands: CoreEditorCommands) {
   );
 }
 
+export function isToolbarItemSupported(itemType: ToolbarItemType, hasExtension: (name: string) => boolean): boolean {
+  switch (itemType) {
+    case "fontFamily":
+      return hasExtension("fontFamily");
+    case "fontSize":
+      return hasExtension("fontSize");
+    case "lineHeight":
+      return hasExtension("lineHeight");
+    case "textColor":
+      return hasExtension("textColor");
+    case "textHighlight":
+      return hasExtension("textHighlight");
+    case "subscript":
+      return hasExtension("subscript");
+    case "superscript":
+      return hasExtension("superscript");
+    case "blockFormat":
+    case "quote":
+    case "alignLeft":
+    case "alignCenter":
+    case "alignRight":
+    case "alignJustify":
+      return hasExtension("blockFormat");
+    case "codeBlock":
+      return hasExtension("code");
+    case "unorderedList":
+    case "orderedList":
+    case "checkList":
+    case "indentList":
+    case "outdentList":
+      return hasExtension("list");
+    case "horizontalRule":
+      return hasExtension("horizontalRule");
+    case "table":
+      return hasExtension("table");
+    case "image":
+      return hasExtension("image");
+    case "emoji":
+      return hasExtension("emoji");
+    case "embed":
+      return hasExtension("iframeEmbed") || hasExtension("youtubeEmbed");
+    case "undo":
+    case "redo":
+      return hasExtension("history");
+    default:
+      return true;
+  }
+}
+
+export function isToolbarItemVisible(
+  itemType: ToolbarItemType,
+  hasExtension: (name: string) => boolean,
+  toolbarVisibility?: ToolbarVisibility,
+): boolean {
+  if (!isToolbarItemSupported(itemType, hasExtension)) {
+    return false;
+  }
+
+  return toolbarVisibility?.[itemType] !== false;
+}
+
+export function filterToolbarLayout(
+  layout: ToolbarLayout,
+  hasExtension: (name: string) => boolean,
+  toolbarVisibility?: ToolbarVisibility,
+): ToolbarLayout {
+  return {
+    sections: layout.sections
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((itemType) => isToolbarItemVisible(itemType, hasExtension, toolbarVisibility)),
+      }))
+      .filter((section) => section.items.length > 0),
+  };
+}
+
 export interface ToolbarProps {
   commands: CoreEditorCommands;
   hasExtension: (name: string) => boolean;
   activeStates: CoreEditorActiveStates;
   isDark: boolean;
   toggleTheme: () => void;
-  onCommandPaletteOpen: () => void;
+  onCommandPaletteOpen?: () => void;
   imageUploadHandler?: (file: File) => Promise<string>;
   classNames?: CoreToolbarClassNames;
   layout?: ToolbarLayout;
+  toolbarVisibility?: ToolbarVisibility;
 }
 
 export function Toolbar({
@@ -624,6 +701,7 @@ export function Toolbar({
   imageUploadHandler,
   classNames,
   layout,
+  toolbarVisibility,
 }: ToolbarProps) {
   const { handlers, fileInputRef, gifInputRef } = useImageHandlers(commands, imageUploadHandler);
   const embedHandlers = useEmbedHandlers(commands);
@@ -894,15 +972,18 @@ export function Toolbar({
     };
   }, [activeStates, commands, hasExtension]);
 
-  const blockFormatOptions = [
-    { value: "p", label: "Paragraph" },
-    { value: "h1", label: "Heading 1" },
-    { value: "h2", label: "Heading 2" },
-    { value: "h3", label: "Heading 3" },
-    { value: "h4", label: "Heading 4" },
-    { value: "h5", label: "Heading 5" },
-    { value: "h6", label: "Heading 6" },
-  ];
+  const blockFormatOptions = useMemo(
+    () => [
+      { value: "p", label: "Paragraph" },
+      { value: "h1", label: "Heading 1" },
+      { value: "h2", label: "Heading 2" },
+      { value: "h3", label: "Heading 3" },
+      { value: "h4", label: "Heading 4" },
+      { value: "h5", label: "Heading 5" },
+      { value: "h6", label: "Heading 6" },
+    ],
+    [],
+  );
 
   const currentBlockFormat =
     activeStates.isH1 ? "h1" :
@@ -975,7 +1056,7 @@ export function Toolbar({
     setTextHighlightValue(value);
   };
 
-  const renderToolbarItem = useCallback((itemType: ToolbarItemType): ReactElement | null => {
+  const renderToolbarItem = (itemType: ToolbarItemType): ReactElement | null => {
     switch (itemType) {
       case "fontFamily":
         if (!hasExtension("fontFamily")) return null;
@@ -1378,7 +1459,7 @@ export function Toolbar({
 
       case "commandPalette":
         return (
-          <IconButton key="commandPalette" onClick={onCommandPaletteOpen} title="Command Palette (Ctrl+Shift+P)">
+          <IconButton key="commandPalette" onClick={() => onCommandPaletteOpen?.()} title="Command Palette (Ctrl+Shift+P)">
             <CommandIcon size={16} />
           </IconButton>
         );
@@ -1393,58 +1474,19 @@ export function Toolbar({
       default:
         return null;
     }
-  }, [
-    hasExtension,
-    fontFamilyValue,
-    fontFamilyOptions,
-    fontSizeValue,
-    fontSizeOptions,
-    lineHeightValue,
-    lineHeightOptions,
-    textColorValue,
-    textColorOptions,
-    recentTextColors,
-    textHighlightValue,
-    textHighlightOptions,
-    recentHighlightColors,
-    activeStates,
-    commands,
-    currentBlockFormat,
-    handleBlockFormatChange,
-    handleFontFamilyChange,
-    handleFontSizeChange,
-    handleLineHeightChange,
-    handleTextColorChange,
-    handleTextHighlightChange,
-    pushRecentColor,
-    setRecentTextColors,
-    setRecentHighlightColors,
-    showImageDropdown,
-    setShowImageDropdown,
-    handlers,
-    showAlignDropdown,
-    setShowAlignDropdown,
-    emojiOptions,
-    showEmojiDropdown,
-    setShowEmojiDropdown,
-    hasAnyEmbedExtension,
-    isAnyEmbedSelected,
-    showEmbedDropdown,
-    setShowEmbedDropdown,
-    embedHandlers,
-    setShowTableDialog,
-    onCommandPaletteOpen,
-    toggleTheme,
-    isDark,
-  ]);
+  };
 
   // Use the provided layout or default to TRADITIONAL_TOOLBAR_LAYOUT
   const activeLayout = layout ?? TRADITIONAL_TOOLBAR_LAYOUT;
+  const visibleLayout = useMemo(
+    () => filterToolbarLayout(activeLayout, hasExtension, toolbarVisibility),
+    [activeLayout, hasExtension, toolbarVisibility],
+  );
 
   return (
     <>
       <div className={classNames?.toolbar ?? "luthor-toolbar"}>
-        {activeLayout.sections.map((section, sectionIndex) => {
+        {visibleLayout.sections.map((section, sectionIndex) => {
           // Flatten and assign unique keys to all toolbar items, even if renderToolbarItem returns a fragment or array
           const renderedItems = section.items
             .map((itemType, itemIndex) => {

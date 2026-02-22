@@ -75,6 +75,8 @@ const myLayout = {
 <ExtensiveEditor toolbarLayout={myLayout} />
 ```
 
+You can also hide the primary toolbar by setting `isToolbarEnabled={false}`. This only affects toolbar rendering; keyboard shortcuts, slash commands, and command palette wiring remain active.
+
 For detailed information on creating custom toolbar layouts, see [toolbar-customization.md](/docs/reference/user/luthor/toolbar-customization/).
 
 ## Related docs

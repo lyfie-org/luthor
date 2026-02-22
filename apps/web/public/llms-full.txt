@@ -3,7 +3,7 @@
 Concatenated markdown corpus for AI ingestion.
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\documentation
-Generated at: 2026-02-22T11:44:58.107Z
+Generated at: 2026-02-22T12:07:48.339Z
 
 ---
 ## FILE: demo-app/website-development-phased-plan.md
@@ -2427,6 +2427,8 @@ const myLayout = {
 
 <ExtensiveEditor toolbarLayout={myLayout} />
 ```
+
+You can also hide the primary toolbar by setting `isToolbarEnabled={false}`. This only affects toolbar rendering; keyboard shortcuts, slash commands, and command palette wiring remain active.
 
 For detailed information on creating custom toolbar layouts, see [toolbar-customization.md](toolbar-customization.md).
 

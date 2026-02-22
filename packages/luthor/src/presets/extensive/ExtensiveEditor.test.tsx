@@ -1,6 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { beforeEach } from "vitest";
 import { vi } from "vitest";
+
+const {
+  registerKeyboardShortcutsMock,
+  commandsToCommandPaletteItemsMock,
+  commandsToSlashCommandItemsMock,
+  toolbarMock,
+} = vi.hoisted(() => ({
+  registerKeyboardShortcutsMock: vi.fn(() => vi.fn()),
+  commandsToCommandPaletteItemsMock: vi.fn(() => [{ id: "mock-command" }]),
+  commandsToSlashCommandItemsMock: vi.fn(() => [{ id: "mock-slash-command" }]),
+  toolbarMock: vi.fn(({ classNames }: { classNames?: { toolbar?: string } }) => (
+    <div data-testid="toolbar" className={classNames?.toolbar} />
+  )),
+}));
 
 vi.mock("lexical", () => ({
   $setSelection: vi.fn(),
@@ -15,22 +30,24 @@ vi.mock("../../core", () => ({
   CommandPalette: () => null,
   SlashCommandMenu: () => null,
   EmojiSuggestionMenu: () => null,
-  commandsToCommandPaletteItems: () => [],
-  commandsToSlashCommandItems: () => [],
+  commandsToCommandPaletteItems: commandsToCommandPaletteItemsMock,
+  commandsToSlashCommandItems: commandsToSlashCommandItemsMock,
   formatJSONBSource: (value: string) => value,
   ModeTabs: () => <div data-testid="mode-tabs" />,
-  registerKeyboardShortcuts: () => () => {},
+  registerKeyboardShortcuts: registerKeyboardShortcutsMock,
   SourceView: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
     <textarea value={value} onChange={(event) => onChange(event.target.value)} />
   ),
-  Toolbar: ({ classNames }: { classNames?: { toolbar?: string } }) => (
-    <div data-testid="toolbar" className={classNames?.toolbar} />
-  ),
+  Toolbar: toolbarMock,
   TRADITIONAL_TOOLBAR_LAYOUT: { sections: [] },
 }));
 
 const mockEditorApi = {
   commands: {
+    registerCommand: vi.fn(),
+    unregisterCommand: vi.fn(),
+    registerSlashCommand: vi.fn(),
+    unregisterSlashCommand: vi.fn(),
     showCommandPalette: vi.fn(),
     hideCommandPalette: vi.fn(),
     closeSlashMenu: vi.fn(),
@@ -66,6 +83,10 @@ vi.mock("@lyfie/luthor-headless", () => ({
 import { ExtensiveEditor } from "./ExtensiveEditor";
 
 describe("ExtensiveEditor toolbar placement and alignment", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("renders toolbar in the header by default with left alignment", () => {
     const { container } = render(<ExtensiveEditor showDefaultContent={false} />);
 
@@ -109,5 +130,23 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     expect(screen.getByTestId("toolbar")).toHaveClass("luthor-toolbar--align-right");
+  });
+
+  it("hides toolbar when isToolbarEnabled is false and keeps command wiring active", () => {
+    render(<ExtensiveEditor showDefaultContent={false} isToolbarEnabled={false} />);
+
+    expect(screen.queryByTestId("toolbar")).toBeNull();
+    expect(registerKeyboardShortcutsMock).toHaveBeenCalled();
+    expect(mockEditorApi.commands.registerCommand).toHaveBeenCalledWith({ id: "mock-command" });
+    expect(mockEditorApi.commands.registerSlashCommand).toHaveBeenCalledWith({ id: "mock-slash-command" });
+  });
+
+  it("passes toolbarVisibility to toolbar rendering", () => {
+    const toolbarVisibility = { bold: false, italic: true };
+
+    render(<ExtensiveEditor showDefaultContent={false} toolbarVisibility={toolbarVisibility} />);
+
+    const toolbarCall = toolbarMock.mock.calls.at(-1)?.[0] as { toolbarVisibility?: unknown };
+    expect(toolbarCall.toolbarVisibility).toEqual(toolbarVisibility);
   });
 });

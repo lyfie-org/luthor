@@ -34,9 +34,11 @@ function App() {
         }}
       >
         <ExtensiveEditor 
-        initialTheme={theme} 
-        toolbarPosition="top"
-        toolbarAlignment="center"/>
+          initialTheme={theme} 
+          toolbarPosition="top"
+          toolbarAlignment="center"
+          toolbarVisibility={{ fontFamily: true }}
+          />
       </div>
     </div>
   );

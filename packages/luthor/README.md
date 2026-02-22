@@ -42,6 +42,7 @@ export function App() {
     <ExtensiveEditor
       toolbarPosition="bottom"
       toolbarAlignment="center"
+      toolbarVisibility={{ embed: false, themeToggle: false }}
     />
   );
 }
@@ -49,6 +50,8 @@ export function App() {
 
 - `toolbarPosition`: `"top"` (default) or `"bottom"`
 - `toolbarAlignment`: `"left"` (default), `"center"`, or `"right"`
+- `isToolbarEnabled`: `true` (default). Set `false` to hide the primary toolbar while keeping keyboard shortcuts, slash commands, and command palette support.
+- `toolbarVisibility`: `Partial<Record<ToolbarItemType, boolean>>`. Set an item to `false` to hide it; unsupported items are auto-hidden even if set to `true`.
 
 ## Primary exports
 
