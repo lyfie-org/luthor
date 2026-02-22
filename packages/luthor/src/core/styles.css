@@ -68,6 +68,15 @@
 	transition: background-color var(--luthor-theme-transition), border-color var(--luthor-theme-transition), color var(--luthor-theme-transition);
 }
 
+.luthor-editor-toolbar-slot {
+	background-color: var(--luthor-muted);
+	transition: background-color var(--luthor-theme-transition), border-color var(--luthor-theme-transition), color var(--luthor-theme-transition);
+}
+
+.luthor-editor-toolbar-slot--bottom {
+	border-top: 1px solid var(--luthor-border);
+}
+
 .luthor-mode-tabs {
 	display: flex;
 	border-bottom: 1px solid var(--luthor-border);
@@ -130,6 +139,18 @@
 	row-gap: 6px;
 	min-height: 48px;
 	transition: background-color var(--luthor-theme-transition), border-color var(--luthor-theme-transition), color var(--luthor-theme-transition);
+}
+
+.luthor-toolbar--align-left {
+	justify-content: flex-start;
+}
+
+.luthor-toolbar--align-center {
+	justify-content: center;
+}
+
+.luthor-toolbar--align-right {
+	justify-content: flex-end;
 }
 
 .luthor-toolbar-section {
@@ -2107,6 +2128,10 @@
 
 	.luthor-toolbar {
 		padding: 6px;
+	}
+
+	.luthor-toolbar--align-right {
+		justify-content: flex-start;
 	}
 
 	.luthor-toolbar-button {

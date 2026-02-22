@@ -33,7 +33,10 @@ function App() {
           justifyContent: "center",
         }}
       >
-        <ExtensiveEditor initialTheme={theme} />
+        <ExtensiveEditor 
+        initialTheme={theme} 
+        toolbarPosition="top"
+        toolbarAlignment="center"/>
       </div>
     </div>
   );

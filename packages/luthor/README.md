@@ -32,6 +32,24 @@ export function App() {
 }
 ```
 
+## Toolbar placement and alignment
+
+```tsx
+import { ExtensiveEditor } from "@lyfie/luthor";
+
+export function App() {
+  return (
+    <ExtensiveEditor
+      toolbarPosition="bottom"
+      toolbarAlignment="center"
+    />
+  );
+}
+```
+
+- `toolbarPosition`: `"top"` (default) or `"bottom"`
+- `toolbarAlignment`: `"left"` (default), `"center"`, or `"right"`
+
 ## Primary exports
 
 - Presets: `extensivePreset`

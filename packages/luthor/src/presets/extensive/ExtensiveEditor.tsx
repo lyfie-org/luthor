@@ -15,7 +15,9 @@ import {
   Toolbar,
   TRADITIONAL_TOOLBAR_LAYOUT,
   type CoreEditorCommands,
+  type ToolbarAlignment,
   type ToolbarLayout,
+  type ToolbarPosition,
 } from "../../core";
 import { EXTENSIVE_WELCOME_CONTENT_JSONB as extensiveWelcomeContent } from "./welcomeContent";
 import type { CommandPaletteExtension, SlashCommandExtension, EmojiExtension, EmojiCatalogItem } from "@lyfie/luthor-headless";
@@ -115,6 +117,8 @@ function ExtensiveEditorContent({
   availableModes,
   onReady,
   toolbarLayout,
+  toolbarPosition,
+  toolbarAlignment,
 }: {
   isDark: boolean;
   toggleTheme: () => void;
@@ -123,6 +127,8 @@ function ExtensiveEditorContent({
   availableModes: readonly ExtensiveEditorMode[];
   onReady?: (methods: ExtensiveEditorRef) => void;
   toolbarLayout?: ToolbarLayout;
+  toolbarPosition: ToolbarPosition;
+  toolbarAlignment: ToolbarAlignment;
 }) {
   const {
     commands,
@@ -317,6 +323,22 @@ function ExtensiveEditorContent({
     }
   };
 
+  const toolbarNode = (
+    <Toolbar
+      commands={commands as CoreEditorCommands}
+      hasExtension={(name: string) => hasExtension(name as any)}
+      activeStates={activeStates}
+      isDark={isDark}
+      toggleTheme={toggleTheme}
+      onCommandPaletteOpen={() => commands.showCommandPalette()}
+      imageUploadHandler={(file) => ((extensiveExtensions.find((ext: any) => ext.name === "image") as any)?.config?.uploadHandler?.(file) ?? Promise.resolve(URL.createObjectURL(file)))}
+      layout={toolbarLayout ?? TRADITIONAL_TOOLBAR_LAYOUT}
+      classNames={{
+        toolbar: `luthor-toolbar luthor-toolbar--align-${toolbarAlignment}`,
+      }}
+    />
+  );
+
   return (
     <>
       <div className="luthor-editor-header">
@@ -326,17 +348,8 @@ function ExtensiveEditorContent({
           availableModes={availableModes}
           isConverting={convertingMode}
         />
-        {mode === "visual" && (
-          <Toolbar
-            commands={commands as CoreEditorCommands}
-            hasExtension={(name: string) => hasExtension(name as any)}
-            activeStates={activeStates}
-            isDark={isDark}
-            toggleTheme={toggleTheme}
-            onCommandPaletteOpen={() => commands.showCommandPalette()}
-            imageUploadHandler={(file) => ((extensiveExtensions.find((ext: any) => ext.name === "image") as any)?.config?.uploadHandler?.(file) ?? Promise.resolve(URL.createObjectURL(file)))}
-            layout={toolbarLayout ?? TRADITIONAL_TOOLBAR_LAYOUT}
-          />
+        {mode === "visual" && toolbarPosition === "top" && (
+          <div className="luthor-editor-toolbar-slot luthor-editor-toolbar-slot--top">{toolbarNode}</div>
         )}
       </div>
       <div className="luthor-editor" data-mode={mode}>
@@ -369,6 +382,9 @@ function ExtensiveEditorContent({
           </div>
         )}
       </div>
+      {mode === "visual" && toolbarPosition === "bottom" && (
+        <div className="luthor-editor-toolbar-slot luthor-editor-toolbar-slot--bottom">{toolbarNode}</div>
+      )}
       <CommandPalette
         isOpen={commandPaletteState.isOpen}
         onClose={() => commands.hideCommandPalette()}
@@ -409,10 +425,25 @@ export interface ExtensiveEditorProps {
   availableModes?: readonly ExtensiveEditorMode[];
   variantClassName?: string;
   toolbarLayout?: ToolbarLayout;
+  toolbarPosition?: ToolbarPosition;
+  toolbarAlignment?: ToolbarAlignment;
 }
 
 export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorProps>(
-  ({ className, onReady, initialTheme = "light", defaultContent, showDefaultContent = true, placeholder = "Write anything...", initialMode = "visual", availableModes = ["visual", "jsonb"], variantClassName, toolbarLayout }, ref) => {
+  ({
+    className,
+    onReady,
+    initialTheme = "light",
+    defaultContent,
+    showDefaultContent = true,
+    placeholder = "Write anything...",
+    initialMode = "visual",
+    availableModes = ["visual", "jsonb"],
+    variantClassName,
+    toolbarLayout,
+    toolbarPosition = "top",
+    toolbarAlignment = "left",
+  }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
     const isDark = editorTheme === "dark";
     const resolvedInitialMode = availableModes.includes(initialMode)
@@ -450,6 +481,8 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             availableModes={availableModes}
             onReady={handleReady}
             toolbarLayout={toolbarLayout}
+            toolbarPosition={toolbarPosition}
+            toolbarAlignment={toolbarAlignment}
           />
         </Provider>
       </div>

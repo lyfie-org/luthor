@@ -176,6 +176,10 @@ export interface CoreToolbarClassNames {
   section?: string;
 }
 
+export type ToolbarPosition = "top" | "bottom";
+
+export type ToolbarAlignment = "left" | "center" | "right";
+
 export type ToolbarItemType =
   // Typography
   | "fontFamily"
