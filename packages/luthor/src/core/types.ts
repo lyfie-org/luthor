@@ -123,6 +123,8 @@ export interface CoreEditorCommands {
   resizeYouTubeEmbed?: (width: number, height: number) => void;
   setYouTubeEmbedCaption?: (caption: string) => void;
   getYouTubeEmbedCaption?: () => Promise<string>;
+  updateYouTubeEmbedUrl?: (inputUrl: string) => boolean;
+  getYouTubeEmbedUrl?: () => Promise<string>;
   undo: () => void;
   redo: () => void;
   showCommandPalette: () => void;

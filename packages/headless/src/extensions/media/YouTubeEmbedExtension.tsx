@@ -46,6 +46,8 @@ export type YouTubeEmbedCommands = {
   resizeYouTubeEmbed: (width: number, height: number) => void;
   setYouTubeEmbedCaption: (caption: string) => void;
   getYouTubeEmbedCaption: () => Promise<string>;
+  updateYouTubeEmbedUrl: (inputUrl: string) => boolean;
+  getYouTubeEmbedUrl: () => Promise<string>;
 };
 
 export type YouTubeEmbedQueries = {
@@ -124,44 +126,64 @@ function isValidYoutubeUrl(input: string): boolean {
   );
 }
 
-function getYouTubeId(url: URL): { videoId?: string; playlistId?: string } {
+function isValidYouTubeToken(value?: string | null): value is string {
+  return typeof value === "string" && /^[A-Za-z0-9_-]{3,}$/.test(value);
+}
+
+function getYouTubeTarget(url: URL): { videoId?: string; playlistId?: string } | null {
   const hostname = url.hostname.toLowerCase();
+  const pathname = url.pathname;
 
   if (hostname === "youtu.be") {
-    const id = url.pathname.split("/").filter(Boolean)[0];
-    return { videoId: id };
+    const id = pathname.split("/").filter(Boolean)[0];
+    return isValidYouTubeToken(id) ? { videoId: id } : null;
   }
 
-  if (url.pathname === "/playlist") {
-    return { playlistId: url.searchParams.get("list") ?? undefined };
+  if (pathname === "/playlist") {
+    const list = url.searchParams.get("list");
+    return isValidYouTubeToken(list) ? { playlistId: list } : null;
   }
 
-  if (url.pathname.startsWith("/shorts/")) {
-    return { videoId: url.pathname.split("/")[2] };
+  if (pathname.startsWith("/shorts/")) {
+    const id = pathname.split("/")[2];
+    return isValidYouTubeToken(id) ? { videoId: id } : null;
   }
 
-  if (url.pathname.startsWith("/embed/")) {
-    return { videoId: url.pathname.split("/")[2] };
+  if (pathname.startsWith("/embed/")) {
+    const segment = pathname.split("/")[2];
+    if (!segment) {
+      return null;
+    }
+    if (segment === "videoseries") {
+      const list = url.searchParams.get("list");
+      return isValidYouTubeToken(list) ? { playlistId: list } : null;
+    }
+    return isValidYouTubeToken(segment) ? { videoId: segment } : null;
   }
 
-  if (url.pathname === "/watch") {
-    const playlistId = url.searchParams.get("list") ?? undefined;
-    const videoId = url.searchParams.get("v") ?? undefined;
-    return { videoId, playlistId };
+  if (pathname === "/watch") {
+    const playlistId = url.searchParams.get("list");
+    const videoId = url.searchParams.get("v");
+    const result: { videoId?: string; playlistId?: string } = {};
+    if (isValidYouTubeToken(videoId)) {
+      result.videoId = videoId;
+    }
+    if (isValidYouTubeToken(playlistId)) {
+      result.playlistId = playlistId;
+    }
+    return result.videoId || result.playlistId ? result : null;
   }
 
-  const regex = /(?:(v|list)=|shorts\/)([-\w]+)/gm;
-  const match = regex.exec(url.toString());
-
-  if (!match) {
-    return {};
+  const fallbackVideo = url.searchParams.get("v");
+  const fallbackList = url.searchParams.get("list");
+  if (isValidYouTubeToken(fallbackVideo) || isValidYouTubeToken(fallbackList)) {
+    return {
+      videoId: isValidYouTubeToken(fallbackVideo) ? fallbackVideo : undefined,
+      playlistId: isValidYouTubeToken(fallbackList) ? fallbackList : undefined,
+    };
   }
 
-  if (match[1] === "list") {
-    return { playlistId: match[2] };
-  }
-
-  return { videoId: match[2] };
+  return null;
 }
 
 function toEmbedUrl(
@@ -188,7 +210,10 @@ function toEmbedUrl(
     return parsed.toString();
   }
 
-  const ids = getYouTubeId(parsed);
+  const ids = getYouTubeTarget(parsed);
+  if (!ids) {
+    return null;
+  }
   const base = options.nocookie
     ? "https://www.youtube-nocookie.com/embed/"
     : "https://www.youtube.com/embed/";
@@ -228,6 +253,44 @@ function toEmbedUrl(
 
   const separator = outputUrl.includes("?") ? "&" : "?";
   return `${outputUrl}${separator}${params.join("&")}`;
+}
+
+function updateEmbedUrlPreservingParams(currentEmbedUrl: string, inputUrl: string): string | null {
+  const parsedCurrent = parseUrl(currentEmbedUrl);
+  if (!parsedCurrent) {
+    return null;
+  }
+
+  if (!isValidYoutubeUrl(inputUrl)) {
+    return null;
+  }
+
+  const parsedInput = parseUrl(inputUrl);
+  if (!parsedInput) {
+    return null;
+  }
+
+  const target = getYouTubeTarget(parsedInput);
+  if (!target || (!target.videoId && !target.playlistId)) {
+    return null;
+  }
+
+  const preserveParams = new URLSearchParams(parsedCurrent.search);
+  preserveParams.delete("v");
+  preserveParams.delete("list");
+  preserveParams.delete("index");
+
+  if (target.playlistId) {
+    preserveParams.set("list", target.playlistId);
+  }
+
+  const useNoCookie = parsedCurrent.hostname.toLowerCase().includes("youtube-nocookie.com");
+  const base = useNoCookie ? "https://www.youtube-nocookie.com" : "https://www.youtube.com";
+  const path = target.videoId ? `/embed/${encodeURIComponent(target.videoId)}` : "/embed/videoseries";
+
+  const nextUrl = new URL(`${base}${path}`);
+  nextUrl.search = preserveParams.toString();
+  return nextUrl.toString();
 }
 
 export class YouTubeEmbedNode extends DecoratorNode<ReactNode> {
@@ -774,6 +837,62 @@ export class YouTubeEmbedExtension extends BaseExtension<
               const fallbackNode = $getNodeByKey(this.lastSelectedYouTubeNodeKey);
               if (fallbackNode instanceof YouTubeEmbedNode) {
                 resolve(fallbackNode.getPayload().caption ?? "");
+                return;
+              }
+            }
+
+            resolve("");
+          });
+        }),
+      updateYouTubeEmbedUrl: (inputUrl: string) => {
+        let updated = false;
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isNodeSelection(selection)) {
+            selection.getNodes().forEach((node) => {
+              if (node instanceof YouTubeEmbedNode) {
+                const nextUrl = updateEmbedUrlPreservingParams(node.getPayload().src, inputUrl);
+                if (!nextUrl) {
+                  return;
+                }
+                node.setPayload({ src: nextUrl });
+                updated = true;
+              }
+            });
+            return;
+          }
+
+          if (this.lastSelectedYouTubeNodeKey) {
+            const fallbackNode = $getNodeByKey(this.lastSelectedYouTubeNodeKey);
+            if (fallbackNode instanceof YouTubeEmbedNode) {
+              const nextUrl = updateEmbedUrlPreservingParams(fallbackNode.getPayload().src, inputUrl);
+              if (nextUrl) {
+                fallbackNode.setPayload({ src: nextUrl });
+                updated = true;
+              }
+            } else {
+              this.lastSelectedYouTubeNodeKey = null;
+            }
+          }
+        });
+        return updated;
+      },
+      getYouTubeEmbedUrl: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isNodeSelection(selection)) {
+              const node = selection.getNodes().find((item) => item instanceof YouTubeEmbedNode) as YouTubeEmbedNode | undefined;
+              if (node) {
+                resolve(node.getPayload().src ?? "");
+                return;
+              }
+            }
+
+            if (this.lastSelectedYouTubeNodeKey) {
+              const fallbackNode = $getNodeByKey(this.lastSelectedYouTubeNodeKey);
+              if (fallbackNode instanceof YouTubeEmbedNode) {
+                resolve(fallbackNode.getPayload().src ?? "");
                 return;
               }
             }

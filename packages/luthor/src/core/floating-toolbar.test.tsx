@@ -42,7 +42,7 @@ const DEFAULT_RECT = {
   y: 20,
 };
 
-describe("FloatingToolbar media caption editing", () => {
+describe("FloatingToolbar media editing", () => {
   it("loads and commits image caption draft", async () => {
     const getImageCaption = vi.fn().mockResolvedValue("existing image caption");
     const setImageCaption = vi.fn();
@@ -89,5 +89,65 @@ describe("FloatingToolbar media caption editing", () => {
     fireEvent.blur(input);
 
     expect(setYouTubeEmbedCaption).toHaveBeenCalledWith("updated youtube caption");
+  });
+
+  it("loads and commits YouTube URL draft", async () => {
+    const getYouTubeEmbedCaption = vi.fn().mockResolvedValue("existing youtube caption");
+    const getYouTubeEmbedUrl = vi.fn().mockResolvedValue("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=30");
+    const updateYouTubeEmbedUrl = vi.fn().mockReturnValue(true);
+    const commands = createCommands({
+      getYouTubeEmbedCaption,
+      getYouTubeEmbedUrl,
+      updateYouTubeEmbedUrl,
+    });
+
+    render(
+      <FloatingToolbar
+        isVisible
+        selectionRect={DEFAULT_RECT}
+        commands={commands}
+        activeStates={{ isYouTubeEmbedSelected: true } as CoreEditorActiveStates}
+      />,
+    );
+
+    const input = await screen.findByLabelText("YouTube URL");
+    await waitFor(() => {
+      expect(input).toHaveValue("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=30");
+    });
+
+    fireEvent.change(input, { target: { value: "https://www.youtube.com/watch?v=aqz-KE-bpKQ" } });
+    fireEvent.blur(input);
+
+    expect(updateYouTubeEmbedUrl).toHaveBeenCalledWith("https://www.youtube.com/watch?v=aqz-KE-bpKQ");
+  });
+
+  it("restores previous YouTube URL draft on invalid URL update", async () => {
+    const existingUrl = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=30";
+    const getYouTubeEmbedCaption = vi.fn().mockResolvedValue("existing youtube caption");
+    const getYouTubeEmbedUrl = vi.fn().mockResolvedValue(existingUrl);
+    const updateYouTubeEmbedUrl = vi.fn().mockReturnValue(false);
+    const commands = createCommands({
+      getYouTubeEmbedCaption,
+      getYouTubeEmbedUrl,
+      updateYouTubeEmbedUrl,
+    });
+
+    render(
+      <FloatingToolbar
+        isVisible
+        selectionRect={DEFAULT_RECT}
+        commands={commands}
+        activeStates={{ isYouTubeEmbedSelected: true } as CoreEditorActiveStates}
+      />,
+    );
+
+    const input = await screen.findByLabelText("YouTube URL");
+    fireEvent.change(input, { target: { value: "https://example.com/not-youtube" } });
+    fireEvent.blur(input);
+
+    await waitFor(() => {
+      expect(input).toHaveValue(existingUrl);
+      expect(input).toHaveAttribute("aria-invalid", "true");
+    });
   });
 });

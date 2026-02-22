@@ -46,7 +46,9 @@ export function FloatingToolbar({
   const [iframeCaptionDraft, setIframeCaptionDraft] = useState("");
   const [imageCaptionDraft, setImageCaptionDraft] = useState("");
   const [youTubeCaptionDraft, setYouTubeCaptionDraft] = useState("");
+  const [youTubeUrlDraft, setYouTubeUrlDraft] = useState("");
   const [iframeUrlError, setIframeUrlError] = useState<string | null>(null);
+  const [youTubeUrlError, setYouTubeUrlError] = useState<string | null>(null);
   const iframeEmbedSelected = !!activeStates.isIframeEmbedSelected;
   const youTubeEmbedSelected = !!activeStates.isYouTubeEmbedSelected;
   const embedSelected = iframeEmbedSelected || youTubeEmbedSelected;
@@ -129,6 +131,14 @@ export function FloatingToolbar({
         }
       });
     }
+    if (typeof commands.getYouTubeEmbedUrl === "function") {
+      void commands.getYouTubeEmbedUrl().then((url) => {
+        if (!disposed) {
+          setYouTubeUrlDraft(url ?? "");
+        }
+      });
+    }
+    setYouTubeUrlError(null);
 
     return () => {
       disposed = true;
@@ -171,10 +181,13 @@ export function FloatingToolbar({
     const canEditCaption = iframeEmbedSelected
       ? typeof commands.setIframeEmbedCaption === "function"
       : typeof commands.setYouTubeEmbedCaption === "function";
-    const canEditIframeUrl =
-      iframeEmbedSelected && typeof commands.updateIframeEmbedUrl === "function";
+    const canEditEmbedUrl = iframeEmbedSelected
+      ? typeof commands.updateIframeEmbedUrl === "function"
+      : typeof commands.updateYouTubeEmbedUrl === "function";
     const captionDraft = iframeEmbedSelected ? iframeCaptionDraft : youTubeCaptionDraft;
     const setCaptionDraft = iframeEmbedSelected ? setIframeCaptionDraft : setYouTubeCaptionDraft;
+    const urlDraft = iframeEmbedSelected ? iframeUrlDraft : youTubeUrlDraft;
+    const urlError = iframeEmbedSelected ? iframeUrlError : youTubeUrlError;
     const commitEmbedCaption = () => {
       if (!canEditCaption) {
         return;
@@ -185,19 +198,39 @@ export function FloatingToolbar({
       }
       commands.setYouTubeEmbedCaption?.(youTubeCaptionDraft);
     };
-    const commitIframeUrl = () => {
-      if (!canEditIframeUrl) {
+    const setEmbedUrlError = (value: string | null) => {
+      if (iframeEmbedSelected) {
+        setIframeUrlError(value);
+      } else {
+        setYouTubeUrlError(value);
+      }
+    };
+    const setEmbedUrlDraft = (value: string) => {
+      if (iframeEmbedSelected) {
+        setIframeUrlDraft(value);
+      } else {
+        setYouTubeUrlDraft(value);
+      }
+    };
+    const commitEmbedUrl = () => {
+      if (!canEditEmbedUrl) {
         return;
       }
-      const updated = commands.updateIframeEmbedUrl?.(iframeUrlDraft) ?? false;
+      const updated = iframeEmbedSelected
+        ? (commands.updateIframeEmbedUrl?.(iframeUrlDraft) ?? false)
+        : (commands.updateYouTubeEmbedUrl?.(youTubeUrlDraft) ?? false);
       if (!updated) {
-        setIframeUrlError("Enter a valid http(s) URL");
-        if (typeof commands.getIframeEmbedUrl === "function") {
+        setEmbedUrlError(
+          iframeEmbedSelected ? "Enter a valid http(s) URL" : "Enter a valid YouTube URL",
+        );
+        if (iframeEmbedSelected && typeof commands.getIframeEmbedUrl === "function") {
           void commands.getIframeEmbedUrl().then((url) => setIframeUrlDraft(url ?? ""));
+        } else if (!iframeEmbedSelected && typeof commands.getYouTubeEmbedUrl === "function") {
+          void commands.getYouTubeEmbedUrl().then((url) => setYouTubeUrlDraft(url ?? ""));
         }
         return;
       }
-      setIframeUrlError(null);
+      setEmbedUrlError(null);
     };
 
     return (
@@ -211,25 +244,25 @@ export function FloatingToolbar({
         <IconButton onClick={() => setAlignment("right")} active={isRightAligned} title="Align Right">
           <AlignRightIcon size={14} />
         </IconButton>
-        {canEditCaption || canEditIframeUrl ? (
+        {canEditCaption || canEditEmbedUrl ? (
           <>
             <div className="luthor-floating-toolbar-separator" />
             <div className="luthor-floating-toolbar-fields">
-              {canEditIframeUrl ? (
+              {canEditEmbedUrl ? (
                 <input
                   type="url"
-                  value={iframeUrlDraft}
-                  className={`luthor-floating-toolbar-input${iframeUrlError ? " is-error" : ""}`}
-                  placeholder="https://example.com/embed"
-                  aria-label="Iframe URL"
-                  aria-invalid={iframeUrlError ? true : undefined}
+                  value={urlDraft}
+                  className={`luthor-floating-toolbar-input${urlError ? " is-error" : ""}`}
+                  placeholder={iframeEmbedSelected ? "https://example.com/embed" : "https://youtube.com/watch?v=..."}
+                  aria-label={iframeEmbedSelected ? "Iframe URL" : "YouTube URL"}
+                  aria-invalid={urlError ? true : undefined}
                   onChange={(event) => {
-                    setIframeUrlDraft(event.target.value);
-                    if (iframeUrlError) {
-                      setIframeUrlError(null);
+                    setEmbedUrlDraft(event.target.value);
+                    if (urlError) {
+                      setEmbedUrlError(null);
                     }
                   }}
-                  onBlur={commitIframeUrl}
+                  onBlur={commitEmbedUrl}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
                       event.preventDefault();
