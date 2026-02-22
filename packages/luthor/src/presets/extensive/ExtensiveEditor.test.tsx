@@ -12,8 +12,8 @@ const {
   registerKeyboardShortcutsMock: vi.fn(() => vi.fn()),
   commandsToCommandPaletteItemsMock: vi.fn(() => [{ id: "mock-command" }]),
   commandsToSlashCommandItemsMock: vi.fn(() => [{ id: "mock-slash-command" }]),
-  toolbarMock: vi.fn(({ classNames }: { classNames?: { toolbar?: string } }) => (
-    <div data-testid="toolbar" className={classNames?.toolbar} />
+  toolbarMock: vi.fn(({ classNames, toolbarStyleVars }: { classNames?: { toolbar?: string }; toolbarStyleVars?: Record<string, string> }) => (
+    <div data-testid="toolbar" className={classNames?.toolbar} style={toolbarStyleVars} />
   )),
 }));
 
@@ -148,5 +148,27 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
 
     const toolbarCall = toolbarMock.mock.calls.at(-1)?.[0] as { toolbarVisibility?: unknown };
     expect(toolbarCall.toolbarVisibility).toEqual(toolbarVisibility);
+  });
+
+  it("applies toolbarClassName and passes toolbarStyleVars to toolbar rendering", () => {
+    const toolbarStyleVars = {
+      "--luthor-toolbar-button-active-bg": "#ff4d4f",
+      "--luthor-toolbar-button-active-fg": "#ffffff",
+    } as const;
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        toolbarClassName="brand-toolbar"
+        toolbarStyleVars={toolbarStyleVars}
+      />,
+    );
+
+    const toolbar = screen.getByTestId("toolbar");
+    expect(toolbar).toHaveClass("brand-toolbar");
+    expect(toolbar).toHaveStyle({
+      "--luthor-toolbar-button-active-bg": "#ff4d4f",
+      "--luthor-toolbar-button-active-fg": "#ffffff",
+    });
   });
 });

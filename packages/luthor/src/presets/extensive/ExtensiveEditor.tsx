@@ -16,6 +16,7 @@ import {
   TRADITIONAL_TOOLBAR_LAYOUT,
   type CoreEditorCommands,
   type ToolbarAlignment,
+  type ToolbarStyleVars,
   type ToolbarLayout,
   type ToolbarVisibility,
   type ToolbarPosition,
@@ -121,6 +122,8 @@ function ExtensiveEditorContent({
   toolbarVisibility,
   toolbarPosition,
   toolbarAlignment,
+  toolbarClassName,
+  toolbarStyleVars,
   isToolbarEnabled,
 }: {
   isDark: boolean;
@@ -133,6 +136,8 @@ function ExtensiveEditorContent({
   toolbarVisibility?: ToolbarVisibility;
   toolbarPosition: ToolbarPosition;
   toolbarAlignment: ToolbarAlignment;
+  toolbarClassName?: string;
+  toolbarStyleVars?: ToolbarStyleVars;
   isToolbarEnabled: boolean;
 }) {
   const {
@@ -339,8 +344,9 @@ function ExtensiveEditorContent({
       imageUploadHandler={(file) => ((extensiveExtensions.find((ext: any) => ext.name === "image") as any)?.config?.uploadHandler?.(file) ?? Promise.resolve(URL.createObjectURL(file)))}
       layout={toolbarLayout ?? TRADITIONAL_TOOLBAR_LAYOUT}
       toolbarVisibility={toolbarVisibility}
+      toolbarStyleVars={toolbarStyleVars}
       classNames={{
-        toolbar: `luthor-toolbar luthor-toolbar--align-${toolbarAlignment}`,
+        toolbar: `luthor-toolbar luthor-toolbar--align-${toolbarAlignment}${toolbarClassName ? ` ${toolbarClassName}` : ""}`,
       }}
     />
   ) : null;
@@ -436,6 +442,8 @@ export interface ExtensiveEditorProps {
   toolbarVisibility?: ToolbarVisibility;
   toolbarPosition?: ToolbarPosition;
   toolbarAlignment?: ToolbarAlignment;
+  toolbarClassName?: string;
+  toolbarStyleVars?: ToolbarStyleVars;
   isToolbarEnabled?: boolean;
 }
 
@@ -454,6 +462,8 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     toolbarVisibility,
     toolbarPosition = "top",
     toolbarAlignment = "left",
+    toolbarClassName,
+    toolbarStyleVars,
     isToolbarEnabled = true,
   }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
@@ -496,6 +506,8 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             toolbarVisibility={toolbarVisibility}
             toolbarPosition={toolbarPosition}
             toolbarAlignment={toolbarAlignment}
+            toolbarClassName={toolbarClassName}
+            toolbarStyleVars={toolbarStyleVars}
             isToolbarEnabled={isToolbarEnabled}
           />
         </Provider>

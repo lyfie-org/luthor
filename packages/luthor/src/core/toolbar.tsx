@@ -50,7 +50,7 @@ import {
 } from "./icons";
 import { Button, Dialog, Dropdown, IconButton, Select } from "./ui";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
-import type { CoreEditorActiveStates, CoreEditorCommands, CoreToolbarClassNames, InsertTableConfig, ImageAlignment, ToolbarLayout, ToolbarItemType, ToolbarVisibility } from "./types";
+import type { CoreEditorActiveStates, CoreEditorCommands, CoreToolbarClassNames, InsertTableConfig, ImageAlignment, ToolbarLayout, ToolbarItemType, ToolbarStyleVars, ToolbarVisibility } from "./types";
 import { TRADITIONAL_TOOLBAR_LAYOUT } from "./types";
 
 type SelectOption = {
@@ -687,6 +687,7 @@ export interface ToolbarProps {
   onCommandPaletteOpen?: () => void;
   imageUploadHandler?: (file: File) => Promise<string>;
   classNames?: CoreToolbarClassNames;
+  toolbarStyleVars?: ToolbarStyleVars;
   layout?: ToolbarLayout;
   toolbarVisibility?: ToolbarVisibility;
 }
@@ -700,6 +701,7 @@ export function Toolbar({
   onCommandPaletteOpen,
   imageUploadHandler,
   classNames,
+  toolbarStyleVars,
   layout,
   toolbarVisibility,
 }: ToolbarProps) {
@@ -1485,7 +1487,7 @@ export function Toolbar({
 
   return (
     <>
-      <div className={classNames?.toolbar ?? "luthor-toolbar"}>
+      <div className={classNames?.toolbar ?? "luthor-toolbar"} style={toolbarStyleVars as CSSProperties | undefined}>
         {visibleLayout.sections.map((section, sectionIndex) => {
           // Flatten and assign unique keys to all toolbar items, even if renderToolbarItem returns a fragment or array
           const renderedItems = section.items

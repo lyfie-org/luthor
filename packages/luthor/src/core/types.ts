@@ -176,6 +176,24 @@ export interface CoreToolbarClassNames {
   section?: string;
 }
 
+export type ToolbarStyleVars = Partial<{
+  "--luthor-toolbar-bg": string;
+  "--luthor-toolbar-section-border": string;
+  "--luthor-toolbar-button-fg": string;
+  "--luthor-toolbar-button-hover-bg": string;
+  "--luthor-toolbar-button-hover-border": string;
+  "--luthor-toolbar-button-hover-shadow": string;
+  "--luthor-toolbar-button-press-shadow": string;
+  "--luthor-toolbar-button-active-bg": string;
+  "--luthor-toolbar-button-active-border": string;
+  "--luthor-toolbar-button-active-fg": string;
+  "--luthor-toolbar-button-active-shadow": string;
+  "--luthor-toolbar-button-overlay": string;
+  "--luthor-toolbar-button-active-overlay": string;
+  "--luthor-toolbar-color-indicator-border": string;
+  "--luthor-toolbar-highlight-bg": string;
+}>;
+
 export type ToolbarPosition = "top" | "bottom";
 
 export type ToolbarAlignment = "left" | "center" | "right";

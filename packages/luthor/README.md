@@ -48,10 +48,61 @@ export function App() {
 }
 ```
 
+## Toolbar style customization (TSX + CSS)
+
+```tsx
+import { ExtensiveEditor } from "@lyfie/luthor";
+
+export function App() {
+  return (
+    <ExtensiveEditor
+      toolbarClassName="docs-toolbar"
+      toolbarStyleVars={{
+        "--luthor-toolbar-button-active-bg": "#ea580c",
+        "--luthor-toolbar-button-active-fg": "#ffffff",
+      }}
+    />
+  );
+}
+```
+
+```css
+/* CSS-only override pattern */
+.docs-toolbar {
+  --luthor-toolbar-bg: color-mix(in srgb, #fff7ed 75%, white 25%);
+  --luthor-toolbar-section-border: #fdba74;
+  --luthor-toolbar-button-fg: #7c2d12;
+  --luthor-toolbar-button-hover-bg: #ffedd5;
+  --luthor-toolbar-button-hover-border: #fb923c;
+  --luthor-toolbar-button-active-bg: #ea580c;
+  --luthor-toolbar-button-active-border: #ea580c;
+  --luthor-toolbar-button-active-fg: #ffffff;
+}
+```
+
 - `toolbarPosition`: `"top"` (default) or `"bottom"`
 - `toolbarAlignment`: `"left"` (default), `"center"`, or `"right"`
 - `isToolbarEnabled`: `true` (default). Set `false` to hide the primary toolbar while keeping keyboard shortcuts, slash commands, and command palette support.
 - `toolbarVisibility`: `Partial<Record<ToolbarItemType, boolean>>`. Set an item to `false` to hide it; unsupported items are auto-hidden even if set to `true`.
+- `toolbarClassName`: optional class appended to the toolbar root (`.luthor-toolbar`) for CSS overrides.
+- `toolbarStyleVars`: optional map of `--luthor-toolbar-*` custom properties applied to the toolbar root.
+
+Toolbar CSS variable contract:
+- `--luthor-toolbar-bg`
+- `--luthor-toolbar-section-border`
+- `--luthor-toolbar-button-fg`
+- `--luthor-toolbar-button-hover-bg`
+- `--luthor-toolbar-button-hover-border`
+- `--luthor-toolbar-button-hover-shadow`
+- `--luthor-toolbar-button-press-shadow`
+- `--luthor-toolbar-button-active-bg`
+- `--luthor-toolbar-button-active-border`
+- `--luthor-toolbar-button-active-fg`
+- `--luthor-toolbar-button-active-shadow`
+- `--luthor-toolbar-button-overlay`
+- `--luthor-toolbar-button-active-overlay`
+- `--luthor-toolbar-color-indicator-border`
+- `--luthor-toolbar-highlight-bg`
 
 ## Primary exports
 

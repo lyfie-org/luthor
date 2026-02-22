@@ -37,7 +37,8 @@ function App() {
           initialTheme={theme} 
           toolbarPosition="top"
           toolbarAlignment="center"
-          toolbarVisibility={{ fontFamily: true }}
+          toolbarVisibility={{ fontFamily: true }}         
+          toolbarClassName="docs-toolbar"
           />
       </div>
     </div>

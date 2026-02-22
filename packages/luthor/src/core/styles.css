@@ -10,6 +10,21 @@
   --luthor-shadow: rgba(0, 0, 0, 0.08);
   --luthor-muted: #f8fafc;
   --luthor-muted-fg: #64748b;
+  --luthor-toolbar-bg: var(--luthor-muted);
+  --luthor-toolbar-section-border: var(--luthor-border);
+  --luthor-toolbar-button-fg: var(--luthor-fg);
+  --luthor-toolbar-button-hover-bg: var(--luthor-muted);
+  --luthor-toolbar-button-hover-border: var(--luthor-border-hover);
+  --luthor-toolbar-button-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --luthor-toolbar-button-press-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --luthor-toolbar-button-active-bg: var(--luthor-accent);
+  --luthor-toolbar-button-active-border: var(--luthor-accent);
+  --luthor-toolbar-button-active-fg: var(--luthor-bg);
+  --luthor-toolbar-button-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --luthor-toolbar-button-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  --luthor-toolbar-button-active-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  --luthor-toolbar-color-indicator-border: var(--luthor-border);
+  --luthor-toolbar-highlight-bg: var(--luthor-muted);
 	--luthor-syntax-comment: #64748b;
 	--luthor-syntax-keyword: #7c3aed;
 	--luthor-syntax-string: #0f766e;
@@ -30,6 +45,21 @@
   --luthor-shadow: rgba(0, 0, 0, 0.5);
   --luthor-muted: #171717;
   --luthor-muted-fg: #a3a3a3;
+  --luthor-toolbar-bg: var(--luthor-muted);
+  --luthor-toolbar-section-border: var(--luthor-border);
+  --luthor-toolbar-button-fg: var(--luthor-fg);
+  --luthor-toolbar-button-hover-bg: var(--luthor-muted);
+  --luthor-toolbar-button-hover-border: var(--luthor-border-hover);
+  --luthor-toolbar-button-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --luthor-toolbar-button-press-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --luthor-toolbar-button-active-bg: var(--luthor-accent);
+  --luthor-toolbar-button-active-border: var(--luthor-accent);
+  --luthor-toolbar-button-active-fg: var(--luthor-bg);
+  --luthor-toolbar-button-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --luthor-toolbar-button-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+  --luthor-toolbar-button-active-overlay: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.06) 100%);
+  --luthor-toolbar-color-indicator-border: var(--luthor-border);
+  --luthor-toolbar-highlight-bg: var(--luthor-muted);
 	--luthor-syntax-comment: #94a3b8;
 	--luthor-syntax-keyword: #c084fc;
 	--luthor-syntax-string: #5eead4;
@@ -69,7 +99,7 @@
 }
 
 .luthor-editor-toolbar-slot {
-	background-color: var(--luthor-muted);
+	background-color: var(--luthor-toolbar-bg, var(--luthor-muted));
 	transition: background-color var(--luthor-theme-transition), border-color var(--luthor-theme-transition), color var(--luthor-theme-transition);
 }
 
@@ -163,7 +193,7 @@
 }
 
 .luthor-toolbar-section:not(:last-child) {
-	border-right: 1px solid var(--luthor-border);
+	border-right: 1px solid var(--luthor-toolbar-section-border, var(--luthor-border));
 	margin-right: 8px;
 	padding-right: 8px;
 	transition: border-color var(--luthor-theme-transition);
@@ -178,7 +208,7 @@
 	border: 1px solid transparent;
 	border-radius: 6px;
 	background-color: transparent;
-	color: var(--luthor-fg);
+	color: var(--luthor-toolbar-button-fg, var(--luthor-fg));
 	cursor: pointer;
 	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	font-size: 16px;
@@ -190,16 +220,16 @@
 	content: '';
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+	background: var(--luthor-toolbar-button-overlay);
 	opacity: 0;
 	transition: opacity 0.2s ease;
 }
 
 .luthor-toolbar-button:hover {
-	background-color: var(--luthor-muted);
-	border-color: var(--luthor-border-hover);
+	background-color: var(--luthor-toolbar-button-hover-bg, var(--luthor-muted));
+	border-color: var(--luthor-toolbar-button-hover-border, var(--luthor-border-hover));
 	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	box-shadow: var(--luthor-toolbar-button-hover-shadow);
 }
 
 .luthor-toolbar-button:hover::before {
@@ -208,18 +238,18 @@
 
 .luthor-toolbar-button:active {
 	transform: translateY(0) scale(0.98);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	box-shadow: var(--luthor-toolbar-button-press-shadow);
 }
 
 .luthor-toolbar-button.active {
-	background-color: var(--luthor-accent);
-	border-color: var(--luthor-accent);
-	color: var(--luthor-bg);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	background-color: var(--luthor-toolbar-button-active-bg, var(--luthor-accent));
+	border-color: var(--luthor-toolbar-button-active-border, var(--luthor-accent));
+	color: var(--luthor-toolbar-button-active-fg, var(--luthor-bg));
+	box-shadow: var(--luthor-toolbar-button-active-shadow);
 }
 
 .luthor-toolbar-button.active::before {
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+	background: var(--luthor-toolbar-button-active-overlay);
 	opacity: 1;
 }
 
@@ -260,7 +290,7 @@
 	bottom: 5px;
 	height: 3px;
 	border-radius: 999px;
-	border: 1px solid var(--luthor-border);
+	border: 1px solid var(--luthor-toolbar-color-indicator-border, var(--luthor-border));
 	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 	z-index: 1;
 }
@@ -268,7 +298,7 @@
 .luthor-color-button.is-highlight .luthor-color-button-letter {
 	padding: 0 2px;
 	border-radius: 3px;
-	background-color: var(--luthor-muted);
+	background-color: var(--luthor-toolbar-highlight-bg, var(--luthor-muted));
 }
 
 .luthor-color-button-highlighter {

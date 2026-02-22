@@ -1,1 +1,10 @@
-
+.docs-toolbar {
+  --luthor-toolbar-bg: color-mix(in srgb, #fff7ed 75%, white 25%);
+  --luthor-toolbar-section-border: #fdba74;
+  --luthor-toolbar-button-fg: #7c2d12;
+  --luthor-toolbar-button-hover-bg: #ffedd5;
+  --luthor-toolbar-button-hover-border: #fb923c;
+  --luthor-toolbar-button-active-bg: #ea580c;
+  --luthor-toolbar-button-active-border: #ea580c;
+  --luthor-toolbar-button-active-fg: #ffffff;
+}
