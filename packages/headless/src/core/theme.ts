@@ -1,6 +1,89 @@
 import { EditorThemeClasses } from "lexical";
 import React from "react";
 
+export const LUTHOR_EDITOR_THEME_TOKENS = [
+  "--luthor-bg",
+  "--luthor-fg",
+  "--luthor-border",
+  "--luthor-border-hover",
+  "--luthor-border-active",
+  "--luthor-accent",
+  "--luthor-accent-hover",
+  "--luthor-shadow",
+  "--luthor-muted",
+  "--luthor-muted-fg",
+  "--luthor-theme-transition",
+  "--luthor-drag-gutter-width",
+  "--luthor-line-height-ratio",
+  "--luthor-toolbar-bg",
+  "--luthor-toolbar-section-border",
+  "--luthor-toolbar-button-fg",
+  "--luthor-toolbar-button-hover-bg",
+  "--luthor-toolbar-button-hover-border",
+  "--luthor-toolbar-button-hover-shadow",
+  "--luthor-toolbar-button-press-shadow",
+  "--luthor-toolbar-button-active-bg",
+  "--luthor-toolbar-button-active-border",
+  "--luthor-toolbar-button-active-fg",
+  "--luthor-toolbar-button-active-shadow",
+  "--luthor-toolbar-button-overlay",
+  "--luthor-toolbar-button-active-overlay",
+  "--luthor-toolbar-color-indicator-border",
+  "--luthor-toolbar-highlight-bg",
+  "--luthor-quote-bg",
+  "--luthor-quote-fg",
+  "--luthor-quote-border",
+  "--luthor-syntax-comment",
+  "--luthor-syntax-keyword",
+  "--luthor-syntax-string",
+  "--luthor-syntax-number",
+  "--luthor-syntax-function",
+  "--luthor-syntax-variable",
+  "--luthor-floating-bg",
+  "--luthor-floating-fg",
+  "--luthor-floating-border",
+  "--luthor-floating-shadow",
+  "--luthor-floating-muted",
+  "--luthor-floating-border-hover",
+  "--luthor-floating-border-active",
+  "--luthor-floating-accent",
+  "--luthor-floating-accent-fg",
+  "--luthor-preset-bg",
+  "--luthor-preset-fg",
+  "--luthor-preset-border",
+  "--luthor-preset-muted",
+  "--luthor-preset-muted-fg",
+  "--luthor-preset-accent",
+  "--luthor-preset-radius",
+  "--luthor-preset-shadow",
+  "--luthor-preset-content-padding",
+  "--luthor-preset-content-min-height",
+] as const;
+
+export type LuthorEditorThemeToken = (typeof LUTHOR_EDITOR_THEME_TOKENS)[number];
+
+export type LuthorEditorThemeOverrides = Partial<Record<LuthorEditorThemeToken, string>>;
+
+function isNonEmptyThemeValue(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+export function createEditorThemeStyleVars(overrides?: LuthorEditorThemeOverrides): React.CSSProperties | undefined {
+  if (!overrides) {
+    return undefined;
+  }
+
+  const style: Record<string, string> = {};
+  for (const token of LUTHOR_EDITOR_THEME_TOKENS) {
+    const value = overrides[token];
+    if (isNonEmptyThemeValue(value)) {
+      style[token] = value;
+    }
+  }
+
+  return Object.keys(style).length > 0 ? (style as React.CSSProperties) : undefined;
+}
+
 /**
  * Enhanced theme type that extends Lexical's EditorThemeClasses
  * with better TypeScript support and additional properties

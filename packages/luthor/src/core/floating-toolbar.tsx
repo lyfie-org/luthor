@@ -16,6 +16,7 @@ import {
   UnlinkIcon,
 } from "./icons";
 import { IconButton } from "./ui";
+import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
 import type { CoreEditorActiveStates, CoreEditorCommands, CoreTheme } from "./types";
 
 type FloatingSelectionRect = {
@@ -148,6 +149,7 @@ export function FloatingToolbar({
   if (!isVisible || !selectionRect) return null;
 
   const style: CSSProperties = {
+    ...getOverlayThemeStyleFromSelection(),
     position: "absolute",
     top: selectionRect.y,
     left: selectionRect.positionFromRight ? "auto" : selectionRect.x,

@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties } from "react";
-import { createEditorSystem, defaultLuthorTheme, mergeThemes, RichText, type LuthorTheme } from "@lyfie/luthor-headless";
+import { createEditorSystem, createEditorThemeStyleVars, defaultLuthorTheme, mergeThemes, RichText, type LuthorTheme } from "@lyfie/luthor-headless";
 import { $setSelection } from "lexical";
 import { createExtensiveExtensions, extensiveExtensions, setFloatingToolbarContext } from "./extensions";
 import {
@@ -20,6 +20,7 @@ import {
   type ToolbarAlignment,
   type ToolbarStyleVars,
   type QuoteStyleVars,
+  type EditorThemeOverrides,
   type ToolbarLayout,
   type ToolbarVisibility,
   type ToolbarPosition,
@@ -163,6 +164,18 @@ function normalizeLineHeightOptionsKey(options?: readonly LineHeightOption[]): s
       lineHeight: String(option.lineHeight).trim(),
     })),
   );
+}
+
+function normalizeStyleVarsKey(styleVars?: Record<string, string | undefined>): string {
+  if (!styleVars) {
+    return "__default__";
+  }
+
+  const entries = Object.entries(styleVars)
+    .filter(([, value]) => typeof value === "string" && value.trim().length > 0)
+    .sort(([left], [right]) => left.localeCompare(right));
+
+  return entries.length > 0 ? JSON.stringify(entries) : "__default__";
 }
 
 function normalizeHeadingOptions(input?: readonly BlockHeadingLevel[]): BlockHeadingLevel[] {
@@ -543,6 +556,7 @@ export interface ExtensiveEditorProps {
   toolbarStyleVars?: ToolbarStyleVars;
   quoteClassName?: string;
   quoteStyleVars?: QuoteStyleVars;
+  editorThemeOverrides?: EditorThemeOverrides;
   isToolbarEnabled?: boolean;
   fontFamilyOptions?: readonly FontFamilyOption[];
   fontSizeOptions?: readonly FontSizeOption[];
@@ -573,6 +587,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     toolbarStyleVars,
     quoteClassName,
     quoteStyleVars,
+    editorThemeOverrides,
     isToolbarEnabled = true,
     fontFamilyOptions,
     fontSizeOptions,
@@ -647,6 +662,41 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         quote: `${mergedTheme.quote ?? ""} ${quoteClassName}`.trim(),
       };
     }, [theme, quoteClassName]);
+    const editorThemeOverridesKey = useMemo(
+      () => normalizeStyleVarsKey(editorThemeOverrides),
+      [editorThemeOverrides],
+    );
+    const quoteStyleVarsKey = useMemo(
+      () => normalizeStyleVarsKey(quoteStyleVars),
+      [quoteStyleVars],
+    );
+    const stableEditorThemeOverridesRef = useRef<EditorThemeOverrides | undefined>(editorThemeOverrides);
+    const stableQuoteStyleVarsRef = useRef<QuoteStyleVars | undefined>(quoteStyleVars);
+    const stableEditorThemeOverridesKeyRef = useRef(editorThemeOverridesKey);
+    const stableQuoteStyleVarsKeyRef = useRef(quoteStyleVarsKey);
+
+    if (stableEditorThemeOverridesKeyRef.current !== editorThemeOverridesKey) {
+      stableEditorThemeOverridesKeyRef.current = editorThemeOverridesKey;
+      stableEditorThemeOverridesRef.current = editorThemeOverrides;
+    }
+
+    if (stableQuoteStyleVarsKeyRef.current !== quoteStyleVarsKey) {
+      stableQuoteStyleVarsKeyRef.current = quoteStyleVarsKey;
+      stableQuoteStyleVarsRef.current = quoteStyleVars;
+    }
+
+    const wrapperStyleVars = useMemo(() => {
+      const editorThemeVars = createEditorThemeStyleVars(stableEditorThemeOverridesRef.current);
+      const quoteVars = stableQuoteStyleVarsRef.current as CSSProperties | undefined;
+      if (!editorThemeVars && !quoteVars) {
+        return undefined;
+      }
+
+      return {
+        ...(editorThemeVars as CSSProperties | undefined),
+        ...(quoteVars ?? {}),
+      };
+    }, [editorThemeOverridesKey, quoteStyleVarsKey]);
 
     const [methods, setMethods] = useState<ExtensiveEditorRef | null>(null);
     useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);
@@ -666,7 +716,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       <div
         className={`luthor-preset luthor-preset-extensive luthor-editor-wrapper ${variantClassName || ""} ${className || ""}`.trim()}
         data-editor-theme={editorTheme}
-        style={quoteStyleVars as CSSProperties | undefined}
+        style={wrapperStyleVars}
       >
         <Provider extensions={memoizedExtensions} config={{ theme: editorThemeConfig }}>
           <ExtensiveEditorContent

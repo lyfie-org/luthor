@@ -87,6 +87,8 @@ Frequently used APIs:
 
 - `createEditorSystem`
 - `RichText`
+- `createEditorThemeStyleVars`
+- `LUTHOR_EDITOR_THEME_TOKENS`
 - extension factories such as `boldExtension`, `italicExtension`, `historyExtension`, `linkExtension`
 - import/export helpers for HTML and enhanced markdown workflows
 
@@ -135,6 +137,25 @@ export function Editor() {
 
 - `scaleByRatio: false` (default): free resize by default, hold `Shift` to keep aspect ratio.
 - `scaleByRatio: true`: keep aspect ratio by default, hold `Shift` to temporarily free resize.
+
+## Editor theme CSS variables helper
+
+For custom UIs, headless exposes the same editor token contract used by `@lyfie/luthor`:
+
+- `LUTHOR_EDITOR_THEME_TOKENS`: full list of supported `--luthor-*` tokens.
+- `createEditorThemeStyleVars(overrides)`: sanitizes token overrides into a React `style` object.
+
+```tsx
+import { createEditorThemeStyleVars, LUTHOR_EDITOR_THEME_TOKENS } from "@lyfie/luthor-headless";
+
+const style = createEditorThemeStyleVars({
+  "--luthor-bg": "#ffffff",
+  "--luthor-fg": "#111827",
+  "--luthor-accent": "#0f172a",
+});
+
+console.log(LUTHOR_EDITOR_THEME_TOKENS);
+```
 
 ## Import and export support
 

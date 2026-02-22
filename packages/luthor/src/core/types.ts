@@ -1,3 +1,5 @@
+import type { LuthorEditorThemeOverrides } from "@lyfie/luthor-headless";
+
 export type CoreTheme = "light" | "dark";
 
 export type CoreEditorMode = "visual" | "jsonb";
@@ -210,6 +212,8 @@ export type QuoteStyleVars = Partial<{
   "--luthor-quote-fg": string;
   "--luthor-quote-border": string;
 }>;
+
+export type EditorThemeOverrides = LuthorEditorThemeOverrides;
 
 export type ToolbarPosition = "top" | "bottom";
 

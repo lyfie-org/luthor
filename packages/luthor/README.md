@@ -57,6 +57,11 @@ export function App() {
   return (
     <ExtensiveEditor
       toolbarClassName="docs-toolbar"
+      editorThemeOverrides={{
+        "--luthor-bg": "#fffaf2",
+        "--luthor-fg": "#431407",
+        "--luthor-accent": "#c2410c",
+      }}
       toolbarStyleVars={{
         "--luthor-toolbar-button-active-bg": "#ea580c",
         "--luthor-toolbar-button-active-fg": "#ffffff",
@@ -86,6 +91,7 @@ export function App() {
 - `toolbarVisibility`: `Partial<Record<ToolbarItemType, boolean>>`. Set an item to `false` to hide it; unsupported items are auto-hidden even if set to `true`.
 - `toolbarClassName`: optional class appended to the toolbar root (`.luthor-toolbar`) for CSS overrides.
 - `toolbarStyleVars`: optional map of `--luthor-toolbar-*` custom properties applied to the toolbar root.
+- `editorThemeOverrides`: optional map of `--luthor-*` custom properties applied to the editor wrapper for per-instance theme injection.
 - `theme`: optional `Partial<LuthorTheme>` merged into the editor theme config.
 - `quoteClassName`: optional class appended to the quote node class (default base class is `.luthor-quote`).
 - `quoteStyleVars`: optional map of `--luthor-quote-*` custom properties applied to the editor wrapper.
@@ -172,6 +178,64 @@ Toolbar CSS variable contract:
 - `--luthor-toolbar-button-active-overlay`
 - `--luthor-toolbar-color-indicator-border`
 - `--luthor-toolbar-highlight-bg`
+
+Editor theme CSS variable contract (`editorThemeOverrides`):
+- `--luthor-bg`
+- `--luthor-fg`
+- `--luthor-border`
+- `--luthor-border-hover`
+- `--luthor-border-active`
+- `--luthor-accent`
+- `--luthor-accent-hover`
+- `--luthor-shadow`
+- `--luthor-muted`
+- `--luthor-muted-fg`
+- `--luthor-theme-transition`
+- `--luthor-drag-gutter-width`
+- `--luthor-line-height-ratio`
+- `--luthor-toolbar-bg`
+- `--luthor-toolbar-section-border`
+- `--luthor-toolbar-button-fg`
+- `--luthor-toolbar-button-hover-bg`
+- `--luthor-toolbar-button-hover-border`
+- `--luthor-toolbar-button-hover-shadow`
+- `--luthor-toolbar-button-press-shadow`
+- `--luthor-toolbar-button-active-bg`
+- `--luthor-toolbar-button-active-border`
+- `--luthor-toolbar-button-active-fg`
+- `--luthor-toolbar-button-active-shadow`
+- `--luthor-toolbar-button-overlay`
+- `--luthor-toolbar-button-active-overlay`
+- `--luthor-toolbar-color-indicator-border`
+- `--luthor-toolbar-highlight-bg`
+- `--luthor-quote-bg`
+- `--luthor-quote-fg`
+- `--luthor-quote-border`
+- `--luthor-syntax-comment`
+- `--luthor-syntax-keyword`
+- `--luthor-syntax-string`
+- `--luthor-syntax-number`
+- `--luthor-syntax-function`
+- `--luthor-syntax-variable`
+- `--luthor-floating-bg`
+- `--luthor-floating-fg`
+- `--luthor-floating-border`
+- `--luthor-floating-shadow`
+- `--luthor-floating-muted`
+- `--luthor-floating-border-hover`
+- `--luthor-floating-border-active`
+- `--luthor-floating-accent`
+- `--luthor-floating-accent-fg`
+- `--luthor-preset-bg`
+- `--luthor-preset-fg`
+- `--luthor-preset-border`
+- `--luthor-preset-muted`
+- `--luthor-preset-muted-fg`
+- `--luthor-preset-accent`
+- `--luthor-preset-radius`
+- `--luthor-preset-shadow`
+- `--luthor-preset-content-padding`
+- `--luthor-preset-content-min-height`
 
 ## Quote style customization (TSX + CSS)
 

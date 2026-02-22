@@ -73,6 +73,11 @@ function App() {
           paragraphLabel="Normal"
           headingOptions={['h1', 'h2', 'h3']}
           scaleByRatio={false}
+          editorThemeOverrides={{
+            "--luthor-bg": theme === "dark" ? "#ea580c" : "#ea580c",
+            "--luthor-fg": theme === "dark" ? "#eee" : "#111",
+            "--luthor-toolbar-bg": theme === "dark" ? "#333" : "#f9f9f9",
+            }}
           />
       </div>
     </div>
