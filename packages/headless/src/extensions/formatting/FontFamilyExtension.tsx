@@ -38,6 +38,68 @@ const DEFAULT_FONT_OPTIONS: readonly FontFamilyOption[] = [
   { value: "mono", label: "Mono", fontFamily: "'Courier New', Courier, monospace" },
 ];
 
+const DEFAULT_FONT_OPTION: FontFamilyOption = {
+  value: "default",
+  label: "Default",
+  fontFamily: "inherit",
+};
+
+function normalizeToken(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function isValidOptionToken(value: string): boolean {
+  return /^[a-z0-9][a-z0-9-]*$/i.test(value);
+}
+
+function sanitizeFontFamilyOptions(
+  options: readonly FontFamilyOption[],
+): readonly FontFamilyOption[] {
+  const seenValues = new Set<string>();
+  const sanitized: FontFamilyOption[] = [];
+
+  for (const option of options) {
+    const value = option.value.trim();
+    const label = option.label.trim();
+    const fontFamily = option.fontFamily.trim();
+
+    if (!value || !label || !fontFamily) {
+      continue;
+    }
+
+    if (!isValidOptionToken(value)) {
+      continue;
+    }
+
+    const normalizedValue = normalizeToken(value);
+    if (seenValues.has(normalizedValue)) {
+      continue;
+    }
+
+    seenValues.add(normalizedValue);
+    sanitized.push({
+      value,
+      label,
+      fontFamily,
+      cssImportUrl: option.cssImportUrl?.trim() || undefined,
+    });
+  }
+
+  if (sanitized.length === 0) {
+    return DEFAULT_FONT_OPTIONS;
+  }
+
+  const hasDefaultOption = sanitized.some((option) => {
+    return normalizeToken(option.value) === "default";
+  });
+
+  if (!hasDefaultOption) {
+    return [DEFAULT_FONT_OPTION, ...sanitized];
+  }
+
+  return sanitized;
+}
+
 /**
  * FontFamilyExtension provides controlled font-family styling for text selections.
  *
@@ -73,6 +135,16 @@ export class FontFamilyExtension extends BaseExtension<
     }
 
     return () => {};
+  }
+
+  configure(config: Partial<FontFamilyConfig>) {
+    const nextConfig: Partial<FontFamilyConfig> = { ...config };
+
+    if (config.options) {
+      nextConfig.options = sanitizeFontFamilyOptions(config.options);
+    }
+
+    return super.configure(nextConfig);
   }
 
   getCommands(editor: LexicalEditor): FontFamilyCommands {

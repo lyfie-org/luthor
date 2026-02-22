@@ -14,7 +14,8 @@ import {
   italicExtension,
   underlineExtension,
   strikethroughExtension,
-  fontFamilyExtension,
+  FontFamilyExtension,
+  type FontFamilyOption,
   fontSizeExtension,
   lineHeightExtension,
   textColorExtension,
@@ -35,6 +36,98 @@ import type { ReactNode } from "react";
 import { createFloatingToolbarExtension, setFloatingToolbarContext } from "../../core";
 
 export { setFloatingToolbarContext };
+
+export type ExtensiveExtensionsConfig = {
+  fontFamilyOptions?: readonly FontFamilyOption[];
+};
+
+const DEFAULT_EXTENSIVE_FONT_FAMILY_OPTIONS: readonly FontFamilyOption[] = [
+  { value: "default", label: "Default", fontFamily: "inherit" },
+  {
+    value: "inter",
+    label: "Inter",
+    fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
+    cssImportUrl:
+      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+  },
+  {
+    value: "merriweather",
+    label: "Merriweather",
+    fontFamily: "'Merriweather', Georgia, 'Times New Roman', serif",
+    cssImportUrl:
+      "https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap",
+  },
+  {
+    value: "jetbrains-mono",
+    label: "JetBrains Mono",
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+    cssImportUrl:
+      "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap",
+  },
+];
+
+const DEFAULT_FONT_FAMILY_OPTION: FontFamilyOption = {
+  value: "default",
+  label: "Default",
+  fontFamily: "inherit",
+};
+
+function normalizeOptionToken(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function isValidOptionToken(value: string): boolean {
+  return /^[a-z0-9][a-z0-9-]*$/i.test(value);
+}
+
+function resolveFontFamilyOptions(
+  inputOptions?: readonly FontFamilyOption[],
+): readonly FontFamilyOption[] {
+  const candidateOptions = inputOptions ?? DEFAULT_EXTENSIVE_FONT_FAMILY_OPTIONS;
+  const seen = new Set<string>();
+  const sanitized: FontFamilyOption[] = [];
+
+  for (const option of candidateOptions) {
+    const value = option.value.trim();
+    const label = option.label.trim();
+    const fontFamily = option.fontFamily.trim();
+
+    if (!value || !label || !fontFamily) {
+      continue;
+    }
+
+    if (!isValidOptionToken(value)) {
+      continue;
+    }
+
+    const normalizedValue = normalizeOptionToken(value);
+    if (seen.has(normalizedValue)) {
+      continue;
+    }
+
+    seen.add(normalizedValue);
+    sanitized.push({
+      value,
+      label,
+      fontFamily,
+      cssImportUrl: option.cssImportUrl?.trim() || undefined,
+    });
+  }
+
+  if (sanitized.length === 0) {
+    return DEFAULT_EXTENSIVE_FONT_FAMILY_OPTIONS;
+  }
+
+  const hasDefaultOption = sanitized.some((option) => {
+    return normalizeOptionToken(option.value) === "default";
+  });
+
+  if (!hasDefaultOption) {
+    return [DEFAULT_FONT_FAMILY_OPTION, ...sanitized];
+  }
+
+  return sanitized;
+}
 
 function TableBubbleIcon({ children }: { children: ReactNode }) {
   return (
@@ -271,34 +364,6 @@ const linkExt = new LinkExtension();
   autoLinkUrls: true,
 };
 
-const fontFamilyExt = fontFamilyExtension.configure({
-  options: [
-    { value: "default", label: "Default", fontFamily: "inherit" },
-    {
-      value: "inter",
-      label: "Inter",
-      fontFamily: "'Inter', 'Segoe UI', Arial, sans-serif",
-      cssImportUrl:
-        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
-    },
-    {
-      value: "merriweather",
-      label: "Merriweather",
-      fontFamily: "'Merriweather', Georgia, 'Times New Roman', serif",
-      cssImportUrl:
-        "https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap",
-    },
-    {
-      value: "jetbrains-mono",
-      label: "JetBrains Mono",
-      fontFamily: "'JetBrains Mono', 'Courier New', monospace",
-      cssImportUrl:
-        "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap",
-    },
-  ],
-  cssLoadStrategy: "on-demand",
-});
-
 const textColorExt = textColorExtension.configure({
   options: [
     { value: "default", label: "Default", color: "inherit" },
@@ -365,39 +430,56 @@ const { extension: featureCardExtension } = createCustomNodeExtension({
   ),
 });
 
-export const extensiveExtensions = [
-  boldExtension,
-  italicExtension,
-  underlineExtension,
-  strikethroughExtension,
-  fontFamilyExt,
-  fontSizeExt,
-  lineHeightExt,
-  textColorExt,
-  textHighlightExt,
-  subscriptExtension,
-  superscriptExtension,
-  linkExt,
-  horizontalRuleExtension,
-  tableExt,
-  listExtension,
-  historyExtension,
-  extensiveImageExtension,
-  blockFormatExtension,
-  codeExtension,
-  codeIntelligenceExtension,
-  codeFormatExtension,
-  tabIndentExtension,
-  enterKeyBehaviorExtension,
-  iframeEmbedExt,
-  youTubeEmbedExt,
-  floatingToolbarExt,
-  contextMenuExt,
-  commandPaletteExt,
-  slashCommandExt,
-  emojiExt,
-  draggableBlockExt,
-  featureCardExtension,
-] as const;
+function buildExtensiveExtensions({
+  fontFamilyOptions,
+}: ExtensiveExtensionsConfig = {}) {
+  const fontFamilyExt = new FontFamilyExtension().configure({
+    options: resolveFontFamilyOptions(fontFamilyOptions),
+    cssLoadStrategy: "on-demand",
+  });
 
-export type ExtensiveExtensions = typeof extensiveExtensions;
+  return [
+    boldExtension,
+    italicExtension,
+    underlineExtension,
+    strikethroughExtension,
+    fontFamilyExt,
+    fontSizeExt,
+    lineHeightExt,
+    textColorExt,
+    textHighlightExt,
+    subscriptExtension,
+    superscriptExtension,
+    linkExt,
+    horizontalRuleExtension,
+    tableExt,
+    listExtension,
+    historyExtension,
+    extensiveImageExtension,
+    blockFormatExtension,
+    codeExtension,
+    codeIntelligenceExtension,
+    codeFormatExtension,
+    tabIndentExtension,
+    enterKeyBehaviorExtension,
+    iframeEmbedExt,
+    youTubeEmbedExt,
+    floatingToolbarExt,
+    contextMenuExt,
+    commandPaletteExt,
+    slashCommandExt,
+    emojiExt,
+    draggableBlockExt,
+    featureCardExtension,
+  ] as const;
+}
+
+export type ExtensiveExtensions = ReturnType<typeof buildExtensiveExtensions>;
+
+export function createExtensiveExtensions(
+  config?: ExtensiveExtensionsConfig,
+): ExtensiveExtensions {
+  return buildExtensiveExtensions(config);
+}
+
+export const extensiveExtensions = buildExtensiveExtensions();

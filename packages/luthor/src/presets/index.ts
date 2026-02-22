@@ -3,8 +3,20 @@ import type {
 	Extension,
 	LuthorTheme,
 } from "@lyfie/luthor-headless";
-import { extensivePreset, ExtensiveEditor, extensiveExtensions } from "./extensive";
-import type { ExtensiveEditorMode, ExtensiveEditorProps, ExtensiveEditorRef } from "./extensive";
+import {
+	extensivePreset,
+	createExtensivePreset,
+	ExtensiveEditor,
+	extensiveExtensions,
+	createExtensiveExtensions,
+} from "./extensive";
+import type {
+	ExtensiveEditorMode,
+	ExtensiveEditorProps,
+	ExtensiveEditorRef,
+	ExtensiveExtensionsConfig,
+	ExtensivePresetConfig,
+} from "./extensive";
 export { createPresetEditorConfig } from "../core/preset-config";
 
 export interface EditorPreset {
@@ -21,14 +33,18 @@ export interface EditorPreset {
 
 export {
 	extensivePreset,
+	createExtensivePreset,
 	ExtensiveEditor,
 	extensiveExtensions,
+	createExtensiveExtensions,
 };
 
 export type {
 	ExtensiveEditorMode,
 	ExtensiveEditorProps,
 	ExtensiveEditorRef,
+	ExtensiveExtensionsConfig,
+	ExtensivePresetConfig,
 };
 
 export const presetRegistry: Record<string, EditorPreset> = {

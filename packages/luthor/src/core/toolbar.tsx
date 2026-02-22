@@ -770,9 +770,16 @@ export function Toolbar({
       label: option.label,
     }));
 
-    if (options.length > 0) {
-      setFontFamilyOptions(options);
-    }
+    const normalizedOptions = options.length > 0
+      ? options
+      : [{ value: "default", label: "Default" }];
+    setFontFamilyOptions(normalizedOptions);
+    setFontFamilyValue((previousValue) => {
+      if (normalizedOptions.some((option) => option.value === previousValue)) {
+        return previousValue;
+      }
+      return "default";
+    });
   }, [commands, hasExtension]);
 
   useEffect(() => {

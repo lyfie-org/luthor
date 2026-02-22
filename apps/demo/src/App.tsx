@@ -39,6 +39,15 @@ function App() {
           toolbarAlignment="center"
           toolbarVisibility={{ fontFamily: true }}         
           toolbarClassName="docs-toolbar"
+          fontFamilyOptions={[
+            { value: "default", label: "Default", fontFamily: "inherit" },
+            {
+              value: "geist",
+              label: "Geist",
+              fontFamily: "'Geist', 'Segoe UI', Arial, sans-serif",
+              cssImportUrl: "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap",
+            },
+          ]}
           />
       </div>
     </div>

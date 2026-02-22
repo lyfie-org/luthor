@@ -86,6 +86,29 @@ export function App() {
 - `toolbarVisibility`: `Partial<Record<ToolbarItemType, boolean>>`. Set an item to `false` to hide it; unsupported items are auto-hidden even if set to `true`.
 - `toolbarClassName`: optional class appended to the toolbar root (`.luthor-toolbar`) for CSS overrides.
 - `toolbarStyleVars`: optional map of `--luthor-toolbar-*` custom properties applied to the toolbar root.
+- `fontFamilyOptions`: optional per-editor font-family option list for the `fontFamily` toolbar select.
+
+### Font family options
+
+```tsx
+import { ExtensiveEditor } from "@lyfie/luthor";
+
+export function App() {
+  return (
+    <ExtensiveEditor
+      fontFamilyOptions={[
+        { value: "default", label: "Default", fontFamily: "inherit" },
+        {
+          value: "geist",
+          label: "Geist",
+          fontFamily: "'Geist', 'Segoe UI', Arial, sans-serif",
+          cssImportUrl: "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap",
+        },
+      ]}
+    />
+  );
+}
+```
 
 Toolbar CSS variable contract:
 - `--luthor-toolbar-bg`

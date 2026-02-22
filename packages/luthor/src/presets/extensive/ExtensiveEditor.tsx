@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { createEditorSystem, RichText } from "@lyfie/luthor-headless";
 import { $setSelection } from "lexical";
-import { extensiveExtensions, setFloatingToolbarContext } from "./extensions";
+import { createExtensiveExtensions, extensiveExtensions, setFloatingToolbarContext } from "./extensions";
 import {
   CommandPalette,
   SlashCommandMenu,
@@ -22,7 +22,13 @@ import {
   type ToolbarPosition,
 } from "../../core";
 import { EXTENSIVE_WELCOME_CONTENT_JSONB as extensiveWelcomeContent } from "./welcomeContent";
-import type { CommandPaletteExtension, SlashCommandExtension, EmojiExtension, EmojiCatalogItem } from "@lyfie/luthor-headless";
+import type {
+  CommandPaletteExtension,
+  SlashCommandExtension,
+  EmojiExtension,
+  EmojiCatalogItem,
+  FontFamilyOption,
+} from "@lyfie/luthor-headless";
 import "./styles.css";
 
 const { Provider, useEditor } = createEditorSystem<typeof extensiveExtensions>();
@@ -109,6 +115,21 @@ function toJSONBInput(value: string): string {
   } catch {
     return JSON.stringify(createJSONBDocumentFromText(value));
   }
+}
+
+function normalizeFontFamilyOptionsKey(options?: readonly FontFamilyOption[]): string {
+  if (!options || options.length === 0) {
+    return "__default__";
+  }
+
+  return JSON.stringify(
+    options.map((option) => ({
+      value: option.value.trim(),
+      label: option.label.trim(),
+      fontFamily: option.fontFamily.trim(),
+      cssImportUrl: option.cssImportUrl?.trim() || "",
+    })),
+  );
 }
 
 function ExtensiveEditorContent({
@@ -341,7 +362,7 @@ function ExtensiveEditorContent({
       isDark={isDark}
       toggleTheme={toggleTheme}
       onCommandPaletteOpen={() => commands.showCommandPalette()}
-      imageUploadHandler={(file) => ((extensiveExtensions.find((ext: any) => ext.name === "image") as any)?.config?.uploadHandler?.(file) ?? Promise.resolve(URL.createObjectURL(file)))}
+      imageUploadHandler={(file) => ((extensions.find((ext: any) => ext.name === "image") as any)?.config?.uploadHandler?.(file) ?? Promise.resolve(URL.createObjectURL(file)))}
       layout={toolbarLayout ?? TRADITIONAL_TOOLBAR_LAYOUT}
       toolbarVisibility={toolbarVisibility}
       toolbarStyleVars={toolbarStyleVars}
@@ -445,6 +466,7 @@ export interface ExtensiveEditorProps {
   toolbarClassName?: string;
   toolbarStyleVars?: ToolbarStyleVars;
   isToolbarEnabled?: boolean;
+  fontFamilyOptions?: readonly FontFamilyOption[];
 }
 
 export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorProps>(
@@ -465,6 +487,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     toolbarClassName,
     toolbarStyleVars,
     isToolbarEnabled = true,
+    fontFamilyOptions,
   }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
     const isDark = editorTheme === "dark";
@@ -477,6 +500,33 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     useEffect(() => {
       setEditorTheme(initialTheme);
     }, [initialTheme]);
+
+    const fontFamilyOptionsKey = useMemo(
+      () => normalizeFontFamilyOptionsKey(fontFamilyOptions),
+      [fontFamilyOptions],
+    );
+    const stableFontFamilyOptionsRef = useRef<readonly FontFamilyOption[] | undefined>(fontFamilyOptions);
+    const stableFontFamilyOptionsKeyRef = useRef(fontFamilyOptionsKey);
+
+    if (stableFontFamilyOptionsKeyRef.current !== fontFamilyOptionsKey) {
+      stableFontFamilyOptionsKeyRef.current = fontFamilyOptionsKey;
+      stableFontFamilyOptionsRef.current = fontFamilyOptions;
+    }
+
+    const memoizedExtensionsRef = useRef<{
+      key: string;
+      value: ReturnType<typeof createExtensiveExtensions>;
+    } | null>(null);
+
+    if (!memoizedExtensionsRef.current || memoizedExtensionsRef.current.key !== fontFamilyOptionsKey) {
+      memoizedExtensionsRef.current = {
+        key: fontFamilyOptionsKey,
+        value: createExtensiveExtensions({
+          fontFamilyOptions: stableFontFamilyOptionsRef.current,
+        }),
+      };
+    }
+    const memoizedExtensions = memoizedExtensionsRef.current.value;
 
     const [methods, setMethods] = useState<ExtensiveEditorRef | null>(null);
     useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);
@@ -494,7 +544,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
 
     return (
       <div className={`luthor-preset luthor-preset-extensive luthor-editor-wrapper ${variantClassName || ""} ${className || ""}`.trim()} data-editor-theme={editorTheme}>
-        <Provider extensions={extensiveExtensions}>
+        <Provider extensions={memoizedExtensions}>
           <ExtensiveEditorContent
             isDark={isDark}
             toggleTheme={toggleTheme}

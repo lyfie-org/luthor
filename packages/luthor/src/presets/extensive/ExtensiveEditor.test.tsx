@@ -8,6 +8,7 @@ const {
   commandsToCommandPaletteItemsMock,
   commandsToSlashCommandItemsMock,
   toolbarMock,
+  createExtensiveExtensionsMock,
 } = vi.hoisted(() => ({
   registerKeyboardShortcutsMock: vi.fn(() => vi.fn()),
   commandsToCommandPaletteItemsMock: vi.fn(() => [{ id: "mock-command" }]),
@@ -15,6 +16,7 @@ const {
   toolbarMock: vi.fn(({ classNames, toolbarStyleVars }: { classNames?: { toolbar?: string }; toolbarStyleVars?: Record<string, string> }) => (
     <div data-testid="toolbar" className={classNames?.toolbar} style={toolbarStyleVars} />
   )),
+  createExtensiveExtensionsMock: vi.fn(() => []),
 }));
 
 vi.mock("lexical", () => ({
@@ -23,6 +25,7 @@ vi.mock("lexical", () => ({
 
 vi.mock("./extensions", () => ({
   extensiveExtensions: [],
+  createExtensiveExtensions: createExtensiveExtensionsMock,
   setFloatingToolbarContext: vi.fn(),
 }));
 
@@ -169,6 +172,24 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     expect(toolbar).toHaveStyle({
       "--luthor-toolbar-button-active-bg": "#ff4d4f",
       "--luthor-toolbar-button-active-fg": "#ffffff",
+    });
+  });
+
+  it("passes fontFamilyOptions to extension factory", () => {
+    const fontFamilyOptions = [
+      { value: "default", label: "Default", fontFamily: "inherit" },
+      { value: "geist", label: "Geist", fontFamily: "'Geist', Arial, sans-serif" },
+    ] as const;
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        fontFamilyOptions={fontFamilyOptions}
+      />,
+    );
+
+    expect(createExtensiveExtensionsMock).toHaveBeenCalledWith({
+      fontFamilyOptions,
     });
   });
 });
