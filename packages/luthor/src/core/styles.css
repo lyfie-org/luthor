@@ -1997,9 +1997,19 @@
 	outline: none;
 }
 
+.luthor-floating-toolbar-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
 .luthor-floating-toolbar-input:focus {
 	border-color: var(--luthor-floating-border-active);
 	box-shadow: 0 0 0 2px color-mix(in srgb, var(--luthor-floating-accent) 18%, transparent);
+}
+
+.luthor-floating-toolbar-input.is-error {
+	border-color: #dc2626;
 }
 
 .luthor-media-embed-shell {

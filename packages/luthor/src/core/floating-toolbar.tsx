@@ -42,7 +42,9 @@ export function FloatingToolbar({
   hide,
 }: FloatingToolbarProps) {
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const [iframeUrlDraft, setIframeUrlDraft] = useState("");
   const [iframeCaptionDraft, setIframeCaptionDraft] = useState("");
+  const [iframeUrlError, setIframeUrlError] = useState<string | null>(null);
   const iframeEmbedSelected = !!activeStates.isIframeEmbedSelected;
   const youTubeEmbedSelected = !!activeStates.isYouTubeEmbedSelected;
   const embedSelected = iframeEmbedSelected || youTubeEmbedSelected;
@@ -67,16 +69,26 @@ export function FloatingToolbar({
   }, [isVisible, hide]);
 
   useEffect(() => {
-    if (!isVisible || !iframeEmbedSelected || typeof commands.getIframeEmbedCaption !== "function") {
+    if (!isVisible || !iframeEmbedSelected) {
       return;
     }
 
     let disposed = false;
-    void commands.getIframeEmbedCaption().then((caption) => {
-      if (!disposed) {
-        setIframeCaptionDraft(caption ?? "");
-      }
-    });
+    if (typeof commands.getIframeEmbedCaption === "function") {
+      void commands.getIframeEmbedCaption().then((caption) => {
+        if (!disposed) {
+          setIframeCaptionDraft(caption ?? "");
+        }
+      });
+    }
+    if (typeof commands.getIframeEmbedUrl === "function") {
+      void commands.getIframeEmbedUrl().then((url) => {
+        if (!disposed) {
+          setIframeUrlDraft(url ?? "");
+        }
+      });
+    }
+    setIframeUrlError(null);
 
     return () => {
       disposed = true;
@@ -118,11 +130,27 @@ export function FloatingToolbar({
 
     const canEditIframeCaption =
       iframeEmbedSelected && typeof commands.setIframeEmbedCaption === "function";
+    const canEditIframeUrl =
+      iframeEmbedSelected && typeof commands.updateIframeEmbedUrl === "function";
     const commitIframeCaption = () => {
       if (!canEditIframeCaption) {
         return;
       }
       commands.setIframeEmbedCaption?.(iframeCaptionDraft);
+    };
+    const commitIframeUrl = () => {
+      if (!canEditIframeUrl) {
+        return;
+      }
+      const updated = commands.updateIframeEmbedUrl?.(iframeUrlDraft) ?? false;
+      if (!updated) {
+        setIframeUrlError("Enter a valid http(s) URL");
+        if (typeof commands.getIframeEmbedUrl === "function") {
+          void commands.getIframeEmbedUrl().then((url) => setIframeUrlDraft(url ?? ""));
+        }
+        return;
+      }
+      setIframeUrlError(null);
     };
 
     return (
@@ -136,24 +164,49 @@ export function FloatingToolbar({
         <IconButton onClick={() => setAlignment("right")} active={isRightAligned} title="Align Right">
           <AlignRightIcon size={14} />
         </IconButton>
-        {canEditIframeCaption ? (
+        {canEditIframeCaption || canEditIframeUrl ? (
           <>
             <div className="luthor-floating-toolbar-separator" />
-            <input
-              type="text"
-              value={iframeCaptionDraft}
-              className="luthor-floating-toolbar-input"
-              placeholder="Add caption"
-              aria-label="Iframe caption"
-              onChange={(event) => setIframeCaptionDraft(event.target.value)}
-              onBlur={commitIframeCaption}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  (event.target as HTMLInputElement).blur();
-                }
-              }}
-            />
+            <div className="luthor-floating-toolbar-fields">
+              {canEditIframeUrl ? (
+                <input
+                  type="url"
+                  value={iframeUrlDraft}
+                  className={`luthor-floating-toolbar-input${iframeUrlError ? " is-error" : ""}`}
+                  placeholder="https://example.com/embed"
+                  aria-label="Iframe URL"
+                  aria-invalid={iframeUrlError ? true : undefined}
+                  onChange={(event) => {
+                    setIframeUrlDraft(event.target.value);
+                    if (iframeUrlError) {
+                      setIframeUrlError(null);
+                    }
+                  }}
+                  onBlur={commitIframeUrl}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      (event.target as HTMLInputElement).blur();
+                    }
+                  }}
+                />
+              ) : null}
+              <input
+                type="text"
+                value={iframeCaptionDraft}
+                className="luthor-floating-toolbar-input"
+                placeholder="Add caption"
+                aria-label="Iframe caption"
+                onChange={(event) => setIframeCaptionDraft(event.target.value)}
+                onBlur={commitIframeCaption}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    (event.target as HTMLInputElement).blur();
+                  }
+                }}
+              />
+            </div>
           </>
         ) : null}
       </div>

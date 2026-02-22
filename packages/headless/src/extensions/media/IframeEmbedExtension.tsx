@@ -42,6 +42,8 @@ export type IframeEmbedCommands = {
   resizeIframeEmbed: (width: number, height: number) => void;
   setIframeEmbedCaption: (caption: string) => void;
   getIframeEmbedCaption: () => Promise<string>;
+  updateIframeEmbedUrl: (inputUrl: string) => boolean;
+  getIframeEmbedUrl: () => Promise<string>;
 };
 
 export type IframeEmbedQueries = {
@@ -75,7 +77,14 @@ function ensureProtocol(input: string): string {
 
 function parseUrl(input: string): URL | null {
   try {
-    return new URL(ensureProtocol(input));
+    const parsed = new URL(ensureProtocol(input.trim()));
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null;
+    }
+    if (!parsed.hostname) {
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
@@ -587,6 +596,41 @@ export class IframeEmbedExtension extends BaseExtension<
 
             const node = selection.getNodes().find((item) => item instanceof IframeEmbedNode) as IframeEmbedNode | undefined;
             resolve(node?.getPayload().caption ?? "");
+          });
+        }),
+      updateIframeEmbedUrl: (inputUrl: string) => {
+        const parsedUrl = parseUrl(inputUrl);
+        if (!parsedUrl) {
+          return false;
+        }
+
+        let updated = false;
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isNodeSelection(selection)) {
+            return;
+          }
+
+          selection.getNodes().forEach((node) => {
+            if (node instanceof IframeEmbedNode) {
+              node.setPayload({ src: parsedUrl.toString() });
+              updated = true;
+            }
+          });
+        });
+        return updated;
+      },
+      getIframeEmbedUrl: () =>
+        new Promise((resolve) => {
+          editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if (!$isNodeSelection(selection)) {
+              resolve("");
+              return;
+            }
+
+            const node = selection.getNodes().find((item) => item instanceof IframeEmbedNode) as IframeEmbedNode | undefined;
+            resolve(node?.getPayload().src ?? "");
           });
         }),
     };
