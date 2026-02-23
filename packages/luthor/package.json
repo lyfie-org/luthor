@@ -17,14 +17,12 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./styles.css": "./dist/index.css",
     "./presets/extensive": {
       "types": "./dist/presets/extensive/index.d.ts",
       "import": "./dist/presets/extensive/index.js",
-      "require": "./dist/presets/extensive/index.js",
       "default": "./dist/presets/extensive/index.js"
     }
   },
@@ -32,7 +30,8 @@
     "build": "tsup",
     "lint": "eslint . --max-warnings 0",
     "dev": "tsup --watch",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:rule-contracts": "node ../../tools/check-rule-contracts.mjs --scope=luthor"
   },
   "keywords": [
     "editor",

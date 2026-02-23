@@ -18,4 +18,6 @@ export {
   LUTHOR_EDITOR_THEME_TOKENS,
 } from "./theme";
 export type { LuthorTheme, LuthorEditorThemeToken, LuthorEditorThemeOverrides } from "./theme";
+export { clearLexicalSelection, resolveLinkNodeKeyFromAnchor } from "./lexical-interop";
+export type { LexicalEditor } from "lexical";
 

@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { $getNearestNodeFromDOMNode, type LexicalEditor } from "lexical";
-import { $isLinkNode } from "@lexical/link";
+import { resolveLinkNodeKeyFromAnchor, type LexicalEditor } from "@lyfie/luthor-headless";
 import { UnlinkIcon } from "./icons";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
 import type { CoreEditorCommands, CoreTheme } from "./types";
@@ -59,40 +58,6 @@ function getLinkFromTarget(target: EventTarget | null, root: HTMLElement): HTMLA
   return link;
 }
 
-function resolveLinkNodeKey(editor: LexicalEditor, anchorEl: HTMLAnchorElement): string | null {
-  const attributeKey = anchorEl.getAttribute("data-lexical-node-key")?.trim();
-  if (attributeKey) {
-    return attributeKey;
-  }
-
-  let resolvedKey: string | null = null;
-  editor.read(() => {
-    const nearest = $getNearestNodeFromDOMNode(anchorEl);
-    if ($isLinkNode(nearest)) {
-      resolvedKey = nearest.getKey();
-      return;
-    }
-
-    const firstChild = anchorEl.firstChild;
-    if (!firstChild) {
-      return;
-    }
-
-    const childNode = $getNearestNodeFromDOMNode(firstChild);
-    if ($isLinkNode(childNode)) {
-      resolvedKey = childNode.getKey();
-      return;
-    }
-
-    const parent = childNode?.getParent();
-    if (parent && $isLinkNode(parent)) {
-      resolvedKey = parent.getKey();
-    }
-  });
-
-  return resolvedKey;
-}
-
 export function LinkHoverBubble({
   editor,
   commands,
@@ -107,37 +72,37 @@ export function LinkHoverBubble({
   const [urlError, setUrlError] = useState<string | null>(null);
   const [position, setPosition] = useState<LinkBubblePosition | null>(null);
 
-  const clearHideTimeout = () => {
+  const clearHideTimeout = useCallback(() => {
     if (hideTimeoutRef.current !== null) {
       window.clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
     }
-  };
+  }, []);
 
-  const hideBubble = () => {
+  const hideBubble = useCallback(() => {
     clearHideTimeout();
     setHoveredLink(null);
     setIsEditing(false);
     setDraftUrl("");
     setUrlError(null);
     setPosition(null);
-  };
+  }, [clearHideTimeout]);
 
-  const scheduleHide = () => {
+  const scheduleHide = useCallback(() => {
     clearHideTimeout();
     hideTimeoutRef.current = window.setTimeout(() => {
       hideBubble();
     }, HIDE_DELAY_MS);
-  };
+  }, [clearHideTimeout, hideBubble]);
 
-  const updatePosition = (anchorEl: HTMLAnchorElement) => {
+  const updatePosition = useCallback((anchorEl: HTMLAnchorElement) => {
     const rect = anchorEl.getBoundingClientRect();
     const nextTop = rect.bottom + 8;
     const nextLeft = Math.max(10, Math.min(rect.left, window.innerWidth - 340));
     setPosition({ top: nextTop, left: nextLeft });
-  };
+  }, []);
 
-  const syncLinkByKey = (nodeKey: string, fallbackUrl: string) => {
+  const syncLinkByKey = useCallback((nodeKey: string, fallbackUrl: string) => {
     if (typeof commands.getLinkByKey !== "function") {
       setHoveredLink((current) => {
         if (!current || current.nodeKey !== nodeKey) {
@@ -161,7 +126,7 @@ export function LinkHoverBubble({
         return { ...current, url: link.url };
       });
     });
-  };
+  }, [commands, hideBubble]);
 
   useEffect(() => {
     if (!editor || disabled || typeof window === "undefined") {
@@ -188,7 +153,7 @@ export function LinkHoverBubble({
 
       clearHideTimeout();
 
-      const nodeKey = resolveLinkNodeKey(editor, link);
+      const nodeKey = resolveLinkNodeKeyFromAnchor(editor, link);
       if (!nodeKey) {
         return;
       }
@@ -265,7 +230,18 @@ export function LinkHoverBubble({
       window.removeEventListener("resize", handleReposition);
       clearHideTimeout();
     };
-  }, [commands, disabled, editor, hoveredLink, isEditing]);
+  }, [
+    commands,
+    disabled,
+    editor,
+    hoveredLink,
+    isEditing,
+    hideBubble,
+    scheduleHide,
+    syncLinkByKey,
+    updatePosition,
+    clearHideTimeout,
+  ]);
 
   const bubbleStyle = useMemo<CSSProperties | undefined>(() => {
     if (!hoveredLink || !position) {

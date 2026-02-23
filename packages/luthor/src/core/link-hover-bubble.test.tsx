@@ -3,6 +3,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { LinkHoverBubble } from "./link-hover-bubble";
 import type { CoreEditorCommands } from "./types";
 
+vi.mock("@lyfie/luthor-headless", () => ({
+  resolveLinkNodeKeyFromAnchor: (_editor: unknown, anchor: HTMLAnchorElement) =>
+    anchor.getAttribute("data-lexical-node-key"),
+}));
+
 function createCommands(overrides: Partial<CoreEditorCommands> = {}): CoreEditorCommands {
   return {
     toggleBold: vi.fn(),

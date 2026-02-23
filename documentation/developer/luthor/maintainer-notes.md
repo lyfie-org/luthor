@@ -8,6 +8,13 @@ Maintainer-focused notes for `@lyfie/luthor` contributors.
 - `@lyfie/luthor` should compose and re-export headless capabilities through preset UX.
 - Avoid introducing direct, preset-only Lexical logic unless it is strictly UI composition glue.
 
+## Rule contracts
+
+- Runtime source under `packages/luthor/src/**` must not import `lexical` or `@lexical/*` directly.
+- If a preset feature needs Lexical-level logic, add it to `@lyfie/luthor-headless` and consume it via headless exports.
+- Run `pnpm --filter @lyfie/luthor check:rule-contracts` before merging.
+- Root enforcement command: `pnpm check:rule-contracts`.
+
 ## Core invariants
 
 - `core/types.ts` is the contract between extension capability and UI components.

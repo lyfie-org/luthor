@@ -183,6 +183,7 @@ vi.mock("@lyfie/luthor-headless", () => ({
     ...override,
   }),
   createEditorThemeStyleVars: createEditorThemeStyleVarsMock,
+  clearLexicalSelection: vi.fn(),
 }));
 
 import { ExtensiveEditor } from "./ExtensiveEditor";

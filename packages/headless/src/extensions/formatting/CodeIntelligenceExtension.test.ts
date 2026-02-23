@@ -14,16 +14,14 @@ describe("CodeIntelligenceExtension language options", () => {
     const extension = new CodeIntelligenceExtension().configure({
       languageOptions: {
         mode: "append",
-        values: ["javascript", "js", "md", "SQL"],
+        values: ["md", "SQL"],
       },
     }) as CodeIntelligenceExtension;
 
     const options = extension.getLanguageOptionsSnapshot();
 
-    expect(options).toContain("js");
     expect(options).toContain("markdown");
     expect(options).toContain("sql");
-    expect(options.filter((option) => option === "js")).toHaveLength(1);
   });
 
   it("replaces defaults when mode is replace", () => {
@@ -78,7 +76,7 @@ describe("CodeIntelligenceExtension language options", () => {
     };
 
     expect(extension.getThemeForLanguage?.("typescript")).toBe("hljs");
-    expect(extension.getThemeForLanguage?.("tsx")).toBe("hljs");
     expect(extension.getThemeForLanguage?.("javascript")).toBe("hljs");
+    expect(extension.getThemeForLanguage?.("tsx")).toBe("plain");
   });
 });

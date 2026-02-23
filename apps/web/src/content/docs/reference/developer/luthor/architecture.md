@@ -76,6 +76,32 @@ From `packages/luthor/package.json`:
 - React and React DOM are peers: `^18.0.0 || ^19.0.0`.
 - Package version: `2.2.0`.
 
+## Ownership contract (authoritative)
+
+- `@lyfie/luthor` must not introduce new direct Lexical-derived feature behavior in runtime preset source.
+- Feature behavior belongs in `@lyfie/luthor-headless`; `@lyfie/luthor` composes, styles, and re-exports.
+- If a preset requires new editor semantics, first add a headless API and consume it here.
+
+## How to add a feature safely
+
+Decision tree:
+
+1. Does the change alter Lexical behavior (nodes, commands, selection semantics, parsing)?
+   - Yes: implement in `@lyfie/luthor-headless`.
+   - No: continue.
+2. Is the change about preset UI, layout, default config, or theme ergonomics?
+   - Yes: implement in `@lyfie/luthor`.
+   - No: continue.
+3. Is it cross-cutting?
+   - Implement headless behavior first, then wire luthor preset UX.
+
+Required delivery steps:
+
+- Update typed public APIs first.
+- Add tests (headless behavior + luthor UX integration).
+- Keep docs synchronized in same PR.
+- Pass rule-contract, lint, test, and build gates.
+
 ## Related documents
 
 - Per-file reference: [source-file-reference.md](/docs/reference/developer/luthor/source-file-reference/)

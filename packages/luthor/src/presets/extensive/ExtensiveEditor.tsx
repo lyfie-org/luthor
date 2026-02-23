@@ -1,6 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties } from "react";
-import { createEditorSystem, createEditorThemeStyleVars, defaultLuthorTheme, mergeThemes, RichText, type LuthorTheme } from "@lyfie/luthor-headless";
-import { $setSelection } from "lexical";
+import { clearLexicalSelection, createEditorSystem, createEditorThemeStyleVars, defaultLuthorTheme, mergeThemes, RichText, type LuthorTheme } from "@lyfie/luthor-headless";
 import {
   createExtensiveExtensions,
   extensiveExtensions,
@@ -874,7 +873,7 @@ function ExtensiveEditorContent({
   const stableShortcutConfigKeyRef = useRef(shortcutConfigKey);
   const disabledCommandIds = useMemo(
     () => normalizeCommandIdList(shortcutConfig?.disabledCommandIds),
-    [shortcutConfigKey],
+    [shortcutConfig?.disabledCommandIds],
   );
   const disabledCommandIdsSet = useMemo(
     () => new Set(disabledCommandIds),
@@ -1001,6 +1000,7 @@ function ExtensiveEditorContent({
     slashCommandVisibilityKey,
     shortcutConfigKey,
     isFeatureEnabled,
+    commandPaletteShortcutOnly,
   ]);
 
   useEffect(() => {
@@ -1166,9 +1166,9 @@ function ExtensiveEditorContent({
       }
 
       if (mode === "visual" && newMode !== "visual") {
-        editor?.update(() => {
-          $setSelection(null);
-        });
+        if (editor) {
+          clearLexicalSelection(editor);
+        }
         editor?.getRootElement()?.blur();
       }
 
@@ -1470,7 +1470,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     );
     const resolvedFeatureFlags = useMemo(
       () => resolveFeatureFlags(effectiveFeatureFlags),
-      [featureFlagsKey],
+      [effectiveFeatureFlags],
     );
     const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${languageOptionsKey}::${featureFlagsKey}`;
     const stableFontFamilyOptionsRef = useRef<readonly FontFamilyOption[] | undefined>(fontFamilyOptions);
@@ -1570,32 +1570,14 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       () => normalizeStyleVarsKey(defaultSettingsVars),
       [defaultSettingsVars],
     );
-    const stableDefaultSettingsRef = useRef<Record<string, string> | undefined>(defaultSettingsVars);
-    const stableEditorThemeOverridesRef = useRef<EditorThemeOverrides | undefined>(editorThemeOverrides);
-    const stableQuoteStyleVarsRef = useRef<QuoteStyleVars | undefined>(quoteStyleVars);
-    const stableDefaultSettingsKeyRef = useRef(defaultSettingsKey);
-    const stableEditorThemeOverridesKeyRef = useRef(editorThemeOverridesKey);
-    const stableQuoteStyleVarsKeyRef = useRef(quoteStyleVarsKey);
-
-    if (stableDefaultSettingsKeyRef.current !== defaultSettingsKey) {
-      stableDefaultSettingsKeyRef.current = defaultSettingsKey;
-      stableDefaultSettingsRef.current = defaultSettingsVars;
-    }
-
-    if (stableEditorThemeOverridesKeyRef.current !== editorThemeOverridesKey) {
-      stableEditorThemeOverridesKeyRef.current = editorThemeOverridesKey;
-      stableEditorThemeOverridesRef.current = editorThemeOverrides;
-    }
-
-    if (stableQuoteStyleVarsKeyRef.current !== quoteStyleVarsKey) {
-      stableQuoteStyleVarsKeyRef.current = quoteStyleVarsKey;
-      stableQuoteStyleVarsRef.current = quoteStyleVars;
-    }
 
     const wrapperStyleVars = useMemo(() => {
-      const defaultVars = stableDefaultSettingsRef.current as CSSProperties | undefined;
-      const editorThemeVars = createEditorThemeStyleVars(stableEditorThemeOverridesRef.current);
-      const quoteVars = stableQuoteStyleVarsRef.current as CSSProperties | undefined;
+      void defaultSettingsKey;
+      void editorThemeOverridesKey;
+      void quoteStyleVarsKey;
+      const defaultVars = defaultSettingsVars as CSSProperties | undefined;
+      const editorThemeVars = createEditorThemeStyleVars(editorThemeOverrides);
+      const quoteVars = quoteStyleVars as CSSProperties | undefined;
       const lineHeightVars = {
         "--luthor-default-line-height": minimumDefaultLineHeightKey,
       } as CSSProperties;
@@ -1609,7 +1591,15 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         ...(quoteVars ?? {}),
         ...lineHeightVars,
       };
-    }, [defaultSettingsKey, editorThemeOverridesKey, quoteStyleVarsKey, minimumDefaultLineHeightKey]);
+    }, [
+      minimumDefaultLineHeightKey,
+      defaultSettingsVars,
+      editorThemeOverrides,
+      quoteStyleVars,
+      defaultSettingsKey,
+      editorThemeOverridesKey,
+      quoteStyleVarsKey,
+    ]);
 
     const [methods, setMethods] = useState<ExtensiveEditorRef | null>(null);
     useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);

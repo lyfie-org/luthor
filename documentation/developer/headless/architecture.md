@@ -50,3 +50,29 @@ This document defines how `@lyfie/luthor-headless` is structured, why key design
 - Place any Lexical-derived feature logic in `packages/headless` and re-export from presets.
 - Keep extension APIs explicit and strongly typed.
 - Favor additive extension configs over hidden global behavior.
+
+## Ownership contract (authoritative)
+
+- `@lyfie/luthor-headless` owns Lexical-derived feature behavior, commands, node logic, parsing, and serialization.
+- `@lyfie/luthor` owns preset composition, UI layout/theming ergonomics, and re-export convenience.
+- If a new feature touches Lexical nodes/selection/editor state semantics, implement it here first.
+
+## How to add a feature safely
+
+Decision tree:
+
+1. Does the feature require Lexical/node/selection behavior?
+   - Yes: implement in `packages/headless/src/extensions/*` (or `src/core/*` only if truly runtime-core).
+   - No: continue.
+2. Is the feature preset UX/composition/theming for plug-and-play users?
+   - Yes: implement in `packages/luthor/src/core/*` or `packages/luthor/src/presets/*`.
+   - No: continue.
+3. Does it need both behavior and UX?
+   - Implement behavior in headless first, then wire UI in luthor.
+
+Required delivery steps:
+
+- Add/extend typed API surface first.
+- Add tests for behavior in headless and UI integration in luthor where applicable.
+- Update package README + user/developer docs in the same change.
+- Run quality gates and rule-contract checks before merge.

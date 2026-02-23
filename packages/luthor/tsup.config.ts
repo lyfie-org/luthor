@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/presets/extensive/index.ts"],
   format: ["esm"],
   dts: true,
   clean: true,
@@ -10,7 +10,6 @@ export default defineConfig({
   external: [
     "react",
     "react-dom",
-    "lucide-react",
     "@lyfie/luthor-headless",
     "lexical",
     "@lexical/code",

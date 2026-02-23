@@ -4,7 +4,7 @@
   "description": "Luthor Editor - A headless, extensible rich text editor built on Lexical",
   "type": "module",
   "private": false,
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
@@ -15,7 +15,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     }
   },
@@ -23,7 +23,8 @@
     "build": "tsup",
     "lint": "eslint . --max-warnings 0",
     "dev": "tsup --watch",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:rule-contracts": "node ../../tools/check-rule-contracts.mjs --scope=headless"
   },
   "keywords": [
     "editor",
@@ -50,7 +51,10 @@
     "@types/node": "^20.19.33",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "eslint": "^9.32.0",
+    "jsdom": "^26.1.0",
     "tsup": "^8.0.0",
     "typescript": "^5.7.3",
     "vitest": "^3.2.4"
@@ -74,5 +78,8 @@
     "highlight.js": {
       "optional": true
     }
+  },
+  "optionalDependencies": {
+    "@emoji-mart/data": "^1.2.1"
   }
 }

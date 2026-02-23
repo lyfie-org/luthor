@@ -3,7 +3,7 @@
 Concatenated markdown corpus for AI ingestion.
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\documentation
-Generated at: 2026-02-23T13:10:41.150Z
+Generated at: 2026-02-23T14:31:50.805Z
 
 ---
 ## FILE: demo-app/website-development-phased-plan.md
@@ -623,6 +623,32 @@ This document defines how `@lyfie/luthor-headless` is structured, why key design
 - Keep extension APIs explicit and strongly typed.
 - Favor additive extension configs over hidden global behavior.
 
+## Ownership contract (authoritative)
+
+- `@lyfie/luthor-headless` owns Lexical-derived feature behavior, commands, node logic, parsing, and serialization.
+- `@lyfie/luthor` owns preset composition, UI layout/theming ergonomics, and re-export convenience.
+- If a new feature touches Lexical nodes/selection/editor state semantics, implement it here first.
+
+## How to add a feature safely
+
+Decision tree:
+
+1. Does the feature require Lexical/node/selection behavior?
+   - Yes: implement in `packages/headless/src/extensions/*` (or `src/core/*` only if truly runtime-core).
+   - No: continue.
+2. Is the feature preset UX/composition/theming for plug-and-play users?
+   - Yes: implement in `packages/luthor/src/core/*` or `packages/luthor/src/presets/*`.
+   - No: continue.
+3. Does it need both behavior and UX?
+   - Implement behavior in headless first, then wire UI in luthor.
+
+Required delivery steps:
+
+- Add/extend typed API surface first.
+- Add tests for behavior in headless and UI integration in luthor where applicable.
+- Update package README + user/developer docs in the same change.
+- Run quality gates and rule-contract checks before merge.
+
 ---
 ## FILE: developer/headless/maintainer-notes.md
 ## URL: https://www.luthor.fyi/docs/reference/developer/headless/maintainer-notes/
@@ -650,6 +676,15 @@ This document defines how `@lyfie/luthor-headless` is structured, why key design
 - Keep this package lightweight and headless-first.
 - Any non-essential integration should be optional and fail-safe.
 - Lexical-derived feature implementations belong in `packages/headless`; preset package re-exports and composes.
+
+## Rule contracts
+
+- `packages/headless/package.json` must not introduce regular `dependencies` for optional integrations.
+- Any runtime dynamic import of third-party modules must be declared in either:
+  - `optionalDependencies`, or
+  - `peerDependencies` + `peerDependenciesMeta[dep].optional: true`.
+- Run `pnpm --filter @lyfie/luthor-headless check:rule-contracts` before merging.
+- Root enforcement command: `pnpm check:rule-contracts`.
 
 ## Testing and validation expectations
 
@@ -858,6 +893,32 @@ From `packages/luthor/package.json`:
 - React and React DOM are peers: `^18.0.0 || ^19.0.0`.
 - Package version: `2.2.0`.
 
+## Ownership contract (authoritative)
+
+- `@lyfie/luthor` must not introduce new direct Lexical-derived feature behavior in runtime preset source.
+- Feature behavior belongs in `@lyfie/luthor-headless`; `@lyfie/luthor` composes, styles, and re-exports.
+- If a preset requires new editor semantics, first add a headless API and consume it here.
+
+## How to add a feature safely
+
+Decision tree:
+
+1. Does the change alter Lexical behavior (nodes, commands, selection semantics, parsing)?
+   - Yes: implement in `@lyfie/luthor-headless`.
+   - No: continue.
+2. Is the change about preset UI, layout, default config, or theme ergonomics?
+   - Yes: implement in `@lyfie/luthor`.
+   - No: continue.
+3. Is it cross-cutting?
+   - Implement headless behavior first, then wire luthor preset UX.
+
+Required delivery steps:
+
+- Update typed public APIs first.
+- Add tests (headless behavior + luthor UX integration).
+- Keep docs synchronized in same PR.
+- Pass rule-contract, lint, test, and build gates.
+
 ## Related documents
 
 - Per-file reference: [source-file-reference.md](source-file-reference.md)
@@ -879,6 +940,13 @@ Maintainer-focused notes for `@lyfie/luthor` contributors.
 - New Lexical-derived feature implementations should live in `@lyfie/luthor-headless` first.
 - `@lyfie/luthor` should compose and re-export headless capabilities through preset UX.
 - Avoid introducing direct, preset-only Lexical logic unless it is strictly UI composition glue.
+
+## Rule contracts
+
+- Runtime source under `packages/luthor/src/**` must not import `lexical` or `@lexical/*` directly.
+- If a preset feature needs Lexical-level logic, add it to `@lyfie/luthor-headless` and consume it via headless exports.
+- Run `pnpm --filter @lyfie/luthor check:rule-contracts` before merging.
+- Root enforcement command: `pnpm check:rule-contracts`.
 
 ## Core invariants
 
@@ -2269,7 +2337,14 @@ Optional:
 
 ```bash
 pnpm add highlight.js
+pnpm add @emoji-mart/data
 ```
+
+Optional integration matrix:
+
+- `highlight.js`: enables richer code token theming when your app loads a highlight stylesheet.
+- `@emoji-mart/data`: enables larger emoji catalog auto-detection by `EmojiExtension`.
+- If either package is missing, `@lyfie/luthor-headless` remains functional and falls back to built-in behavior.
 
 ## Minimal setup
 

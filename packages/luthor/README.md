@@ -2,6 +2,12 @@
 
 Plug-and-play React editor preset package built on top of `@lyfie/luthor-headless`.
 
+## Package responsibility
+
+- Owns preset UX/composition and plug-and-play defaults.
+- Reuses headless behavior APIs instead of re-implementing Lexical semantics.
+- Exposes headless namespace for advanced users who need lower-level control.
+
 ## Installation
 
 ```bash

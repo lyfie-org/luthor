@@ -21,6 +21,15 @@
 - Any non-essential integration should be optional and fail-safe.
 - Lexical-derived feature implementations belong in `packages/headless`; preset package re-exports and composes.
 
+## Rule contracts
+
+- `packages/headless/package.json` must not introduce regular `dependencies` for optional integrations.
+- Any runtime dynamic import of third-party modules must be declared in either:
+  - `optionalDependencies`, or
+  - `peerDependencies` + `peerDependenciesMeta[dep].optional: true`.
+- Run `pnpm --filter @lyfie/luthor-headless check:rule-contracts` before merging.
+- Root enforcement command: `pnpm check:rule-contracts`.
+
 ## Testing and validation expectations
 
 For any source change in `packages/headless`:

@@ -2,6 +2,12 @@
 
 Type-safe, headless rich text editor system for React, built on Lexical.
 
+## Package responsibility
+
+- Owns Lexical-derived behavior and extension runtime semantics.
+- Designed to stay lightweight with optional integrations that degrade gracefully.
+- Preset UX belongs in `@lyfie/luthor`.
+
 ## Installation
 
 ```bash
@@ -13,6 +19,18 @@ Optional syntax highlighting provider:
 ```bash
 pnpm add highlight.js
 ```
+
+Optional emoji catalog provider:
+
+```bash
+pnpm add @emoji-mart/data
+```
+
+Optional package behavior:
+
+- Without `highlight.js`, code blocks use built-in fallback token styling.
+- Without `@emoji-mart/data`, emoji features use the built-in lightweight catalog.
+- Both optional packages are fail-safe and do not block editor startup.
 
 ## Quick Start
 

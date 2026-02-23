@@ -22,7 +22,14 @@ Optional:
 
 ```bash
 pnpm add highlight.js
+pnpm add @emoji-mart/data
 ```
+
+Optional integration matrix:
+
+- `highlight.js`: enables richer code token theming when your app loads a highlight stylesheet.
+- `@emoji-mart/data`: enables larger emoji catalog auto-detection by `EmojiExtension`.
+- If either package is missing, `@lyfie/luthor-headless` remains functional and falls back to built-in behavior.
 
 ## Minimal setup
 
