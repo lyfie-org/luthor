@@ -30,10 +30,16 @@ jobs:
         run: pnpm check:rule-contracts
 
       - name: Headless quality gates
-        run: pnpm --filter @lyfie/luthor-headless lint test build
+        run: |
+          pnpm --filter @lyfie/luthor-headless run lint
+          pnpm --filter @lyfie/luthor-headless run test
+          pnpm --filter @lyfie/luthor-headless run build
 
       - name: Luthor quality gates
-        run: pnpm --filter @lyfie/luthor lint test build
+        run: |
+          pnpm --filter @lyfie/luthor run lint
+          pnpm --filter @lyfie/luthor run test
+          pnpm --filter @lyfie/luthor run build
 
       - name: Release hardening smoke
         run: pnpm check:release-hardening
