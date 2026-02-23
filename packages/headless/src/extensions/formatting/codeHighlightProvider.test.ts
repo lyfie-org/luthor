@@ -18,18 +18,12 @@ describe("codeHighlightProvider", () => {
     expect(resolved).toBe(provider);
   });
 
-  it("returns null when no provider is available", async () => {
-    const originalHljs = (globalThis as Record<string, unknown>).hljs;
-    (globalThis as Record<string, unknown>).hljs = undefined;
-    resetCodeHighlightProviderCacheForTests();
-
+  it("returns null when no provider is configured", async () => {
     const resolved = await resolveCodeHighlightProvider({
-      loadProvider: async () => null,
+      provider: null,
     });
 
     expect(resolved).toBeNull();
-
-    (globalThis as Record<string, unknown>).hljs = originalHljs;
     resetCodeHighlightProviderCacheForTests();
   });
 
@@ -47,6 +41,6 @@ describe("codeHighlightProvider", () => {
   });
 
   it("returns the standard fallback theme token", () => {
-    expect(getFallbackCodeTheme()).toBe("lang-default");
+    expect(getFallbackCodeTheme()).toBe("plain");
   });
 });

@@ -1,6 +1,7 @@
 import { ExtensiveEditor } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
 import { useDemoTheme } from "./hooks/useDemoTheme";
+import "highlight.js/styles/github.css";
 
 function App() {
   const { theme, toggleTheme } = useDemoTheme();
@@ -21,10 +22,6 @@ function App() {
     },
   ];
 
-  const codeLanguageOptions = {
-    mode: "replace" as const,
-    values: ["plaintext", "typescript", "javascript", "tsx"],
-  };
 
   return (
     <div className="app-shell" data-theme={theme}>
@@ -57,6 +54,7 @@ function App() {
       >
         <ExtensiveEditor
           initialTheme={theme}
+          syntaxHighlighting="auto"
           toolbarPosition="top"
           toolbarAlignment="center"
           toolbarVisibility={{ fontFamily: true }}
@@ -92,7 +90,6 @@ function App() {
             { "block.heading1": true },
           ]}
           isCopyAllowed={true}
-          languageOptions={codeLanguageOptions}
           placeholder={{
             visual: "Write your story...",
             jsonb: "Paste JSONB document...",

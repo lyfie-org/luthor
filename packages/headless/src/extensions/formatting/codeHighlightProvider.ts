@@ -23,10 +23,7 @@ export type CodeHighlightProviderConfig = {
   loadProvider?: () => Promise<CodeHighlightProvider | null>;
 };
 
-const HIGHLIGHT_JS_MODULE = "highlight.js/lib/core";
-const FALLBACK_HIGHLIGHT_THEME = "lang-default";
-
-let cachedAutoProviderPromise: Promise<CodeHighlightProvider | null> | null = null;
+const FALLBACK_HIGHLIGHT_THEME = "plain";
 
 export function getFallbackCodeTheme(): string {
   return FALLBACK_HIGHLIGHT_THEME;
@@ -34,55 +31,6 @@ export function getFallbackCodeTheme(): string {
 
 export function getDefaultCodeTokenizer(): CodeTokenizer {
   return PrismTokenizer as unknown as CodeTokenizer;
-}
-
-export function getGlobalCodeHighlightProvider(): CodeHighlightProvider | null {
-  const globalObject = globalThis as Record<string, unknown>;
-  const candidate = globalObject.hljs as { highlightAuto?: unknown } | undefined;
-
-  if (
-    candidate &&
-    typeof candidate === "object" &&
-    typeof candidate.highlightAuto === "function"
-  ) {
-    return {
-      highlightAuto: candidate.highlightAuto as (
-        code: string,
-        languageSubset?: string[],
-      ) => CodeHighlightResult,
-    };
-  }
-
-  return null;
-}
-
-export async function loadDynamicHighlightJsProvider(): Promise<CodeHighlightProvider | null> {
-  try {
-    const dynamicImport = new Function(
-      "moduleName",
-      "return import(moduleName)",
-    ) as (moduleName: string) => Promise<Record<string, unknown>>;
-
-    const module = await dynamicImport(HIGHLIGHT_JS_MODULE);
-    const candidate = (module.default ?? module) as { highlightAuto?: unknown };
-
-    if (
-      candidate &&
-      typeof candidate === "object" &&
-      typeof candidate.highlightAuto === "function"
-    ) {
-      return {
-        highlightAuto: candidate.highlightAuto as (
-          code: string,
-          languageSubset?: string[],
-        ) => CodeHighlightResult,
-      };
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
 }
 
 export async function resolveCodeHighlightProvider(
@@ -95,21 +43,7 @@ export async function resolveCodeHighlightProvider(
   if (config?.loadProvider) {
     return config.loadProvider();
   }
-
-  if (cachedAutoProviderPromise) {
-    return cachedAutoProviderPromise;
-  }
-
-  cachedAutoProviderPromise = (async () => {
-    const globalProvider = getGlobalCodeHighlightProvider();
-    if (globalProvider) {
-      return globalProvider;
-    }
-
-    return loadDynamicHighlightJsProvider();
-  })();
-
-  return cachedAutoProviderPromise;
+  return null;
 }
 
 export async function resolveCodeTokenizer(
@@ -130,6 +64,4 @@ export async function resolveCodeTokenizer(
   return provider.getTokenizer();
 }
 
-export function resetCodeHighlightProviderCacheForTests(): void {
-  cachedAutoProviderPromise = null;
-}
+export function resetCodeHighlightProviderCacheForTests(): void {}

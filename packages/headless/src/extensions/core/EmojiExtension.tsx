@@ -1,6 +1,10 @@
 import {
+  $isCodeNode,
+} from "@lexical/code";
+import {
   COMMAND_PRIORITY_EDITOR,
   LexicalEditor,
+  LexicalNode,
   PASTE_COMMAND,
   $getNodeByKey,
   $getSelection,
@@ -587,6 +591,11 @@ export class EmojiExtension extends BaseExtension<
         return;
       }
 
+      if (this.isSelectionInsideCodeBlock(selection)) {
+        this.closeIfNeeded();
+        return;
+      }
+
       const anchorNode = selection.anchor.getNode();
       if (!$isTextNode(anchorNode)) {
         this.closeIfNeeded();
@@ -677,6 +686,22 @@ export class EmojiExtension extends BaseExtension<
       });
       this.applyingAutoReplace = false;
     }
+  }
+
+  private isSelectionInsideCodeBlock(selection: ReturnType<typeof $getSelection>): boolean {
+    if (!$isRangeSelection(selection)) {
+      return false;
+    }
+
+    let current: LexicalNode | null = selection.anchor.getNode();
+    while (current) {
+      if ($isCodeNode(current)) {
+        return true;
+      }
+      current = current.getParent();
+    }
+
+    return false;
   }
 
   private detectSymbolReplacement(

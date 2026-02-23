@@ -1,6 +1,7 @@
 import {
+  getCodeLanguageOptions,
+  getCodeLanguages,
   $isCodeNode,
-  CODE_LANGUAGE_MAP,
   CodeNode,
   normalizeCodeLang,
 } from "@lexical/code";
@@ -28,10 +29,8 @@ import {
 } from "react";
 import { BaseExtension } from "../base/BaseExtension";
 import {
-  type CodeHighlightProvider,
   type CodeHighlightProviderConfig,
   getFallbackCodeTheme,
-  resolveCodeHighlightProvider,
 } from "./codeHighlightProvider";
 
 const COPY_ICON_SVG =
@@ -59,24 +58,18 @@ const DEFAULT_LANGUAGE_OPTIONS = [
   "plaintext",
   "typescript",
   "javascript",
-  "tsx",
-  "jsx",
-  "json",
+  "markdown",
   "html",
   "css",
-  "bash",
   "python",
+  "sql",
   "java",
   "c",
   "cpp",
-  "go",
   "rust",
-  "sql",
-  "yaml",
-  "markdown",
+  "powershell",
+  "xml",
 ] as const;
-
-const DEFAULT_MAX_AUTODETECT_LENGTH = 12_000;
 
 export type CodeIntelligenceConfig = CodeHighlightProviderConfig & {
   maxAutoDetectLength?: number;
@@ -91,16 +84,11 @@ export class CodeIntelligenceExtension extends BaseExtension<
   Record<string, never>,
   ReactNode[]
 > {
-  private autoModeNodeKeys = new Set<string>();
-  private failedDetectionTextByNodeKey = new Map<string, string>();
-  private autoDetectScheduled = false;
   private languageOptions: string[] = [];
-  private codeHighlightProviderPromise: Promise<CodeHighlightProvider | null> | null = null;
 
   constructor() {
     super("codeIntelligence");
     this.config = {
-      maxAutoDetectLength: DEFAULT_MAX_AUTODETECT_LENGTH,
       isCopyAllowed: true,
     };
   }
@@ -118,19 +106,9 @@ export class CodeIntelligenceExtension extends BaseExtension<
         const hasContentChanges =
           dirtyElements.size > 0 || dirtyLeaves.size > 0;
 
-        if (hasContentChanges && !this.autoDetectScheduled) {
-          this.autoDetectScheduled = true;
-          queueMicrotask(() => {
-            this.autoDetectScheduled = false;
-            void this.autoDetectLanguageForUnlabeledBlocks(editor);
-          });
-        }
-
         if (hasContentChanges) {
           this.ensureCodeBlockThemes(editor);
         }
-
-        this.pruneTransientNodeState(editor);
       },
     );
 
@@ -142,8 +120,6 @@ export class CodeIntelligenceExtension extends BaseExtension<
       unregisterMarkdownShortcuts();
       unregisterUpdate();
       this.languageOptions = [];
-      this.autoModeNodeKeys.clear();
-      this.failedDetectionTextByNodeKey.clear();
     };
   }
 
@@ -163,42 +139,14 @@ export class CodeIntelligenceExtension extends BaseExtension<
         const theme = this.getThemeForLanguage(normalized);
         editor.update(() => {
           this.getSelectionCodeNodes().forEach((node) => {
-            this.autoModeNodeKeys.delete(node.getKey());
-            this.failedDetectionTextByNodeKey.delete(node.getKey());
             node.setLanguage(normalized ?? null);
             node.setTheme(theme);
           });
         });
       },
       autoDetectCodeLanguage: async () => {
-        const target = await this.getPrimaryCodeBlockText(editor);
-        if (!target) {
-          return null;
-        }
-
-        const detected = await this.detectLanguage(target.text);
-        if (!detected) {
-          return null;
-        }
-
-        editor.update(() => {
-          const node = target.key
-            ? (($getNodeByKey(target.key) as CodeNode | null) ?? null)
-            : null;
-
-          if (node && $isCodeNode(node)) {
-            node.setLanguage(detected);
-            node.setTheme(this.getThemeForLanguage(detected));
-            return;
-          }
-
-          this.getSelectionCodeNodes().forEach((codeNode) => {
-            codeNode.setLanguage(detected);
-            codeNode.setTheme(this.getThemeForLanguage(detected));
-          });
-        });
-
-        return detected;
+        void editor;
+        return null;
       },
       getCurrentCodeLanguage: () =>
         new Promise((resolve) => {
@@ -234,39 +182,17 @@ export class CodeIntelligenceExtension extends BaseExtension<
   }
 
   getCodeBlocksSnapshot(editor: LexicalEditor): CodeBlockSnapshot[] {
-    const snapshots = editor.getEditorState().read(() =>
+    return editor.getEditorState().read(() =>
       $nodesOfType(CodeNode).map((node) => {
-        const key = node.getKey();
         const normalized = normalizeLanguage(node.getLanguage());
-        const isAuto = this.autoModeNodeKeys.has(key) || !normalized;
-
-        if (isAuto) {
-          this.autoModeNodeKeys.add(key);
-        } else {
-          this.autoModeNodeKeys.delete(key);
-        }
 
         return {
-          key,
-          language: isAuto ? "auto" : (normalized as string),
+          key: node.getKey(),
+          language: normalized ?? "plaintext",
           text: node.getTextContent(),
         };
       }),
     );
-
-    const activeKeys = new Set(snapshots.map((item) => item.key));
-    this.autoModeNodeKeys.forEach((nodeKey) => {
-      if (!activeKeys.has(nodeKey)) {
-        this.autoModeNodeKeys.delete(nodeKey);
-      }
-    });
-    this.failedDetectionTextByNodeKey.forEach((_value, nodeKey) => {
-      if (!activeKeys.has(nodeKey)) {
-        this.failedDetectionTextByNodeKey.delete(nodeKey);
-      }
-    });
-
-    return snapshots;
   }
 
   setCodeBlockLanguage(
@@ -279,17 +205,6 @@ export class CodeIntelligenceExtension extends BaseExtension<
       if (!node || !$isCodeNode(node)) {
         return;
       }
-
-      if (selectedLanguage === "auto") {
-        this.autoModeNodeKeys.add(nodeKey);
-        this.failedDetectionTextByNodeKey.delete(nodeKey);
-        node.setLanguage(null);
-        node.setTheme(this.getThemeForLanguage(null));
-        return;
-      }
-
-      this.autoModeNodeKeys.delete(nodeKey);
-      this.failedDetectionTextByNodeKey.delete(nodeKey);
 
       const normalized = normalizeLanguage(selectedLanguage);
       node.setLanguage(normalized ?? null);
@@ -307,75 +222,12 @@ export class CodeIntelligenceExtension extends BaseExtension<
     });
   }
 
-  private async autoDetectLanguageForUnlabeledBlocks(
-    editor: LexicalEditor,
-  ): Promise<void> {
-    const pending = editor
-      .getEditorState()
-      .read(() =>
-        $nodesOfType(CodeNode)
-          .filter((node) => {
-            if (
-              !this.autoModeNodeKeys.has(node.getKey()) &&
-              !!normalizeLanguage(node.getLanguage())
-            ) {
-              return false;
-            }
-            return node.getTextContent().trim().length > 0;
-          })
-          .map((node) => ({
-            key: node.getKey(),
-            text: node.getTextContent(),
-          })),
-      );
-
-    if (!pending.length) {
-      return;
-    }
-
-    for (const block of pending) {
-      const failedText = this.failedDetectionTextByNodeKey.get(block.key);
-      if (failedText === block.text) {
-        continue;
-      }
-
-      const detected = await this.detectLanguage(block.text);
-
-      if (!detected) {
-        this.failedDetectionTextByNodeKey.set(block.key, block.text);
-        continue;
-      }
-
-      this.failedDetectionTextByNodeKey.delete(block.key);
-
-      editor.update(() => {
-        const node = $getNodeByKey(block.key);
-        if (!node || !$isCodeNode(node)) {
-          return;
-        }
-
-        if (
-          !this.autoModeNodeKeys.has(block.key) &&
-          !!normalizeLanguage(node.getLanguage())
-        ) {
-          return;
-        }
-
-        const currentLanguage = normalizeLanguage(node.getLanguage());
-        if (currentLanguage === detected) {
-          return;
-        }
-
-        node.setLanguage(detected);
-        node.setTheme(this.getThemeForLanguage(detected));
-      });
-    }
-  }
-
   private getThemeForLanguage(language: string | null | undefined): string | null {
-    const normalized = normalizeLanguage(language) ?? "plain";
-    const family = resolveLanguageFamily(normalized);
-    return `lang-${family}`;
+    const normalized = normalizeLanguage(language);
+    if (!normalized || normalized === "plain") {
+      return getFallbackCodeTheme();
+    }
+    return "hljs";
   }
 
   private ensureCodeBlockThemes(editor: LexicalEditor): void {
@@ -413,45 +265,6 @@ export class CodeIntelligenceExtension extends BaseExtension<
     });
   }
 
-  private pruneTransientNodeState(editor: LexicalEditor): void {
-    const activeNodeKeys = editor.getEditorState().read(() =>
-      new Set($nodesOfType(CodeNode).map((node) => node.getKey())),
-    );
-
-    this.autoModeNodeKeys.forEach((nodeKey) => {
-      if (!activeNodeKeys.has(nodeKey)) {
-        this.autoModeNodeKeys.delete(nodeKey);
-      }
-    });
-
-    this.failedDetectionTextByNodeKey.forEach((_value, nodeKey) => {
-      if (!activeNodeKeys.has(nodeKey)) {
-        this.failedDetectionTextByNodeKey.delete(nodeKey);
-      }
-    });
-  }
-
-  private async getPrimaryCodeBlockText(
-    editor: LexicalEditor,
-  ): Promise<{ key: string; text: string } | null> {
-    return new Promise((resolve) => {
-      editor.getEditorState().read(() => {
-        const nodes = this.getSelectionCodeNodes();
-        const node = nodes[0];
-        if (!node) {
-          resolve(null);
-          return;
-        }
-        const text = node.getTextContent().trim();
-        if (!text) {
-          resolve(null);
-          return;
-        }
-        resolve({ key: node.getKey(), text });
-      });
-    });
-  }
-
   private getSelectionCodeNodes(): CodeNode[] {
     const selection = $getSelection();
     if (!$isRangeSelection(selection)) return [];
@@ -481,39 +294,8 @@ export class CodeIntelligenceExtension extends BaseExtension<
     return null;
   }
 
-  private async detectLanguage(source: string): Promise<string | null> {
-    if (!source.trim()) {
-      return null;
-    }
-
-    const maxLength = this.config.maxAutoDetectLength ?? DEFAULT_MAX_AUTODETECT_LENGTH;
-    if (source.length > maxLength) {
-      return null;
-    }
-
-    const provider = await this.loadCodeHighlightProvider();
-    if (!provider?.highlightAuto) {
-      return null;
-    }
-
-    try {
-      const result = await provider.highlightAuto(
-        source,
-        this.getLanguageOptions(),
-      );
-      return normalizeLanguage(result?.language ?? null);
-    } catch {
-      return null;
-    }
-  }
-
   private getLanguageOptions(): string[] {
-    const lexicalLanguages = Object.keys(CODE_LANGUAGE_MAP || {});
-    const defaultLanguages = new Set<string>([
-      ...DEFAULT_LANGUAGE_OPTIONS,
-      ...lexicalLanguages,
-    ]);
-    const normalizedDefaultLanguages = Array.from(defaultLanguages)
+    const normalizedDefaultLanguages = DEFAULT_LANGUAGE_OPTIONS
       .map((lang) => normalizeLanguage(lang))
       .filter((lang): lang is string => !!lang);
 
@@ -538,17 +320,25 @@ export class CodeIntelligenceExtension extends BaseExtension<
     ]);
   }
 
-  private async loadCodeHighlightProvider(): Promise<CodeHighlightProvider | null> {
-    if (this.config.provider) {
-      return this.config.provider;
-    }
-
-    if (this.codeHighlightProviderPromise) {
-      return this.codeHighlightProviderPromise;
-    }
-
-    this.codeHighlightProviderPromise = resolveCodeHighlightProvider(this.config);
-    return this.codeHighlightProviderPromise;
+  private async getPrimaryCodeBlockText(
+    editor: LexicalEditor,
+  ): Promise<{ key: string; text: string } | null> {
+    return new Promise((resolve) => {
+      editor.getEditorState().read(() => {
+        const nodes = this.getSelectionCodeNodes();
+        const node = nodes[0];
+        if (!node) {
+          resolve(null);
+          return;
+        }
+        const text = node.getTextContent().trim();
+        if (!text) {
+          resolve(null);
+          return;
+        }
+        resolve({ key: node.getKey(), text });
+      });
+    });
   }
 
 }
@@ -585,8 +375,7 @@ function CodeBlockControlsPlugin({
   );
 
   const languageOptions = useMemo(() => {
-    const options = extension.getLanguageOptionsSnapshot();
-    return ["auto", ...options.filter((option) => option !== "auto")];
+    return extension.getLanguageOptionsSnapshot();
   }, [extension]);
 
   const buildControlModels = useCallback((): CodeBlockControlModel[] => {
@@ -954,40 +743,6 @@ function getCodeblockControlsPortalRoot(editor: LexicalEditor): HTMLElement | nu
   return rootElement.parentElement as HTMLElement | null;
 }
 
-function resolveLanguageFamily(language: string): string {
-  const lang = language.toLowerCase();
-
-  if (["javascript", "typescript", "jsx", "tsx", "json"].includes(lang)) {
-    return "javascript";
-  }
-
-  if (["html", "xml", "svg", "markdown", "md"].includes(lang)) {
-    return "markup";
-  }
-
-  if (["css", "scss", "sass", "less"].includes(lang)) {
-    return "styles";
-  }
-
-  if (["python", "py"].includes(lang)) {
-    return "python";
-  }
-
-  if (["bash", "shell", "sh", "zsh", "powershell"].includes(lang)) {
-    return "shell";
-  }
-
-  if (["sql", "postgres", "mysql"].includes(lang)) {
-    return "sql";
-  }
-
-  if (["rust", "go", "java", "c", "cpp", "csharp", "kotlin", "swift"].includes(lang)) {
-    return "systems";
-  }
-
-  return "default";
-}
-
 function normalizeLanguage(language: string | null | undefined): string | null {
   if (!language) return null;
 
@@ -997,7 +752,28 @@ function normalizeLanguage(language: string | null | undefined): string | null {
   const normalized = normalizeCodeLang(trimmed);
   if (!normalized || normalized === "auto") return null;
 
+  if (!isSupportedLanguage(normalized)) {
+    return null;
+  }
+
   return normalized;
+}
+
+function isSupportedLanguage(language: string): boolean {
+  const normalized = language.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  const canonicalOptions = getCodeLanguageOptions()
+    .map(([id]) => normalizeCodeLang(id.trim().toLowerCase()))
+    .filter(Boolean);
+  const runtimeLanguages = getCodeLanguages()
+    .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
+    .filter(Boolean);
+
+  const supported = new Set<string>([...canonicalOptions, ...runtimeLanguages]);
+  return supported.has(normalized);
 }
 
 export const codeIntelligenceExtension = new CodeIntelligenceExtension();

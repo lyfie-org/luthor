@@ -66,6 +66,7 @@ Primary indexes:
 
 - Getting started: [documentation/user/demo/getting-started.md](documentation/user/demo/getting-started.md)
 - Usage and persistence: [documentation/user/demo/usage-and-persistence.md](documentation/user/demo/usage-and-persistence.md)
+- Syntax highlighting showcase: demo enables `ExtensiveEditor` code highlighting auto-detection via `highlight.js` and imports a highlight.js CSS theme for token colors.
 
 ### `@lyfie/luthor`
 

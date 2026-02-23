@@ -46,6 +46,8 @@ type SlashMatch = {
   query: string;
 };
 
+const ALLOWED_SLASH_CONTAINER_TYPES = new Set(["paragraph", "heading"]);
+
 export class SlashCommandExtension extends BaseExtension<
   "slashCommand",
   SlashCommandConfig,
@@ -235,6 +237,12 @@ export class SlashCommandExtension extends BaseExtension<
         return;
       }
 
+      const containerType = getContainerTypeForNode(anchorNode);
+      if (!ALLOWED_SLASH_CONTAINER_TYPES.has(containerType)) {
+        this.closeIfNeeded();
+        return;
+      }
+
       const offset = selection.anchor.offset;
       const textContent = anchorNode.getTextContent();
       const textBeforeCursor = textContent.slice(0, offset);
@@ -247,8 +255,7 @@ export class SlashCommandExtension extends BaseExtension<
       }
 
       const prefix = textBeforeCursor.slice(0, triggerIndex);
-      const isAtWordBoundary = prefix.length === 0 || /\s/.test(prefix[prefix.length - 1] || "");
-      if (!isAtWordBoundary) {
+      if (!isWhitespaceOnly(prefix)) {
         this.closeIfNeeded();
         return;
       }
@@ -322,3 +329,18 @@ export class SlashCommandExtension extends BaseExtension<
 
 export const slashCommandExtension = new SlashCommandExtension();
 export default slashCommandExtension;
+
+function getContainerTypeForNode(node: {
+  getTopLevelElementOrThrow?: () => { getType?: () => string };
+}): string {
+  try {
+    const topLevelNode = node.getTopLevelElementOrThrow?.();
+    return topLevelNode?.getType?.() ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function isWhitespaceOnly(value: string): boolean {
+  return value.trim().length === 0;
+}

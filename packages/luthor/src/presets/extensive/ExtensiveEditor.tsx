@@ -358,6 +358,7 @@ function isShortcutMatch(event: KeyboardEvent, shortcut: FeatureShortcutSpec): b
 function createFeatureGuardedCommands(
   commands: CoreEditorCommands,
   featureFlags: FeatureFlags,
+  isInCodeBlock: boolean,
 ): CoreEditorCommands {
   const guarded = { ...commands } as CoreEditorCommands;
   const disable = (feature: FeatureFlag, apply: () => void) => {
@@ -499,6 +500,53 @@ function createFeatureGuardedCommands(
     guarded.closeSlashMenu = () => {};
     guarded.executeSlashCommand = () => false;
   });
+
+  if (isInCodeBlock) {
+    guarded.toggleBold = () => {};
+    guarded.toggleItalic = () => {};
+    guarded.toggleUnderline = () => {};
+    guarded.toggleStrikethrough = () => {};
+    guarded.formatText = () => {};
+    guarded.setFontFamily = () => {};
+    guarded.clearFontFamily = () => {};
+    guarded.setFontSize = () => {};
+    guarded.clearFontSize = () => {};
+    guarded.setLineHeight = () => {};
+    guarded.clearLineHeight = () => {};
+    guarded.setTextColor = () => {};
+    guarded.clearTextColor = () => {};
+    guarded.setTextHighlight = () => {};
+    guarded.clearTextHighlight = () => {};
+    guarded.toggleSubscript = () => {};
+    guarded.toggleSuperscript = () => {};
+    guarded.insertLink = () => {};
+    guarded.removeLink = () => {};
+    guarded.updateLink = () => false;
+    guarded.toggleParagraph = () => {};
+    guarded.toggleHeading = () => {};
+    guarded.toggleQuote = () => {};
+    guarded.setTextAlignment = () => {};
+    guarded.toggleUnorderedList = () => {};
+    guarded.toggleOrderedList = () => {};
+    guarded.toggleCheckList = () => {};
+    guarded.indentList = () => {};
+    guarded.outdentList = () => {};
+    guarded.insertHorizontalRule = () => {};
+    guarded.insertTable = () => {};
+    guarded.insertImage = () => {};
+    guarded.setImageAlignment = () => {};
+    guarded.setImageCaption = () => {};
+    guarded.insertIframeEmbed = () => {};
+    guarded.setIframeEmbedAlignment = () => {};
+    guarded.resizeIframeEmbed = () => {};
+    guarded.setIframeEmbedCaption = () => {};
+    guarded.updateIframeEmbedUrl = () => false;
+    guarded.insertYouTubeEmbed = () => {};
+    guarded.setYouTubeEmbedAlignment = () => {};
+    guarded.resizeYouTubeEmbed = () => {};
+    guarded.setYouTubeEmbedCaption = () => {};
+    guarded.updateYouTubeEmbedUrl = () => false;
+  }
 
   return guarded;
 }
@@ -798,9 +846,10 @@ function ExtensiveEditorContent({
   );
   const commandHeadingOptions = syncHeadingOptionsWithCommands ? resolvedHeadingOptions : undefined;
   const commandParagraphLabel = syncHeadingOptionsWithCommands ? paragraphLabel : undefined;
+  const isInCodeBlock = activeStates.isInCodeBlock === true;
   const safeCommands = useMemo(
-    () => createFeatureGuardedCommands(commands as CoreEditorCommands, featureFlags),
-    [commands, featureFlags],
+    () => createFeatureGuardedCommands(commands as CoreEditorCommands, featureFlags, isInCodeBlock),
+    [commands, featureFlags, isInCodeBlock],
   );
   const isFeatureEnabled = useMemo(
     () => (feature: string) => {

@@ -167,12 +167,38 @@ export function App() {
 <ExtensiveEditor
   languageOptions={{
     mode: "replace",
-    values: ["plaintext", "typescript", "javascript", "sql", "bash"],
+    values: ["plaintext", "typescript", "javascript", "markdown", "sql"],
   }}
   syntaxHighlighting="auto"
   maxAutoDetectCodeLength={10000}
 />
 ```
+
+Optional: use highlight.js stylesheet for richer code colors
+
+```bash
+pnpm add highlight.js
+```
+
+```tsx
+import { ExtensiveEditor } from "@lyfie/luthor";
+import "@lyfie/luthor/styles.css";
+import "highlight.js/styles/github.css"; // any highlight.js theme
+
+export function App() {
+  return <ExtensiveEditor syntaxHighlighting="auto" />;
+}
+```
+
+What happens:
+
+- Luthor does not auto-detect code language anymore. Language comes from the selected code language option.
+- Language options are normalized through Lexical/Prism aliases (`md` -> `markdown`, `js` -> `javascript` family, `ts` -> `typescript`).
+- Only Prism-supported loaded languages are accepted. Unsupported values (for example `yaml` without Prism YAML grammar loaded) fall back to plain text.
+- `plaintext` uses plain fallback syntax styling.
+- Non-plaintext languages emit `hljs-*` token classes.
+- If a highlight.js stylesheet is loaded, those `hljs-*` tokens use highlight.js colors.
+- Without highlight.js stylesheet, code uses the built-in muted/plain fallback.
 
 ### 6) Per-instance shortcut remap/disable
 

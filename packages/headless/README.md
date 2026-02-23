@@ -269,6 +269,30 @@ Commands include horizontal rule insertion. No custom config required.
 - `provider?: CodeHighlightProvider | null`
 - `loadProvider?: () => Promise<CodeHighlightProvider | null>`
 
+Usage (manual language selection + plaintext fallback):
+
+```tsx
+import {
+  codeExtension,
+  codeIntelligenceExtension,
+} from "@lyfie/luthor-headless";
+
+const extensions = [
+  codeExtension.configure({
+    syntaxHighlighting: "auto", // default
+  }),
+  codeIntelligenceExtension,
+] as const;
+```
+
+- `CodeIntelligenceExtension` no longer auto-detects code languages.
+- Selecting `plaintext` keeps code tokens in the plaintext fallback theme (`plain`).
+- Selecting any non-plaintext language switches token classes to the `hljs-*` namespace.
+- Language values are alias-normalized (`md` -> `markdown`, `ts` -> `typescript`, `js` -> `javascript` family).
+- Only Prism-supported loaded languages are accepted. Unsupported values are treated as plaintext.
+- If your app loads a highlight.js stylesheet, those `hljs-*` token colors are applied automatically.
+- Without a highlight.js stylesheet, code remains muted/plain fallback.
+
 `CodeHighlightProvider` shape:
 
 - `highlightAuto?(code, languageSubset?)`

@@ -46,12 +46,12 @@
   --luthor-floating-border-active: var(--luthor-border-active);
   --luthor-floating-accent: var(--luthor-accent);
   --luthor-floating-accent-fg: var(--luthor-bg);
-	--luthor-syntax-comment: #6e7781;
-	--luthor-syntax-keyword: #cf222e;
-	--luthor-syntax-string: #0a3069;
-	--luthor-syntax-number: #0550ae;
-	--luthor-syntax-function: #8250df;
-	--luthor-syntax-variable: #953800;
+	--luthor-syntax-comment: #64748b;
+	--luthor-syntax-keyword: #64748b;
+	--luthor-syntax-string: #64748b;
+	--luthor-syntax-number: #64748b;
+	--luthor-syntax-function: #64748b;
+	--luthor-syntax-variable: #64748b;
 }
 
 /* Dark theme variables */
@@ -103,11 +103,11 @@
   --luthor-floating-accent: var(--luthor-accent);
   --luthor-floating-accent-fg: var(--luthor-bg);
 	--luthor-syntax-comment: #8b949e;
-	--luthor-syntax-keyword: #ff7b72;
-	--luthor-syntax-string: #a5d6ff;
-	--luthor-syntax-number: #79c0ff;
-	--luthor-syntax-function: #d2a8ff;
-	--luthor-syntax-variable: #ffa657;
+	--luthor-syntax-keyword: #8b949e;
+	--luthor-syntax-string: #8b949e;
+	--luthor-syntax-number: #8b949e;
+	--luthor-syntax-function: #8b949e;
+	--luthor-syntax-variable: #8b949e;
 }
 
 .luthor-preset-extensive.luthor-editor-wrapper {
@@ -1359,7 +1359,7 @@
 	font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 	background-color: var(--luthor-codeblock-bg, var(--luthor-muted));
 	border: 1px solid var(--luthor-border);
-	color: var(--luthor-syntax-string);
+	color: var(--luthor-syntax-string, var(--luthor-muted-fg));
 	border-radius: 4px;
 }
 
@@ -1368,7 +1368,7 @@
 .luthor-content-editable code.luthor-text-code,
 .luthor-preset .luthor-content-editable code,
 .luthor-preset-extensive .luthor-content-editable code {
-	color: var(--luthor-syntax-string);
+	color: var(--luthor-syntax-string, var(--luthor-muted-fg));
 	font-weight: 500;
 }
 
@@ -1507,185 +1507,46 @@
 	color: var(--luthor-syntax-variable);
 }
 
-.luthor-code-block[data-theme="lang-default"] {
-	--luthor-syntax-keyword: #cf222e;
-	--luthor-syntax-string: #0a3069;
-	--luthor-syntax-number: #0550ae;
-	--luthor-syntax-function: #8250df;
-	--luthor-syntax-variable: #953800;
+.luthor-code-block[data-theme="plain"] {
+	--luthor-syntax-keyword: var(--luthor-muted-fg);
+	--luthor-syntax-string: var(--luthor-muted-fg);
+	--luthor-syntax-number: var(--luthor-muted-fg);
+	--luthor-syntax-function: var(--luthor-muted-fg);
+	--luthor-syntax-variable: var(--luthor-muted-fg);
 }
 
-.luthor-code-block[data-theme="lang-javascript"] {
-	--luthor-syntax-keyword: #cf222e;
-	--luthor-syntax-string: #0a3069;
-	--luthor-syntax-number: #0550ae;
-	--luthor-syntax-function: #8250df;
-	--luthor-syntax-variable: #953800;
+:where(.luthor-code-comment),
+:where(.luthor-code-prolog),
+:where(.luthor-code-doctype),
+:where(.luthor-code-cdata),
+:where(.luthor-code-punctuation),
+:where(.luthor-code-operator),
+:where(.luthor-code-namespace),
+:where(.luthor-code-property),
+:where(.luthor-code-tag),
+:where(.luthor-code-constant),
+:where(.luthor-code-symbol),
+:where(.luthor-code-deleted),
+:where(.luthor-code-boolean),
+:where(.luthor-code-number),
+:where(.luthor-code-attr),
+:where(.luthor-code-selector),
+:where(.luthor-code-string),
+:where(.luthor-code-char),
+:where(.luthor-code-builtin),
+:where(.luthor-code-inserted),
+:where(.luthor-code-function),
+:where(.luthor-code-class),
+:where(.luthor-code-class-name),
+:where(.luthor-code-keyword),
+:where(.luthor-code-atrule),
+:where(.luthor-code-regex),
+:where(.luthor-code-variable),
+:where(.luthor-code-important) {
+	color: var(--luthor-syntax-string, var(--luthor-muted-fg));
+	font-weight: inherit;
 }
 
-.luthor-code-block[data-theme="lang-markup"] {
-	--luthor-syntax-keyword: #cf222e;
-	--luthor-syntax-string: #0a3069;
-	--luthor-syntax-number: #0550ae;
-	--luthor-syntax-function: #8250df;
-	--luthor-syntax-variable: #953800;
-}
-
-.luthor-code-block[data-theme="lang-styles"] {
-	--luthor-syntax-keyword: #cf222e;
-	--luthor-syntax-string: #0a3069;
-	--luthor-syntax-number: #0550ae;
-	--luthor-syntax-function: #8250df;
-	--luthor-syntax-variable: #953800;
-}
-
-.luthor-code-block[data-theme="lang-python"] {
-	--luthor-syntax-keyword: #cf222e;
-	--luthor-syntax-string: #0a3069;
-	--luthor-syntax-number: #0550ae;
-	--luthor-syntax-function: #8250df;
-	--luthor-syntax-variable: #953800;
-}
-
-.luthor-code-block[data-theme="lang-shell"] {
-	--luthor-syntax-keyword: #cf222e;
-	--luthor-syntax-string: #0a3069;
-	--luthor-syntax-number: #0550ae;
-	--luthor-syntax-function: #8250df;
-	--luthor-syntax-variable: #953800;
-}
-
-.luthor-code-block[data-theme="lang-sql"] {
-	--luthor-syntax-keyword: #cf222e;
-	--luthor-syntax-string: #0a3069;
-	--luthor-syntax-number: #0550ae;
-	--luthor-syntax-function: #8250df;
-	--luthor-syntax-variable: #953800;
-}
-
-.luthor-code-block[data-theme="lang-systems"] {
-	--luthor-syntax-keyword: #cf222e;
-	--luthor-syntax-string: #0a3069;
-	--luthor-syntax-number: #0550ae;
-	--luthor-syntax-function: #8250df;
-	--luthor-syntax-variable: #953800;
-}
-
-.luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="dark"] .luthor-code-block[data-theme="lang-default"] {
-	--luthor-syntax-keyword: #ff7b72;
-	--luthor-syntax-string: #a5d6ff;
-	--luthor-syntax-number: #79c0ff;
-	--luthor-syntax-function: #d2a8ff;
-	--luthor-syntax-variable: #ffa657;
-}
-
-.luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="dark"] .luthor-code-block[data-theme="lang-javascript"] {
-	--luthor-syntax-keyword: #ff7b72;
-	--luthor-syntax-string: #a5d6ff;
-	--luthor-syntax-number: #79c0ff;
-	--luthor-syntax-function: #d2a8ff;
-	--luthor-syntax-variable: #ffa657;
-}
-
-.luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="dark"] .luthor-code-block[data-theme="lang-markup"] {
-	--luthor-syntax-keyword: #ff7b72;
-	--luthor-syntax-string: #a5d6ff;
-	--luthor-syntax-number: #79c0ff;
-	--luthor-syntax-function: #d2a8ff;
-	--luthor-syntax-variable: #ffa657;
-}
-
-.luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="dark"] .luthor-code-block[data-theme="lang-styles"] {
-	--luthor-syntax-keyword: #ff7b72;
-	--luthor-syntax-string: #a5d6ff;
-	--luthor-syntax-number: #79c0ff;
-	--luthor-syntax-function: #d2a8ff;
-	--luthor-syntax-variable: #ffa657;
-}
-
-.luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="dark"] .luthor-code-block[data-theme="lang-python"] {
-	--luthor-syntax-keyword: #ff7b72;
-	--luthor-syntax-string: #a5d6ff;
-	--luthor-syntax-number: #79c0ff;
-	--luthor-syntax-function: #d2a8ff;
-	--luthor-syntax-variable: #ffa657;
-}
-
-.luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="dark"] .luthor-code-block[data-theme="lang-shell"] {
-	--luthor-syntax-keyword: #ff7b72;
-	--luthor-syntax-string: #a5d6ff;
-	--luthor-syntax-number: #79c0ff;
-	--luthor-syntax-function: #d2a8ff;
-	--luthor-syntax-variable: #ffa657;
-}
-
-.luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="dark"] .luthor-code-block[data-theme="lang-sql"] {
-	--luthor-syntax-keyword: #ff7b72;
-	--luthor-syntax-string: #a5d6ff;
-	--luthor-syntax-number: #79c0ff;
-	--luthor-syntax-function: #d2a8ff;
-	--luthor-syntax-variable: #ffa657;
-}
-
-.luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="dark"] .luthor-code-block[data-theme="lang-systems"] {
-	--luthor-syntax-keyword: #ff7b72;
-	--luthor-syntax-string: #a5d6ff;
-	--luthor-syntax-number: #79c0ff;
-	--luthor-syntax-function: #d2a8ff;
-	--luthor-syntax-variable: #ffa657;
-}
-
-
-.luthor-code-comment,
-.luthor-code-prolog,
-.luthor-code-doctype,
-.luthor-code-cdata {
-	color: var(--luthor-syntax-comment);
-}
-
-.luthor-code-punctuation,
-.luthor-code-operator,
-.luthor-code-namespace {
-	color: var(--luthor-fg);
-}
-
-.luthor-code-property,
-.luthor-code-tag,
-.luthor-code-constant,
-.luthor-code-symbol,
-.luthor-code-deleted {
-	color: var(--luthor-syntax-variable);
-}
-
-.luthor-code-boolean,
-.luthor-code-number,
-.luthor-code-attr,
-.luthor-code-selector,
-.luthor-code-string,
-.luthor-code-char,
-.luthor-code-builtin,
-.luthor-code-inserted {
-	color: var(--luthor-syntax-string);
-}
-
-.luthor-code-function,
-.luthor-code-class,
-.luthor-code-class-name {
-	color: var(--luthor-syntax-function);
-	font-weight: 600;
-}
-
-.luthor-code-keyword,
-.luthor-code-atrule {
-	color: var(--luthor-syntax-keyword);
-	font-weight: 600;
-}
-
-.luthor-code-regex,
-.luthor-code-variable,
-.luthor-code-important {
-	color: var(--luthor-syntax-number);
-}
 
 .luthor-paragraph {
 	margin: var(--luthor-first-block-offset) 0;
