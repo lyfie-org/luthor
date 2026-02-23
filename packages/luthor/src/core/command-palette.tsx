@@ -14,6 +14,7 @@ export function CommandPalette({
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const filteredCommands = commands.filter((cmd) => {
     const searchText = `${cmd.label} ${cmd.description || ""} ${cmd.keywords?.join(" ") || ""}`.toLowerCase();
@@ -38,11 +39,25 @@ export function CommandPalette({
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus({ preventScroll: true });
       setQuery("");
       setSelectedIndex(0);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const listElement = listRef.current;
+    if (!listElement) {
+      return;
+    }
+
+    const selectedElement = listElement.querySelector<HTMLElement>(".luthor-command-palette-item.selected");
+    selectedElement?.scrollIntoView({ block: "nearest" });
+  }, [isOpen, selectedIndex, query]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -51,18 +66,22 @@ export function CommandPalette({
       switch (event.key) {
         case "Escape":
           event.preventDefault();
+          event.stopPropagation();
           onClose();
           break;
         case "ArrowDown":
           event.preventDefault();
+          event.stopPropagation();
           setSelectedIndex((prev) => Math.min(prev + 1, flatCommands.length - 1));
           break;
         case "ArrowUp":
           event.preventDefault();
+          event.stopPropagation();
           setSelectedIndex((prev) => Math.max(prev - 1, 0));
           break;
         case "Enter":
           event.preventDefault();
+          event.stopPropagation();
           if (flatCommands[selectedIndex]) {
             flatCommands[selectedIndex].action();
             onClose();
@@ -71,15 +90,21 @@ export function CommandPalette({
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [isOpen, selectedIndex, flatCommands, onClose]);
 
   if (!isOpen) return null;
 
   return (
     <div className="luthor-command-palette-overlay" onClick={onClose}>
-      <div className="luthor-command-palette" onClick={(event) => event.stopPropagation()}>
+      <div
+        className="luthor-command-palette"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command Palette"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="luthor-command-palette-header">
           <SearchIcon size={16} className="luthor-command-palette-icon" />
           <input
@@ -93,7 +118,7 @@ export function CommandPalette({
           <kbd className="luthor-command-palette-kbd">ESC</kbd>
         </div>
 
-        <div className="luthor-command-palette-list">
+        <div ref={listRef} className="luthor-command-palette-list">
           {Object.keys(groupedCommands).length === 0 ? (
             <div className="luthor-command-palette-empty">No commands found</div>
           ) : (
