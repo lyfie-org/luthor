@@ -6,16 +6,18 @@
     "sync:docs": "node ./scripts/sync-docs.mjs",
     "sync:metadata": "node ./scripts/fetch-package-metadata.mjs",
     "sync:llms": "node ./scripts/generate-llms.mjs",
-    "sync:content": "npm run sync:docs && npm run sync:metadata && npm run sync:llms",
-    "predev": "npm run sync:content",
-    "prebuild": "npm run sync:content",
-    "dev": "next dev",
-    "build": "next build",
-    "preview": "next start",
-    "deploy": "npm run build"
+    "sync:content": "pnpm run sync:docs && pnpm run sync:metadata && pnpm run sync:llms",
+    "predev": "pnpm run sync:content",
+    "prebuild": "pnpm run sync:content",
+    "dev": "node ../../node_modules/next/dist/bin/next dev",
+    "build": "node ../../node_modules/next/dist/bin/next build",
+    "start": "node ../../node_modules/next/dist/bin/next start",
+    "preview": "node ../../node_modules/@opennextjs/cloudflare/dist/cli/index.js build && node ../../node_modules/wrangler/bin/wrangler.js dev --config wrangler.jsonc",
+    "deploy": "node ../../node_modules/@opennextjs/cloudflare/dist/cli/index.js build && node ../../node_modules/wrangler/bin/wrangler.js deploy --config wrangler.jsonc"
   },
   "dependencies": {
     "@lyfie/luthor": "workspace:*",
+    "@opennextjs/cloudflare": "^1.16.5",
     "gray-matter": "^4.0.3",
     "next": "^15.5.2",
     "react": "^19.2.4",
@@ -26,6 +28,7 @@
   "devDependencies": {
     "@types/node": "^20.19.9",
     "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3"
+    "@types/react-dom": "^19.2.3",
+    "wrangler": "^4.67.0"
   }
 }

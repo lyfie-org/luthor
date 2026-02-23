@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
-import { getAllDocs } from '@/lib/docs';
-import { SITE_URL } from '@/lib/site';
+import { SITE_URL } from '@/config/site';
+import { getAllDocs } from '@/features/docs/docs.service';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const docs = await getAllDocs();
@@ -16,9 +16,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const docEntries = docs.map((doc) => ({
     url: `${SITE_URL}${doc.urlPath}`,
-    lastModified: now,
+    lastModified: new Date(doc.updatedAt),
     changeFrequency: 'weekly' as const,
-    priority: 0.7,
+    priority: 0.75,
   }));
 
   return [...baseEntries, ...docEntries];

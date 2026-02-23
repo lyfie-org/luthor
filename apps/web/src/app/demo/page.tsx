@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import { ExtensiveEditorShell } from '@/components/extensive-editor-shell';
+import { ExtensiveEditorShell } from '@/features/editor/extensive-editor-shell';
 
 export const metadata: Metadata = {
   title: 'Luthor Demo Playground',
-  description: 'Try the Extensive Editor preset live and evaluate performance and UX before integrating.',
+  description: 'Try the Luthor Extensive Editor preset live and evaluate React + Lexical rich text editing before integrating.',
+  keywords: ['luthor demo', 'react rich text editor demo', 'lexical editor demo'],
   alternates: {
     canonical: '/demo/',
   },

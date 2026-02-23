@@ -43,6 +43,7 @@ export function SiteHeader() {
         <nav className="site-nav" aria-label="Primary">
           <Link href="/docs/">Documentation</Link>
           <Link href="/demo/">Demo</Link>
+          <Link href="/llms.txt">LLMs</Link>
           <a href="https://github.com/lyfie-app/luthor" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>

@@ -1,10 +1,12 @@
 import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import matter from 'gray-matter';
 
 const WEB_ROOT = process.cwd();
 const REPO_ROOT = path.resolve(WEB_ROOT, '..', '..');
 const SOURCE_DOCS_DIR = path.join(REPO_ROOT, 'documentation');
-const TARGET_DOCS_DIR = path.join(WEB_ROOT, 'src', 'content', 'docs', 'docs', 'reference');
+const TARGET_DOCS_DIR = path.join(WEB_ROOT, 'src', 'content', 'docs', 'reference');
+const GENERATED_DOCS_INDEX_FILE = path.join(WEB_ROOT, 'src', 'data', 'docs-index.generated.ts');
 const GITHUB_BLOB_BASE = 'https://github.com/lyfie-app/luthor/blob/main';
 
 function isMarkdownFile(filename) {
@@ -87,6 +89,21 @@ function toDocsReferenceUrl(relativeDocPath) {
     return `/docs/reference/${normalized.slice(0, -'/index'.length)}/`;
   }
   return `/docs/reference/${normalized}/`;
+}
+
+function toSlugFromRelativePath(relativePath) {
+  const normalized = relativePath.replace(/\\/g, '/');
+  const withoutExt = normalized.replace(/\.(md|mdx)$/i, '');
+
+  if (withoutExt === 'index') return [];
+  if (withoutExt.endsWith('/index')) {
+    return withoutExt
+      .slice(0, -'/index'.length)
+      .split('/')
+      .filter(Boolean);
+  }
+
+  return withoutExt.split('/').filter(Boolean);
 }
 
 async function resolveMarkdownTargetPath(sourceFile, targetPath) {
@@ -223,8 +240,10 @@ async function syncDocs() {
 
   await rm(TARGET_DOCS_DIR, { recursive: true, force: true });
   await mkdir(TARGET_DOCS_DIR, { recursive: true });
+  await mkdir(path.dirname(GENERATED_DOCS_INDEX_FILE), { recursive: true });
 
   let copiedFiles = 0;
+  const docsIndex = [];
   for await (const sourceFile of walkMarkdownFiles(SOURCE_DOCS_DIR)) {
     const relativePath = path.relative(SOURCE_DOCS_DIR, sourceFile);
     const targetFile = path.join(TARGET_DOCS_DIR, relativePath);
@@ -238,8 +257,30 @@ async function syncDocs() {
     const withLuthorLinks = linkLuthorMentions(withFrontmatter);
     const nextContent = await rewriteMarkdownLinks(withLuthorLinks, sourceFile);
     await writeFile(targetFile, nextContent, 'utf8');
+
+    const { data, content } = matter(nextContent);
+    const sourceStats = await stat(sourceFile);
+    const slug = toSlugFromRelativePath(relativePath);
+    const resolvedTitle = (typeof data.title === 'string' && data.title.trim()) || title;
+    const description =
+      (typeof data.description === 'string' && data.description.trim()) ||
+      `Reference documentation for ${resolvedTitle}.`;
+
+    docsIndex.push({
+      slug,
+      title: resolvedTitle,
+      description,
+      content,
+      urlPath: toDocsReferenceUrl(relativePath),
+      sourcePath: path.relative(REPO_ROOT, sourceFile).replace(/\\/g, '/'),
+      updatedAt: sourceStats.mtime.toISOString(),
+    });
     copiedFiles += 1;
   }
+
+  docsIndex.sort((a, b) => a.urlPath.localeCompare(b.urlPath));
+  const generatedSource = `export const docsIndex = ${JSON.stringify(docsIndex, null, 2)};\n`;
+  await writeFile(GENERATED_DOCS_INDEX_FILE, generatedSource, 'utf8');
 
   console.log(`Synced ${copiedFiles} documentation files to ${TARGET_DOCS_DIR}`);
 }

@@ -7,7 +7,9 @@
     "dev": "turbo dev --ui=stream",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "deploy": "pnpm run -C apps/web deploy"
+    "deploy": "pnpm run -C apps/web deploy",
+    "web:preview:wsl": "powershell -ExecutionPolicy Bypass -File ./tools/run-in-wsl.ps1 -Workdir ./apps/web -RunCommand \"pnpm run preview\"",
+    "web:deploy:wsl": "powershell -ExecutionPolicy Bypass -File ./tools/run-in-wsl.ps1 -Workdir ./apps/web -RunCommand \"pnpm run deploy\""
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -19,5 +21,11 @@
   "packageManager": "pnpm@10.4.1",
   "engines": {
     "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
   }
 }

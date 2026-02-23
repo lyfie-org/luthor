@@ -171,3 +171,5 @@ docs_repo_arch
 .astro
 .vscode
 .wrangler
+apps/web/.open-next
+apps/web/.vscode

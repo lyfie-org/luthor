@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { getAllDocs, getAllDocSlugs, getDocBySlug } from '@/lib/docs';
+import { SITE_NAME } from '@/config/site';
+import { getAllDocs, getAllDocSlugs, getDocBySlug } from '@/features/docs/docs.service';
 
 type Params = { slug?: string[] };
 
@@ -38,6 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title: doc.title,
     description: doc.description,
+    keywords: [doc.title, 'luthor docs', 'react rich text editor docs', 'lexical editor docs'],
     alternates: {
       canonical: doc.urlPath,
     },
@@ -46,6 +48,11 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       description: doc.description,
       url: doc.urlPath,
       type: 'article',
+    },
+    twitter: {
+      card: 'summary',
+      title: `${doc.title} | ${SITE_NAME}`,
+      description: doc.description,
     },
   };
 }
@@ -56,6 +63,27 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
   const [doc, allDocs] = await Promise.all([getDocBySlug(slug), getAllDocs()]);
 
   if (!doc) notFound();
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: doc.title,
+    description: doc.description,
+    url: `https://www.luthor.fyi${doc.urlPath}`,
+    dateModified: doc.updatedAt,
+    author: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://www.luthor.fyi/favicon.svg',
+      },
+    },
+  };
 
   return (
     <section className="section docs-section">
@@ -76,6 +104,7 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
           </ul>
         </aside>
         <article className="docs-article">
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
           <h1>{doc.title}</h1>
           <div className="doc-content">
             <ReactMarkdown

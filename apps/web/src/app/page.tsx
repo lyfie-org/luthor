@@ -1,34 +1,36 @@
 import Link from 'next/link';
 import metadata from '@/data/package-metadata.json';
-import { CopyInstallButton } from '@/components/copy-install-button';
-import { ExtensiveEditorShell } from '@/components/extensive-editor-shell';
-import { HomeJsonLd } from '@/components/home-json-ld';
-import { formatBytes, formatCompact } from '@/lib/format';
+import { SEO_FAQS } from '@/config/site';
+import { getAllDocs } from '@/features/docs/docs.service';
+import { ExtensiveEditorShell } from '@/features/editor/extensive-editor-shell';
+import { CopyInstallButton } from '@/features/home/copy-install-button';
+import { HomeJsonLd } from '@/features/home/home-json-ld';
+import { formatBytes, formatCompact } from '@/utils/format';
 
 const valueProps = [
   {
-    title: 'MIT Licensed and Free Forever',
+    title: 'Free And MIT Licensed',
     description:
-      'Modify everything. Own your editor. Luthor is open source, commercially friendly, and built to stay out of paywalls.',
-    proof: 'Open forever, no lock-in',
+      'Luthor is open source and commercially friendly, so your editor stack stays under your control.',
+    proof: 'No lock-in',
   },
   {
-    title: 'Lexical Core Logic',
+    title: 'Built On Lexical',
     description:
-      "Luthor derives runtime behavior from Meta's Lexical framework for fast input handling and resilient editing state.",
-    proof: 'Engineered for responsiveness',
+      "Runtime behavior is powered by Lexical for responsive typing, stable selection handling, and scalable rich text state.",
+    proof: 'Proven core',
   },
   {
-    title: 'Type-Safe and Secure',
+    title: 'TypeScript First APIs',
     description:
-      'TypeScript-first APIs and regular maintenance updates keep integrations stable while reducing unexpected runtime drift.',
-    proof: 'Stable today, safer upgrades',
+      'Typed APIs make editor integration safer and easier to maintain in real production React applications.',
+    proof: 'Predictable integration',
   },
   {
-    title: 'Headless or Plug-and-Play',
+    title: 'Headless Or Plug And Play',
     description:
-      'Use @lyfie/luthor-headless for full logic control, or @lyfie/luthor for a complete UI-first editor you can ship quickly.',
-    proof: 'Freedom to choose your layer',
+      'Use the preset package for instant shipping or move into headless primitives when you need deep product customization.',
+    proof: 'Flexible architecture',
   },
 ];
 
@@ -41,7 +43,18 @@ const stats = {
 
 const fetchedDate = metadata.fetchedAt ? new Date(metadata.fetchedAt).toLocaleString('en-US') : 'N/A';
 
-export default function HomePage() {
+function getDocIntentLabel(urlPath: string): string {
+  if (urlPath.startsWith('/docs/reference/user/')) return 'User Guide';
+  if (urlPath.startsWith('/docs/reference/developer/')) return 'Developer Guide';
+  if (urlPath.startsWith('/docs/reference/tutorials/')) return 'Tutorial';
+  if (urlPath.startsWith('/docs/reference/readmes/')) return 'Reference';
+  return 'Core Docs';
+}
+
+export default async function HomePage() {
+  const docs = await getAllDocs();
+  const highlightedDocs = docs.slice(0, 10);
+
   return (
     <>
       <HomeJsonLd />
@@ -49,13 +62,13 @@ export default function HomePage() {
       <section className="section hero-stage">
         <div className="container hero-grid">
           <div>
-            <span className="eyebrow">Lexical-powered rich text editing</span>
-            <h1 className="hero-title">The performance of Lexical, the simplicity of a single import.</h1>
+            <span className="eyebrow">Open source React + Lexical editor</span>
+            <h1 className="hero-title">Luthor is a modern React rich text editor built for speed, clarity, and control.</h1>
             <p className="hero-copy">
-              Luthor is a free, MIT-licensed React rich text editor with a plug-and-play extensive preset and a headless
-              path for deeper customization.
+              Ship a production-ready rich text editor in minutes with the Extensive preset, then scale into a deeply
+              customizable headless architecture as your product evolves.
             </p>
-            <p className="hero-live-note">Try it now with the Extensive Editor preset.</p>
+            <p className="hero-live-note">Read the docs, run the demo, and evaluate the full source code today.</p>
             <div className="hero-actions">
               <Link className="btn btn-primary" href="/docs/getting-started/">
                 Read docs
@@ -87,10 +100,10 @@ export default function HomePage() {
 
       <section className="section">
         <div className="container">
-          <h2 className="section-title">Trust, freedom, and technical credibility.</h2>
+          <h2 className="section-title">Why developers choose Luthor over bloated editor stacks.</h2>
           <p className="section-copy">
-            Built for React developers who hate bloated editors. Start simple, then customize every part of the stack when
-            you need deeper control.
+            Luthor focuses on clean APIs, realistic bundle behavior, and full ownership of the editor experience for product
+            teams.
           </p>
           <div className="value-grid">
             {valueProps.map((item) => (
@@ -107,9 +120,10 @@ export default function HomePage() {
 
       <section className="section">
         <div className="container">
-          <h2 className="section-title">Social proof and package momentum.</h2>
+          <h2 className="section-title">Package momentum and credibility signals.</h2>
           <p className="section-copy">
-            Package metadata is fetched at build time and exposed as compact badges for fast credibility checks.
+            Build-time metadata from npm and GitHub is exposed as crawlable plain text so developers and bots can validate
+            project momentum quickly.
           </p>
           <div className="stats-badge-row">
             <article className="metric metric-badge">
@@ -147,13 +161,39 @@ export default function HomePage() {
       </section>
 
       <section className="section">
-        <div className="container keyword-strip">
-          <h2 className="section-title">Built to rank for editor-focused intent.</h2>
+        <div className="container docs-teaser">
+          <h2 className="section-title">Documentation map for implementation teams and AI agents.</h2>
           <p className="section-copy">
-            Searching for <strong>Luthor editor</strong>, <strong>Lexical rich text editor</strong>,{' '}
-            <strong>best React based text editor</strong>, or <strong>best free open source rich text editor</strong> should
-            lead developers to this project, with clear documentation and verifiable implementation details.
+            The website serves markdown-first documentation with static URLs for high crawler readability, including user
+            guides, architecture notes, and package-level references.
           </p>
+          <ul className="doc-link-grid">
+            {highlightedDocs.map((doc) => (
+              <li key={doc.urlPath}>
+                <Link href={doc.urlPath}>
+                  <span>{doc.title}</span>
+                  <small>{getDocIntentLabel(doc.urlPath)}</small>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <p className="section-copy">
+            Full AI corpus files: <a href="/llms.txt">llms.txt</a> and <a href="/llms-full.txt">llms-full.txt</a>.
+          </p>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container keyword-strip">
+          <h2 className="section-title">Frequently asked questions.</h2>
+          <div className="faq-grid">
+            {SEO_FAQS.map((item) => (
+              <article key={item.question} className="faq-card">
+                <h3>{item.question}</h3>
+                <p>{item.answer}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
     </>
