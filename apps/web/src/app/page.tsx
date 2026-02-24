@@ -90,6 +90,58 @@ const heroUseCases = [
   { label: 'Teams', icon: ShieldCheck },
 ] as const;
 
+const modernBuildHighlights = [
+  {
+    label: 'Package footprint advantage',
+    detail: 'Up to 14.3x smaller zipped package size than major editor alternatives.',
+  },
+  {
+    label: 'ESM-first architecture',
+    detail: 'CJS removed. ESM-only output unlocks cleaner modern bundling and tree-shaking.',
+  },
+  {
+    label: 'Lean browser payload',
+    detail: '@lyfie/luthor-headless: 141.27 KB minified / 36.65 KB gzipped.',
+  },
+  {
+    label: 'Ship faster',
+    detail: 'Production-ready UI presets plus headless flexibility in one ecosystem.',
+  },
+] as const;
+
+const compatibilityRows = [
+  {
+    label: 'Node.js',
+    version: '>=20',
+    detail: 'Modern Node runtime for local dev, build, and CI.',
+  },
+  {
+    label: 'React',
+    version: '^18.0.0 || ^19.0.0',
+    detail: 'Works with current React app stacks.',
+  },
+  {
+    label: 'React DOM',
+    version: '^18.0.0 || ^19.0.0',
+    detail: 'Fully aligned with supported React versions.',
+  },
+  {
+    label: 'TypeScript',
+    version: 'TypeScript-first',
+    detail: 'Typed APIs and shipped declarations out of the box.',
+  },
+  {
+    label: 'Lexical',
+    version: '^0.40.0 (luthor), >=0.40.0 (headless peers)',
+    detail: 'Stable integration path with the latest Luthor architecture.',
+  },
+  {
+    label: 'Frameworks',
+    version: 'Modern ESM React frameworks',
+    detail: 'Next.js, Vite, Remix, and similar React setups.',
+  },
+] as const;
+
 async function safeFetchJson<T>(url: string): Promise<T | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 4500);
@@ -279,12 +331,49 @@ export default async function HomePage() {
       </section>
 
       <section className="section">
+        <div className="container modern-shell">
+          <h2 className="section-title">Built On Modern. Built For Modern.</h2>
+          <p className="section-copy">
+            ESM-only architecture, strong tree-shaking behavior, and a lightweight package footprint designed for modern
+            production apps.
+          </p>
+
+          <div className="modern-highlight-grid">
+            {modernBuildHighlights.map((item) => (
+              <article key={item.label} className="modern-highlight-card">
+                <p className="metric-label">{item.label}</p>
+                <p className="metric-value modern-highlight-value">{item.detail}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
         <div className="container">
           <h2 className="section-title">Features</h2>
           <p className="section-copy">
             Click any feature to see a deeper breakdown and preview.
           </p>
           <WhyLuthorFeatures />
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container support-shell">
+          <h2 className="section-title">Works With Your Stack</h2>
+          <p className="section-copy">
+            Plug Luthor into modern React workflows quickly with predictable version support.
+          </p>
+          <div className="support-grid" role="list" aria-label="Compatibility highlights">
+            {compatibilityRows.map((row) => (
+              <article key={row.label} className="support-card" role="listitem">
+                <p className="metric-label">{row.label}</p>
+                <p className="support-version">{row.version}</p>
+                <p className="support-detail">{row.detail}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

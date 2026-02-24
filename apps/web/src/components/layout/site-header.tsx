@@ -90,9 +90,10 @@ export function SiteHeader() {
             <span>GitHub</span>
           </a>
           <button
-            className="theme-toggle"
+            className={mounted && theme === 'dark' ? 'theme-toggle active' : 'theme-toggle'}
             type="button"
             onClick={toggleTheme}
+            aria-pressed={mounted ? theme === 'dark' : undefined}
             aria-label={mounted ? (theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode') : 'Toggle color theme'}
           >
             {mounted ? (
