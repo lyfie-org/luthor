@@ -1,9 +1,9 @@
 ---
-title: EmailComposeEditor
-description: Usage and props for the EmailComposeEditor preset.
+title: Email Compose
+description: Usage and prop defaults for the email compose preset.
 ---
 
-# EmailComposeEditor
+# Email Compose
 
 Email composer preset with To/Cc/Bcc/Subject shell.
 
@@ -20,15 +20,12 @@ export function App() {
 
 ## Props
 
-`EmailComposeEditorProps`:
+`EmailComposeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.
 
-- Inherits `ExtensiveEditorProps`
-- Excludes: `featureFlags`
-- Adds:
-  - `showTo?: boolean`
-  - `showCc?: boolean`
-  - `showBcc?: boolean`
-  - `showSubject?: boolean`
+- `showTo`: `true (default) | false`
+- `showCc`: `false (default) | true`
+- `showBcc`: `false (default) | true`
+- `showSubject`: `true (default) | false`
 
 ## Behavior
 

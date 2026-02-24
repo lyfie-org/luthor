@@ -1,11 +1,11 @@
 ---
-title: SimpleTextEditor
-description: Usage and props for the SimpleTextEditor preset.
+title: Simple Text
+description: Minimal text-focused preset with constrained editing modes.
 ---
 
-# SimpleTextEditor
+# Simple Text
 
-Minimal/plain-text style preset built on top of `ExtensiveEditor`.
+Minimal plain-text style preset built on top of `ExtensiveEditor`.
 
 ## Usage
 
@@ -20,12 +20,9 @@ export function App() {
 
 ## Props
 
-`SimpleTextEditorProps`:
+`SimpleTextEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, `initialMode`, and `toolbarVisibility`.
 
-- Inherits `ExtensiveEditorProps`
-- Excludes: `featureFlags`, `availableModes`, `initialMode`, `toolbarVisibility`
-- Adds:
-  - `hideToolbarByDefault?: boolean` (default `true`)
+- `hideToolbarByDefault`: `true (default) | false`
 
 ## Behavior
 

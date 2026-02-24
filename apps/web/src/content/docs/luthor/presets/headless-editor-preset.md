@@ -1,9 +1,9 @@
 ---
-title: HeadlessEditorPreset
-description: Usage and props for the HeadlessEditorPreset preset.
+title: Headless Preset
+description: Reference preset showing direct headless composition.
 ---
 
-# HeadlessEditorPreset
+# Headless Preset
 
 Small reference preset demonstrating direct headless composition.
 
@@ -20,10 +20,8 @@ export function App() {
 
 ## Props
 
-`HeadlessEditorPresetProps`:
-
-- `className?: string`
-- `placeholder?: string`
+- `className`: `undefined (default) | string`
+- `placeholder`: `'Start writing...' (default) | string`
 
 ## Behavior
 

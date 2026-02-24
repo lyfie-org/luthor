@@ -58,7 +58,7 @@ export function SiteFooter() {
       </div>
 
       <div className="container footer-bottom">
-        <p>Build with love by developers for developers.</p>
+        <p>Built with ❤️ by developers for developers.</p>
         <div className="footer-bottom-links">
           <a href="/docs/">Docs</a>
           <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">

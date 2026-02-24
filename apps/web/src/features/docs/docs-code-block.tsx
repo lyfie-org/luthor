@@ -1,6 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import hljs from 'highlight.js/lib/core';
+import bash from 'highlight.js/lib/languages/bash';
+import css from 'highlight.js/lib/languages/css';
+import javascript from 'highlight.js/lib/languages/javascript';
+import json from 'highlight.js/lib/languages/json';
+import markdown from 'highlight.js/lib/languages/markdown';
+import typescript from 'highlight.js/lib/languages/typescript';
+import xml from 'highlight.js/lib/languages/xml';
 
 type PackageManager = 'npm' | 'yarn' | 'pnpm';
 
@@ -26,6 +34,27 @@ const RESERVED_PM_COMMANDS = new Set([
   'up',
   'update',
 ]);
+
+let languagesRegistered = false;
+
+function registerHighlightLanguages() {
+  if (languagesRegistered) return;
+  hljs.registerLanguage('bash', bash);
+  hljs.registerLanguage('shell', bash);
+  hljs.registerLanguage('sh', bash);
+  hljs.registerLanguage('javascript', javascript);
+  hljs.registerLanguage('js', javascript);
+  hljs.registerLanguage('typescript', typescript);
+  hljs.registerLanguage('ts', typescript);
+  hljs.registerLanguage('tsx', typescript);
+  hljs.registerLanguage('json', json);
+  hljs.registerLanguage('css', css);
+  hljs.registerLanguage('html', xml);
+  hljs.registerLanguage('xml', xml);
+  hljs.registerLanguage('md', markdown);
+  hljs.registerLanguage('markdown', markdown);
+  languagesRegistered = true;
+}
 
 function replaceSaveDevFlags(args: string, target: PackageManager): string {
   if (target === 'npm') return args;
@@ -128,6 +157,16 @@ export function DocsCodeBlock({ code, language }: DocsCodeBlockProps) {
   const [copyLabel, setCopyLabel] = useState('Copy');
   const pmVariants = useMemo(() => toPmVariants(code), [code]);
   const displayCode = pmVariants ? pmVariants[activePm] : code;
+  const highlighted = useMemo(() => {
+    registerHighlightLanguages();
+    if (language && hljs.getLanguage(language)) {
+      const result = hljs.highlight(displayCode, { language, ignoreIllegals: true });
+      return { html: result.value, className: `hljs language-${result.language ?? language}` };
+    }
+    const result = hljs.highlightAuto(displayCode);
+    const className = result.language ? `hljs language-${result.language}` : 'hljs';
+    return { html: result.value, className };
+  }, [displayCode, language]);
 
   async function copyCode() {
     try {
@@ -166,7 +205,7 @@ export function DocsCodeBlock({ code, language }: DocsCodeBlockProps) {
         </button>
       </div>
       <pre>
-        <code>{displayCode}</code>
+        <code className={highlighted.className} dangerouslySetInnerHTML={{ __html: highlighted.html }} />
       </pre>
     </div>
   );

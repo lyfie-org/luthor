@@ -1,79 +1,34 @@
 ---
 title: Features
-description: Complete out-of-the-box capabilities and extension inventory for @lyfie/luthor-headless.
+description: Grouped feature documentation for @lyfie/luthor-headless.
 ---
 
-# Features - @lyfie/luthor-headless
+# Features
 
-This page summarizes what you get out of the box from the headless package.
+Feature docs are grouped to match the home page feature set.
 
-## Core runtime
+## Feature groups
 
-- `createEditorSystem`
-- `useEditor`
-- `RichText` renderer
-- typed command/state wiring based on installed extensions
+- [Typography and Text](/docs/luthor-headless/features/typography-and-text/)
+- [Structure and Lists](/docs/luthor-headless/features/structure-and-lists/)
+- [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/)
+- [Code and Devtools](/docs/luthor-headless/features/code-and-devtools/)
+- [Interaction and Productivity](/docs/luthor-headless/features/interaction-and-productivity/)
+- [Customization and Theming](/docs/luthor-headless/features/customization-and-theming/)
 
-## Text formatting extensions
+## Base runtime
 
-- `boldExtension`
-- `italicExtension`
-- `underlineExtension`
-- `strikethroughExtension`
-- `subscriptExtension`
-- `superscriptExtension`
-- `codeFormatExtension` (inline code)
-- `linkExtension`
-- `horizontalRuleExtension`
-- `fontFamilyExtension`
-- `fontSizeExtension`
-- `lineHeightExtension`
-- `textColorExtension`
-- `textHighlightExtension`
-- `blockFormatExtension`
-- `listExtension`
-- `tableExtension`
+```tsx
+import { createEditorSystem, RichText, richTextExtension } from '@lyfie/luthor-headless';
 
-## Code and structure extensions
+const extensions = [richTextExtension] as const;
+const { Provider } = createEditorSystem<typeof extensions>();
 
-- `codeExtension`
-- `codeIntelligenceExtension`
-- `historyExtension`
-- `tabIndentExtension`
-- `enterKeyBehaviorExtension`
-
-## Media extensions
-
-- `imageExtension`
-- `iframeEmbedExtension`
-- `youTubeEmbedExtension`
-
-## UI and interaction extensions
-
-- `commandPaletteExtension`
-- `slashCommandExtension`
-- `emojiExtension`
-- `floatingToolbarExtension`
-- `contextMenuExtension`
-- `draggableBlockExtension`
-
-## Custom extension support
-
-- `createCustomNodeExtension`
-- base extension contracts and extension categories
-
-## Utilities and types
-
-- theme utilities (`defaultLuthorTheme`, `mergeThemes`, token helpers)
-- markdown bridge utilities (`markdownToJSONB`, `jsonbToMarkdown`)
-- rich set of exported extension config/types
-
-## Optional ecosystem integrations
-
-- `highlight.js` for richer code token theming
-- `@emoji-mart/data` for larger emoji catalog integration
-
-## Notes
-
-`@lyfie/luthor` includes `@lyfie/luthor-headless` and builds preset editors on top of these capabilities.
-
+export function App() {
+  return (
+    <Provider extensions={extensions}>
+      <RichText placeholder="Write here..." />
+    </Provider>
+  );
+}
+```

@@ -1,9 +1,9 @@
 ---
-title: NotionLikeEditor
-description: Usage and props for the NotionLikeEditor preset.
+title: Notion Like
+description: Slash-first preset with draggable and command-focused defaults.
 ---
 
-# NotionLikeEditor
+# Notion Like
 
 Slash-first preset with draggable-focused defaults.
 
@@ -20,17 +20,14 @@ export function App() {
 
 ## Props
 
-`NotionLikeEditorProps`:
+`NotionLikeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`, then re-adds both.
 
-- Inherits `ExtensiveEditorProps`
-- Excludes: `featureFlags`, `isToolbarEnabled`
-- Adds:
-  - `slashVisibility?: SlashCommandVisibility`
-  - `isDraggableEnabled?: boolean`
-  - `featureFlags?: FeatureFlagOverrides`
-  - `isToolbarEnabled?: boolean`
+- `slashVisibility`: `undefined (default) | SlashCommandVisibility`
+- `isDraggableEnabled`: `true (default) | false`
+- `featureFlags`: `undefined (default) | FeatureFlagOverrides`
+- `isToolbarEnabled`: `false (default) | true`
 
 ## Behavior
 
-Defaults enable slash commands + draggable blocks + command palette with toolbar hidden by default.
+Defaults enable slash commands, draggable blocks, and command palette while keeping toolbar hidden.
 

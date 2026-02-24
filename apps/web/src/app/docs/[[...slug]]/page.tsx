@@ -1,28 +1,63 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { ReactNode, isValidElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { GITHUB_CONTENT_BASE_URL, SITE_NAME } from '@/config/site';
+import { SITE_NAME } from '@/config/site';
 import { DocsCodeBlock } from '@/features/docs/docs-code-block';
 import { DocsSearch } from '@/features/docs/docs-search';
 import { getAllDocs, getAllDocSlugs, getDocBySlug } from '@/features/docs/docs.service';
 
 type Params = { slug?: string[] };
-type NavGroupId = 'overview' | 'getting_started' | 'luthor_headless' | 'luthor' | 'other';
+type NavGroupId = 'getting_started' | 'luthor_headless' | 'luthor' | 'other';
 
 const NAV_GROUP_ORDER: { id: NavGroupId; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
   { id: 'getting_started', label: 'Getting Started' },
-  { id: 'luthor_headless', label: 'Luthor Headless - @lyfie/luthor-headless' },
-  { id: 'luthor', label: 'Luthor - @lyfie/luthor' },
+  { id: 'luthor_headless', label: '@lyfie/headless' },
+  { id: 'luthor', label: '@lyfie/luthor' },
   { id: 'other', label: 'Other' },
 ];
+
+const GROUP_ENTRY_ORDER: Partial<Record<NavGroupId, string[]>> = {
+  getting_started: [
+    '/docs/getting-started/',
+    '/docs/getting-started/installation/',
+    '/docs/getting-started/luthor-headless/',
+    '/docs/getting-started/luthor/',
+  ],
+  luthor_headless: [
+    '/docs/luthor-headless/features/',
+    '/docs/luthor-headless/features/typography-and-text/',
+    '/docs/luthor-headless/features/structure-and-lists/',
+    '/docs/luthor-headless/features/media-and-embeds/',
+    '/docs/luthor-headless/features/code-and-devtools/',
+    '/docs/luthor-headless/features/interaction-and-productivity/',
+    '/docs/luthor-headless/features/customization-and-theming/',
+  ],
+  luthor: [
+    '/docs/luthor/presets/',
+    '/docs/luthor/presets/extensive-editor/',
+    '/docs/luthor/presets/simple-text-editor/',
+    '/docs/luthor/presets/rich-text-box-editor/',
+    '/docs/luthor/presets/chat-window-editor/',
+    '/docs/luthor/presets/email-compose-editor/',
+    '/docs/luthor/presets/md-text-editor/',
+    '/docs/luthor/presets/notion-like-editor/',
+    '/docs/luthor/presets/headless-editor-preset/',
+    '/docs/luthor/presets/notes-editor/',
+  ],
+};
 
 type BreadcrumbItem = {
   label: string;
   href?: string;
+};
+
+const BREADCRUMB_DEFAULT_ROUTES: Record<string, string> = {
+  '/docs/getting-started/': '/docs/getting-started/',
+  '/docs/luthor-headless/': '/docs/luthor-headless/features/',
+  '/docs/luthor/': '/docs/luthor/presets/',
 };
 
 function resolveHref(href: string): string {
@@ -35,7 +70,6 @@ function resolveHref(href: string): string {
 }
 
 function getNavGroupId(urlPath: string): NavGroupId {
-  if (urlPath === '/docs/') return 'overview';
   if (urlPath.startsWith('/docs/getting-started/')) return 'getting_started';
   if (urlPath.startsWith('/docs/luthor-headless/')) return 'luthor_headless';
   if (urlPath.startsWith('/docs/luthor/')) return 'luthor';
@@ -53,8 +87,23 @@ function buildNavGroups(docs: Awaited<ReturnType<typeof getAllDocs>>) {
   }
 
   for (const [groupId, entries] of grouped.entries()) {
-    if (groupId === 'overview') continue;
-    entries.sort((a, b) => a.title.localeCompare(b.title));
+    const order = GROUP_ENTRY_ORDER[groupId];
+    if (!order || order.length === 0) {
+      entries.sort((a, b) => a.title.localeCompare(b.title));
+      grouped.set(groupId, entries);
+      continue;
+    }
+
+    const orderIndex = new Map(order.map((url, index) => [url, index]));
+    entries.sort((a, b) => {
+      const aIndex = orderIndex.get(a.urlPath);
+      const bIndex = orderIndex.get(b.urlPath);
+
+      if (typeof aIndex === 'number' && typeof bIndex === 'number') return aIndex - bIndex;
+      if (typeof aIndex === 'number') return -1;
+      if (typeof bIndex === 'number') return 1;
+      return a.title.localeCompare(b.title);
+    });
     grouped.set(groupId, entries);
   }
 
@@ -62,12 +111,6 @@ function buildNavGroups(docs: Awaited<ReturnType<typeof getAllDocs>>) {
     ...group,
     entries: grouped.get(group.id)!,
   }));
-}
-
-function toDisplayDate(iso: string): string {
-  const parsed = new Date(iso);
-  if (Number.isNaN(parsed.valueOf())) return iso;
-  return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(parsed);
 }
 
 function toTitleCase(value: string): string {
@@ -92,9 +135,11 @@ function buildBreadcrumbs(slug: string[]): BreadcrumbItem[] {
     if (!segment) continue;
     path += `/${segment}`;
     const isLast = index === slug.length - 1;
+    const segmentPath = `${path}/`;
+    const breadcrumbHref = BREADCRUMB_DEFAULT_ROUTES[segmentPath] ?? segmentPath;
     breadcrumbs.push({
       label: toTitleCase(segment),
-      href: isLast ? undefined : `${path}/`,
+      href: isLast ? undefined : breadcrumbHref,
     });
   }
 
@@ -124,6 +169,15 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const resolvedParams = await params;
   const slug = resolvedParams.slug ?? [];
+  if (slug.length === 0) {
+    return {
+      title: 'Documentation',
+      description: 'Documentation for @lyfie/luthor and @lyfie/luthor-headless.',
+      alternates: {
+        canonical: '/docs/getting-started/',
+      },
+    };
+  }
   const doc = await getDocBySlug(slug);
 
   if (!doc) {
@@ -158,6 +212,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 export default async function DocsPage({ params }: { params: Promise<Params> }) {
   const resolvedParams = await params;
   const slug = resolvedParams.slug ?? [];
+  if (slug.length === 0) redirect('/docs/getting-started/');
   const [doc, allDocs] = await Promise.all([getDocBySlug(slug), getAllDocs()]);
 
   if (!doc) notFound();
@@ -166,7 +221,6 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
   const currentIndex = orderedDocs.findIndex((entry) => entry.urlPath === doc.urlPath);
   const previousDoc = currentIndex > 0 ? orderedDocs[currentIndex - 1] : null;
   const nextDoc = currentIndex >= 0 && currentIndex < orderedDocs.length - 1 ? orderedDocs[currentIndex + 1] : null;
-  const sourceUrl = `${GITHUB_CONTENT_BASE_URL}/${doc.sourcePath}`;
   const searchDocs = allDocs.map((entry) => ({
     urlPath: entry.urlPath,
     title: entry.title,
@@ -217,8 +271,7 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
         </nav>
         <div className="docs-layout">
           <aside className="docs-sidebar" aria-label="Documentation navigation">
-            <h2>Documentation</h2>
-            <p className="docs-sidebar-summary">{allDocs.length} public pages</p>
+            <h2>Luthor Documentation</h2>
             {navGroups.map((group) => (
               <div className="docs-sidebar-group" key={group.id}>
                 <h3>{group.label}</h3>
@@ -241,14 +294,6 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
           <DocsSearch docs={searchDocs} />
           <article className="docs-article">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-            <h1>{doc.title}</h1>
-            <p className="docs-meta">
-              Last updated {toDisplayDate(doc.updatedAt)}. Source:{' '}
-              <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
-                {doc.sourcePath}
-              </a>
-              .
-            </p>
             <div className="doc-content">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}

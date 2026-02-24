@@ -1,11 +1,11 @@
 ---
-title: MDTextEditor
-description: Usage and props for the MDTextEditor preset.
+title: Markdown
+description: Visual and markdown mode preset with mode-switch behavior.
 ---
 
-# MDTextEditor
+# Markdown
 
-Preset that switches between Visual and Markdown editing.
+Preset that switches between visual and markdown editing.
 
 ## Usage
 
@@ -20,15 +20,12 @@ export function App() {
 
 ## Props
 
-`MDTextEditorProps`:
+`MDTextEditorProps` inherits `ExtensiveEditorProps` except `availableModes` and `initialMode`.
 
-- Inherits `ExtensiveEditorProps`
-- Excludes: `availableModes`, `initialMode`
-- Adds:
-  - `initialMode?: 'visual' | 'markdown'`
+- `initialMode`: `'visual' (default) | 'markdown'`
 
 ## Behavior
 
-- Uses markdown/jsonb bridge for mode conversion
-- Applies feature defaults suitable for markdown workflows
+- Uses markdown/jsonb conversion when switching modes
+- Renders source textarea in markdown mode
 

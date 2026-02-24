@@ -1,11 +1,11 @@
 ---
-title: ChatWindowEditor
-description: Usage and props for the ChatWindowEditor preset.
+title: Chat Window
+description: Usage and prop defaults for the chat-style editor preset.
 ---
 
-# ChatWindowEditor
+# Chat Window
 
-Chat composer style preset with send/action controls.
+Chat composer style preset with send and action controls.
 
 ## Usage
 
@@ -26,21 +26,18 @@ export function App() {
 
 ## Props
 
-`ChatWindowEditorProps`:
+`ChatWindowEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`.
 
-- Inherits `ExtensiveEditorProps`
-- Excludes: `featureFlags`, `isToolbarEnabled`
-- Adds:
-  - `onSend?: (payload: { jsonb: string }) => void`
-  - `submitOnEnter?: boolean`
-  - `allowShiftEnter?: boolean`
-  - `showVoiceButton?: boolean`
-  - `showImageButton?: boolean`
-  - `showSendButton?: boolean`
+- `onSend`: `undefined (default) | (payload: { jsonb: string }) => void`
+- `submitOnEnter`: `true (default) | false`
+- `allowShiftEnter`: `true (default) | false`
+- `showVoiceButton`: `false (default) | true`
+- `showImageButton`: `true (default) | false`
+- `showSendButton`: `true (default) | false`
 
 ## Behavior
 
 - Toolbar is disabled by preset defaults
 - Visual mode only
-- Enter-to-send can be configured
+- Enter-to-send behavior is configurable
 

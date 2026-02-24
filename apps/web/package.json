@@ -19,6 +19,7 @@
     "@opennextjs/cloudflare": "^1.16.5",
     "@phosphor-icons/react": "^2.1.10",
     "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
     "next": "^15.5.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

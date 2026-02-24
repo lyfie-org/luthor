@@ -1,11 +1,11 @@
 ---
-title: RichTextBoxEditor
-description: Usage and props for the RichTextBoxEditor preset.
+title: Rich Text
+description: Compact rich text preset and prop defaults.
 ---
 
-# RichTextBoxEditor
+# Rich Text
 
-Compact rich-text preset for focused editing.
+Compact rich text preset for focused editing.
 
 ## Usage
 
@@ -20,15 +20,12 @@ export function App() {
 
 ## Props
 
-`RichTextBoxEditorProps`:
+`RichTextBoxEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.
 
-- Inherits `ExtensiveEditorProps`
-- Excludes: `featureFlags`
-- Adds:
-  - `featureFlags?: FeatureFlagOverrides`
-  - `compactToolbar?: boolean`
+- `featureFlags`: `undefined (default) | FeatureFlagOverrides`
+- `compactToolbar`: `false (default) | true`
 
 ## Behavior
 
-Default feature flags enable core text formatting and disable heavier media/embed features unless re-enabled.
+Default feature flags enable core formatting and disable heavier media/embed features unless re-enabled.
 

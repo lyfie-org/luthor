@@ -1,11 +1,11 @@
 ---
-title: ExtensiveEditor
-description: Usage and full props list for the ExtensiveEditor preset.
+title: Extensive
+description: Full-feature preset and core prop reference.
 ---
 
-# ExtensiveEditor
+# Extensive
 
-`ExtensiveEditor` is the full-feature preset editor.
+`ExtensiveEditor` is the base full-feature preset editor.
 
 ## Usage
 
@@ -18,59 +18,29 @@ export function App() {
 }
 ```
 
-## Props
+## Core props
 
-`ExtensiveEditorProps` includes:
-
-- `className?`
-- `onReady?`
-- `initialTheme?`
-- `theme?`
-- `defaultContent?`
-- `showDefaultContent?`
-- `placeholder?`
-- `initialMode?`
-- `availableModes?`
-- `variantClassName?`
-- `toolbarLayout?`
-- `toolbarVisibility?`
-- `toolbarPosition?`
-- `toolbarAlignment?`
-- `toolbarClassName?`
-- `toolbarStyleVars?`
-- `quoteClassName?`
-- `quoteStyleVars?`
-- `defaultSettings?`
-- `editorThemeOverrides?`
-- `isToolbarEnabled?`
-- `fontFamilyOptions?`
-- `fontSizeOptions?`
-- `lineHeightOptions?`
-- `minimumDefaultLineHeight?`
-- `scaleByRatio?`
-- `headingOptions?`
-- `paragraphLabel?`
-- `syncHeadingOptionsWithCommands?`
-- `slashCommandVisibility?`
-- `shortcutConfig?`
-- `commandPaletteShortcutOnly?`
-- `isDraggableBoxEnabled?`
-- `featureFlags?`
-- `syntaxHighlighting?`
-- `codeHighlightProvider?`
-- `loadCodeHighlightProvider?`
-- `maxAutoDetectCodeLength?`
-- `isCopyAllowed?`
-- `languageOptions?`
+- `initialTheme`: `'light' (default) | 'dark'`
+- `showDefaultContent`: `true (default) | false`
+- `placeholder`: `'Write anything...' (default) | string | { visual?: string; jsonb?: string }`
+- `initialMode`: `'visual' (default) | 'jsonb'`
+- `availableModes`: `['visual', 'jsonb'] (default) | ('visual' | 'jsonb')[]`
+- `toolbarPosition`: `'top' (default) | 'bottom'`
+- `toolbarAlignment`: `'left' (default) | 'center' | 'right'`
+- `isToolbarEnabled`: `true (default) | false`
+- `minimumDefaultLineHeight`: `1.5 (default) | string | number`
+- `scaleByRatio`: `false (default) | true`
+- `syncHeadingOptionsWithCommands`: `true (default) | false`
+- `commandPaletteShortcutOnly`: `false (default) | true`
+- `isCopyAllowed`: `true (default) | false`
+- `syntaxHighlighting`: `'auto' | 'disabled'` | extension default behavior if omitted
 
 ## Ref API
 
-`ExtensiveEditorRef`:
-
-- `injectJSONB(content: string)`
+- `injectJSONB(content: string): void`
 - `getJSONB(): string`
 
 ## Notes
 
-This is the base preset that other presets reuse via `ExtensiveEditorProps`.
+This is the base preset that other presets build on.
 

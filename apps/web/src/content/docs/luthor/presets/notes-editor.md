@@ -1,9 +1,9 @@
 ---
-title: NotesEditor
-description: Usage and props for the NotesEditor preset.
+title: Notes
+description: Notes-style preset with title and action controls.
 ---
 
-# NotesEditor
+# Notes
 
 Notes-style preset with title and action controls.
 
@@ -28,19 +28,16 @@ export function App() {
 
 ## Props
 
-`NotesEditorProps`:
+`NotesEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.
 
-- Inherits `ExtensiveEditorProps`
-- Excludes: `featureFlags`
-- Adds:
-  - `showTitle?: boolean`
-  - `title?: string`
-  - `onTitleChange?: (value: string) => void`
-  - `showActions?: boolean`
-  - `onPin?: () => void`
-  - `onArchive?: () => void`
-  - `onColorChange?: (color: string) => void`
-  - `colorOptions?: readonly string[]`
+- `showTitle`: `true (default) | false`
+- `title`: `'' (default) | string`
+- `onTitleChange`: `undefined (default) | (value: string) => void`
+- `showActions`: `true (default) | false`
+- `onPin`: `undefined (default) | () => void`
+- `onArchive`: `undefined (default) | () => void`
+- `onColorChange`: `undefined (default) | (color: string) => void`
+- `colorOptions`: `['#fef3c7', '#dbeafe', '#dcfce7'] (default) | readonly string[]`
 
 ## Behavior
 

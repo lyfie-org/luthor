@@ -1,23 +1,14 @@
 export const docsIndex = [
   {
-    "slug": [],
-    "title": "Luthor Documentation",
-    "description": "Focused documentation for getting started, luthor-headless features, and luthor presets.",
-    "content": "\n# [Luthor](/demo/) Documentation\n\nThis documentation is intentionally focused and grouped into three sections.\n\n## Groups\n\n- [Getting Started](/docs/getting-started/)\n- [Luthor Headless - @lyfie/luthor-headless](/docs/luthor-headless/features/)\n- [Luthor - @lyfie/luthor](/docs/luthor/presets/)\n\n## Recommended Path\n\n1. Read [Introduction](/docs/getting-started/)\n2. Run [Installation](/docs/getting-started/installation/)\n3. Follow one quick start:\n   - [Get Started @lyfie/luthor](/docs/getting-started/luthor/)\n   - [Get Started @lyfie/luthor-headless](/docs/getting-started/luthor-headless/)\n",
-    "urlPath": "/docs/",
-    "sourcePath": "apps/web/src/content/docs/index.md",
-    "updatedAt": "2026-02-24T09:42:01.669Z"
-  },
-  {
     "slug": [
       "getting-started"
     ],
     "title": "Introduction",
-    "description": "What Luthor and Luthor Headless are, and when to use each package.",
-    "content": "\n# Introduction\n\n`@lyfie/luthor` and `@lyfie/luthor-headless` solve different needs.\n\n## @lyfie/luthor\n\nUse this when you want a production-ready editor quickly.\n\n- Includes preset editors and prebuilt UI\n- Includes `@lyfie/luthor-headless` under the hood\n- Best for fast shipping with strong defaults\n\n## @lyfie/luthor-headless\n\nUse this when you want full control over UI and behavior.\n\n- Extension-first architecture\n- Bring your own toolbar and app UX\n- Best for custom product-specific editing flows\n\n## Compatibility\n\nBased on package metadata in `packages/luthor/package.json` and `packages/headless/package.json`:\n\n- React: `^18.0.0 || ^19.0.0`\n- React DOM: `^18.0.0 || ^19.0.0`\n- TypeScript/TSX: fully supported (the APIs are TypeScript-first)\n- Lexical:\n  - `@lyfie/luthor`: uses Lexical `^0.40.0` dependencies internally\n  - `@lyfie/luthor-headless`: peer dependency `>=0.40.0` for `lexical` and required `@lexical/*` packages\n\n## Which package should you choose?\n\n- Choose `@lyfie/luthor` if you want speed and ready-made preset UX.\n- Choose `@lyfie/luthor-headless` if you need deep customization and your own UI.\n\n## Next\n\n- [Installation](/docs/getting-started/installation/)\n- [Get Started @lyfie/luthor](/docs/getting-started/luthor/)\n- [Get Started @lyfie/luthor-headless](/docs/getting-started/luthor-headless/)\n",
+    "description": "What @lyfie/luthor and @lyfie/luthor-headless are, and when to use each package.",
+    "content": "\n# Introduction\n\n`@lyfie/luthor` and `@lyfie/luthor-headless` solve different needs.\n\n## @lyfie/luthor\n\nUse this when you want a production-ready editor quickly.\n\n- Includes preset editors and prebuilt UI\n- Includes `@lyfie/luthor-headless` under the hood\n- Best for fast shipping with strong defaults\n\n## @lyfie/headless\n\nUse this when you want full control over UI and behavior.\n\n- Extension-first architecture\n- Bring your own toolbar and app UX\n- Best for custom product-specific editing flows\n\n## Compatibility\n\nBased on package metadata in `packages/luthor/package.json` and `packages/headless/package.json`:\n\n- React: `^18.0.0 || ^19.0.0`\n- React DOM: `^18.0.0 || ^19.0.0`\n- TypeScript/TSX: fully supported\n- Lexical:\n  - `@lyfie/luthor`: uses Lexical `^0.40.0` dependencies internally\n  - `@lyfie/luthor-headless`: peer dependency `>=0.40.0` for `lexical` and required `@lexical/*` packages\n\n## Recommended path\n\n1. [Introduction](/docs/getting-started/)\n2. [Installation](/docs/getting-started/installation/)\n3. [@lyfie/headless](/docs/getting-started/luthor-headless/)\n4. [@lyfie/luthor](/docs/getting-started/luthor/)\r\n",
     "urlPath": "/docs/getting-started/",
     "sourcePath": "apps/web/src/content/docs/getting-started/index.md",
-    "updatedAt": "2026-02-24T09:42:10.707Z"
+    "updatedAt": "2026-02-24T11:35:26.965Z"
   },
   {
     "slug": [
@@ -25,35 +16,35 @@ export const docsIndex = [
       "installation"
     ],
     "title": "Installation",
-    "description": "Install, update, uninstall, and avoid common mistakes for both packages.",
-    "content": "\n# Installation\n\nThis page covers install, update, and uninstall for both packages.\n\n## Install @lyfie/luthor\n\n```bash\nnpm install @lyfie/luthor react react-dom\n```\n\n## Install @lyfie/luthor-headless\n\n```bash\nnpm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom\n```\n\nOptional for headless:\n\n```bash\nnpm install highlight.js\n```\n\n```bash\nnpm install @emoji-mart/data\n```\n\n## Update packages\n\n```bash\nnpm update @lyfie/luthor @lyfie/luthor-headless\n```\n\n## Uninstall packages\n\n```bash\nnpm uninstall @lyfie/luthor @lyfie/luthor-headless\n```\n\nIf you installed headless peers directly and want to remove them too:\n\n```bash\nnpm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils highlight.js @emoji-mart/data\n```\n\n## Common mistakes and things to keep in mind\n\n### 1) Missing Lexical peer dependencies (headless only)\n\n`@lyfie/luthor-headless` requires `lexical` + key `@lexical/*` packages. If these are missing, runtime/editor init fails.\n\n### 2) Missing styles with @lyfie/luthor\n\nAlways import preset styles:\n\n```tsx\nimport '@lyfie/luthor/styles.css';\n```\n\n### 3) Version mismatches across React/Lexical\n\nKeep React and Lexical versions compatible with package peer ranges from `package.json`.\n\n### 4) Using preset docs for headless setup (or vice versa)\n\n- `@lyfie/luthor`: preset-first, ready UI\n- `@lyfie/luthor-headless`: extension-first, custom UI\n\n### 5) Optional dependencies confusion\n\n`highlight.js` and `@emoji-mart/data` are optional for headless. The editor still works without them.\n\n## Next\n\n- [Get Started @lyfie/luthor](/docs/getting-started/luthor/)\n- [Get Started @lyfie/luthor-headless](/docs/getting-started/luthor-headless/)\n",
+    "description": "Install, update, and uninstall @lyfie/luthor and @lyfie/luthor-headless.",
+    "content": "\n# Installation\n\nThis page covers install, update, and uninstall for both packages.\n\n## Install @lyfie/luthor\n\n```bash\nnpm install @lyfie/luthor react react-dom\n```\n\n## Install @lyfie/luthor-headless\n\n```bash\nnpm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom\n```\n\nOptional for headless:\n\n```bash\nnpm install highlight.js @emoji-mart/data\n```\n\n## Update packages\n\n```bash\nnpm update @lyfie/luthor @lyfie/luthor-headless\n```\n\n## Uninstall packages\n\n```bash\nnpm uninstall @lyfie/luthor @lyfie/luthor-headless\n```\n\nIf you installed headless peers directly and want to remove them too:\n\n```bash\nnpm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils highlight.js @emoji-mart/data\n```\n\n## Common mistakes\n\n1. Missing Lexical peer dependencies for headless setup\n2. Missing `@lyfie/luthor/styles.css` import for presets\n3. React/Lexical version mismatch\n4. Following preset docs when implementing headless UI (or vice versa)\r\n",
     "urlPath": "/docs/getting-started/installation/",
     "sourcePath": "apps/web/src/content/docs/getting-started/installation.md",
-    "updatedAt": "2026-02-24T09:42:26.879Z"
+    "updatedAt": "2026-02-24T11:35:26.965Z"
   },
   {
     "slug": [
       "getting-started",
       "luthor-headless"
     ],
-    "title": "Get Started @lyfie/luthor-headless",
-    "description": "Minimal setup and validation for the headless package.",
-    "content": "\n# Get Started @lyfie/luthor-headless\n\nUse this when you need full control over editor UI.\n\n## 1) Install\n\n```bash\nnpm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom\n```\n\n## 2) Render a minimal headless editor\n\n```tsx\nimport {\n  createEditorSystem,\n  RichText,\n  richTextExtension,\n  boldExtension,\n  italicExtension,\n} from '@lyfie/luthor-headless';\n\nconst extensions = [richTextExtension, boldExtension, italicExtension] as const;\nconst { Provider, useEditor } = createEditorSystem<typeof extensions>();\n\nfunction Toolbar() {\n  const { commands, activeStates } = useEditor();\n\n  return (\n    <div>\n      <button onClick={() => commands.toggleBold()} aria-pressed={activeStates.bold}>Bold</button>\n      <button onClick={() => commands.toggleItalic()} aria-pressed={activeStates.italic}>Italic</button>\n    </div>\n  );\n}\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <Toolbar />\n      <RichText placeholder=\"Write here...\" />\n    </Provider>\n  );\n}\n```\n\n## 3) Validate installation\n\nIf this works, installation is valid:\n\n- Text area mounts\n- Buttons execute bold/italic commands\n- No missing peer dependency errors for Lexical packages\n\n## Quick validation checklist\n\n- All required `lexical` and `@lexical/*` peers are installed\n- `createEditorSystem` provider wraps your editor UI\n- Commands and active states are accessible from `useEditor()`\n\n## Next\n\n- [Headless Features](/docs/luthor-headless/features/)\n\n",
+    "title": "@lyfie/headless",
+    "description": "Minimal setup and validation for @lyfie/luthor-headless.",
+    "content": "\n# @lyfie/headless\n\nUse this when you need full control over editor UI.\n\n## Install\n\n```bash\nnpm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom\n```\n\n## Render a minimal headless editor\n\n```tsx\nimport {\n  createEditorSystem,\n  RichText,\n  richTextExtension,\n  boldExtension,\n  italicExtension,\n} from '@lyfie/luthor-headless';\n\nconst extensions = [richTextExtension, boldExtension, italicExtension] as const;\nconst { Provider, useEditor } = createEditorSystem<typeof extensions>();\n\nfunction Toolbar() {\n  const { commands, activeStates } = useEditor();\n\n  return (\n    <div>\n      <button onClick={() => commands.toggleBold?.()} aria-pressed={activeStates.bold === true}>Bold</button>\n      <button onClick={() => commands.toggleItalic?.()} aria-pressed={activeStates.italic === true}>Italic</button>\n    </div>\n  );\n}\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <Toolbar />\n      <RichText placeholder=\"Write here...\" />\n    </Provider>\n  );\n}\n```\n\n## Validate installation\n\n- Text area mounts\n- Buttons execute bold and italic commands\n- No missing peer dependency errors for Lexical packages\r\n",
     "urlPath": "/docs/getting-started/luthor-headless/",
     "sourcePath": "apps/web/src/content/docs/getting-started/luthor-headless.md",
-    "updatedAt": "2026-02-24T09:42:44.198Z"
+    "updatedAt": "2026-02-24T11:44:27.583Z"
   },
   {
     "slug": [
       "getting-started",
       "luthor"
     ],
-    "title": "Get Started @lyfie/luthor",
+    "title": "@lyfie/luthor",
     "description": "Minimal setup and validation for the preset package.",
-    "content": "\n# Get Started @lyfie/luthor\n\nUse this when you want a ready-to-use editor quickly.\n\n## 1) Install\n\n```bash\nnpm install @lyfie/luthor react react-dom\n```\n\n## 2) Render a basic editor\n\n```tsx\nimport { ExtensiveEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <ExtensiveEditor placeholder=\"Start writing...\" />;\n}\n```\n\n## 3) Validate installation\n\nIf this renders correctly, installation is valid:\n\n- You can type in the editor\n- Toolbar appears\n- No module resolution errors in dev server\n\n## Quick validation checklist\n\n- `@lyfie/luthor/styles.css` is impasorted\n- React app builds without peer dependency warnings\n- Editor mounts without runtime errors\n\n## Next\n\n- [Luthor Presets](/docs/luthor/presets/)\n\n",
+    "content": "\n# @lyfie/luthor\n\nUse this when you want a ready-to-use editor quickly.\n\n## Install\n\n```bash\nnpm install @lyfie/luthor react react-dom\n```\n\n## Render a basic editor\n\n```tsx\nimport { ExtensiveEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <ExtensiveEditor placeholder=\"Start writing...\" />;\n}\n```\n\n## Validate installation\n\n- You can type in the editor\n- Toolbar appears\n- No module resolution errors in the dev server\r\n",
     "urlPath": "/docs/getting-started/luthor/",
     "sourcePath": "apps/web/src/content/docs/getting-started/luthor.md",
-    "updatedAt": "2026-02-24T10:58:41.681Z"
+    "updatedAt": "2026-02-24T11:44:30.280Z"
   },
   {
     "slug": [
@@ -61,11 +52,89 @@ export const docsIndex = [
       "features"
     ],
     "title": "Features",
-    "description": "Complete out-of-the-box capabilities and extension inventory for @lyfie/luthor-headless.",
-    "content": "\n# Features - @lyfie/luthor-headless\n\nThis page summarizes what you get out of the box from the headless package.\n\n## Core runtime\n\n- `createEditorSystem`\n- `useEditor`\n- `RichText` renderer\n- typed command/state wiring based on installed extensions\n\n## Text formatting extensions\n\n- `boldExtension`\n- `italicExtension`\n- `underlineExtension`\n- `strikethroughExtension`\n- `subscriptExtension`\n- `superscriptExtension`\n- `codeFormatExtension` (inline code)\n- `linkExtension`\n- `horizontalRuleExtension`\n- `fontFamilyExtension`\n- `fontSizeExtension`\n- `lineHeightExtension`\n- `textColorExtension`\n- `textHighlightExtension`\n- `blockFormatExtension`\n- `listExtension`\n- `tableExtension`\n\n## Code and structure extensions\n\n- `codeExtension`\n- `codeIntelligenceExtension`\n- `historyExtension`\n- `tabIndentExtension`\n- `enterKeyBehaviorExtension`\n\n## Media extensions\n\n- `imageExtension`\n- `iframeEmbedExtension`\n- `youTubeEmbedExtension`\n\n## UI and interaction extensions\n\n- `commandPaletteExtension`\n- `slashCommandExtension`\n- `emojiExtension`\n- `floatingToolbarExtension`\n- `contextMenuExtension`\n- `draggableBlockExtension`\n\n## Custom extension support\n\n- `createCustomNodeExtension`\n- base extension contracts and extension categories\n\n## Utilities and types\n\n- theme utilities (`defaultLuthorTheme`, `mergeThemes`, token helpers)\n- markdown bridge utilities (`markdownToJSONB`, `jsonbToMarkdown`)\n- rich set of exported extension config/types\n\n## Optional ecosystem integrations\n\n- `highlight.js` for richer code token theming\n- `@emoji-mart/data` for larger emoji catalog integration\n\n## Notes\n\n`@lyfie/luthor` includes `@lyfie/luthor-headless` and builds preset editors on top of these capabilities.\n\n",
+    "description": "Grouped feature documentation for @lyfie/luthor-headless.",
+    "content": "\n# Features\n\nFeature docs are grouped to match the home page feature set.\n\n## Feature groups\n\n- [Typography and Text](/docs/luthor-headless/features/typography-and-text/)\n- [Structure and Lists](/docs/luthor-headless/features/structure-and-lists/)\n- [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/)\n- [Code and Devtools](/docs/luthor-headless/features/code-and-devtools/)\n- [Interaction and Productivity](/docs/luthor-headless/features/interaction-and-productivity/)\n- [Customization and Theming](/docs/luthor-headless/features/customization-and-theming/)\n\n## Base runtime\n\n```tsx\nimport { createEditorSystem, RichText, richTextExtension } from '@lyfie/luthor-headless';\n\nconst extensions = [richTextExtension] as const;\nconst { Provider } = createEditorSystem<typeof extensions>();\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <RichText placeholder=\"Write here...\" />\n    </Provider>\n  );\n}\n```\r\n",
     "urlPath": "/docs/luthor-headless/features/",
     "sourcePath": "apps/web/src/content/docs/luthor-headless/features.md",
-    "updatedAt": "2026-02-24T09:42:53.791Z"
+    "updatedAt": "2026-02-24T11:36:56.250Z"
+  },
+  {
+    "slug": [
+      "luthor-headless",
+      "features",
+      "code-and-devtools"
+    ],
+    "title": "Code and Devtools",
+    "description": "Code blocks, syntax support, and markdown/json conversion tools.",
+    "content": "\n# Code and Devtools\n\nThis group covers code editing and developer-facing utilities.\n\n## Included extensions and utilities\n\n- `codeExtension`\n- `codeIntelligenceExtension`\n- `codeFormatExtension`\n- `markdownToJSONB`, `jsonbToMarkdown`\n\n## Example: code editor setup\n\n```tsx\nimport {\n  createEditorSystem,\n  RichText,\n  richTextExtension,\n  codeExtension,\n  codeIntelligenceExtension,\n} from '@lyfie/luthor-headless';\n\nconst extensions = [richTextExtension, codeExtension, codeIntelligenceExtension] as const;\nconst { Provider, useEditor } = createEditorSystem<typeof extensions>();\n\nfunction Toolbar() {\n  const { commands } = useEditor();\n  return <button onClick={() => commands.insertCodeBlock?.({ language: 'ts' })}>Code Block</button>;\n}\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <Toolbar />\n      <RichText placeholder=\"Write docs with code...\" />\n    </Provider>\n  );\n}\n```\n\n## Example: markdown bridge\n\n```ts\nimport { markdownToJSONB, jsonbToMarkdown } from '@lyfie/luthor-headless';\n\nconst json = markdownToJSONB('# Title\\n\\nSome text');\nconst markdown = jsonbToMarkdown(json);\n```\r\n",
+    "urlPath": "/docs/luthor-headless/features/code-and-devtools/",
+    "sourcePath": "apps/web/src/content/docs/luthor-headless/features/code-and-devtools.md",
+    "updatedAt": "2026-02-24T11:36:56.255Z"
+  },
+  {
+    "slug": [
+      "luthor-headless",
+      "features",
+      "customization-and-theming"
+    ],
+    "title": "Customization and Theming",
+    "description": "Custom nodes, theme tokens, and extension-level customization.",
+    "content": "\n# Customization and Theming\n\nThis group covers custom block logic and theming APIs.\n\n## Included APIs\n\n- `createCustomNodeExtension`\n- `defaultLuthorTheme`\n- `mergeThemes`\n- `createEditorThemeStyleVars`\n\n## Example: custom extension\n\n```tsx\nimport {\n  createEditorSystem,\n  RichText,\n  richTextExtension,\n  createCustomNodeExtension,\n} from '@lyfie/luthor-headless';\n\nconst calloutExtension = createCustomNodeExtension({\n  key: 'callout',\n  category: 'block',\n  nodeType: 'element',\n  createNode: ({ $createParagraphNode, $createTextNode }) => {\n    const node = $createParagraphNode();\n    node.append($createTextNode('Callout block'));\n    return node;\n  },\n});\n\nconst extensions = [richTextExtension, calloutExtension] as const;\nconst { Provider } = createEditorSystem<typeof extensions>();\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <RichText placeholder=\"Custom editor...\" />\n    </Provider>\n  );\n}\n```\n\n## Example: theme override\n\n```ts\nimport { mergeThemes, defaultLuthorTheme } from '@lyfie/luthor-headless';\n\nconst theme = mergeThemes(defaultLuthorTheme, {\n  colors: {\n    background: '#0b1020',\n    foreground: '#f8fafc',\n  },\n});\n```\r\n",
+    "urlPath": "/docs/luthor-headless/features/customization-and-theming/",
+    "sourcePath": "apps/web/src/content/docs/luthor-headless/features/customization-and-theming.md",
+    "updatedAt": "2026-02-24T11:36:56.258Z"
+  },
+  {
+    "slug": [
+      "luthor-headless",
+      "features",
+      "interaction-and-productivity"
+    ],
+    "title": "Interaction and Productivity",
+    "description": "Slash commands, command palette, shortcuts, history, and contextual UI.",
+    "content": "\n# Interaction and Productivity\n\nThis group covers keyboard-first and contextual workflows.\n\n## Included extensions\n\n- `historyExtension`\n- `enterKeyBehaviorExtension`\n- `commandPaletteExtension`\n- `slashCommandExtension`\n- `floatingToolbarExtension`\n- `contextMenuExtension`\n- `emojiExtension`\n- `draggableBlockExtension`\n\n## Example\n\n```tsx\nimport {\n  createEditorSystem,\n  RichText,\n  richTextExtension,\n  historyExtension,\n  commandPaletteExtension,\n  slashCommandExtension,\n  draggableBlockExtension,\n} from '@lyfie/luthor-headless';\n\nconst extensions = [\n  richTextExtension,\n  historyExtension,\n  commandPaletteExtension,\n  slashCommandExtension,\n  draggableBlockExtension,\n] as const;\n\nconst { Provider, useEditor } = createEditorSystem<typeof extensions>();\n\nfunction Toolbar() {\n  const { commands } = useEditor();\n  return (\n    <div>\n      <button onClick={() => commands.undo?.()}>Undo</button>\n      <button onClick={() => commands.redo?.()}>Redo</button>\n      <button onClick={() => commands.showCommandPalette?.()}>Palette</button>\n    </div>\n  );\n}\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <Toolbar />\n      <RichText placeholder=\"Type '/' for commands...\" />\n    </Provider>\n  );\n}\n```\r\n",
+    "urlPath": "/docs/luthor-headless/features/interaction-and-productivity/",
+    "sourcePath": "apps/web/src/content/docs/luthor-headless/features/interaction-and-productivity.md",
+    "updatedAt": "2026-02-24T11:36:56.257Z"
+  },
+  {
+    "slug": [
+      "luthor-headless",
+      "features",
+      "media-and-embeds"
+    ],
+    "title": "Media and Embeds",
+    "description": "Image, iframe, and YouTube embedding features.",
+    "content": "\n# Media and Embeds\n\nThis group covers rich media insertion.\n\n## Included extensions\n\n- `imageExtension`\n- `iframeEmbedExtension`\n- `youTubeEmbedExtension`\n\n## Example\n\n```tsx\nimport {\n  createEditorSystem,\n  RichText,\n  richTextExtension,\n  imageExtension,\n  iframeEmbedExtension,\n  youTubeEmbedExtension,\n} from '@lyfie/luthor-headless';\n\nconst extensions = [\n  richTextExtension,\n  imageExtension,\n  iframeEmbedExtension,\n  youTubeEmbedExtension,\n] as const;\n\nconst { Provider, useEditor } = createEditorSystem<typeof extensions>();\n\nfunction Toolbar() {\n  const { commands } = useEditor();\n  return (\n    <div>\n      <button onClick={() => commands.insertImage?.({ src: '/demo/image.png', alt: 'Demo' })}>Image</button>\n      <button onClick={() => commands.insertIframe?.({ src: 'https://example.com' })}>Iframe</button>\n      <button onClick={() => commands.insertYouTube?.('dQw4w9WgXcQ')}>YouTube</button>\n    </div>\n  );\n}\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <Toolbar />\n      <RichText placeholder=\"Add media...\" />\n    </Provider>\n  );\n}\n```\r\n",
+    "urlPath": "/docs/luthor-headless/features/media-and-embeds/",
+    "sourcePath": "apps/web/src/content/docs/luthor-headless/features/media-and-embeds.md",
+    "updatedAt": "2026-02-24T11:36:56.254Z"
+  },
+  {
+    "slug": [
+      "luthor-headless",
+      "features",
+      "structure-and-lists"
+    ],
+    "title": "Structure and Lists",
+    "description": "Headings, links, lists, tables, and document structure tools.",
+    "content": "\n# Structure and Lists\n\nThis group covers links, headings, paragraphs, lists, and table workflows.\n\n## Included extensions\n\n- `linkExtension`\n- `blockFormatExtension`\n- `listExtension`\n- `tableExtension`\n- `horizontalRuleExtension`\n- `tabIndentExtension`\n\n## Example\n\n```tsx\nimport {\n  createEditorSystem,\n  RichText,\n  richTextExtension,\n  linkExtension,\n  blockFormatExtension,\n  listExtension,\n  tableExtension,\n  horizontalRuleExtension,\n  tabIndentExtension,\n} from '@lyfie/luthor-headless';\n\nconst extensions = [\n  richTextExtension,\n  linkExtension,\n  blockFormatExtension,\n  listExtension,\n  tableExtension,\n  horizontalRuleExtension,\n  tabIndentExtension,\n] as const;\n\nconst { Provider, useEditor } = createEditorSystem<typeof extensions>();\n\nfunction Toolbar() {\n  const { commands } = useEditor();\n  return (\n    <div>\n      <button onClick={() => commands.toggleUnorderedList?.()}>Bullets</button>\n      <button onClick={() => commands.toggleOrderedList?.()}>Numbers</button>\n      <button onClick={() => commands.insertLink?.('https://example.com')}>Link</button>\n      <button onClick={() => commands.insertTable?.({ rows: 3, columns: 3 })}>3x3 Table</button>\n    </div>\n  );\n}\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <Toolbar />\n      <RichText placeholder=\"Structure your document...\" />\n    </Provider>\n  );\n}\n```\r\n",
+    "urlPath": "/docs/luthor-headless/features/structure-and-lists/",
+    "sourcePath": "apps/web/src/content/docs/luthor-headless/features/structure-and-lists.md",
+    "updatedAt": "2026-02-24T11:36:56.253Z"
+  },
+  {
+    "slug": [
+      "luthor-headless",
+      "features",
+      "typography-and-text"
+    ],
+    "title": "Typography and Text",
+    "description": "Fonts, line-height, and text-formatting capabilities.",
+    "content": "\n# Typography and Text\n\nThis group covers typography, essentials, and color controls.\n\n## Included extensions\n\n- `boldExtension`, `italicExtension`, `underlineExtension`, `strikethroughExtension`\n- `subscriptExtension`, `superscriptExtension`, `codeFormatExtension`\n- `fontFamilyExtension`, `fontSizeExtension`, `lineHeightExtension`\n- `textColorExtension`, `textHighlightExtension`\n\n## Example\n\n```tsx\nimport {\n  createEditorSystem,\n  RichText,\n  richTextExtension,\n  boldExtension,\n  italicExtension,\n  underlineExtension,\n  fontFamilyExtension,\n  fontSizeExtension,\n  lineHeightExtension,\n  textColorExtension,\n  textHighlightExtension,\n} from '@lyfie/luthor-headless';\n\nconst extensions = [\n  richTextExtension,\n  boldExtension,\n  italicExtension,\n  underlineExtension,\n  fontFamilyExtension,\n  fontSizeExtension,\n  lineHeightExtension,\n  textColorExtension,\n  textHighlightExtension,\n] as const;\n\nconst { Provider, useEditor } = createEditorSystem<typeof extensions>();\n\nfunction Toolbar() {\n  const { commands, activeStates } = useEditor();\n  return (\n    <div>\n      <button onClick={() => commands.toggleBold?.()} aria-pressed={activeStates.bold === true}>Bold</button>\n      <button onClick={() => commands.toggleItalic?.()} aria-pressed={activeStates.italic === true}>Italic</button>\n      <button onClick={() => commands.setTextColor?.('#2563eb')}>Blue</button>\n      <button onClick={() => commands.setTextHighlight?.('#fef08a')}>Highlight</button>\n    </div>\n  );\n}\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <Toolbar />\n      <RichText placeholder=\"Type styled content...\" />\n    </Provider>\n  );\n}\n```\n\n## Relevant props\n\n- `RichText.placeholder`: `undefined (default) | string`\n- `RichText.disabled`: `false (default) | true`\r\n\r\n",
+    "urlPath": "/docs/luthor-headless/features/typography-and-text/",
+    "sourcePath": "apps/web/src/content/docs/luthor-headless/features/typography-and-text.md",
+    "updatedAt": "2026-02-24T11:50:02.707Z"
   },
   {
     "slug": [
@@ -73,11 +142,11 @@ export const docsIndex = [
       "presets"
     ],
     "title": "Presets",
-    "description": "Preset catalog for @lyfie/luthor, including links to per-preset docs.",
-    "content": "\n# Presets - @lyfie/luthor\n\n`@lyfie/luthor` is a preset package built on top of `@lyfie/luthor-headless`.\n\n## Important\n\n`@lyfie/luthor-headless` is included with `@lyfie/luthor` and available via:\n\n```ts\nimport { headless } from '@lyfie/luthor';\n```\n\n## Presets included\n\n- `ExtensiveEditor`\n- `SimpleTextEditor`\n- `RichTextBoxEditor`\n- `ChatWindowEditor`\n- `EmailComposeEditor`\n- `MDTextEditor`\n- `NotionLikeEditor`\n- `HeadlessEditorPreset`\n- `NotesEditor`\n\n## Per-preset docs\n\n- [ExtensiveEditor](/docs/luthor/presets/extensive-editor/)\n- [SimpleTextEditor](/docs/luthor/presets/simple-text-editor/)\n- [RichTextBoxEditor](/docs/luthor/presets/rich-text-box-editor/)\n- [ChatWindowEditor](/docs/luthor/presets/chat-window-editor/)\n- [EmailComposeEditor](/docs/luthor/presets/email-compose-editor/)\n- [MDTextEditor](/docs/luthor/presets/md-text-editor/)\n- [NotionLikeEditor](/docs/luthor/presets/notion-like-editor/)\n- [HeadlessEditorPreset](/docs/luthor/presets/headless-editor-preset/)\n- [NotesEditor](/docs/luthor/presets/notes-editor/)\n\n",
+    "description": "Preset catalog for @lyfie/luthor, including per-preset docs.",
+    "content": "\n# Presets\n\n`@lyfie/luthor` is a preset package built on top of `@lyfie/luthor-headless`.\n\n## Importing headless from presets package\n\n```ts\nimport { headless } from '@lyfie/luthor';\n```\n\n## Preset docs\n\n- [Extensive](/docs/luthor/presets/extensive-editor/)\n- [Simple Text](/docs/luthor/presets/simple-text-editor/)\n- [Rich Text](/docs/luthor/presets/rich-text-box-editor/)\n- [Chat Window](/docs/luthor/presets/chat-window-editor/)\n- [Email Compose](/docs/luthor/presets/email-compose-editor/)\n- [Markdown](/docs/luthor/presets/md-text-editor/)\n- [Notion Like](/docs/luthor/presets/notion-like-editor/)\n- [Headless Preset](/docs/luthor/presets/headless-editor-preset/)\n- [Notes](/docs/luthor/presets/notes-editor/)\r\n",
     "urlPath": "/docs/luthor/presets/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets.md",
-    "updatedAt": "2026-02-24T09:43:04.227Z"
+    "updatedAt": "2026-02-24T11:36:11.175Z"
   },
   {
     "slug": [
@@ -85,12 +154,12 @@ export const docsIndex = [
       "presets",
       "chat-window-editor"
     ],
-    "title": "ChatWindowEditor",
-    "description": "Usage and props for the ChatWindowEditor preset.",
-    "content": "\n# ChatWindowEditor\n\nChat composer style preset with send/action controls.\n\n## Usage\n\n```tsx\nimport { ChatWindowEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <ChatWindowEditor\n      onSend={({ jsonb }) => console.log(jsonb)}\n      submitOnEnter\n      allowShiftEnter\n    />\n  );\n}\n```\n\n## Props\n\n`ChatWindowEditorProps`:\n\n- Inherits `ExtensiveEditorProps`\n- Excludes: `featureFlags`, `isToolbarEnabled`\n- Adds:\n  - `onSend?: (payload: { jsonb: string }) => void`\n  - `submitOnEnter?: boolean`\n  - `allowShiftEnter?: boolean`\n  - `showVoiceButton?: boolean`\n  - `showImageButton?: boolean`\n  - `showSendButton?: boolean`\n\n## Behavior\n\n- Toolbar is disabled by preset defaults\n- Visual mode only\n- Enter-to-send can be configured\n\n",
+    "title": "Chat Window",
+    "description": "Usage and prop defaults for the chat-style editor preset.",
+    "content": "\n# Chat Window\n\nChat composer style preset with send and action controls.\n\n## Usage\n\n```tsx\nimport { ChatWindowEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <ChatWindowEditor\n      onSend={({ jsonb }) => console.log(jsonb)}\n      submitOnEnter\n      allowShiftEnter\n    />\n  );\n}\n```\n\n## Props\n\n`ChatWindowEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`.\n\n- `onSend`: `undefined (default) | (payload: { jsonb: string }) => void`\n- `submitOnEnter`: `true (default) | false`\n- `allowShiftEnter`: `true (default) | false`\n- `showVoiceButton`: `false (default) | true`\n- `showImageButton`: `true (default) | false`\n- `showSendButton`: `true (default) | false`\n\n## Behavior\n\n- Toolbar is disabled by preset defaults\n- Visual mode only\n- Enter-to-send behavior is configurable\r\n\r\n",
     "urlPath": "/docs/luthor/presets/chat-window-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/chat-window-editor.md",
-    "updatedAt": "2026-02-24T09:43:36.220Z"
+    "updatedAt": "2026-02-24T11:50:02.687Z"
   },
   {
     "slug": [
@@ -98,12 +167,12 @@ export const docsIndex = [
       "presets",
       "email-compose-editor"
     ],
-    "title": "EmailComposeEditor",
-    "description": "Usage and props for the EmailComposeEditor preset.",
-    "content": "\n# EmailComposeEditor\n\nEmail composer preset with To/Cc/Bcc/Subject shell.\n\n## Usage\n\n```tsx\nimport { EmailComposeEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <EmailComposeEditor showCc showBcc />;\n}\n```\n\n## Props\n\n`EmailComposeEditorProps`:\n\n- Inherits `ExtensiveEditorProps`\n- Excludes: `featureFlags`\n- Adds:\n  - `showTo?: boolean`\n  - `showCc?: boolean`\n  - `showBcc?: boolean`\n  - `showSubject?: boolean`\n\n## Behavior\n\nPreset applies email-friendly feature defaults and renders compose header fields.\n\n",
+    "title": "Email Compose",
+    "description": "Usage and prop defaults for the email compose preset.",
+    "content": "\n# Email Compose\n\nEmail composer preset with To/Cc/Bcc/Subject shell.\n\n## Usage\n\n```tsx\nimport { EmailComposeEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <EmailComposeEditor showCc showBcc />;\n}\n```\n\n## Props\n\n`EmailComposeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.\n\n- `showTo`: `true (default) | false`\n- `showCc`: `false (default) | true`\n- `showBcc`: `false (default) | true`\n- `showSubject`: `true (default) | false`\n\n## Behavior\n\nPreset applies email-friendly feature defaults and renders compose header fields.\r\n\r\n",
     "urlPath": "/docs/luthor/presets/email-compose-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/email-compose-editor.md",
-    "updatedAt": "2026-02-24T09:43:42.808Z"
+    "updatedAt": "2026-02-24T11:50:02.689Z"
   },
   {
     "slug": [
@@ -111,12 +180,12 @@ export const docsIndex = [
       "presets",
       "extensive-editor"
     ],
-    "title": "ExtensiveEditor",
-    "description": "Usage and full props list for the ExtensiveEditor preset.",
-    "content": "\n# ExtensiveEditor\n\n`ExtensiveEditor` is the full-feature preset editor.\n\n## Usage\n\n```tsx\nimport { ExtensiveEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <ExtensiveEditor placeholder=\"Write anything...\" />;\n}\n```\n\n## Props\n\n`ExtensiveEditorProps` includes:\n\n- `className?`\n- `onReady?`\n- `initialTheme?`\n- `theme?`\n- `defaultContent?`\n- `showDefaultContent?`\n- `placeholder?`\n- `initialMode?`\n- `availableModes?`\n- `variantClassName?`\n- `toolbarLayout?`\n- `toolbarVisibility?`\n- `toolbarPosition?`\n- `toolbarAlignment?`\n- `toolbarClassName?`\n- `toolbarStyleVars?`\n- `quoteClassName?`\n- `quoteStyleVars?`\n- `defaultSettings?`\n- `editorThemeOverrides?`\n- `isToolbarEnabled?`\n- `fontFamilyOptions?`\n- `fontSizeOptions?`\n- `lineHeightOptions?`\n- `minimumDefaultLineHeight?`\n- `scaleByRatio?`\n- `headingOptions?`\n- `paragraphLabel?`\n- `syncHeadingOptionsWithCommands?`\n- `slashCommandVisibility?`\n- `shortcutConfig?`\n- `commandPaletteShortcutOnly?`\n- `isDraggableBoxEnabled?`\n- `featureFlags?`\n- `syntaxHighlighting?`\n- `codeHighlightProvider?`\n- `loadCodeHighlightProvider?`\n- `maxAutoDetectCodeLength?`\n- `isCopyAllowed?`\n- `languageOptions?`\n\n## Ref API\n\n`ExtensiveEditorRef`:\n\n- `injectJSONB(content: string)`\n- `getJSONB(): string`\n\n## Notes\n\nThis is the base preset that other presets reuse via `ExtensiveEditorProps`.\n\n",
+    "title": "Extensive",
+    "description": "Full-feature preset and core prop reference.",
+    "content": "\n# Extensive\n\n`ExtensiveEditor` is the base full-feature preset editor.\n\n## Usage\n\n```tsx\nimport { ExtensiveEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <ExtensiveEditor placeholder=\"Write anything...\" />;\n}\n```\n\n## Core props\n\n- `initialTheme`: `'light' (default) | 'dark'`\n- `showDefaultContent`: `true (default) | false`\n- `placeholder`: `'Write anything...' (default) | string | { visual?: string; jsonb?: string }`\n- `initialMode`: `'visual' (default) | 'jsonb'`\n- `availableModes`: `['visual', 'jsonb'] (default) | ('visual' | 'jsonb')[]`\n- `toolbarPosition`: `'top' (default) | 'bottom'`\n- `toolbarAlignment`: `'left' (default) | 'center' | 'right'`\n- `isToolbarEnabled`: `true (default) | false`\n- `minimumDefaultLineHeight`: `1.5 (default) | string | number`\n- `scaleByRatio`: `false (default) | true`\n- `syncHeadingOptionsWithCommands`: `true (default) | false`\n- `commandPaletteShortcutOnly`: `false (default) | true`\n- `isCopyAllowed`: `true (default) | false`\n- `syntaxHighlighting`: `'auto' | 'disabled'` | extension default behavior if omitted\n\n## Ref API\n\n- `injectJSONB(content: string): void`\n- `getJSONB(): string`\n\n## Notes\n\nThis is the base preset that other presets build on.\r\n\r\n",
     "urlPath": "/docs/luthor/presets/extensive-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/extensive-editor.md",
-    "updatedAt": "2026-02-24T09:43:13.513Z"
+    "updatedAt": "2026-02-24T11:50:02.690Z"
   },
   {
     "slug": [
@@ -124,12 +193,12 @@ export const docsIndex = [
       "presets",
       "headless-editor-preset"
     ],
-    "title": "HeadlessEditorPreset",
-    "description": "Usage and props for the HeadlessEditorPreset preset.",
-    "content": "\n# HeadlessEditorPreset\n\nSmall reference preset demonstrating direct headless composition.\n\n## Usage\n\n```tsx\nimport { HeadlessEditorPreset } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <HeadlessEditorPreset placeholder=\"Start writing...\" />;\n}\n```\n\n## Props\n\n`HeadlessEditorPresetProps`:\n\n- `className?: string`\n- `placeholder?: string`\n\n## Behavior\n\nUses a minimal extension set (`richText`, `history`, `bold`, `italic`, `underline`, `list`) and a lightweight toolbar.\n\n",
+    "title": "Headless Preset",
+    "description": "Reference preset showing direct headless composition.",
+    "content": "\n# Headless Preset\n\nSmall reference preset demonstrating direct headless composition.\n\n## Usage\n\n```tsx\nimport { HeadlessEditorPreset } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <HeadlessEditorPreset placeholder=\"Start writing...\" />;\n}\n```\n\n## Props\n\n- `className`: `undefined (default) | string`\n- `placeholder`: `'Start writing...' (default) | string`\n\n## Behavior\n\nUses a minimal extension set (`richText`, `history`, `bold`, `italic`, `underline`, `list`) and a lightweight toolbar.\r\n\r\n",
     "urlPath": "/docs/luthor/presets/headless-editor-preset/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/headless-editor-preset.md",
-    "updatedAt": "2026-02-24T09:44:18.417Z"
+    "updatedAt": "2026-02-24T11:50:02.692Z"
   },
   {
     "slug": [
@@ -137,12 +206,12 @@ export const docsIndex = [
       "presets",
       "md-text-editor"
     ],
-    "title": "MDTextEditor",
-    "description": "Usage and props for the MDTextEditor preset.",
-    "content": "\n# MDTextEditor\n\nPreset that switches between Visual and Markdown editing.\n\n## Usage\n\n```tsx\nimport { MDTextEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <MDTextEditor initialMode=\"visual\" />;\n}\n```\n\n## Props\n\n`MDTextEditorProps`:\n\n- Inherits `ExtensiveEditorProps`\n- Excludes: `availableModes`, `initialMode`\n- Adds:\n  - `initialMode?: 'visual' | 'markdown'`\n\n## Behavior\n\n- Uses markdown/jsonb bridge for mode conversion\n- Applies feature defaults suitable for markdown workflows\n\n",
+    "title": "Markdown",
+    "description": "Visual and markdown mode preset with mode-switch behavior.",
+    "content": "\n# Markdown\n\nPreset that switches between visual and markdown editing.\n\n## Usage\n\n```tsx\nimport { MDTextEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <MDTextEditor initialMode=\"visual\" />;\n}\n```\n\n## Props\n\n`MDTextEditorProps` inherits `ExtensiveEditorProps` except `availableModes` and `initialMode`.\n\n- `initialMode`: `'visual' (default) | 'markdown'`\n\n## Behavior\n\n- Uses markdown/jsonb conversion when switching modes\n- Renders source textarea in markdown mode\r\n\r\n",
     "urlPath": "/docs/luthor/presets/md-text-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/md-text-editor.md",
-    "updatedAt": "2026-02-24T09:44:00.380Z"
+    "updatedAt": "2026-02-24T11:50:02.693Z"
   },
   {
     "slug": [
@@ -150,12 +219,12 @@ export const docsIndex = [
       "presets",
       "notes-editor"
     ],
-    "title": "NotesEditor",
-    "description": "Usage and props for the NotesEditor preset.",
-    "content": "\n# NotesEditor\n\nNotes-style preset with title and action controls.\n\n## Usage\n\n```tsx\nimport { NotesEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <NotesEditor\n      showTitle\n      title=\"Sprint Notes\"\n      onTitleChange={(value) => console.log(value)}\n      onPin={() => console.log('pin')}\n      onArchive={() => console.log('archive')}\n    />\n  );\n}\n```\n\n## Props\n\n`NotesEditorProps`:\n\n- Inherits `ExtensiveEditorProps`\n- Excludes: `featureFlags`\n- Adds:\n  - `showTitle?: boolean`\n  - `title?: string`\n  - `onTitleChange?: (value: string) => void`\n  - `showActions?: boolean`\n  - `onPin?: () => void`\n  - `onArchive?: () => void`\n  - `onColorChange?: (color: string) => void`\n  - `colorOptions?: readonly string[]`\n\n## Behavior\n\nToolbar is disabled by preset default and feature set is tuned for lightweight note taking.\n\n",
+    "title": "Notes",
+    "description": "Notes-style preset with title and action controls.",
+    "content": "\n# Notes\n\nNotes-style preset with title and action controls.\n\n## Usage\n\n```tsx\nimport { NotesEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <NotesEditor\n      showTitle\n      title=\"Sprint Notes\"\n      onTitleChange={(value) => console.log(value)}\n      onPin={() => console.log('pin')}\n      onArchive={() => console.log('archive')}\n    />\n  );\n}\n```\n\n## Props\n\n`NotesEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.\n\n- `showTitle`: `true (default) | false`\n- `title`: `'' (default) | string`\n- `onTitleChange`: `undefined (default) | (value: string) => void`\n- `showActions`: `true (default) | false`\n- `onPin`: `undefined (default) | () => void`\n- `onArchive`: `undefined (default) | () => void`\n- `onColorChange`: `undefined (default) | (color: string) => void`\n- `colorOptions`: `['#fef3c7', '#dbeafe', '#dcfce7'] (default) | readonly string[]`\n\n## Behavior\n\nToolbar is disabled by preset default and feature set is tuned for lightweight note taking.\r\n\r\n",
     "urlPath": "/docs/luthor/presets/notes-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/notes-editor.md",
-    "updatedAt": "2026-02-24T09:44:28.234Z"
+    "updatedAt": "2026-02-24T11:50:13.229Z"
   },
   {
     "slug": [
@@ -163,12 +232,12 @@ export const docsIndex = [
       "presets",
       "notion-like-editor"
     ],
-    "title": "NotionLikeEditor",
-    "description": "Usage and props for the NotionLikeEditor preset.",
-    "content": "\n# NotionLikeEditor\n\nSlash-first preset with draggable-focused defaults.\n\n## Usage\n\n```tsx\nimport { NotionLikeEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <NotionLikeEditor isDraggableEnabled slashVisibility={{ allowlist: ['block.paragraph'] }} />;\n}\n```\n\n## Props\n\n`NotionLikeEditorProps`:\n\n- Inherits `ExtensiveEditorProps`\n- Excludes: `featureFlags`, `isToolbarEnabled`\n- Adds:\n  - `slashVisibility?: SlashCommandVisibility`\n  - `isDraggableEnabled?: boolean`\n  - `featureFlags?: FeatureFlagOverrides`\n  - `isToolbarEnabled?: boolean`\n\n## Behavior\n\nDefaults enable slash commands + draggable blocks + command palette with toolbar hidden by default.\n\n",
+    "title": "Notion Like",
+    "description": "Slash-first preset with draggable and command-focused defaults.",
+    "content": "\n# Notion Like\n\nSlash-first preset with draggable-focused defaults.\n\n## Usage\n\n```tsx\nimport { NotionLikeEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <NotionLikeEditor isDraggableEnabled slashVisibility={{ allowlist: ['block.paragraph'] }} />;\n}\n```\n\n## Props\n\n`NotionLikeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`, then re-adds both.\n\n- `slashVisibility`: `undefined (default) | SlashCommandVisibility`\n- `isDraggableEnabled`: `true (default) | false`\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides`\n- `isToolbarEnabled`: `false (default) | true`\n\n## Behavior\n\nDefaults enable slash commands, draggable blocks, and command palette while keeping toolbar hidden.\r\n\r\n",
     "urlPath": "/docs/luthor/presets/notion-like-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/notion-like-editor.md",
-    "updatedAt": "2026-02-24T09:44:07.513Z"
+    "updatedAt": "2026-02-24T11:50:02.697Z"
   },
   {
     "slug": [
@@ -176,12 +245,12 @@ export const docsIndex = [
       "presets",
       "rich-text-box-editor"
     ],
-    "title": "RichTextBoxEditor",
-    "description": "Usage and props for the RichTextBoxEditor preset.",
-    "content": "\n# RichTextBoxEditor\n\nCompact rich-text preset for focused editing.\n\n## Usage\n\n```tsx\nimport { RichTextBoxEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <RichTextBoxEditor compactToolbar />;\n}\n```\n\n## Props\n\n`RichTextBoxEditorProps`:\n\n- Inherits `ExtensiveEditorProps`\n- Excludes: `featureFlags`\n- Adds:\n  - `featureFlags?: FeatureFlagOverrides`\n  - `compactToolbar?: boolean`\n\n## Behavior\n\nDefault feature flags enable core text formatting and disable heavier media/embed features unless re-enabled.\n\n",
+    "title": "Rich Text",
+    "description": "Compact rich text preset and prop defaults.",
+    "content": "\n# Rich Text\n\nCompact rich text preset for focused editing.\n\n## Usage\n\n```tsx\nimport { RichTextBoxEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <RichTextBoxEditor compactToolbar />;\n}\n```\n\n## Props\n\n`RichTextBoxEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.\n\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides`\n- `compactToolbar`: `false (default) | true`\n\n## Behavior\n\nDefault feature flags enable core formatting and disable heavier media/embed features unless re-enabled.\r\n\r\n",
     "urlPath": "/docs/luthor/presets/rich-text-box-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/rich-text-box-editor.md",
-    "updatedAt": "2026-02-24T09:43:29.129Z"
+    "updatedAt": "2026-02-24T11:50:02.698Z"
   },
   {
     "slug": [
@@ -189,11 +258,11 @@ export const docsIndex = [
       "presets",
       "simple-text-editor"
     ],
-    "title": "SimpleTextEditor",
-    "description": "Usage and props for the SimpleTextEditor preset.",
-    "content": "\n# SimpleTextEditor\n\nMinimal/plain-text style preset built on top of `ExtensiveEditor`.\n\n## Usage\n\n```tsx\nimport { SimpleTextEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <SimpleTextEditor placeholder=\"Start writing...\" />;\n}\n```\n\n## Props\n\n`SimpleTextEditorProps`:\n\n- Inherits `ExtensiveEditorProps`\n- Excludes: `featureFlags`, `availableModes`, `initialMode`, `toolbarVisibility`\n- Adds:\n  - `hideToolbarByDefault?: boolean` (default `true`)\n\n## Behavior\n\n- Forces visual-only mode\n- Disables most rich features by preset defaults\n\n",
+    "title": "Simple Text",
+    "description": "Minimal text-focused preset with constrained editing modes.",
+    "content": "\n# Simple Text\n\nMinimal plain-text style preset built on top of `ExtensiveEditor`.\n\n## Usage\n\n```tsx\nimport { SimpleTextEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <SimpleTextEditor placeholder=\"Start writing...\" />;\n}\n```\n\n## Props\n\n`SimpleTextEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, `initialMode`, and `toolbarVisibility`.\n\n- `hideToolbarByDefault`: `true (default) | false`\n\n## Behavior\n\n- Forces visual-only mode\n- Disables most rich features by preset defaults\r\n\r\n",
     "urlPath": "/docs/luthor/presets/simple-text-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/simple-text-editor.md",
-    "updatedAt": "2026-02-24T09:43:22.221Z"
+    "updatedAt": "2026-02-24T11:50:02.701Z"
   }
 ];

@@ -1056,6 +1056,7 @@ a {
   display: grid;
   grid-template-columns: minmax(220px, 290px) 1fr;
   gap: var(--space-5);
+  align-items: start;
 }
 
 .docs-main {
@@ -1065,8 +1066,7 @@ a {
 }
 
 .docs-sidebar {
-  position: sticky;
-  top: 96px;
+  position: static;
   align-self: start;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
@@ -1407,6 +1407,44 @@ a {
   word-break: break-word;
 }
 
+.doc-content .docs-code-block pre code.hljs {
+  display: block;
+  color: #d6e6f5;
+}
+
+.doc-content .docs-code-block .hljs-comment,
+.doc-content .docs-code-block .hljs-quote {
+  color: #8090a4;
+}
+
+.doc-content .docs-code-block .hljs-keyword,
+.doc-content .docs-code-block .hljs-selector-tag,
+.doc-content .docs-code-block .hljs-subst {
+  color: #7cc2ff;
+}
+
+.doc-content .docs-code-block .hljs-string,
+.doc-content .docs-code-block .hljs-attr,
+.doc-content .docs-code-block .hljs-template-tag {
+  color: #91e6b6;
+}
+
+.doc-content .docs-code-block .hljs-number,
+.doc-content .docs-code-block .hljs-literal {
+  color: #f8c981;
+}
+
+.doc-content .docs-code-block .hljs-title,
+.doc-content .docs-code-block .hljs-section,
+.doc-content .docs-code-block .hljs-type {
+  color: #f39fc1;
+}
+
+.doc-content .docs-code-block .hljs-built_in,
+.doc-content .docs-code-block .hljs-class .hljs-title {
+  color: #bca7ff;
+}
+
 .docs-pager {
   margin-top: var(--space-5);
   padding-top: var(--space-3);
@@ -1456,7 +1494,6 @@ a {
   }
 
   .docs-sidebar {
-    position: static;
     max-height: none;
   }
 
