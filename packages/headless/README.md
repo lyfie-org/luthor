@@ -6,6 +6,9 @@
 
 <div align="center">
 
+[![Project Status](https://img.shields.io/badge/status-active%20development-orange?style=flat-square)](https://github.com/lyfie-app/luthor)
+[![Stability](https://img.shields.io/badge/stable%20release-expected%20soon-blue?style=flat-square)](https://github.com/lyfie-app/luthor/releases)
+
 [![npm version](https://img.shields.io/npm/v/@lyfie/luthor-headless?style=flat-square)](https://www.npmjs.com/package/@lyfie/luthor-headless)
 [![npm downloads](https://img.shields.io/npm/dm/@lyfie/luthor-headless?style=flat-square)](https://www.npmjs.com/package/@lyfie/luthor-headless)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@lyfie/luthor-headless?style=flat-square)](https://bundlephobia.com/package/@lyfie/luthor-headless)
@@ -71,7 +74,7 @@ export function Editor() {
 - :gear: Extension-first architecture with configurable behaviors
 - :brain: Type-safe command and active-state surface
 - :building_construction: Compose only what your product needs
-- :floppy_disk: JSON/JSONB-first import/export workflow
+- :floppy_disk: JSON-first import/export workflow
 - :art: Bring your own toolbar and design system
 
 ## Compatibility

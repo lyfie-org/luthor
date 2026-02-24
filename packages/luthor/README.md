@@ -6,6 +6,9 @@
 
 <div align="center">
 
+[![Project Status](https://img.shields.io/badge/status-active%20development-orange?style=flat-square)](https://github.com/lyfie-app/luthor)
+[![Stability](https://img.shields.io/badge/stable%20release-expected%20soon-blue?style=flat-square)](https://github.com/lyfie-app/luthor/releases)
+
 [![npm version](https://img.shields.io/npm/v/@lyfie/luthor?style=flat-square)](https://www.npmjs.com/package/@lyfie/luthor)
 [![npm downloads](https://img.shields.io/npm/dm/@lyfie/luthor?style=flat-square)](https://www.npmjs.com/package/@lyfie/luthor)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@lyfie/luthor?style=flat-square)](https://bundlephobia.com/package/@lyfie/luthor)

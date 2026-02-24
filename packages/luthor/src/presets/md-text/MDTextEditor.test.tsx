@@ -3,33 +3,33 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
-  injectJSONBMock,
-  getJSONBMock,
-  markdownToJSONBMock,
-  jsonbToMarkdownMock,
+  injectJSONMock,
+  getJSONMock,
+  markdownToJSONMock,
+  jsonToMarkdownMock,
 } = vi.hoisted(() => ({
-  injectJSONBMock: vi.fn(),
-  getJSONBMock: vi.fn(
+  injectJSONMock: vi.fn(),
+  getJSONMock: vi.fn(
     () => "{\"root\":{\"children\":[{\"type\":\"paragraph\",\"children\":[{\"text\":\"hello\"}]}]}}",
   ),
-  markdownToJSONBMock: vi.fn(() => ({ root: { children: [] } })),
-  jsonbToMarkdownMock: vi.fn(() => "# Title\n\n- one\n- two"),
+  markdownToJSONMock: vi.fn(() => ({ root: { children: [] } })),
+  jsonToMarkdownMock: vi.fn(() => "# Title\n\n- one\n- two"),
 }));
 
 vi.mock("@lyfie/luthor-headless", () => ({
-  markdownToJSONB: markdownToJSONBMock,
-  jsonbToMarkdown: jsonbToMarkdownMock,
+  markdownToJSON: markdownToJSONMock,
+  jsonToMarkdown: jsonToMarkdownMock,
 }));
 
 vi.mock("../extensive", async () => {
   const react = await import("react");
   const ExtensiveEditor = react.forwardRef(function MockExtensiveEditor(
     props: { children?: ReactNode },
-    ref: react.ForwardedRef<{ injectJSONB: (value: string) => void; getJSONB: () => string }>,
+    ref: react.ForwardedRef<{ injectJSON: (value: string) => void; getJSON: () => string }>,
   ) {
     react.useImperativeHandle(ref, () => ({
-      injectJSONB: injectJSONBMock,
-      getJSONB: getJSONBMock,
+      injectJSON: injectJSONMock,
+      getJSON: getJSONMock,
     }));
     return <div data-testid="md-extensive-editor">{props.children}</div>;
   });
@@ -46,13 +46,13 @@ describe("MDTextEditor", () => {
     vi.clearAllMocks();
   });
 
-  it("exports visual JSONB to markdown when opening markdown tab", () => {
+  it("exports visual JSON to markdown when opening markdown tab", () => {
     render(<MDTextEditor showDefaultContent={false} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Markdown" }));
 
-    expect(getJSONBMock).toHaveBeenCalled();
-    expect(jsonbToMarkdownMock).toHaveBeenCalled();
+    expect(getJSONMock).toHaveBeenCalled();
+    expect(jsonToMarkdownMock).toHaveBeenCalled();
     expect(screen.getByRole("textbox")).toHaveValue("# Title\n\n- one\n- two");
   });
 
@@ -64,9 +64,9 @@ describe("MDTextEditor", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Visual" }));
 
-    expect(markdownToJSONBMock).toHaveBeenCalledWith("## Heading");
+    expect(markdownToJSONMock).toHaveBeenCalledWith("## Heading");
     await waitFor(() => {
-      expect(injectJSONBMock).toHaveBeenCalledWith(JSON.stringify({ root: { children: [] } }));
+      expect(injectJSONMock).toHaveBeenCalledWith(JSON.stringify({ root: { children: [] } }));
     });
   });
 });

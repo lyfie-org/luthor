@@ -132,3 +132,5 @@ const configuredFontExtension = fontFamilyExtension.configure({
 - `options` is the source of truth for selectable fonts.
 - `cssLoadStrategy: "on-demand"` injects `cssImportUrl` only when a font is used.
 - `cssLoadStrategy: "preload-all"` eagerly loads all configured font CSS at startup.
+
+

@@ -2,15 +2,15 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const getJSONBMock = vi.fn(() => "{\"root\":{\"children\":[]}}");
+const getJSONMock = vi.fn(() => "{\"root\":{\"children\":[]}}");
 
 vi.mock("../extensive", async () => {
   const react = await import("react");
   const ExtensiveEditor = react.forwardRef(function MockExtensiveEditor(
     props: { children?: ReactNode },
-    ref: react.ForwardedRef<{ getJSONB: () => string }>,
+    ref: react.ForwardedRef<{ getJSON: () => string }>,
   ) {
-    react.useImperativeHandle(ref, () => ({ getJSONB: getJSONBMock }));
+    react.useImperativeHandle(ref, () => ({ getJSON: getJSONMock }));
     return <div data-testid="chat-extensive-editor">{props.children}</div>;
   });
 
@@ -33,7 +33,9 @@ describe("ChatWindowEditor", () => {
     const wrapper = container.querySelector(".luthor-preset-chat-window") as HTMLElement;
     fireEvent.keyDown(wrapper, { key: "Enter" });
 
-    expect(onSend).toHaveBeenCalledWith({ jsonb: "{\"root\":{\"children\":[]}}" });
+    expect(onSend).toHaveBeenCalledWith({
+      json: "{\"root\":{\"children\":[]}}",
+    });
   });
 
   it("keeps Shift+Enter when allowShiftEnter is true", () => {

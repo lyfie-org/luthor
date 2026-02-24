@@ -94,7 +94,7 @@ This file documents every code file in `packages/luthor/src`.
 
 - Purpose: source text formatting utilities.
 - Exports:
-  - `formatJSONBSource`
+  - `formatJSONSource`
 - Key behavior:
   - JSON parse/stringify fallback formatting.
 
@@ -201,7 +201,7 @@ This file documents every code file in `packages/luthor/src`.
 - Key behavior:
   - Creates editor system provider and command wiring.
   - Integrates toolbar, floating toolbar, slash menu, emoji menu, and command palette.
-  - Supports visual/JSONB mode switching with conversion and validation.
+  - Supports visual/JSON mode switching with conversion and validation.
   - Exposes imperative ref methods.
 
 ## Cross-file relationships
@@ -222,3 +222,5 @@ When modifying any file in `packages/luthor/src`:
 2. Update user docs if public behavior changed.
 3. Update `packages/luthor/README.md` for API surface changes.
 4. Run package lint/build checks.
+
+

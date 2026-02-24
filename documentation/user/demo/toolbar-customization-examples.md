@@ -143,9 +143,9 @@ function ContentCreatorEditor() {
 }
 ```
 
-## Custom Layout Example 4: JSONB-First Compact Layout
+## Custom Layout Example 4: JSON-First Compact Layout
 
-Minimal toolbar for teams that persist JSONB and prefer compact editing controls:
+Minimal toolbar for teams that persist JSON and prefer compact editing controls:
 
 ```tsx
 import { ExtensiveEditor, type ToolbarLayout } from "@lyfie/luthor";
@@ -165,7 +165,7 @@ function CompactJsonbEditor() {
       placeholder="Start writing with compact controls..."
       toolbarLayout={compactJsonbLayout}
       initialMode="visual"
-      availableModes={["visual", "jsonb"]}
+      availableModes={["visual", "json"]}
     />
   );
 }
@@ -233,3 +233,5 @@ Reference for creating custom layouts:
 - **Utilities**: `commandPalette`, `themeToggle`
 
 Items automatically hide if their corresponding extension is not available.
+
+

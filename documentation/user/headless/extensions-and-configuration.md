@@ -87,3 +87,5 @@ Pass theme through provider config:
 - Always declare extensions with `as const`.
 - Use `createEditorSystem<typeof extensions>()` to get typed `commands` and `activeStates`.
 - Configure extensions once (outside render) and reuse instances.
+
+

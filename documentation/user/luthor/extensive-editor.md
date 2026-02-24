@@ -24,7 +24,7 @@ export function EditorPage() {
 Typical use cases:
 
 - read/write editor content from parent controls
-- trigger JSONB conversion or export workflows
+- trigger JSON conversion or export workflows
 - inspect current mode and change mode programmatically
 
 ## UX modules included
@@ -41,7 +41,7 @@ Typical use cases:
 The editor supports visual and source representations:
 
 - canonical editor state
-- JSONB
+- JSON
 
 Mode switching uses conversion utilities and error handling to avoid silently committing malformed source input.
 
@@ -80,3 +80,5 @@ For detailed information on creating custom toolbar layouts, see [toolbar-custom
 - Getting started: [getting-started.md](getting-started.md)
 - Presets and configuration: [presets-and-configuration.md](presets-and-configuration.md)
 - Developer maintainer notes: [../../developer/luthor/maintainer-notes.md](../../developer/luthor/maintainer-notes.md)
+
+

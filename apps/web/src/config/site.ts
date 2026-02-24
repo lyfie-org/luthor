@@ -60,7 +60,7 @@ export const SEO_FAQS = [
   {
     question: 'What data format should I persist?',
     answer:
-      'Use JSONB for reliable round trips and database-friendly storage.',
+      'Use JSON for reliable round trips and database-friendly storage.',
   },
   {
     question: 'Is TypeScript support first-class?',

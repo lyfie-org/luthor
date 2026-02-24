@@ -14,10 +14,10 @@ export function ModeTabs({
   availableModes?: readonly CoreEditorMode[];
   isConverting?: CoreEditorMode | null;
 }) {
-  const modes = availableModes ?? ["visual", "jsonb"];
+  const modes = availableModes ?? ["visual", "json"];
   const tabLabels: Record<CoreEditorMode, string> = {
     visual: labels?.visual ?? "Visual",
-    jsonb: labels?.jsonb ?? "JSONB",
+    json: labels?.json ?? "JSON",
   };
 
   return (
@@ -28,10 +28,10 @@ export function ModeTabs({
           {isConverting === "visual" && <span className="luthor-tab-converting-spinner" />}
         </button>
       )}
-      {modes.includes("jsonb") && (
-        <button className={`luthor-mode-tab ${mode === "jsonb" ? "active" : ""}`} onClick={() => onModeChange("jsonb")}>
-          {tabLabels.jsonb}
-          {isConverting === "jsonb" && <span className="luthor-tab-converting-spinner" />}
+      {modes.includes("json") && (
+        <button className={`luthor-mode-tab ${mode === "json" ? "active" : ""}`} onClick={() => onModeChange("json")}>
+          {tabLabels.json}
+          {isConverting === "json" && <span className="luthor-tab-converting-spinner" />}
         </button>
       )}
     </div>

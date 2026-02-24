@@ -6,6 +6,9 @@
 
 <div align="center">
 
+[![Project Status](https://img.shields.io/badge/status-active%20development-orange?style=for-the-badge)](https://github.com/lyfie-app/luthor)
+[![Stability](https://img.shields.io/badge/stable%20release-expected%20soon-blue?style=for-the-badge)](https://github.com/lyfie-app/luthor/releases)
+
 [![Quality Gates](https://img.shields.io/github/actions/workflow/status/lyfie-app/luthor/quality-gates.yml?branch=main&label=quality%20gates&style=for-the-badge)](https://github.com/lyfie-app/luthor/actions/workflows/quality-gates.yml)
 [![Publish Packages](https://img.shields.io/github/actions/workflow/status/lyfie-app/luthor/publish-packages.yml?branch=main&label=publish&style=for-the-badge)](https://github.com/lyfie-app/luthor/actions/workflows/publish-packages.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/lyfie-app/luthor?style=for-the-badge)](https://github.com/lyfie-app/luthor/releases)

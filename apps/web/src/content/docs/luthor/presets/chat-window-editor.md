@@ -16,7 +16,7 @@ import '@lyfie/luthor/styles.css';
 export function App() {
   return (
     <ChatWindowEditor
-      onSend={({ jsonb }) => console.log(jsonb)}
+      onSend={({ json }) => console.log(json)}
       submitOnEnter
       allowShiftEnter
     />
@@ -28,7 +28,7 @@ export function App() {
 
 `ChatWindowEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`.
 
-- `onSend`: `undefined (default) | (payload: { jsonb: string }) => void`
+- `onSend`: `undefined (default) | (payload: { json: string }) => void`
 - `submitOnEnter`: `true (default) | false`
 - `allowShiftEnter`: `true (default) | false`
 - `showVoiceButton`: `false (default) | true`
@@ -40,4 +40,5 @@ export function App() {
 - Toolbar is disabled by preset defaults
 - Visual mode only
 - Enter-to-send behavior is configurable
+
 

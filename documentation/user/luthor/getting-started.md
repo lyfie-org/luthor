@@ -33,7 +33,7 @@ export function App() {
 - floating toolbar and contextual actions
 - image, iframe, and YouTube embedding support
 - tables, lists, code/code-block, typography and color tools
-- visual/source mode switching (`visual`, `jsonb`)
+- visual/source mode switching (`visual`, `json`)
 
 ## Additional presets
 
@@ -63,3 +63,5 @@ Use this when you want gradual migration from preset usage to custom extension c
 - Preset options and configuration: [presets-and-configuration.md](presets-and-configuration.md)
 - Extensive editor props and capabilities: [extensive-editor.md](extensive-editor.md)
 - Developer architecture (if contributing): [../../developer/luthor/architecture.md](../../developer/luthor/architecture.md)
+
+

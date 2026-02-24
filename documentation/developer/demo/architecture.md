@@ -39,8 +39,8 @@ The app keeps behavior clear by separating display-only components from editor-b
 
 The integration uses `ExtensiveEditorRef` methods to control content and persistence:
 
-- `injectJSONB(...)`
-- `getJSONB()`
+- `injectJSON(...)`
+- `getJSON()`
 
 This keeps demo operations aligned with real consumer integration patterns.
 
@@ -50,7 +50,7 @@ This keeps demo operations aligned with real consumer integration patterns.
 
 `src/data/demoContent.ts` provides:
 
-- JSONB scenario payload
+- JSON scenario payload
 - extension-to-category maps used by feature panels
 
 ### UI state in `App`
@@ -82,3 +82,5 @@ Theme is stored in local storage; persistence payload is intentionally user-driv
 - Demo source file reference: [source-file-reference.md](source-file-reference.md)
 - Demo maintainer notes: [maintainer-notes.md](maintainer-notes.md)
 - Demo user guide: [../../user/demo/getting-started.md](../../user/demo/getting-started.md)
+
+

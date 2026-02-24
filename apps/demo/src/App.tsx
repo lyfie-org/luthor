@@ -56,7 +56,7 @@ function App() {
           <ExtensiveEditor            
             placeholder={{
               visual: "Write your story...",
-              jsonb: "Paste JSONB document...",
+              json: "Paste JSON document...",
             }}
             toolbarAlignment="center"
           />

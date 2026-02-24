@@ -18,7 +18,7 @@ This folder is the single source of truth for project documentation.
 - Headless getting started: [user/headless/getting-started.md](user/headless/getting-started.md)
 - Headless extensions and configuration: [user/headless/extensions-and-configuration.md](user/headless/extensions-and-configuration.md)
 - Headless import/export: [user/headless/import-export.md](user/headless/import-export.md)
-- JSONB usage and persistence quick start: [user/demo/usage-and-persistence.md](user/demo/usage-and-persistence.md)
+- JSON usage and persistence quick start: [user/demo/usage-and-persistence.md](user/demo/usage-and-persistence.md)
 
 ## Developer Documentation
 
@@ -47,3 +47,5 @@ This folder is the single source of truth for project documentation.
 - Tooling docs:
   - [readmes/packages/eslint-config-readme.md](readmes/packages/eslint-config-readme.md)
   - [readmes/packages/typescript-config-readme.md](readmes/packages/typescript-config-readme.md)
+
+

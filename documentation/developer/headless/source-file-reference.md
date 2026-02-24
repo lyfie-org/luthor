@@ -106,3 +106,5 @@ This is the canonical per-file reference for `packages/headless`.
 
 - Keep this document updated whenever files are added, removed, renamed, or significantly repurposed.
 - Any new extension file must document: commands, state queries, config shape, and integration dependencies.
+
+

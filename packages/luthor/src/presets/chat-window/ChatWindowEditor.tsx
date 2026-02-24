@@ -2,7 +2,7 @@ import { useCallback, useRef, type KeyboardEvent } from "react";
 import { ExtensiveEditor, type ExtensiveEditorProps, type ExtensiveEditorRef } from "../extensive";
 
 export type ChatWindowEditorSendPayload = {
-  jsonb: string;
+  json: string;
 };
 
 export type ChatWindowEditorProps = Omit<ExtensiveEditorProps, "featureFlags" | "isToolbarEnabled"> & {
@@ -32,7 +32,8 @@ export function ChatWindowEditor({
       return;
     }
 
-    onSend({ jsonb: editorRef.current?.getJSONB() ?? "" });
+    const json = editorRef.current?.getJSON() ?? "";
+    onSend({ json });
   }, [onSend]);
 
   const handleKeyDownCapture = useCallback(
