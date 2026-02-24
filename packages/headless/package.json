@@ -1,6 +1,6 @@
 {
   "name": "@lyfie/luthor-headless",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Luthor Editor - A headless, extensible rich text editor built on Lexical",
   "type": "module",
   "private": false,
