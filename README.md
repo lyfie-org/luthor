@@ -1,26 +1,103 @@
-# Luthor Monorepo
+<div align="center">
+  <img src="apps/web/public/luthor-logo-horizontal.png" alt="Luthor" width="420" />
+  <h1>Luthor</h1>
+  <p><strong>TypeScript-first rich text editor ecosystem for React, built on Lexical.</strong></p>
+  <p>:rocket: Production-ready presets + :jigsaw: headless extension runtime + :unlock: MIT license</p>
+</div>
 
-Luthor is a TypeScript-first rich text editor monorepo built on Lexical, organized into a headless extension runtime and a plug-and-play preset package.
+<div align="center">
 
-## Packages
+[![Quality Gates](https://img.shields.io/github/actions/workflow/status/lyfie-app/luthor/quality-gates.yml?branch=main&label=quality%20gates&style=for-the-badge)](https://github.com/lyfie-app/luthor/actions/workflows/quality-gates.yml)
+[![Publish Packages](https://img.shields.io/github/actions/workflow/status/lyfie-app/luthor/publish-packages.yml?branch=main&label=publish&style=for-the-badge)](https://github.com/lyfie-app/luthor/actions/workflows/publish-packages.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/lyfie-app/luthor?style=for-the-badge)](https://github.com/lyfie-app/luthor/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/lyfie-app/luthor/main?style=for-the-badge)](https://github.com/lyfie-app/luthor/commits/main)
+[![License](https://img.shields.io/github/license/lyfie-app/luthor?style=for-the-badge)](LICENSE)
 
-- `@lyfie/luthor-headless` (version `2.2.0`)
-	- Lightweight headless extension system.
-	- Owns Lexical-derived core features and extension implementations.
-	- README: [packages/headless/README.md](packages/headless/README.md)
-- `@lyfie/luthor` (version `2.2.0`)
-	- Preset-focused package with ready editor UX.
-	- Composes and re-exports headless APIs.
-	- README: [packages/luthor/README.md](packages/luthor/README.md)
+[![NPM - @lyfie/luthor](https://img.shields.io/npm/v/@lyfie/luthor?style=for-the-badge&label=@lyfie/luthor)](https://www.npmjs.com/package/@lyfie/luthor)
+[![NPM - @lyfie/luthor-headless](https://img.shields.io/npm/v/@lyfie/luthor-headless?style=for-the-badge&label=@lyfie/luthor-headless)](https://www.npmjs.com/package/@lyfie/luthor-headless)
+[![GitHub Stars](https://img.shields.io/github/stars/lyfie-app/luthor?style=for-the-badge)](https://github.com/lyfie-app/luthor/stargazers)
+[![Contributors](https://img.shields.io/github/contributors/lyfie-app/luthor?style=for-the-badge)](https://github.com/lyfie-app/luthor/graphs/contributors)
 
-## Workspace Setup
+</div>
+
+<p align="center">
+  <img src="apps/web/public/placeholders/feature-preview.gif" alt="Luthor feature preview" width="960" />
+</p>
+
+## :sparkles: Why Luthor
+
+Luthor is an open-source rich text editor ecosystem designed for teams that want modern DX without editor lock-in.
+
+- :package: **Two-package model**: start fast with presets, go deep with headless composition
+- :shield: **TypeScript-first APIs**: safe command/state integrations
+- :zap: **Lexical-powered**: modern performance and extensibility
+- :art: **UI freedom**: build custom editor experiences when product requirements evolve
+- :package: **ESM-first distribution**: optimized for modern React bundling
+
+## :package: Packages
+
+| Package | Purpose | Best for | npm |
+| --- | --- | --- | --- |
+| `@lyfie/luthor` | Plug-and-play editor presets + polished UI | Shipping quickly with minimal setup | [npm](https://www.npmjs.com/package/@lyfie/luthor) |
+| `@lyfie/luthor-headless` | Headless extension runtime and typed editor system | Full UI control and custom workflows | [npm](https://www.npmjs.com/package/@lyfie/luthor-headless) |
+
+## :rocket: Quick Start
+
+```bash
+pnpm add @lyfie/luthor react react-dom
+```
+
+```tsx
+import { ExtensiveEditor } from "@lyfie/luthor";
+import "@lyfie/luthor/styles.css";
+
+export function App() {
+  return <ExtensiveEditor placeholder="Start writing..." />;
+}
+```
+
+Need full control?
+
+```bash
+pnpm add @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
+```
+
+## :globe_with_meridians: Product Links
+
+- Website: [luthor.fyi](https://www.luthor.fyi)
+- Docs home: [luthor.fyi/docs/getting-started](https://www.luthor.fyi/docs/getting-started)
+- Live demo: [luthor.fyi/demo](https://www.luthor.fyi/demo)
+- GitHub: [lyfie-app/luthor](https://github.com/lyfie-app/luthor)
+- Sponsor: [github.com/sponsors/lyfie-app](https://github.com/sponsors/lyfie-app)
+
+## :books: Documentation
+
+Public-facing docs:
+
+- Luthor getting started: [documentation/user/luthor/getting-started.md](documentation/user/luthor/getting-started.md)
+- Luthor presets/config: [documentation/user/luthor/presets-and-configuration.md](documentation/user/luthor/presets-and-configuration.md)
+- Luthor extensive editor: [documentation/user/luthor/extensive-editor.md](documentation/user/luthor/extensive-editor.md)
+- Headless getting started: [documentation/user/headless/getting-started.md](documentation/user/headless/getting-started.md)
+- Headless extensions/config: [documentation/user/headless/extensions-and-configuration.md](documentation/user/headless/extensions-and-configuration.md)
+- Headless import/export: [documentation/user/headless/import-export.md](documentation/user/headless/import-export.md)
+
+Developer/maintainer docs:
+
+- Documentation index: [documentation/index.md](documentation/index.md)
+- Documentation hub: [documentation/documentation-hub.md](documentation/documentation-hub.md)
+- Markdown catalog: [documentation/markdown-catalog.md](documentation/markdown-catalog.md)
+- README map: [documentation/developer_notes/readme-map.md](documentation/developer_notes/readme-map.md)
+- Luthor architecture: [documentation/developer/luthor/architecture.md](documentation/developer/luthor/architecture.md)
+- Headless architecture: [documentation/developer/headless/architecture.md](documentation/developer/headless/architecture.md)
+
+## :computer: Monorepo Development
 
 Requirements:
 
 - Node `>=20`
 - `pnpm@10.4.1`
 
-Install and run:
+Install + run:
 
 ```bash
 pnpm install
@@ -33,88 +110,36 @@ Quality gates:
 pnpm build
 pnpm lint
 pnpm format
+pnpm size:check
+pnpm check:rule-contracts
 ```
 
-## Windows + WSL Split Workflow
-
-Default development remains Windows-first (`pnpm dev`, `pnpm build`, editors, and local tooling).
-Use WSL only for Cloudflare/OpenNext commands that are less stable on native Windows.
-
-WSL-specific commands:
+Windows + WSL split workflow (Cloudflare/OpenNext operations):
 
 ```bash
 pnpm run web:preview:wsl
 pnpm run web:deploy:wsl
 ```
 
-These commands call `tools/run-in-wsl.ps1`, which bridges into WSL and runs the web app command from `apps/web`.
-Prerequisite: install Node.js in your WSL distro (so `pnpm` is available, or `corepack` can activate it).
+## :handshake: Contributing
 
-## Documentation (Canonical Source)
+1. Fork + clone the repo.
+2. Create a feature branch.
+3. Run checks locally (`pnpm lint`, `pnpm build`, `pnpm test` where applicable).
+4. Open a PR with a clear scope and screenshots/GIFs for UI changes.
 
-All long-form project documentation is centralized in [documentation](documentation).
+Issue tracker: [github.com/lyfie-app/luthor/issues](https://github.com/lyfie-app/luthor/issues)
 
-Primary indexes:
+## :chart_with_upwards_trend: Community
 
-- [documentation/index.md](documentation/index.md)
-- [documentation/documentation-hub.md](documentation/documentation-hub.md)
-- [documentation/markdown-catalog.md](documentation/markdown-catalog.md)
+### Star History
 
-## User Documentation
+[![Star History Chart](https://api.star-history.com/svg?repos=lyfie-app/luthor&type=Date)](https://star-history.com/#lyfie-app/luthor&Date)
 
-### Demo App (`apps/demo`)
+### Contributors
 
-- Getting started: [documentation/user/demo/getting-started.md](documentation/user/demo/getting-started.md)
-- Usage and persistence: [documentation/user/demo/usage-and-persistence.md](documentation/user/demo/usage-and-persistence.md)
-- Syntax highlighting showcase: demo enables `ExtensiveEditor` code highlighting auto-detection via `highlight.js` and imports a highlight.js CSS theme for token colors.
+[![Contributors](https://contrib.rocks/image?repo=lyfie-app/luthor)](https://github.com/lyfie-app/luthor/graphs/contributors)
 
-### `@lyfie/luthor`
+## :page_facing_up: License
 
-- Getting started: [documentation/user/luthor/getting-started.md](documentation/user/luthor/getting-started.md)
-- Presets and configuration: [documentation/user/luthor/presets-and-configuration.md](documentation/user/luthor/presets-and-configuration.md)
-- Extensive editor guide: [documentation/user/luthor/extensive-editor.md](documentation/user/luthor/extensive-editor.md)
-
-### `@lyfie/luthor-headless`
-
-- Getting started: [documentation/user/headless/getting-started.md](documentation/user/headless/getting-started.md)
-- Extensions and configuration: [documentation/user/headless/extensions-and-configuration.md](documentation/user/headless/extensions-and-configuration.md)
-- Import/export: [documentation/user/headless/import-export.md](documentation/user/headless/import-export.md)
-
-### Tutorials
-
-- Enhanced markdown quick start: [documentation/tutorials/enhanced-markdown-quick-start.md](documentation/tutorials/enhanced-markdown-quick-start.md)
-
-## Developer Documentation
-
-### Demo App (`apps/demo`)
-
-- Architecture: [documentation/developer/demo/architecture.md](documentation/developer/demo/architecture.md)
-- Source file reference: [documentation/developer/demo/source-file-reference.md](documentation/developer/demo/source-file-reference.md)
-- Maintainer notes: [documentation/developer/demo/maintainer-notes.md](documentation/developer/demo/maintainer-notes.md)
-
-### `@lyfie/luthor`
-
-- Architecture: [documentation/developer/luthor/architecture.md](documentation/developer/luthor/architecture.md)
-- Source file reference (all `packages/luthor/src` files): [documentation/developer/luthor/source-file-reference.md](documentation/developer/luthor/source-file-reference.md)
-- Maintainer notes: [documentation/developer/luthor/maintainer-notes.md](documentation/developer/luthor/maintainer-notes.md)
-
-### `@lyfie/luthor-headless`
-
-- Architecture: [documentation/developer/headless/architecture.md](documentation/developer/headless/architecture.md)
-- Source file reference: [documentation/developer/headless/source-file-reference.md](documentation/developer/headless/source-file-reference.md)
-- Maintainer notes: [documentation/developer/headless/maintainer-notes.md](documentation/developer/headless/maintainer-notes.md)
-
-### Contributor maps and package docs
-
-- README map: [documentation/developer_notes/readme-map.md](documentation/developer_notes/readme-map.md)
-- Luthor legacy docs redirects: [documentation/readmes/packages/luthor-docs/README.md](documentation/readmes/packages/luthor-docs/README.md)
-- Extensive preset notes: [documentation/readmes/presets/extensive-preset-readme.md](documentation/readmes/presets/extensive-preset-readme.md)
-
-## Repository Layout
-
-- [apps/demo](apps/demo): demo playground app
-- [packages/headless](packages/headless): headless runtime package
-- [packages/luthor](packages/luthor): preset package
-- [packages/ui](packages/ui): shared UI package
-- [packages/eslint-config](packages/eslint-config): lint config package
-- [packages/typescript-config](packages/typescript-config): TypeScript config package
+MIT (c) Luthor Team
