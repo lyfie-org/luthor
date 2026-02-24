@@ -33,7 +33,7 @@ export default defineConfig({
     "@lexical/table",
     "@lexical/utils",
   ],
-  splitting: false,
+  splitting: true,
   treeshake: true,
   target: "es2020",
 });

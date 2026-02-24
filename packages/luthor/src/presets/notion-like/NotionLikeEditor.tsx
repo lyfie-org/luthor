@@ -4,7 +4,6 @@ import {
   type ExtensiveEditorProps,
   type FeatureFlagOverrides,
 } from "../extensive";
-import "./styles.css";
 
 const NOTION_DEFAULT_FLAGS: FeatureFlagOverrides = {
   slashCommand: true,

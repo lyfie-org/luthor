@@ -5,7 +5,6 @@ import {
   type ExtensiveEditorRef,
   type FeatureFlagOverrides,
 } from "../extensive";
-import "./styles.css";
 
 const SIMPLE_TEXT_FEATURE_FLAGS: FeatureFlagOverrides = {
   bold: false,

@@ -1,6 +1,5 @@
 import { useCallback, useRef, type KeyboardEvent } from "react";
 import { ExtensiveEditor, type ExtensiveEditorProps, type ExtensiveEditorRef } from "../extensive";
-import "./styles.css";
 
 export type ChatWindowEditorSendPayload = {
   jsonb: string;

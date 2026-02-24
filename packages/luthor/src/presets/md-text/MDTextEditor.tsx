@@ -3,7 +3,6 @@ import { jsonbToMarkdown, markdownToJSONB } from "@lyfie/luthor-headless";
 import { formatMarkdownSource } from "../../core/source-format";
 import { ExtensiveEditor, type ExtensiveEditorProps, type ExtensiveEditorRef } from "../extensive";
 import { createModeCache, invalidateModeCache, isModeCached, markModeCached } from "../_shared";
-import "./styles.css";
 
 export type MDTextEditorMode = "visual" | "markdown";
 

@@ -8,6 +8,8 @@
     "lint": "turbo lint",
     "check:rule-contracts": "node ./tools/check-rule-contracts.mjs",
     "check:release-hardening": "node ./tools/release-hardening-smoke.mjs",
+    "size:report": "node ./tools/pack-size-check.mjs --write-report",
+    "size:check": "node ./tools/pack-size-check.mjs --gate --write-report",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "deploy": "pnpm run -C apps/web deploy",
     "web:preview:wsl": "powershell -ExecutionPolicy Bypass -File ./tools/run-in-wsl.ps1 -Workdir ./apps/web -RunCommand \"pnpm run preview\"",

@@ -120,7 +120,7 @@ This file documents every code file in `packages/luthor/src`.
 
 - Purpose: icon mapping layer.
 - Exports:
-  - editor-oriented icon aliases backed by `lucide-react`.
+  - editor-oriented icon aliases backed by internal SVG components.
 
 ### `core/floating-toolbar.tsx`
 

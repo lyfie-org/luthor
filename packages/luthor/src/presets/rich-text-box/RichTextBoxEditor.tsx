@@ -5,7 +5,6 @@ import {
   type ExtensiveEditorRef,
   type FeatureFlagOverrides,
 } from "../extensive";
-import "./styles.css";
 
 const RICH_TEXT_BOX_DEFAULT_FLAGS: FeatureFlagOverrides = {
   bold: true,

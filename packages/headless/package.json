@@ -20,7 +20,7 @@
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node ./scripts/postbuild.mjs",
     "lint": "eslint . --max-warnings 0",
     "dev": "tsup --watch",
     "test": "vitest run",

@@ -1,5 +1,4 @@
 import { ExtensiveEditor, type ExtensiveEditorProps } from "../extensive";
-import "./styles.css";
 
 export type EmailComposeEditorProps = Omit<ExtensiveEditorProps, "featureFlags"> & {
   showTo?: boolean;

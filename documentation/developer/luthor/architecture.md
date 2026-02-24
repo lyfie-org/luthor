@@ -70,7 +70,8 @@ Other preset modules (`simple-text`, `rich-text-box`, `chat-window`, `email-comp
 
 From `packages/luthor/package.json`:
 
-- Runtime deps include `@lyfie/luthor-headless`, Lexical packages (`^0.40.0`), `lexical`, and `lucide-react`.
+- Runtime deps include `@lyfie/luthor-headless` and Lexical packages (`^0.40.0`, `lexical`).
+- Icon rendering is handled by internal SVG components in `src/core/icons.tsx`.
 - React and React DOM are peers: `^18.0.0 || ^19.0.0`.
 - Package version: `2.2.0`.
 

@@ -1,0 +1,10 @@
+{
+  "luthor": {
+    "maxPackedBytes": 350000,
+    "maxUnpackedBytes": 1700000
+  },
+  "headless": {
+    "maxPackedBytes": 130000,
+    "maxUnpackedBytes": 550000
+  }
+}

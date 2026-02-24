@@ -3,7 +3,7 @@
 Concatenated markdown corpus for AI ingestion.
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-02-24T12:48:42.147Z
+Generated at: 2026-02-24T15:36:50.117Z
 
 ---
 ## FILE: getting-started/index.md

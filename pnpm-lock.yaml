@@ -268,9 +268,6 @@ importers:
       lexical:
         specifier: ^0.40.0
         version: 0.40.0
-      lucide-react:
-        specifier: ^0.475.0
-        version: 0.475.0(react@19.2.4)
       react:
         specifier: ^18.0.0 || ^19.0.0
         version: 19.2.4

@@ -65,7 +65,6 @@ import type {
   FontSizeOption,
   LineHeightOption,
 } from "@lyfie/luthor-headless";
-import "./styles.css";
 
 const { Provider, useEditor } = createEditorSystem<typeof extensiveExtensions>();
 

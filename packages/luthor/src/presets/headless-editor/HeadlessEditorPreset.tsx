@@ -8,7 +8,6 @@ import {
   richTextExtension,
   underlineExtension,
 } from "@lyfie/luthor-headless";
-import "./styles.css";
 
 const headlessPresetExtensions = [
   richTextExtension,
