@@ -1,0 +1,65 @@
+[
+  {
+    "package": "@lyfie/luthor",
+    "version": "2.3.2",
+    "packedBytes": 56532,
+    "unpackedBytes": 251405,
+    "minifiedBytes": null,
+    "gzipBytes": null,
+    "bundlephobiaError": "Failed to parse JSON from https://bundlephobia.com/api/size?package=%40lyfie%2Fluthor%402.3.2: error code: 520"
+  },
+  {
+    "package": "@lyfie/luthor-headless",
+    "version": "2.3.2",
+    "packedBytes": 100940,
+    "unpackedBytes": 427611,
+    "minifiedBytes": null,
+    "gzipBytes": null,
+    "bundlephobiaError": "Failed to parse JSON from https://bundlephobia.com/api/size?package=%40lyfie%2Fluthor-headless%402.3.2: error code: 520"
+  },
+  {
+    "package": "@tiptap/react",
+    "version": "3.20.0",
+    "packedBytes": 89988,
+    "unpackedBytes": 393197,
+    "minifiedBytes": null,
+    "gzipBytes": null,
+    "bundlephobiaError": "Failed to parse JSON from https://bundlephobia.com/api/size?package=%40tiptap%2Freact%403.20.0: error code: 520"
+  },
+  {
+    "package": "slate-react",
+    "version": "0.123.0",
+    "packedBytes": 649165,
+    "unpackedBytes": 2771981,
+    "minifiedBytes": null,
+    "gzipBytes": null,
+    "bundlephobiaError": "Failed to parse JSON from https://bundlephobia.com/api/size?package=slate-react%400.123.0: error code: 520"
+  },
+  {
+    "package": "@lexical/react",
+    "version": "0.40.0",
+    "packedBytes": 181421,
+    "unpackedBytes": 890103,
+    "minifiedBytes": null,
+    "gzipBytes": null,
+    "bundlephobiaError": "Failed to parse JSON from https://bundlephobia.com/api/size?package=%40lexical%2Freact%400.40.0: error code: 520"
+  },
+  {
+    "package": "quill",
+    "version": "2.0.3",
+    "packedBytes": 748714,
+    "unpackedBytes": 3036362,
+    "minifiedBytes": null,
+    "gzipBytes": null,
+    "bundlephobiaError": "Failed to parse JSON from https://bundlephobia.com/api/size?package=quill%402.0.3: error code: 520"
+  },
+  {
+    "package": "react-quill",
+    "version": "2.0.0",
+    "packedBytes": 89240,
+    "unpackedBytes": 405046,
+    "minifiedBytes": null,
+    "gzipBytes": null,
+    "bundlephobiaError": "Failed to parse JSON from https://bundlephobia.com/api/size?package=react-quill%402.0.0: error code: 520"
+  }
+]

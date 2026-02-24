@@ -7,8 +7,9 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist",
-    "README.md"
+    "dist/**/*.js",
+    "dist/**/*.css",
+    "dist/**/*.d.ts"
   ],
   "sideEffects": [
     "**/*.css"
@@ -20,54 +21,15 @@
       "default": "./dist/index.js"
     },
     "./styles.css": "./dist/index.css",
-    "./presets/extensive": {
-      "types": "./dist/presets/extensive/index.d.ts",
-      "import": "./dist/presets/extensive/index.js",
-      "default": "./dist/presets/extensive/index.js"
-    },
-    "./presets/simple-text": {
-      "types": "./dist/presets/simple-text/index.d.ts",
-      "import": "./dist/presets/simple-text/index.js",
-      "default": "./dist/presets/simple-text/index.js"
-    },
-    "./presets/rich-text-box": {
-      "types": "./dist/presets/rich-text-box/index.d.ts",
-      "import": "./dist/presets/rich-text-box/index.js",
-      "default": "./dist/presets/rich-text-box/index.js"
-    },
-    "./presets/chat-window": {
-      "types": "./dist/presets/chat-window/index.d.ts",
-      "import": "./dist/presets/chat-window/index.js",
-      "default": "./dist/presets/chat-window/index.js"
-    },
-    "./presets/email-compose": {
-      "types": "./dist/presets/email-compose/index.d.ts",
-      "import": "./dist/presets/email-compose/index.js",
-      "default": "./dist/presets/email-compose/index.js"
-    },
-    "./presets/md-text": {
-      "types": "./dist/presets/md-text/index.d.ts",
-      "import": "./dist/presets/md-text/index.js",
-      "default": "./dist/presets/md-text/index.js"
-    },
-    "./presets/notion-like": {
-      "types": "./dist/presets/notion-like/index.d.ts",
-      "import": "./dist/presets/notion-like/index.js",
-      "default": "./dist/presets/notion-like/index.js"
-    },
-    "./presets/headless-editor": {
-      "types": "./dist/presets/headless-editor/index.d.ts",
-      "import": "./dist/presets/headless-editor/index.js",
-      "default": "./dist/presets/headless-editor/index.js"
-    },
-    "./presets/notes": {
-      "types": "./dist/presets/notes/index.d.ts",
-      "import": "./dist/presets/notes/index.js",
-      "default": "./dist/presets/notes/index.js"
+    "./presets/*": {
+      "types": "./dist/presets/*/index.d.ts",
+      "import": "./dist/presets/*/index.js",
+      "default": "./dist/presets/*/index.js"
     }
   },
   "scripts": {
     "build": "tsup",
+    "prepack": "npm run build",
     "lint": "eslint . --max-warnings 0",
     "dev": "tsup --watch",
     "test": "vitest run",

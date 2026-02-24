@@ -1,0 +1,20 @@
+{
+  "name": "editor-bench-temp",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest",
+    "@lyfie/luthor": "file:C:/Users/rahul/Documents/GitHub/luthor/packages/luthor/lyfie-luthor-2.3.1.tgz",
+    "@lyfie/luthor-headless": "file:C:/Users/rahul/Documents/GitHub/luthor/packages/headless/lyfie-luthor-headless-2.3.1.tgz",
+    "@tiptap/react": "latest",
+    "@tiptap/starter-kit": "latest",
+    "slate": "latest",
+    "slate-react": "latest",
+    "slate-history": "latest",
+    "@lexical/react": "latest",
+    "lexical": "latest",
+    "quill": "latest",
+    "react-quill": "latest"
+  }
+}

@@ -4,23 +4,23 @@
   "description": "Luthor Editor - A headless, extensible rich text editor built on Lexical",
   "type": "module",
   "private": false,
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist",
-    "README.md"
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
   ],
   "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "tsup && node ./scripts/postbuild.mjs",
+    "build": "tsup",
+    "prepack": "npm run build",
     "lint": "eslint . --max-warnings 0",
     "dev": "tsup --watch",
     "test": "vitest run",
