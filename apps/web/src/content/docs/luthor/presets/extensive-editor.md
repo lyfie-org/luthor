@@ -22,9 +22,9 @@ export function App() {
 
 - `initialTheme`: `'light' (default) | 'dark'`
 - `showDefaultContent`: `true (default) | false`
-- `placeholder`: `'Write anything...' (default) | string | { visual?: string; jsonb?: string }`
-- `initialMode`: `'visual' (default) | 'jsonb'`
-- `availableModes`: `['visual', 'jsonb'] (default) | ('visual' | 'jsonb')[]`
+- `placeholder`: `'Write anything...' (default) | string | { visual?: string; json?: string }`
+- `initialMode`: `'visual' (default) | 'json'`
+- `availableModes`: `['visual', 'json'] (default) | ('visual' | 'json')[]`
 - `toolbarPosition`: `'top' (default) | 'bottom'`
 - `toolbarAlignment`: `'left' (default) | 'center' | 'right'`
 - `isToolbarEnabled`: `true (default) | false`
@@ -37,10 +37,12 @@ export function App() {
 
 ## Ref API
 
-- `injectJSONB(content: string): void`
-- `getJSONB(): string`
+- `injectJSON(content: string): void`
+- `getJSON(): string`
 
 ## Notes
 
 This is the base preset that other presets build on.
+
+
 

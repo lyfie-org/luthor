@@ -21,7 +21,7 @@ const paragraphNode = (
   children,
 });
 
-export const EXTENSIVE_WELCOME_CONTENT_JSONB = {
+export const EXTENSIVE_WELCOME_CONTENT_JSON = {
   root: {
     type: "root",
     version: 1,
@@ -36,11 +36,11 @@ export const EXTENSIVE_WELCOME_CONTENT_JSONB = {
         format: "",
         indent: 0,
         direction: null,
-        children: [textNode("Extensive Preset: JSONB-First Feature Showcase")],
+        children: [textNode("Extensive Preset: JSON-First Feature Showcase")],
       },
       paragraphNode([
         textNode("This starter content is now a native "),
-        textNode("JSONB", 1),
+        textNode("JSON", 1),
         textNode(
           " document that demonstrates visual editing without Markdown conversion.",
         ),
@@ -112,7 +112,7 @@ export const EXTENSIVE_WELCOME_CONTENT_JSONB = {
         direction: null,
         children: [
           textNode(
-            "“Everything in this demo is persisted in JSONB and can round-trip via visual mode.”",
+            "“Everything in this demo is persisted in JSON and can round-trip via visual mode.”",
           ),
         ],
       },
@@ -396,7 +396,7 @@ export const EXTENSIVE_WELCOME_CONTENT_JSONB = {
             "format": 0,
             "mode": "normal",
             "style": "",
-            "text": " jsonb",
+            "text": " json",
             "type": "code-highlight",
             "version": 1
           },
@@ -622,7 +622,7 @@ export const EXTENSIVE_WELCOME_CONTENT_JSONB = {
                 width: 240,
                 backgroundColor: null,
                 children: [
-                  paragraphNode([textNode("Visual ↔ JSONB switching")]),
+                  paragraphNode([textNode("Visual ↔ JSON switching")]),
                 ],
               },
               {
@@ -648,6 +648,6 @@ export const EXTENSIVE_WELCOME_CONTENT_JSONB = {
   },
 } as const;
 
-export const EXTENSIVE_WELCOME_CONTENT_JSONB_STRING = JSON.stringify(
-  EXTENSIVE_WELCOME_CONTENT_JSONB,
+export const EXTENSIVE_WELCOME_CONTENT_JSON_STRING = JSON.stringify(
+  EXTENSIVE_WELCOME_CONTENT_JSON,
 );

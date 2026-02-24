@@ -22,3 +22,5 @@ When adding a new preset in future iterations:
    - `documentation/markdown-catalog.md`
 
 This keeps the package clean today while preserving a predictable path for future preset families.
+
+

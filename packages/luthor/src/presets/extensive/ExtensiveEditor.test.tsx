@@ -122,7 +122,7 @@ vi.mock("../../core", () => ({
   EmojiSuggestionMenu: () => null,
   commandsToCommandPaletteItems: commandsToCommandPaletteItemsMock,
   commandsToSlashCommandItems: commandsToSlashCommandItemsMock,
-  formatJSONBSource: (value: string) => value,
+  formatJSONSource: (value: string) => value,
   ModeTabs: () => <div data-testid="mode-tabs" />,
   registerKeyboardShortcuts: registerKeyboardShortcutsMock,
   generateCommands: vi.fn(() => [
@@ -732,14 +732,14 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
   });
 
-  it("supports mode-specific placeholder pass-through for visual and jsonb modes", () => {
+  it("supports mode-specific placeholder pass-through for visual and json modes", () => {
     render(
       <ExtensiveEditor
         showDefaultContent={false}
-        initialMode="jsonb"
+        initialMode="json"
         placeholder={{
           visual: "Write in visual mode",
-          jsonb: "Paste JSONB here",
+          json: "Paste JSON here",
         }}
       />,
     );
@@ -752,10 +752,10 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     const sourceViewCall = sourceViewMock.mock.calls.at(-1)?.[0] as {
       placeholder?: string;
     };
-    expect(sourceViewCall.placeholder).toBe("Paste JSONB here");
+    expect(sourceViewCall.placeholder).toBe("Paste JSON here");
     expect(screen.getByTestId("source-view")).toHaveAttribute(
       "data-placeholder",
-      "Paste JSONB here",
+      "Paste JSON here",
     );
   });
 });

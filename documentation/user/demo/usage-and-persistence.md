@@ -5,7 +5,7 @@ This page explains the interactive flows available in `apps/demo`.
 ## Content loading
 
 - The top bar provides a "Load Demo Content" action.
-- This injects prepared JSONB content from `src/data/demoContent.ts` into the editor.
+- This injects prepared JSON content from `src/data/demoContent.ts` into the editor.
 
 ## Feature coverage panel
 
@@ -18,7 +18,7 @@ This page explains the interactive flows available in `apps/demo`.
 The panel supports three common flows:
 
 1. **Save payload**
-   - captures current editor state (JSONB-oriented payload)
+   - captures current editor state (JSON-oriented payload)
    - writes payload into textarea for inspection/copy
 2. **Restore payload**
    - parses textarea JSON and injects back into editor
@@ -28,8 +28,8 @@ The panel supports three common flows:
 
 ## Data fidelity expectations
 
-- JSONB payload is the fidelity-first path.
-- Restore behavior uses JSONB document content as the canonical source.
+- JSON payload is the fidelity-first path.
+- Restore behavior uses JSON document content as the canonical source.
 
 ## Theme behavior
 
@@ -46,3 +46,5 @@ The panel supports three common flows:
 
 - Demo getting started: [getting-started.md](getting-started.md)
 - Demo maintainer notes: [../../developer/demo/maintainer-notes.md](../../developer/demo/maintainer-notes.md)
+
+

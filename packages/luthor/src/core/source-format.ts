@@ -2,7 +2,7 @@ function normalizeLineBreaks(value: string): string {
   return value.replace(/\r\n?/g, "\n");
 }
 
-export function formatJSONBSource(input: string): string {
+export function formatJSONSource(input: string): string {
   const normalized = normalizeLineBreaks(input).trim();
   if (!normalized) {
     return "";

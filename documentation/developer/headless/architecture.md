@@ -7,7 +7,7 @@ This document defines how `@lyfie/luthor-headless` is structured, why key design
 - Keep the package headless and lightweight.
 - Keep Lexical integrations in `@lyfie/luthor-headless` (not in presets).
 - Preserve type-safe command/state composition across arbitrary extension sets.
-- Support lossless import/export flows (JSON/JSONB).
+- Support lossless import/export flows (JSON).
 
 ## Runtime Layers
 
@@ -19,7 +19,7 @@ This document defines how `@lyfie/luthor-headless` is structured, why key design
    - Feature modules (formatting, media, core UX, custom nodes).
    - Canonical extension type contracts in `src/extensions/types.ts`.
 3. `src/utils/*`
-   - Runtime utility surface for JSON/JSONB-first integrations.
+   - Runtime utility surface for JSON-first integrations.
 
 ## Why the extension model looks this way
 
@@ -42,7 +42,7 @@ This document defines how `@lyfie/luthor-headless` is structured, why key design
 ## Import / export strategy
 
 - JSON remains the source-of-truth round-trip format for exact editor state.
-- JSONB is the recommended persistence target for production databases.
+- JSON is the recommended persistence target for production databases.
 
 ## Contribution rules for this package
 
@@ -76,3 +76,5 @@ Required delivery steps:
 - Add tests for behavior in headless and UI integration in luthor where applicable.
 - Update package README + user/developer docs in the same change.
 - Run quality gates and rule-contract checks before merge.
+
+

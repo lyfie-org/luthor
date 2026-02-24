@@ -26,6 +26,6 @@ export function App() {
 
 ## Behavior
 
-- Uses markdown/jsonb conversion when switching modes
+- Uses markdown/json conversion when switching modes
 - Renders source textarea in markdown mode
 

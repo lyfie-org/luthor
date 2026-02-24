@@ -16,7 +16,7 @@ Maintainer notes for contributors working on `apps/demo`.
 ## Persistence behavior assumptions
 
 - Theme uses local storage.
-- JSONB/markdown payload handling is user-triggered from the persistence panel.
+- JSON/markdown payload handling is user-triggered from the persistence panel.
 - Restore logic should fail safely on malformed JSON and provide status feedback.
 
 ## Deployment notes
@@ -37,3 +37,5 @@ From repo root:
 - Update [source-file-reference.md](source-file-reference.md) when files move or change responsibilities.
 - Keep user guide aligned with scripts and package versions.
 - Keep docs index links synchronized in `documentation/index.md` and `documentation/documentation-hub.md`.
+
+

@@ -32,7 +32,7 @@ packages/luthor/src/
 - typed command/state contracts (`types.ts`)
 - toolbar / floating toolbar / command palette / slash and emoji menus
 - command catalog and keyboard shortcut wiring
-- source-mode formatting helpers (HTML/Markdown/JSONB)
+- source-mode formatting helpers (HTML/Markdown/JSON)
 - preset config helper (`createPresetEditorConfig`)
 - adapter that bridges headless floating-toolbar extension with React UI
 
@@ -107,3 +107,5 @@ Required delivery steps:
 - Maintainer notes: [maintainer-notes.md](maintainer-notes.md)
 - User guide: [../../user/luthor/getting-started.md](../../user/luthor/getting-started.md)
 - Preset options: [../../user/luthor/presets-and-configuration.md](../../user/luthor/presets-and-configuration.md)
+
+

@@ -79,7 +79,7 @@ This is the canonical per-file reference for the demo app.
 - Behavior:
   - composes demo UI sections
   - wires `ExtensiveEditor` ref actions
-  - handles markdown/JSONB load-save-copy workflows
+  - handles markdown/JSON load-save-copy workflows
   - computes grouped feature coverage from extension list
   - manages theme and status states
 
@@ -93,7 +93,7 @@ This is the canonical per-file reference for the demo app.
 - Purpose: demo content and feature taxonomy constants.
 - Exports:
   - seeded markdown content
-  - JSONB scenario object
+  - JSON scenario object
   - extension categorization maps and ordering
 
 ## Component files
@@ -163,3 +163,5 @@ When touching `apps/demo` files:
 2. Update demo user docs for changed run or usage flows.
 3. Verify README and documentation index links still resolve.
 4. Run demo lint/build checks.
+
+

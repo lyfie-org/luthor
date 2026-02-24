@@ -16,7 +16,7 @@ import {
   EmojiSuggestionMenu,
   commandsToCommandPaletteItems,
   commandsToSlashCommandItems,
-  formatJSONBSource,
+  formatJSONSource,
   generateCommands,
   ModeTabs,
   LinkHoverBubble,
@@ -53,7 +53,7 @@ import {
   type FeatureShortcutSpec,
   type ToolbarFeatureMap,
 } from "../_shared";
-import { EXTENSIVE_WELCOME_CONTENT_JSONB as extensiveWelcomeContent } from "./welcomeContent";
+import { EXTENSIVE_WELCOME_CONTENT_JSON as extensiveWelcomeContent } from "./welcomeContent";
 import type {
   CommandPaletteExtension,
   SlashCommandExtension,
@@ -68,20 +68,20 @@ import type {
 
 const { Provider, useEditor } = createEditorSystem<typeof extensiveExtensions>();
 
-export type ExtensiveEditorMode = "visual" | "jsonb";
+export type ExtensiveEditorMode = "visual" | "json";
 export type ExtensiveEditorPlaceholder =
   | string
   | {
       visual?: string;
-      jsonb?: string;
+      json?: string;
     };
 
 const DEFAULT_VISUAL_PLACEHOLDER = "Write anything...";
-const DEFAULT_JSONB_PLACEHOLDER = "Enter JSONB document content...";
+const DEFAULT_JSON_PLACEHOLDER = "Enter JSON document content...";
 
 export interface ExtensiveEditorRef {
-  injectJSONB: (content: string) => void;
-  getJSONB: () => string;
+  injectJSON: (content: string) => void;
+  getJSON: () => string;
 }
 
 type JsonTextNode = {
@@ -103,7 +103,7 @@ type JsonParagraphNode = {
   children: JsonTextNode[];
 };
 
-type JsonbDocument = {
+type JsonDocument = {
   root: {
     type: "root";
     version: 1;
@@ -114,7 +114,7 @@ type JsonbDocument = {
   };
 };
 
-function createJSONBDocumentFromText(content: string): JsonbDocument {
+function createJSONDocumentFromText(content: string): JsonDocument {
   const normalized = content.replace(/\r\n?/g, "\n").trim();
   const blocks = normalized
     .split(/\n{2,}/)
@@ -152,12 +152,12 @@ function createJSONBDocumentFromText(content: string): JsonbDocument {
   };
 }
 
-function toJSONBInput(value: string): string {
+function toJSONInput(value: string): string {
   try {
     const parsed = JSON.parse(value);
     return JSON.stringify(parsed);
   } catch {
-    return JSON.stringify(createJSONBDocumentFromText(value));
+    return JSON.stringify(createJSONDocumentFromText(value));
   }
 }
 
@@ -516,7 +516,7 @@ function ExtensiveEditorContent({
   isDark,
   toggleTheme,
   visualPlaceholder,
-  jsonbPlaceholder,
+  jsonPlaceholder,
   initialMode,
   availableModes,
   onReady,
@@ -538,7 +538,7 @@ function ExtensiveEditorContent({
   isDark: boolean;
   toggleTheme: () => void;
   visualPlaceholder: string;
-  jsonbPlaceholder: string;
+  jsonPlaceholder: string;
   initialMode: ExtensiveEditorMode;
   availableModes: readonly ExtensiveEditorMode[];
   onReady?: (methods: ExtensiveEditorRef) => void;
@@ -567,7 +567,7 @@ function ExtensiveEditorContent({
     import: importApi,
   } = useEditor();
   const [mode, setMode] = useState<ExtensiveEditorMode>(initialMode);
-  const [content, setContent] = useState({ jsonb: "" });
+  const [content, setContent] = useState({ json: "" });
   const [convertingMode, setConvertingMode] = useState<ExtensiveEditorMode | null>(null);
   const [sourceError, setSourceError] = useState<{ mode: ExtensiveEditorMode; error: string } | null>(null);
   const [commandPaletteState, setCommandPaletteState] = useState({
@@ -670,20 +670,26 @@ function ExtensiveEditorContent({
   }, [safeCommands, activeStates, isDark, isFeatureEnabled]);
 
   const methods = useMemo<ExtensiveEditorRef>(
-    () => ({
-      injectJSONB: (value: string) => {
+    () => {
+      const injectJSON = (value: string) => {
         setTimeout(() => {
           try {
             const parsed = JSON.parse(value);
             importApi.fromJSON(parsed);
           } catch (error) {
-            console.error("Failed to inject JSONB:", error);
+            console.error("Failed to inject JSON:", error);
             return;
           }
         }, 100);
-      },
-      getJSONB: () => formatJSONBSource(JSON.stringify(exportApi.toJSON())),
-    }),
+      };
+      const getJSON = () => formatJSONSource(JSON.stringify(exportApi.toJSON()));
+      return {
+        injectJSON,
+        getJSON,
+        
+        
+      };
+    },
     [exportApi, importApi],
   );
 
@@ -906,8 +912,8 @@ function ExtensiveEditorContent({
       setSourceError(null);
 
       // Step 1: Import edited content from source tabs
-      if (mode === "jsonb" && newMode !== "jsonb") {
-        const parsed = JSON.parse(content.jsonb);
+      if (mode === "json" && newMode !== "json") {
+        const parsed = JSON.parse(content.json);
         importApi.fromJSON(parsed);
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
@@ -924,14 +930,14 @@ function ExtensiveEditorContent({
 
       // Step 2: Lazy export - only convert format if not cached
       // This ensures smooth tab switching with progressive conversion
-      if (newMode === "jsonb" && mode !== "jsonb") {
-        if (!isModeCached(cacheValidRef.current, "jsonb")) {
-          setConvertingMode("jsonb");
+      if (newMode === "json" && mode !== "json") {
+        if (!isModeCached(cacheValidRef.current, "json")) {
+          setConvertingMode("json");
           await new Promise((resolve) => setTimeout(resolve, 50));
           try {
-            const jsonb = formatJSONBSource(JSON.stringify(exportApi.toJSON()));
-            setContent((prev) => ({ ...prev, jsonb }));
-            markModeCached(cacheValidRef.current, "jsonb");
+            const json = formatJSONSource(JSON.stringify(exportApi.toJSON()));
+            setContent((prev) => ({ ...prev, json }));
+            markModeCached(cacheValidRef.current, "json");
           } finally {
             setConvertingMode(null);
           }
@@ -1014,14 +1020,14 @@ function ExtensiveEditorContent({
               <div className="luthor-source-error">
                 <div className="luthor-source-error-icon">⚠️</div>
                 <div className="luthor-source-error-message">
-                  <strong>Invalid JSONB</strong>
+                  <strong>Invalid JSON</strong>
                   <p>{sourceError.error}</p>
                   <small>Fix the errors above and try switching modes again</small>
                 </div>
               </div>
             )}
-            {mode === "jsonb" && (
-              <SourceView value={content.jsonb} onChange={(value) => setContent((prev) => ({ ...prev, jsonb: value }))} placeholder={jsonbPlaceholder} />
+            {mode === "json" && (
+              <SourceView value={content.json} onChange={(value) => setContent((prev) => ({ ...prev, json: value }))} placeholder={jsonPlaceholder} />
             )}
           </div>
         )}
@@ -1117,7 +1123,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     showDefaultContent = true,
     placeholder = DEFAULT_VISUAL_PLACEHOLDER,
     initialMode = "visual",
-    availableModes = ["visual", "jsonb"],
+    availableModes = ["visual", "json"],
     variantClassName,
     toolbarLayout,
     toolbarVisibility,
@@ -1161,13 +1167,13 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       if (typeof placeholder === "string") {
         return {
           visual: placeholder,
-          jsonb: DEFAULT_JSONB_PLACEHOLDER,
+          json: DEFAULT_JSON_PLACEHOLDER,
         };
       }
 
       return {
         visual: placeholder.visual ?? DEFAULT_VISUAL_PLACEHOLDER,
-        jsonb: placeholder.jsonb ?? DEFAULT_JSONB_PLACEHOLDER,
+        json: placeholder.json ?? DEFAULT_JSON_PLACEHOLDER,
       };
     }, [placeholder]);
 
@@ -1355,9 +1361,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       setMethods(m);
       // Auto-inject default welcome content if enabled
       if (showDefaultContent && defaultContent === undefined) {
-        m.injectJSONB(JSON.stringify(extensiveWelcomeContent));
+        m.injectJSON(JSON.stringify(extensiveWelcomeContent));
       } else if (defaultContent) {
-        m.injectJSONB(toJSONBInput(defaultContent));
+        m.injectJSON(toJSONInput(defaultContent));
       }
       onReady?.(m);
     };
@@ -1373,7 +1379,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             isDark={isDark}
             toggleTheme={toggleTheme}
             visualPlaceholder={resolvedPlaceholders.visual}
-            jsonbPlaceholder={resolvedPlaceholders.jsonb}
+            jsonPlaceholder={resolvedPlaceholders.json}
             initialMode={resolvedInitialMode}
             availableModes={availableModes}
             onReady={handleReady}
@@ -1399,4 +1405,5 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
 );
 
 ExtensiveEditor.displayName = "ExtensiveEditor";
+
 

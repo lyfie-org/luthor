@@ -2,12 +2,12 @@
 
 ## Current editor delivery status
 
-The active editor workflow is now Visual + JSONB.
+The active editor workflow is now Visual + JSON.
 
 ### Delivered
 
-- JSONB-first persistence and restoration in demo and extensive preset flows.
-- Visual/JSONB mode switching with validation safeguards.
+- JSON-first persistence and restoration in demo and extensive preset flows.
+- Visual/JSON mode switching with validation safeguards.
 - Headless core import/export contracts simplified to JSON-only APIs.
 - Removal of HTML/Markdown mode-facing APIs and stale extension wiring.
 - Documentation alignment across user and developer guides.
@@ -18,7 +18,7 @@ The active editor workflow is now Visual + JSONB.
 {
   "schemaVersion": 1,
   "content": {
-    "jsonb": "{ ...lexical state... }"
+    "json": "{ ...lexical state... }"
   }
 }
 ```
@@ -26,3 +26,5 @@ The active editor workflow is now Visual + JSONB.
 ### Notes
 
 Historical enhanced-markdown and HTML conversion guidance is archived and no longer the recommended implementation path.
+
+

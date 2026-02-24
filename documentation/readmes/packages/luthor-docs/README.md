@@ -12,3 +12,5 @@ Canonical `@lyfie/luthor` docs now live here:
 - Extensive editor guide: [../../../user/luthor/extensive-editor.md](../../../user/luthor/extensive-editor.md)
 
 Legacy pages in this folder are intentionally kept and linked to canonical sources to avoid broken navigation.
+
+

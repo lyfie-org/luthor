@@ -267,7 +267,7 @@ This group covers code editing and developer-facing utilities.
 - `codeExtension`
 - `codeIntelligenceExtension`
 - `codeFormatExtension`
-- `markdownToJSONB`, `jsonbToMarkdown`
+- `markdownToJSON`, `jsonToMarkdown`
 
 ## Example: code editor setup
 
@@ -301,10 +301,10 @@ export function App() {
 ## Example: markdown bridge
 
 ```ts
-import { markdownToJSONB, jsonbToMarkdown } from '@lyfie/luthor-headless';
+import { markdownToJSON, jsonToMarkdown } from '@lyfie/luthor-headless';
 
-const json = markdownToJSONB('# Title\n\nSome text');
-const markdown = jsonbToMarkdown(json);
+const json = markdownToJSON('# Title\n\nSome text');
+const markdown = jsonToMarkdown(json);
 ```
 
 ---
@@ -711,7 +711,7 @@ import '@lyfie/luthor/styles.css';
 export function App() {
   return (
     <ChatWindowEditor
-      onSend={({ jsonb }) => console.log(jsonb)}
+      onSend={({ json }) => console.log(json)}
       submitOnEnter
       allowShiftEnter
     />
@@ -723,7 +723,7 @@ export function App() {
 
 `ChatWindowEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`.
 
-- `onSend`: `undefined (default) | (payload: { jsonb: string }) => void`
+- `onSend`: `undefined (default) | (payload: { json: string }) => void`
 - `submitOnEnter`: `true (default) | false`
 - `allowShiftEnter`: `true (default) | false`
 - `showVoiceButton`: `false (default) | true`
@@ -803,9 +803,9 @@ export function App() {
 
 - `initialTheme`: `'light' (default) | 'dark'`
 - `showDefaultContent`: `true (default) | false`
-- `placeholder`: `'Write anything...' (default) | string | { visual?: string; jsonb?: string }`
-- `initialMode`: `'visual' (default) | 'jsonb'`
-- `availableModes`: `['visual', 'jsonb'] (default) | ('visual' | 'jsonb')[]`
+- `placeholder`: `'Write anything...' (default) | string | { visual?: string; json?: string }`
+- `initialMode`: `'visual' (default) | 'json'`
+- `availableModes`: `['visual', 'json'] (default) | ('visual' | 'json')[]`
 - `toolbarPosition`: `'top' (default) | 'bottom'`
 - `toolbarAlignment`: `'left' (default) | 'center' | 'right'`
 - `isToolbarEnabled`: `true (default) | false`
@@ -818,8 +818,8 @@ export function App() {
 
 ## Ref API
 
-- `injectJSONB(content: string): void`
-- `getJSONB(): string`
+- `injectJSON(content: string): void`
+- `getJSON(): string`
 
 ## Notes
 
@@ -892,7 +892,7 @@ export function App() {
 
 ## Behavior
 
-- Uses markdown/jsonb conversion when switching modes
+- Uses markdown/json conversion when switching modes
 - Renders source textarea in markdown mode
 
 ---
@@ -1054,4 +1054,8 @@ export function App() {
 
 - Forces visual-only mode
 - Disables most rich features by preset defaults
+
+
+
+
 

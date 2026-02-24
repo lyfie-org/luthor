@@ -12,7 +12,7 @@ This group covers code editing and developer-facing utilities.
 - `codeExtension`
 - `codeIntelligenceExtension`
 - `codeFormatExtension`
-- `markdownToJSONB`, `jsonbToMarkdown`
+- `markdownToJSON`, `jsonToMarkdown`
 
 ## Example: code editor setup
 
@@ -46,8 +46,8 @@ export function App() {
 ## Example: markdown bridge
 
 ```ts
-import { markdownToJSONB, jsonbToMarkdown } from '@lyfie/luthor-headless';
+import { markdownToJSON, jsonToMarkdown } from '@lyfie/luthor-headless';
 
-const json = markdownToJSONB('# Title\n\nSome text');
-const markdown = jsonbToMarkdown(json);
+const json = markdownToJSON('# Title\n\nSome text');
+const markdown = jsonToMarkdown(json);
 ```

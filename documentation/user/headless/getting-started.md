@@ -71,3 +71,5 @@ export function Editor() {
 - Extension catalog and configuration: [extensions-and-configuration.md](extensions-and-configuration.md)
 - Import/export and metadata format: [import-export.md](import-export.md)
 - Troubleshooting and performance notes: [../../developer/headless/maintainer-notes.md](../../developer/headless/maintainer-notes.md)
+
+

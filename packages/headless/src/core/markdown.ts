@@ -26,7 +26,7 @@ type JsonRootNode = {
   children: JsonParagraphNode[];
 };
 
-export type JsonbDocument = {
+export type JsonDocument = {
   root: JsonRootNode;
 };
 
@@ -53,7 +53,7 @@ function createParagraphNode(text: string): JsonParagraphNode {
   };
 }
 
-export function markdownToJSONB(markdown: string): JsonbDocument {
+export function markdownToJSON(markdown: string): JsonDocument {
   const normalized = markdown.replace(/\r\n?/g, "\n").trim();
   const blocks = normalized.length === 0
     ? [""]
@@ -89,7 +89,7 @@ function extractNodeText(node: unknown): string {
   return "";
 }
 
-export function jsonbToMarkdown(input: unknown): string {
+export function jsonToMarkdown(input: unknown): string {
   if (!input || typeof input !== "object") {
     return "";
   }

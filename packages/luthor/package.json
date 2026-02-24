@@ -53,7 +53,10 @@
   "bugs": {
     "url": "https://github.com/lyfie-app/luthor/issues"
   },
-  "homepage": "https://github.com/lyfie-app/luthor#readme",
+  "homepage": "https://github.com/lyfie-app/luthor#readme",  
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com" 
+  },
   "dependencies": {
     "@lexical/code": "^0.40.0",
     "@lexical/link": "^0.40.0",

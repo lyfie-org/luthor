@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { jsonbToMarkdown, markdownToJSONB } from "@lyfie/luthor-headless";
+import { jsonToMarkdown, markdownToJSON } from "@lyfie/luthor-headless";
 import { formatMarkdownSource } from "../../core/source-format";
 import { ExtensiveEditor, type ExtensiveEditorProps, type ExtensiveEditorRef } from "../extensive";
 import { createModeCache, invalidateModeCache, isModeCached, markModeCached } from "../_shared";
@@ -29,9 +29,9 @@ export function MDTextEditor({ className, variantClassName, initialMode = "visua
 
       if (nextMode === "markdown") {
         if (!isModeCached(modeCacheRef.current, "markdown")) {
-          const jsonb = editorRef.current?.getJSONB() ?? "";
-          const parsed = jsonb ? JSON.parse(jsonb) : undefined;
-          const nextMarkdown = formatMarkdownSource(jsonbToMarkdown(parsed));
+          const json = editorRef.current?.getJSON() ?? "";
+          const parsed = json ? JSON.parse(json) : undefined;
+          const nextMarkdown = formatMarkdownSource(jsonToMarkdown(parsed));
           markdownCacheRef.current = nextMarkdown;
           setMarkdown(nextMarkdown);
           markModeCached(modeCacheRef.current, "markdown");
@@ -41,7 +41,7 @@ export function MDTextEditor({ className, variantClassName, initialMode = "visua
       }
 
       if (nextMode === "visual") {
-        const parsed = markdownToJSONB(markdown);
+        const parsed = markdownToJSON(markdown);
         pendingVisualJSONRef.current = JSON.stringify(parsed);
       }
 
@@ -53,7 +53,7 @@ export function MDTextEditor({ className, variantClassName, initialMode = "visua
             return;
           }
 
-          editorRef.current?.injectJSONB(pendingVisualJSONRef.current);
+          editorRef.current?.injectJSON(pendingVisualJSONRef.current);
           pendingVisualJSONRef.current = null;
         }, 0);
       }

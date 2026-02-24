@@ -5,7 +5,7 @@ This document previously described the enhanced markdown converter workflow.
 ## Current status
 
 - HTML/Markdown mode-facing editor APIs are removed from active workflows.
-- The recommended persistence path is now JSON/JSONB only.
+- The recommended persistence path is now JSON only.
 
 ## Use instead
 
@@ -15,6 +15,8 @@ This document previously described the enhanced markdown converter workflow.
 
 ## Migration checklist
 
-1. Replace `getMarkdown()` / `injectMarkdown()` usage with `getJSONB()` / `injectJSONB()`.
-2. Persist canonical payloads in JSONB.
+1. Replace `getMarkdown()` / `injectMarkdown()` usage with `getJSON()` / `injectJSON()`.
+2. Persist canonical payloads in JSON.
 3. Validate imported payload shape before restore.
+
+
