@@ -41,5 +41,5 @@ jobs:
           pnpm --filter @lyfie/luthor run test
           pnpm --filter @lyfie/luthor run build
 
-      - name: Release hardening smoke
+      - name: Release hardening smoke (ESM-only)
         run: pnpm check:release-hardening

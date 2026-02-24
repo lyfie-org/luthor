@@ -54,6 +54,17 @@ function expectEntries(entries, requiredEntries, label) {
   }
 }
 
+function expectNoCjsEntries(entries, label) {
+  const cjsEntries = entries
+    .map((entry) => entry.replace(/\\/g, "/"))
+    .filter((entry) => /(^|\/)dist\/.*\.cjs$/.test(entry));
+  if (cjsEntries.length > 0) {
+    throw new Error(
+      `${label}: unexpected CJS packed files found: ${cjsEntries.join(", ")}`,
+    );
+  }
+}
+
 async function writeFixtureFiles(fixtureDir, packDir, headlessTarName, luthorTarName) {
   const packageJson = {
     name: "luthor-release-smoke-fixture",
@@ -61,7 +72,6 @@ async function writeFixtureFiles(fixtureDir, packDir, headlessTarName, luthorTar
     type: "module",
     scripts: {
       "verify:esm": "node ./verify-esm.mjs",
-      "verify:cjs": "node ./verify-cjs.cjs",
     },
     dependencies: {
       "@lyfie/luthor-headless": `file:${path.join(packDir, headlessTarName)}`,
@@ -88,22 +98,12 @@ if (!("ExtensiveEditor" in extensivePreset) || extensivePreset.ExtensiveEditor =
 console.log("esm smoke ok");
 `.trimStart();
 
-  const verifyCjs = `
-const headless = require("@lyfie/luthor-headless");
-
-if (typeof headless.createEditorSystem !== "function") {
-  throw new Error("headless require createEditorSystem missing");
-}
-console.log("cjs smoke ok");
-`.trimStart();
-
   await fs.writeFile(
     path.join(fixtureDir, "package.json"),
     `${JSON.stringify(packageJson, null, 2)}\n`,
     "utf8",
   );
   await fs.writeFile(path.join(fixtureDir, "verify-esm.mjs"), verifyEsm, "utf8");
-  await fs.writeFile(path.join(fixtureDir, "verify-cjs.cjs"), verifyCjs, "utf8");
 }
 
 async function main() {
@@ -136,7 +136,6 @@ async function main() {
       "package/package.json",
       "package/README.md",
       "package/dist/index.js",
-      "package/dist/index.cjs",
       "package/dist/index.d.ts",
     ],
     "headless",
@@ -154,12 +153,13 @@ async function main() {
     ],
     "luthor",
   );
+  expectNoCjsEntries(headlessEntries, "headless");
+  expectNoCjsEntries(luthorEntries, "luthor");
 
   await writeFixtureFiles(fixtureDir, packDir, headlessTarName, luthorTarName);
 
   run("pnpm", ["install", "--no-frozen-lockfile"], fixtureDir);
   run("pnpm", ["run", "verify:esm"], fixtureDir);
-  run("pnpm", ["run", "verify:cjs"], fixtureDir);
 
   console.log(`Release hardening smoke checks passed.\nTemp workspace: ${tempRoot}`);
 }

@@ -1,6 +1,5 @@
 <div align="center">
   <img src="apps/web/public/luthor-logo-horizontal.png" alt="Luthor" width="420" />
-  <h1>Luthor</h1>
   <p><strong>TypeScript-first rich text editor ecosystem for React, built on Lexical.</strong></p>
   <p>:rocket: Production-ready presets + :jigsaw: headless extension runtime + :unlock: MIT license</p>
 </div>
@@ -11,12 +10,8 @@
 [![Publish Packages](https://img.shields.io/github/actions/workflow/status/lyfie-app/luthor/publish-packages.yml?branch=main&label=publish&style=for-the-badge)](https://github.com/lyfie-app/luthor/actions/workflows/publish-packages.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/lyfie-app/luthor?style=for-the-badge)](https://github.com/lyfie-app/luthor/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/lyfie-app/luthor/main?style=for-the-badge)](https://github.com/lyfie-app/luthor/commits/main)
-[![License](https://img.shields.io/github/license/lyfie-app/luthor?style=for-the-badge)](LICENSE)
-
 [![NPM - @lyfie/luthor](https://img.shields.io/npm/v/@lyfie/luthor?style=for-the-badge&label=@lyfie/luthor)](https://www.npmjs.com/package/@lyfie/luthor)
 [![NPM - @lyfie/luthor-headless](https://img.shields.io/npm/v/@lyfie/luthor-headless?style=for-the-badge&label=@lyfie/luthor-headless)](https://www.npmjs.com/package/@lyfie/luthor-headless)
-[![GitHub Stars](https://img.shields.io/github/stars/lyfie-app/luthor?style=for-the-badge)](https://github.com/lyfie-app/luthor/stargazers)
-[![Contributors](https://img.shields.io/github/contributors/lyfie-app/luthor?style=for-the-badge)](https://github.com/lyfie-app/luthor/graphs/contributors)
 
 </div>
 
