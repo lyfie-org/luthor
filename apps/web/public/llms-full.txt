@@ -3,7 +3,7 @@
 Concatenated markdown corpus for AI ingestion.
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-02-24T16:49:15.770Z
+Generated at: 2026-02-24T19:13:28.897Z
 
 ---
 ## FILE: getting-started/index.md
@@ -1054,8 +1054,4 @@ export function App() {
 
 - Forces visual-only mode
 - Disables most rich features by preset defaults
-
-
-
-
 

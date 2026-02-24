@@ -65,8 +65,9 @@ export function SiteHeader() {
               className="brand-logo"
               src="/luthor-logo-horizontal.png"
               alt="Luthor"
-              width={7200}
-              height={1394}
+              width={360}
+              height={70}
+              sizes="(max-width: 768px) 180px, 220px"
               priority
               onError={() => setLogoFailed(true)}
             />

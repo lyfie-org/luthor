@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import NextImage from 'next/image';
 import {
   ArrowsOutCardinal,
   BracketsCurly,
@@ -9,7 +10,7 @@ import {
   Command,
   CursorText,
   Highlighter,
-  Image,
+  Image as ImageIcon,
   Keyboard,
   LinkSimple,
   ListBullets,
@@ -36,7 +37,7 @@ type WhyFeature = {
   mediaSrc: string;
 };
 
-const FEATURE_PREVIEW_GIF = '/placeholders/feature-preview.gif';
+const FEATURE_PREVIEW_IMAGE = '/social-card.svg';
 
 const WHY_FEATURES: WhyFeature[] = [
   {
@@ -52,7 +53,7 @@ const WHY_FEATURES: WhyFeature[] = [
       'Granular line-height control for cleaner rhythm.',
     ],
     mediaAlt: 'Typography controls preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'essentials',
@@ -67,7 +68,7 @@ const WHY_FEATURES: WhyFeature[] = [
       'Inline code and block quotes.',
     ],
     mediaAlt: 'Text formatting essentials preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'colors',
@@ -82,7 +83,7 @@ const WHY_FEATURES: WhyFeature[] = [
       'Theme-friendly output styles.',
     ],
     mediaAlt: 'Color and highlight preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'links-structure',
@@ -97,11 +98,11 @@ const WHY_FEATURES: WhyFeature[] = [
       'Left, center, right, and justify alignment.',
     ],
     mediaAlt: 'Links and structure preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'lists',
-    title: 'Lists That Know What They’re Doing',
+    title: "Lists That Know What They're Doing",
     summary: 'Unordered, ordered, and checklist/task lists in one workflow.',
     detail: 'Use the right list type without fighting editor state.',
     icon: ListBullets,
@@ -112,7 +113,7 @@ const WHY_FEATURES: WhyFeature[] = [
       'Checklist/task lists for actionable content.',
     ],
     mediaAlt: 'Lists preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'indentation',
@@ -127,22 +128,22 @@ const WHY_FEATURES: WhyFeature[] = [
       'Works cleanly with nested content.',
     ],
     mediaAlt: 'Indentation preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'embeds',
     title: 'Rich Embeds',
     summary: 'Embed images, iframes, and YouTube content with minimal friction.',
     detail: 'Paste and render rich media without bolt-on hacks.',
-    icon: Image,
-    detailIcon: Image,
+    icon: ImageIcon,
+    detailIcon: ImageIcon,
     bullets: [
       'Image embedding support.',
       'Iframe embedding support.',
       'YouTube embed flow.',
     ],
     mediaAlt: 'Rich embed preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'code',
@@ -157,7 +158,7 @@ const WHY_FEATURES: WhyFeature[] = [
       'Extensible for richer syntax experiences.',
     ],
     mediaAlt: 'Code block preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'theme',
@@ -172,7 +173,7 @@ const WHY_FEATURES: WhyFeature[] = [
       'Works with your app-level styling model.',
     ],
     mediaAlt: 'Theme switching preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'history-shortcuts',
@@ -187,7 +188,7 @@ const WHY_FEATURES: WhyFeature[] = [
       'Built for power-user editing speed.',
     ],
     mediaAlt: 'Undo, redo, and shortcuts preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'slash',
@@ -202,7 +203,7 @@ const WHY_FEATURES: WhyFeature[] = [
       'Extensible command architecture.',
     ],
     mediaAlt: 'Slash command preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
   {
     id: 'custom-blocks',
@@ -217,7 +218,7 @@ const WHY_FEATURES: WhyFeature[] = [
       'Extend schema behavior safely.',
     ],
     mediaAlt: 'Custom block preview',
-    mediaSrc: FEATURE_PREVIEW_GIF,
+    mediaSrc: FEATURE_PREVIEW_IMAGE,
   },
 ];
 
@@ -289,8 +290,15 @@ export function WhyLuthorFeatures() {
               <X size={16} weight="bold" aria-hidden="true" />
             </button>
             <div className="why-feature-media-shell">
-              <img src={activeFeature.mediaSrc} alt={activeFeature.mediaAlt} className="why-feature-media" />
-              <p className="why-feature-media-note">Replace this GIF later with your actual feature preview.</p>
+              <NextImage
+                src={activeFeature.mediaSrc}
+                alt={activeFeature.mediaAlt}
+                className="why-feature-media"
+                width={1200}
+                height={630}
+                sizes="(max-width: 768px) 92vw, 720px"
+              />
+              <p className="why-feature-media-note">Preview image for this feature category.</p>
             </div>
             <h3 id={`why-feature-title-${activeFeature.id}`} className="why-feature-modal-title">
               <activeFeature.icon size={18} weight="duotone" aria-hidden="true" />
@@ -311,3 +319,4 @@ export function WhyLuthorFeatures() {
     </>
   );
 }
+

@@ -43,3 +43,9 @@ jobs:
 
       - name: Release hardening smoke (ESM-only)
         run: pnpm check:release-hardening
+
+      - name: Web SEO validation
+        run: pnpm --dir apps/web run seo:check
+
+      - name: Web build
+        run: pnpm --dir apps/web run build

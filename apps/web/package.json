@@ -6,6 +6,7 @@
     "sync:docs": "node ./scripts/sync-docs.mjs",
     "sync:llms": "node ./scripts/generate-llms.mjs",
     "sync:content": "pnpm run sync:docs && pnpm run sync:llms",
+    "seo:check": "node ./scripts/seo-validate.mjs",
     "predev": "pnpm run sync:content",
     "prebuild": "pnpm run sync:content",
     "dev": "node ../../node_modules/next/dist/bin/next dev",

@@ -69,7 +69,7 @@ export const docsIndex = [
     "content": "\n# Code and Devtools\n\nThis group covers code editing and developer-facing utilities.\n\n## Included extensions and utilities\n\n- `codeExtension`\n- `codeIntelligenceExtension`\n- `codeFormatExtension`\n- `markdownToJSON`, `jsonToMarkdown`\n\n## Example: code editor setup\n\n```tsx\nimport {\n  createEditorSystem,\n  RichText,\n  richTextExtension,\n  codeExtension,\n  codeIntelligenceExtension,\n} from '@lyfie/luthor-headless';\n\nconst extensions = [richTextExtension, codeExtension, codeIntelligenceExtension] as const;\nconst { Provider, useEditor } = createEditorSystem<typeof extensions>();\n\nfunction Toolbar() {\n  const { commands } = useEditor();\n  return <button onClick={() => commands.insertCodeBlock?.({ language: 'ts' })}>Code Block</button>;\n}\n\nexport function App() {\n  return (\n    <Provider extensions={extensions}>\n      <Toolbar />\n      <RichText placeholder=\"Write docs with code...\" />\n    </Provider>\n  );\n}\n```\n\n## Example: markdown bridge\n\n```ts\nimport { markdownToJSON, jsonToMarkdown } from '@lyfie/luthor-headless';\n\nconst json = markdownToJSON('# Title\\n\\nSome text');\nconst markdown = jsonToMarkdown(json);\n```\r\n",
     "urlPath": "/docs/luthor-headless/features/code-and-devtools/",
     "sourcePath": "apps/web/src/content/docs/luthor-headless/features/code-and-devtools.md",
-    "updatedAt": "2026-02-24T11:36:56.255Z"
+    "updatedAt": "2026-02-24T18:01:47.194Z"
   },
   {
     "slug": [
@@ -156,10 +156,10 @@ export const docsIndex = [
     ],
     "title": "Chat Window",
     "description": "Usage and prop defaults for the chat-style editor preset.",
-    "content": "\n# Chat Window\n\nChat composer style preset with send and action controls.\n\n## Usage\n\n```tsx\nimport { ChatWindowEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <ChatWindowEditor\n      onSend={({ json }) => console.log(json)}\n      submitOnEnter\n      allowShiftEnter\n    />\n  );\n}\n```\n\n## Props\n\n`ChatWindowEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`.\n\n- `onSend`: `undefined (default) | (payload: { json: string }) => void`\n- `submitOnEnter`: `true (default) | false`\n- `allowShiftEnter`: `true (default) | false`\n- `showVoiceButton`: `false (default) | true`\n- `showImageButton`: `true (default) | false`\n- `showSendButton`: `true (default) | false`\n\n## Behavior\n\n- Toolbar is disabled by preset defaults\n- Visual mode only\n- Enter-to-send behavior is configurable\r\n\r\n",
+    "content": "\n# Chat Window\n\nChat composer style preset with send and action controls.\n\n## Usage\n\n```tsx\nimport { ChatWindowEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <ChatWindowEditor\n      onSend={({ json }) => console.log(json)}\n      submitOnEnter\n      allowShiftEnter\n    />\n  );\n}\n```\n\n## Props\n\n`ChatWindowEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`.\n\n- `onSend`: `undefined (default) | (payload: { json: string }) => void`\n- `submitOnEnter`: `true (default) | false`\n- `allowShiftEnter`: `true (default) | false`\n- `showVoiceButton`: `false (default) | true`\n- `showImageButton`: `true (default) | false`\n- `showSendButton`: `true (default) | false`\n\n## Behavior\n\n- Toolbar is disabled by preset defaults\n- Visual mode only\n- Enter-to-send behavior is configurable\r\n\r\n\r\n",
     "urlPath": "/docs/luthor/presets/chat-window-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/chat-window-editor.md",
-    "updatedAt": "2026-02-24T11:50:02.687Z"
+    "updatedAt": "2026-02-24T18:07:33.605Z"
   },
   {
     "slug": [
@@ -182,10 +182,10 @@ export const docsIndex = [
     ],
     "title": "Extensive",
     "description": "Full-feature preset and core prop reference.",
-    "content": "\n# Extensive\n\n`ExtensiveEditor` is the base full-feature preset editor.\n\n## Usage\n\n```tsx\nimport { ExtensiveEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <ExtensiveEditor placeholder=\"Write anything...\" />;\n}\n```\n\n## Core props\n\n- `initialTheme`: `'light' (default) | 'dark'`\n- `showDefaultContent`: `true (default) | false`\n- `placeholder`: `'Write anything...' (default) | string | { visual?: string; json?: string }`\n- `initialMode`: `'visual' (default) | 'json'`\n- `availableModes`: `['visual', 'json'] (default) | ('visual' | 'json')[]`\n- `toolbarPosition`: `'top' (default) | 'bottom'`\n- `toolbarAlignment`: `'left' (default) | 'center' | 'right'`\n- `isToolbarEnabled`: `true (default) | false`\n- `minimumDefaultLineHeight`: `1.5 (default) | string | number`\n- `scaleByRatio`: `false (default) | true`\n- `syncHeadingOptionsWithCommands`: `true (default) | false`\n- `commandPaletteShortcutOnly`: `false (default) | true`\n- `isCopyAllowed`: `true (default) | false`\n- `syntaxHighlighting`: `'auto' | 'disabled'` | extension default behavior if omitted\n\n## Ref API\n\n- `injectJSON(content: string): void`\n- `getJSON(): string`\n\n## Notes\n\nThis is the base preset that other presets build on.\r\n\r\n",
+    "content": "\n# Extensive\n\n`ExtensiveEditor` is the base full-feature preset editor.\n\n## Usage\n\n```tsx\nimport { ExtensiveEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <ExtensiveEditor placeholder=\"Write anything...\" />;\n}\n```\n\n## Core props\n\n- `initialTheme`: `'light' (default) | 'dark'`\n- `showDefaultContent`: `true (default) | false`\n- `placeholder`: `'Write anything...' (default) | string | { visual?: string; json?: string }`\n- `initialMode`: `'visual' (default) | 'json'`\n- `availableModes`: `['visual', 'json'] (default) | ('visual' | 'json')[]`\n- `toolbarPosition`: `'top' (default) | 'bottom'`\n- `toolbarAlignment`: `'left' (default) | 'center' | 'right'`\n- `isToolbarEnabled`: `true (default) | false`\n- `minimumDefaultLineHeight`: `1.5 (default) | string | number`\n- `scaleByRatio`: `false (default) | true`\n- `syncHeadingOptionsWithCommands`: `true (default) | false`\n- `commandPaletteShortcutOnly`: `false (default) | true`\n- `isCopyAllowed`: `true (default) | false`\n- `syntaxHighlighting`: `'auto' | 'disabled'` | extension default behavior if omitted\n\n## Ref API\n\n- `injectJSON(content: string): void`\n- `getJSON(): string`\n\n## Notes\n\nThis is the base preset that other presets build on.\r\n\r\n\r\n\r\n",
     "urlPath": "/docs/luthor/presets/extensive-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/extensive-editor.md",
-    "updatedAt": "2026-02-24T11:50:02.690Z"
+    "updatedAt": "2026-02-24T18:07:50.307Z"
   },
   {
     "slug": [
@@ -211,7 +211,7 @@ export const docsIndex = [
     "content": "\n# Markdown\n\nPreset that switches between visual and markdown editing.\n\n## Usage\n\n```tsx\nimport { MDTextEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <MDTextEditor initialMode=\"visual\" />;\n}\n```\n\n## Props\n\n`MDTextEditorProps` inherits `ExtensiveEditorProps` except `availableModes` and `initialMode`.\n\n- `initialMode`: `'visual' (default) | 'markdown'`\n\n## Behavior\n\n- Uses markdown/json conversion when switching modes\n- Renders source textarea in markdown mode\r\n\r\n",
     "urlPath": "/docs/luthor/presets/md-text-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/md-text-editor.md",
-    "updatedAt": "2026-02-24T11:50:02.693Z"
+    "updatedAt": "2026-02-24T18:01:42.095Z"
   },
   {
     "slug": [
@@ -266,7 +266,3 @@ export const docsIndex = [
     "updatedAt": "2026-02-24T11:50:02.701Z"
   }
 ];
-
-
-
-

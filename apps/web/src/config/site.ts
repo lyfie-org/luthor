@@ -3,11 +3,12 @@ export const SITE_URL = 'https://www.luthor.fyi';
 export const SITE_NAME = 'Luthor';
 
 export const SITE_DESCRIPTION =
-  'Luthor is a free, open source, React and Lexical based rich text editor with TypeScript-first APIs, a production-ready preset, and a headless architecture for deep customization.';
+  'Open source React rich text editor built on Lexical with TypeScript-first APIs, production-ready presets, and a fully headless mode.';
 
 export const SITE_KEYWORDS = [
   'luthor editor',
   'luthor',
+  'open source react rich text editor',
   'Lexical rich text editor',
   'lexical editor for react',
   'React rich text editor',

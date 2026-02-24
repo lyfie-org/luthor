@@ -40,7 +40,7 @@ const sora = Sora({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} | Open Source React Rich Text Editor`,
+    default: `${SITE_NAME} | Open Source React Rich Text Editor for Lexical`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     type: 'website',
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} | Open Source React Rich Text Editor`,
+    title: `${SITE_NAME} | Open Source React Rich Text Editor for Lexical`,
     description: SITE_DESCRIPTION,
     images: [
       {
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@lyfieapp',
     creator: '@lyfieapp',
-    title: `${SITE_NAME} | Open Source React Rich Text Editor`,
+    title: `${SITE_NAME} | Open Source React Rich Text Editor for Lexical`,
     description: SITE_DESCRIPTION,
     images: [SOCIAL_CARD_PATH],
   },
@@ -85,8 +85,9 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   icons: {
-    icon: ['/favicon.ico', '/favicon.svg'],
-    shortcut: ['/favicon.ico'],
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    shortcut: ['/favicon.svg'],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   other: {
     'github:repo': GITHUB_URL,

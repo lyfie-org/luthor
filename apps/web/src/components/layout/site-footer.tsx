@@ -12,8 +12,9 @@ export function SiteFooter() {
               className="footer-logo-image"
               src="/luthor-logo-horizontal.png"
               alt="Luthor"
-              width={7200}
-              height={1394}
+              width={360}
+              height={70}
+              sizes="(max-width: 768px) 180px, 220px"
             />
           </a>
           <p>
@@ -54,7 +55,7 @@ export function SiteFooter() {
           </a>
           <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
             <GithubLogo size={14} weight="duotone" aria-hidden="true" />
-            <span>GitHub</span>
+            <span>GitHub Repository</span>
           </a>
           <a href={NPM_URL} target="_blank" rel="noopener noreferrer">
             <Package size={14} weight="duotone" aria-hidden="true" />
@@ -80,7 +81,7 @@ export function SiteFooter() {
         <div className="footer-bottom-links">
           <a href="/docs/">Docs</a>
           <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-            GitHub
+            GitHub Repo
           </a>
           <a href="/llms.txt">llms.txt</a>
           <a href="/llms-full.txt">llms-full.txt</a>
