@@ -1074,6 +1074,7 @@ export interface ExtensiveEditorProps {
   className?: string;
   onReady?: (methods: ExtensiveEditorRef) => void;
   initialTheme?: "light" | "dark";
+  onThemeChange?: (theme: "light" | "dark") => void;
   theme?: Partial<LuthorTheme>;
   defaultContent?: string;
   showDefaultContent?: boolean;
@@ -1118,6 +1119,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     className,
     onReady,
     initialTheme = "light",
+    onThemeChange,
     theme,
     defaultContent,
     showDefaultContent = true,
@@ -1180,6 +1182,10 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     useEffect(() => {
       setEditorTheme(initialTheme);
     }, [initialTheme]);
+
+    useEffect(() => {
+      onThemeChange?.(editorTheme);
+    }, [editorTheme, onThemeChange]);
 
     const fontFamilyOptionsKey = useMemo(
       () => normalizeFontFamilyOptionsKey(fontFamilyOptions),

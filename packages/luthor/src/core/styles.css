@@ -37,6 +37,7 @@
   --luthor-hr-color: var(--luthor-border);
   --luthor-placeholder-color: var(--luthor-muted-fg);
   --luthor-codeblock-bg: var(--luthor-muted);
+  --luthor-code-unhighlighted-fg: #24292e;
   --luthor-floating-bg: var(--luthor-bg);
   --luthor-floating-fg: var(--luthor-fg);
   --luthor-floating-border: var(--luthor-border);
@@ -93,6 +94,7 @@
   --luthor-hr-color: var(--luthor-border);
   --luthor-placeholder-color: var(--luthor-muted-fg);
   --luthor-codeblock-bg: var(--luthor-muted);
+  --luthor-code-unhighlighted-fg: #c9d1d9;
   --luthor-floating-bg: var(--luthor-bg);
   --luthor-floating-fg: var(--luthor-fg);
   --luthor-floating-border: var(--luthor-border);
@@ -1513,6 +1515,10 @@
 	--luthor-syntax-number: var(--luthor-muted-fg);
 	--luthor-syntax-function: var(--luthor-muted-fg);
 	--luthor-syntax-variable: var(--luthor-muted-fg);
+}
+
+.luthor-preset-extensive.luthor-editor-wrapper .hljs {
+	color: var(--luthor-code-unhighlighted-fg, var(--luthor-fg));
 }
 
 :where(.luthor-code-comment),

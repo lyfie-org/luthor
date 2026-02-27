@@ -758,4 +758,27 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
       "Paste JSON here",
     );
   });
+
+  it("emits onThemeChange on mount and when initialTheme prop changes", () => {
+    const onThemeChange = vi.fn();
+    const { rerender } = render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialTheme="light"
+        onThemeChange={onThemeChange}
+      />,
+    );
+
+    expect(onThemeChange).toHaveBeenLastCalledWith("light");
+
+    rerender(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialTheme="dark"
+        onThemeChange={onThemeChange}
+      />,
+    );
+
+    expect(onThemeChange).toHaveBeenLastCalledWith("dark");
+  });
 });
