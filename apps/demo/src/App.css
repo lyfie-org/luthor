@@ -73,3 +73,101 @@
 [data-theme="dark"] .slash-panel-label {
   color: #94a3b8;
 }
+
+.app-shell {
+  min-height: 100vh;
+  width: 100%;
+  background: var(--demo-bg);
+  color: var(--demo-fg);
+}
+
+.app-layout {
+  box-sizing: border-box;
+  width: min(1200px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 16px;
+}
+
+.app-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
+  background: var(--demo-panel-bg);
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--demo-muted);
+}
+
+.preset-select,
+.theme-toggle {
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--demo-border);
+  background: var(--demo-control-bg);
+  color: var(--demo-fg);
+  font: inherit;
+  font-weight: 500;
+}
+
+.preset-select {
+  min-width: 220px;
+  padding: 0 12px;
+}
+
+.theme-toggle {
+  cursor: pointer;
+  padding: 0 14px;
+}
+
+.theme-toggle:hover {
+  background: var(--demo-control-hover-bg);
+}
+
+.editor-stage {
+  min-height: 0;
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
+  background: var(--demo-panel-bg);
+  overflow: auto;
+  padding: 20px;
+}
+
+.editor-frame {
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+  .app-layout {
+    padding: 12px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .preset-select,
+  .theme-toggle {
+    width: 100%;
+  }
+}

@@ -14,25 +14,33 @@ import { useMemo, useState } from "react";
 import { useDemoTheme } from "./hooks/useDemoTheme";
 import "highlight.js/styles/github.css";
 
+type PresetId =
+  | "extensive"
+  | "simple-text"
+  | "rich-text-box"
+  | "chat-window"
+  | "email-compose"
+  | "md-text"
+  | "notion-like"
+  | "headless-editor"
+  | "notes";
+
+const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
+  { value: "extensive", label: "Extensive" },
+  { value: "simple-text", label: "Simple Text" },
+  { value: "rich-text-box", label: "Rich Text Box" },
+  { value: "chat-window", label: "Chat Window" },
+  { value: "email-compose", label: "Email Compose" },
+  { value: "md-text", label: "MD Text" },
+  { value: "notion-like", label: "Notion Like" },
+  { value: "headless-editor", label: "Headless" },
+  { value: "notes", label: "Notes" },
+];
+
 function App() {
   const { theme, toggleTheme } = useDemoTheme();
-  const [preset, setPreset] = useState("extensive");
+  const [preset, setPreset] = useState<PresetId>("extensive");
 
-  const fontFamilyOptions = [
-    { value: "default", label: "Default", fontFamily: "inherit" },
-    {
-      value: "geist",
-      label: "Geist",
-      fontFamily: "'Geist', 'Segoe UI', Arial, sans-serif",
-      cssImportUrl: "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap",
-    },
-    {
-      value: "comfortaa",
-      label: "Comfortaa",
-      fontFamily: "'Comfortaa', 'Segoe UI', Arial, sans-serif",
-      cssImportUrl: "https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap",
-    },
-  ];
   const presetNode = useMemo(() => {
     switch (preset) {
       case "simple-text":
@@ -62,55 +70,37 @@ function App() {
           />
         );
     }
-  }, [fontFamilyOptions, preset, theme]);
+  }, [preset]);
 
   return (
     <div className="app-shell" data-theme={theme}>
-      <button
-        style={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          zIndex: 10,
-          padding: "8px 16px",
-          borderRadius: 8,
-          border: "none",
-          background: theme === "dark" ? "#222" : "#eee",
-          color: theme === "dark" ? "#fff" : "#222",
-          cursor: "pointer",
-          fontWeight: 600,
-        }}
-        onClick={toggleTheme}
-      >
-        {theme === "dark" ? "Switch to Light" : "Switch to Dark"}
-      </button>
+      <div className="app-layout">
+        <header className="app-header">
+          <div className="control-group">
+            <label className="control-label" htmlFor="preset-select">
+              Preset
+            </label>
+            <select
+              id="preset-select"
+              className="preset-select"
+              value={preset}
+              onChange={(event) => setPreset(event.target.value as PresetId)}
+            >
+              {PRESET_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button className="theme-toggle" type="button" onClick={toggleTheme}>
+            {theme === "dark" ? "Light Mode" : "Dark Mode"}
+          </button>
+        </header>
 
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <select
-          value={preset}
-          onChange={(event) => setPreset(event.target.value)}
-          style={{ height: 36, borderRadius: 8, padding: "0 10px" }}
-        >
-          <option value="extensive">Extensive</option>
-          <option value="simple-text">Simple Text</option>
-          <option value="rich-text-box">Rich Text Box</option>
-          <option value="chat-window">Chat Window</option>
-          <option value="email-compose">Email Compose</option>
-          <option value="md-text">MD Text</option>
-          <option value="notion-like">Notion Like</option>
-          <option value="headless-editor">Headless</option>
-          <option value="notes">Notes</option>
-        </select>
-        {presetNode}
+        <main className="editor-stage">
+          <div className="editor-frame">{presetNode}</div>
+        </main>
       </div>
     </div>
   );

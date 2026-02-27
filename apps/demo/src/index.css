@@ -2,6 +2,13 @@
   font-family: Inter, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  --demo-bg: #f8fafc;
+  --demo-fg: #0f172a;
+  --demo-muted: #475569;
+  --demo-border: #cbd5e1;
+  --demo-panel-bg: #ffffff;
+  --demo-control-bg: #ffffff;
+  --demo-control-hover-bg: #f1f5f9;
   color: #0f172a;
   background-color: #f8fafc;
 
@@ -24,6 +31,16 @@ body {
 html[data-theme="dark"] body {
   background-color: #05070c;
   color: #e2e8f0;
+}
+
+html[data-theme="dark"] {
+  --demo-bg: #05070c;
+  --demo-fg: #e2e8f0;
+  --demo-muted: #94a3b8;
+  --demo-border: #334155;
+  --demo-panel-bg: #0f172a;
+  --demo-control-bg: #111827;
+  --demo-control-hover-bg: #1f2937;
 }
 
 #root {
