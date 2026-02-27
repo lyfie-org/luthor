@@ -45,9 +45,6 @@
     "url": "https://github.com/lyfie-app/luthor/issues"
   },
   "homepage": "https://github.com/lyfie-app/luthor#readme",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com" 
-  },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
