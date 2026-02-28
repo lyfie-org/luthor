@@ -11,6 +11,7 @@ This file helps AI agents discover Luthor docs quickly.
 ## Documentation Table of Contents
 
 ### General
+- [getting-started/capabilities.md](https://www.luthor.fyi/docs/getting-started/capabilities/)
 - [getting-started/index.md](https://www.luthor.fyi/docs/getting-started/)
 - [getting-started/installation.md](https://www.luthor.fyi/docs/getting-started/installation/)
 - [getting-started/luthor-headless.md](https://www.luthor.fyi/docs/getting-started/luthor-headless/)

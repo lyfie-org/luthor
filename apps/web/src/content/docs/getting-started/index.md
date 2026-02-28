@@ -38,5 +38,6 @@ Based on package metadata in `packages/luthor/package.json` and `packages/headle
 
 1. [Introduction](/docs/getting-started/)
 2. [Installation](/docs/getting-started/installation/)
-3. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
-4. [@lyfie/luthor](/docs/getting-started/luthor/)
+3. [Capabilities](/docs/getting-started/capabilities/)
+4. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
+5. [@lyfie/luthor](/docs/getting-started/luthor/)

@@ -16,6 +16,8 @@ Feature docs are grouped to match the home page feature set.
 - [Interaction and Productivity](/docs/luthor-headless/features/interaction-and-productivity/)
 - [Customization and Theming](/docs/luthor-headless/features/customization-and-theming/)
 
+For deeper engine-level capability details, see the official Lexical docs: [lexical.dev/docs](https://lexical.dev/docs/intro).
+
 ## Base runtime
 
 ```tsx

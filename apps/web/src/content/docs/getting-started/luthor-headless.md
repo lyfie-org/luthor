@@ -53,3 +53,7 @@ export function App() {
 - Text area mounts
 - Buttons execute bold and italic commands
 - No missing peer dependency errors for Lexical packages
+
+## Learn more about Lexical
+
+`@lyfie/luthor-headless` is built on top of Lexical. For deeper engine capabilities and low-level APIs, use the official Lexical documentation: [lexical.dev/docs](https://lexical.dev/docs/intro).

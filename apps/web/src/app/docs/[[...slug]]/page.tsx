@@ -31,6 +31,7 @@ const GROUP_ENTRY_ORDER: Partial<Record<NavGroupId, string[]>> = {
   getting_started: [
     '/docs/getting-started/',
     '/docs/getting-started/installation/',
+    '/docs/getting-started/capabilities/',
     '/docs/getting-started/luthor-headless/',
     '/docs/getting-started/luthor/',
   ],
