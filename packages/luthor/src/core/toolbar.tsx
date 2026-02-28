@@ -289,6 +289,7 @@ function ColorPickerButton({
   const pendingPreviewColorRef = useRef<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [panelStyle, setPanelStyle] = useState<CSSProperties | undefined>(undefined);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const currentColor = resolveCurrentColor(value, options, fallbackColor);
 
   const presetColors = useMemo(() => {
@@ -329,6 +330,22 @@ function ColorPickerButton({
     if (!trigger) return;
 
     const rect = trigger.getBoundingClientRect();
+    const container =
+      (trigger.closest(".luthor-editor-wrapper") as HTMLElement | null) ?? null;
+    setPortalContainer(container);
+    if (container) {
+      const containerRect = container.getBoundingClientRect();
+      setPanelStyle({
+        position: "absolute",
+        top: rect.bottom - containerRect.top + 6,
+        left: Math.max(0, rect.left - containerRect.left),
+        width: 230,
+        visibility: isVisible ? "visible" : "hidden",
+        ...getOverlayThemeStyleFromElement(trigger),
+      });
+      return;
+    }
+
     setPanelStyle({
       position: "fixed",
       top: rect.bottom + 6,
@@ -381,6 +398,7 @@ function ColorPickerButton({
       window.removeEventListener("scroll", handleReposition, true);
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleEscape);
+      setPortalContainer(null);
     };
   }, [isOpen, updatePanelPosition]);
 
@@ -490,7 +508,7 @@ function ColorPickerButton({
             />
           </div>
         </div>,
-        document.body,
+        portalContainer ?? document.body,
       )}
     </>
   );
@@ -748,6 +766,8 @@ export function Toolbar({
     columns: 3,
     includeHeaders: false,
   });
+  const selectionSyncRafRef = useRef<number | null>(null);
+  const lastSelectionTypographyRef = useRef<string>("");
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -755,17 +775,44 @@ export function Toolbar({
     }
 
     const handleSelectionChange = () => {
-      const typography = getSelectionTypographyValues();
-      if (!typography) {
+      if (selectionSyncRafRef.current !== null) {
         return;
       }
 
-      setSelectionVersion((previous) => previous + 1);
+      selectionSyncRafRef.current = window.requestAnimationFrame(() => {
+        selectionSyncRafRef.current = null;
+
+        const domSelection = window.getSelection();
+        if (!domSelection || domSelection.rangeCount === 0) {
+          return;
+        }
+        // Drag-select emits many selectionchange events; avoid rerender churn mid-drag.
+        if (!domSelection.getRangeAt(0).collapsed) {
+          return;
+        }
+
+        const typography = getSelectionTypographyValues();
+        if (!typography) {
+          return;
+        }
+
+        const signature = `${typography.fontFamily}|${typography.fontSize}|${typography.lineHeight}`;
+        if (signature === lastSelectionTypographyRef.current) {
+          return;
+        }
+
+        lastSelectionTypographyRef.current = signature;
+        setSelectionVersion((previous) => previous + 1);
+      });
     };
 
     document.addEventListener("selectionchange", handleSelectionChange);
     return () => {
       document.removeEventListener("selectionchange", handleSelectionChange);
+      if (selectionSyncRafRef.current !== null) {
+        cancelAnimationFrame(selectionSyncRafRef.current);
+        selectionSyncRafRef.current = null;
+      }
     };
   }, []);
 

@@ -7,6 +7,7 @@ export function EmojiSuggestionMenu({
   isOpen,
   query,
   position,
+  portalContainer,
   suggestions,
   onClose,
   onExecute,
@@ -14,6 +15,7 @@ export function EmojiSuggestionMenu({
   isOpen: boolean;
   query: string;
   position: { x: number; y: number } | null;
+  portalContainer?: HTMLElement | null;
   suggestions: EmojiCatalogItem[];
   onClose: () => void;
   onExecute: (emoji: string) => void;
@@ -70,10 +72,28 @@ export function EmojiSuggestionMenu({
     return null;
   }
 
+  const resolvedStyle = (() => {
+    const base = getOverlayThemeStyleFromSelection();
+    if (!position) return base;
+    if (!portalContainer) {
+      return { ...base, left: position.x, top: position.y };
+    }
+
+    const containerRect = portalContainer.getBoundingClientRect();
+    const rawLeft = position.x - containerRect.left;
+    const maxLeft = Math.max(12, containerRect.width - 320);
+    return {
+      ...base,
+      left: Math.max(12, Math.min(rawLeft, maxLeft)),
+      top: Math.max(12, position.y - containerRect.top),
+      position: "absolute" as const,
+    };
+  })();
+
   const menu = (
     <div
       className="luthor-emoji-menu"
-      style={{ left: position.x, top: position.y, ...getOverlayThemeStyleFromSelection() }}
+      style={resolvedStyle}
       onPointerDown={(event) => {
         event.stopPropagation();
       }}
@@ -130,5 +150,5 @@ export function EmojiSuggestionMenu({
     return menu;
   }
 
-  return createPortal(menu, document.body);
+  return createPortal(menu, portalContainer ?? document.body);
 }

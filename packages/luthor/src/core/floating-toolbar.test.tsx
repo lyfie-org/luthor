@@ -199,4 +199,24 @@ describe("FloatingToolbar media editing", () => {
 
     expect(updateLink).toHaveBeenCalledWith("https://example.com/updated");
   });
+
+  it("hides quote and list actions when selection is inside a list item", () => {
+    const commands = createCommands();
+
+    render(
+      <FloatingToolbar
+        isVisible
+        selectionRect={DEFAULT_RECT}
+        commands={commands}
+        activeStates={{
+          unorderedList: true,
+        } as CoreEditorActiveStates}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Quote" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Bullet List" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Numbered List" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Checklist" })).not.toBeInTheDocument();
+  });
 });

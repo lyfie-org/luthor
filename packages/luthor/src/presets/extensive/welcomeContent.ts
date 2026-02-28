@@ -537,10 +537,10 @@ export const EXTENSIVE_WELCOME_CONTENT_JSON = {
         type: "featureCard",
         version: 1,
         payload: {
-          title: "Custom Node: Feature Card",
+          title: "AI Draft: Weekly Product Update",
           description:
-            "This block is rendered with createCustomNodeExtension and persists as structured payload.",
-          tag: "Custom",
+            "This structured block can hold AI-generated draft content that reviewers can quickly edit and approve.",
+          tag: "AI Draft",
         },
         format: "",
         indent: 0,

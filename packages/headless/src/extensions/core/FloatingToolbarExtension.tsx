@@ -6,7 +6,7 @@ import {
   RangeSelection,
 } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import React, { ReactNode, useCallback, useEffect, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base/BaseExtension";
 import {
@@ -232,6 +232,7 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
     null,
   );
   const [selection, setSelection] = useState<RangeSelection | null>(null);
+  const viewportRafIdRef = useRef<number | null>(null);
 
   const getSelectionAnchorRect = (element: HTMLElement): DOMRect => {
     const anchorElement = element.querySelector<HTMLElement>(
@@ -252,6 +253,46 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
       timeout = setTimeout(() => func(() => args), wait);
     };
   };
+
+  const toAnchorRelativeRect = useCallback(
+    (rect: SelectionRect, anchorElem: HTMLElement): SelectionRect => {
+      if (typeof window === "undefined" || anchorElem === document.body) {
+        return rect;
+      }
+
+      const scrollX =
+        window.pageXOffset || document.documentElement.scrollLeft || 0;
+      const scrollY =
+        window.pageYOffset || document.documentElement.scrollTop || 0;
+      const anchorRect = anchorElem.getBoundingClientRect();
+      const anchorLeft = anchorRect.left + scrollX;
+      const anchorTop = anchorRect.top + scrollY;
+      const toolbarWidth = config.toolbarDimensions?.width || 300;
+      const toolbarHeight = config.toolbarDimensions?.height || 40;
+      const rawX = rect.x - anchorLeft;
+      const rawY = rect.y - anchorTop;
+      const clampedX = Math.max(
+        10,
+        Math.min(rawX, Math.max(10, anchorRect.width - toolbarWidth - 10)),
+      );
+      const clampedY = Math.max(
+        10,
+        Math.min(rawY, Math.max(10, anchorRect.height - toolbarHeight - 10)),
+      );
+
+      return {
+        ...rect,
+        x: clampedX,
+        y: clampedY,
+        top: rect.top - anchorTop,
+        left: rect.left - anchorLeft,
+        bottom: rect.bottom - anchorTop,
+        right: rect.right - anchorLeft,
+        positionFromRight: false,
+      };
+    },
+    [config.toolbarDimensions?.height, config.toolbarDimensions?.width],
+  );
 
   /* Convert DOMRect to SelectionRect with intelligent positioning logic */
   const createSelectionRect = useCallback((domRect: DOMRect): SelectionRect => {
@@ -411,11 +452,29 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
       debouncedUpdate();
     };
 
+    const handleViewportChange = () => {
+      if (viewportRafIdRef.current !== null) {
+        return;
+      }
+      viewportRafIdRef.current = window.requestAnimationFrame(() => {
+        viewportRafIdRef.current = null;
+        updateSelection();
+      });
+    };
+
     document.addEventListener("selectionchange", handleSelectionChange);
+    window.addEventListener("scroll", handleViewportChange, true);
+    window.addEventListener("resize", handleViewportChange);
 
     return () => {
       unregister();
       document.removeEventListener("selectionchange", handleSelectionChange);
+      window.removeEventListener("scroll", handleViewportChange, true);
+      window.removeEventListener("resize", handleViewportChange);
+      if (viewportRafIdRef.current !== null) {
+        cancelAnimationFrame(viewportRafIdRef.current);
+        viewportRafIdRef.current = null;
+      }
     };
   }, [editor, config.debounceMs, createSelectionRect, extension]);
 
@@ -437,12 +496,20 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
   /* SSR safety */
   if (typeof document === "undefined") return null;
 
-  const anchorElem = config.anchorElem || document.body;
+  const defaultAnchorElem =
+    editor
+      .getRootElement()
+      ?.closest(".luthor-editor-wrapper") as HTMLElement | null;
+  const anchorElem = config.anchorElem || defaultAnchorElem || document.body;
+  const renderSelectionRect =
+    selectionRect && anchorElem
+      ? toAnchorRelativeRect(selectionRect, anchorElem)
+      : selectionRect;
 
   return createPortal(
     config.render({
       isVisible,
-      selectionRect,
+      selectionRect: renderSelectionRect,
       selection,
       editor,
       commands: config.getCommands?.() || ({} as TCommands),

@@ -110,6 +110,7 @@ export interface CoreEditorCommands {
   insertTable: (config: InsertTableConfig) => void;
   insertImage: (config: InsertImageConfig) => void;
   insertEmoji?: (emoji: string) => void;
+  insertCustomNode?: (payload: Record<string, unknown>) => void;
   executeEmojiSuggestion?: (emoji: string) => boolean;
   closeEmojiSuggestions?: () => void;
   getEmojiSuggestions?: (query?: string) => {
@@ -360,6 +361,7 @@ export type ToolbarItemType =
   | "image"
   | "emoji"
   | "embed"
+  | "customComponent"
   // History
   | "undo"
   | "redo"
@@ -415,6 +417,9 @@ export const DEFAULT_TOOLBAR_LAYOUT: ToolbarLayout = {
       items: ["embed"],
     },
     {
+      items: ["customComponent"],
+    },
+    {
       items: ["undo", "redo"],
     },
     {
@@ -444,7 +449,7 @@ export const TRADITIONAL_TOOLBAR_LAYOUT: ToolbarLayout = {
       items: ["unorderedList", "orderedList", "checkList", "indentList", "outdentList"],
     },
     {
-      items: ["table", "image", "emoji", "embed", "horizontalRule"],
+      items: ["table", "image", "emoji", "embed", "customComponent", "horizontalRule"],
     },
     {
       items: ["codeBlock"],

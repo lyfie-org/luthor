@@ -169,6 +169,11 @@ class ContextMenuManager {
     items: ContextMenuItem[];
     position: { x: number; y: number };
     renderer?: ContextMenuRenderer;
+    anchor?: {
+      element: HTMLElement;
+      offsetX: number;
+      offsetY: number;
+    };
   } | null = null;
   private listeners: Set<(menu: typeof this.currentMenu) => void> = new Set();
   private editor: LexicalEditor;
@@ -210,10 +215,16 @@ class ContextMenuManager {
           const items = provider.getItems(context);
           
           if (items.length > 0) {
+            const targetRect = target.getBoundingClientRect();
             this.showMenu({
               items,
               position: { x: event.clientX, y: event.clientY },
               renderer: provider.renderer || this.config.defaultRenderer,
+              anchor: {
+                element: target,
+                offsetX: event.clientX - targetRect.left,
+                offsetY: event.clientY - targetRect.top,
+              },
             });
             return;
           }
@@ -226,8 +237,13 @@ class ContextMenuManager {
     items: ContextMenuItem[];
     position: { x: number; y: number };
     renderer?: ContextMenuRenderer;
+    anchor?: {
+      element: HTMLElement;
+      offsetX: number;
+      offsetY: number;
+    };
   }) {
-    this.currentMenu = config;
+    this.currentMenu = this.resolveAnchoredMenuConfig(config);
     this.notifyListeners();
   }
 
@@ -236,8 +252,36 @@ class ContextMenuManager {
     this.notifyListeners();
   }
 
+  repositionMenuFromAnchor() {
+    if (!this.currentMenu?.anchor) {
+      return;
+    }
+    if (!this.currentMenu.anchor.element.isConnected) {
+      this.hideMenu();
+      return;
+    }
+
+    const next = this.resolveAnchoredMenuConfig(this.currentMenu);
+    if (
+      !this.currentMenu ||
+      next.position.x !== this.currentMenu.position.x ||
+      next.position.y !== this.currentMenu.position.y
+    ) {
+      this.currentMenu = next;
+      this.notifyListeners();
+    }
+  }
+
   getCurrentMenu() {
     return this.currentMenu;
+  }
+
+  getPortalContainer(): HTMLElement | null {
+    const root = this.editor.getRootElement();
+    if (!root) {
+      return null;
+    }
+    return (root.closest(".luthor-editor-wrapper") as HTMLElement | null) ?? null;
   }
 
   subscribe(listener: (menu: typeof this.currentMenu) => void): () => void {
@@ -251,6 +295,32 @@ class ContextMenuManager {
 
   private notifyListeners() {
     this.listeners.forEach(listener => listener(this.currentMenu));
+  }
+
+  private resolveAnchoredMenuConfig(config: {
+    items: ContextMenuItem[];
+    position: { x: number; y: number };
+    renderer?: ContextMenuRenderer;
+    anchor?: {
+      element: HTMLElement;
+      offsetX: number;
+      offsetY: number;
+    };
+  }) {
+    if (!config.anchor) {
+      return config;
+    }
+
+    const { element, offsetX, offsetY } = config.anchor;
+    const rect = element.getBoundingClientRect();
+
+    return {
+      ...config,
+      position: {
+        x: rect.left + offsetX,
+        y: rect.top + offsetY,
+      },
+    };
   }
 }
 
@@ -306,20 +376,40 @@ function ContextMenuPlugin({ extension }: { extension: ContextMenuExtension }) {
   
   // Use the renderer from the menu state or fall back to the extension's default
   const Renderer = menuState.renderer || extension.config.defaultRenderer!;
+  const portalContainer = extension.manager?.getPortalContainer() ?? null;
+  const resolvedPosition = (() => {
+    if (!portalContainer) {
+      return menuState.position;
+    }
+
+    const rect = portalContainer.getBoundingClientRect();
+    const rawX = menuState.position.x - rect.left;
+    const rawY = menuState.position.y - rect.top;
+    return {
+      x: Math.max(8, Math.min(rawX, Math.max(8, rect.width - 8))),
+      y: Math.max(8, Math.min(rawY, Math.max(8, rect.height - 8))),
+    };
+  })();
+  const resolvedContainerStyle = portalContainer
+    ? {
+        position: "absolute" as const,
+        ...mergedStyles.container,
+      }
+    : mergedStyles.container;
 
   return createPortal(
     <Renderer
       items={menuState.items}
-      position={menuState.position}
+      position={resolvedPosition}
       onClose={() => extension.manager?.hideMenu()}
       className={mergedThemeClasses.container}
-      style={mergedStyles.container}
+      style={resolvedContainerStyle}
       itemClassName={mergedThemeClasses.item}
       itemStyle={mergedStyles.item}
       disabledItemClassName={mergedThemeClasses.itemDisabled}
       disabledItemStyle={mergedStyles.itemDisabled}
     />,
-    document.body
+    portalContainer ?? document.body
   );
 }
 
@@ -381,17 +471,25 @@ export class ContextMenuExtension extends BaseExtension<
       }
     };
 
+    const handleViewportChange = () => {
+      this.manager?.repositionMenuFromAnchor();
+    };
+
     const editorElement = editor.getRootElement();
     
     if (editorElement) {
       editorElement.addEventListener("contextmenu", handleContextMenu);
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleEscape);
+      window.addEventListener("scroll", handleViewportChange, true);
+      window.addEventListener("resize", handleViewportChange);
 
       return () => {
         editorElement.removeEventListener("contextmenu", handleContextMenu);
         document.removeEventListener("mousedown", handleClickOutside);
         document.removeEventListener("keydown", handleEscape);
+        window.removeEventListener("scroll", handleViewportChange, true);
+        window.removeEventListener("resize", handleViewportChange);
         this.manager = null;
       };
     }

@@ -61,6 +61,7 @@ export class SlashCommandExtension extends BaseExtension<
   private query = "";
   private position: { x: number; y: number } | null = null;
   private activeMatch: SlashMatch | null = null;
+  private viewportRafId: number | null = null;
 
   constructor(config: SlashCommandConfig = {}) {
     super("slashCommand", [ExtensionCategory.Toolbar]);
@@ -105,15 +106,20 @@ export class SlashCommandExtension extends BaseExtension<
       if (!this.isOpen || !this.activeMatch) {
         return;
       }
-
-      const position = this.getCaretPosition();
-      if (!position) {
-        this.closeSlashMenu();
+      if (this.viewportRafId !== null) {
         return;
       }
+      this.viewportRafId = window.requestAnimationFrame(() => {
+        this.viewportRafId = null;
+        const position = this.getCaretPosition();
+        if (!position) {
+          this.closeSlashMenu();
+          return;
+        }
 
-      this.position = position;
-      this.notifyListeners();
+        this.position = position;
+        this.notifyListeners();
+      });
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
@@ -126,6 +132,10 @@ export class SlashCommandExtension extends BaseExtension<
       document.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("scroll", handleViewportChange, true);
       window.removeEventListener("resize", handleViewportChange);
+      if (this.viewportRafId !== null) {
+        cancelAnimationFrame(this.viewportRafId);
+        this.viewportRafId = null;
+      }
       this.activeMatch = null;
       this.isOpen = false;
       this.query = "";

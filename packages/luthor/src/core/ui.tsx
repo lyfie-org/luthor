@@ -3,6 +3,11 @@ import { createPortal } from "react-dom";
 import { ChevronDownIcon, CloseIcon } from "./icons";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
 
+function resolveEditorPortalContainer(element: HTMLElement | null): HTMLElement | null {
+  if (!element) return null;
+  return (element.closest(".luthor-editor-wrapper") as HTMLElement | null) ?? null;
+}
+
 export function IconButton({
   children,
   onClick,
@@ -67,6 +72,7 @@ export function Select({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties | undefined>(undefined);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const selectRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -78,6 +84,20 @@ export function Select({
       if (!triggerEl) return;
 
       const rect = triggerEl.getBoundingClientRect();
+      const container = resolveEditorPortalContainer(triggerEl);
+      setPortalContainer(container);
+      if (container) {
+        const containerRect = container.getBoundingClientRect();
+        setDropdownStyle({
+          position: "absolute",
+          top: rect.bottom - containerRect.top + 4,
+          left: Math.max(0, rect.left - containerRect.left),
+          width: rect.width,
+          ...getOverlayThemeStyleFromElement(triggerEl),
+        });
+        return;
+      }
+
       setDropdownStyle({
         position: "fixed",
         top: rect.bottom + 4,
@@ -94,6 +114,7 @@ export function Select({
     return () => {
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
+      setPortalContainer(null);
     };
   }, [isOpen]);
 
@@ -132,7 +153,7 @@ export function Select({
             </button>
           ))}
         </div>,
-        document.body,
+        portalContainer ?? document.body,
       )}
     </div>
   );
@@ -153,6 +174,7 @@ export function Dropdown({
   const triggerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties | undefined>(undefined);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -162,6 +184,19 @@ export function Dropdown({
       if (!triggerEl) return;
 
       const rect = triggerEl.getBoundingClientRect();
+      const container = resolveEditorPortalContainer(triggerEl);
+      setPortalContainer(container);
+      if (container) {
+        const containerRect = container.getBoundingClientRect();
+        setDropdownStyle({
+          position: "absolute",
+          top: rect.bottom - containerRect.top + 4,
+          left: Math.max(0, rect.left - containerRect.left),
+          ...getOverlayThemeStyleFromElement(triggerEl),
+        });
+        return;
+      }
+
       setDropdownStyle({
         position: "fixed",
         top: rect.bottom + 4,
@@ -177,6 +212,7 @@ export function Dropdown({
     return () => {
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
+      setPortalContainer(null);
     };
   }, [isOpen]);
 
@@ -196,7 +232,7 @@ export function Dropdown({
       <div ref={triggerRef} onClick={() => onOpenChange(!isOpen)}>{trigger}</div>
       {isOpen && typeof document !== "undefined" && createPortal(
         <div ref={contentRef} className="luthor-dropdown-content" style={dropdownStyle}>{children}</div>,
-        document.body,
+        portalContainer ?? document.body,
       )}
     </div>
   );

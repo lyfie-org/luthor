@@ -6,7 +6,7 @@ import {
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
 import { BaseExtensionConfig } from "@lyfie/luthor-headless/extensions/types";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
 import { useBaseEditor as useEditor } from "../../core/createEditorSystem";
@@ -212,6 +212,7 @@ function TableQuickActionsPlugin({ extension }: { extension: TableExtension }) {
   const [isVisible, setIsVisible] = useState(false);
   const [headersEnabled, setHeadersEnabled] = useState(false);
   const [bubblePosition, setBubblePosition] = useState<{ x: number; y: number } | null>(null);
+  const viewportRafIdRef = useRef<number | null>(null);
 
   const runWithSelectedTableCell = (action: (cell: TableCellNode) => void) => {
     if (!editor) {
@@ -307,7 +308,13 @@ function TableQuickActionsPlugin({ extension }: { extension: TableExtension }) {
     });
 
     const handleViewportChange = () => {
-      updateBubbleState();
+      if (viewportRafIdRef.current !== null) {
+        return;
+      }
+      viewportRafIdRef.current = window.requestAnimationFrame(() => {
+        viewportRafIdRef.current = null;
+        updateBubbleState();
+      });
     };
 
     window.addEventListener("scroll", handleViewportChange, true);
@@ -317,6 +324,10 @@ function TableQuickActionsPlugin({ extension }: { extension: TableExtension }) {
       unregisterUpdate();
       window.removeEventListener("scroll", handleViewportChange, true);
       window.removeEventListener("resize", handleViewportChange);
+      if (viewportRafIdRef.current !== null) {
+        cancelAnimationFrame(viewportRafIdRef.current);
+        viewportRafIdRef.current = null;
+      }
     };
   }, [editor]);
 

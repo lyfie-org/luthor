@@ -980,6 +980,8 @@ function ExtensiveEditorContent({
   ) : null;
   const shouldRenderTopToolbar = mode === "visual" && isToolbarEnabled && toolbarPosition === "top";
   const shouldRenderBottomToolbar = mode === "visual" && isToolbarEnabled && toolbarPosition === "bottom";
+  const overlayPortalContainer =
+    (editor?.getRootElement()?.closest(".luthor-editor-wrapper") as HTMLElement | null) ?? null;
 
   return (
     <>
@@ -1050,6 +1052,7 @@ function ExtensiveEditorContent({
         isOpen={slashCommandState.isOpen}
         query={slashCommandState.query}
         position={slashCommandState.position}
+        portalContainer={overlayPortalContainer}
         commands={slashCommandState.commands}
         onClose={() => safeCommands.closeSlashMenu?.()}
         onExecute={(commandId) => {
@@ -1060,6 +1063,7 @@ function ExtensiveEditorContent({
         isOpen={emojiSuggestionState.isOpen}
         query={emojiSuggestionState.query}
         position={emojiSuggestionState.position}
+        portalContainer={overlayPortalContainer}
         suggestions={emojiSuggestionState.suggestions}
         onClose={() => safeCommands.closeEmojiSuggestions?.()}
         onExecute={(emoji) => {

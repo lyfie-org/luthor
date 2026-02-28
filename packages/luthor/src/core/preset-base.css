@@ -103,8 +103,3 @@
   background: var(--luthor-preset-muted);
 }
 
-.luthor-preset .luthor-content-editable code {
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--luthor-preset-muted);
-}

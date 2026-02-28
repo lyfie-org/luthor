@@ -293,6 +293,7 @@ export class EmojiExtension extends BaseExtension<
   private position: { x: number; y: number } | null = null;
   private suggestions: EmojiCatalogItem[] = [];
   private activeMatch: EmojiMatch | null = null;
+  private viewportRafId: number | null = null;
   private applyingAutoReplace = false;
   private catalogAdapter: EmojiCatalogAdapter = createStaticCatalogAdapter(
     DEFAULT_EMOJI_CATALOG,
@@ -417,15 +418,20 @@ export class EmojiExtension extends BaseExtension<
       if (!this.isOpen || !this.activeMatch) {
         return;
       }
-
-      const nextPosition = this.getCaretPosition();
-      if (!nextPosition) {
-        this.closeEmojiSuggestions();
+      if (this.viewportRafId !== null) {
         return;
       }
+      this.viewportRafId = window.requestAnimationFrame(() => {
+        this.viewportRafId = null;
+        const nextPosition = this.getCaretPosition();
+        if (!nextPosition) {
+          this.closeEmojiSuggestions();
+          return;
+        }
 
-      this.position = nextPosition;
-      this.notifyListeners();
+        this.position = nextPosition;
+        this.notifyListeners();
+      });
     };
 
     document.addEventListener("keydown", handleEscape);
@@ -440,6 +446,10 @@ export class EmojiExtension extends BaseExtension<
       document.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("scroll", handleViewportChange, true);
       window.removeEventListener("resize", handleViewportChange);
+      if (this.viewportRafId !== null) {
+        cancelAnimationFrame(this.viewportRafId);
+        this.viewportRafId = null;
+      }
       this.activeMatch = null;
       this.isOpen = false;
       this.query = "";

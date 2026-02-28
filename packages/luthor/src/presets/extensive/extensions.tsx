@@ -688,17 +688,17 @@ const textHighlightExt = textHighlightExtension.configure({
 const { extension: featureCardExtension } = createCustomNodeExtension({
   nodeType: "featureCard",
   defaultPayload: {
-    title: "Headless Custom Node",
+    title: "AI Draft Block",
     description:
-      "This block is rendered by createCustomNodeExtension from @lyfie/luthor-headless.",
-    tag: "Custom",
+      "AI-generated first draft. Review and edit before publishing to customers.",
+    tag: "AI Draft",
   },
   render: ({ payload, isSelected }) => (
     <aside className={`luthor-extensive-feature-card${isSelected ? " is-selected" : ""}`}>
-      <div className="luthor-extensive-feature-card__tag">{payload.tag ?? "Custom"}</div>
-      <h4 className="luthor-extensive-feature-card__title">{payload.title ?? "Custom Node"}</h4>
+      <div className="luthor-extensive-feature-card__tag">{payload.tag ?? "AI Draft"}</div>
+      <h4 className="luthor-extensive-feature-card__title">{payload.title ?? "Generated Draft"}</h4>
       <p className="luthor-extensive-feature-card__description">
-        {payload.description ?? "Insert strongly typed custom content blocks."}
+        {payload.description ?? "AI-generated first pass. Review and finalize before sharing."}
       </p>
     </aside>
   ),

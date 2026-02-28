@@ -52,11 +52,7 @@ function isNativeShortcutConflict(shortcut: KeyboardShortcut): boolean {
 
   const isBoldItalicUnderline = shortcutKey === "b" || shortcutKey === "i" || shortcutKey === "u";
   const isLink = shortcutKey === "k";
-  const isUndoRedo =
-    shortcutKey === "z" ||
-    shortcutKey === "y";
-
-  return isBoldItalicUnderline || isLink || isUndoRedo;
+  return isBoldItalicUnderline || isLink;
 }
 
 export type CommandConfig = {

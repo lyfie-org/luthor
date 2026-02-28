@@ -254,6 +254,7 @@ describe("command heading configuration", () => {
   it("prevents native editable shortcut conflicts by default but allows opt-out", () => {
     const commands = createCommands();
     const toggleBold = commands.toggleBold as unknown as ReturnType<typeof vi.fn>;
+    const undo = commands.undo as unknown as ReturnType<typeof vi.fn>;
     const host = document.createElement("div");
     host.setAttribute("contenteditable", "true");
     const child = document.createElement("span");
@@ -269,6 +270,16 @@ describe("command heading configuration", () => {
       }),
     );
     expect(toggleBold).not.toHaveBeenCalled();
+
+    child.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "z",
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    expect(undo).toHaveBeenCalledTimes(1);
     teardownDefault();
 
     const teardownOptOut = registerKeyboardShortcuts(commands, host, {

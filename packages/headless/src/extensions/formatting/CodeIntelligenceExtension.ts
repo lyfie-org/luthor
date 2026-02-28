@@ -524,10 +524,12 @@ function CodeBlockControlsPlugin({
 
     const feedbackTimers = feedbackTimersRef.current;
 
+    window.addEventListener("scroll", onViewportChange, true);
     window.addEventListener("resize", onViewportChange, { passive: true });
 
     return () => {
       unregisterUpdate();
+      window.removeEventListener("scroll", onViewportChange, true);
       window.removeEventListener("resize", onViewportChange);
       if (initialFrameId !== null) {
         cancelAnimationFrame(initialFrameId);

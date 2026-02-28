@@ -1354,8 +1354,34 @@
 	text-decoration: line-through;
 }
 
-.luthor-text-code,
-.luthor-content-editable code,
+.luthor-content-editable code:not(.luthor-code-block),
+.luthor-preset .luthor-content-editable code:not(.luthor-code-block),
+.luthor-preset-extensive .luthor-content-editable code:not(.luthor-code-block) {
+	background-color: color-mix(in srgb, var(--luthor-muted) 78%, var(--luthor-bg) 22%);
+	color: var(--luthor-syntax-keyword, var(--luthor-muted-fg));
+	padding: 0 0.24em;
+	border: 1px solid color-mix(in srgb, var(--luthor-border) 55%, transparent);
+	border-radius: 3px;
+	font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace !important;
+	font-size: 1em !important;
+}
+
+.luthor-content-editable code:not(.luthor-code-block) .luthor-text-code,
+.luthor-preset .luthor-content-editable code:not(.luthor-code-block) .luthor-text-code,
+.luthor-preset-extensive .luthor-content-editable code:not(.luthor-code-block) .luthor-text-code {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	border-radius: 0;
+}
+
+.luthor-content-editable code:not(.luthor-code-block) *,
+.luthor-preset .luthor-content-editable code:not(.luthor-code-block) *,
+.luthor-preset-extensive .luthor-content-editable code:not(.luthor-code-block) * {
+	color: inherit !important;
+	font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace !important;
+	font-size: 1em !important;
+}
 
 .luthor-code-block {
 	font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
@@ -1363,15 +1389,6 @@
 	border: 1px solid var(--luthor-border);
 	color: var(--luthor-syntax-string, var(--luthor-muted-fg));
 	border-radius: 4px;
-}
-
-.luthor-content-editable .luthor-text-code,
-.luthor-content-editable code,
-.luthor-content-editable code.luthor-text-code,
-.luthor-preset .luthor-content-editable code,
-.luthor-preset-extensive .luthor-content-editable code {
-	color: var(--luthor-syntax-string, var(--luthor-muted-fg));
-	font-weight: 500;
 }
 
 .luthor-code-block {

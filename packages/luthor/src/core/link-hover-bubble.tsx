@@ -65,12 +65,15 @@ export function LinkHoverBubble({
   disabled = false,
 }: LinkHoverBubbleProps) {
   const bubbleRef = useRef<HTMLDivElement>(null);
+  const portalContainerRef = useRef<HTMLElement | null>(null);
+  const repositionRafRef = useRef<number | null>(null);
   const hideTimeoutRef = useRef<number | null>(null);
   const [hoveredLink, setHoveredLink] = useState<HoveredLinkState | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [draftUrl, setDraftUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
   const [position, setPosition] = useState<LinkBubblePosition | null>(null);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
   const clearHideTimeout = useCallback(() => {
     if (hideTimeoutRef.current !== null) {
@@ -95,8 +98,18 @@ export function LinkHoverBubble({
     }, HIDE_DELAY_MS);
   }, [clearHideTimeout, hideBubble]);
 
-  const updatePosition = useCallback((anchorEl: HTMLAnchorElement) => {
+  const updatePosition = useCallback((anchorEl: HTMLAnchorElement, container: HTMLElement | null) => {
     const rect = anchorEl.getBoundingClientRect();
+    if (container) {
+      const containerRect = container.getBoundingClientRect();
+      const nextTop = rect.bottom - containerRect.top + 8;
+      const rawLeft = rect.left - containerRect.left;
+      const maxLeft = Math.max(10, containerRect.width - 340);
+      const nextLeft = Math.max(10, Math.min(rawLeft, maxLeft));
+      setPosition({ top: nextTop, left: nextLeft });
+      return;
+    }
+
     const nextTop = rect.bottom + 8;
     const nextLeft = Math.max(10, Math.min(rect.left, window.innerWidth - 340));
     setPosition({ top: nextTop, left: nextLeft });
@@ -131,14 +144,22 @@ export function LinkHoverBubble({
   useEffect(() => {
     if (!editor || disabled || typeof window === "undefined") {
       hideBubble();
+      setPortalContainer(null);
+      portalContainerRef.current = null;
       return;
     }
 
     const root = editor.getRootElement();
     if (!root) {
       hideBubble();
+      setPortalContainer(null);
+      portalContainerRef.current = null;
       return;
     }
+    const nextPortalContainer =
+      (root.closest(".luthor-editor-wrapper") as HTMLElement | null) ?? null;
+    setPortalContainer(nextPortalContainer);
+    portalContainerRef.current = nextPortalContainer;
 
     const handlePointerOver = (event: MouseEvent) => {
       const link = getLinkFromTarget(event.target, root);
@@ -160,7 +181,7 @@ export function LinkHoverBubble({
 
       const fallbackUrl = link.getAttribute("href") ?? link.href;
       setHoveredLink({ nodeKey, url: fallbackUrl, anchorEl: link });
-      updatePosition(link);
+      updatePosition(link, portalContainerRef.current);
       setUrlError(null);
       if (!isEditing) {
         setDraftUrl(fallbackUrl);
@@ -207,7 +228,7 @@ export function LinkHoverBubble({
           return null;
         }
 
-        updatePosition(latestAnchor);
+        updatePosition(latestAnchor, portalContainerRef.current);
         return {
           ...current,
           anchorEl: latestAnchor,
@@ -216,18 +237,32 @@ export function LinkHoverBubble({
       });
     };
 
+    const scheduleReposition = () => {
+      if (repositionRafRef.current !== null) {
+        return;
+      }
+      repositionRafRef.current = window.requestAnimationFrame(() => {
+        repositionRafRef.current = null;
+        handleReposition();
+      });
+    };
+
     root.addEventListener("mouseover", handlePointerOver);
     root.addEventListener("mouseout", handlePointerOut);
     document.addEventListener("selectionchange", handleSelectionChange);
-    window.addEventListener("scroll", handleReposition, true);
-    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", scheduleReposition, true);
+    window.addEventListener("resize", scheduleReposition);
 
     return () => {
       root.removeEventListener("mouseover", handlePointerOver);
       root.removeEventListener("mouseout", handlePointerOut);
       document.removeEventListener("selectionchange", handleSelectionChange);
-      window.removeEventListener("scroll", handleReposition, true);
-      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", scheduleReposition, true);
+      window.removeEventListener("resize", scheduleReposition);
+      if (repositionRafRef.current !== null) {
+        cancelAnimationFrame(repositionRafRef.current);
+        repositionRafRef.current = null;
+      }
       clearHideTimeout();
     };
   }, [
@@ -250,12 +285,12 @@ export function LinkHoverBubble({
 
     return {
       ...getOverlayThemeStyleFromElement(hoveredLink.anchorEl),
-      position: "fixed",
+      position: portalContainer ? "absolute" : "fixed",
       top: position.top,
       left: position.left,
       zIndex: 10040,
     };
-  }, [hoveredLink, position]);
+  }, [hoveredLink, position, portalContainer]);
 
   if (!hoveredLink || !position || typeof document === "undefined") {
     return null;
@@ -379,6 +414,6 @@ export function LinkHoverBubble({
         </>
       )}
     </div>,
-    document.body,
+    portalContainer ?? document.body,
   );
 }
