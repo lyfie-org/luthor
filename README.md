@@ -68,26 +68,6 @@ pnpm add @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/lis
 - GitHub: [lyfie-app/luthor](https://github.com/lyfie-org/luthor)
 - Sponsor: [github.com/sponsors/lyfie-app](https://github.com/sponsors/lyfie-app)
 
-## :books: Documentation
-
-Public-facing docs:
-
-- Luthor getting started: [documentation/user/luthor/getting-started.md](documentation/user/luthor/getting-started.md)
-- Luthor presets/config: [documentation/user/luthor/presets-and-configuration.md](documentation/user/luthor/presets-and-configuration.md)
-- Luthor extensive editor: [documentation/user/luthor/extensive-editor.md](documentation/user/luthor/extensive-editor.md)
-- Headless getting started: [documentation/user/headless/getting-started.md](documentation/user/headless/getting-started.md)
-- Headless extensions/config: [documentation/user/headless/extensions-and-configuration.md](documentation/user/headless/extensions-and-configuration.md)
-- Headless import/export: [documentation/user/headless/import-export.md](documentation/user/headless/import-export.md)
-
-Developer/maintainer docs:
-
-- Documentation index: [documentation/index.md](documentation/index.md)
-- Documentation hub: [documentation/documentation-hub.md](documentation/documentation-hub.md)
-- Markdown catalog: [documentation/markdown-catalog.md](documentation/markdown-catalog.md)
-- README map: [documentation/developer_notes/readme-map.md](documentation/developer_notes/readme-map.md)
-- Luthor architecture: [documentation/developer/luthor/architecture.md](documentation/developer/luthor/architecture.md)
-- Headless architecture: [documentation/developer/headless/architecture.md](documentation/developer/headless/architecture.md)
-
 ## :computer: Monorepo Development
 
 Requirements:
