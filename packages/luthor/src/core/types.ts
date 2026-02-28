@@ -434,28 +434,28 @@ export const DEFAULT_TOOLBAR_LAYOUT: ToolbarLayout = {
 export const TRADITIONAL_TOOLBAR_LAYOUT: ToolbarLayout = {
   sections: [
     {
-      items: ["fontFamily", "fontSize", "lineHeight"],
+      items: ["undo", "redo"],
+    },
+    {
+      items: ["fontFamily", "blockFormat", "fontSize", "lineHeight"],
     },
     {
       items: ["bold", "italic", "underline", "strikethrough", "textColor", "textHighlight"],
     },
     {
-      items: ["subscript", "superscript", "code", "link"],
-    },
-    {
-      items: ["blockFormat", "quote", "alignLeft", "alignCenter", "alignRight", "alignJustify"],
+      items: ["alignLeft", "alignCenter", "alignRight", "alignJustify"],
     },
     {
       items: ["unorderedList", "orderedList", "checkList", "indentList", "outdentList"],
     },
     {
-      items: ["table", "image", "emoji", "embed", "customComponent", "horizontalRule"],
+      items: ["link"],
     },
     {
-      items: ["codeBlock"],
+      items: ["image", "table", "code", "codeBlock", "horizontalRule", "quote"],
     },
     {
-      items: ["undo", "redo"],
+      items: ["subscript", "superscript", "emoji", "embed", "customComponent"],
     },
     {
       items: ["commandPalette", "themeToggle"],

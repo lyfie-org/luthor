@@ -141,11 +141,36 @@ function toMarkdown(json: string): string {
   }
 }
 
-function positionCaretInFirstLine(editable: HTMLElement, clientX: number) {
+function clampCoordinate(value: number, min: number, max: number): number {
+  if (max <= min) {
+    return min;
+  }
+
+  return Math.min(max, Math.max(min, value));
+}
+
+function positionCaretInNearestLine(editable: HTMLElement, clientX: number, clientY: number) {
   editable.focus();
-  const firstBlock = editable.firstElementChild ?? editable;
-  const firstRect = firstBlock.getBoundingClientRect();
-  const y = firstRect.top + Math.max(1, Math.min(firstRect.height - 1, firstRect.height / 2));
+  const blocks = Array.from(editable.children).filter(
+    (node): node is HTMLElement => node instanceof HTMLElement,
+  );
+  const nearestBlock = blocks.reduce<HTMLElement | null>((closest, block) => {
+    const rect = block.getBoundingClientRect();
+    const centerY = rect.top + rect.height / 2;
+    if (!closest) {
+      return block;
+    }
+
+    const closestRect = closest.getBoundingClientRect();
+    const closestCenterY = closestRect.top + closestRect.height / 2;
+    return Math.abs(centerY - clientY) < Math.abs(closestCenterY - clientY) ? block : closest;
+  }, null);
+
+  const targetBlock = nearestBlock ?? (editable.firstElementChild as HTMLElement | null) ?? editable;
+  const editableRect = editable.getBoundingClientRect();
+  const targetRect = targetBlock.getBoundingClientRect();
+  const x = clampCoordinate(clientX, editableRect.left + 1, editableRect.right - 1);
+  const y = clampCoordinate(clientY, targetRect.top + 1, targetRect.bottom - 1);
 
   const documentAny = document as Document & {
     caretPositionFromPoint?: (
@@ -330,7 +355,7 @@ export function ChatWindowEditor({
       }
 
       event.preventDefault();
-      positionCaretInFirstLine(editable, event.clientX);
+      positionCaretInNearestLine(editable, event.clientX, event.clientY);
     },
     [],
   );

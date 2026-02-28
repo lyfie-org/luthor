@@ -12,8 +12,8 @@ import type {
 export const extensiveToolbar = [
   "undo",
   "redo",
-  "heading",
   "fontFamily",
+  "heading",
   "fontSize",
   "lineHeight",
   "textColor",

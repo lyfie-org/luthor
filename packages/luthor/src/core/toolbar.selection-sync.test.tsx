@@ -48,7 +48,11 @@ describe("toolbar selection sync", () => {
     let anchorNode: Node | null = first.firstChild;
     const getSelectionSpy = vi
       .spyOn(window, "getSelection")
-      .mockImplementation(() => ({ anchorNode }) as Selection);
+      .mockImplementation(() => ({
+        anchorNode,
+        rangeCount: 1,
+        getRangeAt: () => ({ collapsed: true }),
+      }) as unknown as Selection);
 
     const commands = createFontFamilyCommands();
     const { container, unmount } = render(

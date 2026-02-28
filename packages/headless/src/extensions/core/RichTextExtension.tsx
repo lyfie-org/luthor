@@ -36,6 +36,81 @@ export interface RichTextConfig
 // Shared component props - extends base props
 type SharedRichTextProps = BaseRichTextProps;
 
+function clampCoordinate(value: number, min: number, max: number): number {
+  if (max <= min) {
+    return min;
+  }
+
+  return Math.min(max, Math.max(min, value));
+}
+
+function resolveCaretPointWithinBlock(editable: HTMLElement, block: HTMLElement, clientX: number, clientY: number) {
+  const editableRect = editable.getBoundingClientRect();
+  const blockRect = block.getBoundingClientRect();
+  const x = clampCoordinate(clientX, editableRect.left + 1, editableRect.right - 1);
+  const y = clampCoordinate(clientY, blockRect.top + 1, blockRect.bottom - 1);
+  return { x, y };
+}
+
+function placeCaretFromPoint(x: number, y: number): void {
+  const documentAny = document as Document & {
+    caretPositionFromPoint?: (
+      caretX: number,
+      caretY: number,
+    ) => {
+      offsetNode: Node;
+      offset: number;
+    } | null;
+    caretRangeFromPoint?: (caretX: number, caretY: number) => Range | null;
+  };
+
+  const selection = window.getSelection();
+  if (!selection) {
+    return;
+  }
+
+  const position = documentAny.caretPositionFromPoint?.(x, y);
+  if (position) {
+    const range = document.createRange();
+    range.setStart(position.offsetNode, position.offset);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return;
+  }
+
+  const range = documentAny.caretRangeFromPoint?.(x, y);
+  if (!range) {
+    return;
+  }
+
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function moveCaretToNearestLine(editable: HTMLElement, clientX: number, clientY: number): void {
+  const blocks = Array.from(editable.children).filter(
+    (node): node is HTMLElement => node instanceof HTMLElement,
+  );
+  const nearestBlock = blocks.reduce<HTMLElement | null>((closest, block) => {
+    const rect = block.getBoundingClientRect();
+    const centerY = rect.top + rect.height / 2;
+    if (!closest) {
+      return block;
+    }
+
+    const closestRect = closest.getBoundingClientRect();
+    const closestCenterY = closestRect.top + closestRect.height / 2;
+    return Math.abs(centerY - clientY) < Math.abs(closestCenterY - clientY) ? block : closest;
+  }, null);
+  const targetBlock = nearestBlock ?? (editable.firstElementChild as HTMLElement | null) ?? editable;
+  const { x, y } = resolveCaretPointWithinBlock(editable, targetBlock, clientX, clientY);
+
+  editable.focus();
+  placeCaretFromPoint(x, y);
+}
+
 const SharedRichText: React.FC<SharedRichTextProps> = (props) => {
   const {
     contentEditable,
@@ -84,8 +159,32 @@ const SharedRichText: React.FC<SharedRichTextProps> = (props) => {
         defaultLuthorTheme.container ||
         "luthor-editor-container"
       }
+      onMouseDown={(event) => {
+        if (event.button !== 0) {
+          return;
+        }
+
+        const target = event.target as HTMLElement | null;
+        if (!target) {
+          return;
+        }
+
+        if (target.closest("button, a, input, textarea, select, [role='button']")) {
+          return;
+        }
+
+        const container = event.currentTarget;
+        const editableElement = container.querySelector("[contenteditable='true']") as HTMLElement | null;
+        if (!editableElement || editableElement.contains(target)) {
+          return;
+        }
+
+        event.preventDefault();
+        moveCaretToNearestLine(editableElement, event.clientX, event.clientY);
+      }}
       style={{
         position: "relative",
+        cursor: "text",
         ...configStyles?.container,
         ...styles?.container,
       }}

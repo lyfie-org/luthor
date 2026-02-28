@@ -1,7 +1,7 @@
 /* @vitest-environment jsdom */
 
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { EditorContext } from "../../core/createEditorSystem";
 import { RichText } from "./RichTextExtension";
@@ -28,7 +28,7 @@ vi.mock("@lexical/react/LexicalContentEditable", () => ({
   }: {
     className?: string;
     style?: React.CSSProperties;
-  }) => <div data-testid="content-editable" className={className} style={style} />,
+  }) => <div data-testid="content-editable" contentEditable className={className} style={style} />,
 }));
 
 describe("RichText placeholder behavior", () => {
@@ -57,5 +57,71 @@ describe("RichText placeholder behavior", () => {
     expect(style).not.toContain("top");
     expect(style).not.toContain("left");
     expect(style).not.toContain("color");
+  });
+
+  it("uses text cursor on container and places caret to nearest line when clicking outside editable", () => {
+    const getSelectionSpy = vi.spyOn(window, "getSelection").mockReturnValue({
+      removeAllRanges: vi.fn(),
+      addRange: vi.fn(),
+    } as unknown as Selection);
+
+    const offsetNode = document.createTextNode("line 2");
+    const caretPositionFromPointMock = vi.fn(() => ({
+      offsetNode,
+      offset: 0,
+    }));
+    const originalCaretPositionFromPoint = (
+      document as Document & {
+        caretPositionFromPoint?: unknown;
+      }
+    ).caretPositionFromPoint;
+    Object.defineProperty(document, "caretPositionFromPoint", {
+      configurable: true,
+      value: caretPositionFromPointMock,
+    });
+
+    const { container } = render(<RichText placeholder="Nearest line" />);
+    const root = container.querySelector(".luthor-editor-container") as HTMLElement;
+    const editable = screen.getByTestId("content-editable") as HTMLElement;
+    const line1 = document.createElement("p");
+    const line2 = document.createElement("p");
+    line2.append(offsetNode);
+    editable.append(line1, line2);
+
+    Object.defineProperty(editable, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        left: 0,
+        right: 400,
+      }),
+    });
+    Object.defineProperty(line1, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        top: 10,
+        bottom: 30,
+        height: 20,
+      }),
+    });
+    Object.defineProperty(line2, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        top: 60,
+        bottom: 90,
+        height: 30,
+      }),
+    });
+
+    expect(root.style.cursor).toBe("text");
+
+    fireEvent.mouseDown(root, { button: 0, clientX: 50, clientY: 70 });
+
+    expect(caretPositionFromPointMock).toHaveBeenCalledWith(50, 70);
+
+    getSelectionSpy.mockRestore();
+    Object.defineProperty(document, "caretPositionFromPoint", {
+      configurable: true,
+      value: originalCaretPositionFromPoint,
+    });
   });
 });

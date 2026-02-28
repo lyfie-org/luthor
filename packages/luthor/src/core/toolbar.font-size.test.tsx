@@ -54,7 +54,7 @@ describe("toolbar fontSize options", () => {
     expect(dropdown).not.toBeNull();
 
     const dropdownQueries = within(dropdown as HTMLElement);
-    expect(dropdownQueries.getByRole("button", { name: "Default" })).toBeInTheDocument();
+    expect(dropdownQueries.getByRole("button", { name: "16px" })).toBeInTheDocument();
     expect(dropdownQueries.getByRole("button", { name: "14px" })).toBeInTheDocument();
     expect(dropdownQueries.getByRole("button", { name: "17px" })).toBeInTheDocument();
   });
@@ -89,7 +89,7 @@ describe("toolbar fontSize options", () => {
     expect(commands.clearFontSize).not.toHaveBeenCalled();
 
     fireEvent.click(trigger as HTMLElement);
-    fireEvent.click(screen.getByRole("button", { name: "Default" }));
+    fireEvent.click(screen.getByRole("button", { name: "16px" }));
 
     expect(commands.clearFontSize).toHaveBeenCalledTimes(1);
   });
