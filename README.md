@@ -19,7 +19,7 @@
 </div>
 
 <p align="center">
-  <img src="apps/web/public/placeholders/feature-preview.gif" alt="Luthor feature preview" width="960" />
+  <img src="public/assets/preview.png" alt="Luthor feature preview" width="960" />
 </p>
 
 ## :sparkles: Why Luthor

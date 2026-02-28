@@ -36,7 +36,7 @@ export function SiteFooter() {
           </Link>
           <Link href="/docs/luthor-headless/features/">
             <Cube size={14} weight="duotone" aria-hidden="true" />
-            <span>@lyfie/headless</span>
+            <span>@lyfie/luthor-headless</span>
           </Link>
           <Link href="/docs/luthor/presets/">
             <BookOpenText size={14} weight="duotone" aria-hidden="true" />

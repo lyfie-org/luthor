@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
-import { PRIMARY_PACKAGE_NAME } from '@/config/site';
-import { ExtensiveEditorShell } from '@/features/editor/extensive-editor-shell';
+import { PresetShowcaseShell } from '@/features/editor/preset-showcase-shell';
 
 export const metadata: Metadata = {
   title: 'Luthor Demo Playground',
-  description: 'Try the Luthor Extensive Editor preset live and evaluate React + Lexical rich text editing before integrating.',
-  keywords: ['luthor demo', 'react rich text editor demo', 'lexical editor demo'],
+  description: 'Explore every Luthor preset live, switch instantly, and evaluate the right React + Lexical editing experience before integrating.',
+  keywords: ['luthor demo', 'react rich text editor demo', 'lexical editor demo', 'luthor presets'],
   alternates: {
     canonical: '/demo/',
   },
@@ -15,22 +14,16 @@ export default function DemoPage() {
   return (
     <section className="section">
       <div className="container">
-        <h1 className="hero-title demo-title">Demo playground</h1>
-        <p className="section-copy">Zero-config Extensive Editor: go from install to full rich text in under a minute.</p>
-
-        <div className="browser-frame">
-          <div className="browser-frame-header">
-            <div className="window-dots" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
-            <code className="install-chip">{PRIMARY_PACKAGE_NAME} extensive preset</code>
-          </div>
-          <div className="editor-pane">
-            <ExtensiveEditorShell />
-          </div>
+        <div className="demo-hero">
+          <p className="eyebrow demo-hero-eyebrow">Live Playground</p>
+          <h1 className="hero-title demo-title demo-page-title">
+            Build Faster With <span className="hero-highlight-text">Production-Ready</span> Presets
+          </h1>
+          <p className="section-copy demo-page-copy">
+            Compare editing experiences, fine-tune behavior, and ship the setup that matches your product.
+          </p>
         </div>
+        <PresetShowcaseShell />
       </div>
     </section>
   );

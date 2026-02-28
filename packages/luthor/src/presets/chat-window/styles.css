@@ -1,21 +1,90 @@
 .luthor-preset-chat-window {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  width: 100%;
+  min-width: var(--luthor-chat-min-width, 240px);
+  max-width: var(--luthor-chat-max-width, 100%);
 }
 
-.luthor-chat-window-actions {
+.luthor-chat-window-composer-row {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
+  width: 100%;
+}
+
+.luthor-chat-window-composer-shell {
+  position: relative;
+  width: 100%;
+  min-width: var(--luthor-chat-min-width, 240px);
+  max-width: var(--luthor-chat-max-width, 100%);
+}
+
+.luthor-preset-chat-window .luthor-preset-extensive.luthor-editor-wrapper {
+  min-height: var(--luthor-chat-min-height, 56px);
+  max-height: var(--luthor-chat-max-height, 220px);
+  height: var(--luthor-chat-current-height, var(--luthor-chat-min-height, 56px));
+  min-width: var(--luthor-chat-min-width, 240px);
+  max-width: var(--luthor-chat-max-width, 100%);
+  border-radius: 16px;
+}
+
+.luthor-preset-chat-window .luthor-editor-header {
+  display: none;
+}
+
+.luthor-preset-chat-window .luthor-editor {
+  min-height: 0;
+  height: 100%;
+}
+
+.luthor-preset-chat-window .luthor-editor-visual-shell {
+  min-height: 0;
+}
+
+.luthor-preset-chat-window .luthor-richtext-container {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  --luthor-editor-content-padding-y: 12px;
+  --luthor-editor-content-padding-x: 14px;
+  --luthor-first-block-offset: 0px;
+}
+
+.luthor-preset-chat-window .luthor-content-editable {
+  padding: var(--luthor-editor-content-padding-y) var(--luthor-editor-content-padding-x);
+  min-height: 100%;
+  box-sizing: border-box;
+  line-height: 1.45;
+}
+
+.luthor-preset-chat-window--send-inside .luthor-content-editable {
+  padding-right: 84px;
+  padding-bottom: 48px;
+}
+
+.luthor-preset-chat-window .luthor-placeholder {
+  top: var(--luthor-editor-content-padding-y);
+  left: var(--luthor-editor-content-padding-x);
+  line-height: 1.45;
+}
+
+.luthor-chat-window-bottom-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 10px;
+  border-top: 1px solid var(--luthor-border);
+  background: var(--luthor-bg);
 }
 
 .luthor-chat-window-action {
   border: 1px solid var(--luthor-border);
   background: var(--luthor-muted);
   color: var(--luthor-fg);
-  border-radius: 8px;
+  border-radius: 10px;
   height: 32px;
   padding: 0 12px;
   cursor: pointer;
@@ -25,4 +94,24 @@
   border-color: var(--luthor-accent);
   background: var(--luthor-accent);
   color: var(--luthor-bg);
+}
+
+.luthor-chat-window-action-send--inside {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
+.luthor-chat-window-action-send--right {
+  align-self: flex-end;
+}
+
+@media (max-width: 640px) {
+  .luthor-chat-window-composer-row {
+    flex-wrap: wrap;
+  }
+
+  .luthor-chat-window-action-send--right {
+    margin-left: auto;
+  }
 }

@@ -1,9 +1,9 @@
 ---
-title: "@lyfie/headless"
+title: "@lyfie/luthor-headless"
 description: Minimal setup and validation for @lyfie/luthor-headless.
 ---
 
-# @lyfie/headless
+# @lyfie/luthor-headless
 
 Use this when you need full control over editor UI.
 

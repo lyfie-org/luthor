@@ -774,6 +774,18 @@ export function registerKeyboardShortcuts(
   },
 ): () => void {
   const commandConfigs = resolveAvailableCommands(commands, options);
+  const isShortcutKeyMatch = (event: KeyboardEvent, shortcut: KeyboardShortcut) => {
+    if (event.key.toLowerCase() === shortcut.key.toLowerCase()) {
+      return true;
+    }
+
+    // Support backquote shortcuts across layouts where Shift+` yields "~" in event.key.
+    if (shortcut.key === "`" && event.code === "Backquote") {
+      return true;
+    }
+
+    return false;
+  };
 
   const handleKeyDown = (event: KeyboardEvent) => {
     const scopeElement = typeof options?.scope === "function"
@@ -795,7 +807,7 @@ export function registerKeyboardShortcuts(
         }
 
         if (
-          event.key.toLowerCase() === shortcut.key.toLowerCase() &&
+          isShortcutKeyMatch(event, shortcut) &&
           !!event.ctrlKey === !!shortcut.ctrlKey &&
           !!event.metaKey === !!shortcut.metaKey &&
           !!event.shiftKey === !!shortcut.shiftKey &&

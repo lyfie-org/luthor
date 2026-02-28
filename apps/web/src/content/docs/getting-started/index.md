@@ -15,7 +15,7 @@ Use this when you want a production-ready editor quickly.
 - Includes `@lyfie/luthor-headless` under the hood
 - Best for fast shipping with strong defaults
 
-## @lyfie/headless
+## @lyfie/luthor-headless
 
 Use this when you want full control over UI and behavior.
 
@@ -38,5 +38,5 @@ Based on package metadata in `packages/luthor/package.json` and `packages/headle
 
 1. [Introduction](/docs/getting-started/)
 2. [Installation](/docs/getting-started/installation/)
-3. [@lyfie/headless](/docs/getting-started/luthor-headless/)
+3. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
 4. [@lyfie/luthor](/docs/getting-started/luthor/)

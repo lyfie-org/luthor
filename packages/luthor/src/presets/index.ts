@@ -30,7 +30,13 @@ import type {
 } from "./extensive";
 import type { SimpleTextEditorProps } from "./simple-text";
 import type { RichTextBoxEditorProps } from "./rich-text-box";
-import type { ChatWindowEditorProps, ChatWindowEditorSendPayload } from "./chat-window";
+import type {
+	ChatWindowFormattingOptions,
+	ChatWindowEditorProps,
+	ChatWindowEditorSendPayload,
+	ChatWindowOutputFormat,
+	ChatWindowToolbarButton,
+} from "./chat-window";
 import type { EmailComposeEditorProps } from "./email-compose";
 import type { MDTextEditorProps, MDTextEditorMode } from "./md-text";
 import type { NotionLikeEditorProps } from "./notion-like";
@@ -88,6 +94,9 @@ export type {
 	RichTextBoxEditorProps,
 	ChatWindowEditorProps,
 	ChatWindowEditorSendPayload,
+	ChatWindowOutputFormat,
+	ChatWindowFormattingOptions,
+	ChatWindowToolbarButton,
 	EmailComposeEditorProps,
 	MDTextEditorProps,
 	MDTextEditorMode,

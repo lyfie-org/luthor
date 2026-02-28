@@ -1,106 +1,65 @@
-type JsonTextNode = {
-  type: "text";
-  version: 1;
-  text: string;
-  detail: 0;
-  format: 0;
-  mode: "normal";
-  style: "";
-};
-
-type JsonParagraphNode = {
-  type: "paragraph";
-  version: 1;
-  format: "";
-  indent: 0;
-  direction: null;
-  children: JsonTextNode[];
-};
-
-type JsonRootNode = {
-  type: "root";
-  version: 1;
-  format: "";
-  indent: 0;
-  direction: null;
-  children: JsonParagraphNode[];
-};
+import { $convertFromMarkdownString, $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
+import { LinkNode } from "@lexical/link";
+import { ListItemNode, ListNode } from "@lexical/list";
+import { QuoteNode, HeadingNode } from "@lexical/rich-text";
+import { CodeNode } from "@lexical/code";
+import {
+  createEditor,
+  ParagraphNode,
+  TextNode,
+  LineBreakNode,
+  TabNode,
+  type EditorState,
+} from "lexical";
 
 export type JsonDocument = {
-  root: JsonRootNode;
+  root: Record<string, unknown>;
 };
 
-function createTextNode(text: string): JsonTextNode {
-  return {
-    type: "text",
-    version: 1,
-    text,
-    detail: 0,
-    format: 0,
-    mode: "normal",
-    style: "",
-  };
+function createMarkdownEditor() {
+  return createEditor({
+    namespace: "luthor-markdown-converter",
+    onError: (error) => {
+      throw error;
+    },
+    nodes: [
+      ParagraphNode,
+      TextNode,
+      LineBreakNode,
+      TabNode,
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      LinkNode,
+      CodeNode,
+    ],
+  });
 }
 
-function createParagraphNode(text: string): JsonParagraphNode {
-  return {
-    type: "paragraph",
-    version: 1,
-    format: "",
-    indent: 0,
-    direction: null,
-    children: [createTextNode(text)],
-  };
+function toEditorState(editor: ReturnType<typeof createMarkdownEditor>, input: unknown): EditorState {
+  const serialized = typeof input === "string" ? input : JSON.stringify(input ?? {});
+  return editor.parseEditorState(serialized);
 }
 
 export function markdownToJSON(markdown: string): JsonDocument {
-  const normalized = markdown.replace(/\r\n?/g, "\n").trim();
-  const blocks = normalized.length === 0
-    ? [""]
-    : normalized.split(/\n{2,}/).map((block) => block.trim());
-
-  return {
-    root: {
-      type: "root",
-      version: 1,
-      format: "",
-      indent: 0,
-      direction: null,
-      children: blocks.map((block) => createParagraphNode(block)),
+  const editor = createMarkdownEditor();
+  editor.update(
+    () => {
+      $convertFromMarkdownString(markdown, TRANSFORMERS);
     },
-  };
-}
+    { discrete: true },
+  );
 
-function extractNodeText(node: unknown): string {
-  if (!node || typeof node !== "object") {
-    return "";
-  }
-
-  if ("text" in node && typeof (node as { text?: unknown }).text === "string") {
-    return (node as { text: string }).text;
-  }
-
-  if ("children" in node && Array.isArray((node as { children?: unknown[] }).children)) {
-    return ((node as { children: unknown[] }).children ?? [])
-      .map((child) => extractNodeText(child))
-      .join("");
-  }
-
-  return "";
+  return editor.getEditorState().toJSON() as JsonDocument;
 }
 
 export function jsonToMarkdown(input: unknown): string {
-  if (!input || typeof input !== "object") {
-    return "";
-  }
+  const editor = createMarkdownEditor();
+  const editorState = toEditorState(editor, input);
+  editor.setEditorState(editorState, { tag: "history-merge" });
 
-  const root = (input as { root?: { children?: unknown[] } }).root;
-  if (!root || !Array.isArray(root.children)) {
-    return "";
-  }
-
-  return root.children
-    .map((child) => extractNodeText(child).trim())
-    .filter((line) => line.length > 0)
-    .join("\n\n");
+  return editorState.read(() => {
+    return $convertToMarkdownString(TRANSFORMERS);
+  });
 }

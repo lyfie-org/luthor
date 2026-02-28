@@ -15,7 +15,7 @@ type NavGroupId = 'getting_started' | 'luthor_headless' | 'luthor' | 'other';
 
 const NAV_GROUP_ORDER: { id: NavGroupId; label: string }[] = [
   { id: 'getting_started', label: 'Getting Started' },
-  { id: 'luthor_headless', label: '@lyfie/headless' },
+  { id: 'luthor_headless', label: '@lyfie/luthor-headless' },
   { id: 'luthor', label: '@lyfie/luthor' },
   { id: 'other', label: 'Other' },
 ];
