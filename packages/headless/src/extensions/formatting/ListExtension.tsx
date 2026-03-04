@@ -83,6 +83,7 @@ const CHECKLIST_VARIANT_TOKEN = "--luthor-checklist-variant";
 const UNORDERED_PATTERN_TOKEN = "--luthor-unordered-pattern";
 const UNORDERED_PATTERN_TEXT_TOKEN = "--luthor-unordered-pattern-token";
 const UNORDERED_MARKER_KIND_TOKEN = "--luthor-unordered-marker-kind";
+const ORDERED_MARKER_CONTENT_TOKEN = "--luthor-ordered-marker-content";
 
 const LEGACY_UNORDERED_PATTERN_ALIAS: Record<string, UnorderedListPattern> = {
   "disc-arrow-square": "arrow-circle-square",
@@ -190,6 +191,104 @@ function getListDepthWithinRoot(node: ListNode, topListNode: ListNode): number {
 function resolveMarkerStyle(sequence: readonly string[], depth: number): string {
   const index = depth % sequence.length;
   return sequence[index] ?? sequence[0] ?? "disc";
+}
+
+function toAlphaSequence(value: number, upper: boolean): string {
+  let n = value;
+  let result = "";
+  while (n > 0) {
+    const remainder = (n - 1) % 26;
+    result = String.fromCharCode((upper ? 65 : 97) + remainder) + result;
+    n = Math.floor((n - 1) / 26);
+  }
+  return result || (upper ? "A" : "a");
+}
+
+function toRomanSequence(value: number, upper: boolean): string {
+  const numerals: Array<[number, string]> = [
+    [1000, "M"],
+    [900, "CM"],
+    [500, "D"],
+    [400, "CD"],
+    [100, "C"],
+    [90, "XC"],
+    [50, "L"],
+    [40, "XL"],
+    [10, "X"],
+    [9, "IX"],
+    [5, "V"],
+    [4, "IV"],
+    [1, "I"],
+  ];
+
+  let n = Math.max(1, Math.floor(value));
+  let result = "";
+  for (const [amount, symbol] of numerals) {
+    while (n >= amount) {
+      result += symbol;
+      n -= amount;
+    }
+  }
+
+  return upper ? result : result.toLowerCase();
+}
+
+function resolveOrderedMarkerText(
+  markerStyle: string,
+  index: number,
+  suffix: OrderedListSuffix,
+  hierarchicalPath: readonly number[] | null,
+): string {
+  const suffixToken = suffix === "paren" ? ")" : ".";
+  const body = hierarchicalPath
+    ? hierarchicalPath.join(".")
+    : markerStyle === "decimal-leading-zero"
+      ? index < 10
+        ? `0${index}`
+        : `${index}`
+      : markerStyle === "lower-alpha"
+        ? toAlphaSequence(index, false)
+        : markerStyle === "upper-alpha"
+          ? toAlphaSequence(index, true)
+          : markerStyle === "lower-roman"
+            ? toRomanSequence(index, false)
+            : markerStyle === "upper-roman"
+              ? toRomanSequence(index, true)
+              : `${index}`;
+
+  return `"${body}${suffixToken}"`;
+}
+
+function getListItemOrdinal(parentListNode: ListNode, targetItem: ListItemNode): number {
+  let ordinal = 0;
+  for (const child of parentListNode.getChildren()) {
+    if (!$isListItemNode(child)) continue;
+    if (shouldRenderUnorderedMarker(child)) {
+      ordinal += 1;
+    }
+    if (child.getKey() === targetItem.getKey()) {
+      return Math.max(1, ordinal);
+    }
+  }
+  return Math.max(1, ordinal);
+}
+
+function getHierarchicalPathPrefix(node: ListNode, topListNode: ListNode): number[] {
+  const path: number[] = [];
+  let current: ListNode = node;
+  while (current.getKey() !== topListNode.getKey()) {
+    const parentListItem = current.getParent();
+    if (!$isListItemNode(parentListItem)) {
+      break;
+    }
+    const parentList = parentListItem.getParent();
+    if (!$isListNode(parentList)) {
+      break;
+    }
+    path.push(getListItemOrdinal(parentList, parentListItem));
+    current = parentList;
+  }
+  return path.reverse();
 }
 
 function resolveUnorderedPatternToken(rawPattern: string | null): UnorderedListPattern {
@@ -988,11 +1087,29 @@ export class ListExtension extends BaseExtension<
       setStyleEntries(node, {
         "--luthor-ordered-pattern": pattern,
         "--luthor-ordered-suffix": suffix,
-        "list-style-type": hierarchical ? "none" : markerStyle,
+        "list-style-type": "none",
+        [ORDERED_MARKER_CONTENT_TOKEN]: null,
       });
 
+      const pathPrefix = hierarchical ? getHierarchicalPathPrefix(node, topListNode) : null;
+      let itemIndex = 0;
       for (const child of node.getChildren()) {
         if (!$isListItemNode(child)) continue;
+        const shouldRenderMarker = shouldRenderUnorderedMarker(child);
+        if (shouldRenderMarker) {
+          itemIndex += 1;
+        }
+        const markerContent = resolveOrderedMarkerText(
+          markerStyle,
+          Math.max(1, itemIndex),
+          suffix === "paren" ? "paren" : "dot",
+          hierarchical ? [...(pathPrefix ?? []), Math.max(1, itemIndex)] : null,
+        );
+        setStyleEntries(child, {
+          [ORDERED_MARKER_CONTENT_TOKEN]: shouldRenderMarker
+            ? markerContent
+            : null,
+        });
         stack.push(...collectNestedListsFromListItem(child));
       }
     }
@@ -1015,6 +1132,13 @@ export class ListExtension extends BaseExtension<
         stack.push(...collectNestedListsFromListItem(child));
       }
     }
+
+    const pattern = (readStyleValue(topListNode, "--luthor-ordered-pattern") ??
+      DEFAULT_ORDERED_PATTERN) as OrderedListPattern;
+    const safePattern = Object.hasOwn(ORDERED_LIST_PATTERNS, pattern)
+      ? pattern
+      : DEFAULT_ORDERED_PATTERN;
+    this.applyOrderedPattern(topListNode, safePattern);
   }
 
   private applyUnorderedPattern(topListNode: ListNode, pattern: UnorderedListPattern): void {
@@ -1043,6 +1167,7 @@ export class ListExtension extends BaseExtension<
         "list-style-type": "none",
         "--luthor-unordered-marker-content": null,
         [UNORDERED_MARKER_KIND_TOKEN]: null,
+        [ORDERED_MARKER_CONTENT_TOKEN]: null,
       });
 
       for (const child of node.getChildren()) {
@@ -1053,6 +1178,7 @@ export class ListExtension extends BaseExtension<
           [UNORDERED_MARKER_KIND_TOKEN]: shouldRenderUnorderedMarker(child)
             ? markerKind
             : null,
+          [ORDERED_MARKER_CONTENT_TOKEN]: null,
         });
         setUnorderedPatternTokenOnListItemContent(child, pattern);
         stack.push(...collectNestedListsFromListItem(child));
@@ -1076,6 +1202,7 @@ export class ListExtension extends BaseExtension<
         "--luthor-checklist-variant": variant,
         "--luthor-unordered-marker-content": null,
         [UNORDERED_MARKER_KIND_TOKEN]: null,
+        [ORDERED_MARKER_CONTENT_TOKEN]: null,
         "--luthor-unordered-pattern": null,
         "--luthor-ordered-pattern": null,
         "--luthor-ordered-suffix": null,
@@ -1089,6 +1216,7 @@ export class ListExtension extends BaseExtension<
           [UNORDERED_PATTERN_TOKEN]: null,
           "--luthor-unordered-marker-content": null,
           [UNORDERED_MARKER_KIND_TOKEN]: null,
+          [ORDERED_MARKER_CONTENT_TOKEN]: null,
         });
         setUnorderedPatternTokenOnListItemContent(child, null);
         const textNodes = collectListItemContentTextNodes(child);
@@ -1121,8 +1249,29 @@ export class ListExtension extends BaseExtension<
       setStyleEntries(node, {
         "--luthor-ordered-pattern": pattern,
         "--luthor-ordered-suffix": suffix,
-        "list-style-type": hierarchical ? "none" : markerStyle,
+        "list-style-type": "none",
+        [ORDERED_MARKER_CONTENT_TOKEN]: null,
       });
+      const pathPrefix = hierarchical ? getHierarchicalPathPrefix(node, topListNode) : null;
+      let itemIndex = 0;
+      for (const child of node.getChildren()) {
+        if (!$isListItemNode(child)) continue;
+        const shouldRenderMarker = shouldRenderUnorderedMarker(child);
+        if (shouldRenderMarker) {
+          itemIndex += 1;
+        }
+        const markerContent = resolveOrderedMarkerText(
+          markerStyle,
+          Math.max(1, itemIndex),
+          suffix === "paren" ? "paren" : "dot",
+          hierarchical ? [...(pathPrefix ?? []), Math.max(1, itemIndex)] : null,
+        );
+        setStyleEntries(child, {
+          [ORDERED_MARKER_CONTENT_TOKEN]: shouldRenderMarker
+            ? markerContent
+            : null,
+        });
+      }
       return;
     }
 
@@ -1139,6 +1288,7 @@ export class ListExtension extends BaseExtension<
         "list-style-type": "none",
         "--luthor-unordered-marker-content": null,
         [UNORDERED_MARKER_KIND_TOKEN]: null,
+        [ORDERED_MARKER_CONTENT_TOKEN]: null,
       });
 
       for (const child of node.getChildren()) {
@@ -1149,6 +1299,7 @@ export class ListExtension extends BaseExtension<
           [UNORDERED_MARKER_KIND_TOKEN]: shouldRenderUnorderedMarker(child)
             ? markerKind
             : null,
+          [ORDERED_MARKER_CONTENT_TOKEN]: null,
         });
         setUnorderedPatternTokenOnListItemContent(child, pattern);
       }
@@ -1161,6 +1312,7 @@ export class ListExtension extends BaseExtension<
         "--luthor-checklist-variant": variant,
         "--luthor-unordered-marker-content": null,
         [UNORDERED_MARKER_KIND_TOKEN]: null,
+        [ORDERED_MARKER_CONTENT_TOKEN]: null,
         "--luthor-unordered-pattern": null,
         "--luthor-ordered-pattern": null,
         "--luthor-ordered-suffix": null,
@@ -1174,6 +1326,7 @@ export class ListExtension extends BaseExtension<
           [UNORDERED_PATTERN_TOKEN]: null,
           "--luthor-unordered-marker-content": null,
           [UNORDERED_MARKER_KIND_TOKEN]: null,
+          [ORDERED_MARKER_CONTENT_TOKEN]: null,
         });
         const textNodes = collectListItemContentTextNodes(child);
         for (const textNode of textNodes) {

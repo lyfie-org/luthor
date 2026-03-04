@@ -83,20 +83,24 @@ const EXTENSIVE_SWATCH_COLORS: readonly string[] = [
 ];
 
 const ORDERED_LIST_OPTIONS: ReadonlyArray<{
-  label: string;
+  title: string;
   pattern:
     | "decimal-alpha-roman"
     | "decimal-hierarchical"
     | "upper-roman-upper-alpha"
-    | "upper-alpha-lower-alpha"
-    | "decimal-leading-zero-alpha";
+    | "upper-alpha-lower-alpha";
 }> = [
-  { label: "1. a. i. (Classic)", pattern: "decimal-alpha-roman" },
-  { label: "1. 1.1 1.1.1 (Hierarchy)", pattern: "decimal-hierarchical" },
-  { label: "I. A. 1. (Roman/Alpha)", pattern: "upper-roman-upper-alpha" },
-  { label: "A. a. i. (Alphabetic)", pattern: "upper-alpha-lower-alpha" },
-  { label: "01. a. i. (Leading Zero)", pattern: "decimal-leading-zero-alpha" },
+  { title: "1. a. i. style", pattern: "decimal-alpha-roman" },
+  { title: "A. a. i. style", pattern: "upper-alpha-lower-alpha" },
+  { title: "1. 1.1 1.2 style", pattern: "decimal-hierarchical" },
+  { title: "I. A. 1. style", pattern: "upper-roman-upper-alpha" },
 ];
+
+type OrderedListPattern =
+  | "decimal-alpha-roman"
+  | "decimal-hierarchical"
+  | "upper-roman-upper-alpha"
+  | "upper-alpha-lower-alpha";
 
 const UNORDERED_LIST_OPTIONS: ReadonlyArray<{
   title: string;
@@ -221,6 +225,48 @@ function ChecklistVariantPreview({ variant }: { variant: "strikethrough" | "plai
           <line x1="26.5" y1="28.8" x2="66.5" y2="28.8" className="luthor-checklist-variant-strike" />
         </>
       ) : null}
+    </svg>
+  );
+}
+
+function OrderedListVariantPreview({ pattern }: { pattern: OrderedListPattern }) {
+  const rowY = [12.5, 24.5, 36.5, 48.5, 60.5] as const;
+  const rowIndent = [0, 1, 1, 2, 0] as const;
+
+  const rowLabels: readonly string[] =
+    pattern === "decimal-alpha-roman"
+      ? ["1.", "a.", "b.", "i.", "2."]
+      : pattern === "upper-alpha-lower-alpha"
+        ? ["A.", "a.", "b.", "i.", "B."]
+        : pattern === "decimal-hierarchical"
+          ? ["1.", "1.1.", "1.2.", "1.2.1.", "2."]
+          : ["I.", "A.", "B.", "1.", "II."];
+
+  return (
+    <svg
+      width="94"
+      height="74"
+      viewBox="0 0 94 74"
+      role="img"
+      aria-hidden="true"
+      className="luthor-ordered-variant-svg"
+    >
+      <rect x="0.5" y="0.5" width="93" height="73" rx="3" className="luthor-ordered-variant-frame" />
+      {rowY.map((y, index) => {
+        const indentLevel = rowIndent[index] ?? 0;
+        const labelX = 9 + indentLevel * 12;
+        const textX = 26 + indentLevel * 12;
+        const textWidth = 56 - indentLevel * 10;
+
+        return (
+          <g key={`${pattern}-ordered-row-${index}`}>
+            <text x={labelX} y={y + 2.8} className="luthor-ordered-variant-label">
+              {rowLabels[index]}
+            </text>
+            <rect x={textX} y={y - 2.5} width={textWidth} height="5" rx="2.5" className="luthor-ordered-variant-line" />
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -1393,14 +1439,7 @@ export function Toolbar({
     setTextHighlightValue(value);
   };
 
-  const applyOrderedListPattern = (
-    pattern:
-      | "decimal-alpha-roman"
-      | "decimal-hierarchical"
-      | "upper-roman-upper-alpha"
-      | "upper-alpha-lower-alpha"
-      | "decimal-leading-zero-alpha",
-  ) => {
+  const applyOrderedListPattern = (pattern: OrderedListPattern) => {
     if (typeof commands.setOrderedListPattern === "function") {
       commands.setOrderedListPattern(pattern);
       return;
@@ -1692,40 +1731,23 @@ export function Toolbar({
               isOpen={showOrderedListDropdown}
               onOpenChange={setShowOrderedListDropdown}
             >
-              {ORDERED_LIST_OPTIONS.map((option) => (
-                <button
-                  key={option.pattern}
-                  className="luthor-dropdown-item"
-                  type="button"
-                  onClick={() => {
-                    applyOrderedListPattern(option.pattern);
-                    setShowOrderedListDropdown(false);
-                  }}
-                >
-                  <span>{option.label}</span>
-                </button>
-              ))}
-              <div className="luthor-dropdown-divider" />
-              <button
-                className="luthor-dropdown-item"
-                type="button"
-                onClick={() => {
-                  commands.setOrderedListSuffix?.("dot");
-                  setShowOrderedListDropdown(false);
-                }}
-              >
-                <span>Suffix: 1.</span>
-              </button>
-              <button
-                className="luthor-dropdown-item"
-                type="button"
-                onClick={() => {
-                  commands.setOrderedListSuffix?.("paren");
-                  setShowOrderedListDropdown(false);
-                }}
-              >
-                <span>Suffix: 1)</span>
-              </button>
+              <div className="luthor-ordered-variant-grid">
+                {ORDERED_LIST_OPTIONS.map((option) => (
+                  <button
+                    key={option.pattern}
+                    className="luthor-ordered-variant-option"
+                    type="button"
+                    title={option.title}
+                    aria-label={option.title}
+                    onClick={() => {
+                      applyOrderedListPattern(option.pattern);
+                      setShowOrderedListDropdown(false);
+                    }}
+                  >
+                    <OrderedListVariantPreview pattern={option.pattern} />
+                  </button>
+                ))}
+              </div>
             </Dropdown>
           </div>
         );
