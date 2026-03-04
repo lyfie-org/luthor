@@ -106,6 +106,25 @@ export interface CoreEditorCommands {
   toggleCheckList: () => void;
   indentList: () => void;
   outdentList: () => void;
+  setOrderedListPattern?: (
+    pattern:
+      | "decimal-alpha-roman"
+      | "decimal-hierarchical"
+      | "upper-roman-upper-alpha"
+      | "upper-alpha-lower-alpha"
+      | "decimal-leading-zero-alpha",
+  ) => void;
+  setOrderedListSuffix?: (suffix: "dot" | "paren") => void;
+  setUnorderedListPattern?: (
+    pattern:
+      | "disc-circle-square"
+      | "disc-arrow-square"
+      | "square-circle-disc"
+      | "arrow-diamond-square"
+      | "star-circle-square"
+      | "arrow-circle-square",
+  ) => void;
+  setCheckListVariant?: (variant: "strikethrough" | "plain") => void;
   insertHorizontalRule: () => void;
   insertTable: (config: InsertTableConfig) => void;
   insertImage: (config: InsertImageConfig) => void;

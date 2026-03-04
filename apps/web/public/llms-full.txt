@@ -3,7 +3,7 @@
 Concatenated markdown corpus for AI ingestion.
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-02-28T16:05:50.983Z
+Generated at: 2026-03-04T16:18:07.564Z
 
 ---
 ## FILE: getting-started/capabilities.md
@@ -727,6 +727,16 @@ This group covers links, headings, paragraphs, lists, and table workflows.
 - `tableExtension`
 - `horizontalRuleExtension`
 - `tabIndentExtension`
+
+## List depth and marker patterns
+
+- List indentation is capped at `8` sub-indent levels (`9` total levels including top-level).
+- `listExtension` supports ordered and unordered marker patterns through:
+  - `commands.setOrderedListPattern(pattern)`
+  - `commands.setUnorderedListPattern(pattern)`
+  - `commands.setOrderedListSuffix('dot' | 'paren')`
+- Checklist variants are available through:
+  - `commands.setCheckListVariant('strikethrough' | 'plain')`
 
 ## Example
 

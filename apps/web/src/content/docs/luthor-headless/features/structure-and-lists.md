@@ -16,6 +16,16 @@ This group covers links, headings, paragraphs, lists, and table workflows.
 - `horizontalRuleExtension`
 - `tabIndentExtension`
 
+## List depth and marker patterns
+
+- List indentation is capped at `8` sub-indent levels (`9` total levels including top-level).
+- `listExtension` supports ordered and unordered marker patterns through:
+  - `commands.setOrderedListPattern(pattern)`
+  - `commands.setUnorderedListPattern(pattern)`
+  - `commands.setOrderedListSuffix('dot' | 'paren')`
+- Checklist variants are available through:
+  - `commands.setCheckListVariant('strikethrough' | 'plain')`
+
 ## Example
 
 ```tsx

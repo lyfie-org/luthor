@@ -79,6 +79,8 @@ export class CodeExtension extends BaseExtension<
   CodeStateQueries,
   ReactNode[]
 > {
+  private static readonly MAX_CODE_TAB_DEPTH = 8;
+
   private codeHighlightProviderPromise: Promise<CodeHighlightProvider | null> | null = null;
 
   constructor() {
@@ -134,6 +136,9 @@ export class CodeExtension extends BaseExtension<
           }
 
           handled = true;
+          if (this.hasReachedCodeTabLimit(selection)) {
+            return;
+          }
           selection.insertText("\t");
         });
 
@@ -303,6 +308,23 @@ export class CodeExtension extends BaseExtension<
     const anchorNode = selection.anchor.getNode();
     const block = this.getBlockNode(anchorNode);
     return block ? this.getNodeFormat(block) : null;
+  }
+
+  private hasReachedCodeTabLimit(selection: any): boolean {
+    const anchor = selection.anchor;
+    const anchorNode = anchor.getNode();
+    if (typeof anchorNode.getTextContent !== "function") {
+      return false;
+    }
+
+    const content = anchorNode.getTextContent();
+    const offset = typeof anchor.offset === "number" ? anchor.offset : content.length;
+    const boundedOffset = Math.max(0, Math.min(content.length, offset));
+    const lineStart = content.lastIndexOf("\n", boundedOffset - 1) + 1;
+    const linePrefix = content.slice(lineStart, boundedOffset);
+    const leadingTabs = linePrefix.match(/^\t*/)?.[0].length ?? 0;
+
+    return leadingTabs >= CodeExtension.MAX_CODE_TAB_DEPTH;
   }
 }
 

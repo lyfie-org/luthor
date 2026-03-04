@@ -403,9 +403,10 @@ export function FloatingToolbar({
   const canShowUnderline = isFeatureEnabled("underline");
   const canShowStrikethrough = isFeatureEnabled("strikethrough");
   const canShowInlineCode = isFeatureEnabled("codeFormat");
-  const canShowQuote = isFeatureEnabled("blockFormat");
+  const isSelectionInList = !!(activeStates.unorderedList || activeStates.orderedList || activeStates.checkList);
+  const canShowQuote = isFeatureEnabled("blockFormat") && !isSelectionInList;
   const canShowLink = isFeatureEnabled("link");
-  const canShowList = isFeatureEnabled("list");
+  const canShowList = isFeatureEnabled("list") && !isSelectionInList;
   const showFormattingGroup = canShowBold || canShowItalic || canShowUnderline || canShowStrikethrough;
   const showBlockGroup = canShowInlineCode || canShowQuote || canShowLink;
   const showListGroup = canShowList;

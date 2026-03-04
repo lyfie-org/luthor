@@ -47,6 +47,7 @@ import {
   PaletteIcon,
   QuoteIcon,
   StrikethroughIcon,
+  ChevronDownIcon,
 } from "./icons";
 import { Button, Dialog, Dropdown, IconButton, Select } from "./ui";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
@@ -79,6 +80,40 @@ const EXTENSIVE_SWATCH_COLORS: readonly string[] = [
   "#e2f0d9", "#c6e0b4", "#a9d18e", "#70ad47", "#548235", "#375623",
   "#ddebf7", "#bdd7ee", "#9dc3e6", "#5b9bd5", "#2f75b5", "#1f4e78",
   "#e4dfec", "#d9c2e9", "#b4a7d6", "#8e7cc3", "#674ea7", "#351c75",
+];
+
+const ORDERED_LIST_OPTIONS: ReadonlyArray<{
+  label: string;
+  pattern:
+    | "decimal-alpha-roman"
+    | "decimal-hierarchical"
+    | "upper-roman-upper-alpha"
+    | "upper-alpha-lower-alpha"
+    | "decimal-leading-zero-alpha";
+}> = [
+  { label: "1. a. i. (Classic)", pattern: "decimal-alpha-roman" },
+  { label: "1. 1.1 1.1.1 (Hierarchy)", pattern: "decimal-hierarchical" },
+  { label: "I. A. 1. (Roman/Alpha)", pattern: "upper-roman-upper-alpha" },
+  { label: "A. a. i. (Alphabetic)", pattern: "upper-alpha-lower-alpha" },
+  { label: "01. a. i. (Leading Zero)", pattern: "decimal-leading-zero-alpha" },
+];
+
+const UNORDERED_LIST_OPTIONS: ReadonlyArray<{
+  label: string;
+  pattern:
+    | "disc-circle-square"
+    | "disc-arrow-square"
+    | "square-circle-disc"
+    | "arrow-diamond-square"
+    | "star-circle-square"
+    | "arrow-circle-square";
+}> = [
+  { label: "\u2022 \u25E6 \u25A0", pattern: "disc-circle-square" },
+  { label: "\u2022 \u27A4 \u25A0", pattern: "disc-arrow-square" },
+  { label: "\u25A0 \u25E6 \u2022", pattern: "square-circle-disc" },
+  { label: "\u27A4 \u25C6 \u25A0", pattern: "arrow-diamond-square" },
+  { label: "\u2605 \u25E6 \u25A0", pattern: "star-circle-square" },
+  { label: "\u27A4 \u25E6 \u25A0", pattern: "arrow-circle-square" },
 ];
 
 function normalizeColorValue(value: string): string {
@@ -804,6 +839,9 @@ export function Toolbar({
   const [showEmojiDropdown, setShowEmojiDropdown] = useState(false);
   const [showAlignDropdown, setShowAlignDropdown] = useState(false);
   const [showEmbedDropdown, setShowEmbedDropdown] = useState(false);
+  const [showUnorderedListDropdown, setShowUnorderedListDropdown] = useState(false);
+  const [showOrderedListDropdown, setShowOrderedListDropdown] = useState(false);
+  const [showCheckListDropdown, setShowCheckListDropdown] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
   const [fontFamilyValue, setFontFamilyValue] = useState("default");
   const [fontFamilyOptions, setFontFamilyOptions] = useState<SelectOption[]>([
@@ -1246,6 +1284,48 @@ export function Toolbar({
     setTextHighlightValue(value);
   };
 
+  const applyOrderedListPattern = (
+    pattern:
+      | "decimal-alpha-roman"
+      | "decimal-hierarchical"
+      | "upper-roman-upper-alpha"
+      | "upper-alpha-lower-alpha"
+      | "decimal-leading-zero-alpha",
+  ) => {
+    if (typeof commands.setOrderedListPattern === "function") {
+      commands.setOrderedListPattern(pattern);
+      return;
+    }
+
+    commands.toggleOrderedList();
+  };
+
+  const applyUnorderedListPattern = (
+    pattern:
+      | "disc-circle-square"
+      | "disc-arrow-square"
+      | "square-circle-disc"
+      | "arrow-diamond-square"
+      | "star-circle-square"
+      | "arrow-circle-square",
+  ) => {
+    if (typeof commands.setUnorderedListPattern === "function") {
+      commands.setUnorderedListPattern(pattern);
+      return;
+    }
+
+    commands.toggleUnorderedList();
+  };
+
+  const applyCheckListVariant = (variant: "strikethrough" | "plain") => {
+    if (typeof commands.setCheckListVariant === "function") {
+      commands.setCheckListVariant(variant);
+      return;
+    }
+
+    commands.toggleCheckList();
+  };
+
   const renderToolbarItem = (itemType: ToolbarItemType): ReactElement | null => {
     switch (itemType) {
       case "fontFamily":
@@ -1445,25 +1525,143 @@ export function Toolbar({
       case "unorderedList":
         if (!hasExtension("list")) return null;
         return (
-          <IconButton key="unorderedList" onClick={() => commands.toggleUnorderedList()} active={activeStates.unorderedList} title="Bullet List">
-            <ListIcon size={16} />
-          </IconButton>
+          <div key="unorderedList" className="luthor-toolbar-split-button">
+            <IconButton onClick={() => commands.toggleUnorderedList()} active={activeStates.unorderedList} title="Bullet List">
+              <ListIcon size={16} />
+            </IconButton>
+            <Dropdown
+              trigger={
+                <button
+                  type="button"
+                  className={`luthor-toolbar-button luthor-toolbar-button-arrow${activeStates.unorderedList ? " active" : ""}`}
+                  title="Bullet List Styles"
+                  aria-label="Bullet List Styles"
+                >
+                  <ChevronDownIcon size={12} />
+                </button>
+              }
+              isOpen={showUnorderedListDropdown}
+              onOpenChange={setShowUnorderedListDropdown}
+            >
+              {UNORDERED_LIST_OPTIONS.map((option) => (
+                <button
+                  key={option.pattern}
+                  className="luthor-dropdown-item"
+                  type="button"
+                  onClick={() => {
+                    applyUnorderedListPattern(option.pattern);
+                    setShowUnorderedListDropdown(false);
+                  }}
+                >
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </Dropdown>
+          </div>
         );
 
       case "orderedList":
         if (!hasExtension("list")) return null;
         return (
-          <IconButton key="orderedList" onClick={() => commands.toggleOrderedList()} active={activeStates.orderedList} title="Numbered List">
-            <ListOrderedIcon size={16} />
-          </IconButton>
+          <div key="orderedList" className="luthor-toolbar-split-button">
+            <IconButton onClick={() => commands.toggleOrderedList()} active={activeStates.orderedList} title="Numbered List">
+              <ListOrderedIcon size={16} />
+            </IconButton>
+            <Dropdown
+              trigger={
+                <button
+                  type="button"
+                  className={`luthor-toolbar-button luthor-toolbar-button-arrow${activeStates.orderedList ? " active" : ""}`}
+                  title="Numbered List Styles"
+                  aria-label="Numbered List Styles"
+                >
+                  <ChevronDownIcon size={12} />
+                </button>
+              }
+              isOpen={showOrderedListDropdown}
+              onOpenChange={setShowOrderedListDropdown}
+            >
+              {ORDERED_LIST_OPTIONS.map((option) => (
+                <button
+                  key={option.pattern}
+                  className="luthor-dropdown-item"
+                  type="button"
+                  onClick={() => {
+                    applyOrderedListPattern(option.pattern);
+                    setShowOrderedListDropdown(false);
+                  }}
+                >
+                  <span>{option.label}</span>
+                </button>
+              ))}
+              <div className="luthor-dropdown-divider" />
+              <button
+                className="luthor-dropdown-item"
+                type="button"
+                onClick={() => {
+                  commands.setOrderedListSuffix?.("dot");
+                  setShowOrderedListDropdown(false);
+                }}
+              >
+                <span>Suffix: 1.</span>
+              </button>
+              <button
+                className="luthor-dropdown-item"
+                type="button"
+                onClick={() => {
+                  commands.setOrderedListSuffix?.("paren");
+                  setShowOrderedListDropdown(false);
+                }}
+              >
+                <span>Suffix: 1)</span>
+              </button>
+            </Dropdown>
+          </div>
         );
 
       case "checkList":
         if (!hasExtension("list")) return null;
         return (
-          <IconButton key="checkList" onClick={() => commands.toggleCheckList()} active={activeStates.checkList} title="Checklist">
-            <ListCheckIcon size={16} />
-          </IconButton>
+          <div key="checkList" className="luthor-toolbar-split-button">
+            <IconButton onClick={() => commands.toggleCheckList()} active={activeStates.checkList} title="Checklist">
+              <ListCheckIcon size={16} />
+            </IconButton>
+            <Dropdown
+              trigger={
+                <button
+                  type="button"
+                  className={`luthor-toolbar-button luthor-toolbar-button-arrow${activeStates.checkList ? " active" : ""}`}
+                  title="Checklist Styles"
+                  aria-label="Checklist Styles"
+                >
+                  <ChevronDownIcon size={12} />
+                </button>
+              }
+              isOpen={showCheckListDropdown}
+              onOpenChange={setShowCheckListDropdown}
+            >
+              <button
+                className="luthor-dropdown-item"
+                type="button"
+                onClick={() => {
+                  applyCheckListVariant("strikethrough");
+                  setShowCheckListDropdown(false);
+                }}
+              >
+                <span>Checked = Strike through</span>
+              </button>
+              <button
+                className="luthor-dropdown-item"
+                type="button"
+                onClick={() => {
+                  applyCheckListVariant("plain");
+                  setShowCheckListDropdown(false);
+                }}
+              >
+                <span>Checked = Keep text</span>
+              </button>
+            </Dropdown>
+          </div>
         );
 
       case "indentList":
@@ -1473,7 +1671,6 @@ export function Toolbar({
             key="indentList"
             onClick={() => commands.indentList()}
             title="Indent List"
-            disabled={activeStates.checkList}
           >
             <IndentIcon size={14} />
           </IconButton>
@@ -1486,7 +1683,6 @@ export function Toolbar({
             key="outdentList"
             onClick={() => commands.outdentList()}
             title="Outdent List"
-            disabled={activeStates.checkList}
           >
             <OutdentIcon size={14} />
           </IconButton>
@@ -1775,3 +1971,4 @@ export function Toolbar({
     </>
   );
 }
+
