@@ -1763,6 +1763,14 @@
 	border-color: var(--luthor-list-checkbox-color, var(--luthor-accent));
 }
 
+.luthor-list-item-unchecked:focus,
+.luthor-list-item-unchecked:focus-visible,
+.luthor-list-item-checked:focus,
+.luthor-list-item-checked:focus-visible {
+	outline: none;
+	box-shadow: none;
+}
+
 .luthor-list-li:has(> .luthor-list-ul:first-child),
 .luthor-list-li:has(> .luthor-list-ol:first-child) {
 	list-style: none;
