@@ -1539,5 +1539,6 @@ export const __TEST_ONLY_LIST_INTERNALS = {
   resolveUnorderedPatternToken,
   resolveUnorderedMarkerKind,
   unorderedPatternKeys: Object.keys(UNORDERED_LIST_PATTERNS),
+  checkListVariants: ["strikethrough", "plain"] as const,
 } as const;
 

@@ -40,4 +40,11 @@ describe("ListExtension unordered pattern internals", () => {
     expect(marker('"\u25b8"')).toBe("arrow");
     expect(marker('"\u25c6"')).toBe("diamond");
   });
+
+  it("exposes exactly the supported checklist variant set", () => {
+    expect(__TEST_ONLY_LIST_INTERNALS.checkListVariants).toEqual([
+      "strikethrough",
+      "plain",
+    ]);
+  });
 });

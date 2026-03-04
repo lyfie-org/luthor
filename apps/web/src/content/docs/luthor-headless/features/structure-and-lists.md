@@ -21,6 +21,7 @@ This group covers links, headings, paragraphs, lists, and table workflows.
 - List indentation is capped at `8` sub-indent levels (`9` total levels including top-level).
 - `ListExtension` supports `maxDepth` configuration for custom depth caps.
 - `TabIndentExtension` supports `maxListDepth` so `Tab`/`Shift+Tab` behavior can match list depth limits.
+- Depth caps apply uniformly to ordered lists, unordered lists, and checklists.
 - `listExtension` supports ordered and unordered marker patterns through:
   - `commands.setOrderedListPattern(pattern)`
   - `commands.setUnorderedListPattern(pattern)`
@@ -32,6 +33,9 @@ This group covers links, headings, paragraphs, lists, and table workflows.
   - `arrow-circle-square`
 - Checklist variants are available through:
   - `commands.setCheckListVariant('strikethrough' | 'plain')`
+  - `strikethrough`: checked items render with line-through text.
+  - `plain`: checked items keep normal text without line-through.
+- Checklist variant and unordered marker pattern tokens are stored on list/list-item styles, so imported JSON can be rehydrated with `commands.rehydrateListStyles()`.
 
 ### Depth configuration example
 

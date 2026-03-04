@@ -37,6 +37,14 @@ export function App() {
 - `syntaxHighlighting`: `'auto' | 'disabled'` | extension default behavior if omitted
 - `maxListIndentation`: `8 (default) | number` (sub-indent levels below root)
 
+## Lists in Extensive
+
+- Ordered, unordered, and checklist styles are implemented in `@lyfie/luthor-headless` and surfaced in the preset toolbar.
+- `maxListIndentation` applies to all list types (ordered, unordered, checklist), including `Tab` and command-based indentation.
+- Checklist supports two variants:
+  - `strikethrough` (default): checked items render line-through text.
+  - `plain`: checked items do not strike through text.
+
 ## Theme callback example (`highlight.js`)
 
 Use `onThemeChange` when host styling must follow the editor's internal theme state (for example, swapping `highlight.js` light/dark styles).
