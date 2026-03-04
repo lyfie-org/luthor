@@ -1836,8 +1836,7 @@
 }
 
 .luthor-list-ol > .luthor-list-li[style*="--luthor-ordered-marker-content"]:not(.luthor-list-item-unchecked):not(.luthor-list-item-checked) {
-	position: relative;
-	padding-left: 34px;
+	padding-left: 0;
 }
 
 .luthor-list-ol > .luthor-list-li[style*="--luthor-ordered-marker-content"]:not(.luthor-list-item-unchecked):not(.luthor-list-item-checked)::marker {
@@ -1846,13 +1845,14 @@
 
 .luthor-list-ol > .luthor-list-li[style*="--luthor-ordered-marker-content"]:not(.luthor-list-item-unchecked):not(.luthor-list-item-checked)::before {
 	content: var(--luthor-ordered-marker-content);
-	position: absolute;
-	left: 0;
-	top: 50%;
-	transform: translateY(-50%);
-	min-width: 28px;
+	display: inline-block;
+	white-space: nowrap;
+	min-width: 2.4ch;
+	margin-right: 10px;
 	text-align: right;
-	line-height: 1;
+	line-height: inherit;
+	vertical-align: baseline;
+	font-variant-numeric: tabular-nums;
 	font-size: 14px;
 	font-weight: 500;
 	color: var(--luthor-list-marker-color, var(--luthor-fg));

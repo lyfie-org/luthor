@@ -85,7 +85,7 @@ function App() {
               json: "Paste JSON document...",
             }}
             toolbarAlignment="center"
-            maxListIndentation={5}
+            maxListIndentation={15}
           />
         );
     }
