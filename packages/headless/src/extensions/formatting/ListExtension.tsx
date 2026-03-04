@@ -23,7 +23,7 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
 import { $isTextNode, type TextNode } from "lexical";
 
-const MAX_LIST_DEPTH = 9;
+const DEFAULT_MAX_LIST_DEPTH = 9;
 
 const ORDERED_LIST_PATTERNS = {
   "decimal-alpha-roman": ["decimal", "lower-alpha", "lower-roman"],
@@ -305,10 +305,10 @@ function collectSelectedTopListNodes(selection: any): ListNode[] {
   return [...map.values()];
 }
 
-function isSelectionAtMaxListDepth(selection: any): boolean {
+function isSelectionAtMaxListDepth(selection: any, maxListDepth: number): boolean {
   const listNode = findNearestListNode(selection.anchor.getNode());
   if (!listNode) return false;
-  return $getListDepth(listNode) >= MAX_LIST_DEPTH;
+  return $getListDepth(listNode) >= maxListDepth;
 }
 
 function collectListItemContentTextNodes(listItemNode: ListItemNode): TextNode[] {
@@ -552,6 +552,11 @@ export type ListCommands = {
   rehydrateListStyles: () => void;
 };
 
+export type ListExtensionConfig = {
+  /** Maximum lexical list depth including the top-level list. */
+  maxDepth?: number;
+};
+
 /**
  * List extension for managing ordered and unordered lists.
  * Provides functionality to convert paragraphs to lists and vice versa.
@@ -588,7 +593,7 @@ export type ListCommands = {
  */
 export class ListExtension extends BaseExtension<
   "list",
-  any,
+  ListExtensionConfig,
   ListCommands,
   {
     unorderedList: () => Promise<boolean>;
@@ -600,8 +605,18 @@ export class ListExtension extends BaseExtension<
   /**
    * Creates a new list extension instance.
    */
-  constructor() {
+  constructor(config: ListExtensionConfig = {}) {
     super("list", [ExtensionCategory.Toolbar]);
+    this.config = config;
+  }
+
+  private getMaxListDepth(): number {
+    const configured = this.config.maxDepth;
+    if (!Number.isFinite(configured)) {
+      return DEFAULT_MAX_LIST_DEPTH;
+    }
+    const normalized = Math.floor(configured as number);
+    return normalized >= 1 ? normalized : DEFAULT_MAX_LIST_DEPTH;
   }
 
   /**
@@ -763,7 +778,7 @@ export class ListExtension extends BaseExtension<
             return;
           }
 
-          if (isSelectionAtMaxListDepth(selection)) {
+          if (isSelectionAtMaxListDepth(selection, this.getMaxListDepth())) {
             return;
           }
 
@@ -776,7 +791,10 @@ export class ListExtension extends BaseExtension<
       insertNestedUnorderedList: () => {
         editor.update(() => {
           const selection = $getSelection();
-          if (!$isRangeSelection(selection) || isSelectionAtMaxListDepth(selection)) {
+          if (
+            !$isRangeSelection(selection) ||
+            isSelectionAtMaxListDepth(selection, this.getMaxListDepth())
+          ) {
             return;
           }
           editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
@@ -786,7 +804,10 @@ export class ListExtension extends BaseExtension<
       insertNestedOrderedList: () => {
         editor.update(() => {
           const selection = $getSelection();
-          if (!$isRangeSelection(selection) || isSelectionAtMaxListDepth(selection)) {
+          if (
+            !$isRangeSelection(selection) ||
+            isSelectionAtMaxListDepth(selection, this.getMaxListDepth())
+          ) {
             return;
           }
           editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);

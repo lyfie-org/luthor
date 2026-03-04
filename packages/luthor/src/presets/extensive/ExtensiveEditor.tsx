@@ -229,6 +229,19 @@ function normalizeMinimumDefaultLineHeightKey(value: string | number | undefined
   return fallback;
 }
 
+function normalizeMaxListIndentationKey(value: number | undefined): string {
+  if (!Number.isFinite(value)) {
+    return "8";
+  }
+
+  const normalized = Math.floor(value as number);
+  if (normalized < 0) {
+    return "8";
+  }
+
+  return normalized.toString();
+}
+
 function normalizeStyleVarsKey(styleVars?: Record<string, string | undefined>): string {
   return sharedNormalizeStyleVarsKey(styleVars);
 }
@@ -1116,6 +1129,8 @@ export interface ExtensiveEditorProps {
   maxAutoDetectCodeLength?: number;
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
+  /** Maximum list sub-indent levels (excluding top-level list). Default: 8 */
+  maxListIndentation?: number;
 }
 
 export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorProps>(
@@ -1161,6 +1176,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     maxAutoDetectCodeLength,
     isCopyAllowed = true,
     languageOptions,
+    maxListIndentation = 8,
   }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
     const isDark = editorTheme === "dark";
@@ -1207,6 +1223,10 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       () => normalizeMinimumDefaultLineHeightKey(minimumDefaultLineHeight),
       [minimumDefaultLineHeight],
     );
+    const maxListIndentationKey = useMemo(
+      () => normalizeMaxListIndentationKey(maxListIndentation),
+      [maxListIndentation],
+    );
     const syntaxHighlightKey = syntaxHighlighting ?? "unset";
     const maxAutoDetectKey =
       typeof maxAutoDetectCodeLength === "number"
@@ -1235,7 +1255,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       () => resolveFeatureFlags(effectiveFeatureFlags),
       [effectiveFeatureFlags],
     );
-    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${languageOptionsKey}::${featureFlagsKey}`;
+    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${languageOptionsKey}::${featureFlagsKey}`;
     const stableFontFamilyOptionsRef = useRef<readonly FontFamilyOption[] | undefined>(fontFamilyOptions);
     const stableFontSizeOptionsRef = useRef<readonly FontSizeOption[] | undefined>(fontSizeOptions);
     const stableLineHeightOptionsRef = useRef<readonly LineHeightOption[] | undefined>(lineHeightOptions);
@@ -1277,6 +1297,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         fontSizeOptions: stableFontSizeOptionsRef.current,
         lineHeightOptions: stableLineHeightOptionsRef.current,
         minimumDefaultLineHeight: stableMinimumDefaultLineHeightRef.current,
+        maxListIndentation: Number(maxListIndentationKey),
         scaleByRatio,
         ...(syntaxHighlighting !== undefined
           ? { syntaxHighlighting }

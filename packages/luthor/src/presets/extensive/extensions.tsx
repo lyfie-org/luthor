@@ -25,13 +25,13 @@ import {
   subscriptExtension,
   superscriptExtension,
   horizontalRuleExtension,
-  listExtension,
+  ListExtension,
   historyExtension,
   blockFormatExtension,
   codeExtension,
   codeIntelligenceExtension,
   codeFormatExtension,
-  tabIndentExtension,
+  TabIndentExtension,
   enterKeyBehaviorExtension,
   type CodeHighlightProvider,
   type CodeLanguageOptionsConfig,
@@ -151,7 +151,11 @@ export type ExtensiveExtensionsConfig = {
   maxAutoDetectCodeLength?: number;
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
+  /** Maximum list sub-indent levels (excluding the top-level list). Default: 8 */
+  maxListIndentation?: number;
 };
+
+const DEFAULT_MAX_LIST_INDENTATION = 8;
 
 const DEFAULT_EXTENSIVE_FONT_FAMILY_OPTIONS: readonly FontFamilyOption[] = [
   { value: "default", label: "Default", fontFamily: "inherit" },
@@ -344,6 +348,15 @@ function parseLineHeightRatio(value: string): string | null {
   }
 
   return parsed.toString();
+}
+
+function normalizeMaxListIndentation(value: number | undefined): number {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_MAX_LIST_INDENTATION;
+  }
+
+  const normalized = Math.floor(value as number);
+  return normalized >= 0 ? normalized : DEFAULT_MAX_LIST_INDENTATION;
 }
 
 function normalizeMinimumDefaultLineHeight(input: string | number | undefined): string {
@@ -718,12 +731,14 @@ function buildExtensiveExtensions({
   maxAutoDetectCodeLength,
   isCopyAllowed,
   languageOptions,
+  maxListIndentation,
 }: ExtensiveExtensionsConfig = {}) {
   const resolvedFeatureFlags = resolveFeatureFlags(featureFlags);
   const enabled = (feature: FeatureFlag) => isFeatureEnabled(resolvedFeatureFlags, feature);
   const isDraggableFeatureEnabled =
     (isDraggableBoxEnabled ?? true) && enabled("draggableBlock");
   const resolvedMinimumDefaultLineHeight = normalizeMinimumDefaultLineHeight(minimumDefaultLineHeight);
+  const resolvedMaxListIndentation = normalizeMaxListIndentation(maxListIndentation);
 
   const fontFamilyExt = new FontFamilyExtension().configure({
     options: resolveFontFamilyOptions(fontFamilyOptions),
@@ -751,6 +766,12 @@ function buildExtensiveExtensions({
     isCopyAllowed: isCopyAllowed ?? true,
     languageOptions,
   });
+  const listExt = new ListExtension({
+    maxDepth: resolvedMaxListIndentation + 1,
+  });
+  const tabIndentExt = new TabIndentExtension({
+    maxListDepth: resolvedMaxListIndentation + 1,
+  });
 
   const extensions: Extension[] = [];
 
@@ -768,14 +789,14 @@ function buildExtensiveExtensions({
   if (enabled("link")) extensions.push(linkExt);
   if (enabled("horizontalRule")) extensions.push(horizontalRuleExtension);
   if (enabled("table")) extensions.push(tableExt);
-  if (enabled("list")) extensions.push(listExtension);
+  if (enabled("list")) extensions.push(listExt);
   if (enabled("history")) extensions.push(historyExtension);
   if (enabled("image")) extensions.push(extensiveImageExtension);
   if (enabled("blockFormat")) extensions.push(blockFormatExtension);
   if (enabled("code")) extensions.push(codeExtension);
   if (enabled("codeIntelligence")) extensions.push(codeIntelligenceExtension);
   if (enabled("codeFormat")) extensions.push(codeFormatExtension);
-  if (enabled("tabIndent")) extensions.push(tabIndentExtension);
+  if (enabled("tabIndent")) extensions.push(tabIndentExt);
   if (enabled("enterKeyBehavior")) extensions.push(enterKeyBehaviorExtension);
   if (enabled("iframeEmbed")) extensions.push(iframeEmbedExt);
   if (enabled("youTubeEmbed")) extensions.push(youTubeEmbedExt);

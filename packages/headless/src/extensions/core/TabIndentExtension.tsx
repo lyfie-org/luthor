@@ -19,6 +19,9 @@ import { ReactNode } from "react";
 const MAX_BLOCK_INDENT_DEPTH = 8;
 const MAX_LIST_INDENT_DEPTH = 9;
 type TabContext = "list" | "heading" | "paragraph" | "other";
+type TabIndentConfig = {
+  maxListDepth?: number;
+};
 
 /**
  * TabIndentExtension - Adds universal Tab/Shift+Tab indentation support
@@ -36,13 +39,14 @@ type TabContext = "list" | "heading" | "paragraph" | "other";
  */
 export class TabIndentExtension extends BaseExtension<
   "tabIndent",
-  Record<string, never>,
+  TabIndentConfig,
   Record<string, never>,
   Record<string, never>,
   ReactNode[]
 > {
-  constructor() {
+  constructor(config: TabIndentConfig = {}) {
     super("tabIndent", [ExtensionCategory.Toolbar]);
+    this.config = config;
   }
 
   /**
@@ -139,7 +143,16 @@ export class TabIndentExtension extends BaseExtension<
    */
   private isListAtMaxDepth(node: any): boolean {
     const listNode = this.findNearestListNode(node);
-    return listNode ? $getListDepth(listNode) >= MAX_LIST_INDENT_DEPTH : false;
+    if (!listNode) {
+      return false;
+    }
+
+    const configuredMaxDepth = this.config.maxListDepth;
+    const maxDepth = Number.isFinite(configuredMaxDepth)
+      ? Math.max(1, Math.floor(configuredMaxDepth as number))
+      : MAX_LIST_INDENT_DEPTH;
+
+    return $getListDepth(listNode) >= maxDepth;
   }
 
   /**
