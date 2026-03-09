@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@lyfie/luthor": "workspace:*",
-    "@opennextjs/cloudflare": "^1.16.5",
+    "@opennextjs/cloudflare": "1.16.5",
     "@phosphor-icons/react": "^2.1.10",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
@@ -31,6 +31,6 @@
     "@types/node": "^20.19.9",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "wrangler": "^4.67.0"
+    "wrangler": "4.67.0"
   }
 }

@@ -1,9 +1,9 @@
 ---
-title: Headless Preset
+title: Headless Text Input
 description: Reference preset showing direct headless composition.
 ---
 
-# Headless Preset
+# Headless Text Input
 
 Small reference preset demonstrating direct headless composition.
 
@@ -26,4 +26,5 @@ export function App() {
 ## Behavior
 
 Uses a minimal extension set (`richText`, `history`, `bold`, `italic`, `underline`, `list`) and a lightweight toolbar.
+
 

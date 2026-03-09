@@ -1,49 +1,49 @@
-.luthor-preset-chat-window {
+.luthor-preset-composer {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  min-width: var(--luthor-chat-min-width, 240px);
-  max-width: var(--luthor-chat-max-width, 100%);
+  min-width: var(--luthor-composer-min-width, 240px);
+  max-width: var(--luthor-composer-max-width, 100%);
 }
 
-.luthor-chat-window-composer-row {
+.luthor-composer-row {
   display: flex;
   align-items: flex-end;
   gap: 8px;
   width: 100%;
 }
 
-.luthor-chat-window-composer-shell {
+.luthor-composer-shell {
   position: relative;
   width: 100%;
-  min-width: var(--luthor-chat-min-width, 240px);
-  max-width: var(--luthor-chat-max-width, 100%);
+  min-width: var(--luthor-composer-min-width, 240px);
+  max-width: var(--luthor-composer-max-width, 100%);
 }
 
-.luthor-preset-chat-window .luthor-preset-extensive.luthor-editor-wrapper {
-  min-height: var(--luthor-chat-min-height, 56px);
-  max-height: var(--luthor-chat-max-height, 220px);
-  height: var(--luthor-chat-current-height, var(--luthor-chat-min-height, 56px));
-  min-width: var(--luthor-chat-min-width, 240px);
-  max-width: var(--luthor-chat-max-width, 100%);
+.luthor-preset-composer .luthor-preset-extensive.luthor-editor-wrapper {
+  min-height: var(--luthor-composer-min-height, 56px);
+  max-height: var(--luthor-composer-max-height, 220px);
+  height: var(--luthor-composer-current-height, var(--luthor-composer-min-height, 56px));
+  min-width: var(--luthor-composer-min-width, 240px);
+  max-width: var(--luthor-composer-max-width, 100%);
   border-radius: 16px;
 }
 
-.luthor-preset-chat-window .luthor-editor-header {
+.luthor-preset-composer .luthor-editor-header {
   display: none;
 }
 
-.luthor-preset-chat-window .luthor-editor {
+.luthor-preset-composer .luthor-editor {
   min-height: 0;
   height: 100%;
 }
 
-.luthor-preset-chat-window .luthor-editor-visual-shell {
+.luthor-preset-composer .luthor-editor-visual-shell {
   min-height: 0;
 }
 
-.luthor-preset-chat-window .luthor-richtext-container {
+.luthor-preset-composer .luthor-richtext-container {
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -52,25 +52,25 @@
   --luthor-first-block-offset: 0px;
 }
 
-.luthor-preset-chat-window .luthor-content-editable {
+.luthor-preset-composer .luthor-content-editable {
   padding: var(--luthor-editor-content-padding-y) var(--luthor-editor-content-padding-x);
   min-height: 100%;
   box-sizing: border-box;
   line-height: 1.45;
 }
 
-.luthor-preset-chat-window--send-inside .luthor-content-editable {
+.luthor-preset-composer--send-inside .luthor-content-editable {
   padding-right: 84px;
   padding-bottom: 48px;
 }
 
-.luthor-preset-chat-window .luthor-placeholder {
+.luthor-preset-composer .luthor-placeholder {
   top: var(--luthor-editor-content-padding-y);
   left: var(--luthor-editor-content-padding-x);
   line-height: 1.45;
 }
 
-.luthor-chat-window-bottom-toolbar {
+.luthor-composer-bottom-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -80,7 +80,7 @@
   background: var(--luthor-bg);
 }
 
-.luthor-chat-window-action {
+.luthor-composer-action {
   border: 1px solid var(--luthor-border);
   background: var(--luthor-muted);
   color: var(--luthor-fg);
@@ -90,28 +90,29 @@
   cursor: pointer;
 }
 
-.luthor-chat-window-action-send {
+.luthor-composer-action-send {
   border-color: var(--luthor-accent);
   background: var(--luthor-accent);
   color: var(--luthor-bg);
 }
 
-.luthor-chat-window-action-send--inside {
+.luthor-composer-action-send--inside {
   position: absolute;
   right: 10px;
   bottom: 10px;
 }
 
-.luthor-chat-window-action-send--right {
+.luthor-composer-action-send--right {
   align-self: flex-end;
 }
 
 @media (max-width: 640px) {
-  .luthor-chat-window-composer-row {
+  .luthor-composer-row {
     flex-wrap: wrap;
   }
 
-  .luthor-chat-window-action-send--right {
+  .luthor-composer-action-send--right {
     margin-left: auto;
   }
 }
+

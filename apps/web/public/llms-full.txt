@@ -3,7 +3,7 @@
 Concatenated markdown corpus for AI ingestion.
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-04T19:24:17.912Z
+Generated at: 2026-03-09T15:20:24.876Z
 
 ---
 ## FILE: getting-started/capabilities.md
@@ -733,6 +733,7 @@ This group covers links, headings, paragraphs, lists, and table workflows.
 - List indentation is capped at `8` sub-indent levels (`9` total levels including top-level).
 - `ListExtension` supports `maxDepth` configuration for custom depth caps.
 - `TabIndentExtension` supports `maxListDepth` so `Tab`/`Shift+Tab` behavior can match list depth limits.
+- Depth caps apply uniformly to ordered lists, unordered lists, and checklists.
 - `listExtension` supports ordered and unordered marker patterns through:
   - `commands.setOrderedListPattern(pattern)`
   - `commands.setUnorderedListPattern(pattern)`
@@ -744,6 +745,9 @@ This group covers links, headings, paragraphs, lists, and table workflows.
   - `arrow-circle-square`
 - Checklist variants are available through:
   - `commands.setCheckListVariant('strikethrough' | 'plain')`
+  - `strikethrough`: checked items render with line-through text.
+  - `plain`: checked items keep normal text without line-through.
+- Checklist variant and unordered marker pattern tokens are stored on list/list-item styles, so imported JSON can be rehydrated with `commands.rehydrateListStyles()`.
 
 ### Depth configuration example
 
@@ -924,262 +928,122 @@ import { headless } from '@lyfie/luthor';
 
 ## Preset docs
 
-- [Extensive](/docs/luthor/presets/extensive-editor/)
-- [Simple Text](/docs/luthor/presets/simple-text-editor/)
-- [Rich Text](/docs/luthor/presets/rich-text-box-editor/)
-- [Chat Window](/docs/luthor/presets/chat-window-editor/)
-- [Email Compose](/docs/luthor/presets/email-compose-editor/)
-- [Markdown](/docs/luthor/presets/md-text-editor/)
-- [Notion Like](/docs/luthor/presets/notion-like-editor/)
-- [Headless Preset](/docs/luthor/presets/headless-editor-preset/)
-- [Notes](/docs/luthor/presets/notes-editor/)
+- [Extensive Editor](/docs/luthor/presets/extensive-editor/)
+- [Rich Text Input](/docs/luthor/presets/compose-editor/)
+- [Simple Text Input](/docs/luthor/presets/composer-editor/)
+- [MD Editor](/docs/luthor/presets/md-friendly-editor/)
+- [Slash Editor](/docs/luthor/presets/notion-like-editor/)
+- [Headless Text Input](/docs/luthor/presets/headless-editor-preset/)
 
 ---
-## FILE: luthor/presets/chat-window-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/chat-window-editor/
+## FILE: luthor/presets/compose-editor.md
+## URL: https://www.luthor.fyi/docs/luthor/presets/compose-editor/
 ---
 
 ---
-title: Chat Window
-description: Complete usage, prop options, and behavior reference for the chat input preset.
+title: Rich Text Input
+description: Focused rich text compose preset with optional recipient rows.
 ---
 
-# Chat Window
+# Rich Text Input
 
-`ChatWindowEditor` is a constrained chat-composer preset built for message input UX.
+`ComposeEditor` merges focused rich-text and draft-composition workflows into one surface.
 
-It is intentionally locked down to a small formatting set and single visual mode.
-
-## Allowed formatting only
-
-The chat preset only supports these text features:
-
-- Bold
-- Italic
-- Strikethrough
-
-Everything else is disabled in this preset:
-
-- No underline
-- No lists
-- No links
-- No images
-- No tables
-- No inline code
-- No code blocks
-- No embeds
-- No command palette/slash menu/context menu
-- No theme-toggle/history features in-editor
-
-## Keyboard shortcuts
-
-Allowed shortcuts:
-
-- Bold: `Ctrl/Cmd + B`
-- Italic: `Ctrl/Cmd + I`
-- Strikethrough: `Ctrl/Cmd + Shift + X`
-
-No other chat formatting shortcuts should be relied on.
+Use it as a clean rich editor, or enable recipient/subject rows when needed.
 
 ## Usage
 
 ```tsx
-import { ChatWindowEditor } from '@lyfie/luthor';
+import { ComposeEditor } from '@lyfie/luthor';
 import '@lyfie/luthor/styles.css';
 
 export function App() {
   return (
-    <ChatWindowEditor
+    <ComposeEditor
+      compactToolbar
+      showTo
+      showCc
+      showSubject
+      placeholder="Write your draft..."
+    />
+  );
+}
+```
+
+## Props
+
+`ComposeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.
+
+- `featureFlags`: `undefined (default) | FeatureFlagOverrides`
+- `compactToolbar`: `false (default) | true`
+- `showRecipients`: `false (default) | true`
+- `showTo`: `false (default) | true`
+- `showCc`: `false (default) | true`
+- `showBcc`: `false (default) | true`
+- `showSubject`: `false (default) | true`
+
+## Behavior
+
+- Defaults to focused formatting with media/embed-heavy features disabled.
+- Optional recipient rows render above the editor shell.
+- Supports feature flag overrides for deeper tuning.
+
+---
+## FILE: luthor/presets/composer-editor.md
+## URL: https://www.luthor.fyi/docs/luthor/presets/composer-editor/
+---
+
+---
+title: Simple Text Input
+description: Constrained message composer preset with send controls.
+---
+
+# Simple Text Input
+
+`ComposerEditor` is a constrained message-composer preset.
+
+It keeps formatting intentionally minimal and supports send workflows out of the box.
+
+## Usage
+
+```tsx
+import { ComposerEditor } from '@lyfie/luthor';
+import '@lyfie/luthor/styles.css';
+
+export function App() {
+  return (
+    <ComposerEditor
       placeholder="Type a message"
-      formattingOptions={{
-        bold: true,
-        italic: true,
-        strikethrough: true,
-      }}
-      minHeight={56}
-      maxHeight={220}
-      minWidth={260}
-      maxWidth={520}
-      submitOnEnter={false}
-      showBottomToolbar
-      toolbarButtons={[
-        { id: 'attachment', content: 'Attach', ariaLabel: 'Attach file', onClick: () => {} },
-        { id: 'image', content: 'Image', ariaLabel: 'Add image', onClick: () => {} },
-      ]}
-      sendButtonPlacement="inside"
+      submitOnEnter
+      allowShiftEnter
       outputFormat="md"
-      onSend={({ format, text, markdown, json }) => {
-        // `text` follows `outputFormat`
-        console.log({ format, text, markdown, json });
+      onSend={({ text }) => {
+        console.log(text);
       }}
     />
   );
 }
 ```
 
-## Prop Reference
-
-`ChatWindowEditorProps` is purpose-built for chat and does not expose the full `ExtensiveEditorProps` surface.
-
-### Core editor props
-
-- `className`: `undefined (default) | string`
-- `variantClassName`: `undefined (default) | string`
-- `initialTheme`: `'light' (default) | 'dark'`
-- `onThemeChange`: `undefined (default) | (theme: 'light' | 'dark') => void`
-- `theme`: `undefined (default) | Partial<LuthorTheme>`
-- `defaultContent`: `undefined (default) | string`
-- `showDefaultContent`: `false (default) | true`
-- `placeholder`: `undefined (default) | ExtensiveEditorProps['placeholder']`
-
-### Formatting control
-
-- `formattingOptions`: `undefined (default) | ChatWindowFormattingOptions`
-
-`ChatWindowFormattingOptions`:
-
-- `bold`: `true (default) | false`
-- `italic`: `true (default) | false`
-- `strikethrough`: `true (default) | false`
-
-### Send/output behavior
-
-- `onSend`: `undefined (default) | (payload: ChatWindowEditorSendPayload) => void`
-- `outputFormat`: `'md' (default) | 'json'`
-- `clearOnSend`: `true (default) | false`
-- `allowEmptySend`: `false (default) | true`
-- `submitOnEnter`: `false (default) | true`
-- `allowShiftEnter`: `true (default) | false`
-
-### Composer size/layout
-
-- `minHeight`: `56 (default) | number | string`
-- `maxHeight`: `220 (default) | number | string`
-- `minWidth`: `240 (default) | number | string`
-- `maxWidth`: `'100%' (default) | number | string`
-
-### Bottom toolbar props
-
-- `showBottomToolbar`: `true (default) | false`
-- `toolbarButtons`: `[] (default) | readonly ChatWindowToolbarButton[]`
-- `toolbarClassName`: `undefined (default) | string`
-- `toolbarStyle`: `undefined (default) | React.CSSProperties`
-
-### Send button props
-
-- `showSendButton`: `true (default) | false`
-- `sendButtonPlacement`: `'inside' (default) | 'right'`
-- `sendButtonContent`: `'Send' (default) | ReactNode`
-- `sendButtonAriaLabel`: `'Send message' (default) | string`
-- `sendButtonClassName`: `undefined (default) | string`
-
-### Scroll area styling
-
-- `scrollAreaClassName`: `undefined (default) | string`
-
-### Types
-
-```ts
-type ChatWindowOutputFormat = 'md' | 'json';
-
-type ChatWindowEditorSendPayload = {
-  format: ChatWindowOutputFormat;
-  // Mirrors outputFormat ('md' -> markdown, 'json' -> json)
-  text: string;
-  // Always included
-  markdown: string;
-  // Always included
-  json: string;
-};
-
-type ChatWindowFormattingOptions = {
-  bold?: boolean;
-  italic?: boolean;
-  strikethrough?: boolean;
-};
-
-type ChatWindowToolbarButton = {
-  id: string;
-  content: React.ReactNode;
-  ariaLabel: string;
-  onClick?: () => void;
-  disabled?: boolean;
-  title?: string;
-  className?: string;
-};
-```
-
-## Detailed behavior
-
-### Output format behavior
-
-- If `outputFormat="md"`, then `payload.text === payload.markdown`.
-- If `outputFormat="json"`, then `payload.text === payload.json`.
-- `payload.markdown` and `payload.json` are always provided for consumers that need both.
-
-### Enter behavior
-
-- `submitOnEnter=false` (default): Enter inserts newline.
-- `submitOnEnter=true`: Enter sends via `onSend`.
-- `allowShiftEnter=true`: Shift+Enter keeps newline behavior even if submit-on-enter is on.
-
-### Auto-grow behavior
-
-- Height grows from `minHeight` as content increases.
-- At `maxHeight`, growth stops and internal composer scrolling is used.
-
-### Cursor behavior
-
-- Clicking in the non-interactive area of the editor shell focuses the editor and places caret near the first line.
-
-### Visual mode only
-
-- Chat preset always runs single visual mode.
-- Visual/JSON tabs are not shown.
-
-## Behavior
-
-- Use this preset when you need a constrained chat input, not a general rich document editor.
-- Use `formattingOptions` to selectively turn off any of the three allowed formatting features.
-- Keep your product logic on `onSend` and treat `text` as the canonical value based on `outputFormat`.
-
----
-## FILE: luthor/presets/email-compose-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/email-compose-editor/
----
-
----
-title: Email Compose
-description: Usage and prop defaults for the email compose preset.
----
-
-# Email Compose
-
-Email composer preset with To/Cc/Bcc/Subject shell.
-
-## Usage
-
-```tsx
-import { EmailComposeEditor } from '@lyfie/luthor';
-import '@lyfie/luthor/styles.css';
-
-export function App() {
-  return <EmailComposeEditor showCc showBcc />;
-}
-```
-
 ## Props
 
-`EmailComposeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.
+`ComposerEditorProps` is purpose-built for message input.
 
-- `showTo`: `true (default) | false`
-- `showCc`: `false (default) | true`
-- `showBcc`: `false (default) | true`
-- `showSubject`: `true (default) | false`
+- `formattingOptions`: `ComposerFormattingOptions`
+- `onSend`: `(payload: ComposerEditorSendPayload) => void`
+- `outputFormat`: `'md' (default) | 'json'`
+- `submitOnEnter`: `false (default) | true`
+- `allowShiftEnter`: `true (default) | false`
+- `showBottomToolbar`: `true (default) | false`
+- `toolbarButtons`: `readonly ComposerToolbarButton[]`
+- `sendButtonPlacement`: `'inside' (default) | 'right'`
+- `minHeight` / `maxHeight` / `minWidth` / `maxWidth`
 
 ## Behavior
 
-Preset applies email-friendly feature defaults and renders compose header fields.
+- Allows only bold, italic, and strikethrough formatting.
+- Always runs visual mode only.
+- Supports auto-grow until `maxHeight`, then internal scrolling.
 
 ---
 ## FILE: luthor/presets/extensive-editor.md
@@ -1187,11 +1051,11 @@ Preset applies email-friendly feature defaults and renders compose header fields
 ---
 
 ---
-title: Extensive
+title: Extensive Editor
 description: Full-feature preset and core prop reference.
 ---
 
-# Extensive
+# Extensive Editor
 
 `ExtensiveEditor` is the base full-feature preset editor.
 
@@ -1224,6 +1088,14 @@ export function App() {
 - `isCopyAllowed`: `true (default) | false`
 - `syntaxHighlighting`: `'auto' | 'disabled'` | extension default behavior if omitted
 - `maxListIndentation`: `8 (default) | number` (sub-indent levels below root)
+
+## Lists in Extensive
+
+- Ordered, unordered, and checklist styles are implemented in `@lyfie/luthor-headless` and surfaced in the preset toolbar.
+- `maxListIndentation` applies to all list types (ordered, unordered, checklist), including `Tab` and command-based indentation.
+- Checklist supports two variants:
+  - `strikethrough` (default): checked items render line-through text.
+  - `plain`: checked items do not strike through text.
 
 ## Theme callback example (`highlight.js`)
 
@@ -1294,11 +1166,11 @@ This is the base preset that other presets build on.
 ---
 
 ---
-title: Headless Preset
+title: Headless Text Input
 description: Reference preset showing direct headless composition.
 ---
 
-# Headless Preset
+# Headless Text Input
 
 Small reference preset demonstrating direct headless composition.
 
@@ -1323,90 +1195,41 @@ export function App() {
 Uses a minimal extension set (`richText`, `history`, `bold`, `italic`, `underline`, `list`) and a lightweight toolbar.
 
 ---
-## FILE: luthor/presets/md-text-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/md-text-editor/
+## FILE: luthor/presets/md-friendly-editor.md
+## URL: https://www.luthor.fyi/docs/luthor/presets/md-friendly-editor/
 ---
 
 ---
-title: Markdown
+title: MD Editor
 description: Visual and markdown mode preset with mode-switch behavior.
 ---
 
-# Markdown
+# MD Editor
 
 Preset that switches between visual and markdown editing.
 
 ## Usage
 
 ```tsx
-import { MDTextEditor } from '@lyfie/luthor';
+import { MDFriendlyEditor } from '@lyfie/luthor';
 import '@lyfie/luthor/styles.css';
 
 export function App() {
-  return <MDTextEditor initialMode="visual" />;
+  return <MDFriendlyEditor initialMode="visual" />;
 }
 ```
 
 ## Props
 
-`MDTextEditorProps` inherits `ExtensiveEditorProps` except `availableModes` and `initialMode`.
+`MDFriendlyEditorProps` inherits `ExtensiveEditorProps` except `availableModes` and `initialMode`.
 
 - `initialMode`: `'visual' (default) | 'markdown'`
 
 ## Behavior
 
-- Uses markdown/json conversion when switching modes
-- Renders source textarea in markdown mode
-
----
-## FILE: luthor/presets/notes-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/notes-editor/
----
-
----
-title: Notes
-description: Notes-style preset with title and action controls.
----
-
-# Notes
-
-Notes-style preset with title and action controls.
-
-## Usage
-
-```tsx
-import { NotesEditor } from '@lyfie/luthor';
-import '@lyfie/luthor/styles.css';
-
-export function App() {
-  return (
-    <NotesEditor
-      showTitle
-      title="Sprint Notes"
-      onTitleChange={(value) => console.log(value)}
-      onPin={() => console.log('pin')}
-      onArchive={() => console.log('archive')}
-    />
-  );
-}
-```
-
-## Props
-
-`NotesEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.
-
-- `showTitle`: `true (default) | false`
-- `title`: `'' (default) | string`
-- `onTitleChange`: `undefined (default) | (value: string) => void`
-- `showActions`: `true (default) | false`
-- `onPin`: `undefined (default) | () => void`
-- `onArchive`: `undefined (default) | () => void`
-- `onColorChange`: `undefined (default) | (color: string) => void`
-- `colorOptions`: `['#fef3c7', '#dbeafe', '#dcfce7'] (default) | readonly string[]`
-
-## Behavior
-
-Toolbar is disabled by preset default and feature set is tuned for lightweight note taking.
+- Converts visual JSON to markdown when switching to markdown mode.
+- Parses markdown back into visual JSON when switching back.
+- Renders source textarea in markdown mode.
 
 ---
 ## FILE: luthor/presets/notion-like-editor.md
@@ -1414,11 +1237,11 @@ Toolbar is disabled by preset default and feature set is tuned for lightweight n
 ---
 
 ---
-title: Notion Like
+title: Slash Editor
 description: Slash-first preset with draggable and command-focused defaults.
 ---
 
-# Notion Like
+# Slash Editor
 
 Slash-first preset with draggable-focused defaults.
 
@@ -1445,76 +1268,4 @@ export function App() {
 ## Behavior
 
 Defaults enable slash commands, draggable blocks, and command palette while keeping toolbar hidden.
-
----
-## FILE: luthor/presets/rich-text-box-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/rich-text-box-editor/
----
-
----
-title: Rich Text
-description: Compact rich text preset and prop defaults.
----
-
-# Rich Text
-
-Compact rich text preset for focused editing.
-
-## Usage
-
-```tsx
-import { RichTextBoxEditor } from '@lyfie/luthor';
-import '@lyfie/luthor/styles.css';
-
-export function App() {
-  return <RichTextBoxEditor compactToolbar />;
-}
-```
-
-## Props
-
-`RichTextBoxEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.
-
-- `featureFlags`: `undefined (default) | FeatureFlagOverrides`
-- `compactToolbar`: `false (default) | true`
-
-## Behavior
-
-Default feature flags enable core formatting and disable heavier media/embed features unless re-enabled.
-
----
-## FILE: luthor/presets/simple-text-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/simple-text-editor/
----
-
----
-title: Simple Text
-description: Minimal text-focused preset with constrained editing modes.
----
-
-# Simple Text
-
-Minimal plain-text style preset built on top of `ExtensiveEditor`.
-
-## Usage
-
-```tsx
-import { SimpleTextEditor } from '@lyfie/luthor';
-import '@lyfie/luthor/styles.css';
-
-export function App() {
-  return <SimpleTextEditor placeholder="Start writing..." />;
-}
-```
-
-## Props
-
-`SimpleTextEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, `initialMode`, and `toolbarVisibility`.
-
-- `hideToolbarByDefault`: `true (default) | false`
-
-## Behavior
-
-- Forces visual-only mode
-- Disables most rich features by preset defaults
 

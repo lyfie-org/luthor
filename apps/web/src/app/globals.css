@@ -885,25 +885,25 @@ a {
   animation-delay: 0.28s;
 }
 
-.demo-chat-composer .luthor-preset-chat-window {
+.demo-chat-composer .luthor-preset-composer {
   width: 100%;
   max-width: 100%;
 }
 
-.demo-chat-composer .luthor-chat-window-composer-row {
+.demo-chat-composer .luthor-composer-row {
   align-items: flex-end;
   gap: 0.55rem;
   width: 100%;
 }
 
-.demo-chat-composer .luthor-chat-window-composer-shell {
+.demo-chat-composer .luthor-composer-shell {
   flex: 1;
   width: auto;
   min-width: 0;
   max-width: none;
 }
 
-.demo-chat-composer .luthor-chat-window-action-send--right {
+.demo-chat-composer .luthor-composer-action-send--right {
   width: 46px;
   height: 46px;
   min-width: 46px;
@@ -922,7 +922,7 @@ a {
   flex-shrink: 0;
 }
 
-.demo-chat-composer .luthor-chat-window-action-send--right:hover {
+.demo-chat-composer .luthor-composer-action-send--right:hover {
   transform: translateY(-1px);
   filter: saturate(1.12);
   border-color: color-mix(in srgb, var(--accent) 62%, #fff 38%);
@@ -2520,12 +2520,12 @@ a {
     font-size: 0.7rem;
   }
 
-  .demo-chat-composer .luthor-chat-window-composer-row {
+  .demo-chat-composer .luthor-composer-row {
     flex-wrap: wrap;
     gap: 0.55rem;
   }
 
-  .demo-chat-composer .luthor-chat-window-action-send--right {
+  .demo-chat-composer .luthor-composer-action-send--right {
     width: 46px;
     min-width: 46px;
     min-height: 42px;
@@ -2601,3 +2601,4 @@ a {
     transition: none !important;
   }
 }
+

@@ -39,15 +39,15 @@ vi.mock("../extensive", async () => {
   };
 });
 
-import { MDTextEditor } from "./MDTextEditor";
+import { MDFriendlyEditor } from "./MDFriendlyEditor";
 
-describe("MDTextEditor", () => {
+describe("MDFriendlyEditor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("exports visual JSON to markdown when opening markdown tab", () => {
-    render(<MDTextEditor showDefaultContent={false} />);
+    render(<MDFriendlyEditor showDefaultContent={false} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Markdown" }));
 
@@ -57,7 +57,7 @@ describe("MDTextEditor", () => {
   });
 
   it("imports markdown into visual mode", async () => {
-    render(<MDTextEditor showDefaultContent={false} initialMode="markdown" />);
+    render(<MDFriendlyEditor showDefaultContent={false} initialMode="markdown" />);
 
     fireEvent.change(screen.getByRole("textbox"), {
       target: { value: "## Heading" },
@@ -70,3 +70,4 @@ describe("MDTextEditor", () => {
     });
   });
 });
+

@@ -15,12 +15,9 @@ import { headless } from '@lyfie/luthor';
 
 ## Preset docs
 
-- [Extensive](/docs/luthor/presets/extensive-editor/)
-- [Simple Text](/docs/luthor/presets/simple-text-editor/)
-- [Rich Text](/docs/luthor/presets/rich-text-box-editor/)
-- [Chat Window](/docs/luthor/presets/chat-window-editor/)
-- [Email Compose](/docs/luthor/presets/email-compose-editor/)
-- [Markdown](/docs/luthor/presets/md-text-editor/)
-- [Notion Like](/docs/luthor/presets/notion-like-editor/)
-- [Headless Preset](/docs/luthor/presets/headless-editor-preset/)
-- [Notes](/docs/luthor/presets/notes-editor/)
+- [Extensive Editor](/docs/luthor/presets/extensive-editor/)
+- [Rich Text Input](/docs/luthor/presets/compose-editor/)
+- [Simple Text Input](/docs/luthor/presets/composer-editor/)
+- [MD Editor](/docs/luthor/presets/md-friendly-editor/)
+- [Slash Editor](/docs/luthor/presets/notion-like-editor/)
+- [Headless Text Input](/docs/luthor/presets/headless-editor-preset/)

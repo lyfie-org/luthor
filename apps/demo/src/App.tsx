@@ -1,13 +1,10 @@
 import {
-  ChatWindowEditor,
-  EmailComposeEditor,
+  ComposeEditor,
+  ComposerEditor,
   ExtensiveEditor,
   HeadlessEditorPreset,
-  MDTextEditor,
+  MDFriendlyEditor,
   NotionLikeEditor,
-  NotesEditor,
-  RichTextBoxEditor,
-  SimpleTextEditor,
 } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
 import { useMemo, useState } from "react";
@@ -16,25 +13,19 @@ import "highlight.js/styles/github.css";
 
 type PresetId =
   | "extensive"
-  | "simple-text"
-  | "rich-text-box"
-  | "chat-window"
-  | "email-compose"
-  | "md-text"
+  | "compose"
+  | "composer"
+  | "md-friendly"
   | "notion-like"
-  | "headless-editor"
-  | "notes";
+  | "headless-editor";
 
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
-  { value: "extensive", label: "Extensive" },
-  { value: "simple-text", label: "Simple Text" },
-  { value: "rich-text-box", label: "Rich Text Box" },
-  { value: "chat-window", label: "Chat Window" },
-  { value: "email-compose", label: "Email Compose" },
-  { value: "md-text", label: "MD Text" },
-  { value: "notion-like", label: "Notion Like" },
-  { value: "headless-editor", label: "Headless" },
-  { value: "notes", label: "Notes" },
+  { value: "extensive", label: "Extensive Editor" },
+  { value: "compose", label: "Rich Text Input" },
+  { value: "composer", label: "Simple Text Input" },
+  { value: "md-friendly", label: "MD Editor" },
+  { value: "notion-like", label: "Slash Editor" },
+  { value: "headless-editor", label: "Headless Text Input" },
 ];
 
 function App() {
@@ -43,12 +34,18 @@ function App() {
 
   const presetNode = useMemo(() => {
     switch (preset) {
-      case "simple-text":
-        return <SimpleTextEditor showDefaultContent={false} placeholder="Simple text only..." />;
-      case "rich-text-box":
-        return <RichTextBoxEditor showDefaultContent={false} compactToolbar placeholder="Short rich text..." />;
-      case "chat-window":
-        return <ChatWindowEditor
+      case "compose":
+        return (
+          <ComposeEditor
+            showDefaultContent={false}
+            compactToolbar
+            showTo
+            showSubject
+            placeholder="Write a draft..."
+          />
+        );
+      case "composer":
+        return <ComposerEditor
           placeholder="Type a message"
           maxHeight={250}
           minHeight={150}
@@ -61,25 +58,19 @@ function App() {
           sendButtonPlacement="inside"
           outputFormat="md"
           formattingOptions={{ bold: true, italic: true, strikethrough: true }}
-          onSend={({ format, text, markdown, json }) => {
-            console.log("chat-send", { format, text });
-            // Full payload available if needed:
-            // console.log({ format, text, markdown, json });
+          onSend={({ format, text }) => {
+            console.log("composer-send", { format, text });
           }}
         />
-      case "email-compose":
-        return <EmailComposeEditor showDefaultContent={false} showCc showSubject />;
-      case "md-text":
-        return <MDTextEditor showDefaultContent={false} />;
+      case "md-friendly":
+        return <MDFriendlyEditor showDefaultContent={false} />;
       case "notion-like":
         return <NotionLikeEditor showDefaultContent={false} />;
       case "headless-editor":
         return <HeadlessEditorPreset />;
-      case "notes":
-        return <NotesEditor showDefaultContent={false} />;
       default:
         return (
-          <ExtensiveEditor            
+          <ExtensiveEditor
             placeholder={{
               visual: "Write your story...",
               json: "Paste JSON document...",

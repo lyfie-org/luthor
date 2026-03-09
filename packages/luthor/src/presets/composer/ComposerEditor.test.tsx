@@ -17,7 +17,7 @@ vi.mock("../extensive", async () => {
   ) {
     extensivePropsSpy(props);
     react.useImperativeHandle(ref, () => ({ getJSON: getJSONMock, injectJSON: injectJSONMock }));
-    return <div data-testid="chat-extensive-editor">{props.children}</div>;
+    return <div data-testid="composer-extensive-editor">{props.children}</div>;
   });
 
   return {
@@ -25,15 +25,15 @@ vi.mock("../extensive", async () => {
   };
 });
 
-import { ChatWindowEditor } from "./ChatWindowEditor";
+import { ComposerEditor } from "./ComposerEditor";
 
-describe("ChatWindowEditor", () => {
+describe("ComposerEditor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("locks feature set to allowed chat formatting only", () => {
-    render(<ChatWindowEditor showDefaultContent={false} />);
+  it("locks feature set to allowed composer formatting only", () => {
+    render(<ComposerEditor showDefaultContent={false} />);
 
     const lastProps = extensivePropsSpy.mock.calls.at(-1)?.[0] as {
       featureFlags?: Record<string, boolean>;
@@ -68,7 +68,7 @@ describe("ChatWindowEditor", () => {
 
   it("always disables code shortcuts and commands", () => {
     render(
-      <ChatWindowEditor
+      <ComposerEditor
         showDefaultContent={false}
         formattingOptions={{ bold: true, italic: true, strikethrough: true }}
       />,
@@ -99,9 +99,9 @@ describe("ChatWindowEditor", () => {
 
   it("does not submit on Enter by default", () => {
     const onSend = vi.fn();
-    const { container } = render(<ChatWindowEditor onSend={onSend} showDefaultContent={false} />);
+    const { container } = render(<ComposerEditor onSend={onSend} showDefaultContent={false} />);
 
-    const wrapper = container.querySelector(".luthor-preset-chat-window") as HTMLElement;
+    const wrapper = container.querySelector(".luthor-preset-composer") as HTMLElement;
     fireEvent.keyDown(wrapper, { key: "Enter" });
 
     expect(onSend).not.toHaveBeenCalled();
@@ -110,10 +110,10 @@ describe("ChatWindowEditor", () => {
   it("submits markdown payload on Enter when enabled", () => {
     const onSend = vi.fn();
     const { container } = render(
-      <ChatWindowEditor onSend={onSend} showDefaultContent={false} submitOnEnter allowEmptySend />,
+      <ComposerEditor onSend={onSend} showDefaultContent={false} submitOnEnter allowEmptySend />,
     );
 
-    const wrapper = container.querySelector(".luthor-preset-chat-window") as HTMLElement;
+    const wrapper = container.querySelector(".luthor-preset-composer") as HTMLElement;
     fireEvent.keyDown(wrapper, { key: "Enter" });
 
     expect(onSend).toHaveBeenCalledWith(
@@ -128,10 +128,10 @@ describe("ChatWindowEditor", () => {
   it("keeps Shift+Enter when allowShiftEnter is true", () => {
     const onSend = vi.fn();
     const { container } = render(
-      <ChatWindowEditor onSend={onSend} showDefaultContent={false} allowShiftEnter submitOnEnter allowEmptySend />,
+      <ComposerEditor onSend={onSend} showDefaultContent={false} allowShiftEnter submitOnEnter allowEmptySend />,
     );
 
-    const wrapper = container.querySelector(".luthor-preset-chat-window") as HTMLElement;
+    const wrapper = container.querySelector(".luthor-preset-composer") as HTMLElement;
     fireEvent.keyDown(wrapper, { key: "Enter", shiftKey: true });
 
     expect(onSend).not.toHaveBeenCalled();
@@ -139,9 +139,9 @@ describe("ChatWindowEditor", () => {
 
   it("fires callback from send button and clears editor by default", () => {
     const onSend = vi.fn();
-    render(<ChatWindowEditor onSend={onSend} showDefaultContent={false} />);
+    render(<ComposerEditor onSend={onSend} showDefaultContent={false} />);
 
-    fireEvent.click(screen.getByTestId("chat-send-button"));
+    fireEvent.click(screen.getByTestId("composer-send-button"));
 
     expect(onSend).toHaveBeenCalledTimes(1);
     expect(injectJSONMock).toHaveBeenCalled();
@@ -149,20 +149,20 @@ describe("ChatWindowEditor", () => {
 
   it("supports right send button placement", () => {
     render(
-      <ChatWindowEditor
+      <ComposerEditor
         onSend={vi.fn()}
         showDefaultContent={false}
         sendButtonPlacement="right"
       />,
     );
 
-    expect(screen.getByTestId("chat-send-button").className).toContain("luthor-chat-window-action-send--right");
+    expect(screen.getByTestId("composer-send-button").className).toContain("luthor-composer-action-send--right");
   });
 
   it("renders dynamic bottom toolbar buttons", () => {
     const onAttachment = vi.fn();
     render(
-      <ChatWindowEditor
+      <ComposerEditor
         onSend={vi.fn()}
         showDefaultContent={false}
         toolbarButtons={[
@@ -180,3 +180,4 @@ describe("ChatWindowEditor", () => {
     expect(onAttachment).toHaveBeenCalledTimes(1);
   });
 });
+

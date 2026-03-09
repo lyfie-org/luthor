@@ -1,11 +1,11 @@
 import type { EditorPreset } from "..";
 import { createPresetEditorConfig } from "../../core/preset-config";
 import { createExtensiveExtensions } from "../extensive";
-import { MDTextEditor } from "./MDTextEditor";
+import { MDFriendlyEditor } from "./MDFriendlyEditor";
 
-export const mdTextPreset: EditorPreset = {
-  id: "md-text",
-  label: "MD Text",
+export const mdFriendlyPreset: EditorPreset = {
+  id: "md-friendly",
+  label: "MD Editor",
   description: "Visual and markdown editing with conversion bridge.",
   extensions: createExtensiveExtensions({
     featureFlags: {
@@ -17,9 +17,10 @@ export const mdTextPreset: EditorPreset = {
     },
   }),
   components: {
-    Editor: MDTextEditor,
+    Editor: MDFriendlyEditor,
   },
   toolbar: ["bold", "italic", "underline", "strikethrough", "link", "unorderedList", "orderedList"],
-  config: createPresetEditorConfig("md-text", "Write markdown..."),
-  css: "md-text/styles.css",
+  config: createPresetEditorConfig("md-friendly", "Write markdown..."),
+  css: "md-friendly/styles.css",
 };
+

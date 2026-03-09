@@ -50,14 +50,11 @@ export function App() {
 ## Presets Included
 
 - `ExtensiveEditor`
-- `SimpleTextEditor`
-- `RichTextBoxEditor`
-- `ChatWindowEditor`
-- `EmailComposeEditor`
-- `MDTextEditor`
+- `ComposeEditor`
+- `ComposerEditor`
+- `MDFriendlyEditor`
 - `NotionLikeEditor`
 - `HeadlessEditorPreset`
-- `NotesEditor`
 
 ## Compatibility
 

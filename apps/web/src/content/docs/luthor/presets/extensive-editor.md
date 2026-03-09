@@ -1,9 +1,9 @@
 ---
-title: Extensive
+title: Extensive Editor
 description: Full-feature preset and core prop reference.
 ---
 
-# Extensive
+# Extensive Editor
 
 `ExtensiveEditor` is the base full-feature preset editor.
 
@@ -107,6 +107,7 @@ Place these files in your app static assets:
 ## Notes
 
 This is the base preset that other presets build on.
+
 
 
 

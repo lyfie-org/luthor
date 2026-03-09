@@ -1,12 +1,12 @@
 import type { EditorPreset } from "..";
 import { createPresetEditorConfig } from "../../core/preset-config";
 import { createExtensiveExtensions } from "../extensive";
-import { ChatWindowEditor } from "./ChatWindowEditor";
+import { ComposerEditor } from "./ComposerEditor";
 
-export const chatWindowPreset: EditorPreset = {
-  id: "chat-window",
-  label: "Chat Window",
-  description: "Chat composer with action row and send controls.",
+export const composerPreset: EditorPreset = {
+  id: "composer",
+  label: "Simple Text Input",
+  description: "Message composer with constrained formatting and send controls.",
   extensions: createExtensiveExtensions({
     featureFlags: {
       bold: true,
@@ -30,9 +30,10 @@ export const chatWindowPreset: EditorPreset = {
     },
   }),
   components: {
-    Editor: ChatWindowEditor,
+    Editor: ComposerEditor,
   },
   toolbar: [],
-  config: createPresetEditorConfig("chat-window", "Write a message..."),
-  css: "chat-window/styles.css",
+  config: createPresetEditorConfig("composer", "Type your message..."),
+  css: "composer/styles.css",
 };
+

@@ -4,8 +4,8 @@ import { HeadlessEditorPreset } from "./HeadlessEditorPreset";
 
 export const headlessEditorPreset: EditorPreset = {
   id: "headless-editor",
-  label: "Headless Editor",
-  description: "Minimal plain-control preset for customization starters.",
+  label: "Headless Text Input",
+  description: "Minimal preset for custom extension and UI composition.",
   components: {
     Editor: HeadlessEditorPreset,
   },

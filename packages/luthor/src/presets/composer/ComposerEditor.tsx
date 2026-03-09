@@ -51,22 +51,22 @@ const EMPTY_DOCUMENT_JSON = JSON.stringify({
 
 type SizeValue = number | string;
 
-export type ChatWindowOutputFormat = "md" | "json";
+export type ComposerOutputFormat = "md" | "json";
 
-export type ChatWindowEditorSendPayload = {
-  format: ChatWindowOutputFormat;
+export type ComposerEditorSendPayload = {
+  format: ComposerOutputFormat;
   text: string;
   markdown: string;
   json: string;
 };
 
-export type ChatWindowFormattingOptions = {
+export type ComposerFormattingOptions = {
   bold?: boolean;
   italic?: boolean;
   strikethrough?: boolean;
 };
 
-export type ChatWindowToolbarButton = {
+export type ComposerToolbarButton = {
   id: string;
   content: ReactNode;
   ariaLabel: string;
@@ -76,7 +76,7 @@ export type ChatWindowToolbarButton = {
   className?: string;
 };
 
-export type ChatWindowEditorProps = {
+export type ComposerEditorProps = {
   className?: string;
   variantClassName?: string;
   initialTheme?: "light" | "dark";
@@ -85,9 +85,9 @@ export type ChatWindowEditorProps = {
   defaultContent?: string;
   showDefaultContent?: boolean;
   placeholder?: ExtensiveEditorProps["placeholder"];
-  formattingOptions?: ChatWindowFormattingOptions;
-  onSend?: (payload: ChatWindowEditorSendPayload) => void;
-  outputFormat?: ChatWindowOutputFormat;
+  formattingOptions?: ComposerFormattingOptions;
+  onSend?: (payload: ComposerEditorSendPayload) => void;
+  outputFormat?: ComposerOutputFormat;
   clearOnSend?: boolean;
   allowEmptySend?: boolean;
   submitOnEnter?: boolean;
@@ -97,7 +97,7 @@ export type ChatWindowEditorProps = {
   minWidth?: SizeValue;
   maxWidth?: SizeValue;
   showBottomToolbar?: boolean;
-  toolbarButtons?: readonly ChatWindowToolbarButton[];
+  toolbarButtons?: readonly ComposerToolbarButton[];
   toolbarClassName?: string;
   toolbarStyle?: CSSProperties;
   showSendButton?: boolean;
@@ -183,7 +183,7 @@ function positionCaretInNearestLine(editable: HTMLElement, clientX: number, clie
     caretRangeFromPoint?: (x: number, y: number) => Range | null;
   };
 
-  const position = documentAny.caretPositionFromPoint?.(clientX, y);
+  const position = documentAny.caretPositionFromPoint?.(x, y);
   if (position) {
     const selection = window.getSelection();
     if (!selection) {
@@ -197,7 +197,7 @@ function positionCaretInNearestLine(editable: HTMLElement, clientX: number, clie
     return;
   }
 
-  const range = documentAny.caretRangeFromPoint?.(clientX, y);
+  const range = documentAny.caretRangeFromPoint?.(x, y);
   if (!range) {
     return;
   }
@@ -211,7 +211,7 @@ function positionCaretInNearestLine(editable: HTMLElement, clientX: number, clie
   selection.addRange(range);
 }
 
-export function ChatWindowEditor({
+export function ComposerEditor({
   className,
   variantClassName,
   initialTheme,
@@ -241,7 +241,7 @@ export function ChatWindowEditor({
   sendButtonAriaLabel = "Send message",
   sendButtonClassName,
   scrollAreaClassName,
-}: ChatWindowEditorProps) {
+}: ComposerEditorProps) {
   const editorRef = useRef<ExtensiveEditorRef | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [editorHeight, setEditorHeight] = useState(() => getNumericPixels(minHeight, 56));
@@ -343,7 +343,7 @@ export function ChatWindowEditor({
       const target = event.target as HTMLElement;
       if (
         target.closest("button, a, input, textarea, [contenteditable='true']") ||
-        target.closest(".luthor-chat-window-bottom-toolbar")
+        target.closest(".luthor-composer-bottom-toolbar")
       ) {
         return;
       }
@@ -423,11 +423,11 @@ export function ChatWindowEditor({
   const rootStyle = useMemo(
     () =>
       ({
-        "--luthor-chat-min-height": toCssSize(minHeight),
-        "--luthor-chat-max-height": toCssSize(maxHeight),
-        "--luthor-chat-current-height": `${editorHeight}px`,
-        "--luthor-chat-min-width": toCssSize(minWidth),
-        "--luthor-chat-max-width": toCssSize(maxWidth),
+        "--luthor-composer-min-height": toCssSize(minHeight),
+        "--luthor-composer-max-height": toCssSize(maxHeight),
+        "--luthor-composer-current-height": `${editorHeight}px`,
+        "--luthor-composer-min-width": toCssSize(minWidth),
+        "--luthor-composer-max-width": toCssSize(maxWidth),
       }) as CSSProperties,
     [editorHeight, maxHeight, maxWidth, minHeight, minWidth],
   );
@@ -436,8 +436,8 @@ export function ChatWindowEditor({
     <div
       ref={rootRef}
       className={[
-        "luthor-preset-chat-window",
-        showSendButton && sendButtonPlacement === "inside" ? "luthor-preset-chat-window--send-inside" : "",
+        "luthor-preset-composer",
+        showSendButton && sendButtonPlacement === "inside" ? "luthor-preset-composer--send-inside" : "",
         className,
       ]
         .filter(Boolean)
@@ -446,8 +446,8 @@ export function ChatWindowEditor({
       onKeyDownCapture={handleKeyDownCapture}
       onMouseDownCapture={handleEditorMouseDownCapture}
     >
-      <div className="luthor-chat-window-composer-row">
-        <div className="luthor-chat-window-composer-shell">
+      <div className="luthor-composer-row">
+        <div className="luthor-composer-shell">
           <ExtensiveEditor
             ref={editorRef}
             initialTheme={initialTheme}
@@ -456,7 +456,7 @@ export function ChatWindowEditor({
             defaultContent={defaultContent}
             showDefaultContent={showDefaultContent}
             placeholder={placeholder}
-            variantClassName={["luthor-preset-chat-window__variant", variantClassName]
+            variantClassName={["luthor-preset-composer__variant", variantClassName]
               .filter(Boolean)
               .join(" ")}
             isToolbarEnabled={false}
@@ -501,14 +501,14 @@ export function ChatWindowEditor({
             <button
               type="button"
               className={[
-                "luthor-chat-window-action",
-                "luthor-chat-window-action-send",
-                "luthor-chat-window-action-send--inside",
+                "luthor-composer-action",
+                "luthor-composer-action-send",
+                "luthor-composer-action-send--inside",
                 sendButtonClassName,
               ]
                 .filter(Boolean)
                 .join(" ")}
-              data-testid="chat-send-button"
+              data-testid="composer-send-button"
               onClick={dispatchSend}
               aria-label={sendButtonAriaLabel}
             >
@@ -517,17 +517,17 @@ export function ChatWindowEditor({
           )}
           {showBottomToolbar && (
             <div
-              className={["luthor-chat-window-bottom-toolbar", toolbarClassName]
+              className={["luthor-composer-bottom-toolbar", toolbarClassName]
                 .filter(Boolean)
                 .join(" ")}
               style={toolbarStyle}
-              data-testid="chat-actions"
+              data-testid="composer-actions"
             >
               {toolbarButtons.map((button) => (
                 <button
                   key={button.id}
                   type="button"
-                  className={["luthor-chat-window-action", button.className].filter(Boolean).join(" ")}
+                  className={["luthor-composer-action", button.className].filter(Boolean).join(" ")}
                   aria-label={button.ariaLabel}
                   disabled={button.disabled}
                   title={button.title}
@@ -543,14 +543,14 @@ export function ChatWindowEditor({
           <button
             type="button"
             className={[
-              "luthor-chat-window-action",
-              "luthor-chat-window-action-send",
-              "luthor-chat-window-action-send--right",
+              "luthor-composer-action",
+              "luthor-composer-action-send",
+              "luthor-composer-action-send--right",
               sendButtonClassName,
             ]
               .filter(Boolean)
               .join(" ")}
-            data-testid="chat-send-button"
+            data-testid="composer-send-button"
             onClick={dispatchSend}
             aria-label={sendButtonAriaLabel}
           >
@@ -561,3 +561,4 @@ export function ChatWindowEditor({
     </div>
   );
 }
+

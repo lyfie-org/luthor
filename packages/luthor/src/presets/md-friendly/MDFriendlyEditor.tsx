@@ -4,22 +4,22 @@ import { formatMarkdownSource } from "../../core/source-format";
 import { ExtensiveEditor, type ExtensiveEditorProps, type ExtensiveEditorRef } from "../extensive";
 import { createModeCache, invalidateModeCache, isModeCached, markModeCached } from "../_shared";
 
-export type MDTextEditorMode = "visual" | "markdown";
+export type MDFriendlyEditorMode = "visual" | "markdown";
 
-export type MDTextEditorProps = Omit<ExtensiveEditorProps, "availableModes" | "initialMode"> & {
-  initialMode?: MDTextEditorMode;
+export type MDFriendlyEditorProps = Omit<ExtensiveEditorProps, "availableModes" | "initialMode"> & {
+  initialMode?: MDFriendlyEditorMode;
 };
 
-export function MDTextEditor({ className, variantClassName, initialMode = "visual", ...props }: MDTextEditorProps) {
+export function MDFriendlyEditor({ className, variantClassName, initialMode = "visual", ...props }: MDFriendlyEditorProps) {
   const editorRef = useRef<ExtensiveEditorRef | null>(null);
-  const modeCacheRef = useRef(createModeCache<MDTextEditorMode>(["visual"]));
+  const modeCacheRef = useRef(createModeCache<MDFriendlyEditorMode>(["visual"]));
   const markdownCacheRef = useRef("");
   const pendingVisualJSONRef = useRef<string | null>(null);
-  const [mode, setMode] = useState<MDTextEditorMode>(initialMode);
+  const [mode, setMode] = useState<MDFriendlyEditorMode>(initialMode);
   const [markdown, setMarkdown] = useState("");
   const [sourceError, setSourceError] = useState<string | null>(null);
 
-  const handleModeChange = (nextMode: MDTextEditorMode) => {
+  const handleModeChange = (nextMode: MDFriendlyEditorMode) => {
     if (nextMode === mode) {
       return;
     }
@@ -65,14 +65,14 @@ export function MDTextEditor({ className, variantClassName, initialMode = "visua
 
   return (
     <div
-      className={["luthor-preset-md-text", className].filter(Boolean).join(" ")}
+      className={["luthor-preset-md-friendly", className].filter(Boolean).join(" ")}
       onInputCapture={() => {
         if (mode === "visual") {
           invalidateModeCache(modeCacheRef.current, ["visual"]);
         }
       }}
     >
-      <div className="luthor-md-text-tabs">
+      <div className="luthor-md-friendly-tabs">
         <button type="button" className={mode === "visual" ? "active" : ""} onClick={() => handleModeChange("visual")}>
           Visual
         </button>
@@ -84,8 +84,8 @@ export function MDTextEditor({ className, variantClassName, initialMode = "visua
         <ExtensiveEditor
           ref={editorRef}
           {...props}
-          className="luthor-preset-md-text__editor"
-          variantClassName={["luthor-preset-md-text__variant", variantClassName].filter(Boolean).join(" ")}
+          className="luthor-preset-md-friendly__editor"
+          variantClassName={["luthor-preset-md-friendly__variant", variantClassName].filter(Boolean).join(" ")}
           availableModes={["visual"]}
           initialMode="visual"
           featureFlags={{
@@ -98,9 +98,9 @@ export function MDTextEditor({ className, variantClassName, initialMode = "visua
         />
       )}
       {mode === "markdown" && (
-        <div className="luthor-md-text-source-shell">
+        <div className="luthor-md-friendly-source-shell">
           <textarea
-            className="luthor-md-text-source"
+            className="luthor-md-friendly-source"
             value={markdown}
             onChange={(event) => {
               setMarkdown(event.target.value);
@@ -109,9 +109,10 @@ export function MDTextEditor({ className, variantClassName, initialMode = "visua
             }}
             placeholder="Write markdown..."
           />
-          {sourceError && <p className="luthor-md-text-error">{sourceError}</p>}
+          {sourceError && <p className="luthor-md-friendly-error">{sourceError}</p>}
         </div>
       )}
     </div>
   );
 }
+

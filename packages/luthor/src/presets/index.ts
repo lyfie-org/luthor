@@ -1,118 +1,97 @@
-import type {
-	EditorConfig,
-	Extension,
-	LuthorTheme,
-} from "@lyfie/luthor-headless";
+import type { EditorConfig, Extension, LuthorTheme } from "@lyfie/luthor-headless";
 import {
-	extensivePreset,
-	createExtensivePreset,
-	ExtensiveEditor,
-	extensiveExtensions,
-	createExtensiveExtensions,
+  extensivePreset,
+  createExtensivePreset,
+  ExtensiveEditor,
+  extensiveExtensions,
+  createExtensiveExtensions,
 } from "./extensive";
-import { simpleTextPreset, SimpleTextEditor } from "./simple-text";
-import { richTextBoxPreset, RichTextBoxEditor } from "./rich-text-box";
-import { chatWindowPreset, ChatWindowEditor } from "./chat-window";
-import { emailComposePreset, EmailComposeEditor } from "./email-compose";
-import { mdTextPreset, MDTextEditor } from "./md-text";
+import { composePreset, ComposeEditor } from "./compose";
+import { composerPreset, ComposerEditor } from "./composer";
+import { mdFriendlyPreset, MDFriendlyEditor } from "./md-friendly";
 import { notionLikePreset, NotionLikeEditor } from "./notion-like";
 import { headlessEditorPreset, HeadlessEditorPreset } from "./headless-editor";
-import { notesPreset, NotesEditor } from "./notes";
 import type {
-	ExtensiveEditorMode,
-	ExtensiveEditorProps,
-	ExtensiveEditorRef,
-	ExtensiveExtensionsConfig,
-	FeatureFlag,
-	FeatureFlags,
-	FeatureFlagOverrides,
-	ExtensivePresetConfig,
+  ExtensiveEditorMode,
+  ExtensiveEditorProps,
+  ExtensiveEditorRef,
+  ExtensiveExtensionsConfig,
+  FeatureFlag,
+  FeatureFlags,
+  FeatureFlagOverrides,
+  ExtensivePresetConfig,
 } from "./extensive";
-import type { SimpleTextEditorProps } from "./simple-text";
-import type { RichTextBoxEditorProps } from "./rich-text-box";
+import type { ComposeEditorProps } from "./compose";
 import type {
-	ChatWindowFormattingOptions,
-	ChatWindowEditorProps,
-	ChatWindowEditorSendPayload,
-	ChatWindowOutputFormat,
-	ChatWindowToolbarButton,
-} from "./chat-window";
-import type { EmailComposeEditorProps } from "./email-compose";
-import type { MDTextEditorProps, MDTextEditorMode } from "./md-text";
+  ComposerFormattingOptions,
+  ComposerEditorProps,
+  ComposerEditorSendPayload,
+  ComposerOutputFormat,
+  ComposerToolbarButton,
+} from "./composer";
+import type { MDFriendlyEditorProps, MDFriendlyEditorMode } from "./md-friendly";
 import type { NotionLikeEditorProps } from "./notion-like";
 import type { HeadlessEditorPresetProps } from "./headless-editor";
-import type { NotesEditorProps } from "./notes";
+
 export { createPresetEditorConfig } from "../core/preset-config";
 export * from "./_shared";
 
 export interface EditorPreset {
-	id: string;
-	label: string;
-	description?: string;
-	extensions?: Extension[];
-	config?: EditorConfig;
-	theme?: LuthorTheme;
-	toolbar?: string[];
-	components?: Record<string, unknown>;
-	css?: string;
+  id: string;
+  label: string;
+  description?: string;
+  extensions?: Extension[];
+  config?: EditorConfig;
+  theme?: LuthorTheme;
+  toolbar?: string[];
+  components?: Record<string, unknown>;
+  css?: string;
 }
 
 export {
-	extensivePreset,
-	createExtensivePreset,
-	ExtensiveEditor,
-	extensiveExtensions,
-	createExtensiveExtensions,
-	simpleTextPreset,
-	SimpleTextEditor,
-	richTextBoxPreset,
-	RichTextBoxEditor,
-	chatWindowPreset,
-	ChatWindowEditor,
-	emailComposePreset,
-	EmailComposeEditor,
-	mdTextPreset,
-	MDTextEditor,
-	notionLikePreset,
-	NotionLikeEditor,
-	headlessEditorPreset,
-	HeadlessEditorPreset,
-	notesPreset,
-	NotesEditor,
+  extensivePreset,
+  createExtensivePreset,
+  ExtensiveEditor,
+  extensiveExtensions,
+  createExtensiveExtensions,
+  composePreset,
+  ComposeEditor,
+  composerPreset,
+  ComposerEditor,
+  mdFriendlyPreset,
+  MDFriendlyEditor,
+  notionLikePreset,
+  NotionLikeEditor,
+  headlessEditorPreset,
+  HeadlessEditorPreset,
 };
 
 export type {
-	ExtensiveEditorMode,
-	ExtensiveEditorProps,
-	ExtensiveEditorRef,
-	ExtensiveExtensionsConfig,
-	FeatureFlag,
-	FeatureFlags,
-	FeatureFlagOverrides,
-	ExtensivePresetConfig,
-	SimpleTextEditorProps,
-	RichTextBoxEditorProps,
-	ChatWindowEditorProps,
-	ChatWindowEditorSendPayload,
-	ChatWindowOutputFormat,
-	ChatWindowFormattingOptions,
-	ChatWindowToolbarButton,
-	EmailComposeEditorProps,
-	MDTextEditorProps,
-	MDTextEditorMode,
-	NotionLikeEditorProps,
-	HeadlessEditorPresetProps,
-	NotesEditorProps,
+  ExtensiveEditorMode,
+  ExtensiveEditorProps,
+  ExtensiveEditorRef,
+  ExtensiveExtensionsConfig,
+  FeatureFlag,
+  FeatureFlags,
+  FeatureFlagOverrides,
+  ExtensivePresetConfig,
+  ComposeEditorProps,
+  ComposerEditorProps,
+  ComposerEditorSendPayload,
+  ComposerOutputFormat,
+  ComposerFormattingOptions,
+  ComposerToolbarButton,
+  MDFriendlyEditorProps,
+  MDFriendlyEditorMode,
+  NotionLikeEditorProps,
+  HeadlessEditorPresetProps,
 };
 
 export const presetRegistry: Record<string, EditorPreset> = {
-	extensive: extensivePreset,
-	"simple-text": simpleTextPreset,
-	"rich-text-box": richTextBoxPreset,
-	"chat-window": chatWindowPreset,
-	"email-compose": emailComposePreset,
-	"md-text": mdTextPreset,
-	"notion-like": notionLikePreset,
-	"headless-editor": headlessEditorPreset,
-	notes: notesPreset,
+  extensive: extensivePreset,
+  compose: composePreset,
+  composer: composerPreset,
+  "md-friendly": mdFriendlyPreset,
+  "notion-like": notionLikePreset,
+  "headless-editor": headlessEditorPreset,
 };

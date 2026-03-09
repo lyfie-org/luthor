@@ -1,9 +1,9 @@
 ---
-title: Notion Like
+title: Slash Editor
 description: Slash-first preset with draggable and command-focused defaults.
 ---
 
-# Notion Like
+# Slash Editor
 
 Slash-first preset with draggable-focused defaults.
 

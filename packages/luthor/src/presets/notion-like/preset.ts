@@ -5,7 +5,7 @@ import { NotionLikeEditor } from "./NotionLikeEditor";
 
 export const notionLikePreset: EditorPreset = {
   id: "notion-like",
-  label: "Notion Like",
+  label: "Slash Editor",
   description: "Slash-first writing with draggable block defaults.",
   extensions: createExtensiveExtensions({
     featureFlags: {

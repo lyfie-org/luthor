@@ -1,8 +1,8 @@
 'use client';
 
 import {
-  type ChatWindowEditorSendPayload,
-  ChatWindowEditor,
+  type ComposerEditorSendPayload,
+  ComposerEditor,
   type EditorPreset,
   ExtensiveEditor,
   presetRegistry,
@@ -15,11 +15,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
-const VISIBLE_PRESET_IDS = ['extensive', 'chat-window'] as const;
+const VISIBLE_PRESET_IDS = ['extensive', 'composer'] as const;
 const presetEntries = VISIBLE_PRESET_IDS.map((id) => presetRegistry[id]).filter(
   (preset): preset is EditorPreset => Boolean(preset),
 );
-const fallbackPreset = { id: 'extensive', label: 'Extensive' };
+const fallbackPreset = { id: 'extensive', label: 'Extensive Editor' };
 type PresetDetails = {
   summary: string;
   useCases: string;
@@ -34,21 +34,21 @@ const presetDetails: Record<string, PresetDetails> = {
     customization: 'Tune feature flags, toolbar alignment, theme tokens, mode defaults, and extension-level behavior.',
     docsPath: '/docs/luthor/presets/extensive-editor/',
   },
-  'chat-window': {
-    summary: 'Constrained chat composer preset for message input with chat-friendly formatting defaults.',
-    useCases: 'Best for assistant chats, support inboxes, and conversational UIs where Enter-to-send is expected.',
+  composer: {
+    summary: 'Constrained simple text input preset for short-form messaging with send-friendly defaults.',
+    useCases: 'Best for assistant chats, support inboxes, comments, and conversational UIs where Enter-to-send is expected.',
     customization: 'Control send behavior, toolbar actions, formatting options, size limits, and output format.',
-    docsPath: '/docs/luthor/presets/chat-window-editor/',
+    docsPath: '/docs/luthor/presets/composer-editor/',
   },
 };
 
 const presetTag: Record<string, string> = {
   extensive: '<ExtensiveEditor />',
-  'chat-window': '<ChatWindowEditor />',
+  composer: '<ComposerEditor />',
 };
 const presetHeading: Record<string, string> = {
-  extensive: 'Extensive Preset',
-  'chat-window': 'Chat Window Preset',
+  extensive: 'Extensive Editor Preset',
+  composer: 'Simple Text Input Preset',
 };
 const defaultPresetDetails: PresetDetails = {
   summary: 'Full-feature rich text editor preset with formatting, embeds, tables, and markdown/source workflows.',
@@ -89,7 +89,7 @@ function formatTime(timestamp: number): string {
   }).format(timestamp);
 }
 
-function ChatWindowExperience({ siteTheme }: { siteTheme: Theme }) {
+function ComposerExperience({ siteTheme }: { siteTheme: Theme }) {
   const [messages, setMessages] = useState<DemoMessage[]>([
     {
       id: 'seed-assistant',
@@ -109,7 +109,7 @@ function ChatWindowExperience({ siteTheme }: { siteTheme: Theme }) {
     };
   }, []);
 
-  const handleSend = (payload: ChatWindowEditorSendPayload) => {
+  const handleSend = (payload: ComposerEditorSendPayload) => {
     const userText = payload.markdown.trim();
     if (!userText) {
       return;
@@ -173,7 +173,7 @@ function ChatWindowExperience({ siteTheme }: { siteTheme: Theme }) {
       </div>
 
       <div className="demo-chat-composer">
-        <ChatWindowEditor
+        <ComposerEditor
           initialTheme={siteTheme}
           placeholder="Type a message and press Enter..."
           onSend={handleSend}
@@ -196,8 +196,8 @@ function ChatWindowExperience({ siteTheme }: { siteTheme: Theme }) {
 
 function PresetRenderer({ presetId, siteTheme }: PresetRendererProps) {
   switch (presetId) {
-    case 'chat-window':
-      return <ChatWindowExperience siteTheme={siteTheme} />;
+    case 'composer':
+      return <ComposerExperience siteTheme={siteTheme} />;
     case 'extensive':
     default:
       return <ExtensiveEditor initialTheme={siteTheme} showDefaultContent toolbarAlignment="center" />;

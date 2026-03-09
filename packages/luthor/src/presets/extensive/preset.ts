@@ -47,8 +47,8 @@ export const extensiveToolbar = [
 
 export const extensivePreset: EditorPreset = {
   id: "extensive",
-  label: "Extensive",
-  description: "All features enabled for power users.",
+  label: "Extensive Editor",
+  description: "Complete editing preset with all core features enabled.",
   extensions: [...extensiveExtensions],
   components: {
     Editor: ExtensiveEditor,

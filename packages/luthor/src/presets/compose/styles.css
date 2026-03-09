@@ -1,16 +1,16 @@
-.luthor-preset-email-compose {
+.luthor-preset-compose {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.luthor-email-compose-shell {
+.luthor-compose-shell {
   border: 1px solid var(--luthor-border);
   border-radius: 8px;
   overflow: hidden;
 }
 
-.luthor-email-compose-row {
+.luthor-compose-row {
   display: grid;
   grid-template-columns: 72px 1fr;
   align-items: center;
@@ -21,12 +21,27 @@
   color: var(--luthor-fg);
 }
 
-.luthor-email-compose-row:last-child {
+.luthor-compose-row:last-child {
   border-bottom: 0;
 }
 
-.luthor-email-compose-row input {
+.luthor-compose-row input {
   border: 0;
   outline: none;
   background: transparent;
+}
+
+.luthor-preset-compose .luthor-editor {
+  min-height: 220px;
+}
+
+.luthor-preset-compose--compact .luthor-toolbar,
+.luthor-preset-compose__toolbar--compact {
+  padding: 4px;
+  gap: 2px;
+}
+
+.luthor-preset-compose__toolbar--compact .luthor-toolbar-button {
+  width: 30px;
+  height: 30px;
 }

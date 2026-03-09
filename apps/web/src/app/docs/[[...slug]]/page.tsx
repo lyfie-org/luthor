@@ -47,14 +47,11 @@ const GROUP_ENTRY_ORDER: Partial<Record<NavGroupId, string[]>> = {
   luthor: [
     '/docs/luthor/presets/',
     '/docs/luthor/presets/extensive-editor/',
-    '/docs/luthor/presets/simple-text-editor/',
-    '/docs/luthor/presets/rich-text-box-editor/',
-    '/docs/luthor/presets/chat-window-editor/',
-    '/docs/luthor/presets/email-compose-editor/',
-    '/docs/luthor/presets/md-text-editor/',
+    '/docs/luthor/presets/compose-editor/',
+    '/docs/luthor/presets/composer-editor/',
+    '/docs/luthor/presets/md-friendly-editor/',
     '/docs/luthor/presets/notion-like-editor/',
     '/docs/luthor/presets/headless-editor-preset/',
-    '/docs/luthor/presets/notes-editor/',
   ],
 };
 
