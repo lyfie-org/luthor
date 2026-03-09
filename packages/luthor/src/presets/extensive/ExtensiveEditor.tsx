@@ -994,7 +994,7 @@ function ExtensiveEditorContent({
     />
   ) : null;
   const shouldRenderTopToolbar = mode === "visual" && isToolbarEnabled && toolbarPosition === "top";
-  const topToolbarSlotClassName = ["luthor-editor-toolbar-slot", "luthor-editor-toolbar-slot--top", isToolbarPinned ? "luthor-editor-toolbar-slot--pinned" : ""]
+  const topToolbarSlotClassName = ["luthor-editor-toolbar-slot", "luthor-editor-toolbar-slot--top", shouldRenderTopToolbar && isToolbarPinned ? "luthor-editor-toolbar-slot--pinned" : ""]
     .filter(Boolean)
     .join(" ");
   const shouldRenderBottomToolbar = mode === "visual" && isToolbarEnabled && toolbarPosition === "bottom";
@@ -1010,10 +1010,10 @@ function ExtensiveEditorContent({
           availableModes={availableModes}
           isConverting={convertingMode}
         />
-        {shouldRenderTopToolbar && (
-          <div className={topToolbarSlotClassName}>{toolbarNode}</div>
-        )}
       </div>
+      {shouldRenderTopToolbar && (
+        <div className={topToolbarSlotClassName}>{toolbarNode}</div>
+      )}
       <div
         className={`luthor-editor${isDraggableBoxEnabled ? "" : " luthor-editor--draggable-disabled"}`}
         data-mode={mode}
@@ -1408,7 +1408,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
 
     return (
       <div
-        className={`luthor-preset luthor-preset-extensive luthor-editor-wrapper ${variantClassName || ""} ${className || ""}`.trim()}
+        className={`luthor-preset luthor-preset-extensive luthor-editor-wrapper${isToolbarPinned ? " luthor-editor-wrapper--toolbar-pinned" : ""} ${variantClassName || ""} ${className || ""}`.trim()}
         data-editor-theme={editorTheme}
         style={wrapperStyleVars}
       >

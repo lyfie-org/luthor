@@ -45,7 +45,7 @@ export function ExtensiveEditorClient({ siteTheme }: ExtensiveEditorClientProps)
       initialTheme={siteTheme}
       onThemeChange={setEditorTheme}
       toolbarAlignment="center"   
-      isToolbarPinned={false}   
+      isToolbarPinned={true}   
     />
   );
 }

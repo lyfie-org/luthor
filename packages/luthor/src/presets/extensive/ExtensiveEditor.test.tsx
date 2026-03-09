@@ -199,10 +199,12 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
 
     const toolbar = screen.getByTestId("toolbar");
     const header = container.querySelector(".luthor-editor-header");
+    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
 
     expect(toolbar).toHaveClass("luthor-toolbar");
     expect(toolbar).toHaveClass("luthor-toolbar--align-left");
-    expect(header).toContainElement(toolbar);
+    expect(header).not.toContainElement(toolbar);
+    expect(topSlot).toContainElement(toolbar);
     expect(container.querySelector(".luthor-editor-toolbar-slot--bottom")).toBeNull();
   });
 
@@ -221,8 +223,42 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     const { container } = render(<ExtensiveEditor showDefaultContent={false} isToolbarPinned />);
 
     const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const wrapper = container.querySelector(".luthor-editor-wrapper");
 
     expect(topSlot).toHaveClass("luthor-editor-toolbar-slot--pinned");
+    expect(wrapper).toHaveClass("luthor-editor-wrapper--toolbar-pinned");
+  });
+
+  it("keeps pinned classes when rendered in demo app scroll container structure", () => {
+    const { container } = render(
+      <div className="editor-stage" style={{ overflow: "auto", maxHeight: "480px" }}>
+        <div className="editor-frame">
+          <ExtensiveEditor showDefaultContent={false} isToolbarPinned />
+        </div>
+      </div>,
+    );
+
+    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const wrapper = container.querySelector(".luthor-editor-wrapper");
+
+    expect(topSlot).toHaveClass("luthor-editor-toolbar-slot--pinned");
+    expect(wrapper).toHaveClass("luthor-editor-wrapper--toolbar-pinned");
+  });
+
+  it("keeps pinned classes when rendered in web homepage editor pane structure", () => {
+    const { container } = render(
+      <div className="browser-frame demo-showcase-frame">
+        <div className="editor-pane demo-showcase-editor-pane" style={{ overflow: "auto", minHeight: 0 }}>
+          <ExtensiveEditor showDefaultContent={false} isToolbarPinned />
+        </div>
+      </div>,
+    );
+
+    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const wrapper = container.querySelector(".luthor-editor-wrapper");
+
+    expect(topSlot).toHaveClass("luthor-editor-toolbar-slot--pinned");
+    expect(wrapper).toHaveClass("luthor-editor-wrapper--toolbar-pinned");
   });
 
   it("applies center and right alignment classes", () => {

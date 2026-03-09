@@ -135,6 +135,10 @@
 	transition: background-color var(--luthor-theme-transition), border-color var(--luthor-theme-transition), color var(--luthor-theme-transition), box-shadow var(--luthor-theme-transition);
 }
 
+.luthor-preset-extensive.luthor-editor-wrapper.luthor-editor-wrapper--toolbar-pinned {
+	overflow: visible;
+}
+
 .luthor-preset-extensive.luthor-editor-wrapper,
 .luthor-preset-extensive.luthor-editor-wrapper *,
 .luthor-preset-extensive.luthor-editor-wrapper *::before,
@@ -153,10 +157,15 @@
 	transition: background-color var(--luthor-theme-transition), border-color var(--luthor-theme-transition), color var(--luthor-theme-transition);
 }
 
+.luthor-editor-toolbar-slot--top {
+	border-bottom: 1px solid var(--luthor-border);
+}
+
 .luthor-editor-toolbar-slot--pinned {
 	position: sticky;
 	top: 0;
-	z-index: 12;
+	z-index: 40;
+	background-color: var(--luthor-toolbar-bg, var(--luthor-muted));
 }
 
 .luthor-editor-toolbar-slot--bottom {
