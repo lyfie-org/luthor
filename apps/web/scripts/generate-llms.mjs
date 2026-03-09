@@ -11,7 +11,7 @@ const SITE_NAME = 'Luthor';
 const SITE_URL = 'https://www.luthor.fyi';
 const MAINTAINER_ORG_NAME = 'Lyfie.org';
 const MAINTAINER_ORG_URL = 'https://lyfie.org';
-const CREATOR_NAME = 'Rahul S Anand';
+const CREATOR_NAME = 'Rahul Anand';
 const CREATOR_URL = 'https://www.rahulnsanand.com';
 
 function isMarkdownFile(filename) {

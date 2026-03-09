@@ -266,21 +266,9 @@ export default async function HomePage() {
             </h1>
             <p className="hero-copy">
               Type-safe, open-source, TypeScript-friendly and <span className="hero-highlight-text">Lexical Based</span> rich text editor built for <span className="hero-highlight-text">React</span> and modern JS frameworks like{' '}
-              <span className="hero-highlight-text">Next.js</span> and <span className="hero-highlight-text">Astro</span>. Crafted with love by developers for developers who want control without chaos.
-              Every feature. <span className="hero-highlight-text"> Zero fluff. No paywalls. No nonsense.</span>
+              <span className="hero-highlight-text">Next.js</span> and <span className="hero-highlight-text">Astro</span>. Crafted with love by developers for developers who want control without chaos. <span className="hero-highlight-text"> Zero fluff. No paywalls. No nonsense.</span>
             </p>
             <p className="hero-live-note">Fully open source. Fully free. Ready for your next project.</p>
-            <p className="hero-attribution">
-              Maintained by{' '}
-              <a href={MAINTAINER_ORG_URL} target="_blank" rel="noopener noreferrer">
-                {MAINTAINER_ORG_NAME}
-              </a>
-              . Created by{' '}
-              <a href={CREATOR_URL} target="_blank" rel="noopener noreferrer">
-                {CREATOR_NAME}
-              </a>
-              , BDFL of {MAINTAINER_ORG_NAME}.
-            </p>
             <div className="hero-uses-container">
               {heroUseCases.map((useCase) => (
                 <span className="eyebrow-muted" key={useCase.label}>
@@ -495,8 +483,17 @@ export default async function HomePage() {
             </a>
           </div>
           <p className="mono-small">
-            Data sources: npm downloads API, npm registry API, GitHub API. Last sync: <LocalLastSync isoTimestamp={stats.fetchedAtIso} />
-          </p>
+            Maintained by{' '}
+            <a href={MAINTAINER_ORG_URL} target="_blank" rel="noopener noreferrer">
+              {MAINTAINER_ORG_NAME}
+            </a>
+            . Created by{' '}
+            <a href={CREATOR_URL} target="_blank" rel="noopener noreferrer">
+              {CREATOR_NAME}
+            </a>
+            , BDFL of {MAINTAINER_ORG_NAME}.
+            | Data sources last sync: <LocalLastSync isoTimestamp={stats.fetchedAtIso} /> 
+          </p>    
         </div>
       </section>
 
@@ -516,8 +513,8 @@ export default async function HomePage() {
               </details>
             ))}
           </div>
-        </div>
-      </section>
+        </div> 
+      </section>             
     </>
   );
 }
