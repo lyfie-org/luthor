@@ -41,6 +41,12 @@ import {
   contextMenuExtension
 } from "@lyfie/luthor-headless/extensions/core/ContextMenuExtension";
 
+function clamp(value: number, min: number, max: number): number {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+}
+
 /**
  * Table extension configuration options.
  */
@@ -211,7 +217,8 @@ function TableQuickActionsPlugin({ extension }: { extension: TableExtension }) {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [headersEnabled, setHeadersEnabled] = useState(false);
-  const [bubblePosition, setBubblePosition] = useState<{ x: number; y: number } | null>(null);
+  const [bubblePosition, setBubblePosition] = useState<{ x: number; y: number; placeAbove: boolean } | null>(null);
+  const bubbleRef = useRef<HTMLDivElement>(null);
   const viewportRafIdRef = useRef<number | null>(null);
 
   const runWithSelectedTableCell = (action: (cell: TableCellNode) => void) => {
@@ -292,10 +299,24 @@ function TableQuickActionsPlugin({ extension }: { extension: TableExtension }) {
 
         const containerRect = container.getBoundingClientRect();
         const tableRect = tableElement.getBoundingClientRect();
+        const measuredBubbleRect = bubbleRef.current?.getBoundingClientRect();
+        const bubbleWidth = measuredBubbleRect?.width ?? 520;
+        const bubbleHeight = measuredBubbleRect?.height ?? 44;
+        const halfWidth = bubbleWidth / 2;
+        const edgePadding = 12;
+        const rawCenterX = tableRect.left - containerRect.left + tableRect.width / 2;
+        const minCenterX = edgePadding + halfWidth;
+        const maxCenterX = Math.max(minCenterX, containerRect.width - edgePadding - halfWidth);
+        const centerX = clamp(rawCenterX, minCenterX, maxCenterX);
+        const spaceAbove = tableRect.top - containerRect.top;
+        const placeAbove = spaceAbove >= bubbleHeight + edgePadding;
 
         setBubblePosition({
-          x: tableRect.left - containerRect.left + tableRect.width / 2,
-          y: tableRect.top - containerRect.top - 12,
+          x: centerX,
+          y: placeAbove
+            ? tableRect.top - containerRect.top - 12
+            : tableRect.bottom - containerRect.top + 12,
+          placeAbove,
         });
         setIsVisible(true);
       });
@@ -371,13 +392,14 @@ function TableQuickActionsPlugin({ extension }: { extension: TableExtension }) {
 
   return createPortal(
     <div
+      ref={bubbleRef}
       className="luthor-table-bubble-menu"
       style={{
         position: "absolute",
         left: bubblePosition.x,
         top: bubblePosition.y,
-        transform: "translate(-50%, -100%)",
-        zIndex: 30,
+        transform: bubblePosition.placeAbove ? "translate(-50%, -100%)" : "translate(-50%, 0)",
+        zIndex: "var(--luthor-z-menu, 460)",
       }}
       onMouseDown={(event) => event.preventDefault()}
     >

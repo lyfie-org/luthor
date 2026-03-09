@@ -1,7 +1,7 @@
 {
   "name": "Luthor",
   "short_name": "Luthor",
-  "description": "The performance of Lexical, the simplicity of a single import.",
+  "description": "Open-source Lexical editor for React, Next.js, Astro, and modern JavaScript frameworks. Fully free and maintained by Lyfie.org.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#020617",

@@ -51,6 +51,7 @@ import {
 } from "./icons";
 import { Button, Dialog, Dropdown, IconButton, Select } from "./ui";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
+import { computeAnchoredOverlayStyle, resolveEditorPortalContainer } from "./overlay-position";
 import { BLOCK_HEADING_LEVELS, type BlockHeadingLevel, type CoreEditorActiveStates, type CoreEditorCommands, type CoreToolbarClassNames, type InsertTableConfig, type ImageAlignment, type ToolbarLayout, type ToolbarItemType, type ToolbarStyleVars, type ToolbarVisibility } from "./types";
 import { TRADITIONAL_TOOLBAR_LAYOUT } from "./types";
 
@@ -587,27 +588,25 @@ function ColorPickerButton({
     if (!trigger) return;
 
     const rect = trigger.getBoundingClientRect();
-    const container =
-      (trigger.closest(".luthor-editor-wrapper") as HTMLElement | null) ?? null;
+    const measuredPanel = panelRef.current?.getBoundingClientRect();
+    const container = resolveEditorPortalContainer(trigger);
     setPortalContainer(container);
-    if (container) {
-      const containerRect = container.getBoundingClientRect();
-      setPanelStyle({
-        position: "absolute",
-        top: rect.bottom - containerRect.top + 6,
-        left: Math.max(0, rect.left - containerRect.left),
-        width: 230,
-        visibility: isVisible ? "visible" : "hidden",
-        ...getOverlayThemeStyleFromElement(trigger),
-      });
-      return;
-    }
-
+    const placement = computeAnchoredOverlayStyle({
+      anchorRect: rect,
+      overlay: {
+        width: measuredPanel?.width ?? 248,
+        height: measuredPanel?.height ?? 340,
+      },
+      portalContainer: container,
+      gap: 6,
+      margin: 8,
+      preferredX: "start",
+      preferredY: "bottom",
+      flipX: true,
+      flipY: true,
+    });
     setPanelStyle({
-      position: "fixed",
-      top: rect.bottom + 6,
-      left: rect.left,
-      width: 230,
+      ...placement,
       visibility: isVisible ? "visible" : "hidden",
       ...getOverlayThemeStyleFromElement(trigger),
     });

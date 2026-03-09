@@ -1,5 +1,19 @@
-import { GITHUB_URL, NPM_URL, SEO_FAQS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/config/site';
+import {
+  CREATOR_NAME,
+  CREATOR_ROLE,
+  CREATOR_URL,
+  GITHUB_URL,
+  MAINTAINER_ORG_NAME,
+  MAINTAINER_ORG_URL,
+  NPM_URL,
+  SEO_FAQS,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+} from '@/config/site';
 const softwareVersion = '2.x';
+const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+const CREATOR_ID = `${SITE_URL}/#creator`;
 const PRIMARY_NAV_LINKS = [
   { name: 'Home', url: `${SITE_URL}/` },
   { name: 'Getting Started', url: `${SITE_URL}/docs/getting-started/` },
@@ -31,12 +45,15 @@ export function HomeJsonLd() {
       isAccessibleForFree: true,
       softwareVersion,
       downloadUrl: NPM_URL,
+      publisher: { '@id': ORGANIZATION_ID },
+      creator: { '@id': CREATOR_ID },
     },
     {
       '@context': 'https://schema.org',
       '@type': 'SoftwareSourceCode',
       name: SITE_NAME,
       codeRepository: GITHUB_URL,
+      creator: { '@id': ORGANIZATION_ID },
       codeSampleType: 'full',
       programmingLanguage: ['TypeScript', 'JavaScript'],
       runtimePlatform: 'Node.js',
@@ -50,6 +67,7 @@ export function HomeJsonLd() {
       description: SITE_DESCRIPTION,
       url: `${SITE_URL}/`,
       inLanguage: 'en-US',
+      publisher: { '@id': ORGANIZATION_ID },
       potentialAction: {
         '@type': 'SearchAction',
         target: `${SITE_URL}/docs/getting-started/?q={search_term_string}`,
@@ -59,10 +77,22 @@ export function HomeJsonLd() {
     {
       '@context': 'https://schema.org',
       '@type': 'Organization',
-      name: SITE_NAME,
-      url: `${SITE_URL}/`,
-      sameAs: [GITHUB_URL, NPM_URL],
+      '@id': ORGANIZATION_ID,
+      name: MAINTAINER_ORG_NAME,
+      url: MAINTAINER_ORG_URL,
+      sameAs: [MAINTAINER_ORG_URL, 'https://github.com/lyfie-org', GITHUB_URL, NPM_URL],
       logo: `${SITE_URL}/favicon.svg`,
+      founder: { '@id': CREATOR_ID },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      '@id': CREATOR_ID,
+      name: CREATOR_NAME,
+      url: CREATOR_URL,
+      description: CREATOR_ROLE,
+      sameAs: [CREATOR_URL],
+      worksFor: { '@id': ORGANIZATION_ID },
     },
     {
       '@context': 'https://schema.org',

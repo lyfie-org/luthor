@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import type { SlashCommandItem } from "@lyfie/luthor-headless";
 import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
+import { computeAnchoredOverlayStyle, createPointRect } from "./overlay-position";
 
 export function SlashCommandMenu({
   isOpen,
@@ -21,6 +22,8 @@ export function SlashCommandMenu({
   onExecute: (commandId: string) => void;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties | undefined>(undefined);
 
   const filteredCommands = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -96,32 +99,58 @@ export function SlashCommandMenu({
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [filteredCommands, isOpen, onClose, onExecute, selectedIndex]);
 
+  const updateMenuPosition = useCallback((isVisible: boolean) => {
+    if (!position) return;
+    const measuredRect = menuRef.current?.getBoundingClientRect();
+    const placement = computeAnchoredOverlayStyle({
+      anchorRect: createPointRect(position.x, position.y),
+      overlay: {
+        width: measuredRect?.width ?? 420,
+        height: measuredRect?.height ?? 360,
+      },
+      portalContainer: portalContainer ?? null,
+      gap: 6,
+      margin: 12,
+      preferredX: "start",
+      preferredY: "bottom",
+      flipX: true,
+      flipY: true,
+    });
+
+    setMenuStyle({
+      ...placement,
+      visibility: isVisible ? "visible" : "hidden",
+      ...getOverlayThemeStyleFromSelection(),
+    });
+  }, [portalContainer, position]);
+
+  useLayoutEffect(() => {
+    if (!isOpen || !position) return;
+    updateMenuPosition(false);
+    const frame = window.requestAnimationFrame(() => updateMenuPosition(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, [isOpen, position, updateMenuPosition]);
+
+  useEffect(() => {
+    if (!isOpen || !position) return;
+    const handleViewportChange = () => updateMenuPosition(true);
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("scroll", handleViewportChange, true);
+    return () => {
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("scroll", handleViewportChange, true);
+    };
+  }, [isOpen, position, updateMenuPosition]);
+
   if (!isOpen || !position) {
     return null;
   }
 
-  const resolvedStyle = (() => {
-    const base = getOverlayThemeStyleFromSelection();
-    if (!position) return base;
-    if (!portalContainer) {
-      return { ...base, left: position.x, top: position.y };
-    }
-
-    const containerRect = portalContainer.getBoundingClientRect();
-    const rawLeft = position.x - containerRect.left;
-    const maxLeft = Math.max(12, containerRect.width - 420);
-    return {
-      ...base,
-      left: Math.max(12, Math.min(rawLeft, maxLeft)),
-      top: Math.max(12, position.y - containerRect.top),
-      position: "absolute" as const,
-    };
-  })();
-
   const menu = (
     <div
       className="luthor-slash-menu"
-      style={resolvedStyle}
+      ref={menuRef}
+      style={menuStyle}
       onPointerDown={(event) => {
         event.stopPropagation();
       }}

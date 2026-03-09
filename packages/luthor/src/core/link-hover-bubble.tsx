@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { resolveLinkNodeKeyFromAnchor, type LexicalEditor } from "@lyfie/luthor-headless";
 import { UnlinkIcon } from "./icons";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
+import { computeAnchoredOverlayStyle } from "./overlay-position";
 import type { CoreEditorCommands, CoreTheme } from "./types";
 
 type HoveredLinkState = {
@@ -100,19 +101,25 @@ export function LinkHoverBubble({
 
   const updatePosition = useCallback((anchorEl: HTMLAnchorElement, container: HTMLElement | null) => {
     const rect = anchorEl.getBoundingClientRect();
-    if (container) {
-      const containerRect = container.getBoundingClientRect();
-      const nextTop = rect.bottom - containerRect.top + 8;
-      const rawLeft = rect.left - containerRect.left;
-      const maxLeft = Math.max(10, containerRect.width - 340);
-      const nextLeft = Math.max(10, Math.min(rawLeft, maxLeft));
-      setPosition({ top: nextTop, left: nextLeft });
-      return;
-    }
-
-    const nextTop = rect.bottom + 8;
-    const nextLeft = Math.max(10, Math.min(rect.left, window.innerWidth - 340));
-    setPosition({ top: nextTop, left: nextLeft });
+    const measuredRect = bubbleRef.current?.getBoundingClientRect();
+    const placement = computeAnchoredOverlayStyle({
+      anchorRect: rect,
+      overlay: {
+        width: measuredRect?.width ?? 340,
+        height: measuredRect?.height ?? 48,
+      },
+      portalContainer: container,
+      gap: 8,
+      margin: 10,
+      preferredX: "start",
+      preferredY: "bottom",
+      flipX: true,
+      flipY: true,
+    });
+    setPosition({
+      top: typeof placement.top === "number" ? placement.top : 0,
+      left: typeof placement.left === "number" ? placement.left : 0,
+    });
   }, []);
 
   const syncLinkByKey = useCallback((nodeKey: string, fallbackUrl: string) => {
@@ -278,6 +285,13 @@ export function LinkHoverBubble({
     clearHideTimeout,
   ]);
 
+  useLayoutEffect(() => {
+    if (!hoveredLink) {
+      return;
+    }
+    updatePosition(hoveredLink.anchorEl, portalContainerRef.current);
+  }, [hoveredLink, isEditing, updatePosition]);
+
   const bubbleStyle = useMemo<CSSProperties | undefined>(() => {
     if (!hoveredLink || !position) {
       return undefined;
@@ -288,7 +302,7 @@ export function LinkHoverBubble({
       position: portalContainer ? "absolute" : "fixed",
       top: position.top,
       left: position.left,
-      zIndex: 10040,
+      zIndex: "var(--luthor-z-menu, 460)",
     };
   }, [hoveredLink, position, portalContainer]);
 

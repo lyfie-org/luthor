@@ -1,12 +1,8 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDownIcon, CloseIcon } from "./icons";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
-
-function resolveEditorPortalContainer(element: HTMLElement | null): HTMLElement | null {
-  if (!element) return null;
-  return (element.closest(".luthor-editor-wrapper") as HTMLElement | null) ?? null;
-}
+import { computeAnchoredOverlayStyle, resolveEditorPortalContainer } from "./overlay-position";
 
 export function IconButton({
   children,
@@ -78,44 +74,85 @@ export function Select({
 
   useEffect(() => {
     if (!isOpen) return;
-
     const updatePosition = () => {
       const triggerEl = selectRef.current?.querySelector(".luthor-select-trigger") as HTMLElement | null;
       if (!triggerEl) return;
 
       const rect = triggerEl.getBoundingClientRect();
+      const measuredRect = dropdownRef.current?.getBoundingClientRect();
       const container = resolveEditorPortalContainer(triggerEl);
       setPortalContainer(container);
-      if (container) {
-        const containerRect = container.getBoundingClientRect();
-        setDropdownStyle({
-          position: "absolute",
-          top: rect.bottom - containerRect.top + 4,
-          left: Math.max(0, rect.left - containerRect.left),
-          width: rect.width,
-          ...getOverlayThemeStyleFromElement(triggerEl),
-        });
-        return;
-      }
+
+      const width = Math.max(rect.width, measuredRect?.width ?? 0);
+      const height = measuredRect?.height ?? 220;
+      const placement = computeAnchoredOverlayStyle({
+        anchorRect: rect,
+        overlay: { width, height },
+        portalContainer: container,
+        gap: 4,
+        margin: 8,
+        preferredX: "start",
+        preferredY: "bottom",
+        flipX: true,
+        flipY: true,
+      });
 
       setDropdownStyle({
-        position: "fixed",
-        top: rect.bottom + 4,
-        left: rect.left,
+        ...placement,
         width: rect.width,
         ...getOverlayThemeStyleFromElement(triggerEl),
       });
     };
 
-    updatePosition();
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
+    const handleReposition = () => updatePosition();
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
 
     return () => {
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
       setPortalContainer(null);
     };
+  }, [isOpen]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    const triggerEl = selectRef.current?.querySelector(".luthor-select-trigger") as HTMLElement | null;
+    if (!triggerEl) return;
+    const rect = triggerEl.getBoundingClientRect();
+    const container = resolveEditorPortalContainer(triggerEl);
+    setPortalContainer(container);
+    const initial = computeAnchoredOverlayStyle({
+      anchorRect: rect,
+      overlay: { width: rect.width, height: 220 },
+      portalContainer: container,
+      gap: 4,
+      margin: 8,
+    });
+    setDropdownStyle({
+      ...initial,
+      width: rect.width,
+      ...getOverlayThemeStyleFromElement(triggerEl),
+    });
+
+    const frame = window.requestAnimationFrame(() => {
+      const measuredRect = dropdownRef.current?.getBoundingClientRect();
+      const next = computeAnchoredOverlayStyle({
+        anchorRect: rect,
+        overlay: { width: Math.max(rect.width, measuredRect?.width ?? 0), height: measuredRect?.height ?? 220 },
+        portalContainer: container,
+        gap: 4,
+        margin: 8,
+      });
+      setDropdownStyle({
+        ...next,
+        width: rect.width,
+        ...getOverlayThemeStyleFromElement(triggerEl),
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, [isOpen]);
 
   useEffect(() => {
@@ -184,36 +221,82 @@ export function Dropdown({
       if (!triggerEl) return;
 
       const rect = triggerEl.getBoundingClientRect();
+      const measuredRect = contentRef.current?.getBoundingClientRect();
       const container = resolveEditorPortalContainer(triggerEl);
       setPortalContainer(container);
-      if (container) {
-        const containerRect = container.getBoundingClientRect();
-        setDropdownStyle({
-          position: "absolute",
-          top: rect.bottom - containerRect.top + 4,
-          left: Math.max(0, rect.left - containerRect.left),
-          ...getOverlayThemeStyleFromElement(triggerEl),
-        });
-        return;
-      }
+
+      const placement = computeAnchoredOverlayStyle({
+        anchorRect: rect,
+        overlay: {
+          width: measuredRect?.width ?? 220,
+          height: measuredRect?.height ?? 200,
+        },
+        portalContainer: container,
+        gap: 4,
+        margin: 8,
+        preferredX: "start",
+        preferredY: "bottom",
+        flipX: true,
+        flipY: true,
+      });
 
       setDropdownStyle({
-        position: "fixed",
-        top: rect.bottom + 4,
-        left: rect.left,
+        ...placement,
         ...getOverlayThemeStyleFromElement(triggerEl),
       });
     };
 
-    updatePosition();
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
+    const handleReposition = () => updatePosition();
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
 
     return () => {
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
       setPortalContainer(null);
     };
+  }, [isOpen]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    const triggerEl = triggerRef.current;
+    if (!triggerEl) return;
+
+    const rect = triggerEl.getBoundingClientRect();
+    const container = resolveEditorPortalContainer(triggerEl);
+    setPortalContainer(container);
+    const initial = computeAnchoredOverlayStyle({
+      anchorRect: rect,
+      overlay: { width: 220, height: 200 },
+      portalContainer: container,
+      gap: 4,
+      margin: 8,
+    });
+    setDropdownStyle({
+      ...initial,
+      ...getOverlayThemeStyleFromElement(triggerEl),
+    });
+
+    const frame = window.requestAnimationFrame(() => {
+      const measuredRect = contentRef.current?.getBoundingClientRect();
+      const next = computeAnchoredOverlayStyle({
+        anchorRect: rect,
+        overlay: {
+          width: measuredRect?.width ?? 220,
+          height: measuredRect?.height ?? 200,
+        },
+        portalContainer: container,
+        gap: 4,
+        margin: 8,
+      });
+      setDropdownStyle({
+        ...next,
+        ...getOverlayThemeStyleFromElement(triggerEl),
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, [isOpen]);
 
   useEffect(() => {

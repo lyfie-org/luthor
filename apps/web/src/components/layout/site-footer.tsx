@@ -1,7 +1,16 @@
 import { BookOpenText, Coffee, Cube, GithubLogo, Package, PlayCircle, RocketLaunch } from '@phosphor-icons/react/dist/ssr';
 import Image from 'next/image';
 import Link from 'next/link';
-import { GITHUB_URL, NPM_URL, REACT_PLAYGROUND_URL, SPONSORS_URL } from '@/config/site';
+import {
+  CREATOR_NAME,
+  CREATOR_URL,
+  GITHUB_URL,
+  MAINTAINER_ORG_NAME,
+  MAINTAINER_ORG_URL,
+  NPM_URL,
+  REACT_PLAYGROUND_URL,
+  SPONSORS_URL,
+} from '@/config/site';
 
 export function SiteFooter() {
   return (
@@ -21,6 +30,9 @@ export function SiteFooter() {
           <p>
             A headless, extensible rich text editor built on Lexical.
             Ship faster with production-ready defaults and TypeScript-first APIs.
+            {' '}
+            Maintained by <a href={MAINTAINER_ORG_URL}>{MAINTAINER_ORG_NAME}</a>, created by{' '}
+            <a href={CREATOR_URL}>{CREATOR_NAME}</a> (BDFL of {MAINTAINER_ORG_NAME}).
           </p>
         </section>
 
@@ -82,7 +94,7 @@ export function SiteFooter() {
       </div>
 
       <div className="container footer-bottom">
-        <p>Built with love by developers for developers.</p>
+        <p>Built with love by developers for developers at {MAINTAINER_ORG_NAME}.</p>
         <div className="footer-bottom-links">
           <Link href="/">Home</Link>
           <Link href="/docs/getting-started/">Docs</Link>

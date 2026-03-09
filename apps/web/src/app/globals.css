@@ -399,6 +399,24 @@ a {
   font-variant-caps: all-small-caps;
 }
 
+.hero-attribution {
+  margin: 0.5rem 0 0;
+  max-width: 62ch;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.hero-attribution a {
+  color: var(--accent-strong);
+  text-underline-offset: 3px;
+}
+
+.hero-attribution a:hover {
+  color: var(--text);
+}
+
 .hero-actions {
   margin-top: var(--space-5);
   display: flex;
@@ -1601,6 +1619,15 @@ a {
   color: var(--muted);
   max-width: 32ch;
   line-height: 1.5;
+}
+
+.footer-brand p a {
+  color: var(--accent-strong);
+  text-underline-offset: 3px;
+}
+
+.footer-brand p a:hover {
+  color: var(--text);
 }
 
 .footer-logo {

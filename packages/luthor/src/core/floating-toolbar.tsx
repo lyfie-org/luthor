@@ -183,7 +183,7 @@ export function FloatingToolbar({
     top: selectionRect.y,
     left: selectionRect.positionFromRight ? "auto" : selectionRect.x,
     right: selectionRect.positionFromRight ? 10 : "auto",
-    zIndex: 9999,
+    zIndex: "var(--luthor-z-menu, 460)",
     pointerEvents: "auto",
   };
 

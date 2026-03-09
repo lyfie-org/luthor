@@ -7,7 +7,12 @@ const PUBLIC_DIR = path.join(WEB_ROOT, 'public');
 const LLMS_FILE = path.join(PUBLIC_DIR, 'llms.txt');
 const LLMS_FULL_FILE = path.join(PUBLIC_DIR, 'llms-full.txt');
 
+const SITE_NAME = 'Luthor';
 const SITE_URL = 'https://www.luthor.fyi';
+const MAINTAINER_ORG_NAME = 'Lyfie.org';
+const MAINTAINER_ORG_URL = 'https://lyfie.org';
+const CREATOR_NAME = 'Rahul S Anand';
+const CREATOR_URL = 'https://www.rahulnsanand.com';
 
 function isMarkdownFile(filename) {
   return filename.endsWith('.md') || filename.endsWith('.mdx');
@@ -77,6 +82,11 @@ async function buildLlmsArtifacts() {
     `- Full corpus: ${SITE_URL}/llms-full.txt`,
     `- Sitemap: ${SITE_URL}/sitemap.xml`,
     '',
+    '## Stewardship',
+    '',
+    `- ${SITE_NAME} is currently developed and maintained by [${MAINTAINER_ORG_NAME}](${MAINTAINER_ORG_URL}).`,
+    `- ${CREATOR_NAME} is the creator and BDFL of ${MAINTAINER_ORG_NAME}: [${CREATOR_URL}](${CREATOR_URL})`,
+    '',
     '## Documentation Table of Contents',
     '',
   ];
@@ -95,6 +105,11 @@ async function buildLlmsArtifacts() {
     '# Luthor Documentation Full Corpus',
     '',
     'Concatenated markdown corpus for AI ingestion.',
+    '',
+    '## Stewardship',
+    '',
+    `- ${SITE_NAME} is currently developed and maintained by [${MAINTAINER_ORG_NAME}](${MAINTAINER_ORG_URL}).`,
+    `- ${CREATOR_NAME} is the creator and BDFL of ${MAINTAINER_ORG_NAME}: [${CREATOR_URL}](${CREATOR_URL})`,
     '',
     `Source root: ${SOURCE_DOCS_DIR}`,
     `Generated at: ${new Date().toISOString()}`,

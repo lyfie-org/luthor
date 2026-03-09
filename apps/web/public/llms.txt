@@ -8,6 +8,11 @@ This file helps AI agents discover Luthor docs quickly.
 - Full corpus: https://www.luthor.fyi/llms-full.txt
 - Sitemap: https://www.luthor.fyi/sitemap.xml
 
+## Stewardship
+
+- Luthor is currently developed and maintained by [Lyfie.org](https://lyfie.org).
+- Rahul S Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
+
 ## Documentation Table of Contents
 
 ### General

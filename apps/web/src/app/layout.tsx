@@ -6,7 +6,18 @@ import { NavigationProgress } from '@/components/layout/navigation-progress';
 import { RouteScrollManager } from '@/components/layout/route-scroll-manager';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
-import { GITHUB_URL, SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_URL, SOCIAL_CARD_PATH } from '@/config/site';
+import {
+  CREATOR_NAME,
+  CREATOR_URL,
+  GITHUB_URL,
+  MAINTAINER_ORG_NAME,
+  MAINTAINER_ORG_URL,
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+  SITE_URL,
+  SOCIAL_CARD_PATH,
+} from '@/config/site';
 
 const THEME_STORAGE_KEY = 'luthor-site-theme';
 const THEME_INIT_SCRIPT = `
@@ -40,11 +51,17 @@ const sora = Sora({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} | Open Source Rich Text Editor for React`,
+    default: `${SITE_NAME} | Open Source Lexical Rich Text Editor for Modern JS Frameworks`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
+  creator: CREATOR_NAME,
+  publisher: MAINTAINER_ORG_NAME,
+  authors: [
+    { name: CREATOR_NAME, url: CREATOR_URL },
+    { name: MAINTAINER_ORG_NAME, url: MAINTAINER_ORG_URL },
+  ],
   category: 'developer tools',
   keywords: SITE_KEYWORDS,
   alternates: {
@@ -54,12 +71,12 @@ export const metadata: Metadata = {
     type: 'website',
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} | Open Source Rich Text Editor for React`,
+    title: `${SITE_NAME} | Open Source Lexical Rich Text Editor for Modern JS Frameworks`,
     description: SITE_DESCRIPTION,
     images: [
       {
         url: SOCIAL_CARD_PATH,
-        alt: 'Luthor React rich text editor',
+        alt: 'Luthor Lexical rich text editor for modern JavaScript frameworks',
       },
     ],
   },
@@ -67,7 +84,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@lyfieapp',
     creator: '@lyfieapp',
-    title: `${SITE_NAME} | Open Source Rich Text Editor for React`,
+    title: `${SITE_NAME} | Open Source Lexical Rich Text Editor for Modern JS Frameworks`,
     description: SITE_DESCRIPTION,
     images: [SOCIAL_CARD_PATH],
   },
@@ -91,6 +108,10 @@ export const metadata: Metadata = {
   },
   other: {
     'github:repo': GITHUB_URL,
+    'organization:name': MAINTAINER_ORG_NAME,
+    'organization:url': MAINTAINER_ORG_URL,
+    'creator:name': CREATOR_NAME,
+    'creator:url': CREATOR_URL,
   },
 };
 

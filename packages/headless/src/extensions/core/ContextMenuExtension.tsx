@@ -100,6 +100,12 @@ export type ContextMenuStateQueries = {
   isContextMenuOpen: () => Promise<boolean>;
 };
 
+function clamp(value: number, min: number, max: number): number {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+}
+
 /**
  * Default context menu renderer - headless and theme-aware
  */
@@ -131,7 +137,7 @@ function DefaultContextMenuRenderer({
         position: 'fixed',
         left: position.x,
         top: position.y,
-        zIndex: 1000,
+        zIndex: "var(--luthor-z-menu, 460)",
         ...style,
       }}
       onClick={(e) => e.stopPropagation()}
@@ -377,17 +383,29 @@ function ContextMenuPlugin({ extension }: { extension: ContextMenuExtension }) {
   // Use the renderer from the menu state or fall back to the extension's default
   const Renderer = menuState.renderer || extension.config.defaultRenderer!;
   const portalContainer = extension.manager?.getPortalContainer() ?? null;
+  const estimatedMenuWidth = 220;
+  const estimatedMenuHeight = Math.min(420, 18 + menuState.items.length * 34);
+  const edgePadding = 8;
   const resolvedPosition = (() => {
     if (!portalContainer) {
-      return menuState.position;
+      const viewportWidth = typeof window === "undefined" ? 0 : window.innerWidth;
+      const viewportHeight = typeof window === "undefined" ? 0 : window.innerHeight;
+      const maxX = Math.max(edgePadding, viewportWidth - estimatedMenuWidth - edgePadding);
+      const maxY = Math.max(edgePadding, viewportHeight - estimatedMenuHeight - edgePadding);
+      return {
+        x: clamp(menuState.position.x, edgePadding, maxX),
+        y: clamp(menuState.position.y, edgePadding, maxY),
+      };
     }
 
     const rect = portalContainer.getBoundingClientRect();
     const rawX = menuState.position.x - rect.left;
     const rawY = menuState.position.y - rect.top;
+    const maxX = Math.max(edgePadding, rect.width - estimatedMenuWidth - edgePadding);
+    const maxY = Math.max(edgePadding, rect.height - estimatedMenuHeight - edgePadding);
     return {
-      x: Math.max(8, Math.min(rawX, Math.max(8, rect.width - 8))),
-      y: Math.max(8, Math.min(rawY, Math.max(8, rect.height - 8))),
+      x: clamp(rawX, edgePadding, maxX),
+      y: clamp(rawY, edgePadding, maxY),
     };
   })();
   const resolvedContainerStyle = portalContainer
