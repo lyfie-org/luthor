@@ -42,7 +42,7 @@ Luthor is an open-source rich text editor ecosystem designed for teams that want
 ## :rocket: Quick Start
 
 ```bash
-pnpm add @lyfie/luthor react react-dom
+pnpm add @lyfie/luthor
 ```
 
 ```tsx

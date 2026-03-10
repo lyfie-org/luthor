@@ -173,3 +173,6 @@ docs_repo_arch
 .wrangler
 apps/web/.open-next
 apps/web/.vscode
+tmp-*
+.blogs/Pub*
+.blogs/Readme*
