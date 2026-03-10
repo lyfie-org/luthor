@@ -9,8 +9,6 @@ description: Shared metadata-free rich editor profile powering both MD and HTML 
 
 Use it when you want the same native feature set and switch only the source tab mode between markdown and html.
 
-Legacy aliases remain available: `MDFriendlyEditor` and `NotionLikeEditor`.
-
 ## Usage
 
 ```tsx

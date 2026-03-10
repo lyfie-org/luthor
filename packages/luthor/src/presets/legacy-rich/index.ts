@@ -8,3 +8,4 @@ export {
   type LegacyRichEditorMode,
   type LegacyRichSourceFormat,
 } from "./LegacyRichEditor";
+export { legacyRichPreset } from "./preset";

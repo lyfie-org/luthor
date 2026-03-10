@@ -1,13 +1,13 @@
 ---
-title: Rich Text Input
-description: Focused rich text compose preset with optional recipient rows.
+title: Compose Editor
+description: Focused rich text drafting preset with a compact, practical toolbar.
 ---
 
-# Rich Text Input
+# Compose Editor
 
 `ComposeEditor` merges focused rich-text and draft-composition workflows into one surface.
 
-Use it as a clean rich editor, or enable recipient/subject rows when needed.
+Use it as a clean rich editor with a constrained feature set for practical drafting flows.
 
 ## Usage
 
@@ -19,9 +19,6 @@ export function App() {
   return (
     <ComposeEditor
       compactToolbar
-      showTo
-      showCc
-      showSubject
       placeholder="Write your draft..."
     />
   );
@@ -34,15 +31,9 @@ export function App() {
 
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides`
 - `compactToolbar`: `false (default) | true`
-- `showRecipients`: `false (default) | true`
-- `showTo`: `false (default) | true`
-- `showCc`: `false (default) | true`
-- `showBcc`: `false (default) | true`
-- `showSubject`: `false (default) | true`
 
 ## Behavior
 
 - Defaults to focused formatting with media/embed-heavy features disabled.
-- Optional recipient rows render above the editor shell.
 - Supports feature flag overrides for deeper tuning.
 

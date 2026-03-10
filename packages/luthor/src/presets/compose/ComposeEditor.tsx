@@ -32,11 +32,6 @@ const COMPOSE_DEFAULT_FLAGS: FeatureFlagOverrides = {
 export type ComposeEditorProps = Omit<ExtensiveEditorProps, "featureFlags"> & {
   featureFlags?: FeatureFlagOverrides;
   compactToolbar?: boolean;
-  showRecipients?: boolean;
-  showTo?: boolean;
-  showCc?: boolean;
-  showBcc?: boolean;
-  showSubject?: boolean;
 };
 
 export const ComposeEditor = forwardRef<ExtensiveEditorRef, ComposeEditorProps>(
@@ -47,49 +42,12 @@ export const ComposeEditor = forwardRef<ExtensiveEditorRef, ComposeEditorProps>(
       compactToolbar = false,
       toolbarClassName,
       featureFlags,
-      showRecipients = false,
-      showTo = false,
-      showCc = false,
-      showBcc = false,
-      showSubject = false,
       ...props
     },
     ref,
   ) => {
-    const resolvedShowTo = showRecipients || showTo;
-    const resolvedShowSubject = showRecipients || showSubject;
-    const shouldShowRecipients = resolvedShowTo || showCc || showBcc || resolvedShowSubject;
-
     return (
       <div className={["luthor-preset-compose", className].filter(Boolean).join(" ")}>
-        {shouldShowRecipients && (
-          <div className="luthor-compose-shell">
-            {resolvedShowTo && (
-              <label className="luthor-compose-row" data-testid="compose-row-to">
-                <span>To</span>
-                <input type="text" readOnly value="" />
-              </label>
-            )}
-            {showCc && (
-              <label className="luthor-compose-row" data-testid="compose-row-cc">
-                <span>Cc</span>
-                <input type="text" readOnly value="" />
-              </label>
-            )}
-            {showBcc && (
-              <label className="luthor-compose-row" data-testid="compose-row-bcc">
-                <span>Bcc</span>
-                <input type="text" readOnly value="" />
-              </label>
-            )}
-            {resolvedShowSubject && (
-              <label className="luthor-compose-row" data-testid="compose-row-subject">
-                <span>Subject</span>
-                <input type="text" readOnly value="" />
-              </label>
-            )}
-          </div>
-        )}
         <ExtensiveEditor
           ref={ref}
           {...props}

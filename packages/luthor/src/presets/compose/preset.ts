@@ -5,8 +5,8 @@ import { ComposeEditor } from "./ComposeEditor";
 
 export const composePreset: EditorPreset = {
   id: "compose",
-  label: "Rich Text Input",
-  description: "Focused rich text composer with optional recipient rows.",
+  label: "Compose Editor",
+  description: "Focused rich text drafting preset with a compact, practical toolbar.",
   extensions: createExtensiveExtensions({
     featureFlags: {
       image: false,

@@ -51,22 +51,22 @@ const EMPTY_DOCUMENT_JSON = JSON.stringify({
 
 type SizeValue = number | string;
 
-export type ComposerOutputFormat = "md" | "json";
+export type SimpleEditorOutputFormat = "md" | "json";
 
-export type ComposerEditorSendPayload = {
-  format: ComposerOutputFormat;
+export type SimpleEditorSendPayload = {
+  format: SimpleEditorOutputFormat;
   text: string;
   markdown: string;
   json: string;
 };
 
-export type ComposerFormattingOptions = {
+export type SimpleFormattingOptions = {
   bold?: boolean;
   italic?: boolean;
   strikethrough?: boolean;
 };
 
-export type ComposerToolbarButton = {
+export type SimpleToolbarButton = {
   id: string;
   content: ReactNode;
   ariaLabel: string;
@@ -76,7 +76,7 @@ export type ComposerToolbarButton = {
   className?: string;
 };
 
-export type ComposerEditorProps = {
+export type SimpleEditorProps = {
   className?: string;
   variantClassName?: string;
   initialTheme?: "light" | "dark";
@@ -85,9 +85,9 @@ export type ComposerEditorProps = {
   defaultContent?: string;
   showDefaultContent?: boolean;
   placeholder?: ExtensiveEditorProps["placeholder"];
-  formattingOptions?: ComposerFormattingOptions;
-  onSend?: (payload: ComposerEditorSendPayload) => void;
-  outputFormat?: ComposerOutputFormat;
+  formattingOptions?: SimpleFormattingOptions;
+  onSend?: (payload: SimpleEditorSendPayload) => void;
+  outputFormat?: SimpleEditorOutputFormat;
   clearOnSend?: boolean;
   allowEmptySend?: boolean;
   submitOnEnter?: boolean;
@@ -97,7 +97,7 @@ export type ComposerEditorProps = {
   minWidth?: SizeValue;
   maxWidth?: SizeValue;
   showBottomToolbar?: boolean;
-  toolbarButtons?: readonly ComposerToolbarButton[];
+  toolbarButtons?: readonly SimpleToolbarButton[];
   toolbarClassName?: string;
   toolbarStyle?: CSSProperties;
   showSendButton?: boolean;
@@ -211,7 +211,7 @@ function positionCaretInNearestLine(editable: HTMLElement, clientX: number, clie
   selection.addRange(range);
 }
 
-export function ComposerEditor({
+export function SimpleEditor({
   className,
   variantClassName,
   initialTheme,
@@ -241,7 +241,7 @@ export function ComposerEditor({
   sendButtonAriaLabel = "Send message",
   sendButtonClassName,
   scrollAreaClassName,
-}: ComposerEditorProps) {
+}: SimpleEditorProps) {
   const editorRef = useRef<ExtensiveEditorRef | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [editorHeight, setEditorHeight] = useState(() => getNumericPixels(minHeight, 56));
@@ -343,7 +343,7 @@ export function ComposerEditor({
       const target = event.target as HTMLElement;
       if (
         target.closest("button, a, input, textarea, [contenteditable='true']") ||
-        target.closest(".luthor-composer-bottom-toolbar")
+        target.closest(".luthor-simple-editor-bottom-toolbar")
       ) {
         return;
       }
@@ -423,11 +423,11 @@ export function ComposerEditor({
   const rootStyle = useMemo(
     () =>
       ({
-        "--luthor-composer-min-height": toCssSize(minHeight),
-        "--luthor-composer-max-height": toCssSize(maxHeight),
-        "--luthor-composer-current-height": `${editorHeight}px`,
-        "--luthor-composer-min-width": toCssSize(minWidth),
-        "--luthor-composer-max-width": toCssSize(maxWidth),
+        "--luthor-simple-editor-min-height": toCssSize(minHeight),
+        "--luthor-simple-editor-max-height": toCssSize(maxHeight),
+        "--luthor-simple-editor-current-height": `${editorHeight}px`,
+        "--luthor-simple-editor-min-width": toCssSize(minWidth),
+        "--luthor-simple-editor-max-width": toCssSize(maxWidth),
       }) as CSSProperties,
     [editorHeight, maxHeight, maxWidth, minHeight, minWidth],
   );
@@ -436,8 +436,8 @@ export function ComposerEditor({
     <div
       ref={rootRef}
       className={[
-        "luthor-preset-composer",
-        showSendButton && sendButtonPlacement === "inside" ? "luthor-preset-composer--send-inside" : "",
+        "luthor-preset-simple-editor",
+        showSendButton && sendButtonPlacement === "inside" ? "luthor-preset-simple-editor--send-inside" : "",
         className,
       ]
         .filter(Boolean)
@@ -446,8 +446,8 @@ export function ComposerEditor({
       onKeyDownCapture={handleKeyDownCapture}
       onMouseDownCapture={handleEditorMouseDownCapture}
     >
-      <div className="luthor-composer-row">
-        <div className="luthor-composer-shell">
+      <div className="luthor-simple-editor-row">
+        <div className="luthor-simple-editor-shell">
           <ExtensiveEditor
             ref={editorRef}
             initialTheme={initialTheme}
@@ -456,7 +456,7 @@ export function ComposerEditor({
             defaultContent={defaultContent}
             showDefaultContent={showDefaultContent}
             placeholder={placeholder}
-            variantClassName={["luthor-preset-composer__variant", variantClassName]
+            variantClassName={["luthor-preset-simple-editor__variant", variantClassName]
               .filter(Boolean)
               .join(" ")}
             isToolbarEnabled={false}
@@ -501,14 +501,14 @@ export function ComposerEditor({
             <button
               type="button"
               className={[
-                "luthor-composer-action",
-                "luthor-composer-action-send",
-                "luthor-composer-action-send--inside",
+                "luthor-simple-editor-action",
+                "luthor-simple-editor-action-send",
+                "luthor-simple-editor-action-send--inside",
                 sendButtonClassName,
               ]
                 .filter(Boolean)
                 .join(" ")}
-              data-testid="composer-send-button"
+              data-testid="simple-editor-send-button"
               onClick={dispatchSend}
               aria-label={sendButtonAriaLabel}
             >
@@ -517,17 +517,17 @@ export function ComposerEditor({
           )}
           {showBottomToolbar && (
             <div
-              className={["luthor-composer-bottom-toolbar", toolbarClassName]
+              className={["luthor-simple-editor-bottom-toolbar", toolbarClassName]
                 .filter(Boolean)
                 .join(" ")}
               style={toolbarStyle}
-              data-testid="composer-actions"
+              data-testid="simple-editor-actions"
             >
               {toolbarButtons.map((button) => (
                 <button
                   key={button.id}
                   type="button"
-                  className={["luthor-composer-action", button.className].filter(Boolean).join(" ")}
+                  className={["luthor-simple-editor-action", button.className].filter(Boolean).join(" ")}
                   aria-label={button.ariaLabel}
                   disabled={button.disabled}
                   title={button.title}
@@ -543,14 +543,14 @@ export function ComposerEditor({
           <button
             type="button"
             className={[
-              "luthor-composer-action",
-              "luthor-composer-action-send",
-              "luthor-composer-action-send--right",
+              "luthor-simple-editor-action",
+              "luthor-simple-editor-action-send",
+              "luthor-simple-editor-action-send--right",
               sendButtonClassName,
             ]
               .filter(Boolean)
               .join(" ")}
-            data-testid="composer-send-button"
+            data-testid="simple-editor-send-button"
             onClick={dispatchSend}
             aria-label={sendButtonAriaLabel}
           >
@@ -561,4 +561,5 @@ export function ComposerEditor({
     </div>
   );
 }
+
 

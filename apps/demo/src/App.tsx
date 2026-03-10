@@ -1,10 +1,11 @@
 import {
   ComposeEditor,
-  ComposerEditor,
   ExtensiveEditor,
   HeadlessEditorPreset,
   HTMLEditor,
+  LegacyRichEditor,
   MDEditor,
+  SimpleEditor,
   SlashEditor,
 } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
@@ -15,7 +16,8 @@ import "highlight.js/styles/github.css";
 type PresetId =
   | "extensive"
   | "compose"
-  | "composer"
+  | "simple-editor"
+  | "legacy-rich"
   | "md-editor"
   | "html-editor"
   | "slash-editor"
@@ -23,8 +25,9 @@ type PresetId =
 
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "extensive", label: "Extensive Editor" },
-  { value: "compose", label: "Rich Text Input" },
-  { value: "composer", label: "Simple Text Input" },
+  { value: "compose", label: "Compose Editor" },
+  { value: "simple-editor", label: "Simple Editor" },
+  { value: "legacy-rich", label: "Legacy Rich Editor" },
   { value: "md-editor", label: "MD Editor" },
   { value: "html-editor", label: "HTML Editor" },
   { value: "slash-editor", label: "Slash Editor" },
@@ -45,9 +48,9 @@ function App() {
             placeholder="Write a draft..."
           />
         );
-      case "composer":
+      case "simple-editor":
         return (
-          <ComposerEditor
+          <SimpleEditor
             placeholder="Type a message"
             maxHeight={220}
             minHeight={140}
@@ -57,8 +60,16 @@ function App() {
             outputFormat="md"
             formattingOptions={{ bold: true, italic: true, strikethrough: true }}
             onSend={({ format, text }) => {
-              console.log("composer-send", { format, text });
+              console.log("simple-editor-send", { format, text });
             }}
+          />
+        );
+      case "legacy-rich":
+        return (
+          <LegacyRichEditor
+            showDefaultContent={false}
+            sourceFormat="markdown"
+            defaultEditorView="markdown"
           />
         );
       case "md-editor":

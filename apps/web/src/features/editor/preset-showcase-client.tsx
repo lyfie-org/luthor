@@ -2,14 +2,15 @@
 
 import {
   ComposeEditor,
-  ComposerEditor,
-  type ComposerEditorSendPayload,
   type EditorPreset,
   ExtensiveEditor,
   HeadlessEditorPreset,
   HTMLEditor,
+  LegacyRichEditor,
   MDEditor,
   presetRegistry,
+  SimpleEditor,
+  type SimpleEditorSendPayload,
   SlashEditor,
 } from '@lyfie/luthor';
 import { PaperPlaneRight } from '@phosphor-icons/react';
@@ -23,7 +24,8 @@ type Theme = 'light' | 'dark';
 const VISIBLE_PRESET_IDS = [
   'extensive',
   'compose',
-  'composer',
+  'simple-editor',
+  'legacy-rich',
   'md-editor',
   'html-editor',
   'slash-editor',
@@ -53,16 +55,22 @@ const presetDetails: Record<VisiblePresetId, PresetDetails> = {
     docsPath: '/docs/luthor/presets/extensive-editor/',
   },
   compose: {
-    summary: 'Focused rich-text drafting experience for email-like compose flows.',
+    summary: 'Focused rich-text drafting preset with essential formatting and source tabs.',
     useCases: 'Best for support replies, outbound messaging, and professional drafting surfaces.',
-    customization: 'Compact toolbar, recipient rows, and preset-scoped feature flags can be tuned for product needs.',
+    customization: 'Compact toolbar and preset-scoped feature flags can be tuned for product needs.',
     docsPath: '/docs/luthor/presets/compose-editor/',
   },
-  composer: {
+  'simple-editor': {
     summary: 'Minimal chat/message input with safe formatting and send-oriented behavior.',
     useCases: 'Best for chats, comments, inbox replies, and compact message composers.',
     customization: 'Output format, send interaction, height constraints, and action controls are configurable.',
-    docsPath: '/docs/luthor/presets/composer-editor/',
+    docsPath: '/docs/luthor/presets/simple-editor/',
+  },
+  'legacy-rich': {
+    summary: 'Metadata-free native profile that powers both MD and HTML focused editors.',
+    useCases: 'Best for compatibility-first products that need clean markdown/html round trips.',
+    customization: 'Switch source format between markdown and html while keeping the same native feature set.',
+    docsPath: '/docs/luthor/presets/legacy-rich-editor/',
   },
   'md-editor': {
     summary: 'LegacyRich markdown profile with native markdown-compatible formatting and clean source round-trips.',
@@ -93,7 +101,8 @@ const presetDetails: Record<VisiblePresetId, PresetDetails> = {
 const presetTag: Record<VisiblePresetId, string> = {
   extensive: '<ExtensiveEditor />',
   compose: '<ComposeEditor />',
-  composer: '<ComposerEditor />',
+  'simple-editor': '<SimpleEditor />',
+  'legacy-rich': '<LegacyRichEditor />',
   'md-editor': '<MDEditor />',
   'html-editor': '<HTMLEditor />',
   'slash-editor': '<SlashEditor />',
@@ -102,8 +111,9 @@ const presetTag: Record<VisiblePresetId, string> = {
 
 const presetHeading: Record<VisiblePresetId, string> = {
   extensive: 'Extensive Editor Preset',
-  compose: 'Rich Text Input Preset',
-  composer: 'Simple Text Input Preset',
+  compose: 'Compose Editor Preset',
+  'simple-editor': 'Simple Editor Preset',
+  'legacy-rich': 'Legacy Rich Editor Preset',
   'md-editor': 'MD Editor Preset',
   'html-editor': 'HTML Editor Preset',
   'slash-editor': 'Slash Editor Preset',
@@ -182,10 +192,25 @@ function ComposeExperience({ siteTheme }: { siteTheme: Theme }) {
         initialTheme={siteTheme}
         showDefaultContent={false}
         compactToolbar
-        showTo
-        showCc
-        showSubject
         placeholder="Write your customer follow-up..."
+      />
+    </PresetSurface>
+  );
+}
+
+function LegacyRichExperience({ siteTheme }: { siteTheme: Theme }) {
+  return (
+    <PresetSurface>
+      <LegacyRichEditor
+        initialTheme={siteTheme}
+        showDefaultContent={false}
+        sourceFormat="markdown"
+        defaultEditorView="markdown"
+        placeholder={{
+          visual: 'Write metadata-free content...',
+          markdown: '## Legacy Rich Markdown\n\n- Metadata-free output',
+          json: 'Review generated JSON...',
+        }}
       />
     </PresetSurface>
   );
@@ -260,7 +285,7 @@ function HeadlessExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function ComposerExperience({ siteTheme }: { siteTheme: Theme }) {
+function SimpleEditorExperience({ siteTheme }: { siteTheme: Theme }) {
   const [messages, setMessages] = useState<DemoMessage[]>([
     {
       id: 'seed-assistant',
@@ -280,7 +305,7 @@ function ComposerExperience({ siteTheme }: { siteTheme: Theme }) {
     };
   }, []);
 
-  const handleSend = (payload: ComposerEditorSendPayload) => {
+  const handleSend = (payload: SimpleEditorSendPayload) => {
     const userText = payload.markdown.trim();
     if (!userText) {
       return;
@@ -345,7 +370,7 @@ function ComposerExperience({ siteTheme }: { siteTheme: Theme }) {
         </div>
 
         <div className="demo-chat-composer">
-          <ComposerEditor
+          <SimpleEditor
             initialTheme={siteTheme}
             placeholder="Type a message and press Enter..."
             onSend={handleSend}
@@ -371,8 +396,10 @@ function PresetRenderer({ presetId, siteTheme }: PresetRendererProps) {
   switch (presetId) {
     case 'compose':
       return <ComposeExperience siteTheme={siteTheme} />;
-    case 'composer':
-      return <ComposerExperience siteTheme={siteTheme} />;
+    case 'simple-editor':
+      return <SimpleEditorExperience siteTheme={siteTheme} />;
+    case 'legacy-rich':
+      return <LegacyRichExperience siteTheme={siteTheme} />;
     case 'md-editor':
       return <MDEditorExperience siteTheme={siteTheme} />;
     case 'html-editor':

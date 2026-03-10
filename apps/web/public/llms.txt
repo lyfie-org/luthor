@@ -30,11 +30,11 @@ This file helps AI agents discover Luthor docs quickly.
 - [luthor-headless/features/typography-and-text.md](https://www.luthor.fyi/docs/luthor-headless/features/typography-and-text/)
 - [luthor/presets.md](https://www.luthor.fyi/docs/luthor/presets/)
 - [luthor/presets/compose-editor.md](https://www.luthor.fyi/docs/luthor/presets/compose-editor/)
-- [luthor/presets/composer-editor.md](https://www.luthor.fyi/docs/luthor/presets/composer-editor/)
 - [luthor/presets/extensive-editor.md](https://www.luthor.fyi/docs/luthor/presets/extensive-editor/)
 - [luthor/presets/headless-editor-preset.md](https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/)
 - [luthor/presets/html-editor.md](https://www.luthor.fyi/docs/luthor/presets/html-editor/)
 - [luthor/presets/legacy-rich-editor.md](https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/)
 - [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/)
+- [luthor/presets/simple-editor.md](https://www.luthor.fyi/docs/luthor/presets/simple-editor/)
 - [luthor/presets/slash-editor.md](https://www.luthor.fyi/docs/luthor/presets/slash-editor/)
 

@@ -4,33 +4,6 @@
   gap: 10px;
 }
 
-.luthor-compose-shell {
-  border: 1px solid var(--luthor-border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.luthor-compose-row {
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--luthor-border);
-  background: var(--luthor-bg);
-  color: var(--luthor-fg);
-}
-
-.luthor-compose-row:last-child {
-  border-bottom: 0;
-}
-
-.luthor-compose-row input {
-  border: 0;
-  outline: none;
-  background: transparent;
-}
-
 .luthor-preset-compose .luthor-editor {
   min-height: 220px;
 }

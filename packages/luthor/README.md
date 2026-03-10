@@ -51,11 +51,11 @@ export function App() {
 
 - `ExtensiveEditor`
 - `ComposeEditor`
-- `ComposerEditor`
-- `MDEditor` (legacy alias: `MDFriendlyEditor`)
+- `SimpleEditor`
+- `MDEditor`
 - `HTMLEditor`
 - `LegacyRichEditor`
-- `SlashEditor` (legacy alias: `NotionLikeEditor`)
+- `SlashEditor`
 - `HeadlessEditorPreset`
 
 ## Compatibility

@@ -1,6 +1,6 @@
 @import "./presets/extensive/styles.css";
 @import "./presets/compose/styles.css";
-@import "./presets/composer/styles.css";
+@import "./presets/simple-editor/styles.css";
 @import "./presets/md-editor/styles.css";
 @import "./presets/html-editor/styles.css";
 @import "./presets/slash-editor/styles.css";

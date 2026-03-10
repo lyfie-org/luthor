@@ -7,6 +7,7 @@ const { extensiveEditorMock } = vi.hoisted(() => ({
 
 vi.mock("../extensive", () => ({
   ExtensiveEditor: extensiveEditorMock,
+  createExtensiveExtensions: vi.fn(() => []),
 }));
 
 import { MDEditor } from "./MDEditor";

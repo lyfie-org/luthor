@@ -16,8 +16,8 @@ import { headless } from '@lyfie/luthor';
 ## Preset docs
 
 - [Extensive Editor](/docs/luthor/presets/extensive-editor/)
-- [Rich Text Input](/docs/luthor/presets/compose-editor/)
-- [Simple Text Input](/docs/luthor/presets/composer-editor/)
+- [Compose Editor](/docs/luthor/presets/compose-editor/)
+- [Simple Editor](/docs/luthor/presets/simple-editor/)
 - [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/)
 - [MD Editor](/docs/luthor/presets/md-editor/)
 - [HTML Editor](/docs/luthor/presets/html-editor/)

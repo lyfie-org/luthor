@@ -32,5 +32,3 @@ export function App() {
 
 Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and disables draggable blocks plus metadata-heavy features like embeds, media, and custom nodes.
 
-Legacy alias: `MDFriendlyEditor` remains available for backward compatibility.
-

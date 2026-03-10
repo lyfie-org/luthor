@@ -17,7 +17,7 @@ vi.mock("../extensive", async () => {
   ) {
     extensivePropsSpy(props);
     react.useImperativeHandle(ref, () => ({ getJSON: getJSONMock, injectJSON: injectJSONMock }));
-    return <div data-testid="composer-extensive-editor">{props.children}</div>;
+    return <div data-testid="simple-editor-extensive-editor">{props.children}</div>;
   });
 
   return {
@@ -25,15 +25,15 @@ vi.mock("../extensive", async () => {
   };
 });
 
-import { ComposerEditor } from "./ComposerEditor";
+import { SimpleEditor } from "./SimpleEditor";
 
-describe("ComposerEditor", () => {
+describe("SimpleEditor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("locks feature set to allowed composer formatting only", () => {
-    render(<ComposerEditor showDefaultContent={false} />);
+  it("locks feature set to allowed simple-editor formatting only", () => {
+    render(<SimpleEditor showDefaultContent={false} />);
 
     const lastProps = extensivePropsSpy.mock.calls.at(-1)?.[0] as {
       featureFlags?: Record<string, boolean>;
@@ -68,7 +68,7 @@ describe("ComposerEditor", () => {
 
   it("always disables code shortcuts and commands", () => {
     render(
-      <ComposerEditor
+      <SimpleEditor
         showDefaultContent={false}
         formattingOptions={{ bold: true, italic: true, strikethrough: true }}
       />,
@@ -99,9 +99,9 @@ describe("ComposerEditor", () => {
 
   it("does not submit on Enter by default", () => {
     const onSend = vi.fn();
-    const { container } = render(<ComposerEditor onSend={onSend} showDefaultContent={false} />);
+    const { container } = render(<SimpleEditor onSend={onSend} showDefaultContent={false} />);
 
-    const wrapper = container.querySelector(".luthor-preset-composer") as HTMLElement;
+    const wrapper = container.querySelector(".luthor-preset-simple-editor") as HTMLElement;
     fireEvent.keyDown(wrapper, { key: "Enter" });
 
     expect(onSend).not.toHaveBeenCalled();
@@ -110,10 +110,10 @@ describe("ComposerEditor", () => {
   it("submits markdown payload on Enter when enabled", () => {
     const onSend = vi.fn();
     const { container } = render(
-      <ComposerEditor onSend={onSend} showDefaultContent={false} submitOnEnter allowEmptySend />,
+      <SimpleEditor onSend={onSend} showDefaultContent={false} submitOnEnter allowEmptySend />,
     );
 
-    const wrapper = container.querySelector(".luthor-preset-composer") as HTMLElement;
+    const wrapper = container.querySelector(".luthor-preset-simple-editor") as HTMLElement;
     fireEvent.keyDown(wrapper, { key: "Enter" });
 
     expect(onSend).toHaveBeenCalledWith(
@@ -128,10 +128,10 @@ describe("ComposerEditor", () => {
   it("keeps Shift+Enter when allowShiftEnter is true", () => {
     const onSend = vi.fn();
     const { container } = render(
-      <ComposerEditor onSend={onSend} showDefaultContent={false} allowShiftEnter submitOnEnter allowEmptySend />,
+      <SimpleEditor onSend={onSend} showDefaultContent={false} allowShiftEnter submitOnEnter allowEmptySend />,
     );
 
-    const wrapper = container.querySelector(".luthor-preset-composer") as HTMLElement;
+    const wrapper = container.querySelector(".luthor-preset-simple-editor") as HTMLElement;
     fireEvent.keyDown(wrapper, { key: "Enter", shiftKey: true });
 
     expect(onSend).not.toHaveBeenCalled();
@@ -139,9 +139,9 @@ describe("ComposerEditor", () => {
 
   it("fires callback from send button and clears editor by default", () => {
     const onSend = vi.fn();
-    render(<ComposerEditor onSend={onSend} showDefaultContent={false} />);
+    render(<SimpleEditor onSend={onSend} showDefaultContent={false} />);
 
-    fireEvent.click(screen.getByTestId("composer-send-button"));
+    fireEvent.click(screen.getByTestId("simple-editor-send-button"));
 
     expect(onSend).toHaveBeenCalledTimes(1);
     expect(injectJSONMock).toHaveBeenCalled();
@@ -149,20 +149,20 @@ describe("ComposerEditor", () => {
 
   it("supports right send button placement", () => {
     render(
-      <ComposerEditor
+      <SimpleEditor
         onSend={vi.fn()}
         showDefaultContent={false}
         sendButtonPlacement="right"
       />,
     );
 
-    expect(screen.getByTestId("composer-send-button").className).toContain("luthor-composer-action-send--right");
+    expect(screen.getByTestId("simple-editor-send-button").className).toContain("luthor-simple-editor-action-send--right");
   });
 
   it("renders dynamic bottom toolbar buttons", () => {
     const onAttachment = vi.fn();
     render(
-      <ComposerEditor
+      <SimpleEditor
         onSend={vi.fn()}
         showDefaultContent={false}
         toolbarButtons={[
@@ -180,4 +180,5 @@ describe("ComposerEditor", () => {
     expect(onAttachment).toHaveBeenCalledTimes(1);
   });
 });
+
 

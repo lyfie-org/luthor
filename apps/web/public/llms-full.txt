@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-10T08:53:21.871Z
+Generated at: 2026-03-10T09:32:44.981Z
 
 ---
 ## FILE: getting-started/capabilities.md
@@ -934,8 +934,8 @@ import { headless } from '@lyfie/luthor';
 ## Preset docs
 
 - [Extensive Editor](/docs/luthor/presets/extensive-editor/)
-- [Rich Text Input](/docs/luthor/presets/compose-editor/)
-- [Simple Text Input](/docs/luthor/presets/composer-editor/)
+- [Compose Editor](/docs/luthor/presets/compose-editor/)
+- [Simple Editor](/docs/luthor/presets/simple-editor/)
 - [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/)
 - [MD Editor](/docs/luthor/presets/md-editor/)
 - [HTML Editor](/docs/luthor/presets/html-editor/)
@@ -948,15 +948,15 @@ import { headless } from '@lyfie/luthor';
 ---
 
 ---
-title: Rich Text Input
-description: Focused rich text compose preset with optional recipient rows.
+title: Compose Editor
+description: Focused rich text drafting preset with a compact, practical toolbar.
 ---
 
-# Rich Text Input
+# Compose Editor
 
 `ComposeEditor` merges focused rich-text and draft-composition workflows into one surface.
 
-Use it as a clean rich editor, or enable recipient/subject rows when needed.
+Use it as a clean rich editor with a constrained feature set for practical drafting flows.
 
 ## Usage
 
@@ -968,9 +968,6 @@ export function App() {
   return (
     <ComposeEditor
       compactToolbar
-      showTo
-      showCc
-      showSubject
       placeholder="Write your draft..."
     />
   );
@@ -983,74 +980,11 @@ export function App() {
 
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides`
 - `compactToolbar`: `false (default) | true`
-- `showRecipients`: `false (default) | true`
-- `showTo`: `false (default) | true`
-- `showCc`: `false (default) | true`
-- `showBcc`: `false (default) | true`
-- `showSubject`: `false (default) | true`
 
 ## Behavior
 
 - Defaults to focused formatting with media/embed-heavy features disabled.
-- Optional recipient rows render above the editor shell.
 - Supports feature flag overrides for deeper tuning.
-
----
-## FILE: luthor/presets/composer-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/composer-editor/
----
-
----
-title: Simple Text Input
-description: Constrained message composer preset with send controls.
----
-
-# Simple Text Input
-
-`ComposerEditor` is a constrained message-composer preset.
-
-It keeps formatting intentionally minimal and supports send workflows out of the box.
-
-## Usage
-
-```tsx
-import { ComposerEditor } from '@lyfie/luthor';
-import '@lyfie/luthor/styles.css';
-
-export function App() {
-  return (
-    <ComposerEditor
-      placeholder="Type a message"
-      submitOnEnter
-      allowShiftEnter
-      outputFormat="md"
-      onSend={({ text }) => {
-        console.log(text);
-      }}
-    />
-  );
-}
-```
-
-## Props
-
-`ComposerEditorProps` is purpose-built for message input.
-
-- `formattingOptions`: `ComposerFormattingOptions`
-- `onSend`: `(payload: ComposerEditorSendPayload) => void`
-- `outputFormat`: `'md' (default) | 'json'`
-- `submitOnEnter`: `false (default) | true`
-- `allowShiftEnter`: `true (default) | false`
-- `showBottomToolbar`: `true (default) | false`
-- `toolbarButtons`: `readonly ComposerToolbarButton[]`
-- `sendButtonPlacement`: `'inside' (default) | 'right'`
-- `minHeight` / `maxHeight` / `minWidth` / `maxWidth`
-
-## Behavior
-
-- Allows only bold, italic, and strikethrough formatting.
-- Always runs visual mode only.
-- Supports auto-grow until `maxHeight`, then internal scrolling.
 
 ---
 ## FILE: luthor/presets/extensive-editor.md
@@ -1259,8 +1193,6 @@ description: Shared metadata-free rich editor profile powering both MD and HTML 
 
 Use it when you want the same native feature set and switch only the source tab mode between markdown and html.
 
-Legacy aliases remain available: `MDFriendlyEditor` and `NotionLikeEditor`.
-
 ## Usage
 
 ```tsx
@@ -1340,7 +1272,62 @@ export function App() {
 
 Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and disables draggable blocks plus metadata-heavy features like embeds, media, and custom nodes.
 
-Legacy alias: `MDFriendlyEditor` remains available for backward compatibility.
+---
+## FILE: luthor/presets/simple-editor.md
+## URL: https://www.luthor.fyi/docs/luthor/presets/simple-editor/
+---
+
+---
+title: Simple Editor
+description: Constrained message editor preset with send controls.
+---
+
+# Simple Editor
+
+`SimpleEditor` is a constrained message-editor preset.
+
+It keeps formatting intentionally minimal and supports send workflows out of the box.
+
+## Usage
+
+```tsx
+import { SimpleEditor } from '@lyfie/luthor';
+import '@lyfie/luthor/styles.css';
+
+export function App() {
+  return (
+    <SimpleEditor
+      placeholder="Type a message"
+      submitOnEnter
+      allowShiftEnter
+      outputFormat="md"
+      onSend={({ text }) => {
+        console.log(text);
+      }}
+    />
+  );
+}
+```
+
+## Props
+
+`SimpleEditorProps` is purpose-built for message input.
+
+- `formattingOptions`: `SimpleFormattingOptions`
+- `onSend`: `(payload: SimpleEditorSendPayload) => void`
+- `outputFormat`: `'md' (default) | 'json'`
+- `submitOnEnter`: `false (default) | true`
+- `allowShiftEnter`: `true (default) | false`
+- `showBottomToolbar`: `true (default) | false`
+- `toolbarButtons`: `readonly SimpleToolbarButton[]`
+- `sendButtonPlacement`: `'inside' (default) | 'right'`
+- `minHeight` / `maxHeight` / `minWidth` / `maxWidth`
+
+## Behavior
+
+- Allows only bold, italic, and strikethrough formatting.
+- Always runs visual mode only.
+- Supports auto-grow until `maxHeight`, then internal scrolling.
 
 ---
 ## FILE: luthor/presets/slash-editor.md
@@ -1379,6 +1366,4 @@ export function App() {
 ## Behavior
 
 Defaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML views.
-
-Legacy alias: `NotionLikeEditor` remains available for backward compatibility.
 

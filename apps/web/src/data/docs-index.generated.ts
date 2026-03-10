@@ -155,10 +155,10 @@ export const docsIndex = [
     ],
     "title": "Presets",
     "description": "Preset catalog for @lyfie/luthor, including per-preset docs.",
-    "content": "\n# Presets\n\n`@lyfie/luthor` is a preset package built on top of `@lyfie/luthor-headless`.\n\n## Importing headless from presets package\n\n```ts\nimport { headless } from '@lyfie/luthor';\n```\n\n## Preset docs\n\n- [Extensive Editor](/docs/luthor/presets/extensive-editor/)\n- [Rich Text Input](/docs/luthor/presets/compose-editor/)\n- [Simple Text Input](/docs/luthor/presets/composer-editor/)\n- [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/)\n- [MD Editor](/docs/luthor/presets/md-editor/)\n- [HTML Editor](/docs/luthor/presets/html-editor/)\n- [Slash Editor](/docs/luthor/presets/slash-editor/)\n- [Headless Editor](/docs/luthor/presets/headless-editor-preset/)\n",
+    "content": "\n# Presets\n\n`@lyfie/luthor` is a preset package built on top of `@lyfie/luthor-headless`.\n\n## Importing headless from presets package\n\n```ts\nimport { headless } from '@lyfie/luthor';\n```\n\n## Preset docs\n\n- [Extensive Editor](/docs/luthor/presets/extensive-editor/)\n- [Compose Editor](/docs/luthor/presets/compose-editor/)\n- [Simple Editor](/docs/luthor/presets/simple-editor/)\n- [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/)\n- [MD Editor](/docs/luthor/presets/md-editor/)\n- [HTML Editor](/docs/luthor/presets/html-editor/)\n- [Slash Editor](/docs/luthor/presets/slash-editor/)\n- [Headless Editor](/docs/luthor/presets/headless-editor-preset/)\n",
     "urlPath": "/docs/luthor/presets/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets.md",
-    "updatedAt": "2026-03-10T07:41:16.760Z"
+    "updatedAt": "2026-03-10T09:20:22.354Z"
   },
   {
     "slug": [
@@ -166,25 +166,12 @@ export const docsIndex = [
       "presets",
       "compose-editor"
     ],
-    "title": "Rich Text Input",
-    "description": "Focused rich text compose preset with optional recipient rows.",
-    "content": "\n# Rich Text Input\n\n`ComposeEditor` merges focused rich-text and draft-composition workflows into one surface.\n\nUse it as a clean rich editor, or enable recipient/subject rows when needed.\n\n## Usage\n\n```tsx\nimport { ComposeEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <ComposeEditor\n      compactToolbar\n      showTo\n      showCc\n      showSubject\n      placeholder=\"Write your draft...\"\n    />\n  );\n}\n```\n\n## Props\n\n`ComposeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.\n\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides`\n- `compactToolbar`: `false (default) | true`\n- `showRecipients`: `false (default) | true`\n- `showTo`: `false (default) | true`\n- `showCc`: `false (default) | true`\n- `showBcc`: `false (default) | true`\n- `showSubject`: `false (default) | true`\n\n## Behavior\n\n- Defaults to focused formatting with media/embed-heavy features disabled.\n- Optional recipient rows render above the editor shell.\n- Supports feature flag overrides for deeper tuning.\r\n\r\n",
+    "title": "Compose Editor",
+    "description": "Focused rich text drafting preset with a compact, practical toolbar.",
+    "content": "\n# Compose Editor\n\n`ComposeEditor` merges focused rich-text and draft-composition workflows into one surface.\n\nUse it as a clean rich editor with a constrained feature set for practical drafting flows.\n\n## Usage\n\n```tsx\nimport { ComposeEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <ComposeEditor\n      compactToolbar\n      placeholder=\"Write your draft...\"\n    />\n  );\n}\n```\n\n## Props\n\n`ComposeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.\n\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides`\n- `compactToolbar`: `false (default) | true`\n\n## Behavior\n\n- Defaults to focused formatting with media/embed-heavy features disabled.\n- Supports feature flag overrides for deeper tuning.\n\r\n",
     "urlPath": "/docs/luthor/presets/compose-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/compose-editor.md",
-    "updatedAt": "2026-03-09T15:18:15.904Z"
-  },
-  {
-    "slug": [
-      "luthor",
-      "presets",
-      "composer-editor"
-    ],
-    "title": "Simple Text Input",
-    "description": "Constrained message composer preset with send controls.",
-    "content": "\n# Simple Text Input\n\n`ComposerEditor` is a constrained message-composer preset.\n\nIt keeps formatting intentionally minimal and supports send workflows out of the box.\n\n## Usage\n\n```tsx\nimport { ComposerEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <ComposerEditor\n      placeholder=\"Type a message\"\n      submitOnEnter\n      allowShiftEnter\n      outputFormat=\"md\"\n      onSend={({ text }) => {\n        console.log(text);\n      }}\n    />\n  );\n}\n```\n\n## Props\n\n`ComposerEditorProps` is purpose-built for message input.\n\n- `formattingOptions`: `ComposerFormattingOptions`\n- `onSend`: `(payload: ComposerEditorSendPayload) => void`\n- `outputFormat`: `'md' (default) | 'json'`\n- `submitOnEnter`: `false (default) | true`\n- `allowShiftEnter`: `true (default) | false`\n- `showBottomToolbar`: `true (default) | false`\n- `toolbarButtons`: `readonly ComposerToolbarButton[]`\n- `sendButtonPlacement`: `'inside' (default) | 'right'`\n- `minHeight` / `maxHeight` / `minWidth` / `maxWidth`\n\n## Behavior\n\n- Allows only bold, italic, and strikethrough formatting.\n- Always runs visual mode only.\n- Supports auto-grow until `maxHeight`, then internal scrolling.\r\n\r\n",
-    "urlPath": "/docs/luthor/presets/composer-editor/",
-    "sourcePath": "apps/web/src/content/docs/luthor/presets/composer-editor.md",
-    "updatedAt": "2026-03-09T15:18:15.999Z"
+    "updatedAt": "2026-03-10T09:20:33.164Z"
   },
   {
     "slug": [
@@ -233,10 +220,10 @@ export const docsIndex = [
     ],
     "title": "Legacy Rich Editor",
     "description": "Shared metadata-free rich editor profile powering both MD and HTML presets.",
-    "content": "\n# Legacy Rich Editor\n\n`LegacyRichEditor` is a shared metadata-free editor profile that powers both `MDEditor` and `HTMLEditor`.\n\nUse it when you want the same native feature set and switch only the source tab mode between markdown and html.\n\nLegacy aliases remain available: `MDFriendlyEditor` and `NotionLikeEditor`.\n\n## Usage\n\n```tsx\nimport { LegacyRichEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <LegacyRichEditor\n      sourceFormat=\"markdown\"\n      defaultEditorView=\"markdown\"\n    />\n  );\n}\n```\n\n## Props\n\n`LegacyRichEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.\n\n- `sourceFormat`: `'markdown' (default) | 'html'`\n- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)\n- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides` (metadata-heavy features remain disabled)\n\n## Behavior\n\n- Shared native profile:\n  - headings, paragraph, quote\n  - bold, italic, strikethrough, inline code\n  - code block\n  - links\n  - ordered/unordered/check lists + indentation\n  - horizontal rule\n- Disabled to keep metadata-free round trips:\n  - tables, images, embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle\n- Source views:\n  - `sourceFormat=\"markdown\"` uses Visual/JSON/Markdown tabs\n  - `sourceFormat=\"html\"` uses Visual/JSON/HTML tabs\n",
+    "content": "\n# Legacy Rich Editor\n\n`LegacyRichEditor` is a shared metadata-free editor profile that powers both `MDEditor` and `HTMLEditor`.\n\nUse it when you want the same native feature set and switch only the source tab mode between markdown and html.\n\n## Usage\n\n```tsx\nimport { LegacyRichEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <LegacyRichEditor\n      sourceFormat=\"markdown\"\n      defaultEditorView=\"markdown\"\n    />\n  );\n}\n```\n\n## Props\n\n`LegacyRichEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.\n\n- `sourceFormat`: `'markdown' (default) | 'html'`\n- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)\n- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides` (metadata-heavy features remain disabled)\n\n## Behavior\n\n- Shared native profile:\n  - headings, paragraph, quote\n  - bold, italic, strikethrough, inline code\n  - code block\n  - links\n  - ordered/unordered/check lists + indentation\n  - horizontal rule\n- Disabled to keep metadata-free round trips:\n  - tables, images, embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle\n- Source views:\n  - `sourceFormat=\"markdown\"` uses Visual/JSON/Markdown tabs\n  - `sourceFormat=\"html\"` uses Visual/JSON/HTML tabs\n",
     "urlPath": "/docs/luthor/presets/legacy-rich-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/legacy-rich-editor.md",
-    "updatedAt": "2026-03-10T07:41:51.911Z"
+    "updatedAt": "2026-03-10T09:20:48.089Z"
   },
   {
     "slug": [
@@ -246,10 +233,23 @@ export const docsIndex = [
     ],
     "title": "MD Editor",
     "description": "Visual and markdown mode preset with mode-switch behavior.",
-    "content": "\n# MD Editor\n\nMarkdown-native preset with visual editing plus JSON/Markdown source tabs.\n\nInternally this preset is a `LegacyRichEditor` wrapper with `sourceFormat=\"markdown\"`.\n\n## Usage\n\n```tsx\nimport { MDEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <MDEditor defaultEditorView=\"markdown\" />;\n}\n```\n\n## Props\n\n`MDEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.\n\n- `initialMode`: `'visual' (default) | 'json' | 'markdown'`\n- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown'`\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)\n\n## Behavior\n\nProvides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and disables draggable blocks plus metadata-heavy features like embeds, media, and custom nodes.\n\nLegacy alias: `MDFriendlyEditor` remains available for backward compatibility.\n\r\n",
+    "content": "\n# MD Editor\n\nMarkdown-native preset with visual editing plus JSON/Markdown source tabs.\n\nInternally this preset is a `LegacyRichEditor` wrapper with `sourceFormat=\"markdown\"`.\n\n## Usage\n\n```tsx\nimport { MDEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <MDEditor defaultEditorView=\"markdown\" />;\n}\n```\n\n## Props\n\n`MDEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.\n\n- `initialMode`: `'visual' (default) | 'json' | 'markdown'`\n- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown'`\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)\n\n## Behavior\n\nProvides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and disables draggable blocks plus metadata-heavy features like embeds, media, and custom nodes.\n\r\n",
     "urlPath": "/docs/luthor/presets/md-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/md-editor.md",
-    "updatedAt": "2026-03-10T07:41:30.245Z"
+    "updatedAt": "2026-03-10T09:21:49.299Z"
+  },
+  {
+    "slug": [
+      "luthor",
+      "presets",
+      "simple-editor"
+    ],
+    "title": "Simple Editor",
+    "description": "Constrained message editor preset with send controls.",
+    "content": "\n# Simple Editor\n\n`SimpleEditor` is a constrained message-editor preset.\n\nIt keeps formatting intentionally minimal and supports send workflows out of the box.\n\n## Usage\n\n```tsx\nimport { SimpleEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return (\n    <SimpleEditor\n      placeholder=\"Type a message\"\n      submitOnEnter\n      allowShiftEnter\n      outputFormat=\"md\"\n      onSend={({ text }) => {\n        console.log(text);\n      }}\n    />\n  );\n}\n```\n\n## Props\n\n`SimpleEditorProps` is purpose-built for message input.\n\n- `formattingOptions`: `SimpleFormattingOptions`\n- `onSend`: `(payload: SimpleEditorSendPayload) => void`\n- `outputFormat`: `'md' (default) | 'json'`\n- `submitOnEnter`: `false (default) | true`\n- `allowShiftEnter`: `true (default) | false`\n- `showBottomToolbar`: `true (default) | false`\n- `toolbarButtons`: `readonly SimpleToolbarButton[]`\n- `sendButtonPlacement`: `'inside' (default) | 'right'`\n- `minHeight` / `maxHeight` / `minWidth` / `maxWidth`\n\n## Behavior\n\n- Allows only bold, italic, and strikethrough formatting.\n- Always runs visual mode only.\n- Supports auto-grow until `maxHeight`, then internal scrolling.\r\n\r\n",
+    "urlPath": "/docs/luthor/presets/simple-editor/",
+    "sourcePath": "apps/web/src/content/docs/luthor/presets/simple-editor.md",
+    "updatedAt": "2026-03-10T09:20:43.227Z"
   },
   {
     "slug": [
@@ -259,9 +259,9 @@ export const docsIndex = [
     ],
     "title": "Slash Editor",
     "description": "Slash-first preset with draggable and command-focused defaults.",
-    "content": "\n# Slash Editor\n\nSlash-first preset with draggable-focused defaults.\n\n## Usage\n\n```tsx\nimport { SlashEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <SlashEditor showDefaultContent={false} />;\n}\n```\n\n## Props\n\n`SlashEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`, then re-adds both.\n\n- `slashVisibility`: `undefined (default) | SlashCommandVisibility`\n- `isDraggableEnabled`: `true (default) | false`\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides`\n- `isToolbarEnabled`: `false (default) | true`\n\n## Behavior\n\nDefaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML views.\n\nLegacy alias: `NotionLikeEditor` remains available for backward compatibility.\n\r\n",
+    "content": "\n# Slash Editor\n\nSlash-first preset with draggable-focused defaults.\n\n## Usage\n\n```tsx\nimport { SlashEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <SlashEditor showDefaultContent={false} />;\n}\n```\n\n## Props\n\n`SlashEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`, then re-adds both.\n\n- `slashVisibility`: `undefined (default) | SlashCommandVisibility`\n- `isDraggableEnabled`: `true (default) | false`\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides`\n- `isToolbarEnabled`: `false (default) | true`\n\n## Behavior\n\nDefaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML views.\n\r\n",
     "urlPath": "/docs/luthor/presets/slash-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/slash-editor.md",
-    "updatedAt": "2026-03-10T07:41:45.609Z"
+    "updatedAt": "2026-03-10T09:21:56.478Z"
   }
 ];

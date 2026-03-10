@@ -48,7 +48,7 @@ const GROUP_ENTRY_ORDER: Partial<Record<NavGroupId, string[]>> = {
     '/docs/luthor/presets/',
     '/docs/luthor/presets/extensive-editor/',
     '/docs/luthor/presets/compose-editor/',
-    '/docs/luthor/presets/composer-editor/',
+    '/docs/luthor/presets/simple-editor/',
     '/docs/luthor/presets/legacy-rich-editor/',
     '/docs/luthor/presets/md-editor/',
     '/docs/luthor/presets/html-editor/',

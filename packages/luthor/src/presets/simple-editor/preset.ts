@@ -1,12 +1,12 @@
 import type { EditorPreset } from "..";
 import { createPresetEditorConfig } from "../../core/preset-config";
 import { createExtensiveExtensions } from "../extensive";
-import { ComposerEditor } from "./ComposerEditor";
+import { SimpleEditor } from "./SimpleEditor";
 
-export const composerPreset: EditorPreset = {
-  id: "composer",
-  label: "Simple Text Input",
-  description: "Message composer with constrained formatting and send controls.",
+export const simpleEditorPreset: EditorPreset = {
+  id: "simple-editor",
+  label: "Simple Editor",
+  description: "Lightweight editor with constrained formatting and send controls.",
   extensions: createExtensiveExtensions({
     featureFlags: {
       bold: true,
@@ -30,10 +30,10 @@ export const composerPreset: EditorPreset = {
     },
   }),
   components: {
-    Editor: ComposerEditor,
+    Editor: SimpleEditor,
   },
   toolbar: [],
-  config: createPresetEditorConfig("composer", "Type your message..."),
-  css: "composer/styles.css",
+  config: createPresetEditorConfig("simple-editor", "Type your message..."),
+  css: "simple-editor/styles.css",
 };
 

@@ -35,22 +35,4 @@ describe("ComposeEditor", () => {
     expect(props.variantClassName).toContain("luthor-preset-compose--compact");
     expect(props.toolbarClassName).toContain("luthor-preset-compose__toolbar--compact");
   });
-
-  it("renders optional recipient rows", () => {
-    const { getByTestId } = render(
-      <ComposeEditor showDefaultContent={false} showTo showSubject />,
-    );
-
-    expect(getByTestId("compose-row-to")).toBeInTheDocument();
-    expect(getByTestId("compose-row-subject")).toBeInTheDocument();
-  });
-
-  it("renders default recipient rows when showRecipients is enabled", () => {
-    const { getByTestId } = render(
-      <ComposeEditor showDefaultContent={false} showRecipients />,
-    );
-
-    expect(getByTestId("compose-row-to")).toBeInTheDocument();
-    expect(getByTestId("compose-row-subject")).toBeInTheDocument();
-  });
 });

@@ -1,23 +1,23 @@
 ---
-title: Simple Text Input
-description: Constrained message composer preset with send controls.
+title: Simple Editor
+description: Constrained message editor preset with send controls.
 ---
 
-# Simple Text Input
+# Simple Editor
 
-`ComposerEditor` is a constrained message-composer preset.
+`SimpleEditor` is a constrained message-editor preset.
 
 It keeps formatting intentionally minimal and supports send workflows out of the box.
 
 ## Usage
 
 ```tsx
-import { ComposerEditor } from '@lyfie/luthor';
+import { SimpleEditor } from '@lyfie/luthor';
 import '@lyfie/luthor/styles.css';
 
 export function App() {
   return (
-    <ComposerEditor
+    <SimpleEditor
       placeholder="Type a message"
       submitOnEnter
       allowShiftEnter
@@ -32,15 +32,15 @@ export function App() {
 
 ## Props
 
-`ComposerEditorProps` is purpose-built for message input.
+`SimpleEditorProps` is purpose-built for message input.
 
-- `formattingOptions`: `ComposerFormattingOptions`
-- `onSend`: `(payload: ComposerEditorSendPayload) => void`
+- `formattingOptions`: `SimpleFormattingOptions`
+- `onSend`: `(payload: SimpleEditorSendPayload) => void`
 - `outputFormat`: `'md' (default) | 'json'`
 - `submitOnEnter`: `false (default) | true`
 - `allowShiftEnter`: `true (default) | false`
 - `showBottomToolbar`: `true (default) | false`
-- `toolbarButtons`: `readonly ComposerToolbarButton[]`
+- `toolbarButtons`: `readonly SimpleToolbarButton[]`
 - `sendButtonPlacement`: `'inside' (default) | 'right'`
 - `minHeight` / `maxHeight` / `minWidth` / `maxWidth`
 
