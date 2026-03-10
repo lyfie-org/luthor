@@ -1,0 +1,10 @@
+.luthor-preset-html-editor {
+  border: 1px solid #d8dde6;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.luthor-preset-html-editor .luthor-editor {
+  min-height: 320px;
+}

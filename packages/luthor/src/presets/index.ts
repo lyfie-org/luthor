@@ -8,7 +8,11 @@ import {
 } from "./extensive";
 import { composePreset, ComposeEditor } from "./compose";
 import { composerPreset, ComposerEditor } from "./composer";
+import { mdEditorPreset, MDEditor } from "./md-editor";
 import { mdFriendlyPreset, MDFriendlyEditor } from "./md-friendly";
+import { htmlEditorPreset, HTMLEditor } from "./html-editor";
+import { LegacyRichEditor } from "./legacy-rich";
+import { slashEditorPreset, SlashEditor } from "./slash-editor";
 import { notionLikePreset, NotionLikeEditor } from "./notion-like";
 import { headlessEditorPreset, HeadlessEditorPreset } from "./headless-editor";
 import type {
@@ -29,7 +33,15 @@ import type {
   ComposerOutputFormat,
   ComposerToolbarButton,
 } from "./composer";
+import type { MDEditorProps, MDEditorMode } from "./md-editor";
 import type { MDFriendlyEditorProps, MDFriendlyEditorMode } from "./md-friendly";
+import type { HTMLEditorProps, HTMLEditorMode } from "./html-editor";
+import type {
+  LegacyRichEditorProps,
+  LegacyRichEditorMode,
+  LegacyRichSourceFormat,
+} from "./legacy-rich";
+import type { SlashEditorProps } from "./slash-editor";
 import type { NotionLikeEditorProps } from "./notion-like";
 import type { HeadlessEditorPresetProps } from "./headless-editor";
 
@@ -58,8 +70,15 @@ export {
   ComposeEditor,
   composerPreset,
   ComposerEditor,
+  mdEditorPreset,
+  MDEditor,
   mdFriendlyPreset,
   MDFriendlyEditor,
+  htmlEditorPreset,
+  HTMLEditor,
+  LegacyRichEditor,
+  slashEditorPreset,
+  SlashEditor,
   notionLikePreset,
   NotionLikeEditor,
   headlessEditorPreset,
@@ -81,8 +100,16 @@ export type {
   ComposerOutputFormat,
   ComposerFormattingOptions,
   ComposerToolbarButton,
+  MDEditorProps,
+  MDEditorMode,
   MDFriendlyEditorProps,
   MDFriendlyEditorMode,
+  HTMLEditorProps,
+  HTMLEditorMode,
+  LegacyRichEditorProps,
+  LegacyRichEditorMode,
+  LegacyRichSourceFormat,
+  SlashEditorProps,
   NotionLikeEditorProps,
   HeadlessEditorPresetProps,
 };
@@ -91,7 +118,10 @@ export const presetRegistry: Record<string, EditorPreset> = {
   extensive: extensivePreset,
   compose: composePreset,
   composer: composerPreset,
+  "md-editor": mdEditorPreset,
   "md-friendly": mdFriendlyPreset,
+  "html-editor": htmlEditorPreset,
+  "slash-editor": slashEditorPreset,
   "notion-like": notionLikePreset,
   "headless-editor": headlessEditorPreset,
 };

@@ -156,6 +156,11 @@
   margin: 0 auto;
 }
 
+.demo-editor-host {
+  width: 100%;
+  min-height: 420px;
+}
+
 @media (max-width: 720px) {
   .app-layout {
     padding: 12px;

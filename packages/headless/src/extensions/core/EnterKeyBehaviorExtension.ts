@@ -2,6 +2,7 @@ import {
   $createParagraphNode,
   $getSelection,
   $isRangeSelection,
+  INSERT_LINE_BREAK_COMMAND,
   LexicalEditor,
 } from "lexical";
 import { $isCodeNode } from "@lexical/code";
@@ -15,7 +16,9 @@ import { BaseExtension } from "../base/BaseExtension";
 import { ExtensionCategory } from "../types";
 import type { BaseExtensionConfig } from "../types";
 
-type EnterKeyBehaviorCommands = Record<string, never>;
+type EnterKeyBehaviorCommands = {
+  insertHardBreak: () => void;
+};
 type EnterKeyBehaviorStateQueries = Record<string, never>;
 
 export class EnterKeyBehaviorExtension extends BaseExtension<
@@ -151,6 +154,15 @@ export class EnterKeyBehaviorExtension extends BaseExtension<
     return () => {
       cleanupRootListener?.();
       unregisterRootListener();
+    };
+  }
+
+  getCommands(editor: LexicalEditor): EnterKeyBehaviorCommands {
+    return {
+      insertHardBreak: () => {
+        editor.focus();
+        editor.dispatchCommand(INSERT_LINE_BREAK_COMMAND, false);
+      },
     };
   }
 

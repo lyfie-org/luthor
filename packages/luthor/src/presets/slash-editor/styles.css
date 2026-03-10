@@ -1,0 +1,10 @@
+.luthor-preset-slash-editor {
+  border: 1px solid #d8dee8;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.luthor-preset-slash-editor .luthor-editor {
+  min-height: 320px;
+}

@@ -112,6 +112,40 @@ describe("command heading configuration", () => {
     expect(slash.map((command) => command.id)).toEqual(["block.heading2", "insert.table"]);
   });
 
+  it("allows basic formatting commands in slash menu when explicitly allowlisted", () => {
+    const commands = createCommands();
+
+    const slash = commandsToSlashCommandItems(commands, {
+      slashCommandVisibility: {
+        allowlist: ["format.bold", "format.italic", "format.code", "block.heading2", "insert.table"],
+      },
+    });
+
+    expect(slash.map((command) => command.id)).toEqual([
+      "format.bold",
+      "format.italic",
+      "format.code",
+      "block.heading2",
+      "insert.table",
+    ]);
+  });
+
+  it("keeps denylist precedence for allowlisted format commands", () => {
+    const commands = createCommands();
+
+    const slash = commandsToSlashCommandItems(commands, {
+      slashCommandVisibility: {
+        allowlist: ["format.bold", "format.italic", "insert.table"],
+        denylist: ["format.italic"],
+      },
+    });
+
+    expect(slash.map((command) => command.id)).toEqual([
+      "format.bold",
+      "insert.table",
+    ]);
+  });
+
   it("keeps slash command order deterministic when filtering", () => {
     const commands = createCommands();
 

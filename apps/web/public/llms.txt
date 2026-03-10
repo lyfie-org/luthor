@@ -33,6 +33,8 @@ This file helps AI agents discover Luthor docs quickly.
 - [luthor/presets/composer-editor.md](https://www.luthor.fyi/docs/luthor/presets/composer-editor/)
 - [luthor/presets/extensive-editor.md](https://www.luthor.fyi/docs/luthor/presets/extensive-editor/)
 - [luthor/presets/headless-editor-preset.md](https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/)
-- [luthor/presets/md-friendly-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-friendly-editor/)
-- [luthor/presets/notion-like-editor.md](https://www.luthor.fyi/docs/luthor/presets/notion-like-editor/)
+- [luthor/presets/html-editor.md](https://www.luthor.fyi/docs/luthor/presets/html-editor/)
+- [luthor/presets/legacy-rich-editor.md](https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/)
+- [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/)
+- [luthor/presets/slash-editor.md](https://www.luthor.fyi/docs/luthor/presets/slash-editor/)
 

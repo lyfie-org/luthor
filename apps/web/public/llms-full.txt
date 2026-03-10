@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-10T05:21:55.170Z
+Generated at: 2026-03-10T08:53:21.871Z
 
 ---
 ## FILE: getting-started/capabilities.md
@@ -936,9 +936,11 @@ import { headless } from '@lyfie/luthor';
 - [Extensive Editor](/docs/luthor/presets/extensive-editor/)
 - [Rich Text Input](/docs/luthor/presets/compose-editor/)
 - [Simple Text Input](/docs/luthor/presets/composer-editor/)
-- [MD Editor](/docs/luthor/presets/md-friendly-editor/)
-- [Slash Editor](/docs/luthor/presets/notion-like-editor/)
-- [Headless Text Input](/docs/luthor/presets/headless-editor-preset/)
+- [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/)
+- [MD Editor](/docs/luthor/presets/md-editor/)
+- [HTML Editor](/docs/luthor/presets/html-editor/)
+- [Slash Editor](/docs/luthor/presets/slash-editor/)
+- [Headless Editor](/docs/luthor/presets/headless-editor-preset/)
 
 ---
 ## FILE: luthor/presets/compose-editor.md
@@ -1171,13 +1173,13 @@ This is the base preset that other presets build on.
 ---
 
 ---
-title: Headless Text Input
+title: Headless Editor
 description: Reference preset showing direct headless composition.
 ---
 
-# Headless Text Input
+# Headless Editor
 
-Small reference preset demonstrating direct headless composition.
+Basic rich-text preset with lightweight defaults and source tabs.
 
 ## Usage
 
@@ -1186,22 +1188,122 @@ import { HeadlessEditorPreset } from '@lyfie/luthor';
 import '@lyfie/luthor/styles.css';
 
 export function App() {
-  return <HeadlessEditorPreset placeholder="Start writing..." />;
+  return <HeadlessEditorPreset defaultEditorView="visual" />;
 }
 ```
 
 ## Props
 
-- `className`: `undefined (default) | string`
-- `placeholder`: `'Start writing...' (default) | string`
+`HeadlessEditorPresetProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
+
+- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'`
+- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'`
+- `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
 
 ## Behavior
 
-Uses a minimal extension set (`richText`, `history`, `bold`, `italic`, `underline`, `list`) and a lightweight toolbar.
+Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, HR, hard break, undo/redo), supports Visual/JSON/MD/HTML tabs, and keeps draggable blocks plus metadata-heavy features disabled.
 
 ---
-## FILE: luthor/presets/md-friendly-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/md-friendly-editor/
+## FILE: luthor/presets/html-editor.md
+## URL: https://www.luthor.fyi/docs/luthor/presets/html-editor/
+---
+
+---
+title: HTML Editor
+description: Visual and HTML-focused preset with constrained markdown/html-native features.
+---
+
+# HTML Editor
+
+HTML-focused preset with visual editing plus JSON/HTML source tabs.
+
+Internally this preset is a `LegacyRichEditor` wrapper with `sourceFormat="html"`.
+
+## Usage
+
+```tsx
+import { HTMLEditor } from '@lyfie/luthor';
+import '@lyfie/luthor/styles.css';
+
+export function App() {
+  return <HTMLEditor defaultEditorView="html" />;
+}
+```
+
+## Props
+
+`HTMLEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
+
+- `initialMode`: `'visual' (default) | 'json' | 'html'`
+- `defaultEditorView`: `'visual' (default) | 'json' | 'html'`
+- `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
+
+## Behavior
+
+Provides markdown/html-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and disables draggable blocks plus metadata-heavy features like embeds, media, and custom nodes.
+
+---
+## FILE: luthor/presets/legacy-rich-editor.md
+## URL: https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/
+---
+
+---
+title: Legacy Rich Editor
+description: Shared metadata-free rich editor profile powering both MD and HTML presets.
+---
+
+# Legacy Rich Editor
+
+`LegacyRichEditor` is a shared metadata-free editor profile that powers both `MDEditor` and `HTMLEditor`.
+
+Use it when you want the same native feature set and switch only the source tab mode between markdown and html.
+
+Legacy aliases remain available: `MDFriendlyEditor` and `NotionLikeEditor`.
+
+## Usage
+
+```tsx
+import { LegacyRichEditor } from '@lyfie/luthor';
+import '@lyfie/luthor/styles.css';
+
+export function App() {
+  return (
+    <LegacyRichEditor
+      sourceFormat="markdown"
+      defaultEditorView="markdown"
+    />
+  );
+}
+```
+
+## Props
+
+`LegacyRichEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
+
+- `sourceFormat`: `'markdown' (default) | 'html'`
+- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
+- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
+- `featureFlags`: `undefined (default) | FeatureFlagOverrides` (metadata-heavy features remain disabled)
+
+## Behavior
+
+- Shared native profile:
+  - headings, paragraph, quote
+  - bold, italic, strikethrough, inline code
+  - code block
+  - links
+  - ordered/unordered/check lists + indentation
+  - horizontal rule
+- Disabled to keep metadata-free round trips:
+  - tables, images, embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
+- Source views:
+  - `sourceFormat="markdown"` uses Visual/JSON/Markdown tabs
+  - `sourceFormat="html"` uses Visual/JSON/HTML tabs
+
+---
+## FILE: luthor/presets/md-editor.md
+## URL: https://www.luthor.fyi/docs/luthor/presets/md-editor/
 ---
 
 ---
@@ -1211,34 +1313,38 @@ description: Visual and markdown mode preset with mode-switch behavior.
 
 # MD Editor
 
-Preset that switches between visual and markdown editing.
+Markdown-native preset with visual editing plus JSON/Markdown source tabs.
+
+Internally this preset is a `LegacyRichEditor` wrapper with `sourceFormat="markdown"`.
 
 ## Usage
 
 ```tsx
-import { MDFriendlyEditor } from '@lyfie/luthor';
+import { MDEditor } from '@lyfie/luthor';
 import '@lyfie/luthor/styles.css';
 
 export function App() {
-  return <MDFriendlyEditor initialMode="visual" />;
+  return <MDEditor defaultEditorView="markdown" />;
 }
 ```
 
 ## Props
 
-`MDFriendlyEditorProps` inherits `ExtensiveEditorProps` except `availableModes` and `initialMode`.
+`MDEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
 
-- `initialMode`: `'visual' (default) | 'markdown'`
+- `initialMode`: `'visual' (default) | 'json' | 'markdown'`
+- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown'`
+- `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
 
 ## Behavior
 
-- Converts visual JSON to markdown when switching to markdown mode.
-- Parses markdown back into visual JSON when switching back.
-- Renders source textarea in markdown mode.
+Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and disables draggable blocks plus metadata-heavy features like embeds, media, and custom nodes.
+
+Legacy alias: `MDFriendlyEditor` remains available for backward compatibility.
 
 ---
-## FILE: luthor/presets/notion-like-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/notion-like-editor/
+## FILE: luthor/presets/slash-editor.md
+## URL: https://www.luthor.fyi/docs/luthor/presets/slash-editor/
 ---
 
 ---
@@ -1253,17 +1359,17 @@ Slash-first preset with draggable-focused defaults.
 ## Usage
 
 ```tsx
-import { NotionLikeEditor } from '@lyfie/luthor';
+import { SlashEditor } from '@lyfie/luthor';
 import '@lyfie/luthor/styles.css';
 
 export function App() {
-  return <NotionLikeEditor isDraggableEnabled slashVisibility={{ allowlist: ['block.paragraph'] }} />;
+  return <SlashEditor showDefaultContent={false} />;
 }
 ```
 
 ## Props
 
-`NotionLikeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`, then re-adds both.
+`SlashEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`, then re-adds both.
 
 - `slashVisibility`: `undefined (default) | SlashCommandVisibility`
 - `isDraggableEnabled`: `true (default) | false`
@@ -1272,5 +1378,7 @@ export function App() {
 
 ## Behavior
 
-Defaults enable slash commands, draggable blocks, and command palette while keeping toolbar hidden.
+Defaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML views.
+
+Legacy alias: `NotionLikeEditor` remains available for backward compatibility.
 

@@ -1,11 +1,11 @@
 ---
-title: Headless Text Input
+title: Headless Editor
 description: Reference preset showing direct headless composition.
 ---
 
-# Headless Text Input
+# Headless Editor
 
-Small reference preset demonstrating direct headless composition.
+Basic rich-text preset with lightweight defaults and source tabs.
 
 ## Usage
 
@@ -14,17 +14,20 @@ import { HeadlessEditorPreset } from '@lyfie/luthor';
 import '@lyfie/luthor/styles.css';
 
 export function App() {
-  return <HeadlessEditorPreset placeholder="Start writing..." />;
+  return <HeadlessEditorPreset defaultEditorView="visual" />;
 }
 ```
 
 ## Props
 
-- `className`: `undefined (default) | string`
-- `placeholder`: `'Start writing...' (default) | string`
+`HeadlessEditorPresetProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
+
+- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'`
+- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'`
+- `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
 
 ## Behavior
 
-Uses a minimal extension set (`richText`, `history`, `bold`, `italic`, `underline`, `list`) and a lightweight toolbar.
+Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, HR, hard break, undo/redo), supports Visual/JSON/MD/HTML tabs, and keeps draggable blocks plus metadata-heavy features disabled.
 
 

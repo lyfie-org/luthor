@@ -1,3 +1,6 @@
-export { MDFriendlyEditor, type MDFriendlyEditorProps, type MDFriendlyEditorMode } from "./MDFriendlyEditor";
+export {
+  MDEditor as MDFriendlyEditor,
+  type MDEditorProps as MDFriendlyEditorProps,
+  type MDEditorMode as MDFriendlyEditorMode,
+} from "../md-editor";
 export { mdFriendlyPreset } from "./preset";
-

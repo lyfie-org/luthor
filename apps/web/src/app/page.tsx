@@ -266,7 +266,9 @@ export default async function HomePage() {
             </h1>
             <p className="hero-copy">
               Type-safe, TypeScript-first and <span className="hero-highlight-text">Lexical Based</span> rich text editor built for <span className="hero-highlight-text">React</span> and modern JS frameworks like{' '}
-              <span className="hero-highlight-text">Next.js</span> and <span className="hero-highlight-text">Astro</span>. Crafted with love by developers for developers who want control without chaos. <span className="hero-highlight-text"> Zero fluff. No paywalls. No nonsense.</span>
+              <span className="hero-highlight-text">Next.js</span> and <span className="hero-highlight-text">Astro</span>. 
+            </p>
+            <p className="hero-copy">Crafted with ❤️ by developers for developers who want control without chaos. <span className="hero-highlight-text"> Zero fluff. No paywalls. No nonsense.</span>
             </p>
             <p className="hero-live-note">Fully open source. Fully free. Ready for your next project.</p>
             <div className="hero-uses-container">

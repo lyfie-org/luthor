@@ -1,25 +1,43 @@
 'use client';
 
 import {
-  type ComposerEditorSendPayload,
+  ComposeEditor,
   ComposerEditor,
+  type ComposerEditorSendPayload,
   type EditorPreset,
   ExtensiveEditor,
+  HeadlessEditorPreset,
+  HTMLEditor,
+  MDEditor,
   presetRegistry,
+  SlashEditor,
 } from '@lyfie/luthor';
 import { PaperPlaneRight } from '@phosphor-icons/react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
 
-const VISIBLE_PRESET_IDS = ['extensive', 'composer'] as const;
+const VISIBLE_PRESET_IDS = [
+  'extensive',
+  'compose',
+  'composer',
+  'md-editor',
+  'html-editor',
+  'slash-editor',
+  'headless-editor',
+] as const;
+
+type VisiblePresetId = (typeof VISIBLE_PRESET_IDS)[number];
+
 const presetEntries = VISIBLE_PRESET_IDS.map((id) => presetRegistry[id]).filter(
   (preset): preset is EditorPreset => Boolean(preset),
 );
-const fallbackPreset = { id: 'extensive', label: 'Extensive Editor' };
+
+const fallbackPreset: { id: VisiblePresetId; label: string } = { id: 'extensive', label: 'Extensive Editor' };
+
 type PresetDetails = {
   summary: string;
   useCases: string;
@@ -27,43 +45,85 @@ type PresetDetails = {
   docsPath: string;
 };
 
-const presetDetails: Record<string, PresetDetails> = {
+const presetDetails: Record<VisiblePresetId, PresetDetails> = {
   extensive: {
-    summary: 'Full-feature rich text editor preset with formatting, embeds, tables, and markdown/source workflows.',
-    useCases: 'Best for docs editors, CMS authoring, internal tools, and any product needing complete WYSIWYG controls.',
-    customization: 'Tune feature flags, toolbar alignment, theme tokens, mode defaults, and extension-level behavior.',
+    summary: 'Complete WYSIWYG surface for long-form writing, docs, and knowledge workflows.',
+    useCases: 'Best for CMS pages, technical docs, internal knowledge bases, and full editing suites.',
+    customization: 'Theme tokens, toolbar controls, source tabs, slash visibility, and feature flags are all configurable.',
     docsPath: '/docs/luthor/presets/extensive-editor/',
   },
+  compose: {
+    summary: 'Focused rich-text drafting experience for email-like compose flows.',
+    useCases: 'Best for support replies, outbound messaging, and professional drafting surfaces.',
+    customization: 'Compact toolbar, recipient rows, and preset-scoped feature flags can be tuned for product needs.',
+    docsPath: '/docs/luthor/presets/compose-editor/',
+  },
   composer: {
-    summary: 'Constrained simple text input preset for short-form messaging with send-friendly defaults.',
-    useCases: 'Best for assistant chats, support inboxes, comments, and conversational UIs where Enter-to-send is expected.',
-    customization: 'Control send behavior, toolbar actions, formatting options, size limits, and output format.',
+    summary: 'Minimal chat/message input with safe formatting and send-oriented behavior.',
+    useCases: 'Best for chats, comments, inbox replies, and compact message composers.',
+    customization: 'Output format, send interaction, height constraints, and action controls are configurable.',
     docsPath: '/docs/luthor/presets/composer-editor/',
+  },
+  'md-editor': {
+    summary: 'LegacyRich markdown profile with native markdown-compatible formatting and clean source round-trips.',
+    useCases: 'Best for developer docs, markdown knowledge bases, and migration-safe text workflows.',
+    customization: 'Uses LegacyRichEditor under the hood with markdown source mode defaults.',
+    docsPath: '/docs/luthor/presets/md-editor/',
+  },
+  'html-editor': {
+    summary: 'LegacyRich html profile with metadata-free html-compatible formatting and source control.',
+    useCases: 'Best for html templates, static-page editors, and systems requiring html round-trips.',
+    customization: 'Uses LegacyRichEditor under the hood with html source mode defaults.',
+    docsPath: '/docs/luthor/presets/html-editor/',
+  },
+  'slash-editor': {
+    summary: 'Slash-first authoring mode with draggable blocks and zero toolbar dependence.',
+    useCases: 'Best for block-based editors, keyboard-first authoring, and lightweight command-driven input.',
+    customization: 'Slash visibility can be tightly controlled while keeping a curated command set.',
+    docsPath: '/docs/luthor/presets/slash-editor/',
+  },
+  'headless-editor': {
+    summary: 'Basic rich-text preset with simple controls and full source tabs for lightweight authoring.',
+    useCases: 'Best for starter editors, internal tools, and simple text workflows with clean output.',
+    customization: 'Focused feature profile keeps only essential formatting and structure controls enabled.',
+    docsPath: '/docs/luthor/presets/headless-editor-preset/',
   },
 };
 
-const presetTag: Record<string, string> = {
+const presetTag: Record<VisiblePresetId, string> = {
   extensive: '<ExtensiveEditor />',
+  compose: '<ComposeEditor />',
   composer: '<ComposerEditor />',
+  'md-editor': '<MDEditor />',
+  'html-editor': '<HTMLEditor />',
+  'slash-editor': '<SlashEditor />',
+  'headless-editor': '<HeadlessEditorPreset />',
 };
-const presetHeading: Record<string, string> = {
+
+const presetHeading: Record<VisiblePresetId, string> = {
   extensive: 'Extensive Editor Preset',
+  compose: 'Rich Text Input Preset',
   composer: 'Simple Text Input Preset',
+  'md-editor': 'MD Editor Preset',
+  'html-editor': 'HTML Editor Preset',
+  'slash-editor': 'Slash Editor Preset',
+  'headless-editor': 'Headless Editor Preset',
 };
+
 const defaultPresetDetails: PresetDetails = {
-  summary: 'Full-feature rich text editor preset with formatting, embeds, tables, and markdown/source workflows.',
-  useCases: 'Best for docs editors, CMS authoring, internal tools, and any product needing complete WYSIWYG controls.',
-  customization: 'Tune feature flags, toolbar alignment, theme tokens, mode defaults, and extension-level behavior.',
+  summary: 'Full-feature rich text editor preset with formatting, embeds, tables, and source workflows.',
+  useCases: 'Best for docs editors, CMS authoring, and internal tools needing complete WYSIWYG controls.',
+  customization: 'Tune feature flags, toolbar alignment, theme tokens, and mode defaults.',
   docsPath: '/docs/luthor/presets/extensive-editor/',
 };
 
-function resolveTheme(): Theme {
-  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
-}
-
 type PresetRendererProps = {
-  presetId: string;
+  presetId: VisiblePresetId;
   siteTheme: Theme;
+};
+
+type PresetSurfaceProps = {
+  children: ReactNode;
 };
 
 type DemoMessage = {
@@ -72,6 +132,10 @@ type DemoMessage = {
   text: string;
   createdAt: number;
 };
+
+function resolveTheme(): Theme {
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+}
 
 function nextReply(input: string): string {
   const trimmed = input.trim();
@@ -87,6 +151,113 @@ function formatTime(timestamp: number): string {
     hour: 'numeric',
     minute: '2-digit',
   }).format(timestamp);
+}
+
+function PresetSurface({ children }: PresetSurfaceProps) {
+  return (
+    <section className="demo-preset-surface-body">
+      <div>{children}</div>
+    </section>
+  );
+}
+
+function ExtensiveExperience({ siteTheme }: { siteTheme: Theme }) {
+  return (
+    <PresetSurface>
+      <ExtensiveEditor
+        initialTheme={siteTheme}
+        showDefaultContent
+        toolbarAlignment="center"
+        isToolbarPinned
+        maxListIndentation={8}
+      />
+    </PresetSurface>
+  );
+}
+
+function ComposeExperience({ siteTheme }: { siteTheme: Theme }) {
+  return (
+    <PresetSurface>
+      <ComposeEditor
+        initialTheme={siteTheme}
+        showDefaultContent={false}
+        compactToolbar
+        showTo
+        showCc
+        showSubject
+        placeholder="Write your customer follow-up..."
+      />
+    </PresetSurface>
+  );
+}
+
+function MDEditorExperience({ siteTheme }: { siteTheme: Theme }) {
+  return (
+    <PresetSurface>
+      <MDEditor
+        initialTheme={siteTheme}
+        showDefaultContent={false}
+        defaultEditorView="markdown"
+        placeholder={{
+          visual: 'Write markdown-compatible content...',
+          markdown: '# Heading\n\n- Bullet point',
+          json: 'Review generated JSON...',
+        }}
+      />
+    </PresetSurface>
+  );
+}
+
+function HTMLEditorExperience({ siteTheme }: { siteTheme: Theme }) {
+  return (
+    <PresetSurface>
+      <HTMLEditor
+        initialTheme={siteTheme}
+        showDefaultContent={false}
+        defaultEditorView="html"
+        placeholder={{
+          visual: 'Write html-compatible content...',
+          html: '<h2>Product Section</h2>\n<p>Compatible markup only.</p>',
+          json: 'Review generated JSON...',
+        }}
+      />
+    </PresetSurface>
+  );
+}
+
+function SlashEditorExperience({ siteTheme }: { siteTheme: Theme }) {
+  return (
+    <PresetSurface>
+      <SlashEditor
+        initialTheme={siteTheme}
+        showDefaultContent={false}
+        placeholder={{
+          visual: "Type '/' to open commands...",
+          markdown: 'Slash editor source markdown...',
+          html: '<p>Slash editor source html...</p>',
+          json: 'Slash editor source JSON...',
+        }}
+      />
+    </PresetSurface>
+  );
+}
+
+function HeadlessExperience({ siteTheme }: { siteTheme: Theme }) {
+  return (
+    <PresetSurface>
+      <HeadlessEditorPreset
+        initialTheme={siteTheme}
+        showDefaultContent={false}
+        defaultEditorView="visual"
+        placeholder={{
+          visual: 'Simple writing surface...',
+          markdown: '## Quick notes',
+          html: '<p>Simple html source...</p>',
+          json: 'Simple json source...',
+        }}
+      />
+    </PresetSurface>
+  );
 }
 
 function ComposerExperience({ siteTheme }: { siteTheme: Theme }) {
@@ -135,80 +306,90 @@ function ComposerExperience({ siteTheme }: { siteTheme: Theme }) {
   };
 
   return (
-    <div className="demo-chat-shell">
-      <div className="demo-chat-history" aria-live="polite">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={[
-              'demo-chat-bubble-row',
-              message.role === 'user' ? 'demo-chat-bubble-row-user' : 'demo-chat-bubble-row-assistant',
-            ].join(' ')}
-          >
-            <div className="demo-chat-message">
-              <div className={['demo-chat-bubble', message.role === 'user' ? 'is-user' : 'is-assistant'].join(' ')}>
-                <div className="demo-chat-bubble-content">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+    <PresetSurface>
+      <div className="demo-chat-shell">
+        <div className="demo-chat-history" aria-live="polite">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={[
+                'demo-chat-bubble-row',
+                message.role === 'user' ? 'demo-chat-bubble-row-user' : 'demo-chat-bubble-row-assistant',
+              ].join(' ')}
+            >
+              <div className="demo-chat-message">
+                <div className={['demo-chat-bubble', message.role === 'user' ? 'is-user' : 'is-assistant'].join(' ')}>
+                  <div className="demo-chat-bubble-content">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                  </div>
+                </div>
+                <div className="demo-chat-message-meta">
+                  <span>{message.role === 'user' ? 'You' : 'luthor'}</span>
+                  <span className="demo-chat-meta-separator" aria-hidden="true">
+                    |
+                  </span>
+                  <span>{formatTime(message.createdAt)}</span>
                 </div>
               </div>
-              <div className="demo-chat-message-meta">
-                <span>{message.role === 'user' ? 'You' : 'luthor'}</span>
-                <span className="demo-chat-meta-separator" aria-hidden="true">
-                  |
-                </span>
-                <span>{formatTime(message.createdAt)}</span>
+            </div>
+          ))}
+          {isTyping ? (
+            <div className="demo-chat-bubble-row demo-chat-bubble-row-assistant">
+              <div className="demo-chat-bubble is-assistant demo-chat-bubble-typing">
+                <span />
+                <span />
+                <span />
               </div>
             </div>
-          </div>
-        ))}
-        {isTyping ? (
-          <div className="demo-chat-bubble-row demo-chat-bubble-row-assistant">
-            <div className="demo-chat-bubble is-assistant demo-chat-bubble-typing">
-              <span />
-              <span />
-              <span />
-            </div>
-          </div>
-        ) : null}
-      </div>
+          ) : null}
+        </div>
 
-      <div className="demo-chat-composer">
-        <ComposerEditor
-          initialTheme={siteTheme}
-          placeholder="Type a message and press Enter..."
-          onSend={handleSend}
-          submitOnEnter
-          allowShiftEnter
-          clearOnSend
-          outputFormat="md"
-          minHeight={56}
-          maxHeight={160}
-          minWidth="100%"
-          maxWidth="100%"
-          showBottomToolbar={false}
-          sendButtonPlacement="right"
-          sendButtonContent={<PaperPlaneRight size={18} weight="fill" />}
-        />
+        <div className="demo-chat-composer">
+          <ComposerEditor
+            initialTheme={siteTheme}
+            placeholder="Type a message and press Enter..."
+            onSend={handleSend}
+            submitOnEnter
+            allowShiftEnter
+            clearOnSend
+            outputFormat="md"
+            minHeight={56}
+            maxHeight={160}
+            minWidth="100%"
+            maxWidth="100%"
+            showBottomToolbar={false}
+            sendButtonPlacement="right"
+            sendButtonContent={<PaperPlaneRight size={18} weight="fill" />}
+          />
+        </div>
       </div>
-    </div>
+    </PresetSurface>
   );
 }
 
 function PresetRenderer({ presetId, siteTheme }: PresetRendererProps) {
   switch (presetId) {
+    case 'compose':
+      return <ComposeExperience siteTheme={siteTheme} />;
     case 'composer':
       return <ComposerExperience siteTheme={siteTheme} />;
+    case 'md-editor':
+      return <MDEditorExperience siteTheme={siteTheme} />;
+    case 'html-editor':
+      return <HTMLEditorExperience siteTheme={siteTheme} />;
+    case 'slash-editor':
+      return <SlashEditorExperience siteTheme={siteTheme} />;
+    case 'headless-editor':
+      return <HeadlessExperience siteTheme={siteTheme} />;
     case 'extensive':
     default:
-      return <ExtensiveEditor initialTheme={siteTheme} showDefaultContent toolbarAlignment="center" />;
+      return <ExtensiveExperience siteTheme={siteTheme} />;
   }
 }
 
 export function PresetShowcaseClient() {
   const [siteTheme, setSiteTheme] = useState<Theme>('light');
-  const [selectedPresetId, setSelectedPresetId] = useState(() => {
-    return presetEntries.find((preset) => preset.id === 'extensive')?.id ?? presetEntries[0]?.id ?? 'extensive';
-  });
+  const [selectedPresetId, setSelectedPresetId] = useState<VisiblePresetId>('extensive');
 
   useEffect(() => {
     setSiteTheme(resolveTheme());
@@ -226,15 +407,15 @@ export function PresetShowcaseClient() {
   }, []);
 
   const activePreset = useMemo(() => {
-    return presetEntries.find((preset) => preset.id === selectedPresetId) ?? presetEntries[0] ?? fallbackPreset;
+    return presetEntries.find((preset) => preset.id === selectedPresetId) ?? fallbackPreset;
   }, [selectedPresetId]);
-  const activePresetDetails = presetDetails[activePreset.id] ?? defaultPresetDetails;
+  const activePresetDetails = presetDetails[selectedPresetId] ?? defaultPresetDetails;
 
   return (
     <div className="demo-showcase-layout">
       <aside className="demo-preset-sidebar" aria-label="Preset navigation">
         <h2>Presets</h2>
-        <p className="demo-preset-sidebar-copy">Choose a preset.</p>
+        <p className="demo-preset-sidebar-copy">Choose a preset and inspect a real-world style treatment.</p>
         <nav>
           {presetEntries.map((preset) => {
             const isActive = preset.id === activePreset.id;
@@ -244,7 +425,7 @@ export function PresetShowcaseClient() {
                 key={preset.id}
                 type="button"
                 className={['demo-preset-nav-item', isActive ? 'is-active' : ''].filter(Boolean).join(' ')}
-                onClick={() => setSelectedPresetId(preset.id)}
+                onClick={() => setSelectedPresetId(preset.id as VisiblePresetId)}
                 aria-current={isActive ? 'true' : undefined}
               >
                 <span>{preset.label}</span>
@@ -257,8 +438,8 @@ export function PresetShowcaseClient() {
       <div className="demo-showcase-main">
         <article className="demo-preset-writeup">
           <div className="demo-preset-title-row">
-            <h3>{presetHeading[activePreset.id] ?? `${activePreset.label} Preset`}</h3>
-            <code className="demo-preset-inline-code">{presetTag[activePreset.id] ?? '<Editor />'}</code>
+            <h3>{presetHeading[selectedPresetId] ?? `${activePreset.label} Preset`}</h3>
+            <code className="demo-preset-inline-code">{presetTag[selectedPresetId] ?? '<Editor />'}</code>
           </div>
           <p>{activePresetDetails.summary}</p>
           <p>
@@ -279,9 +460,7 @@ export function PresetShowcaseClient() {
               <span />
             </div>
           </div>
-          <div className="editor-pane demo-showcase-editor-pane">
-            <PresetRenderer key={`${activePreset.id}-${siteTheme}`} presetId={activePreset.id} siteTheme={siteTheme} />
-          </div>
+          <PresetRenderer key={`${selectedPresetId}-${siteTheme}`} presetId={selectedPresetId} siteTheme={siteTheme} />
         </div>
       </div>
     </div>

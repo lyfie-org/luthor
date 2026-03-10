@@ -2355,7 +2355,7 @@
 	box-shadow: none;
 }
 
-.luthor-floating-toolbar-action-primary {
+.luthor-floating-toolbar .luthor-floating-toolbar-action-primary {
 	border-color: var(--luthor-floating-accent);
 	background: var(--luthor-floating-accent);
 	color: var(--luthor-floating-accent-fg);
@@ -2420,7 +2420,7 @@
 	box-shadow: none;
 }
 
-.luthor-link-hover-bubble-button-primary {
+.luthor-link-hover-bubble .luthor-link-hover-bubble-button-primary {
 	border-color: var(--luthor-floating-accent);
 	background: var(--luthor-floating-accent);
 	color: var(--luthor-floating-accent-fg);

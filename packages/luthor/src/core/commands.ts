@@ -731,15 +731,16 @@ export function commandsToSlashCommandItems(
   const hasAllowlist = allowlist.size > 0;
 
   return resolveAvailableCommands(commands, options)
-    .filter(isCreatableSlashCommand)
     .filter((command) => {
       if (denylist.has(command.id)) {
         return false;
       }
-      if (!hasAllowlist) {
-        return true;
+
+      if (hasAllowlist) {
+        return allowlist.has(command.id);
       }
-      return allowlist.has(command.id);
+
+      return isCreatableSlashCommand(command);
     })
     .map((command) => ({
       id: command.id,

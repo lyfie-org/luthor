@@ -6,7 +6,7 @@
 
 <div align="center">
 
-[![Project Status](https://img.shields.io/badge/status-active%20development-orange?style=for-the-badge)](https://github.com/lyfie-org/luthor)
+[![Project Status](https://img.shields.io/badge/status-stable%20release%20%7C%20internal%20QA-yellowgreen?style=for-the-badge)](https://github.com/lyfie-org/luthor)
 [![Stability](https://img.shields.io/badge/stable%20release-expected%20soon-blue?style=for-the-badge)](https://github.com/lyfie-org/luthor/releases)
 
 [![Quality Gates](https://img.shields.io/github/actions/workflow/status/lyfie-org/luthor/quality-gates.yml?branch=main&label=quality%20gates&style=for-the-badge)](https://github.com/lyfie-org/luthor/actions/workflows/quality-gates.yml)
