@@ -259,9 +259,9 @@ export const docsIndex = [
     ],
     "title": "Slash Editor",
     "description": "Slash-first preset with draggable and command-focused defaults.",
-    "content": "\n# Slash Editor\n\nSlash-first preset with draggable-focused defaults.\n\n## Usage\n\n```tsx\nimport { SlashEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <SlashEditor showDefaultContent={false} />;\n}\n```\n\n## Props\n\n`SlashEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`, then re-adds both.\n\n- `slashVisibility`: `undefined (default) | SlashCommandVisibility`\n- `isDraggableEnabled`: `true (default) | false`\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides`\n- `isToolbarEnabled`: `false (default) | true`\n\n## Behavior\n\nDefaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML views.\n\r\n",
+    "content": "\n# Slash Editor\n\nSlash-first preset with draggable-focused defaults.\n\n## Usage\n\n```tsx\nimport { SlashEditor } from '@lyfie/luthor';\nimport '@lyfie/luthor/styles.css';\n\nexport function App() {\n  return <SlashEditor showDefaultContent={false} />;\n}\n```\n\n## Props\n\n`SlashEditorProps` inherits `ExtensiveEditorProps` except `featureFlags` and `isToolbarEnabled`, then re-adds both.\n\n- `slashVisibility`: `undefined (default) | SlashCommandVisibility`\n- `isDraggableEnabled`: `true (default) | false`\n- `featureFlags`: `undefined (default) | FeatureFlagOverrides`\n- `isToolbarEnabled`: `false (default) | true`\n\n## Behavior\n\nDefaults keep toolbar hidden, enable draggable blocks in visual editor mode, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML tabs.\n\r\n",
     "urlPath": "/docs/luthor/presets/slash-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/slash-editor.md",
-    "updatedAt": "2026-03-10T09:21:56.478Z"
+    "updatedAt": "2026-03-11T13:52:06.880Z"
   }
 ];

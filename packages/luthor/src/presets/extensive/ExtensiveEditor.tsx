@@ -1443,7 +1443,7 @@ function ExtensiveEditorContent({
   const activeSourceMode = isSourceMode(mode) ? mode : null;
   const isVisualOnlyMode = mode === "visual-only";
   const showVisualShell = isVisualEditorMode(mode) || isVisualOnlyMode;
-  const shouldHideDraggableAffordances = !isDraggableBoxEnabled || isVisualOnlyMode;
+  const shouldHideDraggableAffordances = !isDraggableBoxEnabled || !isVisualEditorMode(mode);
 
   return (
     <>

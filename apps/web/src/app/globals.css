@@ -202,6 +202,13 @@ a {
   display: flex;
   align-items: center;
   gap: 1.2rem;
+  margin-left: auto;
+}
+
+.nav-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
 }
 
 .nav-menu-toggle {
@@ -2371,10 +2378,12 @@ a {
   .site-nav {
     width: 100%;
     display: none;
+    order: 3;
     grid-template-columns: 1fr;
     gap: 0.45rem;
     padding: 0.8rem;
     margin: 0 0 0.35rem;
+    margin-left: 0;
     border: 1px solid var(--line);
     border-radius: 14px;
     background: color-mix(in srgb, var(--bg-elevated) 90%, var(--surface) 10%);
@@ -2385,8 +2394,7 @@ a {
     display: grid;
   }
 
-  .site-nav a,
-  .theme-toggle {
+  .site-nav a {
     width: 100%;
     justify-content: flex-start;
     padding: 0.58rem 0.66rem;
@@ -2404,6 +2412,7 @@ a {
 
   .theme-toggle {
     height: 2.1rem;
+    width: 2.1rem;
   }
 
   .demo-showcase-layout {

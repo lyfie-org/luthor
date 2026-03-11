@@ -1018,6 +1018,31 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     expect(container.querySelector(".luthor-editor-visual-gutter")).toBeNull();
   });
 
+  it("hides draggable affordances outside visual-editor mode even when draggable is enabled", async () => {
+    const { container } = render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="json"
+        availableModes={["visual-editor", "json"]}
+      />,
+    );
+
+    expect(container.querySelector(".luthor-editor")).toHaveClass("luthor-editor--draggable-disabled");
+    expect(container.querySelector(".luthor-editor-visual-gutter")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "visual-editor" }));
+    await waitFor(() => {
+      expect(container.querySelector(".luthor-editor")).not.toHaveClass("luthor-editor--draggable-disabled");
+    });
+    expect(container.querySelector(".luthor-editor-visual-gutter")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "json" }));
+    await waitFor(() => {
+      expect(container.querySelector(".luthor-editor")).toHaveClass("luthor-editor--draggable-disabled");
+    });
+    expect(container.querySelector(".luthor-editor-visual-gutter")).toBeNull();
+  });
+
   it("disables editing overlays and editing menu shortcuts in visual-only mode", () => {
     const subscribe = vi.fn((listener: (isOpen: boolean, items: Array<{ id: string; shortcut?: string }>) => void) => {
       listener(true, [{ id: "format.bold", shortcut: "Ctrl+B" }]);

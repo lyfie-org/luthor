@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-11T13:41:39.176Z
+Generated at: 2026-03-11T14:29:57.560Z
 
 ---
 ## FILE: getting-started/capabilities.md
@@ -1366,5 +1366,5 @@ export function App() {
 
 ## Behavior
 
-Defaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML views.
+Defaults keep toolbar hidden, enable draggable blocks in visual editor mode, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML tabs.
 
