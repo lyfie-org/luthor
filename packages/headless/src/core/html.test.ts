@@ -289,6 +289,25 @@ describe("html bridge", () => {
     expect(collectNodeText(code as JsonNode)).toContain("const value = 42;");
   });
 
+  it("round-trips horizontal rule nodes natively", () => {
+    const input = createDocument([
+      paragraphNode([textNode("Before")]),
+      {
+        type: "horizontalrule",
+        version: 1,
+      },
+      paragraphNode([textNode("After")]),
+    ]);
+
+    const html = jsonToHTML(input);
+    expect(html).toContain("<hr");
+    expect(html).not.toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument;
+    const horizontalRule = findTopLevelNode(roundTrip, "horizontalrule");
+    expect(horizontalRule).toBeDefined();
+  });
+
   it("exports and re-imports image nodes natively", () => {
     const input = createDocument([
       {
@@ -328,7 +347,11 @@ describe("html bridge", () => {
       },
     ]);
 
-    const roundTrip = roundTripJSON(input);
+    const html = jsonToHTML(input);
+    expect(html).toContain("<iframe");
+    expect(html).not.toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument;
     const iframe = findTopLevelNode(roundTrip, "iframe-embed");
     expect(iframe).toBeDefined();
     expect(String(iframe?.src ?? "")).toContain("https://example.com/embed/widget");
@@ -352,7 +375,11 @@ describe("html bridge", () => {
       },
     ]);
 
-    const roundTrip = roundTripJSON(input);
+    const html = jsonToHTML(input);
+    expect(html).toContain("<iframe");
+    expect(html).not.toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument;
     const youtube = findTopLevelNode(roundTrip, "youtube-embed");
     expect(youtube).toBeDefined();
     expect(String(youtube?.src ?? "")).toContain("youtube.com/embed/dQw4w9WgXcQ");
@@ -360,6 +387,89 @@ describe("html bridge", () => {
     expect(youtube?.height).toBe(360);
     expect(youtube?.alignment).toBe("center");
     expect(youtube?.caption).toBe("Video caption");
+  });
+
+  it("round-trips table nodes natively", () => {
+    const input = createDocument([
+      {
+        type: "table",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "tablerow",
+            version: 1,
+            children: [
+              {
+                type: "tablecell",
+                version: 1,
+                headerState: 1,
+                colSpan: 1,
+                rowSpan: 1,
+                width: 120,
+                backgroundColor: null,
+                children: [paragraphNode([textNode("Name")])],
+              },
+              {
+                type: "tablecell",
+                version: 1,
+                headerState: 1,
+                colSpan: 1,
+                rowSpan: 1,
+                width: 160,
+                backgroundColor: null,
+                children: [paragraphNode([textNode("Role")])],
+              },
+            ],
+          },
+          {
+            type: "tablerow",
+            version: 1,
+            children: [
+              {
+                type: "tablecell",
+                version: 1,
+                headerState: 0,
+                colSpan: 1,
+                rowSpan: 1,
+                width: 120,
+                backgroundColor: null,
+                children: [paragraphNode([textNode("Ada")])],
+              },
+              {
+                type: "tablecell",
+                version: 1,
+                headerState: 0,
+                colSpan: 1,
+                rowSpan: 1,
+                width: 160,
+                backgroundColor: null,
+                children: [paragraphNode([textNode("Engineer")])],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    const html = jsonToHTML(input);
+    expect(html).toContain("<table");
+    expect(html).not.toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument;
+    const tableNode = findTopLevelNode(roundTrip, "table");
+    expect(tableNode).toBeDefined();
+
+    const rows = getChildren(tableNode as JsonNode);
+    expect(rows.length).toBe(2);
+    const firstRowCells = getChildren(rows[0] as JsonNode);
+    const secondRowCells = getChildren(rows[1] as JsonNode);
+    expect(collectNodeText(firstRowCells[0] as JsonNode)).toContain("Name");
+    expect(collectNodeText(firstRowCells[1] as JsonNode)).toContain("Role");
+    expect(collectNodeText(secondRowCells[0] as JsonNode)).toContain("Ada");
+    expect(collectNodeText(secondRowCells[1] as JsonNode)).toContain("Engineer");
   });
 
   it("round-trips mixed extensive-editor component documents collectively", () => {
