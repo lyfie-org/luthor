@@ -17,10 +17,13 @@ This file helps AI agents discover Luthor docs quickly.
 
 ### General
 - [getting-started/capabilities.md](https://www.luthor.fyi/docs/getting-started/capabilities/)
+- [getting-started/contributor-guide.md](https://www.luthor.fyi/docs/getting-started/contributor-guide/)
 - [getting-started/index.md](https://www.luthor.fyi/docs/getting-started/)
 - [getting-started/installation.md](https://www.luthor.fyi/docs/getting-started/installation/)
 - [getting-started/luthor-headless.md](https://www.luthor.fyi/docs/getting-started/luthor-headless/)
 - [getting-started/luthor.md](https://www.luthor.fyi/docs/getting-started/luthor/)
+- [luthor-headless/architecture.md](https://www.luthor.fyi/docs/luthor-headless/architecture/)
+- [luthor-headless/extensions-and-api.md](https://www.luthor.fyi/docs/luthor-headless/extensions-and-api/)
 - [luthor-headless/features.md](https://www.luthor.fyi/docs/luthor-headless/features/)
 - [luthor-headless/features/code-and-devtools.md](https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/)
 - [luthor-headless/features/customization-and-theming.md](https://www.luthor.fyi/docs/luthor-headless/features/customization-and-theming/)
@@ -28,6 +31,9 @@ This file helps AI agents discover Luthor docs quickly.
 - [luthor-headless/features/media-and-embeds.md](https://www.luthor.fyi/docs/luthor-headless/features/media-and-embeds/)
 - [luthor-headless/features/structure-and-lists.md](https://www.luthor.fyi/docs/luthor-headless/features/structure-and-lists/)
 - [luthor-headless/features/typography-and-text.md](https://www.luthor.fyi/docs/luthor-headless/features/typography-and-text/)
+- [luthor-headless/metadata-comment-system.md](https://www.luthor.fyi/docs/luthor-headless/metadata-comment-system/)
+- [luthor/architecture.md](https://www.luthor.fyi/docs/luthor/architecture/)
+- [luthor/feature-flags.md](https://www.luthor.fyi/docs/luthor/feature-flags/)
 - [luthor/presets.md](https://www.luthor.fyi/docs/luthor/presets/)
 - [luthor/presets/compose-editor.md](https://www.luthor.fyi/docs/luthor/presets/compose-editor/)
 - [luthor/presets/extensive-editor.md](https://www.luthor.fyi/docs/luthor/presets/extensive-editor/)
@@ -37,4 +43,5 @@ This file helps AI agents discover Luthor docs quickly.
 - [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/)
 - [luthor/presets/simple-editor.md](https://www.luthor.fyi/docs/luthor/presets/simple-editor/)
 - [luthor/presets/slash-editor.md](https://www.luthor.fyi/docs/luthor/presets/slash-editor/)
+- [luthor/props-reference.md](https://www.luthor.fyi/docs/luthor/props-reference/)
 

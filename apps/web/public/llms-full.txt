@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-11T08:50:27.138Z
+Generated at: 2026-03-11T17:37:20.199Z
 
 ---
 ## FILE: getting-started/capabilities.md
@@ -100,7 +100,7 @@ Unordered, ordered, and checklist/task lists in one workflow. Use the right list
 
 ## Indentation Control
 
-![Indentation preview](/social-card.svg)
+![Indentation preview](/features/Feature6.gif)
 
 Indent in and out with consistent, structure-safe behavior. Tab behavior is predictable and respects document structure.
 
@@ -115,7 +115,7 @@ Indent in and out with consistent, structure-safe behavior. Tab behavior is pred
 
 ## Rich Embeds
 
-![Rich embed preview](/social-card.svg)
+![Rich embed preview](/features/Feature7.gif)
 
 Embed images, iframes, and YouTube content with minimal friction. Paste and render rich media without bolt-on hacks.
 
@@ -204,6 +204,94 @@ Create custom nodes and schema extensions for product-specific UX. If defaults a
 | `@lyfie/luthor-headless` | Yes |
 
 ---
+## FILE: getting-started/contributor-guide.md
+## URL: https://www.luthor.fyi/docs/getting-started/contributor-guide/
+---
+
+---
+title: Contributor Guide
+description: Monorepo architecture, local workflows, docs tooling, and contributor checklist for Luthor packages.
+---
+
+# Contributor Guide
+
+This page is the fastest path for contributors working on `@lyfie/luthor` and `@lyfie/luthor-headless`.
+
+## Prerequisites
+
+- Node `>=20`
+- `pnpm@10.4.1`
+
+## Monorepo map
+
+- `packages/headless`: headless runtime, extension system, and JSON/Markdown/HTML bridges.
+- `packages/luthor`: preset package built on top of headless.
+- `apps/demo`: Vite playground for rapid preset QA.
+- `apps/web`: docs + marketing site (this documentation lives here).
+- `tools`: release hardening, rule contracts, size checks, and workflow scripts.
+
+## Local development commands
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Useful checks:
+
+```bash
+pnpm build
+pnpm lint
+pnpm check:rule-contracts
+pnpm size:check
+pnpm check:release-hardening
+```
+
+Package-level tests:
+
+```bash
+pnpm -C packages/headless test
+pnpm -C packages/luthor test
+```
+
+## Docs workflow (`apps/web`)
+
+1. Add or edit markdown files in `apps/web/src/content/docs/**`.
+2. Keep `title` and `description` frontmatter set.
+3. Regenerate the static docs index:
+
+```bash
+pnpm -C apps/web run sync:docs
+```
+
+4. If you changed content for LLM files, run:
+
+```bash
+pnpm -C apps/web run sync:llms
+```
+
+5. Preview docs locally:
+
+```bash
+pnpm -C apps/web run dev
+```
+
+## Where to start by topic
+
+- Preset behavior and UI composition: [/docs/luthor/architecture/](/docs/luthor/architecture/)
+- Preset props and feature gates: [/docs/luthor/props-reference/](/docs/luthor/props-reference/)
+- Headless runtime and extension API: [/docs/luthor-headless/architecture/](/docs/luthor-headless/architecture/)
+- Metadata comment bridge internals: [/docs/luthor-headless/metadata-comment-system/](/docs/luthor-headless/metadata-comment-system/)
+
+## Pull request checklist
+
+- Reproduce in `apps/demo` or `apps/web/demo` if UI-related.
+- Add or update tests in touched package when behavior changes.
+- Run `pnpm lint` and impacted package tests.
+- Run `pnpm -C apps/web run sync:docs` if docs changed.
+- Include before/after screenshots or GIFs for UX changes.
+
+---
 ## FILE: getting-started/index.md
 ## URL: https://www.luthor.fyi/docs/getting-started/
 ---
@@ -248,9 +336,19 @@ Based on package metadata in `packages/luthor/package.json` and `packages/headle
 
 1. [Introduction](/docs/getting-started/)
 2. [Installation](/docs/getting-started/installation/)
-3. [Capabilities](/docs/getting-started/capabilities/)
-4. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
-5. [@lyfie/luthor](/docs/getting-started/luthor/)
+3. [Contributor Guide](/docs/getting-started/contributor-guide/)
+4. [Capabilities](/docs/getting-started/capabilities/)
+5. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
+6. [@lyfie/luthor](/docs/getting-started/luthor/)
+
+## Contributor deep dives
+
+- [@lyfie/luthor architecture](/docs/luthor/architecture/)
+- [@lyfie/luthor props reference](/docs/luthor/props-reference/)
+- [@lyfie/luthor feature flags](/docs/luthor/feature-flags/)
+- [@lyfie/luthor-headless architecture](/docs/luthor-headless/architecture/)
+- [@lyfie/luthor-headless extensions and API](/docs/luthor-headless/extensions-and-api/)
+- [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)
 
 ---
 ## FILE: getting-started/installation.md
@@ -374,6 +472,13 @@ export function App() {
 
 `@lyfie/luthor-headless` is built on top of Lexical. For deeper engine capabilities and low-level APIs, use the official Lexical documentation: [lexical.dev/docs](https://lexical.dev/docs/intro).
 
+## Contributor docs
+
+- [Architecture](/docs/luthor-headless/architecture/)
+- [Extensions and API](/docs/luthor-headless/extensions-and-api/)
+- [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)
+- [Feature groups](/docs/luthor-headless/features/)
+
 ---
 ## FILE: getting-started/luthor.md
 ## URL: https://www.luthor.fyi/docs/getting-started/luthor/
@@ -411,6 +516,238 @@ export function App() {
 - Toolbar appears
 - No module resolution errors in the dev server
 
+## Contributor docs
+
+- [Architecture](/docs/luthor/architecture/)
+- [Props reference](/docs/luthor/props-reference/)
+- [Feature flags](/docs/luthor/feature-flags/)
+- [Presets](/docs/luthor/presets/)
+
+---
+## FILE: luthor-headless/architecture.md
+## URL: https://www.luthor.fyi/docs/luthor-headless/architecture/
+---
+
+---
+title: Architecture
+description: "Internal runtime model of @lyfie/luthor-headless: editor system, extension lifecycle, and conversion bridges."
+---
+
+# @lyfie/luthor-headless Architecture
+
+`@lyfie/luthor-headless` is a typed extension runtime on top of Lexical. It does not ship preset UI; you compose your own UI from commands and active states.
+
+## High-level runtime flow
+
+1. Define an extension array.
+2. Create a typed system with `createEditorSystem<typeof extensions>()`.
+3. Render `<Provider extensions={extensions}>`.
+4. Use `useEditor()` in your UI for `commands`, `activeStates`, `export`, and `import`.
+5. Render `<RichText />` or your own contenteditable plugin layer.
+
+## Key modules
+
+- `packages/headless/src/core/createEditorSystem.tsx`: provider and hook factory.
+- `packages/headless/src/core/createExtension.ts`: typed extension factory.
+- `packages/headless/src/extensions/**`: built-in extension catalog.
+- `packages/headless/src/core/markdown.ts` and `html.ts`: JSON <-> Markdown/HTML bridges.
+- `packages/headless/src/core/metadata-envelope.ts`: metadata comment preservation layer.
+
+## What `Provider` does
+
+- Collects Lexical nodes from all extensions (`getNodes`).
+- Registers extensions sorted by `config.initPriority` (higher first).
+- Aggregates extension commands into one typed `commands` object.
+- Aggregates async state queries into `activeStates`.
+- Renders plugins before children when `position` is `'before'`.
+- Renders plugins after children when `position` is `'after'`.
+- Exposes `export.toJSON()` and `import.fromJSON(...)`.
+
+## Extension lifecycle contract
+
+Every extension follows the `Extension` interface:
+
+- `name`, `category`, `config`
+- `register(editor) => cleanup`
+- `getCommands(editor)`
+- `getStateQueries(editor)` (optional)
+- `getPlugins()`
+- `getNodes()` (optional)
+
+Use `createExtension(...)` for simple cases. Extend `BaseExtension` for advanced behavior.
+
+## Runtime mutation note
+
+`extensionsAPI.add/remove/reorder` is intentionally read-only at runtime and logs warnings. To change extension sets, pass a new `extensions` array to `Provider`.
+
+## Bridge architecture
+
+Source conversion is JSON-centered:
+
+- visual editor state is JSON
+- `jsonToMarkdown` and `jsonToHTML` export source
+- `markdownToJSON` and `htmlToJSON` import source
+- metadata comments preserve unsupported nodes and non-native fields
+
+Read full details:
+
+- [/docs/luthor-headless/metadata-comment-system/](/docs/luthor-headless/metadata-comment-system/)
+
+## Contributor entry points
+
+- Build new extension APIs: `packages/headless/src/extensions`
+- Update type contracts: `packages/headless/src/extensions/types.ts`
+- Adjust provider lifecycle and state behavior: `packages/headless/src/core/createEditorSystem.tsx`
+- Adjust bridge behavior: `packages/headless/src/core/markdown.ts`, `packages/headless/src/core/html.ts`, `packages/headless/src/core/metadata-envelope.ts`
+
+---
+## FILE: luthor-headless/extensions-and-api.md
+## URL: https://www.luthor.fyi/docs/luthor-headless/extensions-and-api/
+---
+
+---
+title: Extensions and API
+description: Extension catalog and API usage for createEditorSystem, RichText, and custom extension authoring in @lyfie/luthor-headless.
+---
+
+# Extensions and API
+
+This page is the contributor-facing API map for `@lyfie/luthor-headless`.
+
+## Core entry points
+
+- `createEditorSystem`
+- `createExtension`
+- `RichText` and `richTextExtension`
+- `markdownToJSON`, `jsonToMarkdown`, `htmlToJSON`, `jsonToHTML`
+- `defaultLuthorTheme`, `mergeThemes`, `createEditorThemeStyleVars`
+
+## Built-in extension catalog
+
+### Formatting and structure
+
+- `boldExtension`, `italicExtension`, `underlineExtension`, `strikethroughExtension`
+- `subscriptExtension`, `superscriptExtension`, `codeFormatExtension`
+- `fontFamilyExtension`, `fontSizeExtension`, `lineHeightExtension`
+- `textColorExtension`, `textHighlightExtension`
+- `linkExtension`, `blockFormatExtension`, `listExtension`, `tabIndentExtension`
+- `codeExtension`, `codeIntelligenceExtension`
+- `horizontalRuleExtension`, `tableExtension`, `enterKeyBehaviorExtension`
+
+### Interaction and productivity
+
+- `historyExtension`
+- `commandPaletteExtension`
+- `slashCommandExtension`
+- `floatingToolbarExtension`
+- `contextMenuExtension`
+- `draggableBlockExtension`
+- `emojiExtension`
+
+### Media
+
+- `imageExtension`
+- `iframeEmbedExtension`
+- `youTubeEmbedExtension`
+
+### Custom
+
+- `createCustomNodeExtension(...)`
+- `createExtension(...)` (general-purpose extension factory)
+
+## Minimal typed setup
+
+```tsx
+import {
+  createEditorSystem,
+  RichText,
+  richTextExtension,
+  boldExtension,
+  italicExtension,
+} from '@lyfie/luthor-headless';
+
+const extensions = [richTextExtension, boldExtension, italicExtension] as const;
+const { Provider, useEditor } = createEditorSystem<typeof extensions>();
+
+function Toolbar() {
+  const { commands, activeStates } = useEditor();
+  return (
+    <div>
+      <button onClick={() => commands.toggleBold?.()} aria-pressed={activeStates.bold === true}>Bold</button>
+      <button onClick={() => commands.toggleItalic?.()} aria-pressed={activeStates.italic === true}>Italic</button>
+    </div>
+  );
+}
+
+export function Editor() {
+  return (
+    <Provider extensions={extensions}>
+      <Toolbar />
+      <RichText placeholder="Write..." />
+    </Provider>
+  );
+}
+```
+
+## `RichText` props
+
+`RichText` and `RichTextConfig` share these core props:
+
+- `placeholder?: ReactElement | string`
+- `contentEditable?: ReactElement`
+- `className?: string`
+- `classNames?: { container?: string; contentEditable?: string; placeholder?: string }`
+- `styles?: { container?: CSSProperties; contentEditable?: CSSProperties; placeholder?: CSSProperties }`
+- `nonEditableVisualMode?: boolean`
+- `onEditIntent?: ({ clientX, clientY }) => void`
+- `errorBoundary?: React.ComponentType<{ children; onError }>`
+
+Use `nonEditableVisualMode` and `onEditIntent` when you need read-only visual mode that promotes to editable mode on user intent.
+
+## `useEditor()` context surface
+
+- `commands`
+- `activeStates`
+- `stateQueries`
+- `listeners.registerUpdate(...)`
+- `listeners.registerPaste(...)`
+- `export.toJSON()`
+- `import.fromJSON(...)`
+- `lexical` and `editor`
+- `hasExtension(name)`
+
+## Custom extension example (`createExtension`)
+
+```tsx
+import { $createParagraphNode, $getRoot } from 'lexical';
+import { createExtension, ExtensionCategory } from '@lyfie/luthor-headless';
+
+export const clearDocumentExtension = createExtension({
+  name: 'clearDocument',
+  category: [ExtensionCategory.Toolbar],
+  commands: (editor) => ({
+    clearDocument: () => {
+      editor.update(() => {
+        const root = $getRoot();
+        root.clear();
+        root.append($createParagraphNode());
+      });
+    },
+  }),
+});
+```
+
+## Choosing an extension authoring style
+
+- Use `createExtension(...)` for straightforward command and plugin additions.
+- Use `BaseExtension` subclasses when you need class-level `configure(...)` behavior, richer lifecycle hooks, or custom node registration patterns.
+
+## Related pages
+
+- [/docs/luthor-headless/architecture/](/docs/luthor-headless/architecture/)
+- [/docs/luthor-headless/metadata-comment-system/](/docs/luthor-headless/metadata-comment-system/)
+- [/docs/luthor-headless/features/](/docs/luthor-headless/features/)
+
 ---
 ## FILE: luthor-headless/features.md
 ## URL: https://www.luthor.fyi/docs/luthor-headless/features/
@@ -424,6 +761,12 @@ description: Grouped feature documentation for @lyfie/luthor-headless.
 # Features
 
 Feature docs are grouped to match the home page feature set.
+
+## Contributor guides
+
+- [Architecture](/docs/luthor-headless/architecture/)
+- [Extensions and API](/docs/luthor-headless/extensions-and-api/)
+- [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)
 
 ## Feature groups
 
@@ -912,6 +1255,258 @@ export function App() {
 - `RichText.disabled`: `false (default) | true`
 
 ---
+## FILE: luthor-headless/metadata-comment-system.md
+## URL: https://www.luthor.fyi/docs/luthor-headless/metadata-comment-system/
+---
+
+---
+title: Metadata Comment System
+description: How luthor metadata envelopes preserve unsupported and non-native data across JSON, Markdown, and HTML bridges.
+---
+
+# Metadata Comment System
+
+When converting between editor JSON and Markdown or HTML, not every node or field can be represented natively.  
+`@lyfie/luthor-headless` preserves that data using metadata envelopes encoded as HTML comments.
+
+## Envelope format
+
+Comments are appended to source output:
+
+```html
+<!-- luthor:meta v1 {"id":"featureCard:1:1","type":"featureCard","path":[1],"node":{"type":"featureCard","version":1,"payload":{"title":"AI Draft"}},"fallback":"[Unsupported featureCard preserved in markdown metadata]"} -->
+```
+
+Source implementation:
+
+- `packages/headless/src/core/metadata-envelope.ts`
+
+## Export pipeline (`jsonToMarkdown` and `jsonToHTML`)
+
+1. `prepareDocumentForBridge(...)` sanitizes the JSON for source-safe conversion.
+2. Unsupported node types are replaced with fallback text and stored in envelopes.
+3. Supported nodes with non-native fields generate patch envelopes.
+4. The converter builds markdown or html from sanitized JSON.
+5. `appendMetadataEnvelopes(...)` appends envelopes as `<!-- luthor:meta v1 ... -->`.
+
+## Import pipeline (`markdownToJSON` and `htmlToJSON`)
+
+1. `extractMetadataEnvelopes(...)` strips and parses envelope comments.
+2. Markdown or HTML content is converted to base JSON.
+3. `rehydrateDocumentFromEnvelopes(...)` restores preserved data.
+
+## Why two restoration strategies exist
+
+- `replace`: for unsupported node types. The original node is restored by path.
+- `merge`: for supported node types where extra metadata must be patched back onto native fields.
+
+## Markdown-specific behavior
+
+`markdown.ts` intentionally keeps markdown-editable fields native (for example image alt text and embed captions) while storing non-native extras in merge envelopes. This supports manual markdown edits without losing richer metadata.
+
+Legacy comments are still supported for backwards compatibility:
+
+- `<!-- luthor:iframe {...} -->`
+- `<!-- luthor:youtube {...} -->`
+
+## Safety guarantees
+
+- Unknown envelope versions are ignored with warnings.
+- Malformed JSON payloads are ignored safely.
+- Envelopes missing required fields are ignored.
+- Import continues with valid content even when some envelopes are invalid.
+
+## Contributor rules
+
+- If you add a new node type with non-native fields, update supported-type sets and patch extraction logic in both `markdown.ts` and `html.ts`.
+- Keep `ENVELOPE_VERSION` stable unless the format truly changes.
+- Add round-trip tests in `packages/headless/src/core/metadata-envelope.test.ts`, `packages/headless/src/core/markdown.test.ts`, and `packages/headless/src/core/html.test.ts`.
+
+## Debugging checklist
+
+1. Export JSON to markdown or html and confirm `luthor:meta v1` comments appear when expected.
+2. Edit source manually and re-import.
+3. Verify metadata fields survive round-trip.
+4. Check console warnings for ignored or malformed envelopes.
+
+## Preset impact
+
+`LegacyRichEditor`, `MDEditor`, `HTMLEditor`, and `HeadlessEditorPreset` in `@lyfie/luthor` disable many metadata-heavy features by default to keep source workflows predictable.
+
+---
+## FILE: luthor/architecture.md
+## URL: https://www.luthor.fyi/docs/luthor/architecture/
+---
+
+---
+title: Architecture
+description: How @lyfie/luthor is structured internally, how presets compose headless extensions, and where to contribute.
+---
+
+# @lyfie/luthor Architecture
+
+`@lyfie/luthor` is a preset layer on top of `@lyfie/luthor-headless`. It packages curated extension bundles, ready-made UI, and source-mode workflows.
+
+## High-level flow
+
+1. A preset component (for example `ExtensiveEditor`) resolves feature flags and options.
+2. The preset builds an extension array with `createExtensiveExtensions(...)`.
+3. It mounts a typed headless `Provider` created with `createEditorSystem(...)`.
+4. UI components (toolbar, tabs, source panel, slash/palette overlays) call typed editor commands.
+5. Source modes convert through `jsonToMarkdown` / `markdownToJSON` and `jsonToHTML` / `htmlToJSON`.
+
+## Key directories
+
+- `packages/luthor/src/presets/extensive`: base preset, extension assembly, and default UX.
+- `packages/luthor/src/presets/*`: wrappers around `ExtensiveEditor` (Compose, Simple, Slash, MD, HTML, Legacy, Headless preset).
+- `packages/luthor/src/presets/_shared`: shared preset policy, feature guards, mode cache, and style-var helpers.
+- `packages/luthor/src/core`: reusable UI pieces (toolbar, command palette, slash menu, source view, command registry, shortcut system).
+
+## Preset composition model
+
+1. `ExtensiveEditor` is the base runtime.
+2. Wrapper presets set constrained `availableModes`.
+3. Wrapper presets apply preset defaults and optional overrides via `featureFlags`.
+4. Wrapper presets optionally enforce fixed flags with `PresetFeaturePolicy`.
+5. Wrapper presets tune toolbar layouts and class names.
+
+This keeps behavior centralized while allowing focused preset surfaces.
+
+## Feature policy model
+
+`PresetFeaturePolicy` merges:
+
+1. preset defaults,
+2. user overrides,
+3. enforced flags (cannot be turned back on).
+
+This is why presets such as `LegacyRichEditor` keep metadata-heavy features disabled even when overrides are passed.
+
+## Source mode behavior
+
+`ExtensiveEditor` supports:
+
+- visual modes: `visual-editor`, `visual-only`, plus the legacy alias `visual`
+- source modes: `json`, `markdown`, `html`
+
+Source values are synchronized and validated on mode switches. Conversion errors are isolated to source mode and do not silently overwrite visual content.
+
+## Extension and theme wiring
+
+- Extensions are memoized from normalized config keys to avoid stale editor wiring.
+- Theme tokens use `createEditorThemeStyleVars(...)` plus CSS custom properties.
+- `defaultSettings` maps common style values (font, list marker, quote, table, placeholder, code block, toolbar) to CSS vars.
+
+## Contributor entry points
+
+- Add new preset behavior: `packages/luthor/src/presets/extensive/ExtensiveEditor.tsx`
+- Add or adjust feature flags: `packages/luthor/src/presets/extensive/extensions.tsx`
+- Add shared preset utilities: `packages/luthor/src/presets/_shared`
+- Add commands and shortcuts: `packages/luthor/src/core/commands.ts`
+
+---
+## FILE: luthor/feature-flags.md
+## URL: https://www.luthor.fyi/docs/luthor/feature-flags/
+---
+
+---
+title: Feature Flags
+description: Complete feature-flag model for @lyfie/luthor presets, including defaults, overrides, and preset enforcement.
+---
+
+# Feature Flags
+
+`@lyfie/luthor` uses feature flags to compose preset capability without forking runtime logic.
+
+## Source of truth
+
+Canonical keys are defined in `packages/luthor/src/presets/extensive/extensions.tsx` as `EXTENSIVE_FEATURE_KEYS`.
+
+```ts
+type FeatureFlag =
+  | 'bold'
+  | 'italic'
+  | 'underline'
+  | 'strikethrough'
+  | 'fontFamily'
+  | 'fontSize'
+  | 'lineHeight'
+  | 'textColor'
+  | 'textHighlight'
+  | 'subscript'
+  | 'superscript'
+  | 'link'
+  | 'horizontalRule'
+  | 'table'
+  | 'list'
+  | 'history'
+  | 'image'
+  | 'blockFormat'
+  | 'code'
+  | 'codeIntelligence'
+  | 'codeFormat'
+  | 'tabIndent'
+  | 'enterKeyBehavior'
+  | 'iframeEmbed'
+  | 'youTubeEmbed'
+  | 'floatingToolbar'
+  | 'contextMenu'
+  | 'commandPalette'
+  | 'slashCommand'
+  | 'emoji'
+  | 'draggableBlock'
+  | 'customNode'
+  | 'themeToggle';
+```
+
+## Default behavior
+
+`ExtensiveEditor` defaults to all flags enabled (`DEFAULT_FEATURE_FLAGS`).
+
+Disable selectively:
+
+```tsx
+<ExtensiveEditor
+  featureFlags={{
+    image: false,
+    table: false,
+    customNode: false,
+    commandPalette: false,
+  }}
+/>
+```
+
+## Preset enforcement
+
+Some presets hard-enforce specific flags:
+
+- `LegacyRichEditor`: enforces metadata-heavy features off (table, image, embeds, custom nodes, draggable, palette/slash, emoji, theme toggle).
+- `SlashEditor`: enforces `slashCommand: true` and `commandPalette: false`.
+- `HeadlessEditorPreset`: enforces a lightweight metadata-free profile.
+- `SimpleEditor`: hardcodes a minimal visual-only feature set for message input.
+
+## Why enforcement exists
+
+Preset contracts must stay stable. If a preset promises metadata-free markdown/html workflows or slash-first behavior, enforced flags prevent accidental contract drift.
+
+## Feature groups
+
+- Typography: `fontFamily`, `fontSize`, `lineHeight`
+- Inline formatting: `bold`, `italic`, `underline`, `strikethrough`, `subscript`, `superscript`, `codeFormat`, `textColor`, `textHighlight`
+- Document structure: `blockFormat`, `list`, `horizontalRule`, `table`, `tabIndent`, `enterKeyBehavior`
+- Rich content: `image`, `iframeEmbed`, `youTubeEmbed`, `customNode`
+- Productivity UI: `history`, `commandPalette`, `slashCommand`, `floatingToolbar`, `contextMenu`, `draggableBlock`, `themeToggle`, `emoji`
+- Code workflows: `code`, `codeIntelligence`
+
+## Contributor rules
+
+- Add new flags only in `EXTENSIVE_FEATURE_KEYS`.
+- Reflect the flag in `DEFAULT_FEATURE_FLAGS`.
+- Wire the flag into extension assembly in `buildExtensiveExtensions(...)`.
+- Update preset-specific policies if needed.
+- Update docs that describe preset behavior.
+
+---
 ## FILE: luthor/presets.md
 ## URL: https://www.luthor.fyi/docs/luthor/presets/
 ---
@@ -924,6 +1519,12 @@ description: Preset catalog for @lyfie/luthor, including per-preset docs.
 # Presets
 
 `@lyfie/luthor` is a preset package built on top of `@lyfie/luthor-headless`.
+
+## Contributor guides
+
+- [Architecture](/docs/luthor/architecture/)
+- [Props reference](/docs/luthor/props-reference/)
+- [Feature flags](/docs/luthor/feature-flags/)
 
 ## Importing headless from presets package
 
@@ -1366,5 +1967,197 @@ export function App() {
 
 ## Behavior
 
-Defaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML views.
+Defaults keep toolbar hidden, enable draggable blocks in visual editor mode, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML tabs.
+
+---
+## FILE: luthor/props-reference.md
+## URL: https://www.luthor.fyi/docs/luthor/props-reference/
+---
+
+---
+title: Props Reference
+description: Contributor-level prop reference for ExtensiveEditor and all preset wrappers in @lyfie/luthor.
+---
+
+# Props Reference
+
+This page explains how preset props are layered. Most wrappers inherit `ExtensiveEditorProps` and then constrain modes or features.
+
+## 1) `ExtensiveEditorProps` (base preset)
+
+### Content and mode
+
+- `defaultContent?: string`
+- `showDefaultContent?: boolean` (default `true`)
+- `placeholder?: string | { visual?: string; json?: string; markdown?: string; html?: string }`
+- `initialMode?: 'visual-only' | 'visual-editor' | 'visual' | 'json' | 'markdown' | 'html'`
+- `defaultEditorView?: same as initialMode`
+- `availableModes?: readonly ExtensiveEditorMode[]`
+- `isEditorViewTabsVisible?: boolean`
+- `isEditorViewsTabVisible?: boolean` (legacy alias)
+
+### Toolbar and command UI
+
+- `isToolbarEnabled?: boolean` (default `true`)
+- `toolbarPosition?: 'top' | 'bottom'`
+- `toolbarAlignment?: 'left' | 'center' | 'right'`
+- `toolbarLayout?: ToolbarLayout`
+- `toolbarVisibility?: ToolbarVisibility`
+- `toolbarClassName?: string`
+- `toolbarStyleVars?: ToolbarStyleVars`
+- `isToolbarPinned?: boolean`
+- `slashCommandVisibility?: SlashCommandVisibility`
+- `commandPaletteShortcutOnly?: boolean`
+- `shortcutConfig?: ShortcutConfig`
+
+### Features and editing behavior
+
+- `featureFlags?: FeatureFlagOverrides`
+- `editOnClick?: boolean` (visual-only to visual-editor promotion on click)
+- `isDraggableBoxEnabled?: boolean` (mapped into draggable feature flag)
+- `syncHeadingOptionsWithCommands?: boolean`
+- `headingOptions?: readonly ('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6')[]`
+- `paragraphLabel?: string`
+- `isCopyAllowed?: boolean`
+
+### Theme and style
+
+- `initialTheme?: 'light' | 'dark'`
+- `onThemeChange?: (theme: 'light' | 'dark') => void`
+- `theme?: Partial<LuthorTheme>`
+- `editorThemeOverrides?: LuthorEditorThemeOverrides`
+- `quoteClassName?: string`
+- `quoteStyleVars?: QuoteStyleVars`
+- `defaultSettings?: DefaultSettings`
+- `className?: string`
+- `variantClassName?: string`
+
+### Typography and code options
+
+- `fontFamilyOptions?: readonly FontFamilyOption[]`
+- `fontSizeOptions?: readonly FontSizeOption[]`
+- `lineHeightOptions?: readonly LineHeightOption[]`
+- `minimumDefaultLineHeight?: string | number`
+- `scaleByRatio?: boolean`
+- `syntaxHighlighting?: 'auto' | 'disabled'`
+- `codeHighlightProvider?: CodeHighlightProvider | null`
+- `loadCodeHighlightProvider?: () => Promise<CodeHighlightProvider | null>`
+- `maxAutoDetectCodeLength?: number`
+- `languageOptions?: readonly string[] | CodeLanguageOptionsConfig`
+- `maxListIndentation?: number` (sub-indent depth)
+
+### Lifecycle and ref
+
+- `onReady?: (methods: ExtensiveEditorRef) => void`
+- Ref methods: `injectJSON(content: string): void` and `getJSON(): string`
+
+## 2) Preset-specific additions
+
+### `ComposeEditorProps`
+
+Inherits `ExtensiveEditorProps` (except direct `featureFlags`), then adds:
+
+- `featureFlags?: FeatureFlagOverrides`
+- `compactToolbar?: boolean`
+
+Default modes are constrained to `['visual', 'json']` and media or metadata-heavy features are disabled by default.
+
+### `SimpleEditorProps`
+
+Purpose-built message input wrapper.
+
+- `formattingOptions?: { bold?: boolean; italic?: boolean; strikethrough?: boolean }`
+- `onSend?: (payload: SimpleEditorSendPayload) => void`
+- `outputFormat?: 'md' | 'json'`
+- `clearOnSend?: boolean`
+- `submitOnEnter?: boolean`
+- `allowShiftEnter?: boolean`
+- `minHeight | maxHeight | minWidth | maxWidth`
+- `toolbarButtons?: readonly SimpleToolbarButton[]`
+- `showBottomToolbar?: boolean`
+- `showSendButton?: boolean`
+- `sendButtonPlacement?: 'inside' | 'right'`
+
+### `LegacyRichEditorProps`
+
+Inherits `ExtensiveEditorProps` but constrains source and mode behavior:
+
+- `sourceFormat?: 'markdown' | 'html' | 'both'`
+- `initialMode?: LegacyRichEditorMode`
+- `defaultEditorView?: LegacyRichEditorMode`
+- `featureFlags?: FeatureFlagOverrides`
+
+### `MDEditorProps`
+
+`LegacyRichEditor` wrapper with:
+
+- `sourceFormat` fixed to `'markdown'`
+- modes limited to `'visual' | 'json' | 'markdown'`
+
+### `HTMLEditorProps`
+
+`LegacyRichEditor` wrapper with:
+
+- `sourceFormat` fixed to `'html'`
+- modes limited to `'visual' | 'json' | 'html'`
+
+### `SlashEditorProps`
+
+Inherits most of `ExtensiveEditorProps`, adds:
+
+- `slashVisibility?: SlashCommandVisibility`
+- `isDraggableEnabled?: boolean`
+- `featureFlags?: FeatureFlagOverrides`
+- `isToolbarEnabled?: boolean` (default `false`)
+
+Slash command support is enforced on.
+
+### `HeadlessEditorPresetProps`
+
+Inherits `ExtensiveEditorProps` but constrains:
+
+- `initialMode?: 'visual' | 'json' | 'markdown' | 'html'`
+- `defaultEditorView?: same`
+- `featureFlags?: FeatureFlagOverrides`
+
+Uses a text-pill toolbar and metadata-light defaults.
+
+## 3) Practical patterns
+
+Visual + markdown workflow:
+
+```tsx
+<MDEditor initialMode="visual" defaultEditorView="markdown" />
+```
+
+Disable heavy features without changing preset:
+
+```tsx
+<ExtensiveEditor
+  featureFlags={{
+    image: false,
+    table: false,
+    iframeEmbed: false,
+    youTubeEmbed: false,
+    customNode: false,
+  }}
+/>
+```
+
+Sync host syntax theme with editor theme:
+
+```tsx
+<ExtensiveEditor
+  initialTheme="light"
+  onThemeChange={(theme) => {
+    console.log(theme);
+  }}
+/>
+```
+
+## 4) Related pages
+
+- [/docs/luthor/architecture/](/docs/luthor/architecture/)
+- [/docs/luthor/feature-flags/](/docs/luthor/feature-flags/)
+- [/docs/luthor/presets/](/docs/luthor/presets/)
 

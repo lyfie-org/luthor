@@ -57,3 +57,10 @@ export function App() {
 ## Learn more about Lexical
 
 `@lyfie/luthor-headless` is built on top of Lexical. For deeper engine capabilities and low-level APIs, use the official Lexical documentation: [lexical.dev/docs](https://lexical.dev/docs/intro).
+
+## Contributor docs
+
+- [Architecture](/docs/luthor-headless/architecture/)
+- [Extensions and API](/docs/luthor-headless/extensions-and-api/)
+- [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)
+- [Feature groups](/docs/luthor-headless/features/)

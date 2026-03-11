@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import NextImage from 'next/image';
 import {
   ArrowsOutCardinal,
   BracketsCurly,
@@ -24,6 +23,7 @@ import {
   X,
 } from '@phosphor-icons/react/dist/ssr';
 import type { Icon } from '@phosphor-icons/react';
+import { FeatureGifImage } from '@/components/media/feature-gif-image';
 
 type WhyFeature = {
   id: string;
@@ -37,7 +37,6 @@ type WhyFeature = {
   mediaSrc: string;
 };
 
-const FEATURE_PREVIEW_IMAGE = '/social-card.svg';
 const featureGif = (index: number) => `/features/Feature${index}.gif`;
 
 const WHY_FEATURES: WhyFeature[] = [
@@ -225,7 +224,6 @@ const WHY_FEATURES: WhyFeature[] = [
 
 export function WhyLuthorFeatures() {
   const [activeFeatureId, setActiveFeatureId] = useState<string | null>(null);
-  const [missingMediaIds, setMissingMediaIds] = useState<Record<string, true>>({});
 
   const activeFeature = useMemo(
     () => WHY_FEATURES.find((feature) => feature.id === activeFeatureId) ?? null,
@@ -291,32 +289,27 @@ export function WhyLuthorFeatures() {
             >
               <X size={16} weight="bold" aria-hidden="true" />
             </button>
-            <div className="why-feature-media-shell">
-              <NextImage
-                src={missingMediaIds[activeFeature.id] ? FEATURE_PREVIEW_IMAGE : activeFeature.mediaSrc}
-                alt={activeFeature.mediaAlt}
-                className="why-feature-media"
-                width={1200}
-                height={630}
-                sizes="(max-width: 768px) 92vw, 720px"
-                onError={() =>
-                  setMissingMediaIds((current) => (current[activeFeature.id] ? current : { ...current, [activeFeature.id]: true }))
-                }
-              />
+            <FeatureGifImage
+              src={activeFeature.mediaSrc}
+              alt={activeFeature.mediaAlt}
+              className="why-feature-media-viewer"
+              imageClassName="why-feature-media"
+            />
+            <div className="why-feature-modal-content">
+              <h3 id={`why-feature-title-${activeFeature.id}`} className="why-feature-modal-title">
+                <activeFeature.icon size={18} weight="duotone" aria-hidden="true" />
+                <span>{activeFeature.title}</span>
+              </h3>
+              <p>{activeFeature.detail}</p>
+              <ul className="why-feature-detail-list">
+                {activeFeature.bullets.map((bullet) => (
+                  <li key={bullet}>
+                    <activeFeature.detailIcon size={14} weight="duotone" aria-hidden="true" />
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <h3 id={`why-feature-title-${activeFeature.id}`} className="why-feature-modal-title">
-              <activeFeature.icon size={18} weight="duotone" aria-hidden="true" />
-              <span>{activeFeature.title}</span>
-            </h3>
-            <p>{activeFeature.detail}</p>
-            <ul className="why-feature-detail-list">
-              {activeFeature.bullets.map((bullet) => (
-                <li key={bullet}>
-                  <activeFeature.detailIcon size={14} weight="duotone" aria-hidden="true" />
-                  <span>{bullet}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       ) : null}

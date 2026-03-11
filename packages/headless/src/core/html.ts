@@ -3,6 +3,8 @@ import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { QuoteNode, HeadingNode } from "@lexical/rich-text";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
+import { TableNode, TableRowNode, TableCellNode } from "@lexical/table";
+import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import {
   createEditor,
   $getRoot,
@@ -15,10 +17,12 @@ import {
 import { ImageNode, IframeEmbedNode, YouTubeEmbedNode } from "@lyfie/luthor-headless/extensions/media";
 import {
   appendMetadataEnvelopes,
+  collectSupportedNodeMetadataPatches,
   extractMetadataEnvelopes,
   prepareDocumentForBridge,
   rehydrateDocumentFromEnvelopes,
   type JsonDocument,
+  type MetadataEnvelope,
 } from "./metadata-envelope";
 
 const HTML_SUPPORTED_NODE_TYPES = new Set<string>([
@@ -35,10 +39,135 @@ const HTML_SUPPORTED_NODE_TYPES = new Set<string>([
   "autolink",
   "code",
   "code-highlight",
+  "horizontalrule",
   "image",
   "iframe-embed",
   "youtube-embed",
+  "table",
+  "tablerow",
+  "tablecell",
 ]);
+
+type JsonRecord = Record<string, unknown>;
+
+const HTML_NATIVE_KEYS: Readonly<Record<string, ReadonlySet<string>>> = {
+  root: new Set(["type", "version", "format", "indent", "direction", "children"]),
+  paragraph: new Set(["type", "version", "format", "indent", "direction", "children"]),
+  text: new Set(["type", "version", "text", "detail", "format", "mode", "style"]),
+  linebreak: new Set(["type", "version"]),
+  tab: new Set(["type", "version"]),
+  heading: new Set(["type", "version", "tag", "format", "indent", "direction", "children"]),
+  quote: new Set(["type", "version", "format", "indent", "direction", "children"]),
+  list: new Set(["type", "version", "listType", "start", "tag", "format", "indent", "direction", "style", "children"]),
+  listitem: new Set(["type", "version", "value", "checked", "format", "indent", "direction", "style", "children"]),
+  link: new Set(["type", "version", "url", "target", "rel", "title", "children"]),
+  autolink: new Set(["type", "version", "url", "target", "rel", "title", "isUnlinked", "children"]),
+  code: new Set(["type", "version", "language", "format", "indent", "direction", "children"]),
+  "code-highlight": new Set(["type", "version", "text", "highlightType"]),
+  horizontalrule: new Set(["type", "version"]),
+  image: new Set(["type", "version", "src", "alt", "caption", "alignment", "className", "style", "width", "height"]),
+  "iframe-embed": new Set(["type", "version", "src", "width", "height", "alignment", "title", "caption"]),
+  "youtube-embed": new Set(["type", "version", "src", "width", "height", "alignment", "caption", "start"]),
+  table: new Set([
+    "type",
+    "version",
+    "format",
+    "indent",
+    "direction",
+    "children",
+    "rowStriping",
+    "frozenColumnCount",
+    "frozenRowCount",
+    "colWidths",
+    "style",
+  ]),
+  tablerow: new Set(["type", "version", "height", "children"]),
+  tablecell: new Set([
+    "type",
+    "version",
+    "headerState",
+    "colSpan",
+    "rowSpan",
+    "width",
+    "backgroundColor",
+    "verticalAlign",
+    "children",
+  ]),
+};
+
+function deepClone<T>(value: T): T {
+  if (value === undefined) {
+    return value;
+  }
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function hasOwnEntries(record: JsonRecord): boolean {
+  return Object.keys(record).length > 0;
+}
+
+function isDefaultExtraValue(key: string, value: unknown): boolean {
+  switch (key) {
+    case "textFormat":
+      return value === 0;
+    case "textStyle":
+      return value === "";
+    case "format":
+      return value === "" || value === 0;
+    case "indent":
+      return value === 0;
+    case "direction":
+      return value === null;
+    case "detail":
+      return value === 0;
+    case "mode":
+      return value === "normal";
+    case "style":
+      return value === "" || value === null;
+    case "uploading":
+      return value === false || value === undefined;
+    default:
+      return false;
+  }
+}
+
+function extractHTMLPatch(node: JsonRecord, type: string): JsonRecord | null {
+  const nativeKeys = HTML_NATIVE_KEYS[type];
+  if (!nativeKeys) {
+    return null;
+  }
+
+  const patch: JsonRecord = {};
+  for (const [key, value] of Object.entries(node)) {
+    if (key === "children" || key === "type") {
+      continue;
+    }
+
+    if (nativeKeys.has(key)) {
+      continue;
+    }
+
+    if (value === undefined) {
+      continue;
+    }
+
+    if (isDefaultExtraValue(key, value)) {
+      continue;
+    }
+
+    patch[key] = deepClone(value);
+  }
+
+  return hasOwnEntries(patch) ? patch : null;
+}
+
+function collectHTMLPartialEnvelopes(input: unknown): MetadataEnvelope[] {
+  return collectSupportedNodeMetadataPatches(input, {
+    mode: "html",
+    supportedNodeTypes: HTML_SUPPORTED_NODE_TYPES,
+    extractPatch: ({ node, type }) => extractHTMLPatch(node, type),
+  });
+}
 
 const RAW_TEXT_TAGS = new Set(["pre", "script", "style", "textarea"]);
 
@@ -61,9 +190,13 @@ function createHTMLEditor() {
       AutoLinkNode,
       CodeNode,
       CodeHighlightNode,
+      HorizontalRuleNode,
       ImageNode,
       IframeEmbedNode,
       YouTubeEmbedNode,
+      TableNode,
+      TableRowNode,
+      TableCellNode,
     ],
   });
 }
@@ -251,6 +384,7 @@ export function jsonToHTML(input: unknown): string {
     mode: "html",
     supportedNodeTypes: HTML_SUPPORTED_NODE_TYPES,
   });
+  const partialEnvelopes = collectHTMLPartialEnvelopes(input);
   const editor = createHTMLEditor();
   const editorState = toEditorState(editor, prepared.document);
   editor.setEditorState(editorState, { tag: "history-merge" });
@@ -259,5 +393,5 @@ export function jsonToHTML(input: unknown): string {
     return $generateHtmlFromNodes(editor, null);
   });
 
-  return appendMetadataEnvelopes(html, prepared.envelopes);
+  return appendMetadataEnvelopes(html, [...prepared.envelopes, ...partialEnvelopes]);
 }

@@ -16,6 +16,7 @@ export type MetadataEnvelope = {
   path: number[];
   node: JsonRecord;
   fallback: string;
+  strategy?: "replace" | "merge";
 };
 
 export type PreparedBridgeDocument = {
@@ -34,6 +35,9 @@ function isRecord(value: unknown): value is JsonRecord {
 }
 
 function deepClone<T>(value: T): T {
+  if (value === undefined) {
+    return value;
+  }
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
@@ -219,6 +223,63 @@ function replaceNodeAtPath(root: JsonRecord, path: readonly number[], node: Json
   return false;
 }
 
+function getNodeAtPath(root: JsonRecord, path: readonly number[]): JsonRecord | null {
+  if (path.length === 0) {
+    return root;
+  }
+
+  let current: JsonRecord = root;
+  for (const index of path) {
+    if (!Array.isArray(current.children) || index < 0 || index >= current.children.length) {
+      return null;
+    }
+
+    const next = current.children[index];
+    if (!isRecord(next)) {
+      return null;
+    }
+
+    current = next;
+  }
+
+  return current;
+}
+
+function mergeRecord(target: JsonRecord, patch: JsonRecord): void {
+  for (const [key, value] of Object.entries(patch)) {
+    if (key === "__luthorTextFormatExtra") {
+      const extra = typeof value === "number" ? value : Number(value);
+      if (!Number.isFinite(extra) || extra === 0) {
+        continue;
+      }
+
+      const currentFormat =
+        typeof target.format === "number" ? target.format : Number(target.format ?? 0);
+      target.format = Number.isFinite(currentFormat)
+        ? currentFormat | extra
+        : extra;
+      continue;
+    }
+
+    if (isRecord(value) && isRecord(target[key])) {
+      mergeRecord(target[key] as JsonRecord, value);
+      continue;
+    }
+
+    target[key] = deepClone(value);
+  }
+}
+
+function mergeNodeAtPath(root: JsonRecord, path: readonly number[], patch: JsonRecord): boolean {
+  const target = getNodeAtPath(root, path);
+  if (!target) {
+    return false;
+  }
+
+  mergeRecord(target, patch);
+  return true;
+}
+
 export function prepareDocumentForBridge(
   input: unknown,
   options: {
@@ -293,6 +354,10 @@ export function extractMetadataEnvelopes(content: string): ExtractedMetadataEnve
       const type = typeof parsed.type === "string" ? parsed.type : "";
       const id = typeof parsed.id === "string" ? parsed.id : "";
       const fallback = typeof parsed.fallback === "string" ? parsed.fallback : "";
+      const strategy =
+        parsed.strategy === "merge" || parsed.strategy === "replace"
+          ? parsed.strategy
+          : undefined;
       const rawPath = Array.isArray(parsed.path) ? parsed.path : [];
       const path = rawPath
         .filter((segment): segment is number => Number.isInteger(segment) && segment >= 0)
@@ -304,7 +369,7 @@ export function extractMetadataEnvelopes(content: string): ExtractedMetadataEnve
         continue;
       }
 
-      envelopes.push({ id, type, path, node, fallback });
+      envelopes.push({ id, type, path, node, fallback, strategy });
     } catch {
       warnings.push("Ignoring malformed metadata envelope payload.");
     }
@@ -328,6 +393,11 @@ export function rehydrateDocumentFromEnvelopes(
   const nextRoot = deepClone(document.root);
 
   for (const envelope of envelopes) {
+    if (envelope.strategy === "merge") {
+      mergeNodeAtPath(nextRoot, envelope.path, envelope.node);
+      continue;
+    }
+
     const restored = replaceNodeAtPath(nextRoot, envelope.path, envelope.node);
     if (restored) {
       continue;
@@ -344,4 +414,65 @@ export function rehydrateDocumentFromEnvelopes(
     ...document,
     root: nextRoot,
   };
+}
+
+function hasOwnEntries(record: JsonRecord): boolean {
+  return Object.keys(record).length > 0;
+}
+
+export function collectSupportedNodeMetadataPatches(
+  input: unknown,
+  options: {
+    mode: BridgeMode;
+    supportedNodeTypes: ReadonlySet<string>;
+    extractPatch: (params: {
+      mode: BridgeMode;
+      type: string;
+      path: number[];
+      node: JsonRecord;
+    }) => JsonRecord | null;
+  },
+): MetadataEnvelope[] {
+  const baseDocument = normalizeDocument(input);
+  const rootChildren = Array.isArray(baseDocument.root.children) ? baseDocument.root.children : [];
+  const envelopes: MetadataEnvelope[] = [];
+
+  const visitChildren = (children: unknown[], parentPath: readonly number[]): void => {
+    for (const [index, child] of children.entries()) {
+      if (!isRecord(child)) {
+        continue;
+      }
+
+      const path = [...parentPath, index];
+      const type = typeof child.type === "string" ? child.type : "";
+      if (!type || !options.supportedNodeTypes.has(type)) {
+        continue;
+      }
+
+      const patch = options.extractPatch({
+        mode: options.mode,
+        type,
+        path,
+        node: child,
+      });
+
+      if (patch && hasOwnEntries(patch)) {
+        envelopes.push({
+          id: createEnvelopeId(type, path, envelopes.length + 1),
+          type,
+          path,
+          node: patch,
+          fallback: "",
+          strategy: "merge",
+        });
+      }
+
+      if (Array.isArray(child.children)) {
+        visitChildren(child.children, path);
+      }
+    }
+  };
+
+  visitChildren(rootChildren, []);
+  return envelopes;
 }

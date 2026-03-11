@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   appendMetadataEnvelopes,
+  collectSupportedNodeMetadataPatches,
   extractMetadataEnvelopes,
   prepareDocumentForBridge,
   rehydrateDocumentFromEnvelopes,
@@ -101,6 +102,80 @@ describe("metadata envelopes", () => {
     expect((restored.root.children as any[])[1]).toMatchObject({
       type: "featureCard",
       payload: { title: "AI Draft" },
+    });
+  });
+
+  it("merges patch envelopes without overwriting native fields", () => {
+    const document: JsonDocument = {
+      root: {
+        type: "root",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "paragraph",
+            version: 1,
+            children: [
+              {
+                type: "text",
+                version: 1,
+                text: "Edited",
+                detail: 0,
+                format: 1,
+                mode: "normal",
+                style: "",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const merged = rehydrateDocumentFromEnvelopes(document, [
+      {
+        id: "text:0.0:1",
+        type: "text",
+        path: [0, 0],
+        fallback: "",
+        strategy: "merge",
+        node: {
+          style: "color: red;",
+          __luthorTextFormatExtra: 64,
+        },
+      },
+    ]);
+
+    const textNode = ((merged.root.children as any[])[0].children as any[])[0];
+    expect(textNode.text).toBe("Edited");
+    expect(textNode.style).toBe("color: red;");
+    expect(textNode.format).toBe(65);
+  });
+
+  it("collects merge patches only for supported node types", () => {
+    const document = createFixtureDocument();
+    const patches = collectSupportedNodeMetadataPatches(document, {
+      mode: "markdown",
+      supportedNodeTypes: SIMPLE_SUPPORTED_TYPES,
+      extractPatch: ({ type, node }) => {
+        if (type !== "text") {
+          return null;
+        }
+        return {
+          style: node.style,
+        };
+      },
+    });
+
+    expect(patches).toHaveLength(1);
+    expect(patches[0]).toMatchObject({
+      strategy: "merge",
+      type: "text",
+      path: [0, 0],
+      node: {
+        style: "",
+      },
     });
   });
 });

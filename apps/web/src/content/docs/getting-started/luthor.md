@@ -29,3 +29,10 @@ export function App() {
 - You can type in the editor
 - Toolbar appears
 - No module resolution errors in the dev server
+
+## Contributor docs
+
+- [Architecture](/docs/luthor/architecture/)
+- [Props reference](/docs/luthor/props-reference/)
+- [Feature flags](/docs/luthor/feature-flags/)
+- [Presets](/docs/luthor/presets/)

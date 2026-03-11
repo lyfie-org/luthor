@@ -81,16 +81,6 @@ export function SiteHeader() {
             />
           )}
         </Link>
-        <button
-          className="nav-menu-toggle"
-          type="button"
-          aria-expanded={mobileMenuOpen}
-          aria-controls="site-primary-nav"
-          aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          onClick={() => setMobileMenuOpen((isOpen) => !isOpen)}
-        >
-          {mobileMenuOpen ? <X size={18} weight="bold" aria-hidden="true" /> : <List size={18} weight="bold" aria-hidden="true" />}
-        </button>
         <nav id="site-primary-nav" className={mobileMenuOpen ? 'site-nav is-open' : 'site-nav'} aria-label="Primary">
           <Link href="/demo/" aria-current={isDemoActive ? 'page' : undefined} className={isDemoActive ? 'active' : undefined} onClick={closeMobileMenu}>
             <PlayCircle size={16} weight="duotone" aria-hidden="true" />
@@ -127,6 +117,8 @@ export function SiteHeader() {
             <span>GitHub</span>
             <ArrowSquareOut size={12} weight="bold" aria-hidden="true" className="nav-external-indicator" />
           </a>
+        </nav>
+        <div className="nav-actions">
           <button
             className={mounted && theme === 'dark' ? 'theme-toggle active' : 'theme-toggle'}
             type="button"
@@ -144,7 +136,17 @@ export function SiteHeader() {
               <MoonStars size={18} weight="duotone" aria-hidden="true" />
             )}
           </button>
-        </nav>
+          <button
+            className="nav-menu-toggle"
+            type="button"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="site-primary-nav"
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            onClick={() => setMobileMenuOpen((isOpen) => !isOpen)}
+          >
+            {mobileMenuOpen ? <X size={18} weight="bold" aria-hidden="true" /> : <List size={18} weight="bold" aria-hidden="true" />}
+          </button>
+        </div>
       </div>
     </header>
   );

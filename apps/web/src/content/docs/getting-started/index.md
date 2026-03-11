@@ -38,6 +38,16 @@ Based on package metadata in `packages/luthor/package.json` and `packages/headle
 
 1. [Introduction](/docs/getting-started/)
 2. [Installation](/docs/getting-started/installation/)
-3. [Capabilities](/docs/getting-started/capabilities/)
-4. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
-5. [@lyfie/luthor](/docs/getting-started/luthor/)
+3. [Contributor Guide](/docs/getting-started/contributor-guide/)
+4. [Capabilities](/docs/getting-started/capabilities/)
+5. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
+6. [@lyfie/luthor](/docs/getting-started/luthor/)
+
+## Contributor deep dives
+
+- [@lyfie/luthor architecture](/docs/luthor/architecture/)
+- [@lyfie/luthor props reference](/docs/luthor/props-reference/)
+- [@lyfie/luthor feature flags](/docs/luthor/feature-flags/)
+- [@lyfie/luthor-headless architecture](/docs/luthor-headless/architecture/)
+- [@lyfie/luthor-headless extensions and API](/docs/luthor-headless/extensions-and-api/)
+- [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)

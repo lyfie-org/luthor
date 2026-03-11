@@ -7,6 +7,12 @@ description: Grouped feature documentation for @lyfie/luthor-headless.
 
 Feature docs are grouped to match the home page feature set.
 
+## Contributor guides
+
+- [Architecture](/docs/luthor-headless/architecture/)
+- [Extensions and API](/docs/luthor-headless/extensions-and-api/)
+- [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)
+
 ## Feature groups
 
 - [Typography and Text](/docs/luthor-headless/features/typography-and-text/)

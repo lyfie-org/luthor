@@ -5,6 +5,7 @@ import { notFound, redirect } from 'next/navigation';
 import { ReactNode, isValidElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { FeatureGifImage } from '@/components/media/feature-gif-image';
 import { SITE_NAME } from '@/config/site';
 import { DocsCodeBlock } from '@/features/docs/docs-code-block';
 import { DocsSearch } from '@/features/docs/docs-search';
@@ -31,11 +32,15 @@ const GROUP_ENTRY_ORDER: Partial<Record<NavGroupId, string[]>> = {
   getting_started: [
     '/docs/getting-started/',
     '/docs/getting-started/installation/',
+    '/docs/getting-started/contributor-guide/',
     '/docs/getting-started/capabilities/',
     '/docs/getting-started/luthor-headless/',
     '/docs/getting-started/luthor/',
   ],
   luthor_headless: [
+    '/docs/luthor-headless/architecture/',
+    '/docs/luthor-headless/extensions-and-api/',
+    '/docs/luthor-headless/metadata-comment-system/',
     '/docs/luthor-headless/features/',
     '/docs/luthor-headless/features/typography-and-text/',
     '/docs/luthor-headless/features/structure-and-lists/',
@@ -45,6 +50,9 @@ const GROUP_ENTRY_ORDER: Partial<Record<NavGroupId, string[]>> = {
     '/docs/luthor-headless/features/customization-and-theming/',
   ],
   luthor: [
+    '/docs/luthor/architecture/',
+    '/docs/luthor/props-reference/',
+    '/docs/luthor/feature-flags/',
     '/docs/luthor/presets/',
     '/docs/luthor/presets/extensive-editor/',
     '/docs/luthor/presets/compose-editor/',
@@ -65,8 +73,8 @@ type BreadcrumbItem = {
 
 const BREADCRUMB_DEFAULT_ROUTES: Record<string, string> = {
   '/docs/getting-started/': '/docs/getting-started/',
-  '/docs/luthor-headless/': '/docs/luthor-headless/features/',
-  '/docs/luthor/': '/docs/luthor/presets/',
+  '/docs/luthor-headless/': '/docs/luthor-headless/architecture/',
+  '/docs/luthor/': '/docs/luthor/architecture/',
 };
 
 function resolveHref(href: string): string {
@@ -344,6 +352,24 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
                     const extracted = extractCodeBlock(children);
                     if (!extracted) return <pre>{children}</pre>;
                     return <DocsCodeBlock code={extracted.code} language={extracted.language} />;
+                  },
+                  img: ({ src, alt }) => {
+                    const rawSrc = typeof src === 'string' ? src : '#';
+                    const resolvedSrc = resolveHref(rawSrc);
+                    const resolvedAlt = alt ?? 'Documentation image';
+
+                    if (/^\/features\/Feature\d+\.gif$/i.test(resolvedSrc)) {
+                      return (
+                        <FeatureGifImage
+                          src={resolvedSrc}
+                          alt={resolvedAlt}
+                          className="docs-feature-gif-shell"
+                          imageClassName="docs-feature-gif"
+                        />
+                      );
+                    }
+
+                    return <img src={resolvedSrc} alt={resolvedAlt} loading="lazy" decoding="async" />;
                   },
                 }}
               >

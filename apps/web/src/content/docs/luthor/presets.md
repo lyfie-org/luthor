@@ -7,6 +7,12 @@ description: Preset catalog for @lyfie/luthor, including per-preset docs.
 
 `@lyfie/luthor` is a preset package built on top of `@lyfie/luthor-headless`.
 
+## Contributor guides
+
+- [Architecture](/docs/luthor/architecture/)
+- [Props reference](/docs/luthor/props-reference/)
+- [Feature flags](/docs/luthor/feature-flags/)
+
 ## Importing headless from presets package
 
 ```ts

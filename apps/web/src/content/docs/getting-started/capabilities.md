@@ -83,7 +83,7 @@ Unordered, ordered, and checklist/task lists in one workflow. Use the right list
 
 ## Indentation Control
 
-![Indentation preview](/social-card.svg)
+![Indentation preview](/features/Feature6.gif)
 
 Indent in and out with consistent, structure-safe behavior. Tab behavior is predictable and respects document structure.
 
@@ -98,7 +98,7 @@ Indent in and out with consistent, structure-safe behavior. Tab behavior is pred
 
 ## Rich Embeds
 
-![Rich embed preview](/social-card.svg)
+![Rich embed preview](/features/Feature7.gif)
 
 Embed images, iframes, and YouTube content with minimal friction. Paste and render rich media without bolt-on hacks.
 
