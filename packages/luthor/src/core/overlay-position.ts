@@ -8,6 +8,8 @@ type OverlayBounds = {
   top: number;
   right: number;
   bottom: number;
+  width: number;
+  height: number;
 };
 
 type OverlayDimensions = {
@@ -35,6 +37,8 @@ function resolveOverlayBounds(portalContainer: HTMLElement | null): OverlayBound
       top: 0,
       right: width,
       bottom: height,
+      width,
+      height,
     };
   }
 
@@ -44,6 +48,8 @@ function resolveOverlayBounds(portalContainer: HTMLElement | null): OverlayBound
     top: rect.top,
     right: rect.right,
     bottom: rect.bottom,
+    width: rect.width,
+    height: rect.height,
   };
 }
 
@@ -139,8 +145,10 @@ export function computeAnchoredOverlayStyle({
   flipY?: boolean;
 }): CSSProperties {
   const bounds = resolveOverlayBounds(portalContainer);
-  const overlayWidth = Math.max(0, overlay.width);
-  const overlayHeight = Math.max(0, overlay.height);
+  const maxOverlayWidth = Math.max(0, bounds.width - margin * 2);
+  const maxOverlayHeight = Math.max(0, bounds.height - margin * 2);
+  const overlayWidth = Math.max(0, Math.min(overlay.width, maxOverlayWidth));
+  const overlayHeight = Math.max(0, Math.min(overlay.height, maxOverlayHeight));
   const viewportLeft = resolveHorizontalPosition(
     anchorRect,
     overlayWidth,
@@ -163,8 +171,10 @@ export function computeAnchoredOverlayStyle({
     const containerRect = portalContainer.getBoundingClientRect();
     return {
       position: "absolute",
-      left: viewportLeft - containerRect.left,
-      top: viewportTop - containerRect.top,
+      left: viewportLeft - containerRect.left + portalContainer.scrollLeft,
+      top: viewportTop - containerRect.top + portalContainer.scrollTop,
+      maxWidth: maxOverlayWidth > 0 ? maxOverlayWidth : undefined,
+      maxHeight: maxOverlayHeight > 0 ? maxOverlayHeight : undefined,
     };
   }
 
@@ -172,6 +182,8 @@ export function computeAnchoredOverlayStyle({
     position: "fixed",
     left: viewportLeft,
     top: viewportTop,
+    maxWidth: maxOverlayWidth > 0 ? maxOverlayWidth : undefined,
+    maxHeight: maxOverlayHeight > 0 ? maxOverlayHeight : undefined,
   };
 }
 

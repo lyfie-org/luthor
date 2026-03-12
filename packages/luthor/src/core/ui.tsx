@@ -80,10 +80,14 @@ export function Select({
 
       const rect = triggerEl.getBoundingClientRect();
       const measuredRect = dropdownRef.current?.getBoundingClientRect();
+      const measuredWidth = Math.max(
+        measuredRect?.width ?? 0,
+        dropdownRef.current?.scrollWidth ?? 0,
+      );
       const container = resolveEditorPortalContainer(triggerEl);
       setPortalContainer(container);
 
-      const width = Math.max(rect.width, measuredRect?.width ?? 0);
+      const width = Math.max(rect.width, measuredWidth);
       const height = measuredRect?.height ?? 220;
       const placement = computeAnchoredOverlayStyle({
         anchorRect: rect,
@@ -99,10 +103,12 @@ export function Select({
 
       setDropdownStyle({
         ...placement,
-        width: rect.width,
+        width,
         ...getOverlayThemeStyleFromElement(triggerEl),
       });
     };
+
+    updatePosition();
 
     const handleReposition = () => updatePosition();
     window.addEventListener("resize", handleReposition);
@@ -138,16 +144,21 @@ export function Select({
 
     const frame = window.requestAnimationFrame(() => {
       const measuredRect = dropdownRef.current?.getBoundingClientRect();
+      const measuredWidth = Math.max(
+        measuredRect?.width ?? 0,
+        dropdownRef.current?.scrollWidth ?? 0,
+      );
+      const width = Math.max(rect.width, measuredWidth);
       const next = computeAnchoredOverlayStyle({
         anchorRect: rect,
-        overlay: { width: Math.max(rect.width, measuredRect?.width ?? 0), height: measuredRect?.height ?? 220 },
+        overlay: { width, height: measuredRect?.height ?? 220 },
         portalContainer: container,
         gap: 4,
         margin: 8,
       });
       setDropdownStyle({
         ...next,
-        width: rect.width,
+        width,
         ...getOverlayThemeStyleFromElement(triggerEl),
       });
     });

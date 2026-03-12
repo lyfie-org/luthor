@@ -43,6 +43,24 @@ const DEFAULT_RECT = {
 };
 
 describe("FloatingToolbar media editing", () => {
+  it("uses right-edge positioning and width guard when selection requests right alignment", () => {
+    const commands = createCommands();
+    const { container } = render(
+      <FloatingToolbar
+        isVisible
+        selectionRect={{ x: 999, y: 20, positionFromRight: true }}
+        commands={commands}
+        activeStates={{} as CoreEditorActiveStates}
+      />,
+    );
+
+    const toolbar = container.querySelector(".luthor-floating-toolbar") as HTMLElement | null;
+    expect(toolbar).not.toBeNull();
+    expect(toolbar?.style.left).toBe("auto");
+    expect(toolbar?.style.right).toBe("20px");
+    expect(toolbar?.style.maxWidth).toBe("calc(100% - 40px)");
+  });
+
   it("loads and commits image caption draft", async () => {
     const getImageCaption = vi.fn().mockResolvedValue("existing image caption");
     const setImageCaption = vi.fn();

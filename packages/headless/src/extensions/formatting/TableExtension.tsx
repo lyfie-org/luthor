@@ -222,7 +222,7 @@ function TableQuickActionsPlugin({ extension }: { extension: TableExtension }) {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [headersEnabled, setHeadersEnabled] = useState(false);
-  const [bubblePosition, setBubblePosition] = useState<{ x: number; y: number; placeAbove: boolean } | null>(null);
+  const [bubblePosition, setBubblePosition] = useState<{ x: number; y: number; maxWidth: number } | null>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const viewportRafIdRef = useRef<number | null>(null);
 
@@ -327,21 +327,30 @@ function TableQuickActionsPlugin({ extension }: { extension: TableExtension }) {
         const measuredBubbleRect = bubbleRef.current?.getBoundingClientRect();
         const bubbleWidth = measuredBubbleRect?.width ?? 520;
         const bubbleHeight = measuredBubbleRect?.height ?? 44;
-        const halfWidth = bubbleWidth / 2;
         const edgePadding = 12;
+        const maxBubbleWidth = Math.max(0, containerRect.width - edgePadding * 2);
+        const resolvedBubbleWidth = Math.min(bubbleWidth, maxBubbleWidth || bubbleWidth);
+        const halfWidth = resolvedBubbleWidth / 2;
         const rawCenterX = tableRect.left - containerRect.left + tableRect.width / 2;
         const minCenterX = edgePadding + halfWidth;
         const maxCenterX = Math.max(minCenterX, containerRect.width - edgePadding - halfWidth);
         const centerX = clamp(rawCenterX, minCenterX, maxCenterX);
         const spaceAbove = tableRect.top - containerRect.top;
-        const placeAbove = spaceAbove >= bubbleHeight + edgePadding;
+        const spaceBelow = containerRect.bottom - tableRect.bottom;
+        const prefersAbove = spaceAbove >= bubbleHeight + edgePadding;
+        const canPlaceBelow = spaceBelow >= bubbleHeight + edgePadding;
+        const placeAbove = prefersAbove || !canPlaceBelow;
+        const desiredTop = placeAbove
+          ? tableRect.top - containerRect.top - 12 - bubbleHeight
+          : tableRect.bottom - containerRect.top + 12;
+        const minTop = edgePadding;
+        const maxTop = Math.max(minTop, containerRect.height - bubbleHeight - edgePadding);
+        const top = clamp(desiredTop, minTop, maxTop);
 
         setBubblePosition({
           x: centerX,
-          y: placeAbove
-            ? tableRect.top - containerRect.top - 12
-            : tableRect.bottom - containerRect.top + 12,
-          placeAbove,
+          y: top,
+          maxWidth: maxBubbleWidth,
         });
         setIsVisible(true);
       });
@@ -429,7 +438,9 @@ function TableQuickActionsPlugin({ extension }: { extension: TableExtension }) {
         position: "absolute",
         left: bubblePosition.x,
         top: bubblePosition.y,
-        transform: bubblePosition.placeAbove ? "translate(-50%, -100%)" : "translate(-50%, 0)",
+        transform: "translateX(-50%)",
+        maxWidth: bubblePosition.maxWidth > 0 ? bubblePosition.maxWidth : undefined,
+        overflowX: "auto",
         zIndex: "var(--luthor-z-menu, 460)",
       }}
       onMouseDown={(event) => event.preventDefault()}

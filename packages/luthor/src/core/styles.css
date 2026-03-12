@@ -127,11 +127,11 @@
 	min-height: 500px;
 	height: auto;
 	isolation: isolate;
-	--luthor-z-dropdown: 20;
-	--luthor-z-popover: 24;
-	--luthor-z-menu: 28;
-	--luthor-z-overlay: 32;
-	--luthor-z-modal: 36;
+	--luthor-z-dropdown: 60;
+	--luthor-z-popover: 64;
+	--luthor-z-menu: 68;
+	--luthor-z-overlay: 72;
+	--luthor-z-modal: 76;
 	transition: background-color var(--luthor-theme-transition), border-color var(--luthor-theme-transition), color var(--luthor-theme-transition), box-shadow var(--luthor-theme-transition);
 }
 
@@ -602,6 +602,7 @@
 	border-radius: 6px;
 	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 	max-height: 200px;
+	overflow-x: hidden;
 	overflow-y: auto;
 }
 
@@ -615,6 +616,9 @@
 	cursor: pointer;
 	font-size: 14px;
 	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	transition: all 0.15s ease;
 }
 
@@ -642,6 +646,9 @@
 	box-shadow: 0 4px 6px -1px var(--luthor-shadow);
 	margin-top: 2px;
 	min-width: 160px;
+	max-height: 280px;
+	overflow-x: hidden;
+	overflow-y: auto;
 	padding: 4px 0;
 }
 
@@ -2280,6 +2287,9 @@
 	border: 1px solid var(--luthor-floating-border);
 	border-radius: 8px;
 	box-shadow: 0 8px 24px var(--luthor-floating-shadow);
+	max-width: calc(100% - 40px);
+	overflow-x: auto;
+	overscroll-behavior: contain;
 }
 
 .luthor-floating-toolbar[data-theme="dark"] {
