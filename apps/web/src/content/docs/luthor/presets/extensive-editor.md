@@ -104,6 +104,8 @@ Place these files in your app static assets:
 
 - `injectJSON(content: string): void`
 - `getJSON(): string`
+- `getMarkdown(): string`
+- `getHTML(): string`
 
 ## Notes
 

@@ -73,7 +73,11 @@ This page explains how preset props are layered. Most wrappers inherit `Extensiv
 ### Lifecycle and ref
 
 - `onReady?: (methods: ExtensiveEditorRef) => void`
-- Ref methods: `injectJSON(content: string): void` and `getJSON(): string`
+- Ref methods:
+  - `injectJSON(content: string): void`
+  - `getJSON(): string`
+  - `getMarkdown(): string`
+  - `getHTML(): string`
 
 ## 2) Preset-specific additions
 

@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-12T17:54:35.068Z
+Generated at: 2026-03-12T18:26:06.469Z
 
 ---
 ## FILE: getting-started/capabilities.md
@@ -1698,6 +1698,8 @@ Place these files in your app static assets:
 
 - `injectJSON(content: string): void`
 - `getJSON(): string`
+- `getMarkdown(): string`
+- `getHTML(): string`
 
 ## Notes
 
@@ -1739,6 +1741,15 @@ export function App() {
 ## Behavior
 
 Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, HR, hard break, undo/redo), supports Visual/JSON/MD/HTML tabs, and keeps draggable blocks plus metadata-heavy features disabled.
+
+## Ref API
+
+`HeadlessEditorPreset` forwards the same imperative methods as `ExtensiveEditorRef`:
+
+- `injectJSON(content: string): void`
+- `getJSON(): string`
+- `getMarkdown(): string`
+- `getHTML(): string`
 
 ---
 ## FILE: luthor/presets/html-editor.md
@@ -2049,7 +2060,11 @@ This page explains how preset props are layered. Most wrappers inherit `Extensiv
 ### Lifecycle and ref
 
 - `onReady?: (methods: ExtensiveEditorRef) => void`
-- Ref methods: `injectJSON(content: string): void` and `getJSON(): string`
+- Ref methods:
+  - `injectJSON(content: string): void`
+  - `getJSON(): string`
+  - `getMarkdown(): string`
+  - `getHTML(): string`
 
 ## 2) Preset-specific additions
 

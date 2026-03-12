@@ -30,4 +30,13 @@ export function App() {
 
 Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, HR, hard break, undo/redo), supports Visual/JSON/MD/HTML tabs, and keeps draggable blocks plus metadata-heavy features disabled.
 
+## Ref API
+
+`HeadlessEditorPreset` forwards the same imperative methods as `ExtensiveEditorRef`:
+
+- `injectJSON(content: string): void`
+- `getJSON(): string`
+- `getMarkdown(): string`
+- `getHTML(): string`
+
 

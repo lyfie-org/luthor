@@ -18,6 +18,7 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { isExternalWebsiteHref } from '@/utils/link';
 
 type Theme = 'light' | 'dark';
 
@@ -344,7 +345,25 @@ function SimpleEditorExperience({ siteTheme }: { siteTheme: Theme }) {
               <div className="demo-chat-message">
                 <div className={['demo-chat-bubble', message.role === 'user' ? 'is-user' : 'is-assistant'].join(' ')}>
                   <div className="demo-chat-bubble-content">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a: ({ href, children }) => {
+                          const nextHref = href ?? '#';
+                          if (isExternalWebsiteHref(nextHref)) {
+                            return (
+                              <a href={nextHref} target="_blank" rel="noopener noreferrer">
+                                {children}
+                              </a>
+                            );
+                          }
+                          if (nextHref.startsWith('/')) return <Link href={nextHref}>{children}</Link>;
+                          return <a href={nextHref}>{children}</a>;
+                        },
+                      }}
+                    >
+                      {message.text}
+                    </ReactMarkdown>
                   </div>
                 </div>
                 <div className="demo-chat-message-meta">

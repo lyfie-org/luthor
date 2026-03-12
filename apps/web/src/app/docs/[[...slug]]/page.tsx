@@ -10,6 +10,7 @@ import { SITE_NAME } from '@/config/site';
 import { DocsCodeBlock } from '@/features/docs/docs-code-block';
 import { DocsSearch } from '@/features/docs/docs-search';
 import { getAllDocs, getAllDocSlugs, getDocBySlug } from '@/features/docs/docs.service';
+import { isExternalWebsiteHref } from '@/utils/link';
 
 type Params = { slug?: string[] };
 type NavGroupId = 'getting_started' | 'luthor_headless' | 'luthor' | 'other';
@@ -338,15 +339,15 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
                 components={{
                   a: ({ href, children }) => {
                     const nextHref = resolveHref(href ?? '#');
-                    const isInternal = nextHref.startsWith('/');
-                    if (!isInternal) {
+                    if (isExternalWebsiteHref(nextHref)) {
                       return (
                         <a href={nextHref} target="_blank" rel="noopener noreferrer">
                           {children}
                         </a>
                       );
                     }
-                    return <Link href={nextHref}>{children}</Link>;
+                    if (nextHref.startsWith('/')) return <Link href={nextHref}>{children}</Link>;
+                    return <a href={nextHref}>{children}</a>;
                   },
                   pre: ({ children }) => {
                     const extracted = extractCodeBlock(children);
