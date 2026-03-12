@@ -20,6 +20,7 @@ import {
 } from '@/config/site';
 
 const THEME_STORAGE_KEY = 'luthor-site-theme';
+const ASSET_VERSION = '20260312';
 const THEME_INIT_SCRIPT = `
 (() => {
   try {
@@ -102,9 +103,13 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
-    shortcut: ['/favicon.svg'],
-    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    icon: [
+      { url: `/favicon-32x32.png?v=${ASSET_VERSION}`, sizes: '32x32', type: 'image/png' },
+      { url: `/favicon-16x16.png?v=${ASSET_VERSION}`, sizes: '16x16', type: 'image/png' },
+      { url: `/favicon.ico?v=${ASSET_VERSION}`, type: 'image/x-icon' },
+    ],
+    shortcut: [`/favicon.ico?v=${ASSET_VERSION}`],
+    apple: [{ url: `/apple-touch-icon.png?v=${ASSET_VERSION}`, sizes: '180x180', type: 'image/png' }],
   },
   other: {
     'github:repo': GITHUB_URL,

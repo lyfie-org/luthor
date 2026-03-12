@@ -82,7 +82,7 @@ export function HomeJsonLd() {
       name: MAINTAINER_ORG_NAME,
       url: MAINTAINER_ORG_URL,
       sameAs: [MAINTAINER_ORG_URL, 'https://github.com/lyfie-org', GITHUB_URL, LYFIE_NPM_URL, LYFIE_HEADLESS_NPM_URL],
-      logo: `${SITE_URL}/favicon.svg`,
+      logo: `${SITE_URL}/favicon-32x32.png`,
       founder: { '@id': CREATOR_ID },
     },
     {

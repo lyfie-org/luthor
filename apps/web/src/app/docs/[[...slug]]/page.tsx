@@ -274,7 +274,7 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
       name: SITE_NAME,
       logo: {
         '@type': 'ImageObject',
-        url: 'https://www.luthor.fyi/favicon.svg',
+        url: 'https://www.luthor.fyi/favicon-32x32.png',
       },
     },
   };

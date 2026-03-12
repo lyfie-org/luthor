@@ -1,5 +1,8 @@
 <div align="center">
-  <img src="apps/web/public/luthor-logo-horizontal.png" alt="Luthor" width="420" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/luthor-logo-horizontal-dark.png" />
+    <img src="apps/web/public/luthor-logo-horizontal-light.png" alt="Luthor" width="420" />
+  </picture>
   <p><strong>TypeScript-first rich text editor ecosystem for React, built on Lexical.</strong></p>
   <p>:rocket: Production-ready presets + :jigsaw: headless extension runtime + :unlock: MIT license</p>
 </div>

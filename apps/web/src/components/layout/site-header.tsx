@@ -1,7 +1,6 @@
 'use client';
 
 import { ArrowSquareOut, BookOpen, Code, GithubLogo, List, MoonStars, PlayCircle, Sun, X } from '@phosphor-icons/react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -23,7 +22,6 @@ export function SiteHeader() {
   const router = useRouter();
   const [theme, setTheme] = useState<Theme>('light');
   const [mounted, setMounted] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -66,20 +64,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="container nav-shell">
         <Link className="brand" href="/" aria-label="Luthor">
-          {logoFailed ? (
-            <span className="brand-fallback">Luthor</span>
-          ) : (
-            <Image
-              className="brand-logo"
-              src="/luthor-logo-horizontal.png"
-              alt="Luthor"
-              width={360}
-              height={70}
-              sizes="(max-width: 768px) 180px, 220px"
-              priority
-              onError={() => setLogoFailed(true)}
-            />
-          )}
+          <span className="brand-logo theme-logo-horizontal" aria-hidden="true" />
         </Link>
         <nav id="site-primary-nav" className={mobileMenuOpen ? 'site-nav is-open' : 'site-nav'} aria-label="Primary">
           <Link href="/demo/" aria-current={isDemoActive ? 'page' : undefined} className={isDemoActive ? 'active' : undefined} onClick={closeMobileMenu}>

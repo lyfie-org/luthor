@@ -1,5 +1,4 @@
 import { BookOpenText, Coffee, Cube, GithubLogo, Package, PlayCircle, RocketLaunch } from '@phosphor-icons/react/dist/ssr';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   CREATOR_NAME,
@@ -18,15 +17,8 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="container footer-grid">
         <section className="footer-brand" aria-label="About Luthor">
-          <Link className="footer-logo" href="/">
-            <Image
-              className="footer-logo-image"
-              src="/luthor-logo-horizontal.png"
-              alt="Luthor"
-              width={360}
-              height={70}
-              sizes="(max-width: 768px) 180px, 220px"
-            />
+          <Link className="footer-logo" href="/" aria-label="Luthor">
+            <span className="footer-logo-image theme-logo-horizontal" aria-hidden="true" />
           </Link>
           <p>
             An extensible rich text editor framework built on Lexical.

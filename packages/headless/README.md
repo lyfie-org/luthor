@@ -1,5 +1,8 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/luthor-logo-horizontal.png" alt="Luthor" width="360" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/luthor-logo-horizontal-dark.png" />
+    <img src="https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/luthor-logo-horizontal-light.png" alt="Luthor" width="360" />
+  </picture>
   <h1>@lyfie/luthor-headless</h1>
   <p><strong>Headless, extension-first rich text editor runtime for React on top of Lexical.</strong></p>
 </div>

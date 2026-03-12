@@ -1,153 +1,106 @@
-# Ship a Cool Editor Fast with `@lyfie/luthor`
+---
+title: Preset or Headless? How I Pick the Right Luthor Setup in 5 Minutes
+description: A practical guide to choosing @lyfie/luthor presets or @lyfie/luthor-headless for React rich text editors, with simple rules and copy-paste examples.
+slug: luthor-preset-vs-headless-guide
+keywords:
+  - react editor
+  - lexical headless editor
+  - rich text editor guide
+  - markdown html editor
+  - typescript react
+---
 
-Hey devs.
-If you have ever said "this editor integration will be quick" and then lost days on toolbar behavior, edge cases, and source mode, this post is for you.
+![Luthor logo](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/luthor-logo.png)
 
-`@lyfie/luthor` is the preset package I built to compress that effort.
-You get plug-and-play editor experiences on top of `@lyfie/luthor-headless` + Lexical, with a clean path to deeper customization.
+# Preset or Headless? How I Pick the Right Luthor Setup in 5 Minutes
 
-Quick links:
+I use one simple rule: pick the fastest path that still gives me room to grow.
 
-- npm: https://www.npmjs.com/package/@lyfie/luthor
-- docs: https://www.luthor.fyi/docs/getting-started/luthor
-- presets docs: https://www.luthor.fyi/docs/luthor/presets
-- demo: https://www.luthor.fyi/demo
-- license: https://github.com/lyfie-org/luthor/blob/main/LICENSE
+## If I need a React editor live today: use `@lyfie/luthor`
 
-![Typography and formatting quality](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature1.gif)
-
-## Why this package exists
-
-I wanted one package that gives teams:
-
-- fast integration
-- polished UX defaults
-- no future lock-in
-
-That is exactly the shape of `@lyfie/luthor`.
-Use presets now, switch to headless APIs when requirements get custom.
-
-## Open source and free forever (MIT, no paywalls)
-
-`@lyfie/luthor` is not an open-core teaser.
-It is an MIT-licensed package with the preset system shipped openly.
-
-What that means for teams:
-
-- no in-package paywalls
-- no per-seat feature gates tied to preset usage
-- no restrictive licensing clauses blocking commercial deployment
-- no forced migration tax when your product scales
-
-Standard MIT notice requirements still apply when redistributing.
-
-As of **March 10, 2026**, licensing metadata in the package/repo indicates MIT.
-
-## How this compares to other editor business models
-
-| Model | Common reality | With `@lyfie/luthor` |
-| --- | --- | --- |
-| Hosted editor platforms | fast start, but recurring pricing and gated premium capabilities | installable npm package with full preset access |
-| Open-core editors | free basics, paid “pro” features for serious workflows | preset capabilities shipped under MIT |
-| Restrictive/custom licenses | legal friction for product usage and redistribution | permissive MIT terms |
-
-If you care about both engineering velocity and long-term product freedom, this difference is huge.
-
-## Get started in 60 seconds
-
-```bash
-npm install @lyfie/luthor react react-dom
-```
+This is my default when I want a polished editor without wiring everything manually.
 
 ```tsx
 import { ExtensiveEditor } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
 
 export function App() {
-  return <ExtensiveEditor placeholder="Start writing..." />;
+  return <ExtensiveEditor placeholder="Write anything..." />;
 }
 ```
 
-You can literally ship a serious baseline editor with this.
+Why I pick presets:
 
-## Preset lineup (8 included)
+- quick integration
+- ready toolbars and slash flows
+- visual + source modes in one place
+- clean upgrade path to deeper control
 
-From `presetRegistry`, these are available today:
+![Preset editor flow](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature4.gif)
 
-1. `ExtensiveEditor`
-2. `ComposeEditor`
-3. `SimpleEditor`
-4. `LegacyRichEditor`
-5. `MDEditor`
-6. `HTMLEditor`
-7. `SlashEditor`
-8. `HeadlessEditorPreset`
+## If I need total UI control: use `@lyfie/luthor-headless`
 
-## Which preset fits which use case?
+When product requirements are custom, this gives me typed building blocks instead of fixed UI.
 
-- **ExtensiveEditor**: full WYSIWYG for docs/CMS/editor-heavy products
-- **ComposeEditor**: focused drafting for support, email, and workflows
-- **SimpleEditor**: chat or message composer with send-centric behavior
-- **MDEditor / HTMLEditor**: source-aware markdown/html workflows
-- **SlashEditor**: command-first writing experiences
-- **HeadlessEditorPreset**: lightweight base preset for simple internal tools
+```tsx
+import {
+  createEditorSystem,
+  RichText,
+  richTextExtension,
+  boldExtension,
+  italicExtension,
+} from "@lyfie/luthor-headless";
 
-![Slash command workflow](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature11.gif)
+const extensions = [richTextExtension, boldExtension, italicExtension] as const;
+const { Provider } = createEditorSystem<typeof extensions>();
 
-## Feature depth users can actually feel
-
-This is not "thin wrappers over an editor core."
-Across presets you get:
-
-- typography controls
-- links, lists, headings, indentation
-- code blocks and source mode workflows
-- rich embeds (image, iframe, YouTube)
-- dark/light behavior
-- undo/redo and keyboard-friendly flows
-
-![Rich embeds in action](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature7.gif)
-
-![Theme switching support](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature9.gif)
-
-## Efficiency check (validated)
-
-Checked locally on **March 10, 2026** via `npm pack --json`.
-For plug-and-play editors, I compared **usable install sets** (KB, rounded to 1 decimal), not runtime bundle timings.
-`@lyfie/luthor` itself does not require extra top-level editor packages; `highlight.js` and `@emoji-mart/data` are optional add-ons.
-
-| Plug-and-play stack (top-level install set) | Versions checked | Packed size (KB) |
-| --- | --- | ---: |
-| `@lyfie/luthor` | `2.4.0` | 62.4 |
-| TinyMCE React stack (`@tinymce/tinymce-react` + `tinymce`) | `6.3.0` + `8.3.2` | 2,082.7 |
-| ReactQuill stack (`react-quill` + `quill`) | `2.0.0` + `2.0.3` | 818.3 |
-| CKEditor React stack (`@ckeditor/ckeditor5-react` + `@ckeditor/ckeditor5-build-classic`) | `11.0.1` + `41.4.2` | 2,083.3 |
-
-For a preset-rich package, that footprint is a strong practical balance.
-
-And paired with MIT licensing plus no paid feature gates in the package, it removes both technical and business friction from adoption.
-
-## No dead-end abstraction (important)
-
-`@lyfie/luthor` also re-exports headless APIs:
-
-```ts
-import { headless } from "@lyfie/luthor";
+export function App() {
+  return (
+    <Provider extensions={extensions}>
+      <RichText placeholder="Write here..." />
+    </Provider>
+  );
+}
 ```
 
-So your path is clean:
+Why I pick headless:
 
-- move fast with presets first
-- go deeper with headless when product complexity grows
+- custom toolbar and custom UX from day one
+- extension-first architecture
+- strong TypeScript command/state contracts
+- native JSON/Markdown/HTML conversion APIs
 
-## Who should use this
+![Headless customization demo](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature12.gif)
 
-Use `@lyfie/luthor` if you want to:
+## If source content matters: use MD or HTML presets
 
-- ship polished editing experiences quickly
-- support multiple editor modes in one package
-- keep long-term flexibility without rewrite risk
-- stay on an MIT-licensed stack with no in-package paywalls
+The latest updates improved native markdown/html workflows, so these presets are now cleaner for source-first apps.
 
-Subtle pitch, direct one: start with `ExtensiveEditor`.
-You will get to a "this already feels production-ready" state very quickly.
+```tsx
+import { MDEditor, HTMLEditor } from "@lyfie/luthor";
+import "@lyfie/luthor/styles.css";
+
+export function MarkdownScreen() {
+  return <MDEditor defaultEditorView="markdown" />;
+}
+
+export function HtmlScreen() {
+  return <HTMLEditor defaultEditorView="html" />;
+}
+```
+
+![Markdown and HTML source mode flow](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature6.gif)
+
+## My default decision matrix
+
+- Need shipping speed: `@lyfie/luthor`
+- Need custom product UX: `@lyfie/luthor-headless`
+- Need markdown/html-native authoring: `MDEditor` or `HTMLEditor`
+- Need read-only viewing with clean edit handoff: `visual-only` mode in `ExtensiveEditor`
+
+## Final note
+
+I do not want editor drama in a sprint.
+I want stable APIs, clear behavior, and a path that does not trap me later.
+
+That is exactly why I use Luthor this way.

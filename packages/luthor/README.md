@@ -1,5 +1,8 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/luthor-logo-horizontal.png" alt="Luthor" width="360" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/luthor-logo-horizontal-dark.png" />
+    <img src="https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/luthor-logo-horizontal-light.png" alt="Luthor" width="360" />
+  </picture>
   <h1>@lyfie/luthor</h1>
   <p><strong>Plug-and-play rich text editor presets for React, powered by Luthor Headless + Lexical.</strong></p>
 </div>

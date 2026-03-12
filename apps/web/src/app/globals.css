@@ -15,6 +15,8 @@
   --btn-primary-start: #0a84ff;
   --btn-primary-end: #0568c7;
   --btn-primary-text: #f7fbff;
+  --logo-horizontal-url: url('/luthor-logo-horizontal-light.png');
+  --logo-square-url: url('/luthor-logo-light.png');
   --btn-muted-bg: color-mix(in srgb, var(--surface) 76%, var(--bg-elevated) 24%);
   --btn-muted-bg-hover: color-mix(in srgb, var(--surface) 60%, var(--bg-elevated) 40%);
   --footer-cta-primary-bg: color-mix(in srgb, var(--accent) 14%, var(--bg-elevated) 86%);
@@ -54,6 +56,8 @@
   --btn-primary-start: #4da6ff;
   --btn-primary-end: #1f6ec2;
   --btn-primary-text: #ecf5ff;
+  --logo-horizontal-url: url('/luthor-logo-horizontal-dark.png');
+  --logo-square-url: url('/luthor-logo-dark.png');
   --btn-muted-bg: color-mix(in srgb, var(--surface) 74%, var(--bg-elevated) 26%);
   --btn-muted-bg-hover: color-mix(in srgb, var(--surface) 58%, var(--bg-elevated) 42%);
   --footer-cta-primary-bg: color-mix(in srgb, var(--accent) 18%, var(--bg-elevated) 82%);
@@ -188,14 +192,26 @@ a {
 }
 
 .brand-logo {
-  width: auto;
-  height: clamp(1.45rem, 2.1vw, 1.75rem);
-  max-width: 100%;
+  width: clamp(6.4rem, 11vw, 8.9rem);
+  aspect-ratio: 5213 / 1394;
+  height: auto;
   display: block;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: contain;
 }
 
 .brand-fallback {
   display: inline-block;
+}
+
+.theme-logo-horizontal {
+  background-image: var(--logo-horizontal-url);
+}
+
+.theme-logo-square {
+  background-image: var(--logo-square-url);
 }
 
 .site-nav {
@@ -1717,9 +1733,14 @@ a {
 }
 
 .footer-logo-image {
-  width: auto;
-  height: clamp(1.5rem, 2.4vw, 2rem);
+  width: clamp(7.2rem, 12.8vw, 10.1rem);
+  aspect-ratio: 5213 / 1394;
+  height: auto;
   display: block;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: contain;
 }
 
 .footer-column {
@@ -2739,4 +2760,3 @@ a {
     transition: none !important;
   }
 }
-
