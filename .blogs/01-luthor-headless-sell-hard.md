@@ -1,7 +1,7 @@
 ---
 title: Luthor: A Clean React Editor Stack for Speed and Control
 description: I built Luthor to remove editor tradeoffs in React apps. Use the preset package for fast WYSIWYG shipping or go headless for full UI control.
-slug: introducing-luthor-react-editor-stack
+slug: luthor-react-editor-stack
 keywords:
   - react rich text editor
   - lexical editor
