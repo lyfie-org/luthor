@@ -32,21 +32,53 @@ export function App() {
 
 ## Props
 
-`SimpleEditorProps` is purpose-built for message input.
+`SimpleEditorProps` is purpose-built for message input:
 
-- `formattingOptions`: `SimpleFormattingOptions`
+- `formattingOptions`: `SimpleFormattingOptions` (`bold`, `italic`, `strikethrough`)
 - `onSend`: `(payload: SimpleEditorSendPayload) => void`
 - `outputFormat`: `'md' (default) | 'json'`
+- `clearOnSend`: `true (default) | false`
+- `allowEmptySend`: `false (default) | true`
 - `submitOnEnter`: `false (default) | true`
 - `allowShiftEnter`: `true (default) | false`
+- `showSendButton`: `true (default) | false`
+- `sendButtonPlacement`: `'inside' (default) | 'right'`
+- `sendButtonContent`: `ReactNode` (default `'Send'`)
+- `sendButtonAriaLabel`: `string` (default `'Send message'`)
+- `sendButtonClassName`: `string`
 - `showBottomToolbar`: `true (default) | false`
 - `toolbarButtons`: `readonly SimpleToolbarButton[]`
-- `sendButtonPlacement`: `'inside' (default) | 'right'`
+- `toolbarClassName`: `string`
+- `toolbarStyle`: `CSSProperties`
+- `scrollAreaClassName`: `string`
 - `minHeight` / `maxHeight` / `minWidth` / `maxWidth`
 
 ## Behavior
 
 - Allows only bold, italic, and strikethrough formatting.
 - Always runs visual mode only.
+- Uses custom shortcut defaults for chat-style typing.
 - Supports auto-grow until `maxHeight`, then internal scrolling.
+- Supports click-to-place-caret in the nearest line of text.
+
+## `SimpleEditorSendPayload`
+
+`onSend` receives:
+
+- `format`: `'md' | 'json'`
+- `text`: output text in the selected `outputFormat`
+- `markdown`: markdown representation of current content
+- `json`: JSON representation of current content
+
+## Example: right-side send button
+
+```tsx
+<SimpleEditor
+  sendButtonPlacement="right"
+  submitOnEnter
+  onSend={({ markdown }) => {
+    console.log(markdown);
+  }}
+/>
+```
 

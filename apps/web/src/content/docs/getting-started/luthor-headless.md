@@ -5,7 +5,7 @@ description: Minimal setup and validation for @lyfie/luthor-headless.
 
 # @lyfie/luthor-headless
 
-Use this when you need full control over editor UI.
+Use `@lyfie/luthor-headless` when you need complete control over editor behavior and UI.
 
 ## Install
 
@@ -50,15 +50,23 @@ export function App() {
 
 ## Validate installation
 
-- Text area mounts
-- Buttons execute bold and italic commands
-- No missing peer dependency errors for Lexical packages
+1. The editor mounts and accepts input.
+2. Toolbar buttons call typed commands (`toggleBold`, `toggleItalic`).
+3. `activeStates` updates correctly when formatting changes.
+4. No Lexical peer dependency warnings appear.
+
+## Why headless
+
+- You control toolbar UX, command wiring, and layout.
+- You decide exactly which extensions are mounted.
+- You can keep JSON-first persistence and convert to Markdown/HTML when needed.
+- You can build product-specific blocks with `createCustomNodeExtension(...)` or `createExtension(...)`.
 
 ## Learn more about Lexical
 
 `@lyfie/luthor-headless` is built on top of Lexical. For deeper engine capabilities and low-level APIs, use the official Lexical documentation: [lexical.dev/docs](https://lexical.dev/docs/intro).
 
-## Contributor docs
+## Deep-dive docs
 
 - [Architecture](/docs/luthor-headless/architecture/)
 - [Extensions and API](/docs/luthor-headless/extensions-and-api/)

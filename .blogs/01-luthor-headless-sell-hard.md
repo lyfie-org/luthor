@@ -1,49 +1,112 @@
 ---
-title: React Rich Text Editor That Just Works
-description: I built Luthor for developers who want a React rich text editor that works fast, with visual-only mode, native Markdown and HTML workflows, and TypeScript APIs.
-slug: luthor-react-rich-text-editor-that-just-works
+title: Luthor: A Clean React Editor Stack for Speed and Control
+description: I built Luthor to remove editor tradeoffs in React apps. Use the preset package for fast WYSIWYG shipping or go headless for full UI control.
+slug: luthor-react-editor-stack
 keywords:
   - react rich text editor
   - lexical editor
-  - typescript editor
-  - markdown editor
-  - html editor
+  - headless rich text editor
+  - wysiwyg editor react
+  - typescript editor package
 ---
 
-![Luthor logo](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/luthor-logo-horizontal.png)
+![Luthor logo](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/luthor-logo-horizontal-dark.png)
 
-# React Rich Text Editor That Just Works
+# Luthor: A WYSIWYG React Text Editor for Performance and Control
 
-I am a simple developer. I just want code that works, no questions asked.
+I built Luthor to end the editor tradeoff: fast setup with lock-in, or full control that burns weeks before you ship anything real at scale.
 
-That is exactly why I built Luthor in two layers:
+I just want to build my app! Not wonder what a toolbar icon should look like on the text editor.
+I wanted one ecosystem where I can ship fast, then go deep only when I actually need to.
 
-- `@lyfie/luthor` for fast, preset-based shipping
-- `@lyfie/luthor-headless` for full control when I need custom UX
+## Quick Links
 
-Quick links:
-
+- Website: https://www.luthor.fyi
+- Playground: https://www.luthor.fyi/demo
+- Docs: https://www.luthor.fyi/docs/getting-started/index
+- GitHub: https://github.com/lyfie-org/luthor
 - npm (`@lyfie/luthor`): https://www.npmjs.com/package/@lyfie/luthor
 - npm (`@lyfie/luthor-headless`): https://www.npmjs.com/package/@lyfie/luthor-headless
-- docs: https://www.luthor.fyi/docs/getting-started/index
-- demo: https://www.luthor.fyi/demo
-- license: https://github.com/lyfie-org/luthor/blob/main/LICENSE
 
-## What changed recently
+## The components that make Luthor
 
-Recent updates that matter in day-to-day work:
+### The Core - `@lyfie/luthor-headless`
 
-- `ExtensiveEditor` now supports `visual-only` mode with `editOnClick` for cleaner read/view flows.
-- MD/HTML presets now better preserve native markdown/html behavior for cleaner source workflows.
-- Read-only interaction behavior improved across lists, tables, embeds, images, and code-related flows.
-- Headless preset styling and responsive polish were improved.
-- CI quality gates now run lint, test, build, release-hardening, and web SEO validation in one workflow.
+Use this when you want full editor UI control.
 
-![Visual editing and formatting](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature1.gif)
+- runtime dependencies: **0**
+- core engine and related packages are exposed via `peerDependencies`
+- you choose exactly what to install and what to customize
+- you build your own UI/UX, toolbar, behavior, and design-system integration
 
-## Fast path: ship with presets
+This package is lean by design. Performant by intention.
 
-If I need to ship this week, I use presets first.
+### The Showoff - `@lyfie/luthor`
+
+Use this when you want one-package-solution, shipping speed with polished defaults, this package does not bloat your application, it depends ONLY on Lexical packages and The Core `@lyfie/luthor-headless`.
+
+- includes the Lexical package set it needs under the hood
+- gives you presets out of the box, just plug and play
+- includes and exposes all extensibility of `@lyfie/luthor-headless` under the hood
+- still lets you move into deeper customization when needed
+
+This is the practical all-in-one lane.  
+QYSIQYG/WYSIWYG style, but without losing the escape hatch.
+
+## Performance at a glance
+
+Both packages are built for fast, responsive editing in real apps.
+
+- `@lyfie/luthor` is intentionally super lightweight for a ready-to-ship WYSIWYG package.
+- `@lyfie/luthor-headless` is even more lightweight, since it keeps runtime dependencies at zero and relies on peer dependencies for composition.
+
+## Tree-Shaking
+
+Tree-shaking helps keep shipped code lean:
+
+- headless is especially tree-shake friendly because it is ESM and marks `sideEffects: false`
+- preset package also tree-shakes JS imports, while stylesheet imports stay intentional
+
+Result: you can avoid dragging unnecessary editor code into production bundles, keeping your final build as lean as possible on the users browser.
+
+## Features Developers Might Love (I know I do)
+
+### Writing + structure that feels solid
+
+- typography controls
+- formatting essentials
+- links, headings, alignment, and list workflows
+
+![Typography and formatting](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature1.gif)
+![Links and structure](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature4.gif)
+![Lists and structure](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature5.gif)
+
+### Productivity without friction
+
+- slash command center
+- command workflows
+- undo/redo and keyboard-first speed
+
+![Slash commands](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature11.gif)
+![History and shortcuts](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature10.gif)
+
+### Real product features, not just demo features
+
+- embeds (image, iframe, YouTube)
+- code blocks
+- custom blocks and extension-level flexibility
+- dark/light ready behavior
+
+![Embeds and media](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature7.gif)
+![Code blocks](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature8.gif)
+![Custom blocks](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature12.gif)
+![Theme support](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature9.gif)
+
+## Minimal Setup: Preset Lane
+
+```bash
+npm install @lyfie/luthor
+```
 
 ```tsx
 import { ExtensiveEditor } from "@lyfie/luthor";
@@ -54,22 +117,15 @@ export function App() {
 }
 ```
 
-Available presets right now:
+## Minimal Setup: Headless Lane
 
-- `ExtensiveEditor`
-- `ComposeEditor`
-- `SimpleEditor`
-- `LegacyRichEditor`
-- `MDEditor`
-- `HTMLEditor`
-- `SlashEditor`
-- `HeadlessEditorPreset`
+```bash
+npm install @lyfie/luthor-headless
+```
 
-![Slash commands and quick actions](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature11.gif)
-
-## Control path: go headless when product needs it
-
-If the UI needs to be fully custom, I switch to `@lyfie/luthor-headless`.
+```bash
+npm install lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils
+```
 
 ```tsx
 import {
@@ -90,6 +146,9 @@ function Toolbar() {
       <button onClick={() => commands.toggleBold?.()} aria-pressed={activeStates.bold === true}>
         Bold
       </button>
+      <button onClick={() => commands.toggleItalic?.()} aria-pressed={activeStates.italic === true}>
+        Italic
+      </button>
     </div>
   );
 }
@@ -104,20 +163,28 @@ export function App() {
 }
 ```
 
-![Custom workflows and code support](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature8.gif)
+## Why Developers Stick With It
 
-## Why this stack is practical
+- clear split between preset workflow and headless workflow
+- practical docs for getting started, presets, architecture, and API usage
+- live playground to evaluate flows before integration
+- feature depth that covers real product requirements, not just demos
+- developer-first approach: open source, MIT, no paywalls
 
-- I can launch fast with presets.
-- I can move to headless without rewriting the whole editor.
-- Source modes (`json`, `markdown`, `html`) are built in.
-- License is MIT, so no feature paywall drama later.
+## Final Take
 
-![Embeds and rich media workflows](https://raw.githubusercontent.com/lyfie-org/luthor/main/apps/web/public/features/Feature7.gif)
+If you want a clean editor stack with zero confusion:
 
-## Final take
+- choose `@lyfie/luthor-headless` for maximum UI/UX control and lean dependency strategy
+- choose `@lyfie/luthor` for all the built in presets for fast QYSIQYG/WYSIWYG plug and play shipping and built-in ergonomics (bonus: you get luthor-headless features within this package too, best of both worlds)
 
-If you want a **React rich text editor** that works right now, start with `@lyfie/luthor`.
-If you need deep customization later, move to `@lyfie/luthor-headless`.
+Either way, you stay in one ecosystem and scale without redoing everything.
 
-That is the workflow I use myself: ship first, customize when needed, keep everything clean.
+## Quick Links (Again)
+
+- Website: https://www.luthor.fyi
+- Playground: https://www.luthor.fyi/demo
+- Docs: https://www.luthor.fyi/docs/getting-started/index
+- GitHub: https://github.com/lyfie-org/luthor
+- npm (`@lyfie/luthor`): https://www.npmjs.com/package/@lyfie/luthor
+- npm (`@lyfie/luthor-headless`): https://www.npmjs.com/package/@lyfie/luthor-headless

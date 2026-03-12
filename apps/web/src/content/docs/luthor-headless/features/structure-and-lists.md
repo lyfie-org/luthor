@@ -5,7 +5,7 @@ description: Headings, links, lists, tables, and document structure tools.
 
 # Structure and Lists
 
-This group covers links, headings, paragraphs, lists, and table workflows.
+This group covers links, block structure, list systems, horizontal rules, and tables.
 
 ## Included extensions
 
@@ -16,28 +16,51 @@ This group covers links, headings, paragraphs, lists, and table workflows.
 - `horizontalRuleExtension`
 - `tabIndentExtension`
 
+## Key commands
+
+- Links:
+  - `insertLink`, `updateLink`, `removeLink`
+  - `getCurrentLink`, `getLinkByKey`, `updateLinkByKey`, `removeLinkByKey`
+- Block structure:
+  - `toggleParagraph`, `toggleHeading`, `toggleQuote`
+  - `setTextAlignment`
+- Lists:
+  - `toggleUnorderedList`, `toggleOrderedList`, `toggleCheckList`
+  - `indentList`, `outdentList`
+  - `setOrderedListPattern`, `setOrderedListSuffix`
+  - `setUnorderedListPattern`, `setCheckListVariant`
+  - `rehydrateListStyles`
+- Tables/rules:
+  - `insertTable`
+  - `insertHorizontalRule`
+
 ## List depth and marker patterns
 
-- List indentation is capped at `8` sub-indent levels (`9` total levels including top-level).
-- `ListExtension` supports `maxDepth` configuration for custom depth caps.
-- `TabIndentExtension` supports `maxListDepth` so `Tab`/`Shift+Tab` behavior can match list depth limits.
-- Depth caps apply uniformly to ordered lists, unordered lists, and checklists.
-- `listExtension` supports ordered and unordered marker patterns through:
-  - `commands.setOrderedListPattern(pattern)`
-  - `commands.setUnorderedListPattern(pattern)`
-  - `commands.setOrderedListSuffix('dot' | 'paren')`
-- Supported unordered patterns:
+- Default list sub-indent cap in extensive presets is `8`.
+- `ListExtension` supports `maxDepth` configuration.
+- `TabIndentExtension` supports `maxListDepth`.
+- Caps apply to ordered, unordered, and checklist nodes.
+
+Ordered list controls:
+
+- `setOrderedListPattern(pattern)` with patterns:
+  - `decimal-alpha-roman`
+  - `decimal-hierarchical`
+  - `upper-roman-upper-alpha`
+  - `upper-alpha-lower-alpha`
+  - `decimal-leading-zero-alpha`
+- `setOrderedListSuffix('dot' | 'paren')`
+
+Unordered/checklist controls:
+
+- `setUnorderedListPattern(pattern)`:
   - `disc-circle-square`
   - `arrow-diamond-disc`
   - `square-square-square`
   - `arrow-circle-square`
-- Checklist variants are available through:
-  - `commands.setCheckListVariant('strikethrough' | 'plain')`
-  - `strikethrough`: checked items render with line-through text.
-  - `plain`: checked items keep normal text without line-through.
-- Checklist variant and unordered marker pattern tokens are stored on list/list-item styles, so imported JSON can be rehydrated with `commands.rehydrateListStyles()`.
+- `setCheckListVariant('strikethrough' | 'plain')`
 
-### Depth configuration example
+## Depth configuration example
 
 ```tsx
 import {

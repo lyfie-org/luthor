@@ -5,7 +5,7 @@ description: Preset catalog for @lyfie/luthor, including per-preset docs.
 
 # Presets
 
-`@lyfie/luthor` is a preset package built on top of `@lyfie/luthor-headless`.
+`@lyfie/luthor` is built around presets. Each preset wraps `ExtensiveEditor` with a specific product profile.
 
 ## Contributor guides
 
@@ -13,11 +13,26 @@ description: Preset catalog for @lyfie/luthor, including per-preset docs.
 - [Props reference](/docs/luthor/props-reference/)
 - [Feature flags](/docs/luthor/feature-flags/)
 
-## Importing headless from presets package
+## Re-exported headless API
 
 ```ts
 import { headless } from '@lyfie/luthor';
 ```
+
+This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
+
+## Preset matrix
+
+| Preset | Best for | Mode profile |
+| --- | --- | --- |
+| `ExtensiveEditor` | Full-feature editor UI | `visual-editor`, `visual-only`, `json`, `markdown`, `html` |
+| `ComposeEditor` | Focused drafting UI | `visual`, `json` |
+| `SimpleEditor` | Chat/message input | `visual` only |
+| `LegacyRichEditor` | Metadata-light markdown/html-compatible flow | Depends on `sourceFormat` |
+| `MDEditor` | Markdown-first flow | `visual`, `json`, `markdown` |
+| `HTMLEditor` | HTML-first flow | `visual`, `json`, `html` |
+| `SlashEditor` | Slash-first interactions | `visual`, `json`, `markdown`, `html` |
+| `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual`, `json`, `markdown`, `html` |
 
 ## Preset docs
 

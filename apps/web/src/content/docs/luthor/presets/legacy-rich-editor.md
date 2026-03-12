@@ -26,7 +26,7 @@ export function App() {
 
 ## Props
 
-`LegacyRichEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
+`LegacyRichEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, `initialMode`, and `defaultEditorView`, then re-adds constrained variants:
 
 - `sourceFormat`: `'both' (default) | 'markdown' | 'html'`
 - `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
@@ -42,9 +42,19 @@ export function App() {
   - links
   - ordered/unordered/check lists + indentation
   - horizontal rule
-- Disabled to keep metadata-free round trips:
+- Disabled by default to keep metadata-light markdown/html round trips:
   - tables, images, embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
 - Source views:
   - `sourceFormat="both"` uses Visual/Markdown/HTML tabs
   - `sourceFormat="markdown"` uses Visual/JSON/Markdown tabs
   - `sourceFormat="html"` uses Visual/JSON/HTML tabs
+
+## Toolbar profile
+
+Default toolbar sections focus on writing and structure:
+
+- Undo/redo
+- Block format + quote
+- Bold/italic/strikethrough/inline code/link
+- Ordered/unordered/checklist + indent/outdent
+- Code block + horizontal rule

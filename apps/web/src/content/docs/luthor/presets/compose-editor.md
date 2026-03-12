@@ -5,9 +5,7 @@ description: Focused rich text drafting preset with a compact, practical toolbar
 
 # Compose Editor
 
-`ComposeEditor` merges focused rich-text and draft-composition workflows into one surface.
-
-Use it as a clean rich editor with a constrained feature set for practical drafting flows.
+`ComposeEditor` is a focused drafting preset for writing flows where speed and clarity matter more than every possible feature.
 
 ## Usage
 
@@ -27,13 +25,38 @@ export function App() {
 
 ## Props
 
-`ComposeEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`.
+`ComposeEditorProps` inherits all `ExtensiveEditorProps` except direct `featureFlags`, then adds:
 
-- `featureFlags`: `undefined (default) | FeatureFlagOverrides`
+- `featureFlags`: `FeatureFlagOverrides` (optional overrides)
 - `compactToolbar`: `false (default) | true`
+
+## Default mode profile
+
+- `availableModes`: `["visual", "json"]`
+- Toolbar is enabled by default (inherited from `ExtensiveEditor`).
+
+## Default feature profile
+
+Enabled by default:
+
+- `bold`, `italic`, `underline`, `strikethrough`
+- `list`, `history`, `link`, `blockFormat`, `codeFormat`
+
+Disabled by default:
+
+- `image`, `table`, `iframeEmbed`, `youTubeEmbed`
+- `emoji`, `floatingToolbar`, `contextMenu`
+- `commandPalette`, `slashCommand`
+- `draggableBlock`, `customNode`
 
 ## Behavior
 
-- Defaults to focused formatting with media/embed-heavy features disabled.
-- Supports feature flag overrides for deeper tuning.
+- Great for writing drafts, briefs, notes, and long-form content where rich media is optional.
+- Keeps the surface clean while still allowing the core writing commands most teams use daily.
+- Supports user-provided `featureFlags` overrides so you can selectively re-enable disabled features.
+
+## Related pages
+
+- [Extensive Editor](/docs/luthor/presets/extensive-editor/)
+- [Feature Flags](/docs/luthor/feature-flags/)
 

@@ -5,7 +5,7 @@ description: Fonts, line-height, and text-formatting capabilities.
 
 # Typography and Text
 
-This group covers typography, essentials, and color controls.
+This group covers text formatting, typography controls, and text emphasis.
 
 ## Included extensions
 
@@ -13,6 +13,19 @@ This group covers typography, essentials, and color controls.
 - `subscriptExtension`, `superscriptExtension`, `codeFormatExtension`
 - `fontFamilyExtension`, `fontSizeExtension`, `lineHeightExtension`
 - `textColorExtension`, `textHighlightExtension`
+
+## Key commands (by capability)
+
+- Formatting:
+  - `toggleBold`, `toggleItalic`, `toggleUnderline`, `toggleStrikethrough`
+  - `toggleSubscript`, `toggleSuperscript`, `formatText("code")`
+- Typography:
+  - `setFontFamily`, `clearFontFamily`, `getFontFamilyOptions`
+  - `setFontSize`, `clearFontSize`, `getFontSizeOptions`
+  - `setLineHeight`, `clearLineHeight`, `getLineHeightOptions`
+- Color:
+  - `setTextColor`, `clearTextColor`, `getTextColorOptions`
+  - `setTextHighlight`, `clearTextHighlight`, `getTextHighlightOptions`
 
 ## Example
 
@@ -66,9 +79,3 @@ export function App() {
   );
 }
 ```
-
-## Relevant props
-
-- `RichText.placeholder`: `undefined (default) | string`
-- `RichText.disabled`: `false (default) | true`
-

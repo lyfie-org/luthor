@@ -268,6 +268,8 @@ function setupToolbarPinOverflowFallback(wrapper: HTMLElement): () => void {
 export interface ExtensiveEditorRef {
   injectJSON: (content: string) => void;
   getJSON: () => string;
+  getMarkdown: () => string;
+  getHTML: () => string;
 }
 
 type JsonTextNode = {
@@ -337,6 +339,8 @@ function createJSONDocumentFromText(content: string): JsonDocument {
     },
   };
 }
+
+const EMPTY_JSON_DOCUMENT = createJSONDocumentFromText("");
 
 function clampCoordinate(value: number, min: number, max: number): number {
   if (max <= min) {
@@ -418,6 +422,20 @@ function toJSONInput(value: string): string {
   } catch {
     return JSON.stringify(createJSONDocumentFromText(value));
   }
+}
+
+function serializeJSONToSource(mode: ExtensiveEditorSourceMode, document: unknown): string {
+  const resolvedDocument = document ?? EMPTY_JSON_DOCUMENT;
+
+  if (mode === "json") {
+    return formatJSONSource(JSON.stringify(resolvedDocument));
+  }
+
+  if (mode === "markdown") {
+    return formatMarkdownSource(jsonToMarkdown(resolvedDocument));
+  }
+
+  return formatHTMLSource(jsonToHTML(resolvedDocument));
 }
 
 function normalizeFontFamilyOptionsKey(options?: readonly FontFamilyOption[]): string {
@@ -978,12 +996,14 @@ function ExtensiveEditorContent({
           }
         }, 100);
       };
-      const getJSON = () => formatJSONSource(JSON.stringify(exportApi.toJSON()));
+      const getJSON = () => serializeJSONToSource("json", exportApi.toJSON());
+      const getMarkdown = () => serializeJSONToSource("markdown", exportApi.toJSON());
+      const getHTML = () => serializeJSONToSource("html", exportApi.toJSON());
       return {
         injectJSON,
         getJSON,
-        
-        
+        getMarkdown,
+        getHTML,
       };
     },
     [exportApi, importApi],
@@ -1265,17 +1285,8 @@ function ExtensiveEditorContent({
   };
 
   const exportToSourceMode = (sourceMode: ExtensiveEditorSourceMode): string => {
-    const visualDocument = exportApi.toJSON() ?? createJSONDocumentFromText("");
-
-    if (sourceMode === "json") {
-      return formatJSONSource(JSON.stringify(visualDocument));
-    }
-
-    if (sourceMode === "markdown") {
-      return formatMarkdownSource(jsonToMarkdown(visualDocument));
-    }
-
-    return formatHTMLSource(jsonToHTML(visualDocument));
+    const visualDocument = exportApi.toJSON() ?? EMPTY_JSON_DOCUMENT;
+    return serializeJSONToSource(sourceMode, visualDocument);
   };
 
   const updateSourceModeContent = (
@@ -1907,7 +1918,17 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     ]);
 
     const [methods, setMethods] = useState<ExtensiveEditorRef | null>(null);
-    useImperativeHandle(ref, () => methods as ExtensiveEditorRef, [methods]);
+    useImperativeHandle(
+      ref,
+      () =>
+        methods ?? {
+          injectJSON: () => {},
+          getJSON: () => serializeJSONToSource("json", EMPTY_JSON_DOCUMENT),
+          getMarkdown: () => serializeJSONToSource("markdown", EMPTY_JSON_DOCUMENT),
+          getHTML: () => serializeJSONToSource("html", EMPTY_JSON_DOCUMENT),
+        },
+      [methods],
+    );
 
     const handleReady = (m: ExtensiveEditorRef) => {
       setMethods(m);

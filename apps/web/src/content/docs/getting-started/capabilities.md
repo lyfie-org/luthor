@@ -1,187 +1,229 @@
 ---
 title: Capabilities
-description: Complete capability overview copied from the home page Why Luthor section, with package availability notes.
+description: Complete feature overview for Luthor, with package availability and command-level mapping.
 ---
 
 # Capabilities
-For Lexical engine-level behavior and APIs, read the official Lexical docs: [lexical.dev/docs](https://lexical.dev/docs/intro).
 
-## Typography Controls
+This page shows what Luthor can do today, in plain language, with quick package mapping.
+
+For Lexical engine internals, see: [lexical.dev/docs](https://lexical.dev/docs/intro).
+
+## Capability index
+
+1. Typography Controls
+2. Essentials Done Right
+3. Color and Highlight
+4. Links and Structure
+5. Lists
+6. Indentation
+7. Rich Embeds
+8. Code Blocks and Intelligence
+9. Theme and Visual Modes
+10. History and Keyboard Speed
+11. Slash and Command Workflows
+12. Custom Blocks
+
+## 1) Typography Controls
 
 ![Typography controls preview](/features/Feature1.gif)
 
-Custom fonts, font size controls, and line-height that behaves. Typography should fit your product voice, not force browser defaults.
+Typography features include font family, font size, and line-height controls.  
+These are useful when your product needs branded writing styles or accessibility-focused spacing.
 
-- Use any custom font you want.
-- Dial in font sizes for readability.
-- Granular line-height control for cleaner rhythm.
+- Related commands:
+  - `setFontFamily`, `clearFontFamily`, `getFontFamilyOptions`
+  - `setFontSize`, `clearFontSize`, `getFontSizeOptions`
+  - `setLineHeight`, `clearLineHeight`, `getLineHeightOptions`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Essentials Done Right
+## 2) Essentials Done Right
 
 ![Text formatting essentials preview](/features/Feature2.gif)
 
-Bold, italic, underline, strike, sub/superscript, code, and quotes. Core formatting is implemented cleanly and type-safe.
+Core text formatting supports bold, italic, underline, strikethrough, subscript, superscript, inline code, and quote blocks.
 
-- Bold, italic, underline, and strikethrough.
-- Subscript and superscript support.
-- Inline code and block quotes.
+- Related commands:
+  - `toggleBold`, `toggleItalic`, `toggleUnderline`, `toggleStrikethrough`
+  - `toggleSubscript`, `toggleSuperscript`, `formatText("code")`
+  - `toggleQuote`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Color And Highlight
+## 3) Color and Highlight
 
 ![Color and highlight preview](/features/Feature3.gif)
 
-Apply font color and highlights without inline style chaos. Color tools integrate with themes and keep output clean.
+Text color and highlight options let you apply emphasis without messy inline style logic in your app layer.
 
-- Font color support.
-- Highlight support.
-- Theme-friendly output styles.
+- Related commands:
+  - `setTextColor`, `clearTextColor`, `getTextColorOptions`
+  - `setTextHighlight`, `clearTextHighlight`, `getTextHighlightOptions`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Links And Structure
+## 4) Links and Structure
 
 ![Links and structure preview](/features/Feature4.gif)
 
-Predictable links plus semantic headings and paragraph flow. Link insertion is clean, and document hierarchy stays sane.
+Luthor supports links, paragraphs, headings (`h1` to `h6`), alignment controls, and quote/code block structure.
 
-- Predictable link insertion behavior.
-- Paragraphs and headings from H1 to H6.
-- Left, center, right, and justify alignment.
+- Related commands:
+  - `insertLink`, `updateLink`, `removeLink`
+  - `toggleParagraph`, `toggleHeading`, `setTextAlignment`
+  - `toggleQuote`, `toggleCodeBlock`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Lists That Know What They're Doing
+## 5) Lists
 
 ![Lists preview](/features/Feature5.gif)
 
-Unordered, ordered, and checklist/task lists in one workflow. Use the right list type without fighting editor state.
+List workflows include unordered lists, ordered lists, and checklist/task lists.
 
-- Unordered lists for free-form notes.
-- Ordered lists for sequences and steps.
-- Checklist/task lists for actionable content.
+- Related commands:
+  - `toggleUnorderedList`, `toggleOrderedList`, `toggleCheckList`
+  - `setOrderedListPattern`, `setOrderedListSuffix`
+  - `setUnorderedListPattern`, `setCheckListVariant`
+  - `rehydrateListStyles` (for imported JSON style tokens)
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Indentation Control
+## 6) Indentation
 
 ![Indentation preview](/features/Feature6.gif)
 
-Indent in and out with consistent, structure-safe behavior. Tab behavior is predictable and respects document structure.
+Indentation behavior is structure-aware. You can cap nesting depth with `maxListIndentation` in presets or configure list/tab extensions directly in headless.
 
-- Tab in and tab out quickly.
-- Supports structured indentation behavior.
-- Works cleanly with nested content.
+- Related commands:
+  - `indentList`, `outdentList`
+- Related config:
+  - `maxListIndentation` in `ExtensiveEditorProps`
+  - `ListExtension({ maxDepth })`
+  - `TabIndentExtension({ maxListDepth })`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Rich Embeds
+## 7) Rich Embeds
 
 ![Rich embed preview](/features/Feature7.gif)
 
-Embed images, iframes, and YouTube content with minimal friction. Paste and render rich media without bolt-on hacks.
+Media support includes images, iframe embeds, and YouTube embeds, including alignment, resize, and caption controls.
 
-- Image embedding support.
-- Iframe embedding support.
-- YouTube embed flow.
+- Related commands:
+  - `insertImage`, `setImageAlignment`, `setImageCaption`
+  - `insertIframeEmbed`, `updateIframeEmbedUrl`, `resizeIframeEmbed`
+  - `insertYouTubeEmbed`, `updateYouTubeEmbedUrl`, `resizeYouTubeEmbed`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Code Blocks
+## 8) Code Blocks and Intelligence
 
 ![Code block preview](/features/Feature8.gif)
 
-Syntax-ready code blocks for docs, tutorials, and snippets. Code content stays structured and extendable for real product usage.
+Code workflows include inline code formatting, block-level code nodes, language selection, auto-detection, and optional copy support.
 
-- Dedicated code block support.
-- Built for developer-focused content.
-- Extensible for richer syntax experiences.
+- Related commands:
+  - `toggleCodeBlock`, `setCodeLanguage`, `autoDetectCodeLanguage`
+  - `getCurrentCodeLanguage`, `copySelectedCodeBlock`
+- Related config:
+  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
+  - `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Dark/Light Ready
+## 9) Theme and Visual Modes
 
 ![Theme switching preview](/features/Feature9.gif)
 
-Editor-layer theme support, not fragile visual hacks. Dark and light mode behavior is built in from the editor layer.
+Theme support includes light/dark mode and callback hooks so host UI can stay in sync (for example, code highlighting theme CSS).
 
-- Theme switching support.
-- Consistent readability across themes.
-- Works with your app-level styling model.
+- Related props:
+  - `initialTheme`, `onThemeChange`, `theme`, `editorThemeOverrides`
+  - `defaultSettings`, `quoteStyleVars`, `toolbarStyleVars`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## History + Shortcuts
+## 10) History and Keyboard Speed
 
 ![Undo, redo, and shortcuts preview](/features/Feature10.gif)
 
-Undo/redo and keyboard-first interactions across core features. Move fast without relying on toolbar clicks.
+History and keyboard commands are built for fast editing flows.
 
-- Full undo and redo history.
-- Keyboard-friendly command flow.
-- Built for power-user editing speed.
+- Related commands:
+  - `undo`, `redo`
+- Related props:
+  - `shortcutConfig`, `commandPaletteShortcutOnly`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Slash Command Center
+## 11) Slash and Command Workflows
 
 ![Slash command preview](/features/Feature11.gif)
 
-Type `/` to discover and trigger editor actions quickly. Slash commands are fast, predictable, and easy to extend.
+Slash commands and command palette support command discovery and execution without hunting in toolbars.
 
-- Type `/` to reveal actions.
-- Predictable command discovery.
-- Extensible command architecture.
+- Related commands:
+  - `showCommandPalette`, `hideCommandPalette`
+  - `setSlashCommands`, `executeSlashCommand`, `closeSlashMenu`
+  - `registerCommand`, `registerSlashCommand`
+- Related props:
+  - `slashCommandVisibility`, `featureFlags.commandPalette`, `featureFlags.slashCommand`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
 
-## Custom Blocks
+## 12) Custom Blocks
 
 ![Custom block preview](/features/Feature12.gif)
 
-Create custom nodes and schema extensions for product-specific UX. If defaults are not enough, the editor can be shaped around your needs.
+Custom node support lets you build product-specific content blocks and keep structured data in editor state.
 
-- Create custom nodes.
-- Inject product-specific blocks.
-- Extend schema behavior safely.
+- Related APIs:
+  - `createCustomNodeExtension(...)`
+  - `createExtension(...)`
+  - `insertCustomNode`
 
 | Package | Availability |
 | --- | --- |
 | `@lyfie/luthor` | Yes |
 | `@lyfie/luthor-headless` | Yes |
+
+## Where to go next
+
+- Preset users: [@lyfie/luthor](/docs/getting-started/luthor/)
+- Headless users: [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
+- Full props map: [Luthor Props Reference](/docs/luthor/props-reference/)

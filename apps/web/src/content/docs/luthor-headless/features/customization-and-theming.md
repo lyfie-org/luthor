@@ -5,11 +5,12 @@ description: Custom nodes, theme tokens, and extension-level customization.
 
 # Customization and Theming
 
-This group covers custom block logic and theming APIs.
+This group covers custom node composition and theme token control.
 
 ## Included APIs
 
 - `createCustomNodeExtension`
+- `createExtension`
 - `defaultLuthorTheme`
 - `mergeThemes`
 - `createEditorThemeStyleVars`
@@ -59,3 +60,9 @@ const theme = mergeThemes(defaultLuthorTheme, {
   },
 });
 ```
+
+## Practical notes
+
+- Keep custom nodes small and composable.
+- Use typed payloads in custom node creation to avoid implicit schema drift.
+- Prefer token-level theme overrides over ad-hoc CSS overrides whenever possible.

@@ -22,7 +22,7 @@ export function App() {
 
 ## Props
 
-`HTMLEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
+`HTMLEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to HTML.
 
 - `initialMode`: `'visual' (default) | 'json' | 'html'`
 - `defaultEditorView`: `'visual' (default) | 'json' | 'html'`
@@ -30,4 +30,14 @@ export function App() {
 
 ## Behavior
 
-Provides markdown/html-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and disables draggable blocks plus metadata-heavy features like embeds, media, and custom nodes.
+Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and disables metadata-heavy features by default.
+
+## Default modes
+
+- `availableModes`: `["visual", "json", "html"]`
+
+## Good fit
+
+- CMS integrations that store sanitized HTML
+- HTML-first publishing pipelines
+- Apps with strict HTML output requirements

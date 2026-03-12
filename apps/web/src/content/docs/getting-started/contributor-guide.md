@@ -5,7 +5,7 @@ description: Monorepo architecture, local workflows, docs tooling, and contribut
 
 # Contributor Guide
 
-This page is the fastest path for contributors working on `@lyfie/luthor` and `@lyfie/luthor-headless`.
+This is the fastest path for contributors working on `@lyfie/luthor` and `@lyfie/luthor-headless`.
 
 ## Prerequisites
 
@@ -14,11 +14,11 @@ This page is the fastest path for contributors working on `@lyfie/luthor` and `@
 
 ## Monorepo map
 
-- `packages/headless`: headless runtime, extension system, and JSON/Markdown/HTML bridges.
+- `packages/headless`: headless runtime, extension system, conversion bridges, theme utilities.
 - `packages/luthor`: preset package built on top of headless.
-- `apps/demo`: Vite playground for rapid preset QA.
-- `apps/web`: docs + marketing site (this documentation lives here).
-- `tools`: release hardening, rule contracts, size checks, and workflow scripts.
+- `apps/demo`: Vite playground for preset behavior QA.
+- `apps/web`: docs + marketing site. All docs pages live here.
+- `tools`: release hardening, contracts, size checks, and CI support scripts.
 
 ## Local development commands
 
@@ -47,24 +47,31 @@ pnpm -C packages/luthor test
 ## Docs workflow (`apps/web`)
 
 1. Add or edit markdown files in `apps/web/src/content/docs/**`.
-2. Keep `title` and `description` frontmatter set.
+2. Keep `title` and `description` frontmatter current and accurate.
 3. Regenerate the static docs index:
 
 ```bash
 pnpm -C apps/web run sync:docs
 ```
 
-4. If you changed content for LLM files, run:
+4. Regenerate LLM artifacts:
 
 ```bash
 pnpm -C apps/web run sync:llms
 ```
 
-5. Preview docs locally:
+5. Validate docs locally:
 
 ```bash
 pnpm -C apps/web run dev
 ```
+
+## Docs quality bar
+
+- Explain features in plain English first, then show APIs.
+- Include every relevant prop/method/feature flag in reference pages.
+- Keep examples practical and copy-paste friendly.
+- Keep docs and runtime behavior aligned. If behavior changes, docs must change in the same PR.
 
 ## Where to start by topic
 
@@ -79,4 +86,5 @@ pnpm -C apps/web run dev
 - Add or update tests in touched package when behavior changes.
 - Run `pnpm lint` and impacted package tests.
 - Run `pnpm -C apps/web run sync:docs` if docs changed.
+- Run `pnpm -C apps/web run sync:llms` when docs content changes.
 - Include before/after screenshots or GIFs for UX changes.

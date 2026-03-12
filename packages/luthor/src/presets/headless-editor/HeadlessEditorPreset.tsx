@@ -177,6 +177,8 @@ type HeadlessEditorSourceError = {
 type HeadlessEditorMethods = {
   injectJSON: (content: string) => void;
   getJSON: () => string;
+  getMarkdown: () => string;
+  getHTML: () => string;
 };
 
 export type HeadlessEditorPresetMode = (typeof HEADLESS_EDITOR_DEFAULT_MODES)[number];
@@ -311,6 +313,8 @@ function HeadlessEditorContent({
         }
       },
       getJSON: () => convertJSONToSource("json", exportApi.toJSON()),
+      getMarkdown: () => convertJSONToSource("markdown", exportApi.toJSON()),
+      getHTML: () => convertJSONToSource("html", exportApi.toJSON()),
     }),
     [exportApi, importApi, syncSourceStateFromVisual],
   );
@@ -733,6 +737,8 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
         methods ?? {
           injectJSON: () => {},
           getJSON: () => convertJSONToSource("json", EMPTY_DOCUMENT),
+          getMarkdown: () => convertJSONToSource("markdown", EMPTY_DOCUMENT),
+          getHTML: () => convertJSONToSource("html", EMPTY_DOCUMENT),
         },
       [methods],
     );

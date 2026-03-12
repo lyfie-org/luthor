@@ -1296,6 +1296,29 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     });
   });
 
+  it("exposes JSON, markdown, and html getters through onReady methods", () => {
+    const exportedDocument = { root: { children: [{ type: "paragraph", marker: "from-visual" }] } };
+    const onReady = vi.fn();
+    mockEditorApi.export.toJSON.mockReturnValue(exportedDocument);
+    jsonToMarkdownMock.mockReturnValue("## heading");
+    jsonToHTMLMock.mockReturnValue("<p>heading</p>");
+
+    render(<ExtensiveEditor showDefaultContent={false} onReady={onReady} />);
+
+    expect(onReady).toHaveBeenCalledTimes(1);
+    const methods = onReady.mock.calls[0]?.[0] as {
+      getJSON: () => string;
+      getMarkdown: () => string;
+      getHTML: () => string;
+    };
+
+    expect(methods.getJSON()).toBe(JSON.stringify(exportedDocument));
+    expect(methods.getMarkdown()).toBe("## heading");
+    expect(methods.getHTML()).toBe("<p>heading</p>");
+    expect(jsonToMarkdownMock).toHaveBeenCalledWith(exportedDocument);
+    expect(jsonToHTMLMock).toHaveBeenCalledWith(exportedDocument);
+  });
+
   it("does not re-import untouched html source when returning to visual-editor mode", async () => {
     render(
       <ExtensiveEditor

@@ -1,6 +1,7 @@
 import {
   ComposeEditor,
   ExtensiveEditor,
+  type ExtensiveEditorRef,
   HeadlessEditorPreset,
   HTMLEditor,
   LegacyRichEditor,
@@ -9,7 +10,7 @@ import {
   SlashEditor,
 } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDemoTheme } from "./hooks/useDemoTheme";
 import "highlight.js/styles/github.css";
 
@@ -37,6 +38,140 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
 function App() {
   const { theme, toggleTheme } = useDemoTheme();
   const [preset, setPreset] = useState<PresetId>("extensive");
+  const demoEditorHostRef = useRef<HTMLDivElement | null>(null);
+  const extensiveEditorRef = useRef<ExtensiveEditorRef | null>(null);
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAutoSavedSnapshotRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (preset !== "extensive") {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+        autoSaveTimeoutRef.current = null;
+      }
+      lastAutoSavedSnapshotRef.current = null;
+      return;
+    }
+
+    const host = demoEditorHostRef.current;
+    if (!host) {
+      return;
+    }
+
+    const scheduleAutoSave = () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        const methods = extensiveEditorRef.current;
+        if (!methods) {
+          return;
+        }
+
+        const snapshot = {
+          json: methods.getJSON(),
+          markdown: methods.getMarkdown(),
+          html: methods.getHTML(),
+        };
+        const snapshotSignature = JSON.stringify(snapshot);
+        if (lastAutoSavedSnapshotRef.current === snapshotSignature) {
+          return;
+        }
+
+        lastAutoSavedSnapshotRef.current = snapshotSignature;
+
+        console.log("extensive-editor-auto-save", snapshot);
+      }, 2000);
+    };
+
+    const isEditorInteractionTarget = (target: EventTarget | null): target is HTMLElement => {
+      if (!(target instanceof HTMLElement)) {
+        return false;
+      }
+
+      return target.closest(".luthor-editor") !== null;
+    };
+
+    let hasUserInteracted = false;
+
+    const handleEditorActivity = (event: Event) => {
+      const target = event.target;
+      if (!isEditorInteractionTarget(target)) {
+        return;
+      }
+
+      hasUserInteracted = true;
+      scheduleAutoSave();
+    };
+
+    const handleEditorKeydown = (event: KeyboardEvent) => {
+      if (!isEditorInteractionTarget(event.target)) {
+        return;
+      }
+
+      const isContentMutationKey =
+        event.key === "Enter" ||
+        event.key === "Backspace" ||
+        event.key === "Delete" ||
+        event.key === "Tab";
+      const isCommandMutationKey = event.ctrlKey || event.metaKey;
+
+      if (!isContentMutationKey && !isCommandMutationKey) {
+        return;
+      }
+
+      hasUserInteracted = true;
+      scheduleAutoSave();
+    };
+
+    const observer = new MutationObserver((mutations) => {
+      if (!hasUserInteracted) {
+        return;
+      }
+
+      const hasEditorMutation = mutations.some((mutation) => {
+        const target = mutation.target;
+        const element = target instanceof HTMLElement ? target : target.parentElement;
+        return element?.closest(".luthor-editor") !== null;
+      });
+
+      if (hasEditorMutation) {
+        scheduleAutoSave();
+      }
+    });
+
+    observer.observe(host, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+    });
+
+    host.addEventListener("input", handleEditorActivity, true);
+    host.addEventListener("beforeinput", handleEditorActivity, true);
+    host.addEventListener("change", handleEditorActivity, true);
+    host.addEventListener("paste", handleEditorActivity, true);
+    host.addEventListener("cut", handleEditorActivity, true);
+    host.addEventListener("drop", handleEditorActivity, true);
+    host.addEventListener("click", handleEditorActivity, true);
+    host.addEventListener("keydown", handleEditorKeydown, true);
+
+    return () => {
+      observer.disconnect();
+      host.removeEventListener("input", handleEditorActivity, true);
+      host.removeEventListener("beforeinput", handleEditorActivity, true);
+      host.removeEventListener("change", handleEditorActivity, true);
+      host.removeEventListener("paste", handleEditorActivity, true);
+      host.removeEventListener("cut", handleEditorActivity, true);
+      host.removeEventListener("drop", handleEditorActivity, true);
+      host.removeEventListener("click", handleEditorActivity, true);
+      host.removeEventListener("keydown", handleEditorKeydown, true);
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+        autoSaveTimeoutRef.current = null;
+      }
+    };
+  }, [preset]);
 
   const presetNode = useMemo(() => {
     switch (preset) {
@@ -82,6 +217,7 @@ function App() {
       default:
         return (
           <ExtensiveEditor
+            ref={extensiveEditorRef}
             placeholder={{
               visual: "Write your story...",
               json: "Paste JSON document...",
@@ -125,7 +261,9 @@ function App() {
 
         <main className="editor-stage">
           <div className="editor-frame">
-            <div className="demo-editor-host">{presetNode}</div>
+            <div className="demo-editor-host" ref={demoEditorHostRef}>
+              {presetNode}
+            </div>
           </div>
         </main>
       </div>
