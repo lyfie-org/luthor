@@ -5,7 +5,7 @@ description: Slash commands, command palette, shortcuts, history, and contextual
 
 # Interaction and Productivity
 
-This group covers keyboard-first and contextual workflows.
+This group covers keyboard-first workflows and contextual editing tools.
 
 ## Included extensions
 
@@ -17,6 +17,24 @@ This group covers keyboard-first and contextual workflows.
 - `contextMenuExtension`
 - `emojiExtension`
 - `draggableBlockExtension`
+
+## Key commands
+
+- History:
+  - `undo`, `redo`
+- Command palette:
+  - `showCommandPalette`, `hideCommandPalette`
+  - `registerCommand`, `unregisterCommand`
+- Slash commands:
+  - `registerSlashCommand`, `unregisterSlashCommand`
+  - `setSlashCommands`, `executeSlashCommand`, `closeSlashMenu`
+- Emoji:
+  - `insertEmoji`, `executeEmojiSuggestion`, `closeEmojiSuggestions`
+  - `getEmojiSuggestions`, `getEmojiCatalog`, `resolveEmojiShortcode`
+- Draggable/context:
+  - extension-driven UI behavior through draggable/context menu plugins
+- Enter behavior:
+  - `insertHardBreak` (from enter key behavior support)
 
 ## Example
 

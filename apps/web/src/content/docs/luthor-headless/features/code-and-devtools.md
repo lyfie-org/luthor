@@ -5,7 +5,7 @@ description: Code blocks, syntax support, and markdown/json conversion tools.
 
 # Code and Devtools
 
-This group covers code editing and developer-facing utilities.
+This group covers code editing and developer-facing conversion utilities.
 
 ## Included extensions and utilities
 
@@ -13,6 +13,17 @@ This group covers code editing and developer-facing utilities.
 - `codeIntelligenceExtension`
 - `codeFormatExtension`
 - `markdownToJSON`, `jsonToMarkdown`
+- `htmlToJSON`, `jsonToHTML`
+
+## Key commands
+
+- `toggleCodeBlock`
+- `setCodeLanguage`
+- `autoDetectCodeLanguage`
+- `getCurrentCodeLanguage`
+- `getCodeLanguageOptions`
+- `copySelectedCodeBlock`
+- `formatText("code")` (inline code)
 
 ## Example: code editor setup
 
@@ -30,7 +41,14 @@ const { Provider, useEditor } = createEditorSystem<typeof extensions>();
 
 function Toolbar() {
   const { commands } = useEditor();
-  return <button onClick={() => commands.insertCodeBlock?.({ language: 'ts' })}>Code Block</button>;
+  return (
+    <div>
+      <button onClick={() => commands.toggleCodeBlock?.()}>Code Block</button>
+      <button onClick={() => commands.setCodeLanguage?.('ts')}>TypeScript</button>
+      <button onClick={() => void commands.autoDetectCodeLanguage?.()}>Auto detect</button>
+      <button onClick={() => void commands.copySelectedCodeBlock?.()}>Copy code</button>
+    </div>
+  );
 }
 
 export function App() {

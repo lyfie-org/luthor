@@ -5,7 +5,7 @@ description: Slash-first preset with draggable and command-focused defaults.
 
 # Slash Editor
 
-Slash-first preset with draggable-focused defaults.
+`SlashEditor` is a slash-first preset tuned for command-driven writing.
 
 ## Usage
 
@@ -29,5 +29,22 @@ export function App() {
 
 ## Behavior
 
-Defaults keep toolbar hidden, enable draggable blocks in visual editor mode, and provide a curated slash-command list for basic editing actions (headings, lists, quote, code block, inline code, bold/italic, links, horizontal rule, table) across Visual/JSON/Markdown/HTML tabs.
+Defaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command allowlist for fast block creation.
+
+## Default modes
+
+- `availableModes`: `["visual", "json", "markdown", "html"]`
+
+## Default slash allowlist
+
+- `format.bold`, `format.italic`, `format.underline`, `format.strikethrough`, `format.code`
+- `block.paragraph`, `block.heading1` to `block.heading6`, `block.quote`, `block.codeblock`
+- `list.bullet`, `list.numbered`, `list.check`
+- `link.insert`, `insert.horizontal-rule`, `insert.table`
+
+## Feature policy notes
+
+- Enforced: `slashCommand: true`, `commandPalette: false`
+- Default: `isToolbarEnabled = false`
+- Override available through props if your product needs a visible toolbar
 

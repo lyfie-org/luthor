@@ -5,13 +5,37 @@ description: Image, iframe, and YouTube embedding features.
 
 # Media and Embeds
 
-This group covers rich media insertion.
+This group covers image, iframe, and YouTube workflows.
 
 ## Included extensions
 
 - `imageExtension`
 - `iframeEmbedExtension`
 - `youTubeEmbedExtension`
+
+## Key commands
+
+- Image:
+  - `insertImage`
+  - `setImageAlignment`
+  - `setImageCaption`
+  - `getImageCaption`
+- iframe:
+  - `insertIframeEmbed`
+  - `setIframeEmbedAlignment`
+  - `resizeIframeEmbed`
+  - `setIframeEmbedCaption`
+  - `getIframeEmbedCaption`
+  - `updateIframeEmbedUrl`
+  - `getIframeEmbedUrl`
+- YouTube:
+  - `insertYouTubeEmbed`
+  - `setYouTubeEmbedAlignment`
+  - `resizeYouTubeEmbed`
+  - `setYouTubeEmbedCaption`
+  - `getYouTubeEmbedCaption`
+  - `updateYouTubeEmbedUrl`
+  - `getYouTubeEmbedUrl`
 
 ## Example
 
@@ -39,8 +63,8 @@ function Toolbar() {
   return (
     <div>
       <button onClick={() => commands.insertImage?.({ src: '/demo/image.png', alt: 'Demo' })}>Image</button>
-      <button onClick={() => commands.insertIframe?.({ src: 'https://example.com' })}>Iframe</button>
-      <button onClick={() => commands.insertYouTube?.('dQw4w9WgXcQ')}>YouTube</button>
+      <button onClick={() => commands.insertIframeEmbed?.('https://example.com')}>Iframe</button>
+      <button onClick={() => commands.insertYouTubeEmbed?.('https://www.youtube.com/watch?v=dQw4w9WgXcQ')}>YouTube</button>
     </div>
   );
 }

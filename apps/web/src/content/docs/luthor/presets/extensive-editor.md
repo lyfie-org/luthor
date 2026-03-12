@@ -5,7 +5,8 @@ description: Full-feature preset and core prop reference.
 
 # Extensive Editor
 
-`ExtensiveEditor` is the base full-feature preset editor.
+`ExtensiveEditor` is the base preset in `@lyfie/luthor`.  
+Every other preset is a focused wrapper around this component.
 
 ## Usage
 
@@ -18,37 +19,67 @@ export function App() {
 }
 ```
 
-## Core props
+## Default behavior snapshot
 
-- `initialTheme`: `'light' (default) | 'dark'`
-- `onThemeChange`: `(theme: 'light' | 'dark') => void`
-- `showDefaultContent`: `true (default) | false`
-- `placeholder`: `'Write anything...' (default) | string | { visual?: string; json?: string; markdown?: string; html?: string }`
-- `initialMode`: `'visual-editor' (default) | 'visual-only' | 'visual' (legacy alias) | 'json' | 'markdown' | 'html'`
-- `availableModes`: `['visual-editor', 'visual-only', 'json', 'markdown', 'html'] (default) | ExtensiveEditorMode[]`
-- `toolbarPosition`: `'top' (default) | 'bottom'`
-- `toolbarAlignment`: `'left' (default) | 'center' | 'right'`
-- `isToolbarEnabled`: `true (default) | false`
-- `minimumDefaultLineHeight`: `1.5 (default) | string | number`
-- `scaleByRatio`: `false (default) | true`
-- `syncHeadingOptionsWithCommands`: `true (default) | false`
-- `commandPaletteShortcutOnly`: `false (default) | true`
-- `editOnClick`: `true (default) | false` (in `visual-only` mode, click jumps into editable `visual-editor` mode at click/nearest line)
-- `isCopyAllowed`: `true (default) | false`
-- `syntaxHighlighting`: `'auto' | 'disabled'` | extension default behavior if omitted
-- `maxListIndentation`: `8 (default) | number` (sub-indent levels below root)
+| Category | Default |
+| --- | --- |
+| Theme | `initialTheme="light"` |
+| Mode | `initialMode="visual-editor"` |
+| Available modes | `["visual-editor", "visual-only", "json", "markdown", "html"]` |
+| Toolbar | Enabled, top, left-aligned |
+| Feature flags | All enabled by default |
+| Line height baseline | `minimumDefaultLineHeight = 1.5` |
+| List indentation | `maxListIndentation = 8` sub-indent levels |
+
+## Core props (high signal)
+
+- Content and mode:
+  - `defaultContent`, `showDefaultContent`, `placeholder`
+  - `initialMode`, `defaultEditorView`, `availableModes`
+  - `isEditorViewTabsVisible` (`isEditorViewsTabVisible` legacy alias)
+- Toolbar:
+  - `isToolbarEnabled`, `isToolbarPinned`
+  - `toolbarPosition`, `toolbarAlignment`, `toolbarLayout`, `toolbarVisibility`
+  - `toolbarClassName`, `toolbarStyleVars`
+- Editing behavior:
+  - `featureFlags`
+  - `editOnClick` (promote `visual-only` to editable `visual-editor`)
+  - `headingOptions`, `paragraphLabel`, `syncHeadingOptionsWithCommands`
+  - `slashCommandVisibility`, `shortcutConfig`, `commandPaletteShortcutOnly`
+- Theme and style:
+  - `theme`, `editorThemeOverrides`
+  - `initialTheme`, `onThemeChange`
+  - `defaultSettings`, `quoteClassName`, `quoteStyleVars`
+- Typography/code options:
+  - `fontFamilyOptions`, `fontSizeOptions`, `lineHeightOptions`
+  - `minimumDefaultLineHeight`, `scaleByRatio`
+  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
+  - `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
+  - `maxListIndentation`
+
+For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
+
+## Mode behavior details
+
+- `visual-editor`: normal editable visual mode.
+- `visual-only`: read mode visual surface. If `editOnClick` is true (default), click can promote to editable mode and place caret near click point.
+- `visual`: accepted legacy alias that maps internally to `visual-editor`.
+- `json`, `markdown`, `html`: source modes with conversion validation on switch.
+
+If source parsing fails, an inline source error panel is shown and visual content is preserved.
 
 ## Lists in Extensive
 
-- Ordered, unordered, and checklist styles are implemented in `@lyfie/luthor-headless` and surfaced in the preset toolbar.
-- `maxListIndentation` applies to all list types (ordered, unordered, checklist), including `Tab` and command-based indentation.
-- Checklist supports two variants:
-  - `strikethrough` (default): checked items render line-through text.
-  - `plain`: checked items do not strike through text.
+- Ordered, unordered, and checklist styles are supported.
+- `maxListIndentation` applies to all list types.
+- Checklist variants:
+  - `strikethrough` (default)
+  - `plain`
+- Style tokens can be rehydrated from imported JSON.
 
 ## Theme callback example (`highlight.js`)
 
-Use `onThemeChange` when host styling must follow the editor's internal theme state (for example, swapping `highlight.js` light/dark styles).
+Use `onThemeChange` when host styling must follow editor theme state.
 
 ```tsx
 'use client';
@@ -63,16 +94,9 @@ export function EditorWithHighlightTheme() {
   const [editorTheme, setEditorTheme] = useState<Theme>('light');
 
   useEffect(() => {
-    const href =
-      editorTheme === 'dark'
-        ? '/highlightjs/github-dark.css'
-        : '/highlightjs/github.css';
-
+    const href = editorTheme === 'dark' ? '/highlightjs/github-dark.css' : '/highlightjs/github.css';
     const existing = document.getElementById(HIGHLIGHT_THEME_LINK_ID);
-    const link =
-      existing instanceof HTMLLinkElement
-        ? existing
-        : document.createElement('link');
+    const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
 
     if (!(existing instanceof HTMLLinkElement)) {
       link.id = HIGHLIGHT_THEME_LINK_ID;
@@ -85,13 +109,7 @@ export function EditorWithHighlightTheme() {
     }
   }, [editorTheme]);
 
-  return (
-    <ExtensiveEditor
-      initialTheme="light"
-      onThemeChange={setEditorTheme}
-      toolbarAlignment="center"
-    />
-  );
+  return <ExtensiveEditor initialTheme="light" onThemeChange={setEditorTheme} />;
 }
 ```
 
@@ -107,10 +125,28 @@ Place these files in your app static assets:
 - `getMarkdown(): string`
 - `getHTML(): string`
 
-## Notes
+```tsx
+import { useRef } from 'react';
+import { ExtensiveEditor, type ExtensiveEditorRef } from '@lyfie/luthor';
 
-This is the base preset that other presets build on.
+export function SaveExample() {
+  const editorRef = useRef<ExtensiveEditorRef>(null);
 
+  const save = () => {
+    const methods = editorRef.current;
+    if (!methods) return;
+    console.log({
+      json: methods.getJSON(),
+      markdown: methods.getMarkdown(),
+      html: methods.getHTML(),
+    });
+  };
 
-
-
+  return (
+    <>
+      <button onClick={save}>Save</button>
+      <ExtensiveEditor ref={editorRef} />
+    </>
+  );
+}
+```

@@ -1,164 +1,232 @@
 ---
 title: Props Reference
-description: Contributor-level prop reference for ExtensiveEditor and all preset wrappers in @lyfie/luthor.
+description: Complete prop and ref reference for ExtensiveEditor and all @lyfie/luthor preset wrappers.
 ---
 
 # Props Reference
 
-This page explains how preset props are layered. Most wrappers inherit `ExtensiveEditorProps` and then constrain modes or features.
+This page is the full prop contract for `@lyfie/luthor` presets.
 
-## 1) `ExtensiveEditorProps` (base preset)
+- Base preset: `ExtensiveEditor`
+- Wrapper presets: `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MDEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
+
+## 1) `ExtensiveEditorProps` (base contract)
 
 ### Content and mode
 
-- `defaultContent?: string`
-- `showDefaultContent?: boolean` (default `true`)
-- `placeholder?: string | { visual?: string; json?: string; markdown?: string; html?: string }`
-- `initialMode?: 'visual-only' | 'visual-editor' | 'visual' | 'json' | 'markdown' | 'html'`
-- `defaultEditorView?: same as initialMode`
-- `availableModes?: readonly ExtensiveEditorMode[]`
-- `isEditorViewTabsVisible?: boolean`
-- `isEditorViewsTabVisible?: boolean` (legacy alias)
-
-### Toolbar and command UI
-
-- `isToolbarEnabled?: boolean` (default `true`)
-- `toolbarPosition?: 'top' | 'bottom'`
-- `toolbarAlignment?: 'left' | 'center' | 'right'`
-- `toolbarLayout?: ToolbarLayout`
-- `toolbarVisibility?: ToolbarVisibility`
-- `toolbarClassName?: string`
-- `toolbarStyleVars?: ToolbarStyleVars`
-- `isToolbarPinned?: boolean`
-- `slashCommandVisibility?: SlashCommandVisibility`
-- `commandPaletteShortcutOnly?: boolean`
-- `shortcutConfig?: ShortcutConfig`
-
-### Features and editing behavior
-
-- `featureFlags?: FeatureFlagOverrides`
-- `editOnClick?: boolean` (visual-only to visual-editor promotion on click)
-- `isDraggableBoxEnabled?: boolean` (mapped into draggable feature flag)
-- `syncHeadingOptionsWithCommands?: boolean`
-- `headingOptions?: readonly ('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6')[]`
-- `paragraphLabel?: string`
-- `isCopyAllowed?: boolean`
-
-### Theme and style
-
-- `initialTheme?: 'light' | 'dark'`
-- `onThemeChange?: (theme: 'light' | 'dark') => void`
-- `theme?: Partial<LuthorTheme>`
-- `editorThemeOverrides?: LuthorEditorThemeOverrides`
-- `quoteClassName?: string`
-- `quoteStyleVars?: QuoteStyleVars`
-- `defaultSettings?: DefaultSettings`
-- `className?: string`
-- `variantClassName?: string`
-
-### Typography and code options
-
-- `fontFamilyOptions?: readonly FontFamilyOption[]`
-- `fontSizeOptions?: readonly FontSizeOption[]`
-- `lineHeightOptions?: readonly LineHeightOption[]`
-- `minimumDefaultLineHeight?: string | number`
-- `scaleByRatio?: boolean`
-- `syntaxHighlighting?: 'auto' | 'disabled'`
-- `codeHighlightProvider?: CodeHighlightProvider | null`
-- `loadCodeHighlightProvider?: () => Promise<CodeHighlightProvider | null>`
-- `maxAutoDetectCodeLength?: number`
-- `languageOptions?: readonly string[] | CodeLanguageOptionsConfig`
-- `maxListIndentation?: number` (sub-indent depth)
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `defaultContent` | `string` | `undefined` | Injected on ready when present. |
+| `showDefaultContent` | `boolean` | `true` | When true and `defaultContent` is empty, ships with welcome JSON content. |
+| `placeholder` | `string \| { visual?: string; json?: string; markdown?: string; html?: string }` | `"Write anything..."` | Source modes have dedicated default placeholders. |
+| `initialMode` | `'visual-only' \| 'visual-editor' \| 'visual' \| 'json' \| 'markdown' \| 'html'` | `'visual-editor'` | `visual` is accepted and normalized to `visual-editor`. |
+| `defaultEditorView` | same as `initialMode` | `undefined` | If set, overrides `initialMode` for first view. |
+| `availableModes` | `readonly ExtensiveEditorMode[]` | `['visual-editor', 'visual-only', 'json', 'markdown', 'html']` | Invalid initial/default mode falls back to first available mode. |
+| `isEditorViewTabsVisible` | `boolean` | `true` | Preferred prop name for mode tabs visibility. |
+| `isEditorViewsTabVisible` | `boolean` | `undefined` | Legacy alias; used when preferred prop is not provided. |
 
 ### Lifecycle and ref
 
-- `onReady?: (methods: ExtensiveEditorRef) => void`
-- Ref methods:
-  - `injectJSON(content: string): void`
-  - `getJSON(): string`
-  - `getMarkdown(): string`
-  - `getHTML(): string`
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `onReady` | `(methods: ExtensiveEditorRef) => void` | `undefined` | Called when editor methods are ready. |
 
-## 2) Preset-specific additions
+`ExtensiveEditorRef` methods:
+
+- `injectJSON(content: string): void`
+- `getJSON(): string`
+- `getMarkdown(): string`
+- `getHTML(): string`
+
+### Toolbar, layout, and visibility
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `isToolbarEnabled` | `boolean` | `true` | Hides toolbar UI only; command wiring still exists. |
+| `isToolbarPinned` | `boolean` | `false` | Sticky pin behavior for top toolbar region. |
+| `toolbarPosition` | `'top' \| 'bottom'` | `'top'` | Top is most common for docs/editing UX. |
+| `toolbarAlignment` | `'left' \| 'center' \| 'right'` | `'left'` | Alignment inside toolbar region. |
+| `toolbarLayout` | `ToolbarLayout` | `undefined` | Use default/traditional/custom section layouts. |
+| `toolbarVisibility` | `ToolbarVisibility` | `undefined` | Per-toolbar-item visibility overrides. |
+| `toolbarClassName` | `string` | `undefined` | Class name for toolbar root. |
+| `toolbarStyleVars` | `ToolbarStyleVars` | `undefined` | CSS custom properties for toolbar theme tokens. |
+| `className` | `string` | `undefined` | Class on preset wrapper root. |
+| `variantClassName` | `string` | `undefined` | Class on preset variant shell. |
+
+### Feature gating and behavior
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `featureFlags` | `FeatureFlagOverrides` | `undefined` | Partial override map for all extensive feature flags. |
+| `isDraggableBoxEnabled` | `boolean` | `undefined` | Convenience alias for draggable behavior; merges into `featureFlags.draggableBlock`. |
+| `editOnClick` | `boolean` | `true` | In `visual-only` mode, click promotes to editable mode and places caret near click. |
+| `syncHeadingOptionsWithCommands` | `boolean` | `true` | Keeps command palette/slash heading options synced with heading controls. |
+| `headingOptions` | `readonly ('h1' \| 'h2' \| 'h3' \| 'h4' \| 'h5' \| 'h6')[]` | all levels | Filters available heading levels. |
+| `paragraphLabel` | `string` | `'Paragraph'` | Label used in command-generated block entry. |
+| `isCopyAllowed` | `boolean` | `true` | Used by code intelligence copy behavior. |
+
+### Slash, palette, and shortcuts
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `slashCommandVisibility` | `SlashCommandVisibility` | `undefined` | Supports allow/deny filters or explicit selection arrays. |
+| `shortcutConfig` | `ShortcutConfig` | `undefined` | Override bindings, disable command IDs, collision/native conflict behavior. |
+| `commandPaletteShortcutOnly` | `boolean` | `false` | When true, palette shows only commands that currently have shortcuts. |
+
+### Theme and style system
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `initialTheme` | `'light' \| 'dark'` | `'light'` | Initial theme state for preset UI. |
+| `onThemeChange` | `(theme: 'light' \| 'dark') => void` | `undefined` | Called whenever theme changes. |
+| `theme` | `Partial<LuthorTheme>` | `undefined` | Deep merge into default headless theme. |
+| `editorThemeOverrides` | `LuthorEditorThemeOverrides` | `undefined` | Token-level CSS var bridge for editor theme. |
+| `defaultSettings` | `DefaultSettings` | `undefined` | High-level style defaults (font, link, list, quote, table, hr, placeholder, codeblock, toolbar). |
+| `quoteClassName` | `string` | `undefined` | Extra class merged into quote node styles. |
+| `quoteStyleVars` | `QuoteStyleVars` | `undefined` | Quote visual CSS vars. |
+
+### Typography and code configuration
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `fontFamilyOptions` | `readonly FontFamilyOption[]` | built-in list | Includes `default`, `inter`, `merriweather`, `jetbrains-mono` by default. |
+| `fontSizeOptions` | `readonly FontSizeOption[]` | built-in list | Includes common pixel sizes + default option. |
+| `lineHeightOptions` | `readonly LineHeightOption[]` | built-in list | Includes default and common ratios. |
+| `minimumDefaultLineHeight` | `string \| number` | `1.5` | Validated and normalized; invalid values fall back to `1.5`. |
+| `scaleByRatio` | `boolean` | `false` | Used by image resize behavior. |
+| `syntaxHighlighting` | `'auto' \| 'disabled'` | extension default | Controls code syntax highlighting behavior. |
+| `codeHighlightProvider` | `CodeHighlightProvider \| null` | `undefined` | Inject a concrete provider implementation. |
+| `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
+| `maxAutoDetectCodeLength` | `number` | `undefined` | Max code length for language autodetect. |
+| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`). |
+| `maxListIndentation` | `number` | `8` | Maximum sub-indent levels below root list level. |
+
+## 2) Preset-specific prop layers
 
 ### `ComposeEditorProps`
 
-Inherits `ExtensiveEditorProps` (except direct `featureFlags`), then adds:
+`ComposeEditorProps = Omit<ExtensiveEditorProps, "featureFlags"> & { featureFlags?: FeatureFlagOverrides; compactToolbar?: boolean }`
 
-- `featureFlags?: FeatureFlagOverrides`
-- `compactToolbar?: boolean`
-
-Default modes are constrained to `['visual', 'json']` and media or metadata-heavy features are disabled by default.
+- Adds:
+  - `featureFlags?`
+  - `compactToolbar?: boolean` (default `false`)
+- Forces mode profile:
+  - `availableModes = ["visual", "json"]`
 
 ### `SimpleEditorProps`
 
-Purpose-built message input wrapper.
+`SimpleEditor` is a purpose-built message input wrapper and does not expose the full extensive surface directly.
 
-- `formattingOptions?: { bold?: boolean; italic?: boolean; strikethrough?: boolean }`
-- `onSend?: (payload: SimpleEditorSendPayload) => void`
-- `outputFormat?: 'md' | 'json'`
-- `clearOnSend?: boolean`
-- `submitOnEnter?: boolean`
-- `allowShiftEnter?: boolean`
-- `minHeight | maxHeight | minWidth | maxWidth`
-- `toolbarButtons?: readonly SimpleToolbarButton[]`
-- `showBottomToolbar?: boolean`
-- `showSendButton?: boolean`
-- `sendButtonPlacement?: 'inside' | 'right'`
+| Prop | Type | Default |
+| --- | --- | --- |
+| `className` / `variantClassName` | `string` | `undefined` |
+| `initialTheme` | `'light' \| 'dark'` | inherited |
+| `onThemeChange` | callback | `undefined` |
+| `theme` | `Partial<LuthorTheme>` | `undefined` |
+| `defaultContent` | `string` | `undefined` |
+| `showDefaultContent` | `boolean` | `false` |
+| `placeholder` | `ExtensiveEditorProps["placeholder"]` | `undefined` |
+| `formattingOptions` | `{ bold?: boolean; italic?: boolean; strikethrough?: boolean }` | all enabled |
+| `onSend` | `(payload: SimpleEditorSendPayload) => void` | `undefined` |
+| `outputFormat` | `'md' \| 'json'` | `'md'` |
+| `clearOnSend` | `boolean` | `true` |
+| `allowEmptySend` | `boolean` | `false` |
+| `submitOnEnter` | `boolean` | `false` |
+| `allowShiftEnter` | `boolean` | `true` |
+| `minHeight` | `number \| string` | `56` |
+| `maxHeight` | `number \| string` | `220` |
+| `minWidth` | `number \| string` | `240` |
+| `maxWidth` | `number \| string` | `'100%'` |
+| `showBottomToolbar` | `boolean` | `true` |
+| `toolbarButtons` | `readonly SimpleToolbarButton[]` | `[]` |
+| `toolbarClassName` | `string` | `undefined` |
+| `toolbarStyle` | `CSSProperties` | `undefined` |
+| `showSendButton` | `boolean` | `true` |
+| `sendButtonPlacement` | `'inside' \| 'right'` | `'inside'` |
+| `sendButtonContent` | `ReactNode` | `'Send'` |
+| `sendButtonAriaLabel` | `string` | `'Send message'` |
+| `sendButtonClassName` | `string` | `undefined` |
+| `scrollAreaClassName` | `string` | `undefined` |
+
+`SimpleEditorSendPayload`:
+
+- `format: 'md' | 'json'`
+- `text: string` (selected output format)
+- `markdown: string`
+- `json: string`
 
 ### `LegacyRichEditorProps`
 
-Inherits `ExtensiveEditorProps` but constrains source and mode behavior:
+`LegacyRichEditorProps = Omit<ExtensiveEditorProps, "featureFlags" | "availableModes" | "initialMode" | "defaultEditorView"> & { sourceFormat?: 'markdown' | 'html' | 'both'; initialMode?: LegacyRichEditorMode; defaultEditorView?: LegacyRichEditorMode; featureFlags?: FeatureFlagOverrides }`
 
-- `sourceFormat?: 'markdown' | 'html' | 'both'`
-- `initialMode?: LegacyRichEditorMode`
-- `defaultEditorView?: LegacyRichEditorMode`
-- `featureFlags?: FeatureFlagOverrides`
+- `sourceFormat` default: `'both'`
+- Mode sets by source format:
+  - `'both'` -> `['visual', 'markdown', 'html']`
+  - `'markdown'` -> `['visual', 'json', 'markdown']`
+  - `'html'` -> `['visual', 'json', 'html']`
 
 ### `MDEditorProps`
 
-`LegacyRichEditor` wrapper with:
-
-- `sourceFormat` fixed to `'markdown'`
-- modes limited to `'visual' | 'json' | 'markdown'`
+- Inherits `LegacyRichEditorProps`
+- Fixes source format to markdown
+- Allowed modes: `'visual' | 'json' | 'markdown'`
 
 ### `HTMLEditorProps`
 
-`LegacyRichEditor` wrapper with:
-
-- `sourceFormat` fixed to `'html'`
-- modes limited to `'visual' | 'json' | 'html'`
+- Inherits `LegacyRichEditorProps`
+- Fixes source format to html
+- Allowed modes: `'visual' | 'json' | 'html'`
 
 ### `SlashEditorProps`
 
-Inherits most of `ExtensiveEditorProps`, adds:
+`SlashEditorProps = Omit<ExtensiveEditorProps, "featureFlags" | "isToolbarEnabled"> & { slashVisibility?: SlashCommandVisibility; isDraggableEnabled?: boolean; featureFlags?: FeatureFlagOverrides; isToolbarEnabled?: boolean }`
 
-- `slashVisibility?: SlashCommandVisibility`
-- `isDraggableEnabled?: boolean`
-- `featureFlags?: FeatureFlagOverrides`
-- `isToolbarEnabled?: boolean` (default `false`)
-
-Slash command support is enforced on.
+- `isToolbarEnabled` default: `false`
+- `isDraggableEnabled` default: `true`
+- Enforced behavior:
+  - `slashCommand: true`
+  - `commandPalette: false`
 
 ### `HeadlessEditorPresetProps`
 
-Inherits `ExtensiveEditorProps` but constrains:
+`HeadlessEditorPresetProps = Omit<ExtensiveEditorProps, "featureFlags" | "availableModes" | "initialMode" | "defaultEditorView"> & { initialMode?: 'visual' | 'json' | 'markdown' | 'html'; defaultEditorView?: same; featureFlags?: FeatureFlagOverrides }`
 
-- `initialMode?: 'visual' | 'json' | 'markdown' | 'html'`
-- `defaultEditorView?: same`
-- `featureFlags?: FeatureFlagOverrides`
+- Allowed modes fixed to: `['visual', 'json', 'markdown', 'html']`
+- Uses lightweight feature policy defaults and enforcement.
 
-Uses a text-pill toolbar and metadata-light defaults.
+## 3) Practical usage patterns
 
-## 3) Practical patterns
-
-Visual + markdown workflow:
+### Save all output formats from ref
 
 ```tsx
-<MDEditor initialMode="visual" defaultEditorView="markdown" />
+import { useRef } from 'react';
+import { ExtensiveEditor, type ExtensiveEditorRef } from '@lyfie/luthor';
+
+export function SaveExample() {
+  const ref = useRef<ExtensiveEditorRef>(null);
+
+  return (
+    <>
+      <button
+        onClick={() => {
+          const methods = ref.current;
+          if (!methods) return;
+          console.log({
+            json: methods.getJSON(),
+            markdown: methods.getMarkdown(),
+            html: methods.getHTML(),
+          });
+        }}
+      >
+        Save
+      </button>
+      <ExtensiveEditor ref={ref} />
+    </>
+  );
+}
 ```
 
-Disable heavy features without changing preset:
+### Disable heavy features without changing preset
 
 ```tsx
 <ExtensiveEditor
@@ -172,19 +240,14 @@ Disable heavy features without changing preset:
 />
 ```
 
-Sync host syntax theme with editor theme:
+### Markdown-first editing profile
 
 ```tsx
-<ExtensiveEditor
-  initialTheme="light"
-  onThemeChange={(theme) => {
-    console.log(theme);
-  }}
-/>
+<MDEditor initialMode="visual" defaultEditorView="markdown" />
 ```
 
 ## 4) Related pages
 
-- [/docs/luthor/architecture/](/docs/luthor/architecture/)
-- [/docs/luthor/feature-flags/](/docs/luthor/feature-flags/)
-- [/docs/luthor/presets/](/docs/luthor/presets/)
+- [Architecture](/docs/luthor/architecture/)
+- [Feature Flags](/docs/luthor/feature-flags/)
+- [Presets](/docs/luthor/presets/)

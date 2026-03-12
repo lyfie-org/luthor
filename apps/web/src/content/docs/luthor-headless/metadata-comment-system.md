@@ -5,8 +5,9 @@ description: How luthor metadata envelopes preserve unsupported and non-native d
 
 # Metadata Comment System
 
-When converting between editor JSON and Markdown or HTML, not every node or field can be represented natively.  
-`@lyfie/luthor-headless` preserves that data using metadata envelopes encoded as HTML comments.
+When converting between JSON and Markdown/HTML, some node types or fields cannot be represented natively.
+
+`@lyfie/luthor-headless` preserves that data in metadata envelopes stored as HTML comments.
 
 ## Envelope format
 

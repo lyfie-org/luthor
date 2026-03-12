@@ -5,37 +5,51 @@ description: "Internal runtime model of @lyfie/luthor-headless: editor system, e
 
 # @lyfie/luthor-headless Architecture
 
-`@lyfie/luthor-headless` is a typed extension runtime on top of Lexical. It does not ship preset UI; you compose your own UI from commands and active states.
+`@lyfie/luthor-headless` is a typed extension runtime built on Lexical.
+
+- No preset UI is forced on you.
+- You mount extensions, then build UI from typed `commands` and `activeStates`.
 
 ## High-level runtime flow
 
 1. Define an extension array.
 2. Create a typed system with `createEditorSystem<typeof extensions>()`.
 3. Render `<Provider extensions={extensions}>`.
-4. Use `useEditor()` in your UI for `commands`, `activeStates`, `export`, and `import`.
-5. Render `<RichText />` or your own contenteditable plugin layer.
+4. Use `useEditor()` in UI components.
+5. Render `<RichText />` (or your own contenteditable plugin stack).
 
-## Key modules
+## Core modules
 
-- `packages/headless/src/core/createEditorSystem.tsx`: provider and hook factory.
-- `packages/headless/src/core/createExtension.ts`: typed extension factory.
-- `packages/headless/src/extensions/**`: built-in extension catalog.
-- `packages/headless/src/core/markdown.ts` and `html.ts`: JSON <-> Markdown/HTML bridges.
-- `packages/headless/src/core/metadata-envelope.ts`: metadata comment preservation layer.
+- `packages/headless/src/core/createEditorSystem.tsx`
+  - Typed provider/hook generation
+  - Command/state aggregation
+  - Extension registration order by `initPriority`
+- `packages/headless/src/core/createExtension.ts`
+  - Extension factory for quick custom extensions
+- `packages/headless/src/extensions/**`
+  - Built-in extension catalog
+- `packages/headless/src/core/markdown.ts` and `html.ts`
+  - JSON <-> Markdown/HTML conversion bridges
+- `packages/headless/src/core/metadata-envelope.ts`
+  - Metadata envelope preservation for unsupported/non-native fields
 
-## What `Provider` does
+## What Provider is responsible for
 
-- Collects Lexical nodes from all extensions (`getNodes`).
-- Registers extensions sorted by `config.initPriority` (higher first).
-- Aggregates extension commands into one typed `commands` object.
-- Aggregates async state queries into `activeStates`.
-- Renders plugins before children when `position` is `'before'`.
-- Renders plugins after children when `position` is `'after'`.
-- Exposes `export.toJSON()` and `import.fromJSON(...)`.
+- Collect Lexical nodes from all extensions.
+- Register extensions and cleanup subscriptions.
+- Build a typed command surface from extension `getCommands(...)`.
+- Build async state query map from `getStateQueries(...)`.
+- Keep `activeStates` in sync on editor updates.
+- Render plugins before/after children based on extension `config.position`.
+- Expose:
+  - `export.toJSON()`
+  - `import.fromJSON(...)`
+  - `listeners.registerUpdate(...)`
+  - `listeners.registerPaste(...)`
 
-## Extension lifecycle contract
+## Extension contract
 
-Every extension follows the `Extension` interface:
+Each extension follows the `Extension` interface:
 
 - `name`, `category`, `config`
 - `register(editor) => cleanup`
@@ -44,28 +58,37 @@ Every extension follows the `Extension` interface:
 - `getPlugins()`
 - `getNodes()` (optional)
 
-Use `createExtension(...)` for simple cases. Extend `BaseExtension` for advanced behavior.
+Use `createExtension(...)` for simple command/plugin additions.  
+Use `BaseExtension` for richer lifecycle customization.
 
 ## Runtime mutation note
 
-`extensionsAPI.add/remove/reorder` is intentionally read-only at runtime and logs warnings. To change extension sets, pass a new `extensions` array to `Provider`.
+`extensionsAPI.add/remove/reorder` is intentionally read-only at runtime and logs warnings.  
+To change loaded extensions, pass a new `extensions` array to `<Provider />`.
+
+## RichText rendering model
+
+`RichText` / `richTextExtension` supports:
+
+- String or element placeholders
+- `classNames` and `styles` for container/content/placeholder
+- `nonEditableVisualMode`
+- `onEditIntent` callback (useful for read-first surfaces)
 
 ## Bridge architecture
 
 Source conversion is JSON-centered:
 
-- visual editor state is JSON
-- `jsonToMarkdown` and `jsonToHTML` export source
-- `markdownToJSON` and `htmlToJSON` import source
-- metadata comments preserve unsupported nodes and non-native fields
+- Visual editor state is JSON.
+- `jsonToMarkdown` / `markdownToJSON`
+- `jsonToHTML` / `htmlToJSON`
+- Metadata envelopes preserve unsupported nodes and extra fields.
 
-Read full details:
-
-- [/docs/luthor-headless/metadata-comment-system/](/docs/luthor-headless/metadata-comment-system/)
+More detail: [Metadata Comment System](/docs/luthor-headless/metadata-comment-system/).
 
 ## Contributor entry points
 
-- Build new extension APIs: `packages/headless/src/extensions`
-- Update type contracts: `packages/headless/src/extensions/types.ts`
-- Adjust provider lifecycle and state behavior: `packages/headless/src/core/createEditorSystem.tsx`
-- Adjust bridge behavior: `packages/headless/src/core/markdown.ts`, `packages/headless/src/core/html.ts`, `packages/headless/src/core/metadata-envelope.ts`
+- Extension authoring: `packages/headless/src/extensions`
+- Type contracts: `packages/headless/src/extensions/types.ts`
+- Provider runtime behavior: `packages/headless/src/core/createEditorSystem.tsx`
+- Bridge logic: `packages/headless/src/core/markdown.ts`, `packages/headless/src/core/html.ts`, `packages/headless/src/core/metadata-envelope.ts`

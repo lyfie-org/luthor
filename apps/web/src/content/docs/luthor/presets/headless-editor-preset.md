@@ -5,7 +5,7 @@ description: Reference preset showing direct headless composition.
 
 # Headless Editor
 
-Basic rich-text preset with lightweight defaults and source tabs.
+`HeadlessEditorPreset` is a lightweight, source-aware preset with a simple text-pill toolbar.
 
 ## Usage
 
@@ -28,7 +28,25 @@ export function App() {
 
 ## Behavior
 
-Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, HR, hard break, undo/redo), supports Visual/JSON/MD/HTML tabs, and keeps draggable blocks plus metadata-heavy features disabled.
+Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, horizontal rule, hard break, undo/redo), supports Visual/JSON/Markdown/HTML tabs, and keeps metadata-heavy features disabled by default.
+
+## Default mode profile
+
+- `availableModes`: `["visual", "json", "markdown", "html"]`
+
+## Default feature profile
+
+Enabled by default:
+
+- `bold`, `italic`, `strikethrough`, `list`, `history`
+- `blockFormat`, `code`, `codeFormat`
+- `horizontalRule`, `tabIndent`, `enterKeyBehavior`
+
+Disabled and enforced off:
+
+- `table`, `image`, `iframeEmbed`, `youTubeEmbed`
+- `customNode`, `slashCommand`, `commandPalette`
+- `contextMenu`, `floatingToolbar`, `draggableBlock`, `themeToggle`
 
 ## Ref API
 
@@ -38,5 +56,37 @@ Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists,
 - `getJSON(): string`
 - `getMarkdown(): string`
 - `getHTML(): string`
+
+Example:
+
+```tsx
+import { useRef } from 'react';
+import { HeadlessEditorPreset, type ExtensiveEditorRef } from '@lyfie/luthor';
+
+export function SaveHeadlessPresetData() {
+  const editorRef = useRef<ExtensiveEditorRef>(null);
+
+  return (
+    <>
+      <button
+        onClick={() => {
+          const methods = editorRef.current;
+          if (!methods) return;
+
+          const snapshot = {
+            json: methods.getJSON(),
+            markdown: methods.getMarkdown(),
+            html: methods.getHTML(),
+          };
+          console.log(snapshot);
+        }}
+      >
+        Save
+      </button>
+      <HeadlessEditorPreset ref={editorRef} />
+    </>
+  );
+}
+```
 
 

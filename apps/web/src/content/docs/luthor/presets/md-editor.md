@@ -22,7 +22,7 @@ export function App() {
 
 ## Props
 
-`MDEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
+`MDEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to markdown.
 
 - `initialMode`: `'visual' (default) | 'json' | 'markdown'`
 - `defaultEditorView`: `'visual' (default) | 'json' | 'markdown'`
@@ -30,5 +30,15 @@ export function App() {
 
 ## Behavior
 
-Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and disables draggable blocks plus metadata-heavy features like embeds, media, and custom nodes.
+Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and disables metadata-heavy features by default.
+
+## Default modes
+
+- `availableModes`: `["visual", "json", "markdown"]`
+
+## Good fit
+
+- Documentation tools
+- Markdown content pipelines
+- Apps that persist markdown or run markdown-first review workflows
 

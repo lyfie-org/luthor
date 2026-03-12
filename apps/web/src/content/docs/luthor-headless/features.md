@@ -5,7 +5,7 @@ description: Grouped feature documentation for @lyfie/luthor-headless.
 
 # Features
 
-Feature docs are grouped to match the home page feature set.
+Feature docs are grouped by real implementation areas so you can find APIs faster.
 
 ## Contributor guides
 
@@ -24,7 +24,7 @@ Feature docs are grouped to match the home page feature set.
 
 For deeper engine-level capability details, see the official Lexical docs: [lexical.dev/docs](https://lexical.dev/docs/intro).
 
-## Base runtime
+## Base runtime example
 
 ```tsx
 import { createEditorSystem, RichText, richTextExtension } from '@lyfie/luthor-headless';
@@ -40,3 +40,14 @@ export function App() {
   );
 }
 ```
+
+## How to read this section
+
+- Each feature-group page lists:
+  - extensions involved
+  - high-signal commands
+  - practical setup examples
+- If you are building a preset-like experience in your app, start with:
+  1. Typography and Text
+  2. Structure and Lists
+  3. Interaction and Productivity

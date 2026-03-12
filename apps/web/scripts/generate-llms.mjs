@@ -54,12 +54,56 @@ function sectionLabel(relativePath) {
   return 'General';
 }
 
+function splitFrontmatter(raw) {
+  if (!raw.startsWith('---\n')) {
+    return { frontmatter: '', body: raw };
+  }
+
+  const closingIndex = raw.indexOf('\n---\n', 4);
+  if (closingIndex === -1) {
+    return { frontmatter: '', body: raw };
+  }
+
+  return {
+    frontmatter: raw.slice(4, closingIndex),
+    body: raw.slice(closingIndex + 5),
+  };
+}
+
+function extractDocTitle(raw, relativePath) {
+  const { frontmatter, body } = splitFrontmatter(raw);
+  const titleMatch = frontmatter.match(/^\s*title:\s*["']?(.+?)["']?\s*$/m);
+  if (titleMatch?.[1]) return titleMatch[1].trim();
+
+  const headingMatch = body.match(/^#\s+(.+)$/m);
+  if (headingMatch?.[1]) return headingMatch[1].trim();
+
+  return relativePath.replace(/\.(md|mdx)$/i, '').replace(/\\/g, '/');
+}
+
+function summarizeDoc(raw) {
+  const { body } = splitFrontmatter(raw);
+  const normalized = body
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`([^`]*)`/g, ' $1 ')
+    .replace(/!\[([^\]]*)]\([^)]*\)/g, ' $1 ')
+    .replace(/\[([^\]]*)]\([^)]*\)/g, ' $1 ')
+    .replace(/^#+\s+/gm, '')
+    .replace(/[*_>#|~-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!normalized) return 'No summary available.';
+  const snippet = normalized.slice(0, 320);
+  return snippet.length === normalized.length ? snippet : `${snippet}...`;
+}
+
 async function buildLlmsArtifacts() {
   const docs = [];
   for await (const filePath of walkFiles(SOURCE_DOCS_DIR)) {
     const relativePath = path.relative(SOURCE_DOCS_DIR, filePath);
     const raw = await readFile(filePath, 'utf8');
-    docs.push({ relativePath, raw });
+    docs.push({ relativePath, raw, title: extractDocTitle(raw, relativePath), summary: summarizeDoc(raw) });
   }
 
   docs.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
@@ -74,7 +118,7 @@ async function buildLlmsArtifacts() {
   const tocLines = [
     '# Luthor LLM Index',
     '',
-    'This file helps AI agents discover Luthor docs quickly.',
+    'This file helps AI agents discover and query Luthor docs quickly.',
     '',
     `- Site: ${SITE_URL}`,
     `- Demo: ${SITE_URL}/demo/`,
@@ -96,8 +140,26 @@ async function buildLlmsArtifacts() {
     for (const item of items) {
       const url = docsUrlFromRelativePath(item.relativePath);
       const normalizedPath = item.relativePath.replace(/\\/g, '/');
-      tocLines.push(`- [${normalizedPath}](${url})`);
+      tocLines.push(`- [${normalizedPath}](${url}) - ${item.title}`);
     }
+    tocLines.push('');
+  }
+
+  tocLines.push('## AI Agent Workflow');
+  tocLines.push('');
+  tocLines.push('1. Load this file for docs discovery and route mapping.');
+  tocLines.push('2. Load `/llms-full.txt` for full, file-by-file content context.');
+  tocLines.push('3. Ask for exact APIs by name (props, commands, methods, feature flags).');
+  tocLines.push('4. Use generated code with your repository context and validate with tests/build.');
+  tocLines.push('');
+  tocLines.push('## Documentation Summaries');
+  tocLines.push('');
+
+  for (const item of docs) {
+    tocLines.push(`### ${item.title}`);
+    tocLines.push(`- File: ${item.relativePath.replace(/\\/g, '/')}`);
+    tocLines.push(`- URL: ${docsUrlFromRelativePath(item.relativePath)}`);
+    tocLines.push(`- Summary: ${item.summary}`);
     tocLines.push('');
   }
 
@@ -113,6 +175,13 @@ async function buildLlmsArtifacts() {
     '',
     `Source root: ${SOURCE_DOCS_DIR}`,
     `Generated at: ${new Date().toISOString()}`,
+    '',
+    '## AI Agent Workflow',
+    '',
+    '1. Add this file to your AI agent context.',
+    '2. Ask for exact API usage by prop, method, command, or extension name.',
+    '3. Ask the agent to keep docs and code behavior aligned.',
+    '4. Re-run docs sync after implementation updates.',
     '',
   ];
 

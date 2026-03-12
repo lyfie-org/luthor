@@ -5,7 +5,7 @@ description: Extension catalog and API usage for createEditorSystem, RichText, a
 
 # Extensions and API
 
-This page is the contributor-facing API map for `@lyfie/luthor-headless`.
+This page is the full API map for `@lyfie/luthor-headless`.
 
 ## Core entry points
 
@@ -13,40 +13,9 @@ This page is the contributor-facing API map for `@lyfie/luthor-headless`.
 - `createExtension`
 - `RichText` and `richTextExtension`
 - `markdownToJSON`, `jsonToMarkdown`, `htmlToJSON`, `jsonToHTML`
+- `appendMetadataEnvelopes`, `extractMetadataEnvelopes`, `rehydrateDocumentFromEnvelopes`
 - `defaultLuthorTheme`, `mergeThemes`, `createEditorThemeStyleVars`
-
-## Built-in extension catalog
-
-### Formatting and structure
-
-- `boldExtension`, `italicExtension`, `underlineExtension`, `strikethroughExtension`
-- `subscriptExtension`, `superscriptExtension`, `codeFormatExtension`
-- `fontFamilyExtension`, `fontSizeExtension`, `lineHeightExtension`
-- `textColorExtension`, `textHighlightExtension`
-- `linkExtension`, `blockFormatExtension`, `listExtension`, `tabIndentExtension`
-- `codeExtension`, `codeIntelligenceExtension`
-- `horizontalRuleExtension`, `tableExtension`, `enterKeyBehaviorExtension`
-
-### Interaction and productivity
-
-- `historyExtension`
-- `commandPaletteExtension`
-- `slashCommandExtension`
-- `floatingToolbarExtension`
-- `contextMenuExtension`
-- `draggableBlockExtension`
-- `emojiExtension`
-
-### Media
-
-- `imageExtension`
-- `iframeEmbedExtension`
-- `youTubeEmbedExtension`
-
-### Custom
-
-- `createCustomNodeExtension(...)`
-- `createExtension(...)` (general-purpose extension factory)
+- `clearLexicalSelection`, `resolveLinkNodeKeyFromAnchor`
 
 ## Minimal typed setup
 
@@ -82,9 +51,27 @@ export function Editor() {
 }
 ```
 
+## `createEditorSystem` return shape
+
+`createEditorSystem<typeof extensions>()` returns:
+
+- `Provider`
+  - Props: `extensions`, optional `config`, `children`
+- `useEditor`
+  - Returns editor context with:
+    - `commands`
+    - `activeStates`
+    - `stateQueries`
+    - `listeners.registerUpdate(...)`
+    - `listeners.registerPaste(...)`
+    - `export.toJSON()`
+    - `import.fromJSON(...)`
+    - `editor` / `lexical`
+    - `extensions`, `hasExtension(name)`, `plugins`
+
 ## `RichText` props
 
-`RichText` and `RichTextConfig` share these core props:
+`RichText` and `RichTextConfig` share these props:
 
 - `placeholder?: ReactElement | string`
 - `contentEditable?: ReactElement`
@@ -95,19 +82,83 @@ export function Editor() {
 - `onEditIntent?: ({ clientX, clientY }) => void`
 - `errorBoundary?: React.ComponentType<{ children; onError }>`
 
-Use `nonEditableVisualMode` and `onEditIntent` when you need read-only visual mode that promotes to editable mode on user intent.
+## Built-in extension catalog
 
-## `useEditor()` context surface
+### Formatting and structure
 
-- `commands`
-- `activeStates`
-- `stateQueries`
-- `listeners.registerUpdate(...)`
-- `listeners.registerPaste(...)`
-- `export.toJSON()`
-- `import.fromJSON(...)`
-- `lexical` and `editor`
-- `hasExtension(name)`
+- `boldExtension`, `italicExtension`, `underlineExtension`, `strikethroughExtension`
+- `subscriptExtension`, `superscriptExtension`, `codeFormatExtension`
+- `fontFamilyExtension`, `fontSizeExtension`, `lineHeightExtension`
+- `textColorExtension`, `textHighlightExtension`
+- `linkExtension`, `blockFormatExtension`, `listExtension`, `tabIndentExtension`
+- `horizontalRuleExtension`, `tableExtension`, `enterKeyBehaviorExtension`
+- `codeExtension`, `codeIntelligenceExtension`
+
+### Interaction and productivity
+
+- `historyExtension`
+- `commandPaletteExtension`
+- `slashCommandExtension`
+- `floatingToolbarExtension`
+- `contextMenuExtension`
+- `draggableBlockExtension`
+- `emojiExtension`
+
+### Media
+
+- `imageExtension`
+- `iframeEmbedExtension`
+- `youTubeEmbedExtension`
+
+### Custom
+
+- `createCustomNodeExtension(...)`
+- `createExtension(...)`
+- `BaseExtension` (advanced class-based extension model)
+
+## Config and typed helpers exported from extensions
+
+- Font:
+  - `FontFamilyConfig`, `FontFamilyOption`, `FontCssLoadStrategy`
+  - `FontSizeConfig`, `FontSizeOption`
+  - `LineHeightConfig`, `LineHeightOption`
+- Color:
+  - `TextColorConfig`, `TextColorOption`
+  - `TextHighlightConfig`, `TextHighlightOption`
+- Code:
+  - `CodeExtensionConfig`
+  - `CodeIntelligenceConfig`, `CodeIntelligenceCommands`
+  - `CodeHighlightProvider`, `CodeHighlightProviderConfig`
+  - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig`
+- Table/media/draggable:
+  - `TableConfig`
+  - `DraggableConfig`
+  - media command/config types from `media/types`
+- Emoji:
+  - `EmojiConfig`, `EmojiCommands`, `EmojiStateQueries`
+  - `EmojiCatalogAdapter`, `EmojiCatalogItem`, `EmojiSuggestionState`
+  - `LIGHTWEIGHT_EMOJI_CATALOG`
+
+## Export/import workflows
+
+```tsx
+import { jsonToHTML, jsonToMarkdown } from '@lyfie/luthor-headless';
+
+function SaveButton() {
+  const { export: exportApi } = useEditor();
+
+  const save = () => {
+    const json = exportApi.toJSON();
+    console.log({
+      json,
+      markdown: jsonToMarkdown(json),
+      html: jsonToHTML(json),
+    });
+  };
+
+  return <button onClick={save}>Save</button>;
+}
+```
 
 ## Custom extension example (`createExtension`)
 
@@ -130,13 +181,16 @@ export const clearDocumentExtension = createExtension({
 });
 ```
 
-## Choosing an extension authoring style
+## Choosing extension authoring style
 
-- Use `createExtension(...)` for straightforward command and plugin additions.
-- Use `BaseExtension` subclasses when you need class-level `configure(...)` behavior, richer lifecycle hooks, or custom node registration patterns.
+- Use `createExtension(...)` for straightforward command/plugin additions.
+- Use `BaseExtension` when you need:
+  - richer lifecycle behavior
+  - custom config patterns
+  - explicit class-based extension architecture
 
 ## Related pages
 
-- [/docs/luthor-headless/architecture/](/docs/luthor-headless/architecture/)
-- [/docs/luthor-headless/metadata-comment-system/](/docs/luthor-headless/metadata-comment-system/)
-- [/docs/luthor-headless/features/](/docs/luthor-headless/features/)
+- [Architecture](/docs/luthor-headless/architecture/)
+- [Features](/docs/luthor-headless/features/)
+- [Metadata Comment System](/docs/luthor-headless/metadata-comment-system/)

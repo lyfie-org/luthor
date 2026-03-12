@@ -34,6 +34,7 @@ const GROUP_ENTRY_ORDER: Partial<Record<NavGroupId, string[]>> = {
     '/docs/getting-started/',
     '/docs/getting-started/installation/',
     '/docs/getting-started/contributor-guide/',
+    '/docs/getting-started/ai-agents-and-vibe-coding/',
     '/docs/getting-started/capabilities/',
     '/docs/getting-started/luthor-headless/',
     '/docs/getting-started/luthor/',
@@ -178,16 +179,20 @@ function extractCodeBlock(children: ReactNode): { code: string; language?: strin
   };
 }
 
-function buildSearchableText(markdown: string): string {
-  return markdown
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/`[^`]*`/g, ' ')
-    .replace(/!\[[^\]]*]\([^)]*\)/g, ' ')
-    .replace(/\[[^\]]*]\([^)]*\)/g, ' ')
-    .replace(/[#>*_~|-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 1800);
+function buildSearchableText(doc: {
+  title: string;
+  description: string;
+  urlPath: string;
+  sourcePath: string;
+  content: string;
+}): string {
+  return [
+    doc.title,
+    doc.description,
+    doc.urlPath,
+    doc.sourcePath,
+    doc.content,
+  ].join('\n');
 }
 
 export async function generateStaticParams() {
@@ -255,7 +260,13 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
     urlPath: entry.urlPath,
     title: entry.title,
     description: entry.description,
-    searchableText: buildSearchableText(entry.content),
+    searchableText: buildSearchableText({
+      title: entry.title,
+      description: entry.description,
+      urlPath: entry.urlPath,
+      sourcePath: entry.sourcePath,
+      content: entry.content,
+    }),
   }));
   const breadcrumbs = buildBreadcrumbs(slug);
 
