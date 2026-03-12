@@ -109,6 +109,12 @@
   gap: 6px;
 }
 
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .control-label {
   font-size: 12px;
   font-weight: 600;
@@ -118,7 +124,8 @@
 }
 
 .preset-select,
-.theme-toggle {
+.theme-toggle,
+.save-button {
   height: 38px;
   border-radius: 8px;
   border: 1px solid var(--demo-border);
@@ -138,8 +145,22 @@
   padding: 0 14px;
 }
 
+.save-button {
+  cursor: pointer;
+  padding: 0 14px;
+}
+
 .theme-toggle:hover {
   background: var(--demo-control-hover-bg);
+}
+
+.save-button:hover:not(:disabled) {
+  background: var(--demo-control-hover-bg);
+}
+
+.save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .editor-stage {
@@ -172,7 +193,13 @@
   }
 
   .preset-select,
-  .theme-toggle {
+  .theme-toggle,
+  .save-button {
     width: 100%;
+  }
+
+  .control-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

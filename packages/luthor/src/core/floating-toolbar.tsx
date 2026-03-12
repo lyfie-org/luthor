@@ -44,6 +44,8 @@ export function FloatingToolbar({
   hide,
   isFeatureEnabled = () => true,
 }: FloatingToolbarProps) {
+  const edgeInsetPx = 20;
+
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [iframeUrlDraft, setIframeUrlDraft] = useState("");
   const [iframeCaptionDraft, setIframeCaptionDraft] = useState("");
@@ -182,7 +184,9 @@ export function FloatingToolbar({
     position: "absolute",
     top: selectionRect.y,
     left: selectionRect.positionFromRight ? "auto" : selectionRect.x,
-    right: selectionRect.positionFromRight ? 10 : "auto",
+    right: selectionRect.positionFromRight ? edgeInsetPx : "auto",
+    maxWidth: `calc(100% - ${edgeInsetPx * 2}px)`,
+    boxSizing: "border-box",
     zIndex: "var(--luthor-z-menu, 460)",
     pointerEvents: "auto",
   };

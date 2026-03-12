@@ -225,6 +225,7 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
   extension,
   config,
 }: FloatingToolbarPluginProps<TCommands, TStates>) {
+  const edgeMargin = 20;
   const [editor] = useLexicalComposerContext();
   const { config: globalConfig } = useEditor();
   const [isVisible, setIsVisible] = useState(false);
@@ -267,17 +268,17 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
       const anchorRect = anchorElem.getBoundingClientRect();
       const anchorLeft = anchorRect.left + scrollX;
       const anchorTop = anchorRect.top + scrollY;
-      const toolbarWidth = config.toolbarDimensions?.width || 300;
+      const toolbarWidth = config.toolbarDimensions?.width || 420;
       const toolbarHeight = config.toolbarDimensions?.height || 40;
       const rawX = rect.x - anchorLeft;
       const rawY = rect.y - anchorTop;
       const clampedX = Math.max(
-        10,
-        Math.min(rawX, Math.max(10, anchorRect.width - toolbarWidth - 10)),
+        edgeMargin,
+        Math.min(rawX, Math.max(edgeMargin, anchorRect.width - toolbarWidth - edgeMargin)),
       );
       const clampedY = Math.max(
-        10,
-        Math.min(rawY, Math.max(10, anchorRect.height - toolbarHeight - 10)),
+        edgeMargin,
+        Math.min(rawY, Math.max(edgeMargin, anchorRect.height - toolbarHeight - edgeMargin)),
       );
 
       return {
@@ -288,10 +289,10 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
         left: rect.left - anchorLeft,
         bottom: rect.bottom - anchorTop,
         right: rect.right - anchorLeft,
-        positionFromRight: false,
+        positionFromRight: rect.positionFromRight,
       };
     },
-    [config.toolbarDimensions?.height, config.toolbarDimensions?.width],
+    [config.toolbarDimensions?.height, config.toolbarDimensions?.width, edgeMargin],
   );
 
   /* Convert DOMRect to SelectionRect with intelligent positioning logic */
@@ -329,9 +330,9 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
       !!activeStates?.isYouTubeEmbedSelected;
 
     /* Toolbar dimensions (configurable with defaults) */
-    const toolbarWidth = config.toolbarDimensions?.width || (isEmbedSelection ? 132 : 300);
+    const toolbarWidth = config.toolbarDimensions?.width || (isEmbedSelection ? 132 : 420);
     const toolbarHeight = config.toolbarDimensions?.height || 40;
-    const margin = 10; // Minimum margin from viewport edges
+    const margin = edgeMargin; // Minimum margin from viewport edges
 
     /* Calculate selection center in viewport coordinates */
     const selectionCenterX = domRect.left + domRect.width / 2;
@@ -391,7 +392,7 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
       right: domRect.right + scrollX,
       positionFromRight,
     };
-  }, [config]);
+  }, [config, edgeMargin]);
 
   /* Update extension state */
   useEffect(() => {

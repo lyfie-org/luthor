@@ -386,12 +386,30 @@ function ContextMenuPlugin({ extension }: { extension: ContextMenuExtension }) {
   const estimatedMenuWidth = 220;
   const estimatedMenuHeight = Math.min(420, 18 + menuState.items.length * 34);
   const edgePadding = 8;
-  const resolvedPosition = (() => {
+  const bounds = (() => {
     if (!portalContainer) {
       const viewportWidth = typeof window === "undefined" ? 0 : window.innerWidth;
       const viewportHeight = typeof window === "undefined" ? 0 : window.innerHeight;
-      const maxX = Math.max(edgePadding, viewportWidth - estimatedMenuWidth - edgePadding);
-      const maxY = Math.max(edgePadding, viewportHeight - estimatedMenuHeight - edgePadding);
+      return {
+        width: viewportWidth,
+        height: viewportHeight,
+      };
+    }
+
+    const rect = portalContainer.getBoundingClientRect();
+    return {
+      width: rect.width,
+      height: rect.height,
+    };
+  })();
+  const maxMenuWidth = Math.max(0, bounds.width - edgePadding * 2);
+  const maxMenuHeight = Math.max(0, bounds.height - edgePadding * 2);
+  const resolvedMenuWidth = Math.min(estimatedMenuWidth, maxMenuWidth || estimatedMenuWidth);
+  const resolvedMenuHeight = Math.min(estimatedMenuHeight, maxMenuHeight || estimatedMenuHeight);
+  const resolvedPosition = (() => {
+    if (!portalContainer) {
+      const maxX = Math.max(edgePadding, bounds.width - resolvedMenuWidth - edgePadding);
+      const maxY = Math.max(edgePadding, bounds.height - resolvedMenuHeight - edgePadding);
       return {
         x: clamp(menuState.position.x, edgePadding, maxX),
         y: clamp(menuState.position.y, edgePadding, maxY),
@@ -399,21 +417,33 @@ function ContextMenuPlugin({ extension }: { extension: ContextMenuExtension }) {
     }
 
     const rect = portalContainer.getBoundingClientRect();
-    const rawX = menuState.position.x - rect.left;
-    const rawY = menuState.position.y - rect.top;
-    const maxX = Math.max(edgePadding, rect.width - estimatedMenuWidth - edgePadding);
-    const maxY = Math.max(edgePadding, rect.height - estimatedMenuHeight - edgePadding);
+    const rawX = menuState.position.x - rect.left + portalContainer.scrollLeft;
+    const rawY = menuState.position.y - rect.top + portalContainer.scrollTop;
+    const minX = portalContainer.scrollLeft + edgePadding;
+    const minY = portalContainer.scrollTop + edgePadding;
+    const maxX = Math.max(minX, portalContainer.scrollLeft + rect.width - resolvedMenuWidth - edgePadding);
+    const maxY = Math.max(minY, portalContainer.scrollTop + rect.height - resolvedMenuHeight - edgePadding);
     return {
-      x: clamp(rawX, edgePadding, maxX),
-      y: clamp(rawY, edgePadding, maxY),
+      x: clamp(rawX, minX, maxX),
+      y: clamp(rawY, minY, maxY),
     };
   })();
   const resolvedContainerStyle = portalContainer
     ? {
         position: "absolute" as const,
         ...mergedStyles.container,
+        maxWidth: maxMenuWidth > 0 ? maxMenuWidth : undefined,
+        maxHeight: maxMenuHeight > 0 ? maxMenuHeight : undefined,
+        overflowY: "auto" as const,
+        overscrollBehavior: "contain" as const,
       }
-    : mergedStyles.container;
+    : {
+        ...mergedStyles.container,
+        maxWidth: maxMenuWidth > 0 ? maxMenuWidth : undefined,
+        maxHeight: maxMenuHeight > 0 ? maxMenuHeight : undefined,
+        overflowY: "auto" as const,
+        overscrollBehavior: "contain" as const,
+      };
 
   return createPortal(
     <Renderer
