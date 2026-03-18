@@ -67,7 +67,6 @@ import {
   type FeatureShortcutSpec,
   type ToolbarFeatureMap,
 } from "../_shared";
-import { EXTENSIVE_WELCOME_CONTENT_JSON as extensiveWelcomeContent } from "./welcomeContent";
 import type {
   CommandPaletteExtension,
   SlashCommandExtension,
@@ -1932,11 +1931,10 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
 
     const handleReady = (m: ExtensiveEditorRef) => {
       setMethods(m);
-      // Auto-inject default welcome content if enabled
-      if (showDefaultContent && defaultContent === undefined) {
-        m.injectJSON(JSON.stringify(extensiveWelcomeContent));
-      } else if (defaultContent) {
+      if (defaultContent) {
         m.injectJSON(toJSONInput(defaultContent));
+      } else if (showDefaultContent) {
+        // Demo starter content is app-owned; package presets remain content-neutral by default.
       }
       onReady?.(m);
     };

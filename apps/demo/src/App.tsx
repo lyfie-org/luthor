@@ -10,7 +10,17 @@ import {
   SlashEditor,
 } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  DEMO_COMPOSE_CONTENT,
+  DEMO_EXTENSIVE_CONTENT,
+  DEMO_HEADLESS_PRESET_CONTENT,
+  DEMO_HTML_EDITOR_CONTENT,
+  DEMO_LEGACY_RICH_CONTENT,
+  DEMO_MD_EDITOR_CONTENT,
+  DEMO_SIMPLE_EDITOR_CONTENT,
+  DEMO_SLASH_EDITOR_CONTENT,
+} from "./demo-content";
 import { useDemoTheme } from "./hooks/useDemoTheme";
 import "highlight.js/styles/github.css";
 
@@ -38,12 +48,36 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
 function App() {
   const { theme, toggleTheme } = useDemoTheme();
   const [preset, setPreset] = useState<PresetId>("extensive");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const extensiveEditorRef = useRef<ExtensiveEditorRef | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+        toastTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage(null);
+      toastTimeoutRef.current = null;
+    }, 1800);
+  };
 
   const handleSave = () => {
     const methods = extensiveEditorRef.current;
     if (!methods) {
       console.log("demo-save-snapshot-unavailable", { preset });
+      showToast("Save unavailable for this preset.");
       return;
     }
 
@@ -54,6 +88,7 @@ function App() {
     };
 
     console.log("demo-save-snapshot", snapshot);
+    showToast("Done. Printed to console log.");
   };
 
   const presetNode = useMemo(() => {
@@ -61,6 +96,7 @@ function App() {
       case "compose":
         return (
           <ComposeEditor
+            defaultContent={DEMO_COMPOSE_CONTENT}
             showDefaultContent={false}
             compactToolbar
             placeholder="Write a draft..."
@@ -69,6 +105,8 @@ function App() {
       case "simple-editor":
         return (
           <SimpleEditor
+            defaultContent={DEMO_SIMPLE_EDITOR_CONTENT}
+            showDefaultContent={false}
             placeholder="Type a message"
             maxHeight={220}
             minHeight={140}
@@ -85,22 +123,47 @@ function App() {
       case "legacy-rich":
         return (
           <LegacyRichEditor
+            defaultContent={DEMO_LEGACY_RICH_CONTENT}
             showDefaultContent={false}
             defaultEditorView="markdown"
           />
         );
       case "md-editor":
-        return <MDEditor showDefaultContent={false} />;
+        return (
+          <MDEditor
+            defaultContent={DEMO_MD_EDITOR_CONTENT}
+            showDefaultContent={false}
+            defaultEditorView="markdown"
+          />
+        );
       case "html-editor":
-        return <HTMLEditor showDefaultContent={false} />;
+        return (
+          <HTMLEditor
+            defaultContent={DEMO_HTML_EDITOR_CONTENT}
+            showDefaultContent={false}
+            defaultEditorView="html"
+          />
+        );
       case "slash-editor":
-        return <SlashEditor showDefaultContent={false} />;
+        return (
+          <SlashEditor
+            defaultContent={DEMO_SLASH_EDITOR_CONTENT}
+            showDefaultContent={false}
+          />
+        );
       case "headless-editor":
-        return <HeadlessEditorPreset />;
+        return (
+          <HeadlessEditorPreset
+            defaultContent={DEMO_HEADLESS_PRESET_CONTENT}
+            showDefaultContent={false}
+          />
+        );
       default:
         return (
           <ExtensiveEditor
             ref={extensiveEditorRef}
+            defaultContent={DEMO_EXTENSIVE_CONTENT}
+            showDefaultContent={false}
             placeholder={{
               visual: "Write your story...",
               json: "Paste JSON document...",
@@ -158,6 +221,11 @@ function App() {
           </div>
         </main>
       </div>
+      {toastMessage ? (
+        <div className="demo-toast" role="status" aria-live="polite">
+          {toastMessage}
+        </div>
+      ) : null}
     </div>
   );
 }

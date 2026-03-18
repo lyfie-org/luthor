@@ -2,6 +2,7 @@
 
 import { ExtensiveEditor } from '@lyfie/luthor';
 import { useEffect, useState } from 'react';
+import { HOME_EXTENSIVE_SHORT_CONTENT } from './demo-content';
 
 type Theme = 'light' | 'dark';
 const HIGHLIGHT_THEME_LINK_ID = 'luthor-highlightjs-theme';
@@ -44,8 +45,10 @@ export function ExtensiveEditorClient({ siteTheme }: ExtensiveEditorClientProps)
     <ExtensiveEditor
       initialTheme={siteTheme}
       onThemeChange={setEditorTheme}
-      toolbarAlignment="center"   
-      isToolbarPinned={true}   
+      showDefaultContent={false}
+      defaultContent={HOME_EXTENSIVE_SHORT_CONTENT}
+      toolbarAlignment="center"
+      isToolbarPinned={true}
     />
   );
 }
