@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-12T20:10:56.967Z
+Generated at: 2026-03-18T05:22:25.692Z
 
 ## AI Agent Workflow
 

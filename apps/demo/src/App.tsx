@@ -11,6 +11,16 @@ import {
 } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  DEMO_COMPOSE_CONTENT,
+  DEMO_EXTENSIVE_CONTENT,
+  DEMO_HEADLESS_PRESET_CONTENT,
+  DEMO_HTML_EDITOR_CONTENT,
+  DEMO_LEGACY_RICH_CONTENT,
+  DEMO_MD_EDITOR_CONTENT,
+  DEMO_SIMPLE_EDITOR_CONTENT,
+  DEMO_SLASH_EDITOR_CONTENT,
+} from "./demo-content";
 import { useDemoTheme } from "./hooks/useDemoTheme";
 import "highlight.js/styles/github.css";
 
@@ -86,6 +96,7 @@ function App() {
       case "compose":
         return (
           <ComposeEditor
+            defaultContent={DEMO_COMPOSE_CONTENT}
             showDefaultContent={false}
             compactToolbar
             placeholder="Write a draft..."
@@ -94,6 +105,8 @@ function App() {
       case "simple-editor":
         return (
           <SimpleEditor
+            defaultContent={DEMO_SIMPLE_EDITOR_CONTENT}
+            showDefaultContent={false}
             placeholder="Type a message"
             maxHeight={220}
             minHeight={140}
@@ -110,22 +123,47 @@ function App() {
       case "legacy-rich":
         return (
           <LegacyRichEditor
+            defaultContent={DEMO_LEGACY_RICH_CONTENT}
             showDefaultContent={false}
             defaultEditorView="markdown"
           />
         );
       case "md-editor":
-        return <MDEditor showDefaultContent={false} />;
+        return (
+          <MDEditor
+            defaultContent={DEMO_MD_EDITOR_CONTENT}
+            showDefaultContent={false}
+            defaultEditorView="markdown"
+          />
+        );
       case "html-editor":
-        return <HTMLEditor showDefaultContent={false} />;
+        return (
+          <HTMLEditor
+            defaultContent={DEMO_HTML_EDITOR_CONTENT}
+            showDefaultContent={false}
+            defaultEditorView="html"
+          />
+        );
       case "slash-editor":
-        return <SlashEditor showDefaultContent={false} />;
+        return (
+          <SlashEditor
+            defaultContent={DEMO_SLASH_EDITOR_CONTENT}
+            showDefaultContent={false}
+          />
+        );
       case "headless-editor":
-        return <HeadlessEditorPreset />;
+        return (
+          <HeadlessEditorPreset
+            defaultContent={DEMO_HEADLESS_PRESET_CONTENT}
+            showDefaultContent={false}
+          />
+        );
       default:
         return (
           <ExtensiveEditor
             ref={extensiveEditorRef}
+            defaultContent={DEMO_EXTENSIVE_CONTENT}
+            showDefaultContent={false}
             placeholder={{
               visual: "Write your story...",
               json: "Paste JSON document...",

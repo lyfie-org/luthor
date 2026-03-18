@@ -40,22 +40,6 @@ const DEFAULT_JSON_PLACEHOLDER = "Enter JSON document content...";
 const DEFAULT_MARKDOWN_PLACEHOLDER = "Enter Markdown content...";
 const DEFAULT_HTML_PLACEHOLDER = "Enter HTML content...";
 
-const HEADLESS_DEFAULT_CONTENT_MD = `## Hi there,
-
-this is a *basic* example of **Luthor Headless**. It covers simple text styles and lists:
-
-- That's a bullet list with one item.
-- ... and one more item.
-
-Try a code block next:
-
-\`\`\`
-console.log("hello from luthor");
-\`\`\`
-`;
-
-const HEADLESS_DEFAULT_CONTENT_JSON = markdownToJSON(HEADLESS_DEFAULT_CONTENT_MD);
-
 const EMPTY_DOCUMENT = {
   root: {
     type: "root",
@@ -751,9 +735,7 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
           if (defaultContent) {
             nextMethods.injectJSON(defaultContent);
           } else if (showDefaultContent) {
-            nextMethods.injectJSON(
-              convertJSONToSource("json", HEADLESS_DEFAULT_CONTENT_JSON),
-            );
+            // Demo starter content is app-owned; package presets remain content-neutral by default.
           }
           didHydrateDefaultContentRef.current = true;
         }

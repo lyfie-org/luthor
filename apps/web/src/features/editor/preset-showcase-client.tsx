@@ -18,6 +18,16 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  WEB_DEMO_COMPOSE_CONTENT,
+  WEB_DEMO_EXTENSIVE_CONTENT,
+  WEB_DEMO_HEADLESS_PRESET_CONTENT,
+  WEB_DEMO_HTML_EDITOR_CONTENT,
+  WEB_DEMO_LEGACY_RICH_CONTENT,
+  WEB_DEMO_MD_EDITOR_CONTENT,
+  WEB_DEMO_SIMPLE_EDITOR_CONTENT,
+  WEB_DEMO_SLASH_EDITOR_CONTENT,
+} from './demo-content';
 import { isExternalWebsiteHref } from '@/utils/link';
 
 type Theme = 'light' | 'dark';
@@ -177,7 +187,8 @@ function ExtensiveExperience({ siteTheme }: { siteTheme: Theme }) {
     <PresetSurface>
       <ExtensiveEditor
         initialTheme={siteTheme}
-        showDefaultContent
+        showDefaultContent={false}
+        defaultContent={WEB_DEMO_EXTENSIVE_CONTENT}
         toolbarAlignment="center"
         isToolbarPinned
         maxListIndentation={8}
@@ -190,6 +201,7 @@ function ComposeExperience({ siteTheme }: { siteTheme: Theme }) {
   return (
     <PresetSurface>
       <ComposeEditor
+        defaultContent={WEB_DEMO_COMPOSE_CONTENT}
         initialTheme={siteTheme}
         showDefaultContent={false}
         compactToolbar
@@ -203,14 +215,10 @@ function LegacyRichExperience({ siteTheme }: { siteTheme: Theme }) {
   return (
     <PresetSurface>
       <LegacyRichEditor
+        defaultContent={WEB_DEMO_LEGACY_RICH_CONTENT}
         initialTheme={siteTheme}
         showDefaultContent={false}
         defaultEditorView="markdown"
-        placeholder={{
-          visual: 'Write metadata-free content...',
-          markdown: '## Legacy Rich Markdown\n\n- Metadata-free output',
-          html: '<h2>Legacy Rich HTML</h2>\n<ul><li>Metadata-free output</li></ul>',
-        }}
       />
     </PresetSurface>
   );
@@ -220,14 +228,10 @@ function MDEditorExperience({ siteTheme }: { siteTheme: Theme }) {
   return (
     <PresetSurface>
       <MDEditor
+        defaultContent={WEB_DEMO_MD_EDITOR_CONTENT}
         initialTheme={siteTheme}
         showDefaultContent={false}
         defaultEditorView="markdown"
-        placeholder={{
-          visual: 'Write markdown-compatible content...',
-          markdown: '# Heading\n\n- Bullet point',
-          json: 'Review generated JSON...',
-        }}
       />
     </PresetSurface>
   );
@@ -237,14 +241,10 @@ function HTMLEditorExperience({ siteTheme }: { siteTheme: Theme }) {
   return (
     <PresetSurface>
       <HTMLEditor
+        defaultContent={WEB_DEMO_HTML_EDITOR_CONTENT}
         initialTheme={siteTheme}
         showDefaultContent={false}
         defaultEditorView="html"
-        placeholder={{
-          visual: 'Write html-compatible content...',
-          html: '<h2>Product Section</h2>\n<p>Compatible markup only.</p>',
-          json: 'Review generated JSON...',
-        }}
       />
     </PresetSurface>
   );
@@ -254,14 +254,9 @@ function SlashEditorExperience({ siteTheme }: { siteTheme: Theme }) {
   return (
     <PresetSurface>
       <SlashEditor
+        defaultContent={WEB_DEMO_SLASH_EDITOR_CONTENT}
         initialTheme={siteTheme}
         showDefaultContent={false}
-        placeholder={{
-          visual: "Type '/' to open commands...",
-          markdown: 'Slash editor source markdown...',
-          html: '<p>Slash editor source html...</p>',
-          json: 'Slash editor source JSON...',
-        }}
       />
     </PresetSurface>
   );
@@ -271,15 +266,10 @@ function HeadlessExperience({ siteTheme }: { siteTheme: Theme }) {
   return (
     <PresetSurface>
       <HeadlessEditorPreset
+        defaultContent={WEB_DEMO_HEADLESS_PRESET_CONTENT}
         initialTheme={siteTheme}
         showDefaultContent={false}
         defaultEditorView="visual"
-        placeholder={{
-          visual: 'Simple writing surface...',
-          markdown: '## Quick notes',
-          html: '<p>Simple html source...</p>',
-          json: 'Simple json source...',
-        }}
       />
     </PresetSurface>
   );
@@ -389,7 +379,9 @@ function SimpleEditorExperience({ siteTheme }: { siteTheme: Theme }) {
 
         <div className="demo-chat-composer">
           <SimpleEditor
+            defaultContent={WEB_DEMO_SIMPLE_EDITOR_CONTENT}
             initialTheme={siteTheme}
+            showDefaultContent={false}
             placeholder="Type a message and press Enter..."
             onSend={handleSend}
             submitOnEnter
