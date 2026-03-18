@@ -2093,6 +2093,22 @@ a {
   word-break: break-all;
 }
 
+.docs-related-reading {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.docs-related-reading a {
+  color: var(--accent-strong);
+  text-underline-offset: 3px;
+}
+
+.docs-related-reading a:hover {
+  color: var(--text);
+}
+
 .doc-content {
   color: var(--text);
   line-height: 1.74;
