@@ -6,7 +6,7 @@ import { ReactNode, isValidElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { FeatureGifImage } from '@/components/media/feature-gif-image';
-import { SITE_NAME } from '@/config/site';
+import { DEVTO_ARTICLE_URL, MEDIUM_ARTICLE_URL, SITE_NAME } from '@/config/site';
 import { DocsCodeBlock } from '@/features/docs/docs-code-block';
 import { DocsSearch } from '@/features/docs/docs-search';
 import { getAllDocs, getAllDocSlugs, getDocBySlug } from '@/features/docs/docs.service';
@@ -269,6 +269,7 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
     }),
   }));
   const breadcrumbs = buildBreadcrumbs(slug);
+  const showProjectBackstoryLinks = doc.urlPath === '/docs/getting-started/';
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -406,6 +407,14 @@ export default async function DocsPage({ params }: { params: Promise<Params> }) 
                 ) : null}
               </div>
             </nav>
+            {showProjectBackstoryLinks ? (
+              <p className="docs-related-reading">
+                Looking for the project backstory? Read the short posts on{' '}
+                <a href={DEVTO_ARTICLE_URL} target="_blank" rel="noopener noreferrer">dev.to</a>
+                {' '}or{' '}
+                <a href={MEDIUM_ARTICLE_URL} target="_blank" rel="noopener noreferrer">Medium</a>.
+              </p>
+            ) : null}
           </article>
           </div>
         </div>

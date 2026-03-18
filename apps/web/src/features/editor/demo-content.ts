@@ -172,18 +172,33 @@ function htmlToJSONString(htmlSource: string): string {
 }
 
 export const HOME_EXTENSIVE_SHORT_CONTENT = documentToJSONString([
-  headingNode('h2', 'Ship Luthor in Minutes'),
+  headingNode('h2', '🚀 Welcome to Luthor'),
   paragraphNode([
-    textNode('Install '),
-    textNode('@lyfie/luthor', 16),
-    textNode(', import the stylesheet, and render '),
-    textNode('<ExtensiveEditor />', 16),
-    textNode('.'),
+    textNode('✨ Build production-ready rich text editors with '),
+    textNode('React + Lexical', 1),
+    textNode(', without the boilerplate.'),
   ]),
-  listNode('number', 'ol', [
-    listItemNode([paragraphNode([textNode('pnpm add @lyfie/luthor react react-dom')])], 1),
-    listItemNode([paragraphNode([textNode("import '@lyfie/luthor/styles.css'")])], 2),
-    listItemNode([paragraphNode([textNode('Mount the preset and start typing')])], 3),
+  headingNode('h3', '🔥 Key Features'),
+  listNode('bullet', 'ul', [
+    listItemNode([paragraphNode([textNode('⚡ Type-safe presets with configurable toolbars and themes.')])], 1),
+    listItemNode([paragraphNode([textNode('🧠 JSON-first content model with Markdown and HTML source views.')])], 2),
+    listItemNode([paragraphNode([textNode('🛠️ Built for docs, CMS, chat, and internal product workflows.')])], 3),
+  ]),
+  headingNode('h3', '✅ Quick Start'),
+  paragraphNode([
+    textNode('📦 Install in one line: '),
+    textNode('pnpm add @lyfie/luthor react react-dom', 16),
+  ]),
+  codeNode('typescript', [
+    "import '@lyfie/luthor/styles.css';",
+    "import { ExtensiveEditor } from '@lyfie/luthor';",
+    '',
+    'export function App() {',
+    '  return <ExtensiveEditor />;',
+    '}',
+  ]),
+  paragraphNode([
+    textNode("🎉 That's it. Start shipping now and customize deeply when you need to."),
   ]),
 ]);
 

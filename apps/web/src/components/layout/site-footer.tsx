@@ -1,11 +1,11 @@
 import { BookOpenText, Coffee, Cube, GithubLogo, Package, PlayCircle, RocketLaunch } from '@phosphor-icons/react/dist/ssr';
 import Link from 'next/link';
 import {
-  CREATOR_NAME,
-  CREATOR_URL,
+  DEVTO_ARTICLE_URL,
   GITHUB_URL,
   MAINTAINER_ORG_NAME,
   MAINTAINER_ORG_URL,
+  MEDIUM_ARTICLE_URL,
   LYFIE_HEADLESS_NPM_URL,
   LYFIE_NPM_URL,
   REACT_PLAYGROUND_URL,
@@ -97,6 +97,12 @@ export function SiteFooter() {
           <Link href="/docs/getting-started/">Docs</Link>
           <Link href="/#features">Features</Link>
           <Link href="/demo/">Demo</Link>
+          <a href={DEVTO_ARTICLE_URL} target="_blank" rel="noopener noreferrer">
+            dev.to
+          </a>
+          <a href={MEDIUM_ARTICLE_URL} target="_blank" rel="noopener noreferrer">
+            Medium
+          </a>
           <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
