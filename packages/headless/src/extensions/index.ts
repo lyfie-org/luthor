@@ -81,6 +81,11 @@ export {
   type CodeHighlightProviderConfig,
 } from "./formatting/codeHighlightProvider";
 export {
+  getDefaultPopularPrismLanguages,
+  loadPrismLanguages,
+  loadPopularPrismLanguages,
+} from "./formatting/prismLanguageLoader";
+export {
   CodeIntelligenceExtension,
   codeIntelligenceExtension,
   type CodeIntelligenceConfig,

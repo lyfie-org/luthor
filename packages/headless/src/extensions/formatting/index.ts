@@ -20,6 +20,11 @@ export {
   type CodeHighlightProviderConfig,
 } from "./codeHighlightProvider";
 export {
+  getDefaultPopularPrismLanguages,
+  loadPrismLanguages,
+  loadPopularPrismLanguages,
+} from "./prismLanguageLoader";
+export {
   FontFamilyExtension,
   fontFamilyExtension,
   type FontFamilyConfig,

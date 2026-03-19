@@ -108,7 +108,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Code and Devtools
 - File: luthor-headless/features/code-and-devtools.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/
-- Summary: Code and Devtools This group covers code editing and developer facing conversion utilities. Recent defaults: Code block language labels use full language names in UI (for example, TypeScript , JavaScript , Bash ). bash is included in the default language options. Code block line numbers can be enabled/disabled through ...
+- Summary: Code and Devtools This group covers code editing and developer facing conversion utilities. Recent defaults: Code block language labels use full language names in UI (for example, TypeScript , JavaScript , SQL ). Default language options are filtered to languages that are actually supported by the active runtime tokeni...
 
 ### Customization and Theming
 - File: luthor-headless/features/customization-and-theming.md

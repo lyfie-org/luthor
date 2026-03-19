@@ -508,6 +508,27 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     expect(screen.getByTestId("toolbar")).toHaveClass("luthor-toolbar--align-right");
   });
 
+  it("toggles inline code highlight styling without changing code block settings", () => {
+    const { container, rerender } = render(<ExtensiveEditor showDefaultContent={false} />);
+
+    expect(container.querySelector(".luthor-editor-wrapper")).toHaveAttribute(
+      "data-inline-code-highlighting",
+      "on",
+    );
+
+    rerender(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        inlineCodeHighlighting={false}
+      />,
+    );
+
+    expect(container.querySelector(".luthor-editor-wrapper")).toHaveAttribute(
+      "data-inline-code-highlighting",
+      "off",
+    );
+  });
+
   it("hides toolbar when isToolbarEnabled is false and keeps command wiring active", () => {
     render(<ExtensiveEditor showDefaultContent={false} isToolbarEnabled={false} />);
 

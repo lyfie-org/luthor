@@ -37,6 +37,9 @@ Optional:
 pnpm add highlight.js @emoji-mart/data
 ```
 
+Advanced language grammars are preloaded automatically for common code-block languages
+(`bash`, `json`, `yaml`, `go`, `php`, `ruby`, `csharp`, `kotlin`, `jsx`, `tsx`, `graphql`, `docker`, `toml`, `lua`, `perl`, `r`, `scala`, `dart`) when code highlighting is enabled.
+
 ## Quick Usage
 
 ```tsx

@@ -28,6 +28,7 @@ import {
   resolveCodeHighlightProvider,
   resolveCodeTokenizer,
 } from "./codeHighlightProvider";
+import { loadPopularPrismLanguages } from "./prismLanguageLoader";
 
 /**
  * Commands exposed by the CodeExtension for toggling code blocks
@@ -103,6 +104,7 @@ export class CodeExtension extends BaseExtension<
   register(editor: LexicalEditor): () => void {
     let unregisterCodeHighlighting = () => {};
     let didDispose = false;
+    let activeTokenizer: CodeTokenizer | null = null;
     const syncCodeBlockLineNumbers = () => {
       if (didDispose) {
         return;
@@ -111,6 +113,7 @@ export class CodeExtension extends BaseExtension<
     };
 
     const applyHighlighting = (tokenizer: CodeTokenizer) => {
+      activeTokenizer = tokenizer;
       unregisterCodeHighlighting();
       unregisterCodeHighlighting = registerCodeHighlighting(
         editor,
@@ -126,6 +129,23 @@ export class CodeExtension extends BaseExtension<
           return;
         }
         applyHighlighting(tokenizer);
+      });
+
+      void loadPopularPrismLanguages().then((newlyLoadedLanguages) => {
+        if (didDispose || newlyLoadedLanguages.length === 0 || !activeTokenizer) {
+          return;
+        }
+
+        // Re-register highlighting once optional grammars are available to avoid stale plain fallbacks.
+        applyHighlighting(activeTokenizer);
+        editor.update(() => {
+          $nodesOfType(CodeNode).forEach((node) => {
+            const language = node.getLanguage();
+            if (typeof language === "string" && language.trim().length > 0) {
+              node.setLanguage(language);
+            }
+          });
+        });
       });
     }
 

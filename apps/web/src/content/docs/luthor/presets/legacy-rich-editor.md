@@ -69,5 +69,9 @@ Default toolbar sections focus on writing and structure:
 
 Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch `highlight.js` CSS for code color parity:
 
-- light: `/public/highlightjs/github.css`
-- dark: `/public/highlightjs/github-dark.css`
+- local/public (light): `/public/highlightjs/github.css`
+- local/public (dark): `/public/highlightjs/github-dark.css`
+- CDN (light): `https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css`
+- CDN (dark): `https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github-dark.min.css`
+
+Code tokens render with color only when these highlight styles (or equivalent custom `.hljs*` styles) are loaded.

@@ -99,7 +99,8 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 | `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
 | `showLineNumbers` | `boolean` | `true` | Enables line numbers for visual code blocks and source tabs (`json`/`markdown`/`html`). |
 | `maxAutoDetectCodeLength` | `number` | `undefined` | Max code length for language autodetect. |
-| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); dropdown labels use full names (for example, `TypeScript`, `JavaScript`, `Bash`). |
+| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); runtime keeps only languages supported by the active tokenizer (including preloaded popular grammars like `bash`, `json`, `yaml`, `go`, `php`, `ruby`, `csharp`, `kotlin`, `jsx`, `tsx`, `graphql`, `docker`, `toml`, `lua`, `perl`, `r`, `scala`, `dart`). |
+| `inlineCodeHighlighting` | `boolean` | `true` | Enables accented inline-code styling while keeping fenced code block highlighting behavior unchanged. |
 | `maxListIndentation` | `number` | `8` | Maximum sub-indent levels below root list level. |
 
 Line-number behavior notes:

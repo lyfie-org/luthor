@@ -1976,6 +1976,8 @@ export interface ExtensiveEditorProps {
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
   showLineNumbers?: boolean;
+  /** Controls accent styling for inline code spans without affecting fenced code blocks. */
+  inlineCodeHighlighting?: boolean;
   /** Maximum list sub-indent levels (excluding top-level list). Default: 8 */
   maxListIndentation?: number;
 }
@@ -2033,6 +2035,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     isCopyAllowed = true,
     languageOptions,
     showLineNumbers = true,
+    inlineCodeHighlighting = true,
     maxListIndentation = 8,
   }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
@@ -2304,6 +2307,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         ref={wrapperRef}
         className={`luthor-preset luthor-preset-extensive luthor-editor-wrapper${isToolbarPinned ? " luthor-editor-wrapper--toolbar-pinned" : ""} ${variantClassName || ""} ${className || ""}`.trim()}
         data-editor-theme={editorTheme}
+        data-inline-code-highlighting={inlineCodeHighlighting ? "on" : "off"}
         style={wrapperStyleVars}
       >
         <Provider extensions={memoizedExtensions} config={{ theme: editorThemeConfig }}>

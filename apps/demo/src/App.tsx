@@ -21,6 +21,10 @@ import {
   DEMO_SIMPLE_EDITOR_CONTENT,
   DEMO_SLASH_EDITOR_CONTENT,
 } from "./demo-content";
+import {
+  syncHighlightThemeStylesheet,
+  type EditorTheme,
+} from "./highlight-theme";
 import { useDemoTheme } from "./hooks/useDemoTheme";
 
 type PresetId =
@@ -32,9 +36,6 @@ type PresetId =
   | "html-editor"
   | "slash-editor"
   | "headless-editor";
-type Theme = "light" | "dark";
-
-const HIGHLIGHT_THEME_LINK_ID = "luthor-highlightjs-theme";
 
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "extensive", label: "Extensive Editor" },
@@ -47,34 +48,10 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "headless-editor", label: "Headless Editor" },
 ];
 
-function syncHighlightTheme(theme: Theme): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  const href = theme === "dark"
-    ? "/highlightjs/github-dark.css"
-    : "/highlightjs/github.css";
-  const existing = document.getElementById(HIGHLIGHT_THEME_LINK_ID);
-  const link = existing instanceof HTMLLinkElement
-    ? existing
-    : document.createElement("link");
-
-  if (!(existing instanceof HTMLLinkElement)) {
-    link.id = HIGHLIGHT_THEME_LINK_ID;
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-  }
-
-  if (link.href !== new URL(href, window.location.origin).href) {
-    link.href = href;
-  }
-}
-
 function App() {
   const { theme, toggleTheme } = useDemoTheme();
   const [preset, setPreset] = useState<PresetId>("extensive");
-  const [activeEditorTheme, setActiveEditorTheme] = useState<Theme>(theme);
+  const [activeEditorTheme, setActiveEditorTheme] = useState<EditorTheme>(theme);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const extensiveEditorRef = useRef<ExtensiveEditorRef | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -93,7 +70,7 @@ function App() {
   }, [preset, theme]);
 
   useEffect(() => {
-    syncHighlightTheme(activeEditorTheme);
+    syncHighlightThemeStylesheet(activeEditorTheme, { source: "public" });
   }, [activeEditorTheme]);
 
   const showToast = (message: string) => {

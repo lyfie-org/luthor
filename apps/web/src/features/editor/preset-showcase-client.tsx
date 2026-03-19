@@ -28,10 +28,13 @@ import {
   WEB_DEMO_SIMPLE_EDITOR_CONTENT,
   WEB_DEMO_SLASH_EDITOR_CONTENT,
 } from './demo-content';
+import {
+  syncHighlightThemeStylesheet,
+  type EditorTheme,
+} from './highlight-theme';
 import { isExternalWebsiteHref } from '@/utils/link';
 
-type Theme = 'light' | 'dark';
-const HIGHLIGHT_THEME_LINK_ID = 'luthor-highlightjs-theme';
+type Theme = EditorTheme;
 
 const VISIBLE_PRESET_IDS = [
   'extensive',
@@ -174,26 +177,6 @@ function formatTime(timestamp: number): string {
     hour: 'numeric',
     minute: '2-digit',
   }).format(timestamp);
-}
-
-function syncHighlightTheme(theme: Theme): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const href = theme === 'dark' ? '/highlightjs/github-dark.css' : '/highlightjs/github.css';
-  const existing = document.getElementById(HIGHLIGHT_THEME_LINK_ID);
-  const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
-
-  if (!(existing instanceof HTMLLinkElement)) {
-    link.id = HIGHLIGHT_THEME_LINK_ID;
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-  }
-
-  if (link.href !== new URL(href, window.location.origin).href) {
-    link.href = href;
-  }
 }
 
 function PresetSurface({ children }: PresetSurfaceProps) {
@@ -491,7 +474,7 @@ export function PresetShowcaseClient() {
   }, [selectedPresetId, siteTheme]);
 
   useEffect(() => {
-    syncHighlightTheme(activeEditorTheme);
+    syncHighlightThemeStylesheet(activeEditorTheme, { source: 'public' });
   }, [activeEditorTheme]);
 
   useEffect(() => {

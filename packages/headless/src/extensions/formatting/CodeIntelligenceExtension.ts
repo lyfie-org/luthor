@@ -1,5 +1,4 @@
 import {
-  getCodeLanguageOptions,
   getCodeLanguages,
   $isCodeNode,
   CodeNode,
@@ -58,51 +57,83 @@ const DEFAULT_LANGUAGE_OPTIONS = [
   "plaintext",
   "typescript",
   "javascript",
+  "jsx",
+  "tsx",
+  "json",
   "markdown",
   "html",
   "css",
   "python",
   "bash",
+  "yaml",
   "sql",
+  "graphql",
   "java",
   "c",
   "cpp",
+  "csharp",
+  "go",
+  "docker",
   "rust",
+  "php",
+  "ruby",
+  "perl",
+  "lua",
+  "r",
+  "scala",
+  "dart",
+  "toml",
+  "kotlin",
+  "swift",
   "powershell",
   "xml",
-] as const;
-
-const ADDITIONAL_SUPPORTED_LANGUAGES = [
-  "bash",
 ] as const;
 
 const LANGUAGE_LABEL_OVERRIDES: Record<string, string> = {
   atom: "Atom",
   bash: "Bash",
   c: "C",
+  csharp: "C#",
   clike: "C-like",
   cpp: "C++",
   css: "CSS",
+  dart: "Dart",
   diff: "Diff",
+  docker: "Dockerfile",
+  dockerfile: "Dockerfile",
+  go: "Go",
+  graphql: "GraphQL",
   html: "HTML",
   java: "Java",
+  json: "JSON",
   js: "JavaScript",
+  jsx: "JSX",
+  kotlin: "Kotlin",
+  lua: "Lua",
   markup: "Markup",
   markdown: "Markdown",
   mathml: "MathML",
   objc: "Objective-C",
   objectivec: "Objective-C",
+  perl: "Perl",
   plain: "Plain Text",
+  php: "PHP",
   powershell: "PowerShell",
   py: "Python",
+  r: "R",
+  ruby: "Ruby",
   rss: "RSS",
   rust: "Rust",
+  scala: "Scala",
   sql: "SQL",
   ssml: "SSML",
   svg: "SVG",
   swift: "Swift",
+  toml: "TOML",
+  tsx: "TSX",
   txt: "Plain Text",
   typescript: "TypeScript",
+  yaml: "YAML",
   xml: "XML",
 };
 
@@ -119,8 +150,6 @@ export class CodeIntelligenceExtension extends BaseExtension<
   Record<string, never>,
   ReactNode[]
 > {
-  private languageOptions: string[] = [];
-
   constructor() {
     super("codeIntelligence");
     this.config = {
@@ -129,8 +158,6 @@ export class CodeIntelligenceExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
-    this.languageOptions = this.getLanguageOptions();
-
     const unregisterMarkdownShortcuts = registerMarkdownShortcuts(
       editor,
       TRANSFORMERS,
@@ -154,7 +181,6 @@ export class CodeIntelligenceExtension extends BaseExtension<
     return () => {
       unregisterMarkdownShortcuts();
       unregisterUpdate();
-      this.languageOptions = [];
     };
   }
 
@@ -170,11 +196,11 @@ export class CodeIntelligenceExtension extends BaseExtension<
   getCommands(editor: LexicalEditor): CodeIntelligenceCommands {
     return {
       setCodeLanguage: (language: string) => {
-        const normalized = normalizeLanguage(language);
+        const normalized = normalizeLanguage(language) ?? "plain";
         const theme = this.getThemeForLanguage(normalized);
         editor.update(() => {
           this.getSelectionCodeNodes().forEach((node) => {
-            node.setLanguage(normalized ?? null);
+            node.setLanguage(normalized);
             node.setTheme(theme);
           });
         });
@@ -211,9 +237,7 @@ export class CodeIntelligenceExtension extends BaseExtension<
   }
 
   getLanguageOptionsSnapshot(): string[] {
-    return this.languageOptions.length
-      ? [...this.languageOptions]
-      : this.getLanguageOptions();
+    return this.getLanguageOptions();
   }
 
   getCodeBlocksSnapshot(editor: LexicalEditor): CodeBlockSnapshot[] {
@@ -223,7 +247,7 @@ export class CodeIntelligenceExtension extends BaseExtension<
 
         return {
           key: node.getKey(),
-          language: normalized ?? "plaintext",
+          language: normalized ?? "plain",
           text: node.getTextContent(),
         };
       }),
@@ -245,8 +269,8 @@ export class CodeIntelligenceExtension extends BaseExtension<
         return;
       }
 
-      const normalized = normalizeLanguage(selectedLanguage);
-      node.setLanguage(normalized ?? null);
+      const normalized = normalizeLanguage(selectedLanguage) ?? "plain";
+      node.setLanguage(normalized);
       node.setTheme(this.getThemeForLanguage(normalized));
     });
   }
@@ -273,20 +297,32 @@ export class CodeIntelligenceExtension extends BaseExtension<
     const updates = editor.getEditorState().read(() => {
       return $nodesOfType(CodeNode)
         .map((node) => {
+          const language = node.getLanguage();
+          const normalizedLanguage = normalizeLanguage(language);
+          const shouldNormalizeLanguage =
+            typeof language === "string" &&
+            language.trim().length > 0 &&
+            !normalizedLanguage;
           const currentTheme =
             (
               node as unknown as {
                 getTheme?: () => string | null | undefined;
               }
             ).getTheme?.() ?? "";
-          const theme = this.getThemeForLanguage(node.getLanguage());
+          const theme = this.getThemeForLanguage(
+            shouldNormalizeLanguage ? "plain" : normalizedLanguage,
+          );
           return {
             key: node.getKey(),
+            nextLanguage: shouldNormalizeLanguage ? "plain" : null,
             nextTheme: theme ?? getFallbackCodeTheme(),
             currentTheme,
           };
         })
-        .filter((entry) => entry.currentTheme !== entry.nextTheme);
+        .filter(
+          (entry) =>
+            entry.nextLanguage !== null || entry.currentTheme !== entry.nextTheme,
+        );
     });
 
     if (updates.length === 0) {
@@ -298,6 +334,9 @@ export class CodeIntelligenceExtension extends BaseExtension<
         const node = $getNodeByKey(entry.key);
         if (!node || !$isCodeNode(node)) {
           return;
+        }
+        if (entry.nextLanguage) {
+          node.setLanguage(entry.nextLanguage);
         }
         node.setTheme(entry.nextTheme);
       });
@@ -414,9 +453,7 @@ function CodeBlockControlsPlugin({
     new Map(),
   );
 
-  const languageOptions = useMemo(() => {
-    return extension.getLanguageOptionsSnapshot();
-  }, [extension]);
+  const languageOptions = extension.getLanguageOptionsSnapshot();
   const languageOptionEntries = useMemo(() => {
     return languageOptions.map((id) => ({
       id,
@@ -807,14 +844,38 @@ function normalizeLanguage(language: string | null | undefined): string | null {
   const trimmed = language.trim().toLowerCase();
   if (!trimmed || trimmed === "auto") return null;
 
-  const normalized = normalizeCodeLang(trimmed);
+  const aliasNormalized = normalizeExtraLanguageAlias(trimmed);
+  const normalized = normalizeCodeLang(aliasNormalized);
   if (!normalized || normalized === "auto") return null;
 
-  if (!isSupportedLanguage(normalized)) {
+  const finalLanguage = normalizeExtraLanguageAlias(normalized);
+  if (!isSupportedLanguage(finalLanguage)) {
     return null;
   }
 
-  return normalized;
+  return finalLanguage;
+}
+
+function normalizeExtraLanguageAlias(language: string): string {
+  switch (language) {
+    case "cs":
+      return "csharp";
+    case "golang":
+      return "go";
+    case "dockerfile":
+      return "docker";
+    case "kt":
+      return "kotlin";
+    case "rb":
+      return "ruby";
+    case "shell":
+    case "sh":
+      return "bash";
+    case "yml":
+      return "yaml";
+    default:
+      return language;
+  }
 }
 
 function isSupportedLanguage(language: string): boolean {
@@ -823,21 +884,11 @@ function isSupportedLanguage(language: string): boolean {
     return false;
   }
 
-  const canonicalOptions = getCodeLanguageOptions()
-    .map(([id]) => normalizeCodeLang(id.trim().toLowerCase()))
-    .filter(Boolean);
-  const runtimeLanguages = getCodeLanguages()
-    .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
-    .filter(Boolean);
-  const additionalLanguages = ADDITIONAL_SUPPORTED_LANGUAGES
-    .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
-    .filter(Boolean);
-
-  const supported = new Set<string>([
-    ...canonicalOptions,
-    ...runtimeLanguages,
-    ...additionalLanguages,
-  ]);
+  const supported = new Set<string>(
+    getCodeLanguages()
+      .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
+      .filter((id): id is string => Boolean(id)),
+  );
   return supported.has(normalized);
 }
 

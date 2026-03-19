@@ -1,3 +1,4 @@
+import { getCodeLanguages, normalizeCodeLang } from "@lexical/code";
 import type { LexicalEditor } from "lexical";
 import {
   CodeIntelligenceExtension,
@@ -9,11 +10,19 @@ describe("CodeIntelligenceExtension language options", () => {
   it("returns default language options when no override is provided", () => {
     const extension = new CodeIntelligenceExtension();
     const options = extension.getLanguageOptionsSnapshot();
+    const supported = new Set(
+      getCodeLanguages()
+        .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
+        .filter((id): id is string => Boolean(id)),
+    );
 
     expect(options).toContain("plain");
     expect(options).toContain("typescript");
-    expect(options).toContain("bash");
+    expect(options.includes("bash")).toBe(supported.has("bash"));
     expect(options).not.toContain("yaml");
+    options.forEach((option) => {
+      expect(supported.has(option)).toBe(true);
+    });
   });
 
   it("appends custom language options and normalizes aliases", () => {
