@@ -1,4 +1,4 @@
-import { getCodeLanguages, normalizeCodeLang } from "@lexical/code";
+import { getCodeLanguages, normalizeCodeLang } from "@lyfie/luthor-headless/vendor/lexicalCode";
 
 export const CODE_LANGUAGE_ALIAS_MAP: Record<string, string> = {
   csharp: "csharp",

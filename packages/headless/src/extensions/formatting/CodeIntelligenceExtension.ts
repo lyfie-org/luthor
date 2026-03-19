@@ -1,7 +1,7 @@
 import {
   $isCodeNode,
   CodeNode,
-} from "@lexical/code";
+} from "@lyfie/luthor-headless/vendor/lexicalCode";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   registerMarkdownShortcuts,

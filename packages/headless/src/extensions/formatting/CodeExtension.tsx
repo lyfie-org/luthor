@@ -15,7 +15,7 @@ import {
   CodeHighlightNode,
   CodeNode,
   registerCodeHighlighting,
-} from "@lexical/code";
+} from "@lyfie/luthor-headless/vendor/lexicalCode";
 import { $createParagraphNode } from "lexical";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { BaseExtensionConfig } from "@lyfie/luthor-headless/extensions/types";

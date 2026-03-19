@@ -1,4 +1,4 @@
-import { getCodeLanguages, normalizeCodeLang } from "@lexical/code";
+import { getCodeLanguages, normalizeCodeLang } from "@lyfie/luthor-headless/vendor/lexicalCode";
 import { describe, expect, it } from "vitest";
 import {
   getDefaultPopularPrismLanguages,
