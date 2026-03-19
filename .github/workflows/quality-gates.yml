@@ -49,3 +49,6 @@ jobs:
 
       - name: Web build
         run: pnpm --dir apps/web run build
+
+      - name: Demo build
+        run: pnpm --dir apps/demo run build
