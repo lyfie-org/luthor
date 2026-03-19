@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-19T16:56:13.722Z
+Generated at: 2026-03-19T17:30:07.374Z
 
 ## AI Agent Workflow
 
@@ -531,32 +531,32 @@ This page covers install, update, uninstall, and validation for both packages.
 ## Prerequisites
 
 - Node.js `>=20`
-- A React app using React `18` or `19`
+- If you are integrating with React UI, use React `18` or `19` already present in your app.
 
 ## Install @lyfie/luthor
 
 ### npm
 
 ```bash
-npm install @lyfie/luthor react react-dom
+npm install @lyfie/luthor
 ```
 
 ### pnpm
 
 ```bash
-pnpm add @lyfie/luthor react react-dom
+pnpm add @lyfie/luthor
 ```
 
 ### yarn
 
 ```bash
-yarn add @lyfie/luthor react react-dom
+yarn add @lyfie/luthor
 ```
 
 ### bun
 
 ```bash
-bun add @lyfie/luthor react react-dom
+bun add @lyfie/luthor
 ```
 
 ## Install @lyfie/luthor-headless
@@ -564,7 +564,7 @@ bun add @lyfie/luthor react react-dom
 ### npm
 
 ```bash
-npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
+npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils
 ```
 
 ### Optional dependencies for headless
@@ -639,7 +639,7 @@ Use `@lyfie/luthor-headless` when you need complete control over editor behavior
 ## Install
 
 ```bash
-npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
+npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils
 ```
 
 Optional (recommended for richer code/emoji UX):
@@ -731,7 +731,7 @@ Use `@lyfie/luthor` when you want a production-ready editor quickly with strong 
 ## Install
 
 ```bash
-npm install @lyfie/luthor react react-dom
+npm install @lyfie/luthor
 ```
 
 ## Render a basic editor

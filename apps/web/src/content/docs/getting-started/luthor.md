@@ -10,7 +10,7 @@ Use `@lyfie/luthor` when you want a production-ready editor quickly with strong 
 ## Install
 
 ```bash
-npm install @lyfie/luthor react react-dom
+npm install @lyfie/luthor
 ```
 
 ## Render a basic editor
