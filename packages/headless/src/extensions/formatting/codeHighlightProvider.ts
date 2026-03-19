@@ -1,4 +1,4 @@
-import { PrismTokenizer } from "@lyfie/luthor-headless/vendor/lexicalCode";
+import { PrismTokenizer } from "@lexical/code";
 
 export type CodeTokenizer = {
   defaultLanguage: string;

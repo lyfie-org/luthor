@@ -1,17 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { __TEST_ONLY_CODE_EXTENSION_INTERNALS } from "./CodeExtension";
+import { CodeExtension } from "./CodeExtension";
 
-describe("CodeExtension preload mode resolution", () => {
-  it("defaults grammar preload mode to lazy", () => {
-    const { resolveGrammarPreloadMode } = __TEST_ONLY_CODE_EXTENSION_INTERNALS;
-    expect(resolveGrammarPreloadMode(undefined)).toBe("lazy");
+describe("CodeExtension defaults", () => {
+  it("enables syntax highlighting by default", () => {
+    const extension = new CodeExtension() as CodeExtension & {
+      config: {
+        syntaxHighlighting?: "auto" | "disabled";
+      };
+    };
+    expect(extension.config.syntaxHighlighting).toBe("auto");
   });
 
-  it("keeps explicit preload mode selections", () => {
-    const { resolveGrammarPreloadMode } = __TEST_ONLY_CODE_EXTENSION_INTERNALS;
-    expect(resolveGrammarPreloadMode("lazy")).toBe("lazy");
-    expect(resolveGrammarPreloadMode("idle")).toBe("idle");
-    expect(resolveGrammarPreloadMode("eager")).toBe("eager");
+  it("shows code line numbers by default", () => {
+    const extension = new CodeExtension() as CodeExtension & {
+      config: {
+        showLineNumbers?: boolean;
+      };
+    };
+    expect(extension.config.showLineNumbers).toBe(true);
   });
 });
-

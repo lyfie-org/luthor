@@ -12,7 +12,7 @@ import {
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { QuoteNode, HeadingNode } from "@lexical/rich-text";
-import { CodeHighlightNode, CodeNode } from "@lyfie/luthor-headless/vendor/lexicalCode";
+import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import {
   TableNode,
   TableRowNode,

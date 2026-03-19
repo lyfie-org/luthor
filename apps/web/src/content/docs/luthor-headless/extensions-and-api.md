@@ -129,11 +129,10 @@ export function Editor() {
   - `TextColorConfig`, `TextColorOption`
   - `TextHighlightConfig`, `TextHighlightOption`
 - Code:
-  - `CodeExtensionConfig` (`showLineNumbers`, `grammarPreloadMode` for code grammar loading strategy)
+  - `CodeExtensionConfig` (`showLineNumbers`, `syntaxHighlighting`)
   - `CodeIntelligenceConfig`, `CodeIntelligenceCommands`
   - `CodeHighlightProvider`, `CodeHighlightProviderConfig`
   - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig` (UI labels use full language names)
-  - `loadPopularPrismLanguages`, `loadPrismLanguages`, `getDefaultPopularPrismLanguages`
 - Table/media/draggable:
   - `TableConfig`
   - `DraggableConfig`
@@ -193,16 +192,6 @@ const html = jsonToHTML(json, {
   metadataMode: 'none',
 });
 ```
-
-## Optional Prism language preload API
-
-Code highlighting now exposes explicit Prism grammar preload helpers:
-
-- `getDefaultPopularPrismLanguages()`
-- `loadPopularPrismLanguages()`
-- `loadPrismLanguages([...])`
-
-Use these only when you want additional runtime control. The code extension already preloads a default popular set in normal usage.
 
 ## Custom extension example (`createExtension`)
 

@@ -1,6 +1,6 @@
 import {
   $isCodeNode,
-} from "@lyfie/luthor-headless/vendor/lexicalCode";
+} from "@lexical/code";
 import {
   COMMAND_PRIORITY_EDITOR,
   LexicalEditor,

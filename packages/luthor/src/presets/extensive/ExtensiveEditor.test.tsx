@@ -987,21 +987,6 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
   });
 
-  it("passes grammar preload mode to extension factory", () => {
-    render(
-      <ExtensiveEditor
-        showDefaultContent={false}
-        grammarPreloadMode="idle"
-      />,
-    );
-
-    expect(createExtensiveExtensionsMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        grammarPreloadMode: "idle",
-      }),
-    );
-  });
-
   it("passes scaleByRatio to extension factory", () => {
     render(
       <ExtensiveEditor
