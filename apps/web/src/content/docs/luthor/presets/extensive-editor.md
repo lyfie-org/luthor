@@ -54,7 +54,7 @@ export function App() {
 - Typography/code options:
   - `fontFamilyOptions`, `fontSizeOptions`, `lineHeightOptions`
   - `minimumDefaultLineHeight`, `scaleByRatio`
-  - `syntaxHighlighting`, `grammarPreloadMode`, `codeHighlightProvider`, `loadCodeHighlightProvider`
+  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
   - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
   - `inlineCodeHighlighting` (toggle accented inline-code styling without affecting code blocks)
   - `maxListIndentation`
@@ -83,8 +83,6 @@ If source parsing fails, an inline source error panel is shown and visual conten
 
 Use `onThemeChange` when host styling must follow editor theme state.  
 Code token colors render only when your app loads highlight theme CSS (`highlight.js` or equivalent custom `.hljs*` styles).
-
-`ExtensiveEditor` supports common industry grammars (for example `bash`, `json`, `yaml`, `go`, `php`, `ruby`, `csharp`, `kotlin`, `jsx`, `tsx`, `graphql`, `docker`, `toml`, `lua`, `perl`, `r`, `scala`, `dart`) with lazy loading by default (`grammarPreloadMode="lazy"`).
 
 ```tsx
 'use client';

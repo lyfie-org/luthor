@@ -78,12 +78,12 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Installation
 - File: getting-started/installation.md
 - URL: https://www.luthor.fyi/docs/getting-started/installation/
-- Summary: Installation This page covers install, update, uninstall, and validation for both packages. Prerequisites Node.js =20 If you are integrating with React UI, use React 18 or 19 already present in your app. Install @lyfie/luthor npm pnpm yarn bun Install @lyfie/luthor headless npm Optional dependencies for headless highli...
+- Summary: title: Installation description: Install, update, and uninstall @lyfie/luthor and @lyfie/luthor headless. Installation This page covers install, update, uninstall, and validation for both packages. Prerequisites Node.js =20 If you are integrating with React UI, use React 18 or 19 already present in your app. Install @l...
 
 ### @lyfie/luthor-headless
 - File: getting-started/luthor-headless.md
 - URL: https://www.luthor.fyi/docs/getting-started/luthor-headless/
-- Summary: @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Optional (recommended for richer code/emoji UX): Render a minimal headless editor Validate installation 1. The editor mounts and accepts input. 2. Toolbar buttons call typed commands ( toggleBold , togg...
+- Summary: title: "@lyfie/luthor headless" description: Minimal setup and validation for @lyfie/luthor headless. @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Optional (recommended for richer code/emoji UX): Render a minimal headless editor Validate installat...
 
 ### @lyfie/luthor
 - File: getting-started/luthor.md

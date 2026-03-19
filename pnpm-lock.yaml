@@ -238,9 +238,6 @@ importers:
       '@emoji-mart/data':
         specifier: ^1.2.1
         version: 1.2.1
-      prismjs:
-        specifier: ^1.30.0
-        version: 1.30.0
 
   packages/luthor:
     dependencies:

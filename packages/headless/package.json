@@ -81,7 +81,6 @@
     }
   },
   "optionalDependencies": {
-    "@emoji-mart/data": "^1.2.1",
-    "prismjs": "^1.30.0"
+    "@emoji-mart/data": "^1.2.1"
   }
 }

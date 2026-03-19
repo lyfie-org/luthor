@@ -5,7 +5,7 @@ import {
   INSERT_LINE_BREAK_COMMAND,
   LexicalEditor,
 } from "lexical";
-import { $isCodeNode } from "@lyfie/luthor-headless/vendor/lexicalCode";
+import { $isCodeNode } from "@lexical/code";
 import {
   $findCellNode,
   $getTableNodeFromLexicalNodeOrThrow,

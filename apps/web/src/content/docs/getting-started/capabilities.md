@@ -149,9 +149,9 @@ Code workflows include inline code formatting, block-level code nodes, language 
   - `toggleCodeBlock`, `setCodeLanguage`, `autoDetectCodeLanguage`
   - `getCurrentCodeLanguage`, `copySelectedCodeBlock`
 - Related config:
-  - `syntaxHighlighting`, `grammarPreloadMode`, `codeHighlightProvider`, `loadCodeHighlightProvider`
+  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
   - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
-  - `inlineCodeHighlighting` (preset prop) and optional Prism grammar preload helpers in headless
+  - `inlineCodeHighlighting` (preset prop)
 
 | Package | Availability |
 | --- | --- |

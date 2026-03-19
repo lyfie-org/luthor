@@ -1,4 +1,4 @@
-import { getCodeLanguages, normalizeCodeLang } from "@lyfie/luthor-headless/vendor/lexicalCode";
+import { getCodeLanguages, normalizeCodeLang } from "@lexical/code";
 import type { Transformer } from "@lexical/markdown";
 import type { LexicalEditor } from "lexical";
 import {
@@ -20,8 +20,7 @@ describe("CodeIntelligenceExtension language options", () => {
 
     expect(options).toContain("plain");
     expect(options).toContain("typescript");
-    expect(options).toContain("bash");
-    expect(options).toContain("yaml");
+    expect(options).not.toContain("made-up-language");
     options.forEach((option) => {
       expect(supported.has(option) || isKnownCodeLanguage(option)).toBe(true);
     });
@@ -107,7 +106,7 @@ describe("CodeIntelligenceExtension language options", () => {
 
     expect(extension.getThemeForLanguage?.("typescript")).toBe("hljs");
     expect(extension.getThemeForLanguage?.("javascript")).toBe("hljs");
-    expect(extension.getThemeForLanguage?.("tsx")).toBe("hljs");
+    expect(extension.getThemeForLanguage?.("tsx")).toBe("plain");
   });
 
   it("does not update code block language when the editor is non-editable", () => {

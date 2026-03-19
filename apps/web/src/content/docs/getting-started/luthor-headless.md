@@ -16,7 +16,7 @@ npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/
 Optional (recommended for richer code/emoji UX):
 
 ```bash
-npm install highlight.js prismjs @emoji-mart/data
+npm install highlight.js @emoji-mart/data
 ```
 
 ## Render a minimal headless editor

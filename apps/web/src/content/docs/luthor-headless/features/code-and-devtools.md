@@ -11,20 +11,16 @@ Recent defaults:
 
 - Code block language labels use full language names in UI (for example, `TypeScript`, `JavaScript`, `SQL`).
 - Default language options are filtered to languages that are actually supported by the active runtime tokenizer.
-- Optional popular Prism grammar support covers: `bash`, `json`, `yaml`, `go`, `php`, `ruby`, `csharp`, `kotlin`, `jsx`, `tsx`, `graphql`, `docker`, `toml`, `lua`, `perl`, `r`, `scala`, `dart`.
-- `CodeExtension` defaults to `grammarPreloadMode: "lazy"` and loads grammars only when used by code blocks.
-- Combined with Lexical defaults, common dropdown languages include `TypeScript`, `JavaScript`, `JSX`, `TSX`, `JSON`, `Python`, `Java`, `C/C++`, `C#`, `Go`, `Rust`, `PHP`, `Ruby`, `Kotlin`, `Swift`, `SQL`, `PowerShell`, `GraphQL`, `Dockerfile`, `TOML`, `Lua`, `Perl`, `R`, `Scala`, `Dart`, `HTML`, `CSS`, `Markdown`, `XML`, and `YAML`.
+- Combined with Lexical defaults, common dropdown languages include `TypeScript`, `JavaScript`, `Python`, `Java`, `C/C++`, `Rust`, `Swift`, `SQL`, `PowerShell`, `HTML`, `CSS`, `Markdown`, and `XML`.
 - Unsupported languages are normalized to plain text to avoid stale token classes when switching code languages.
 - Code block line numbers can be enabled/disabled through `CodeExtensionConfig.showLineNumbers`.
 - Syntax colors are applied only when your app loads `highlight.js` theme CSS (or equivalent custom `.hljs*` styles).
-- Prism preload helpers are exported for advanced control: `getDefaultPopularPrismLanguages`, `loadPopularPrismLanguages`, `loadPrismLanguages`.
 
 ## Included extensions and utilities
 
 - `codeExtension`
 - `codeIntelligenceExtension`
 - `codeFormatExtension`
-- `getDefaultPopularPrismLanguages`, `loadPopularPrismLanguages`, `loadPrismLanguages`
 - `markdownToJSON`, `jsonToMarkdown`
 - `htmlToJSON`, `jsonToHTML`
 
@@ -108,32 +104,6 @@ Use either a local/public stylesheet or a CDN stylesheet:
   - dark: `https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github-dark.min.css`
 
 Then switch URLs on your theme change callback so code block colors stay in sync.
-
-## Optional Prism preload control
-
-Use this when you want explicit preload behavior instead of relying only on default automatic preload:
-
-```tsx
-import {
-  codeExtension,
-  getDefaultPopularPrismLanguages,
-  loadPopularPrismLanguages,
-  loadPrismLanguages,
-} from '@lyfie/luthor-headless';
-
-const codeExt = codeExtension.configure({
-  grammarPreloadMode: 'idle', // 'lazy' (default) | 'idle' | 'eager'
-});
-
-await loadPopularPrismLanguages();
-await loadPrismLanguages(['graphql', 'docker', 'toml']);
-console.log(getDefaultPopularPrismLanguages());
-```
-
-Notes:
-
-- `prismjs` is optional for `@lyfie/luthor-headless`.
-- If Prism components are unavailable, the editor still works and unsupported languages stay plain-text themed.
 
 ## Example: markdown bridge
 

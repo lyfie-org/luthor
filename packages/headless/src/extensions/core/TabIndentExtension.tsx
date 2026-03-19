@@ -9,7 +9,7 @@ import {
   INDENT_CONTENT_COMMAND,
   OUTDENT_CONTENT_COMMAND,
 } from "lexical";
-import { $isCodeNode } from "@lyfie/luthor-headless/vendor/lexicalCode";
+import { $isCodeNode } from "@lexical/code";
 import { $getListDepth, $isListItemNode, $isListNode } from "@lexical/list";
 import { $isHeadingNode } from "@lexical/rich-text";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";

@@ -95,12 +95,11 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 | `minimumDefaultLineHeight` | `string \| number` | `1.5` | Validated and normalized; invalid values fall back to `1.5`. |
 | `scaleByRatio` | `boolean` | `false` | Used by image resize behavior. |
 | `syntaxHighlighting` | `'auto' \| 'disabled'` | extension default | Controls code syntax highlighting behavior. |
-| `grammarPreloadMode` | `'lazy' \| 'idle' \| 'eager'` | `'lazy'` | Controls when optional Prism grammars are loaded for code highlighting (`lazy`: on demand, `idle`: background warmup, `eager`: immediate warmup). |
 | `codeHighlightProvider` | `CodeHighlightProvider \| null` | `undefined` | Inject a concrete provider implementation. |
 | `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
 | `showLineNumbers` | `boolean` | `true` | Enables line numbers for visual code blocks and source tabs (`json`/`markdown`/`html`). |
 | `maxAutoDetectCodeLength` | `number` | `undefined` | Max code length for language autodetect. |
-| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); runtime keeps only languages supported by the active tokenizer (including preloaded popular grammars like `bash`, `json`, `yaml`, `go`, `php`, `ruby`, `csharp`, `kotlin`, `jsx`, `tsx`, `graphql`, `docker`, `toml`, `lua`, `perl`, `r`, `scala`, `dart`). |
+| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); runtime keeps only languages supported by the active tokenizer. |
 | `inlineCodeHighlighting` | `boolean` | `true` | Enables accented inline-code styling while keeping fenced code block highlighting behavior unchanged. |
 | `maxListIndentation` | `number` | `8` | Maximum sub-indent levels below root list level. |
 

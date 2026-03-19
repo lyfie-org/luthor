@@ -14,17 +14,11 @@ export {
   CodeExtension,
   codeExtension,
   type CodeExtensionConfig,
-  type CodeGrammarPreloadMode,
 } from "./CodeExtension";
 export {
   type CodeHighlightProvider,
   type CodeHighlightProviderConfig,
 } from "./codeHighlightProvider";
-export {
-  getDefaultPopularPrismLanguages,
-  loadPrismLanguages,
-  loadPopularPrismLanguages,
-} from "./prismLanguageLoader";
 export {
   FontFamilyExtension,
   fontFamilyExtension,
