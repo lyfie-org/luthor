@@ -38,9 +38,9 @@
   --luthor-placeholder-color: var(--luthor-muted-fg);
   --luthor-codeblock-bg: var(--luthor-muted);
   --luthor-code-unhighlighted-fg: #24292e;
-  --luthor-inline-code-bg: color-mix(in srgb, #dbeafe 68%, #ffffff 32%);
-  --luthor-inline-code-fg: color-mix(in srgb, #1d4ed8 72%, #0f172a 28%);
-  --luthor-inline-code-border: color-mix(in srgb, #93c5fd 62%, transparent);
+  --luthor-inline-code-bg: color-mix(in srgb, var(--luthor-codeblock-bg) 90%, var(--luthor-bg) 10%);
+  --luthor-inline-code-fg: color-mix(in srgb, var(--luthor-code-unhighlighted-fg) 88%, var(--luthor-fg) 12%);
+  --luthor-inline-code-border: color-mix(in srgb, var(--luthor-border) 72%, transparent);
   --luthor-floating-bg: var(--luthor-bg);
   --luthor-floating-fg: var(--luthor-fg);
   --luthor-floating-border: var(--luthor-border);
@@ -98,9 +98,9 @@
   --luthor-placeholder-color: var(--luthor-muted-fg);
   --luthor-codeblock-bg: var(--luthor-muted);
   --luthor-code-unhighlighted-fg: #c9d1d9;
-  --luthor-inline-code-bg: color-mix(in srgb, #1e3a8a 42%, #0a0a0a 58%);
-  --luthor-inline-code-fg: color-mix(in srgb, #bfdbfe 72%, #ffffff 28%);
-  --luthor-inline-code-border: color-mix(in srgb, #60a5fa 54%, transparent);
+  --luthor-inline-code-bg: color-mix(in srgb, var(--luthor-codeblock-bg) 86%, var(--luthor-bg) 14%);
+  --luthor-inline-code-fg: color-mix(in srgb, var(--luthor-code-unhighlighted-fg) 92%, var(--luthor-fg) 8%);
+  --luthor-inline-code-border: color-mix(in srgb, var(--luthor-border) 72%, transparent);
   --luthor-floating-bg: var(--luthor-bg);
   --luthor-floating-fg: var(--luthor-fg);
   --luthor-floating-border: var(--luthor-border);
@@ -1662,14 +1662,10 @@
 }
 
 .luthor-editor-wrapper[data-inline-code-highlighting="on"] .luthor-content-editable code:not(.luthor-code-block) {
-	background: linear-gradient(
-		120deg,
-		color-mix(in srgb, var(--luthor-inline-code-bg) 82%, transparent) 0%,
-		color-mix(in srgb, var(--luthor-inline-code-bg) 100%, transparent) 100%
-	);
-	color: var(--luthor-inline-code-fg, var(--luthor-syntax-keyword, var(--luthor-muted-fg)));
+	background-color: var(--luthor-inline-code-bg, var(--luthor-codeblock-bg, var(--luthor-muted)));
+	color: var(--luthor-inline-code-fg, var(--luthor-code-unhighlighted-fg, var(--luthor-muted-fg)));
 	border: 1px solid var(--luthor-inline-code-border, color-mix(in srgb, var(--luthor-border) 55%, transparent));
-	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--luthor-inline-code-border, var(--luthor-border)) 38%, transparent);
+	box-shadow: inset 0 1px 0 color-mix(in srgb, var(--luthor-bg) 16%, transparent);
 }
 
 .luthor-editor-wrapper[data-inline-code-highlighting="off"] .luthor-content-editable code:not(.luthor-code-block) {
