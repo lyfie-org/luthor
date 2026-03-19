@@ -24,18 +24,21 @@ const {
       placeholder,
       className,
       wrap,
+      showLineNumbers,
     }: {
       value: string;
       onChange: (value: string) => void;
       placeholder: string;
       className?: string;
       wrap?: "soft" | "hard" | "off";
+      showLineNumbers?: boolean;
     }) => (
       <textarea
         data-testid="source-view"
         data-placeholder={placeholder}
         data-classname={className}
         data-wrap={wrap}
+        data-line-numbers={showLineNumbers ? "true" : "false"}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />
@@ -226,6 +229,23 @@ describe("HeadlessEditorPreset", () => {
     expect(extensionConfig.featureFlags?.themeToggle).toBe(false);
     expect(extensionConfig.featureFlags?.table).toBe(false);
     expect(extensionConfig.featureFlags?.commandPalette).toBe(false);
+  });
+
+  it("passes line number visibility to extension factory and source views", () => {
+    render(
+      <HeadlessEditorPreset
+        showDefaultContent={false}
+        defaultEditorView="json"
+        showLineNumbers={false}
+      />,
+    );
+
+    const extensionConfig = createExtensiveExtensionsMock.mock.calls.at(-1)?.[0] as {
+      showLineNumbers?: boolean;
+    };
+
+    expect(extensionConfig.showLineNumbers).toBe(false);
+    expect(screen.getByTestId("source-view")).toHaveAttribute("data-line-numbers", "false");
   });
 
   it("supports wrapper classes and defaultEditorView mode aliases", () => {

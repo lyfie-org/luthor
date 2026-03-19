@@ -67,18 +67,21 @@ const {
       placeholder,
       className,
       wrap,
+      showLineNumbers,
     }: {
       value: string;
       onChange: (value: string) => void;
       placeholder: string;
       className?: string;
       wrap?: "soft" | "hard" | "off";
+      showLineNumbers?: boolean;
     }) => (
       <textarea
         data-testid="source-view"
         data-placeholder={placeholder}
         data-classname={className}
         data-wrap={wrap}
+        data-line-numbers={showLineNumbers ? "true" : "false"}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />
@@ -948,6 +951,21 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
   });
 
+  it("passes line number visibility to extension factory", () => {
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    expect(createExtensiveExtensionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showLineNumbers: false,
+      }),
+    );
+  });
+
   it("passes scaleByRatio to extension factory", () => {
     render(
       <ExtensiveEditor
@@ -1204,6 +1222,25 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
       "data-placeholder",
       "Paste JSON here",
     );
+    expect(screen.getByTestId("source-view")).toHaveAttribute(
+      "data-line-numbers",
+      "true",
+    );
+  });
+
+  it("disables source line numbers when showLineNumbers is false", () => {
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="json"
+        showLineNumbers={false}
+      />,
+    );
+
+    expect(screen.getByTestId("source-view")).toHaveAttribute(
+      "data-line-numbers",
+      "false",
+    );
   });
 
   it("supports mode-specific placeholder pass-through for markdown mode", () => {
@@ -1266,6 +1303,44 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
       "data-classname",
       "luthor-source-view--wrapped",
     );
+  });
+
+  it("hydrates markdown source mode on first render when defaultContent is provided", async () => {
+    const defaultDocument = { root: { children: [{ type: "paragraph", marker: "default-markdown" }] } };
+    jsonToMarkdownMock.mockReturnValue("## Prefilled markdown");
+
+    render(
+      <ExtensiveEditor
+        defaultContent={JSON.stringify(defaultDocument)}
+        showDefaultContent={false}
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown"]}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue("## Prefilled markdown");
+    });
+    expect(mockEditorApi.import.fromJSON).toHaveBeenCalledWith(defaultDocument);
+  });
+
+  it("hydrates html source mode on first render when defaultContent is provided", async () => {
+    const defaultDocument = { root: { children: [{ type: "paragraph", marker: "default-html" }] } };
+    jsonToHTMLMock.mockReturnValue("<p>Prefilled html</p>");
+
+    render(
+      <ExtensiveEditor
+        defaultContent={JSON.stringify(defaultDocument)}
+        showDefaultContent={false}
+        initialMode="html"
+        availableModes={["visual-editor", "html"]}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue("<p>Prefilled html</p>");
+    });
+    expect(mockEditorApi.import.fromJSON).toHaveBeenCalledWith(defaultDocument);
   });
 
   it("routes markdown to json transitions through the visual import/export pipeline", async () => {

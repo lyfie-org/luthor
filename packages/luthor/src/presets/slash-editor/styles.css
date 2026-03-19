@@ -1,7 +1,7 @@
 .luthor-preset-slash-editor {
-  border: 1px solid #d8dee8;
+  border: 1px solid var(--luthor-border);
   border-radius: 14px;
-  background: #ffffff;
+  background: var(--luthor-bg);
   padding: 10px;
 }
 

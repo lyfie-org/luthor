@@ -31,6 +31,7 @@ import {
 import { isExternalWebsiteHref } from '@/utils/link';
 
 type Theme = 'light' | 'dark';
+const HIGHLIGHT_THEME_LINK_ID = 'luthor-highlightjs-theme';
 
 const VISIBLE_PRESET_IDS = [
   'extensive',
@@ -141,6 +142,7 @@ const defaultPresetDetails: PresetDetails = {
 type PresetRendererProps = {
   presetId: VisiblePresetId;
   siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
 };
 
 type PresetSurfaceProps = {
@@ -174,6 +176,26 @@ function formatTime(timestamp: number): string {
   }).format(timestamp);
 }
 
+function syncHighlightTheme(theme: Theme): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const href = theme === 'dark' ? '/highlightjs/github-dark.css' : '/highlightjs/github.css';
+  const existing = document.getElementById(HIGHLIGHT_THEME_LINK_ID);
+  const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
+
+  if (!(existing instanceof HTMLLinkElement)) {
+    link.id = HIGHLIGHT_THEME_LINK_ID;
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+  }
+
+  if (link.href !== new URL(href, window.location.origin).href) {
+    link.href = href;
+  }
+}
+
 function PresetSurface({ children }: PresetSurfaceProps) {
   return (
     <section className="demo-preset-surface-body">
@@ -182,11 +204,18 @@ function PresetSurface({ children }: PresetSurfaceProps) {
   );
 }
 
-function ExtensiveExperience({ siteTheme }: { siteTheme: Theme }) {
+function ExtensiveExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
       <ExtensiveEditor
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         defaultContent={WEB_DEMO_EXTENSIVE_CONTENT}
         toolbarAlignment="center"
@@ -197,12 +226,19 @@ function ExtensiveExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function ComposeExperience({ siteTheme }: { siteTheme: Theme }) {
+function ComposeExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
       <ComposeEditor
         defaultContent={WEB_DEMO_COMPOSE_CONTENT}
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         compactToolbar
         placeholder="Write your customer follow-up..."
@@ -211,12 +247,19 @@ function ComposeExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function LegacyRichExperience({ siteTheme }: { siteTheme: Theme }) {
+function LegacyRichExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
       <LegacyRichEditor
         defaultContent={WEB_DEMO_LEGACY_RICH_CONTENT}
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         defaultEditorView="markdown"
       />
@@ -224,12 +267,19 @@ function LegacyRichExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function MarkDownEditorExperience({ siteTheme }: { siteTheme: Theme }) {
+function MarkDownEditorExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
       <MarkDownEditor
         defaultContent={WEB_DEMO_MD_EDITOR_CONTENT}
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         defaultEditorView="markdown"
       />
@@ -237,12 +287,19 @@ function MarkDownEditorExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function HTMLEditorExperience({ siteTheme }: { siteTheme: Theme }) {
+function HTMLEditorExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
       <HTMLEditor
         defaultContent={WEB_DEMO_HTML_EDITOR_CONTENT}
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         defaultEditorView="html"
       />
@@ -402,31 +459,40 @@ function SimpleEditorExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function PresetRenderer({ presetId, siteTheme }: PresetRendererProps) {
+function PresetRenderer({ presetId, siteTheme, onEditorThemeChange }: PresetRendererProps) {
   switch (presetId) {
     case 'compose':
-      return <ComposeExperience siteTheme={siteTheme} />;
+      return <ComposeExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
     case 'simple-editor':
       return <SimpleEditorExperience siteTheme={siteTheme} />;
     case 'legacy-rich':
-      return <LegacyRichExperience siteTheme={siteTheme} />;
+      return <LegacyRichExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
     case 'md-editor':
-      return <MarkDownEditorExperience siteTheme={siteTheme} />;
+      return <MarkDownEditorExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
     case 'html-editor':
-      return <HTMLEditorExperience siteTheme={siteTheme} />;
+      return <HTMLEditorExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
     case 'slash-editor':
       return <SlashEditorExperience siteTheme={siteTheme} />;
     case 'headless-editor':
       return <HeadlessExperience siteTheme={siteTheme} />;
     case 'extensive':
     default:
-      return <ExtensiveExperience siteTheme={siteTheme} />;
+      return <ExtensiveExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
   }
 }
 
 export function PresetShowcaseClient() {
   const [siteTheme, setSiteTheme] = useState<Theme>('light');
+  const [activeEditorTheme, setActiveEditorTheme] = useState<Theme>('light');
   const [selectedPresetId, setSelectedPresetId] = useState<VisiblePresetId>('extensive');
+
+  useEffect(() => {
+    setActiveEditorTheme(siteTheme);
+  }, [selectedPresetId, siteTheme]);
+
+  useEffect(() => {
+    syncHighlightTheme(activeEditorTheme);
+  }, [activeEditorTheme]);
 
   useEffect(() => {
     setSiteTheme(resolveTheme());
@@ -497,7 +563,12 @@ export function PresetShowcaseClient() {
               <span />
             </div>
           </div>
-          <PresetRenderer key={`${selectedPresetId}-${siteTheme}`} presetId={selectedPresetId} siteTheme={siteTheme} />
+          <PresetRenderer
+            key={`${selectedPresetId}-${siteTheme}`}
+            presetId={selectedPresetId}
+            siteTheme={siteTheme}
+            onEditorThemeChange={setActiveEditorTheme}
+          />
         </div>
       </div>
     </div>

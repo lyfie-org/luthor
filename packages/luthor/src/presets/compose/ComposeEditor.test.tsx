@@ -36,4 +36,18 @@ describe("ComposeEditor", () => {
     expect(props.variantClassName).toContain("luthor-preset-compose--compact");
     expect(props.toolbarClassName).toContain("luthor-preset-compose__toolbar--compact");
   });
+
+  it("forwards line number visibility to underlying editor", () => {
+    render(
+      <ComposeEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      showLineNumbers?: boolean;
+    };
+    expect(props.showLineNumbers).toBe(false);
+  });
 });

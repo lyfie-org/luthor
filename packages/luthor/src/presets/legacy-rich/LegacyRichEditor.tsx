@@ -52,7 +52,7 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   emoji: false,
   draggableBlock: false,
   customNode: false,
-  themeToggle: false,
+  themeToggle: true,
 };
 
 const LEGACY_RICH_ENFORCED_FEATURE_FLAGS: FeatureFlagOverrides = {
@@ -64,7 +64,6 @@ const LEGACY_RICH_ENFORCED_FEATURE_FLAGS: FeatureFlagOverrides = {
   emoji: false,
   commandPalette: false,
   slashCommand: false,
-  themeToggle: false,
 };
 
 const LEGACY_RICH_FEATURE_POLICY = new PresetFeaturePolicy<FeatureFlag>(
@@ -88,6 +87,9 @@ export const LEGACY_RICH_TOOLBAR_LAYOUT: ToolbarLayout = {
     },
     {
       items: ["codeBlock", "horizontalRule", "table", "image"],
+    },
+    {
+      items: ["themeToggle"],
     },
   ],
 };

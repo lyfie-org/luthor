@@ -66,6 +66,7 @@ export type ExtensivePresetConfig = {
   maxListIndentation?: number;
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
+  showLineNumbers?: boolean;
 };
 
 export function createExtensivePreset(
@@ -81,6 +82,7 @@ export function createExtensivePreset(
       maxListIndentation: config.maxListIndentation,
       isCopyAllowed: config.isCopyAllowed,
       languageOptions: config.languageOptions,
+      showLineNumbers: config.showLineNumbers,
     })],
   };
 }

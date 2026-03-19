@@ -249,10 +249,12 @@ function resolvePlaceholders(
 function HeadlessEditorContent({
   initialMode,
   placeholders,
+  showLineNumbers,
   onReady,
 }: {
   initialMode: HeadlessEditorPresetMode;
   placeholders: HeadlessEditorContentState & { visual: string };
+  showLineNumbers: boolean;
   onReady?: (methods: HeadlessEditorMethods) => void;
 }) {
   const { activeStates, commands, export: exportApi, import: importApi } = useEditor();
@@ -631,6 +633,7 @@ function HeadlessEditorContent({
                 }));
               }}
               placeholder={placeholders.json}
+              showLineNumbers={showLineNumbers}
             />
           )}
           {mode === "markdown" && (
@@ -645,6 +648,7 @@ function HeadlessEditorContent({
               placeholder={placeholders.markdown}
               className="luthor-source-view--wrapped"
               wrap="soft"
+              showLineNumbers={showLineNumbers}
             />
           )}
           {mode === "html" && (
@@ -659,6 +663,7 @@ function HeadlessEditorContent({
               placeholder={placeholders.html}
               className="luthor-source-view--wrapped"
               wrap="soft"
+              showLineNumbers={showLineNumbers}
             />
           )}
         </div>
@@ -680,6 +685,7 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
       showDefaultContent = true,
       initialMode = "visual",
       defaultEditorView,
+      showLineNumbers = true,
       featureFlags,
       ...unusedProps
     },
@@ -710,8 +716,9 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
       const parsedFlags = JSON.parse(extensionsKey) as FeatureFlagOverrides;
       return createExtensiveExtensions({
         featureFlags: parsedFlags,
+        showLineNumbers,
       });
-    }, [extensionsKey]);
+    }, [extensionsKey, showLineNumbers]);
 
     const [methods, setMethods] = useState<HeadlessEditorMethods | null>(null);
     const didHydrateDefaultContentRef = useRef(false);
@@ -770,6 +777,7 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
           <HeadlessEditorContent
             initialMode={resolvedInitialMode}
             placeholders={placeholders}
+            showLineNumbers={showLineNumbers}
             onReady={handleReady}
           />
         </Provider>

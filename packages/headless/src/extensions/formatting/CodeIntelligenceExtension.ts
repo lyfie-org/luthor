@@ -62,6 +62,7 @@ const DEFAULT_LANGUAGE_OPTIONS = [
   "html",
   "css",
   "python",
+  "bash",
   "sql",
   "java",
   "c",
@@ -70,6 +71,40 @@ const DEFAULT_LANGUAGE_OPTIONS = [
   "powershell",
   "xml",
 ] as const;
+
+const ADDITIONAL_SUPPORTED_LANGUAGES = [
+  "bash",
+] as const;
+
+const LANGUAGE_LABEL_OVERRIDES: Record<string, string> = {
+  atom: "Atom",
+  bash: "Bash",
+  c: "C",
+  clike: "C-like",
+  cpp: "C++",
+  css: "CSS",
+  diff: "Diff",
+  html: "HTML",
+  java: "Java",
+  js: "JavaScript",
+  markup: "Markup",
+  markdown: "Markdown",
+  mathml: "MathML",
+  objc: "Objective-C",
+  objectivec: "Objective-C",
+  plain: "Plain Text",
+  powershell: "PowerShell",
+  py: "Python",
+  rss: "RSS",
+  rust: "Rust",
+  sql: "SQL",
+  ssml: "SSML",
+  svg: "SVG",
+  swift: "Swift",
+  txt: "Plain Text",
+  typescript: "TypeScript",
+  xml: "XML",
+};
 
 export type CodeIntelligenceConfig = CodeHighlightProviderConfig & {
   maxAutoDetectLength?: number;
@@ -382,6 +417,12 @@ function CodeBlockControlsPlugin({
   const languageOptions = useMemo(() => {
     return extension.getLanguageOptionsSnapshot();
   }, [extension]);
+  const languageOptionEntries = useMemo(() => {
+    return languageOptions.map((id) => ({
+      id,
+      label: getLanguageDisplayLabel(id),
+    }));
+  }, [languageOptions]);
 
   const buildControlModels = useCallback((): CodeBlockControlModel[] => {
     const portalRoot = getCodeblockControlsPortalRoot(editor);
@@ -637,8 +678,8 @@ function CodeBlockControlsPlugin({
                   handleLanguageChange(control.key, target.value);
                 },
               },
-              languageOptions.map((option) =>
-                createElement("option", { key: option, value: option }, option),
+              languageOptionEntries.map((option) =>
+                createElement("option", { key: option.id, value: option.id }, option.label),
               ),
             ),
           ),
@@ -788,8 +829,15 @@ function isSupportedLanguage(language: string): boolean {
   const runtimeLanguages = getCodeLanguages()
     .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
     .filter(Boolean);
+  const additionalLanguages = ADDITIONAL_SUPPORTED_LANGUAGES
+    .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
+    .filter(Boolean);
 
-  const supported = new Set<string>([...canonicalOptions, ...runtimeLanguages]);
+  const supported = new Set<string>([
+    ...canonicalOptions,
+    ...runtimeLanguages,
+    ...additionalLanguages,
+  ]);
   return supported.has(normalized);
 }
 
@@ -859,3 +907,37 @@ function toSortedUniqueLanguageOptions(languageOptions: readonly string[]): stri
     left.localeCompare(right),
   );
 }
+
+function getLanguageDisplayLabel(languageId: string): string {
+  const normalized = normalizeLanguage(languageId)
+    ?? normalizeCodeLang(languageId.trim().toLowerCase())
+    ?? languageId.trim().toLowerCase();
+
+  if (!normalized) {
+    return "Plain Text";
+  }
+
+  return LANGUAGE_LABEL_OVERRIDES[normalized]
+    ?? humanizeLanguageIdentifier(normalized);
+}
+
+function humanizeLanguageIdentifier(languageId: string): string {
+  const normalized = languageId.trim();
+  if (!normalized) {
+    return "Plain Text";
+  }
+
+  return normalized
+    .split(/[-_]+/)
+    .filter((token) => token.length > 0)
+    .map((token) =>
+      token.length <= 2
+        ? token.toUpperCase()
+        : `${token[0]?.toUpperCase() ?? ""}${token.slice(1)}`,
+    )
+    .join(" ");
+}
+
+export const __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS = {
+  getLanguageDisplayLabel,
+} as const;

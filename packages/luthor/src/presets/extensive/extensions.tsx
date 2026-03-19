@@ -151,6 +151,7 @@ export type ExtensiveExtensionsConfig = {
   maxAutoDetectCodeLength?: number;
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
+  showLineNumbers?: boolean;
   /** Maximum list sub-indent levels (excluding the top-level list). Default: 8 */
   maxListIndentation?: number;
 };
@@ -731,6 +732,7 @@ function buildExtensiveExtensions({
   maxAutoDetectCodeLength,
   isCopyAllowed,
   languageOptions,
+  showLineNumbers,
   maxListIndentation,
 }: ExtensiveExtensionsConfig = {}) {
   const resolvedFeatureFlags = resolveFeatureFlags(featureFlags);
@@ -758,6 +760,7 @@ function buildExtensiveExtensions({
     syntaxHighlighting: syntaxHighlighting ?? "auto",
     provider: codeHighlightProvider ?? undefined,
     loadProvider: loadCodeHighlightProvider,
+    showLineNumbers: showLineNumbers ?? true,
   });
   (codeIntelligenceExtension as any).configure({
     provider: codeHighlightProvider ?? undefined,

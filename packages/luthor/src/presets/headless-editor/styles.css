@@ -11,6 +11,7 @@
   --luthor-pill-hover-bg: #d7d7d7;
   --luthor-pill-active-bg: #6366f1;
   --luthor-pill-active-fg: #ffffff;
+  --luthor-code-unhighlighted-fg: #24292e;
 }
 
 .luthor-preset-headless-editor.luthor-editor-wrapper[data-editor-theme="dark"] {
@@ -26,6 +27,7 @@
   --luthor-pill-hover-bg: #334155;
   --luthor-pill-active-bg: #93c5fd;
   --luthor-pill-active-fg: #0b1220;
+  --luthor-code-unhighlighted-fg: #c9d1d9;
 }
 
 .luthor-preset-headless-editor {

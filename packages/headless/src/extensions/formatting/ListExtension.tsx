@@ -509,6 +509,16 @@ function shouldRenderUnorderedMarker(listItemNode: ListItemNode): boolean {
   return !hasNestedLists;
 }
 
+function clearUnorderedMarkerStyleTokens(node: {
+  getStyle: () => string;
+  setStyle: (style: string) => unknown;
+}): void {
+  setStyleEntries(node, {
+    "--luthor-unordered-marker-content": null,
+    [UNORDERED_MARKER_KIND_TOKEN]: null,
+  });
+}
+
 function setUnorderedPatternTokenOnListItemContent(
   listItemNode: ListItemNode,
   pattern: UnorderedListPattern | null,
@@ -1232,6 +1242,7 @@ export class ListExtension extends BaseExtension<
       const markerStyle = resolveMarkerStyle(sequence, depth);
       const hierarchical = pattern === "decimal-hierarchical";
 
+      clearUnorderedMarkerStyleTokens(node);
       setStyleEntries(node, {
         "--luthor-ordered-pattern": pattern,
         "--luthor-ordered-suffix": suffix,
@@ -1253,6 +1264,7 @@ export class ListExtension extends BaseExtension<
           suffix === "paren" ? "paren" : "dot",
           hierarchical ? [...(pathPrefix ?? []), Math.max(1, itemIndex)] : null,
         );
+        clearUnorderedMarkerStyleTokens(child);
         setStyleEntries(child, {
           [ORDERED_MARKER_CONTENT_TOKEN]: shouldRenderMarker
             ? markerContent
@@ -1394,6 +1406,7 @@ export class ListExtension extends BaseExtension<
       const hierarchical = pattern === "decimal-hierarchical";
       const suffix = readStyleValue(topListNode, "--luthor-ordered-suffix") ?? "dot";
 
+      clearUnorderedMarkerStyleTokens(node);
       setStyleEntries(node, {
         "--luthor-ordered-pattern": pattern,
         "--luthor-ordered-suffix": suffix,
@@ -1414,6 +1427,7 @@ export class ListExtension extends BaseExtension<
           suffix === "paren" ? "paren" : "dot",
           hierarchical ? [...(pathPrefix ?? []), Math.max(1, itemIndex)] : null,
         );
+        clearUnorderedMarkerStyleTokens(child);
         setStyleEntries(child, {
           [ORDERED_MARKER_CONTENT_TOKEN]: shouldRenderMarker
             ? markerContent
@@ -1646,6 +1660,7 @@ export class ListExtension extends BaseExtension<
 export const listExtension = new ListExtension();
 
 export const __TEST_ONLY_LIST_INTERNALS = {
+  clearUnorderedMarkerStyleTokens,
   resolveUnorderedPatternToken,
   resolveUnorderedMarkerKind,
   resolveReadOnlyChecklistToggleListItem,

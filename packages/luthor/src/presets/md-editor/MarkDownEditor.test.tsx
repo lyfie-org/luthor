@@ -48,6 +48,7 @@ describe("MarkDownEditor", () => {
         italic: true,
         strikethrough: true,
         code: true,
+        codeIntelligence: true,
         codeFormat: true,
         link: true,
         list: true,
@@ -60,6 +61,7 @@ describe("MarkDownEditor", () => {
         customNode: false,
         draggableBlock: false,
         tabIndent: true,
+        themeToggle: true,
       }),
     );
     expect(props.sourceMetadataMode).toBe("none");
@@ -142,5 +144,19 @@ describe("MarkDownEditor", () => {
     };
 
     expect(props.initialMode).toBe("visual");
+  });
+
+  it("forwards line number visibility to underlying editor", () => {
+    render(
+      <MarkDownEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      showLineNumbers?: boolean;
+    };
+    expect(props.showLineNumbers).toBe(false);
   });
 });

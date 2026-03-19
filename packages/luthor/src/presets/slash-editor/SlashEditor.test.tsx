@@ -72,4 +72,18 @@ describe("SlashEditor", () => {
       denylist: ["insert.table"],
     });
   });
+
+  it("forwards line number visibility to underlying editor", () => {
+    render(
+      <SlashEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      showLineNumbers?: boolean;
+    };
+    expect(props.showLineNumbers).toBe(false);
+  });
 });

@@ -52,6 +52,7 @@ describe("LegacyRichEditor", () => {
         table: true,
         image: true,
         tabIndent: true,
+        themeToggle: true,
       }),
     );
   });
@@ -68,7 +69,7 @@ describe("LegacyRichEditor", () => {
           customNode: true,
           draggableBlock: true,
           tabIndent: false,
-          themeToggle: true,
+          themeToggle: false,
         }}
       />,
     );
@@ -108,5 +109,24 @@ describe("LegacyRichEditor", () => {
         (section.items ?? []).includes("image"),
       ),
     ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
+        (section.items ?? []).includes("themeToggle"),
+      ),
+    ).toBe(true);
+  });
+
+  it("forwards line number visibility to underlying editor", () => {
+    render(
+      <LegacyRichEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      showLineNumbers?: boolean;
+    };
+    expect(props.showLineNumbers).toBe(false);
   });
 });

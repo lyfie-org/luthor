@@ -12,6 +12,7 @@ import { joinClassNames } from "../_shared";
 export const MD_EDITOR_DEFAULT_MODES = ["visual-only", "visual", "json", "markdown"] as const;
 export const MD_EDITOR_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   ...LEGACY_RICH_DEFAULT_FEATURE_FLAGS,
+  codeIntelligence: true,
 };
 
 export const MD_EDITOR_TOOLBAR_LAYOUT: ToolbarLayout = LEGACY_RICH_TOOLBAR_LAYOUT;

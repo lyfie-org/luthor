@@ -178,7 +178,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Legacy Rich Editor
 - File: luthor/presets/legacy-rich-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/
-- Summary: Legacy Rich Editor LegacyRichEditor is a shared metadata free editor profile that powers both MarkDownEditor and HTMLEditor . Use it when you want the same native feature set and switch only the source tab mode between markdown and html. Usage Props LegacyRichEditorProps inherits ExtensiveEditorProps except featureFlag...
+- Summary: title: Legacy Rich Editor description: Shared metadata free rich editor profile powering both MD and HTML presets. Legacy Rich Editor LegacyRichEditor is a shared metadata free editor profile that powers both MarkDownEditor and HTMLEditor . Use it when you want the same native feature set and switch only the source tab...
 
 ### MD Editor
 - File: luthor/presets/md-editor.md

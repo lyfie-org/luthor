@@ -4,6 +4,7 @@ import {
   LexicalEditor,
   $getSelection,
   $isRangeSelection,
+  $nodesOfType,
 } from "lexical";
 import { $setBlocksType } from "@lexical/selection";
 import {
@@ -48,6 +49,7 @@ export type CodeExtensionConfig = BaseExtensionConfig &
   CodeHighlightProviderConfig & {
     syntaxHighlighting?: "auto" | "disabled";
     tokenizer?: CodeTokenizer | null;
+    showLineNumbers?: boolean;
   };
 
 /**
@@ -82,11 +84,14 @@ export class CodeExtension extends BaseExtension<
   private static readonly MAX_CODE_TAB_DEPTH = 8;
 
   private codeHighlightProviderPromise: Promise<CodeHighlightProvider | null> | null = null;
+  private lineNumberTextCache = new Map<number, string>();
+  private appliedLineNumberNodeKeys = new Set<string>();
 
   constructor() {
     super("code", [ExtensionCategory.Toolbar]);
     this.config = {
       syntaxHighlighting: "auto",
+      showLineNumbers: true,
     };
   }
 
@@ -98,6 +103,12 @@ export class CodeExtension extends BaseExtension<
   register(editor: LexicalEditor): () => void {
     let unregisterCodeHighlighting = () => {};
     let didDispose = false;
+    const syncCodeBlockLineNumbers = () => {
+      if (didDispose) {
+        return;
+      }
+      this.ensureCodeBlockLineNumbers(editor);
+    };
 
     const applyHighlighting = (tokenizer: CodeTokenizer) => {
       unregisterCodeHighlighting();
@@ -117,6 +128,22 @@ export class CodeExtension extends BaseExtension<
         applyHighlighting(tokenizer);
       });
     }
+
+    const unregisterLineNumberUpdate = editor.registerUpdateListener(
+      ({ dirtyElements, dirtyLeaves }) => {
+        const hasContentChanges =
+          dirtyElements.size > 0 || dirtyLeaves.size > 0;
+        if (!hasContentChanges) {
+          return;
+        }
+
+        syncCodeBlockLineNumbers();
+      },
+    );
+
+    queueMicrotask(() => {
+      syncCodeBlockLineNumbers();
+    });
 
     const unregisterTabCommand = editor.registerCommand<KeyboardEvent>(
       KEY_TAB_COMMAND,
@@ -155,7 +182,9 @@ export class CodeExtension extends BaseExtension<
     return () => {
       didDispose = true;
       unregisterCodeHighlighting();
+      unregisterLineNumberUpdate();
       unregisterTabCommand();
+      this.appliedLineNumberNodeKeys.clear();
     };
   }
 
@@ -325,6 +354,99 @@ export class CodeExtension extends BaseExtension<
     const leadingTabs = linePrefix.match(/^\t*/)?.[0].length ?? 0;
 
     return leadingTabs >= CodeExtension.MAX_CODE_TAB_DEPTH;
+  }
+
+  private ensureCodeBlockLineNumbers(editor: LexicalEditor): void {
+    const showLineNumbers = this.config.showLineNumbers !== false;
+    const snapshots = editor.getEditorState().read(() =>
+      $nodesOfType(CodeNode).map((node) => ({
+        key: node.getKey(),
+        lineCount: this.getCodeBlockLineCount(node.getTextContent()),
+      })),
+    );
+
+    const activeNodeKeys = new Set<string>();
+
+    snapshots.forEach(({ key, lineCount }) => {
+      activeNodeKeys.add(key);
+      const codeElement = editor.getElementByKey(key) as HTMLElement | null;
+      if (!codeElement) {
+        return;
+      }
+
+      if (!showLineNumbers) {
+        this.clearCodeBlockLineNumberAttributes(codeElement);
+        this.appliedLineNumberNodeKeys.delete(key);
+        return;
+      }
+
+      const normalizedLineCount = Math.max(1, lineCount);
+      const lineCountText = String(normalizedLineCount);
+      if (
+        codeElement.getAttribute("data-luthor-line-number-count") !== lineCountText ||
+        !codeElement.hasAttribute("data-luthor-line-numbers")
+      ) {
+        codeElement.setAttribute("data-luthor-line-number-count", lineCountText);
+        codeElement.setAttribute(
+          "data-luthor-line-numbers",
+          this.getCodeBlockLineNumberText(normalizedLineCount),
+        );
+        codeElement.style.setProperty(
+          "--luthor-code-line-number-gutter-width",
+          `${Math.max(2, lineCountText.length)}ch`,
+        );
+      }
+
+      codeElement.classList.add("luthor-code-block--line-numbers");
+      this.appliedLineNumberNodeKeys.add(key);
+    });
+
+    Array.from(this.appliedLineNumberNodeKeys).forEach((key) => {
+      if (showLineNumbers && activeNodeKeys.has(key)) {
+        return;
+      }
+
+      const codeElement = editor.getElementByKey(key) as HTMLElement | null;
+      if (codeElement) {
+        this.clearCodeBlockLineNumberAttributes(codeElement);
+      }
+      this.appliedLineNumberNodeKeys.delete(key);
+    });
+  }
+
+  private clearCodeBlockLineNumberAttributes(codeElement: HTMLElement): void {
+    codeElement.classList.remove("luthor-code-block--line-numbers");
+    codeElement.removeAttribute("data-luthor-line-numbers");
+    codeElement.removeAttribute("data-luthor-line-number-count");
+    codeElement.style.removeProperty("--luthor-code-line-number-gutter-width");
+  }
+
+  private getCodeBlockLineCount(content: string): number {
+    if (!content) {
+      return 1;
+    }
+
+    let count = 1;
+    for (let index = 0; index < content.length; index += 1) {
+      if (content[index] === "\n") {
+        count += 1;
+      }
+    }
+
+    return Math.max(1, count);
+  }
+
+  private getCodeBlockLineNumberText(lineCount: number): string {
+    const cached = this.lineNumberTextCache.get(lineCount);
+    if (cached) {
+      return cached;
+    }
+
+    const lineNumbers = Array.from({ length: lineCount }, (_, index) =>
+      String(index + 1),
+    ).join("\n");
+    this.lineNumberTextCache.set(lineCount, lineNumbers);
+    return lineNumbers;
   }
 }
 

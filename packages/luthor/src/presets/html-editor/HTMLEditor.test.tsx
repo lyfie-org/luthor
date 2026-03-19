@@ -56,6 +56,7 @@ describe("HTMLEditor", () => {
         customNode: false,
         draggableBlock: false,
         tabIndent: true,
+        themeToggle: true,
       }),
     );
     expect(props.sourceMetadataMode).toBe("none");
@@ -103,5 +104,19 @@ describe("HTMLEditor", () => {
     expect(props.className).toContain("outer");
     expect(props.variantClassName).toContain("luthor-preset-html-editor__variant");
     expect(props.variantClassName).toContain("inner");
+  });
+
+  it("forwards line number visibility to underlying editor", () => {
+    render(
+      <HTMLEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      showLineNumbers?: boolean;
+    };
+    expect(props.showLineNumbers).toBe(false);
   });
 });

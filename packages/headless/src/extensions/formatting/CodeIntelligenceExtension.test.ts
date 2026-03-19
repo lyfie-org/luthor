@@ -1,5 +1,8 @@
 import type { LexicalEditor } from "lexical";
-import { CodeIntelligenceExtension } from "./CodeIntelligenceExtension";
+import {
+  CodeIntelligenceExtension,
+  __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS,
+} from "./CodeIntelligenceExtension";
 import { describe, expect, it, vi } from "vitest";
 
 describe("CodeIntelligenceExtension language options", () => {
@@ -9,6 +12,7 @@ describe("CodeIntelligenceExtension language options", () => {
 
     expect(options).toContain("plain");
     expect(options).toContain("typescript");
+    expect(options).toContain("bash");
     expect(options).not.toContain("yaml");
   });
 
@@ -60,6 +64,19 @@ describe("CodeIntelligenceExtension language options", () => {
     }) as CodeIntelligenceExtension;
 
     expect(() => extension.getLanguageOptionsSnapshot()).toThrow(/Invalid language option/);
+  });
+
+  it("uses full language labels for canonical and alias identifiers", () => {
+    const { getLanguageDisplayLabel } = __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS;
+
+    expect(getLanguageDisplayLabel("js")).toBe("JavaScript");
+    expect(getLanguageDisplayLabel("javascript")).toBe("JavaScript");
+    expect(getLanguageDisplayLabel("py")).toBe("Python");
+    expect(getLanguageDisplayLabel("ts")).toBe("TypeScript");
+    expect(getLanguageDisplayLabel("text")).toBe("Plain Text");
+    expect(getLanguageDisplayLabel("txt")).toBe("Plain Text");
+    expect(getLanguageDisplayLabel("plain")).toBe("Plain Text");
+    expect(getLanguageDisplayLabel("bash")).toBe("Bash");
   });
 
   it("uses plain fallback theme for plaintext-like languages", () => {

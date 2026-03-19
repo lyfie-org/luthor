@@ -906,6 +906,7 @@ function ExtensiveEditorContent({
   sourceMetadataMode,
   markdownBridgeFlavor,
   markdownSourceOfTruth,
+  showLineNumbers,
 }: {
   isDark: boolean;
   toggleTheme: () => void;
@@ -937,6 +938,7 @@ function ExtensiveEditorContent({
   sourceMetadataMode: SourceMetadataMode;
   markdownBridgeFlavor: MarkdownBridgeFlavor;
   markdownSourceOfTruth: boolean;
+  showLineNumbers: boolean;
 }) {
   const {
     commands,
@@ -1070,11 +1072,57 @@ function ExtensiveEditorContent({
 
   const methods = useMemo<ExtensiveEditorRef>(
     () => {
+      const hydrateSourceSnapshots = (document: unknown) => {
+        const nextJson = serializeJSONToSource(
+          "json",
+          document,
+          sourceMetadataMode,
+          markdownBridgeFlavor,
+        );
+        const nextMarkdown = serializeJSONToSource(
+          "markdown",
+          document,
+          sourceMetadataMode,
+          markdownBridgeFlavor,
+        );
+        const nextHTML = serializeJSONToSource(
+          "html",
+          document,
+          sourceMetadataMode,
+          markdownBridgeFlavor,
+        );
+
+        setContent((previous) => (
+          previous.json === nextJson &&
+          previous.markdown === nextMarkdown &&
+          previous.html === nextHTML
+            ? previous
+            : {
+                json: nextJson,
+                markdown: nextMarkdown,
+                html: nextHTML,
+              }
+        ));
+
+        sourceDirtyRef.current.json = false;
+        sourceDirtyRef.current.markdown = false;
+        sourceDirtyRef.current.html = false;
+        markModeCached(cacheValidRef.current, "json");
+        markModeCached(cacheValidRef.current, "markdown");
+        markModeCached(cacheValidRef.current, "html");
+
+        if (markdownSourceOfTruth) {
+          canonicalMarkdownRef.current = nextMarkdown;
+          canonicalMarkdownStaleRef.current = false;
+        }
+      };
+
       const injectJSON = (value: string) => {
         setTimeout(() => {
           try {
             const parsed = JSON.parse(value);
             importApi.fromJSON(parsed);
+            hydrateSourceSnapshots(parsed);
           } catch (error) {
             console.error("Failed to inject JSON:", error);
             return;
@@ -1798,6 +1846,7 @@ function ExtensiveEditorContent({
                 value={content.json}
                 onChange={(value) => updateSourceModeContent("json", value, { dirty: true })}
                 placeholder={jsonPlaceholder}
+                showLineNumbers={showLineNumbers}
               />
             )}
             {activeSourceMode === "markdown" && (
@@ -1807,6 +1856,7 @@ function ExtensiveEditorContent({
                 placeholder={markdownPlaceholder}
                 className="luthor-source-view--wrapped"
                 wrap="soft"
+                showLineNumbers={showLineNumbers}
               />
             )}
             {activeSourceMode === "html" && (
@@ -1816,6 +1866,7 @@ function ExtensiveEditorContent({
                 placeholder={htmlPlaceholder}
                 className="luthor-source-view--wrapped"
                 wrap="soft"
+                showLineNumbers={showLineNumbers}
               />
             )}
           </div>
@@ -1924,6 +1975,7 @@ export interface ExtensiveEditorProps {
   maxAutoDetectCodeLength?: number;
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
+  showLineNumbers?: boolean;
   /** Maximum list sub-indent levels (excluding top-level list). Default: 8 */
   maxListIndentation?: number;
 }
@@ -1980,6 +2032,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     maxAutoDetectCodeLength,
     isCopyAllowed = true,
     languageOptions,
+    showLineNumbers = true,
     maxListIndentation = 8,
   }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
@@ -2061,6 +2114,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       [languageOptions],
     );
     const copyAllowedKey = isCopyAllowed ? "copy-on" : "copy-off";
+    const lineNumbersKey = showLineNumbers ? "line-numbers-on" : "line-numbers-off";
     const effectiveFeatureFlags = useMemo<FeatureFlagOverrides | undefined>(() => {
       if (typeof isDraggableBoxEnabled !== "boolean") {
         return featureFlags;
@@ -2079,7 +2133,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       () => resolveFeatureFlags(effectiveFeatureFlags),
       [effectiveFeatureFlags],
     );
-    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${languageOptionsKey}::${featureFlagsKey}`;
+    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${lineNumbersKey}::${languageOptionsKey}::${featureFlagsKey}`;
     const stableFontFamilyOptionsRef = useRef<readonly FontFamilyOption[] | undefined>(fontFamilyOptions);
     const stableFontSizeOptionsRef = useRef<readonly FontSizeOption[] | undefined>(fontSizeOptions);
     const stableLineHeightOptionsRef = useRef<readonly LineHeightOption[] | undefined>(lineHeightOptions);
@@ -2136,6 +2190,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
           ? { maxAutoDetectCodeLength }
           : {}),
         isCopyAllowed,
+        showLineNumbers,
         ...(stableLanguageOptionsRef.current !== undefined
           ? { languageOptions: stableLanguageOptionsRef.current }
           : {}),
@@ -2283,6 +2338,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             sourceMetadataMode={sourceMetadataMode}
             markdownBridgeFlavor={markdownBridgeFlavor}
             markdownSourceOfTruth={markdownSourceOfTruth}
+            showLineNumbers={showLineNumbers}
           />
         </Provider>
       </div>

@@ -1,7 +1,7 @@
 .luthor-preset-html-editor {
-  border: 1px solid #d8dde6;
+  border: 1px solid var(--luthor-border);
   border-radius: 14px;
-  background: #ffffff;
+  background: var(--luthor-bg);
   padding: 10px;
 }
 
