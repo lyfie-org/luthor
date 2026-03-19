@@ -29,11 +29,11 @@ export function App() {
 
 ## Behavior
 
-Defaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command allowlist for fast block creation.
+Defaults keep toolbar hidden, enable draggable blocks, provide a curated slash-command allowlist for fast block creation, and include code block language selector/copy controls.
 
 ## Default modes
 
-- `availableModes`: `["visual", "json", "markdown", "html"]`
+- `availableModes`: `["visual-only", "visual", "json", "markdown", "html"]`
 
 ## Default slash allowlist
 
@@ -45,6 +45,7 @@ Defaults keep toolbar hidden, enable draggable blocks, and provide a curated sla
 ## Feature policy notes
 
 - Enforced: `slashCommand: true`, `commandPalette: false`
+- Enabled by default: `codeIntelligence: true`
 - Default: `isToolbarEnabled = false`
 - Override available through props if your product needs a visible toolbar
 

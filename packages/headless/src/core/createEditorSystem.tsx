@@ -25,6 +25,7 @@ import {
   BaseCommands,
 } from "@lyfie/luthor-headless/extensions/types";
 import { defaultLuthorTheme } from "./theme";
+import { isSelectionInsideCodeBlock } from "./selectionGuards";
 
 // Shared context to avoid mismatches between typed/untyped usage
 export const EditorContext = createContext<
@@ -113,7 +114,21 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       () => ({
         formatText: (format: TextFormatType, value?: boolean | string) => {
           void value;
-          return editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format);
+          if (!editor) {
+            return;
+          }
+
+          if (format === "code") {
+            const isInsideCodeBlock = editor.getEditorState().read(() => {
+              return isSelectionInsideCodeBlock();
+            });
+
+            if (isInsideCodeBlock) {
+              return;
+            }
+          }
+
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
         },
       }),
       [editor],

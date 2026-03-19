@@ -91,7 +91,7 @@ export const HEADLESS_EDITOR_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   image: false,
   blockFormat: true,
   code: true,
-  codeIntelligence: false,
+  codeIntelligence: true,
   codeFormat: true,
   tabIndent: true,
   enterKeyBehavior: true,
@@ -452,7 +452,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.code ? " is-active" : ""}`}
           onClick={() => commands.formatText?.("code")}
-          disabled={!isEditableVisualMode}
+          disabled={!isEditableVisualMode || typedActiveStates.isInCodeBlock}
         >
           Code
         </button>

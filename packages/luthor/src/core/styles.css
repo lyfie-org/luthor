@@ -1256,7 +1256,7 @@
 	border-radius: 10px;
 	box-shadow: 0 12px 36px rgba(0, 0, 0, 0.14);
 	width: min(420px, calc(100vw - 24px));
-	max-height: min(55vh, 420px);
+	max-height: min(50vh, 360px);
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
@@ -1291,7 +1291,10 @@
 }
 
 .luthor-slash-menu-list {
+	flex: 1 1 auto;
+	min-height: 0;
 	overflow-y: auto;
+	overscroll-behavior: contain;
 	padding: 8px 0;
 }
 

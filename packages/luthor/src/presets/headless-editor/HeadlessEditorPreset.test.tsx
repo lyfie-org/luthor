@@ -179,6 +179,7 @@ describe("HeadlessEditorPreset", () => {
         italic: true,
         strikethrough: true,
         code: true,
+        codeIntelligence: true,
         codeFormat: true,
         list: true,
         blockFormat: true,
@@ -365,6 +366,21 @@ describe("HeadlessEditorPreset", () => {
     fireEvent.click(screen.getByRole("button", { name: "Redo" }));
     expect(mockEditorApi.commands.undo).toHaveBeenCalled();
     expect(mockEditorApi.commands.redo).toHaveBeenCalled();
+  });
+
+  it("disables inline code button inside code blocks while keeping command available outside", () => {
+    mockEditorApi.activeStates = {
+      ...mockEditorApi.activeStates,
+      isInCodeBlock: true,
+    };
+
+    render(<HeadlessEditorPreset showDefaultContent={false} />);
+
+    const codeButton = screen.getByRole("button", { name: "Code" });
+    expect(codeButton).toBeDisabled();
+
+    fireEvent.click(codeButton);
+    expect(mockEditorApi.commands.formatText).not.toHaveBeenCalled();
   });
 
   it("calls onReady only once even if editor api references change across rerenders", () => {

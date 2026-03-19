@@ -1,4 +1,5 @@
 import { getCodeLanguages, normalizeCodeLang } from "@lexical/code";
+import type { Transformer } from "@lexical/markdown";
 import type { LexicalEditor } from "lexical";
 import {
   CodeIntelligenceExtension,
@@ -133,5 +134,35 @@ describe("CodeIntelligenceExtension language options", () => {
     extension.setCodeBlockLanguage(editor, "node-key", "typescript");
 
     expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it("filters markdown shortcut transformers missing node dependencies", () => {
+    class LinkNodeMock {}
+    class CodeNodeMock {}
+
+    const linkTransformer = {
+      dependencies: [LinkNodeMock],
+    } as unknown as Transformer;
+    const codeTransformer = {
+      dependencies: [CodeNodeMock],
+    } as unknown as Transformer;
+    const dependencyFreeTransformer = {} as Transformer;
+
+    const editor = {
+      hasNodes: (dependencies: readonly unknown[]) => {
+        return dependencies.every((dependency) => dependency !== LinkNodeMock);
+      },
+    } as unknown as LexicalEditor;
+
+    const { resolveSupportedMarkdownTransformers } =
+      __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS;
+
+    const supported = resolveSupportedMarkdownTransformers(editor, [
+      linkTransformer,
+      codeTransformer,
+      dependencyFreeTransformer,
+    ]);
+
+    expect(supported).toEqual([codeTransformer, dependencyFreeTransformer]);
   });
 });

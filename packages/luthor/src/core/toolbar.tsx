@@ -1592,7 +1592,13 @@ export function Toolbar({
 
       case "code":
         return (
-          <IconButton key="code" onClick={() => commands.formatText("code")} active={activeStates.code} title="Inline Code">
+          <IconButton
+            key="code"
+            onClick={() => commands.formatText("code")}
+            active={activeStates.code}
+            disabled={activeStates.isInCodeBlock}
+            title="Inline Code"
+          >
             <CodeIcon size={16} />
           </IconButton>
         );

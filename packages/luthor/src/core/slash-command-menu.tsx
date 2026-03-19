@@ -4,6 +4,34 @@ import type { SlashCommandItem } from "@lyfie/luthor-headless";
 import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
 import { computeAnchoredOverlayStyle, createPointRect } from "./overlay-position";
 
+const SLASH_MENU_MAX_HEIGHT_PX = 360;
+const SLASH_MENU_MAX_HEIGHT_VIEWPORT_RATIO = 0.5;
+const SLASH_MENU_FALLBACK_WIDTH_PX = 420;
+
+function resolveSlashMenuSoftHeightCap(): number {
+  if (typeof window === "undefined") {
+    return SLASH_MENU_MAX_HEIGHT_PX;
+  }
+
+  const viewportCap = Math.floor(window.innerHeight * SLASH_MENU_MAX_HEIGHT_VIEWPORT_RATIO);
+  if (viewportCap <= 0) {
+    return SLASH_MENU_MAX_HEIGHT_PX;
+  }
+
+  return Math.min(SLASH_MENU_MAX_HEIGHT_PX, viewportCap);
+}
+
+function resolveSlashMenuMaxHeight(
+  placementMaxHeight: CSSProperties["maxHeight"],
+): number {
+  const softCap = resolveSlashMenuSoftHeightCap();
+  if (typeof placementMaxHeight !== "number") {
+    return softCap;
+  }
+
+  return Math.max(0, Math.min(placementMaxHeight, softCap));
+}
+
 export function SlashCommandMenu({
   isOpen,
   query,
@@ -24,6 +52,7 @@ export function SlashCommandMenu({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuStyle, setMenuStyle] = useState<CSSProperties | undefined>(undefined);
+  const hasOpenedRef = useRef(false);
 
   const filteredCommands = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -101,12 +130,13 @@ export function SlashCommandMenu({
 
   const updateMenuPosition = useCallback((isVisible: boolean) => {
     if (!position) return;
+    const softHeightCap = resolveSlashMenuSoftHeightCap();
     const measuredRect = menuRef.current?.getBoundingClientRect();
     const placement = computeAnchoredOverlayStyle({
       anchorRect: createPointRect(position.x, position.y),
       overlay: {
-        width: measuredRect?.width ?? 420,
-        height: measuredRect?.height ?? 360,
+        width: measuredRect?.width ?? SLASH_MENU_FALLBACK_WIDTH_PX,
+        height: Math.min(measuredRect?.height ?? softHeightCap, softHeightCap),
       },
       portalContainer: portalContainer ?? null,
       gap: 6,
@@ -119,16 +149,26 @@ export function SlashCommandMenu({
 
     setMenuStyle({
       ...placement,
+      maxHeight: resolveSlashMenuMaxHeight(placement.maxHeight),
       visibility: isVisible ? "visible" : "hidden",
       ...getOverlayThemeStyleFromSelection(),
     });
   }, [portalContainer, position]);
 
   useLayoutEffect(() => {
-    if (!isOpen || !position) return;
-    updateMenuPosition(false);
-    const frame = window.requestAnimationFrame(() => updateMenuPosition(true));
-    return () => window.cancelAnimationFrame(frame);
+    if (!isOpen || !position) {
+      hasOpenedRef.current = false;
+      return;
+    }
+
+    if (!hasOpenedRef.current) {
+      hasOpenedRef.current = true;
+      updateMenuPosition(false);
+      const frame = window.requestAnimationFrame(() => updateMenuPosition(true));
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    updateMenuPosition(true);
   }, [isOpen, position, updateMenuPosition]);
 
   useEffect(() => {

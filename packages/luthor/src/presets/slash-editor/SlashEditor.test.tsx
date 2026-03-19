@@ -44,6 +44,7 @@ describe("SlashEditor", () => {
     expect(featureFlags.slashCommand).toBe(true);
     expect(featureFlags.draggableBlock).toBe(true);
     expect(featureFlags.commandPalette).toBe(false);
+    expect(featureFlags.codeIntelligence).toBe(true);
     expect(featureFlags.image).toBe(false);
     expect(featureFlags.iframeEmbed).toBe(false);
   });

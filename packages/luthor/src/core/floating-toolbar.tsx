@@ -470,7 +470,12 @@ export function FloatingToolbar({
       {showBlockGroup ? (
         <>
           {canShowInlineCode ? (
-            <IconButton onClick={() => commands.formatText("code")} active={activeStates.code} title="Inline Code">
+            <IconButton
+              onClick={() => commands.formatText("code")}
+              active={activeStates.code}
+              disabled={activeStates.isInCodeBlock}
+              title="Inline Code"
+            >
               <CodeIcon size={14} />
             </IconButton>
           ) : null}

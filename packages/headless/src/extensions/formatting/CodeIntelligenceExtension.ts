@@ -5,10 +5,15 @@ import {
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   registerMarkdownShortcuts,
+  type Transformer,
   TRANSFORMERS,
 } from "@lexical/markdown";
 import { createPortal } from "react-dom";
-import type { LexicalEditor, LexicalNode } from "lexical";
+import type {
+  KlassConstructor,
+  LexicalEditor,
+  LexicalNode,
+} from "lexical";
 import {
   $getNodeByKey,
   $getSelection,
@@ -161,9 +166,14 @@ export class CodeIntelligenceExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
-    const unregisterMarkdownShortcuts = registerMarkdownShortcuts(
+    const supportedMarkdownTransformers = resolveSupportedMarkdownTransformers(
       editor,
       TRANSFORMERS,
+    );
+
+    const unregisterMarkdownShortcuts = registerMarkdownShortcuts(
+      editor,
+      supportedMarkdownTransformers,
     );
 
     const unregisterUpdate = editor.registerUpdateListener(
@@ -850,6 +860,25 @@ function normalizeLanguage(language: string | null | undefined): string | null {
   return normalizeKnownCodeLanguageId(normalized);
 }
 
+function resolveSupportedMarkdownTransformers(
+  editor: LexicalEditor,
+  transformers: readonly Transformer[],
+): Transformer[] {
+  return transformers.filter((transformer) => {
+    const dependencies = (
+      transformer as Transformer & {
+        dependencies?: readonly KlassConstructor<typeof LexicalNode>[];
+      }
+    ).dependencies;
+
+    if (!dependencies || dependencies.length === 0) {
+      return true;
+    }
+
+    return editor.hasNodes([...dependencies]);
+  });
+}
+
 export const codeIntelligenceExtension = new CodeIntelligenceExtension();
 
 function resolveLanguageOptionsConfig(
@@ -949,4 +978,5 @@ function humanizeLanguageIdentifier(languageId: string): string {
 
 export const __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS = {
   getLanguageDisplayLabel,
+  resolveSupportedMarkdownTransformers,
 } as const;

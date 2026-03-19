@@ -39,7 +39,7 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   image: true,
   blockFormat: true,
   code: true,
-  codeIntelligence: false,
+  codeIntelligence: true,
   codeFormat: true,
   tabIndent: true,
   enterKeyBehavior: true,

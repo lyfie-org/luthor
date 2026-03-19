@@ -17,6 +17,8 @@ const COMPOSE_DEFAULT_FLAGS: FeatureFlagOverrides = {
   history: true,
   link: true,
   blockFormat: true,
+  code: true,
+  codeIntelligence: true,
   codeFormat: true,
   image: false,
   table: false,
