@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-19T08:48:46.529Z
+Generated at: 2026-03-19T10:03:18.289Z
 
 ## AI Agent Workflow
 
@@ -733,7 +733,7 @@ export function App() {
 
 ## What you get
 
-- Preset components: `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MDEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
+- Preset components: `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
 - Source mode workflows (JSON/Markdown/HTML where supported by the preset)
 - Feature-flag driven extension composition
 - Consistent imperative API on ref (`getJSON`, `getMarkdown`, `getHTML`, `injectJSON`)
@@ -1765,7 +1765,7 @@ Legacy comments are still supported for backwards compatibility:
 
 ## Preset impact
 
-`LegacyRichEditor`, `MDEditor`, and `HTMLEditor` in `@lyfie/luthor` run in metadata-free bridge mode (`metadataMode: "none"`), so Markdown/HTML output does not include `luthor:meta` comments.
+`LegacyRichEditor`, `MarkDownEditor`, and `HTMLEditor` in `@lyfie/luthor` run in metadata-free bridge mode (`metadataMode: "none"`), so Markdown/HTML output does not include `luthor:meta` comments.
 
 `HeadlessEditorPreset` continues to use metadata-preserving bridge mode by default.
 
@@ -2030,7 +2030,7 @@ This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
 | `ComposeEditor` | Focused drafting UI | `visual`, `json` |
 | `SimpleEditor` | Chat/message input | `visual` only |
 | `LegacyRichEditor` | Metadata-light markdown/html-compatible flow | Depends on `sourceFormat` |
-| `MDEditor` | Markdown-first flow | `visual`, `json`, `markdown` |
+| `MarkDownEditor` | Markdown-first flow | `visual`, `json`, `markdown` |
 | `HTMLEditor` | HTML-first flow | `visual`, `json`, `html` |
 | `SlashEditor` | Slash-first interactions | `visual`, `json`, `markdown`, `html` |
 | `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual`, `json`, `markdown`, `html` |
@@ -2428,7 +2428,7 @@ description: Shared metadata-free rich editor profile powering both MD and HTML 
 
 # Legacy Rich Editor
 
-`LegacyRichEditor` is a shared metadata-free editor profile that powers both `MDEditor` and `HTMLEditor`.
+`LegacyRichEditor` is a shared metadata-free editor profile that powers both `MarkDownEditor` and `HTMLEditor`.
 
 Use it when you want the same native feature set and switch only the source tab mode between markdown and html.
 
@@ -2504,17 +2504,17 @@ Internally this preset is a `LegacyRichEditor` wrapper with `sourceFormat="markd
 ## Usage
 
 ```tsx
-import { MDEditor } from '@lyfie/luthor';
+import { MarkDownEditor } from '@lyfie/luthor';
 import '@lyfie/luthor/styles.css';
 
 export function App() {
-  return <MDEditor defaultEditorView="markdown" />;
+  return <MarkDownEditor defaultEditorView="markdown" />;
 }
 ```
 
 ## Props
 
-`MDEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to markdown.
+`MarkDownEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to markdown.
 
 - `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
 - `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
@@ -2697,7 +2697,7 @@ description: Complete prop and ref reference for ExtensiveEditor and all @lyfie/
 This page is the full prop contract for `@lyfie/luthor` presets.
 
 - Base preset: `ExtensiveEditor`
-- Wrapper presets: `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MDEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
+- Wrapper presets: `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
 
 ## 1) `ExtensiveEditorProps` (base contract)
 
@@ -2854,7 +2854,7 @@ This page is the full prop contract for `@lyfie/luthor` presets.
   - `'markdown'` -> `['visual', 'json', 'markdown']`
   - `'html'` -> `['visual', 'json', 'html']`
 
-### `MDEditorProps`
+### `MarkDownEditorProps`
 
 - Inherits `LegacyRichEditorProps`
 - Fixes source format to markdown
@@ -2932,7 +2932,7 @@ export function SaveExample() {
 ### Markdown-first editing profile
 
 ```tsx
-<MDEditor initialMode="visual" defaultEditorView="markdown" />
+<MarkDownEditor initialMode="visual" defaultEditorView="markdown" />
 ```
 
 ## 4) Related pages

@@ -8,7 +8,7 @@ description: Complete prop and ref reference for ExtensiveEditor and all @lyfie/
 This page is the full prop contract for `@lyfie/luthor` presets.
 
 - Base preset: `ExtensiveEditor`
-- Wrapper presets: `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MDEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
+- Wrapper presets: `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
 
 ## 1) `ExtensiveEditorProps` (base contract)
 
@@ -165,7 +165,7 @@ This page is the full prop contract for `@lyfie/luthor` presets.
   - `'markdown'` -> `['visual', 'json', 'markdown']`
   - `'html'` -> `['visual', 'json', 'html']`
 
-### `MDEditorProps`
+### `MarkDownEditorProps`
 
 - Inherits `LegacyRichEditorProps`
 - Fixes source format to markdown
@@ -243,7 +243,7 @@ export function SaveExample() {
 ### Markdown-first editing profile
 
 ```tsx
-<MDEditor initialMode="visual" defaultEditorView="markdown" />
+<MarkDownEditor initialMode="visual" defaultEditorView="markdown" />
 ```
 
 ## 4) Related pages

@@ -10,15 +10,15 @@ vi.mock("../extensive", () => ({
   createExtensiveExtensions: vi.fn(() => []),
 }));
 
-import { MDEditor } from "./MDEditor";
+import { MarkDownEditor } from "./MarkDownEditor";
 
-describe("MDEditor", () => {
+describe("MarkDownEditor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("locks modes to visual-only, visual, json, and markdown", () => {
-    render(<MDEditor showDefaultContent={false} />);
+    render(<MarkDownEditor showDefaultContent={false} />);
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
       availableModes?: string[];
@@ -32,7 +32,7 @@ describe("MDEditor", () => {
   });
 
   it("applies markdown-native defaults with metadata-free source conversion", () => {
-    render(<MDEditor showDefaultContent={false} />);
+    render(<MarkDownEditor showDefaultContent={false} />);
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
       featureFlags?: Record<string, boolean>;
@@ -108,7 +108,7 @@ describe("MDEditor", () => {
 
   it("supports defaultEditorView alias and class composition", () => {
     render(
-      <MDEditor
+      <MarkDownEditor
         showDefaultContent={false}
         defaultEditorView="markdown"
         className="outer"
@@ -131,7 +131,7 @@ describe("MDEditor", () => {
 
   it("falls back to visual for unsupported defaultEditorView values", () => {
     render(
-      <MDEditor
+      <MarkDownEditor
         showDefaultContent={false}
         defaultEditorView="html"
       />,

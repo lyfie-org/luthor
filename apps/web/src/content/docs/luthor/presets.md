@@ -29,7 +29,7 @@ This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
 | `ComposeEditor` | Focused drafting UI | `visual`, `json` |
 | `SimpleEditor` | Chat/message input | `visual` only |
 | `LegacyRichEditor` | Metadata-light markdown/html-compatible flow | Depends on `sourceFormat` |
-| `MDEditor` | Markdown-first flow | `visual`, `json`, `markdown` |
+| `MarkDownEditor` | Markdown-first flow | `visual`, `json`, `markdown` |
 | `HTMLEditor` | HTML-first flow | `visual`, `json`, `html` |
 | `SlashEditor` | Slash-first interactions | `visual`, `json`, `markdown`, `html` |
 | `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual`, `json`, `markdown`, `html` |

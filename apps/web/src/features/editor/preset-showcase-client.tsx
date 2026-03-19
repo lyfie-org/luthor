@@ -7,7 +7,7 @@ import {
   HeadlessEditorPreset,
   HTMLEditor,
   LegacyRichEditor,
-  MDEditor,
+  MarkDownEditor,
   presetRegistry,
   SimpleEditor,
   type SimpleEditorSendPayload,
@@ -114,7 +114,7 @@ const presetTag: Record<VisiblePresetId, string> = {
   compose: '<ComposeEditor />',
   'simple-editor': '<SimpleEditor />',
   'legacy-rich': '<LegacyRichEditor />',
-  'md-editor': '<MDEditor />',
+  'md-editor': '<MarkDownEditor />',
   'html-editor': '<HTMLEditor />',
   'slash-editor': '<SlashEditor />',
   'headless-editor': '<HeadlessEditorPreset />',
@@ -224,10 +224,10 @@ function LegacyRichExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function MDEditorExperience({ siteTheme }: { siteTheme: Theme }) {
+function MarkDownEditorExperience({ siteTheme }: { siteTheme: Theme }) {
   return (
     <PresetSurface>
-      <MDEditor
+      <MarkDownEditor
         defaultContent={WEB_DEMO_MD_EDITOR_CONTENT}
         initialTheme={siteTheme}
         showDefaultContent={false}
@@ -411,7 +411,7 @@ function PresetRenderer({ presetId, siteTheme }: PresetRendererProps) {
     case 'legacy-rich':
       return <LegacyRichExperience siteTheme={siteTheme} />;
     case 'md-editor':
-      return <MDEditorExperience siteTheme={siteTheme} />;
+      return <MarkDownEditorExperience siteTheme={siteTheme} />;
     case 'html-editor':
       return <HTMLEditorExperience siteTheme={siteTheme} />;
     case 'slash-editor':

@@ -565,6 +565,73 @@ describe("markdown bridge", () => {
     expect(allText.some((value) => value.includes("Task child"))).toBe(true);
   });
 
+  it("parses gfm task list syntax into checklist nodes", () => {
+    const markdown = [
+      "## Checklist",
+      "",
+      "- [x] Heading and list support",
+      "- [X] Inline formatting",
+      "- [ ] Publish migration guide",
+    ].join("\n");
+
+    const parsed = markdownToJSON(markdown, {
+      bridgeFlavor: "github",
+      metadataMode: "none",
+    }) as JsonDocument;
+
+    const checklist = findTopLevelNode(parsed, "list") as
+      | {
+          listType?: string;
+          children?: Array<{ checked?: boolean | null }>;
+        }
+      | undefined;
+    expect(checklist?.listType).toBe("check");
+
+    const [firstItem, secondItem, thirdItem] = checklist?.children ?? [];
+    expect(firstItem?.checked).toBe(true);
+    expect(secondItem?.checked).toBe(true);
+    expect(thirdItem?.checked).toBe(false);
+
+    const checklistText = collectTextNodes(checklist as Record<string, unknown>).join(" ");
+    expect(checklistText).toContain("Heading and list support");
+    expect(checklistText).toContain("Inline formatting");
+    expect(checklistText).toContain("Publish migration guide");
+    expect(checklistText).not.toContain("[x]");
+    expect(checklistText).not.toContain("[X]");
+  });
+
+  it("keeps bracketed non-task bullets as plain unordered list items", () => {
+    const markdown = [
+      "- [xyz] Not a task marker",
+      "- [ ] Valid task marker",
+    ].join("\n");
+
+    const parsed = markdownToJSON(markdown, {
+      bridgeFlavor: "github",
+      metadataMode: "none",
+    }) as JsonDocument;
+
+    const firstList = findTopLevelNode(parsed, "list", 0) as
+      | {
+          listType?: string;
+          children?: Array<Record<string, unknown>>;
+        }
+      | undefined;
+    const secondList = findTopLevelNode(parsed, "list", 1) as
+      | {
+          listType?: string;
+          children?: Array<{ checked?: boolean | null }>;
+        }
+      | undefined;
+
+    expect(firstList?.listType).toBe("bullet");
+    expect(collectTextNodes(firstList as Record<string, unknown>).join(" ")).toContain(
+      "[xyz] Not a task marker",
+    );
+    expect(secondList?.listType).toBe("check");
+    expect(secondList?.children?.[0]?.checked).toBe(false);
+  });
+
   it("round-trips markdown tables natively", () => {
     const markdown = [
       "| Name | Role |",

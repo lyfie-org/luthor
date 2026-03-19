@@ -12,17 +12,17 @@ Internally this preset is a `LegacyRichEditor` wrapper with `sourceFormat="markd
 ## Usage
 
 ```tsx
-import { MDEditor } from '@lyfie/luthor';
+import { MarkDownEditor } from '@lyfie/luthor';
 import '@lyfie/luthor/styles.css';
 
 export function App() {
-  return <MDEditor defaultEditorView="markdown" />;
+  return <MarkDownEditor defaultEditorView="markdown" />;
 }
 ```
 
 ## Props
 
-`MDEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to markdown.
+`MarkDownEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to markdown.
 
 - `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
 - `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`

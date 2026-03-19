@@ -1,7 +1,9 @@
 import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
+  CHECK_LIST,
   TRANSFORMERS,
+  UNORDERED_LIST,
   type ElementTransformer,
   type MultilineElementTransformer,
   type TextFormatTransformer,
@@ -557,8 +559,32 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
   type: "multiline-element" as const,
 };
 
+function createChecklistAwareTransformers(base: readonly Transformer[]): Transformer[] {
+  const normalized: Transformer[] = [];
+  let insertedChecklist = false;
+
+  for (const transformer of base) {
+    if (transformer === CHECK_LIST) {
+      continue;
+    }
+
+    if (transformer === UNORDERED_LIST && !insertedChecklist) {
+      normalized.push(CHECK_LIST);
+      insertedChecklist = true;
+    }
+
+    normalized.push(transformer);
+  }
+
+  if (!insertedChecklist) {
+    normalized.push(CHECK_LIST);
+  }
+
+  return normalized;
+}
+
 const MARKDOWN_TRANSFORMERS: Transformer[] = [
-  ...TRANSFORMERS,
+  ...createChecklistAwareTransformers(TRANSFORMERS),
   UNDERLINE_TRANSFORMER,
   HORIZONTAL_RULE_MARKDOWN_TRANSFORMER,
   TABLE_MARKDOWN_TRANSFORMER,
@@ -1537,6 +1563,43 @@ function normalizeMathBlockSyntax(markdown: string): string {
   return output.join("\n");
 }
 
+function normalizeChecklistMarkerCase(markdown: string): string {
+  const lines = normalizeMarkdownLineBreaks(markdown).split("\n");
+  const output: string[] = [];
+  let activeFence: { marker: "`" | "~"; length: number } | null = null;
+
+  for (const line of lines) {
+    const fence = isFenceDelimiterLine(line);
+    if (fence) {
+      if (
+        activeFence &&
+        fence.marker === activeFence.marker &&
+        fence.length >= activeFence.length
+      ) {
+        activeFence = null;
+      } else if (!activeFence) {
+        activeFence = fence;
+      }
+      output.push(line);
+      continue;
+    }
+
+    if (activeFence) {
+      output.push(line);
+      continue;
+    }
+
+    output.push(
+      line.replace(
+        /^(\s*(?:[-*+]\s+)?\[)X(\]\s+)/,
+        "$1x$2",
+      ),
+    );
+  }
+
+  return output.join("\n");
+}
+
 function normalizeFootnoteAnchorId(id: string): string {
   return id
     .trim()
@@ -2017,7 +2080,8 @@ function extractLeadingFrontmatter(markdown: string): MarkdownFrontmatterExtract
 function preprocessMarkdownForBridgeImport(markdown: string): MarkdownFrontmatterExtraction {
   const extracted = extractLeadingFrontmatter(markdown);
   const withNestedImageLinks = normalizeNestedImageLinks(extracted.content);
-  const withReferenceExpansion = normalizeReferenceStyleMarkdown(withNestedImageLinks);
+  const withChecklistNormalization = normalizeChecklistMarkerCase(withNestedImageLinks);
+  const withReferenceExpansion = normalizeReferenceStyleMarkdown(withChecklistNormalization);
   const withAlertNormalization = normalizeGitHubAlertBlocks(withReferenceExpansion);
   const withMathNormalization = normalizeMathBlockSyntax(withAlertNormalization);
   const withFootnoteNormalization = normalizeFootnoteSyntax(withMathNormalization);

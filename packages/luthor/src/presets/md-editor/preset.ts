@@ -2,9 +2,9 @@ import type { EditorPreset } from "..";
 import { createPresetEditorConfig } from "../../core/preset-config";
 import { createExtensiveExtensions } from "../extensive";
 import {
-  MDEditor,
+  MarkDownEditor,
   MD_EDITOR_DEFAULT_FEATURE_FLAGS,
-} from "./MDEditor";
+} from "./MarkDownEditor";
 
 export const mdEditorPreset: EditorPreset = {
   id: "md-editor",
@@ -14,7 +14,7 @@ export const mdEditorPreset: EditorPreset = {
     featureFlags: MD_EDITOR_DEFAULT_FEATURE_FLAGS,
   }),
   components: {
-    Editor: MDEditor,
+    Editor: MarkDownEditor,
   },
   toolbar: [
     "undo",

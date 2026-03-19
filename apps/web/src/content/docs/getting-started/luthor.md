@@ -26,7 +26,7 @@ export function App() {
 
 ## What you get
 
-- Preset components: `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MDEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
+- Preset components: `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
 - Source mode workflows (JSON/Markdown/HTML where supported by the preset)
 - Feature-flag driven extension composition
 - Consistent imperative API on ref (`getJSON`, `getMarkdown`, `getHTML`, `injectJSON`)

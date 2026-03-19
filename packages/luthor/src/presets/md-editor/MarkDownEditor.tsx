@@ -16,18 +16,18 @@ export const MD_EDITOR_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
 
 export const MD_EDITOR_TOOLBAR_LAYOUT: ToolbarLayout = LEGACY_RICH_TOOLBAR_LAYOUT;
 
-export type MDEditorMode = Exclude<LegacyRichEditorMode, "html">;
-export type MDEditorView = MDEditorMode;
+export type MarkDownEditorMode = Exclude<LegacyRichEditorMode, "html">;
+export type MarkDownEditorView = MarkDownEditorMode;
 
-export type MDEditorProps = Omit<
+export type MarkDownEditorProps = Omit<
   LegacyRichEditorProps,
   "sourceFormat" | "initialMode" | "defaultEditorView"
 > & {
-  initialMode?: MDEditorMode;
-  defaultEditorView?: MDEditorView;
+  initialMode?: MarkDownEditorMode;
+  defaultEditorView?: MarkDownEditorView;
 };
 
-export const MDEditor = forwardRef<ExtensiveEditorRef, MDEditorProps>(
+export const MarkDownEditor = forwardRef<ExtensiveEditorRef, MarkDownEditorProps>(
   (
     {
       className,
@@ -71,4 +71,4 @@ export const MDEditor = forwardRef<ExtensiveEditorRef, MDEditorProps>(
   },
 );
 
-MDEditor.displayName = "MDEditor";
+MarkDownEditor.displayName = "MarkDownEditor";

@@ -5,7 +5,7 @@ description: Shared metadata-free rich editor profile powering both MD and HTML 
 
 # Legacy Rich Editor
 
-`LegacyRichEditor` is a shared metadata-free editor profile that powers both `MDEditor` and `HTMLEditor`.
+`LegacyRichEditor` is a shared metadata-free editor profile that powers both `MarkDownEditor` and `HTMLEditor`.
 
 Use it when you want the same native feature set and switch only the source tab mode between markdown and html.
 

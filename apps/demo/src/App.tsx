@@ -5,7 +5,7 @@ import {
   HeadlessEditorPreset,
   HTMLEditor,
   LegacyRichEditor,
-  MDEditor,
+  MarkDownEditor,
   SimpleEditor,
   SlashEditor,
 } from "@lyfie/luthor";
@@ -130,7 +130,7 @@ function App() {
         );
       case "md-editor":
         return (
-          <MDEditor
+          <MarkDownEditor
             defaultContent={DEMO_MD_EDITOR_CONTENT}
             showDefaultContent={false}
             defaultEditorView="markdown"

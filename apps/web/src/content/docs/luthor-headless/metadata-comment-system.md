@@ -71,6 +71,6 @@ Legacy comments are still supported for backwards compatibility:
 
 ## Preset impact
 
-`LegacyRichEditor`, `MDEditor`, and `HTMLEditor` in `@lyfie/luthor` run in metadata-free bridge mode (`metadataMode: "none"`), so Markdown/HTML output does not include `luthor:meta` comments.
+`LegacyRichEditor`, `MarkDownEditor`, and `HTMLEditor` in `@lyfie/luthor` run in metadata-free bridge mode (`metadataMode: "none"`), so Markdown/HTML output does not include `luthor:meta` comments.
 
 `HeadlessEditorPreset` continues to use metadata-preserving bridge mode by default.
