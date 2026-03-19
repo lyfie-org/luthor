@@ -38,7 +38,7 @@ export function App() {
 - Shared native profile:
   - headings, paragraph, quote
   - bold, italic, strikethrough, inline code
-  - code block
+  - code block with language selector and copy control
   - links
   - alignment controls (left/center/right/justify)
   - ordered/unordered/check lists with indent/outdent controls for nested sublists

@@ -40,7 +40,7 @@ Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists,
 Enabled by default:
 
 - `bold`, `italic`, `strikethrough`, `list`, `history`
-- `blockFormat`, `code`, `codeFormat`
+- `blockFormat`, `code`, `codeIntelligence`, `codeFormat`
 - `horizontalRule`, `tabIndent`, `enterKeyBehavior`
 
 Disabled and enforced off:

@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-19T16:35:51.473Z
+Generated at: 2026-03-19T16:56:13.722Z
 
 ## AI Agent Workflow
 
@@ -2068,7 +2068,7 @@ Disable selectively:
 
 Some presets enforce specific flags to protect preset contracts:
 
-- `LegacyRichEditor`: keeps advanced non-markdown features off (embeds, custom nodes, draggable, palette/slash, emoji, theme toggle) while keeping markdown-compatible structure/media features on (`table`, `image`, `horizontalRule`, block alignment, and list indentation).
+- `LegacyRichEditor`: keeps advanced non-markdown features off (embeds, custom nodes, draggable, palette/slash, emoji) while keeping markdown-compatible structure/media features on (`table`, `image`, `horizontalRule`, block alignment, list indentation, `themeToggle`, and `codeIntelligence`).
 - `SlashEditor`: enforces `slashCommand: true` and `commandPalette: false`.
 - `HeadlessEditorPreset`: keeps a lightweight metadata-friendly profile.
 - `SimpleEditor`: hardcodes a minimal visual-only chat input profile.
@@ -2232,6 +2232,7 @@ export function App() {
 ## Default mode profile
 
 - `availableModes`: `["visual", "json"]`
+- `availableModes`: `["visual-only", "visual", "json"]`
 - Toolbar is enabled by default (inherited from `ExtensiveEditor`).
 
 ## Default feature profile
@@ -2239,7 +2240,7 @@ export function App() {
 Enabled by default:
 
 - `bold`, `italic`, `underline`, `strikethrough`
-- `list`, `history`, `link`, `blockFormat`, `codeFormat`
+- `list`, `history`, `link`, `blockFormat`, `code`, `codeIntelligence`, `codeFormat`
 
 Disabled by default:
 
@@ -2497,7 +2498,7 @@ Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists,
 Enabled by default:
 
 - `bold`, `italic`, `strikethrough`, `list`, `history`
-- `blockFormat`, `code`, `codeFormat`
+- `blockFormat`, `code`, `codeIntelligence`, `codeFormat`
 - `horizontalRule`, `tabIndent`, `enterKeyBehavior`
 
 Disabled and enforced off:
@@ -2648,7 +2649,7 @@ export function App() {
 - Shared native profile:
   - headings, paragraph, quote
   - bold, italic, strikethrough, inline code
-  - code block
+  - code block with language selector and copy control
   - links
   - alignment controls (left/center/right/justify)
   - ordered/unordered/check lists with indent/outdent controls for nested sublists
@@ -2871,11 +2872,11 @@ export function App() {
 
 ## Behavior
 
-Defaults keep toolbar hidden, enable draggable blocks, and provide a curated slash-command allowlist for fast block creation.
+Defaults keep toolbar hidden, enable draggable blocks, provide a curated slash-command allowlist for fast block creation, and include code block language selector/copy controls.
 
 ## Default modes
 
-- `availableModes`: `["visual", "json", "markdown", "html"]`
+- `availableModes`: `["visual-only", "visual", "json", "markdown", "html"]`
 
 ## Default slash allowlist
 
@@ -2887,6 +2888,7 @@ Defaults keep toolbar hidden, enable draggable blocks, and provide a curated sla
 ## Feature policy notes
 
 - Enforced: `slashCommand: true`, `commandPalette: false`
+- Enabled by default: `codeIntelligence: true`
 - Default: `isToolbarEnabled = false`
 - Override available through props if your product needs a visible toolbar
 

@@ -46,6 +46,7 @@ describe("HTMLEditor", () => {
         italic: true,
         strikethrough: true,
         code: true,
+        codeIntelligence: true,
         codeFormat: true,
         blockFormat: true,
         list: true,

@@ -33,6 +33,7 @@ export function App() {
 ## Default mode profile
 
 - `availableModes`: `["visual", "json"]`
+- `availableModes`: `["visual-only", "visual", "json"]`
 - Toolbar is enabled by default (inherited from `ExtensiveEditor`).
 
 ## Default feature profile
@@ -40,7 +41,7 @@ export function App() {
 Enabled by default:
 
 - `bold`, `italic`, `underline`, `strikethrough`
-- `list`, `history`, `link`, `blockFormat`, `codeFormat`
+- `list`, `history`, `link`, `blockFormat`, `code`, `codeIntelligence`, `codeFormat`
 
 Disabled by default:
 

@@ -13,6 +13,8 @@ export const composePreset: EditorPreset = {
       table: false,
       iframeEmbed: false,
       youTubeEmbed: false,
+      code: true,
+      codeIntelligence: true,
       emoji: true,
       commandPalette: false,
       slashCommand: false,

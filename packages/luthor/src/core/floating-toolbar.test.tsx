@@ -237,4 +237,25 @@ describe("FloatingToolbar media editing", () => {
     expect(screen.queryByRole("button", { name: "Numbered List" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Checklist" })).not.toBeInTheDocument();
   });
+
+  it("disables inline code action when selection is inside a code block", () => {
+    const commands = createCommands();
+
+    render(
+      <FloatingToolbar
+        isVisible
+        selectionRect={DEFAULT_RECT}
+        commands={commands}
+        activeStates={{
+          isInCodeBlock: true,
+        } as CoreEditorActiveStates}
+      />,
+    );
+
+    const inlineCodeButton = screen.getByRole("button", { name: "Inline Code" });
+    expect(inlineCodeButton).toBeDisabled();
+
+    fireEvent.click(inlineCodeButton);
+    expect(commands.formatText).not.toHaveBeenCalled();
+  });
 });

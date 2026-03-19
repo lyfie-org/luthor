@@ -51,6 +51,7 @@ describe("LegacyRichEditor", () => {
       expect.objectContaining({
         table: true,
         image: true,
+        codeIntelligence: true,
         tabIndent: true,
         themeToggle: true,
       }),

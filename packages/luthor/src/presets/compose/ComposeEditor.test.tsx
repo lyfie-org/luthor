@@ -26,6 +26,8 @@ describe("ComposeEditor", () => {
     expect(featureFlags.bold).toBe(true);
     expect(featureFlags.italic).toBe(true);
     expect(featureFlags.list).toBe(true);
+    expect(featureFlags.code).toBe(true);
+    expect(featureFlags.codeIntelligence).toBe(true);
     expect(featureFlags.image).toBe(false);
     expect(featureFlags.table).toBe(false);
   });

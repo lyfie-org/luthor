@@ -31,7 +31,7 @@ export const slashEditorPreset: EditorPreset = {
       image: false,
       blockFormat: true,
       code: true,
-      codeIntelligence: false,
+      codeIntelligence: true,
       codeFormat: true,
       tabIndent: true,
       enterKeyBehavior: true,

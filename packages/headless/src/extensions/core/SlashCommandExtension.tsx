@@ -264,8 +264,12 @@ export class SlashCommandExtension extends BaseExtension<
         return;
       }
 
-      const prefix = textBeforeCursor.slice(0, triggerIndex);
-      if (!isWhitespaceOnly(prefix)) {
+      if (triggerIndex !== 0) {
+        this.closeIfNeeded();
+        return;
+      }
+
+      if (hasContentBeforePointInTopLevel(anchorNode, triggerIndex)) {
         this.closeIfNeeded();
         return;
       }
@@ -351,6 +355,42 @@ function getContainerTypeForNode(node: {
   }
 }
 
-function isWhitespaceOnly(value: string): boolean {
-  return value.trim().length === 0;
+type TreeNodeLike = {
+  getTopLevelElementOrThrow?: () => TreeNodeLike;
+  getPreviousSibling?: () => TreeNodeLike | null;
+  getParent?: () => TreeNodeLike | null;
+  getTextContent?: () => string;
+};
+
+function hasContentBeforePointInTopLevel(node: TreeNodeLike, offsetInNode: number): boolean {
+  if (offsetInNode > 0) {
+    return true;
+  }
+
+  const topLevelNode = getTopLevelNode(node);
+  if (!topLevelNode) {
+    return false;
+  }
+
+  let current: TreeNodeLike | null = node;
+  while (current && current !== topLevelNode) {
+    let sibling = current.getPreviousSibling?.() ?? null;
+    while (sibling) {
+      if ((sibling.getTextContent?.() ?? "").length > 0) {
+        return true;
+      }
+      sibling = sibling.getPreviousSibling?.() ?? null;
+    }
+    current = current.getParent?.() ?? null;
+  }
+
+  return false;
+}
+
+function getTopLevelNode(node: TreeNodeLike): TreeNodeLike | null {
+  try {
+    return node.getTopLevelElementOrThrow?.() ?? null;
+  } catch {
+    return null;
+  }
 }
