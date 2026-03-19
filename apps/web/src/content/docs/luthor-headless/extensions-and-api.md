@@ -14,6 +14,9 @@ This page is the full API map for `@lyfie/luthor-headless`.
 - `RichText` and `richTextExtension`
 - `markdownToJSON`, `jsonToMarkdown`, `htmlToJSON`, `jsonToHTML`
 - `appendMetadataEnvelopes`, `extractMetadataEnvelopes`, `rehydrateDocumentFromEnvelopes`
+- `MARKDOWN_SUPPORTED_NODE_TYPES`, `HTML_SUPPORTED_NODE_TYPES`
+- `MARKDOWN_NATIVE_KEY_MAP`, `HTML_NATIVE_KEY_MAP`, `MARKDOWN_TEXT_NATIVE_FORMAT_MASK`
+- `isMarkdownRepresentable`, `isHTMLRepresentable`, `extractMarkdownMetadataPatch`, `extractHTMLMetadataPatch`
 - `defaultLuthorTheme`, `mergeThemes`, `createEditorThemeStyleVars`
 - `clearLexicalSelection`, `resolveLinkNodeKeyFromAnchor`
 
@@ -130,6 +133,7 @@ export function Editor() {
   - `CodeIntelligenceConfig`, `CodeIntelligenceCommands`
   - `CodeHighlightProvider`, `CodeHighlightProviderConfig`
   - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig` (UI labels use full language names)
+  - `loadPopularPrismLanguages`, `loadPrismLanguages`, `getDefaultPopularPrismLanguages`
 - Table/media/draggable:
   - `TableConfig`
   - `DraggableConfig`
@@ -166,6 +170,39 @@ Use metadata-free conversion when your source workflow should never emit `luthor
 const markdown = jsonToMarkdown(json, { metadataMode: 'none' });
 const html = jsonToHTML(json, { metadataMode: 'none' });
 ```
+
+## Source bridge options
+
+`jsonToMarkdown` and `jsonToHTML` support metadata policy controls:
+
+- `metadataMode: 'preserve' | 'none'`
+  - `'preserve'` keeps non-native metadata in `luthor:meta` envelopes.
+  - `'none'` drops envelope emission for metadata-free source output.
+- `bridgeFlavor: 'github' | 'luthor' | 'lexical-native'` (markdown bridge)
+  - `'github'` is default and keeps GitHub-compatible markdown behavior.
+
+```tsx
+import { jsonToMarkdown, jsonToHTML } from '@lyfie/luthor-headless';
+
+const markdown = jsonToMarkdown(json, {
+  bridgeFlavor: 'github',
+  metadataMode: 'none',
+});
+
+const html = jsonToHTML(json, {
+  metadataMode: 'none',
+});
+```
+
+## Optional Prism language preload API
+
+Code highlighting now exposes explicit Prism grammar preload helpers:
+
+- `getDefaultPopularPrismLanguages()`
+- `loadPopularPrismLanguages()`
+- `loadPrismLanguages([...])`
+
+Use these only when you want additional runtime control. The code extension already preloads a default popular set in normal usage.
 
 ## Custom extension example (`createExtension`)
 

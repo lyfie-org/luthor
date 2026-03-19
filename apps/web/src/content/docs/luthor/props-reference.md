@@ -107,6 +107,7 @@ Line-number behavior notes:
 
 - Wrapped markdown/html source rows are continuation rows and remain unnumbered to preserve logical line alignment.
 - Line numbers are reference-only and are excluded from copy behavior in both code blocks and source tabs.
+- Code token colors render only when host apps load highlight theme CSS (for example `highlight.js` styles or equivalent custom `.hljs*` rules).
 
 ## 2) Preset-specific prop layers
 

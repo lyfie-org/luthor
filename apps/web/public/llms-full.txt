@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-19T14:43:46.616Z
+Generated at: 2026-03-19T15:36:06.252Z
 
 ## AI Agent Workflow
 
@@ -260,6 +260,7 @@ Code workflows include inline code formatting, block-level code nodes, language 
 - Related config:
   - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
   - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
+  - `inlineCodeHighlighting` (preset prop) and optional Prism grammar preload helpers in headless
 
 | Package | Availability |
 | --- | --- |
@@ -569,10 +570,11 @@ npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/
 ### Optional dependencies for headless
 
 ```bash
-npm install highlight.js @emoji-mart/data
+npm install highlight.js prismjs @emoji-mart/data
 ```
 
 `highlight.js` is optional but useful when code highlighting is enabled.  
+`prismjs` is optional and enables additional code grammar preloading for popular languages.  
 `@emoji-mart/data` is optional and used by richer emoji catalogs.
 
 ## Verify your install
@@ -604,7 +606,7 @@ npm uninstall @lyfie/luthor @lyfie/luthor-headless
 If you installed headless peers directly and want to remove them too:
 
 ```bash
-npm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils highlight.js @emoji-mart/data
+npm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils highlight.js prismjs @emoji-mart/data
 ```
 
 ## Common mistakes
@@ -638,6 +640,12 @@ Use `@lyfie/luthor-headless` when you need complete control over editor behavior
 
 ```bash
 npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
+```
+
+Optional (recommended for richer code/emoji UX):
+
+```bash
+npm install highlight.js prismjs @emoji-mart/data
 ```
 
 ## Render a minimal headless editor
@@ -682,6 +690,11 @@ export function App() {
 3. `activeStates` updates correctly when formatting changes.
 4. No Lexical peer dependency warnings appear.
 
+If you enable code blocks:
+
+5. Load highlight CSS for token colors (`highlight.js` theme file or custom `.hljs*` styles).
+6. Verify language dropdown options show only languages supported by your active runtime tokenizer.
+
 ## Why headless
 
 - You control toolbar UX, command wiring, and layout.
@@ -699,6 +712,7 @@ export function App() {
 - [Extensions and API](/docs/luthor-headless/extensions-and-api/)
 - [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)
 - [Feature groups](/docs/luthor-headless/features/)
+- [Code and Devtools](/docs/luthor-headless/features/code-and-devtools/)
 
 ---
 ## FILE: getting-started/luthor.md
@@ -738,12 +752,18 @@ export function App() {
 - Feature-flag driven extension composition
 - Consistent imperative API on ref (`getJSON`, `getMarkdown`, `getHTML`, `injectJSON`)
 
+Metadata policy defaults:
+
+- Metadata-free presets: `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor` (`metadataMode: "none"` bridges).
+- Metadata-friendly presets: `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `SlashEditor`, `HeadlessEditorPreset` (preserve only non-representable metadata).
+
 ## Validate installation
 
 1. You can type in the editor.
 2. Toolbar and mode tabs render.
 3. No dependency or module resolution errors in your dev server.
 4. Export methods return valid JSON/Markdown/HTML from `ExtensiveEditorRef`.
+5. If using code blocks, highlight theme CSS is loaded for syntax colors in both light and dark modes.
 
 ## Pick a preset
 
@@ -884,6 +904,9 @@ This page is the full API map for `@lyfie/luthor-headless`.
 - `RichText` and `richTextExtension`
 - `markdownToJSON`, `jsonToMarkdown`, `htmlToJSON`, `jsonToHTML`
 - `appendMetadataEnvelopes`, `extractMetadataEnvelopes`, `rehydrateDocumentFromEnvelopes`
+- `MARKDOWN_SUPPORTED_NODE_TYPES`, `HTML_SUPPORTED_NODE_TYPES`
+- `MARKDOWN_NATIVE_KEY_MAP`, `HTML_NATIVE_KEY_MAP`, `MARKDOWN_TEXT_NATIVE_FORMAT_MASK`
+- `isMarkdownRepresentable`, `isHTMLRepresentable`, `extractMarkdownMetadataPatch`, `extractHTMLMetadataPatch`
 - `defaultLuthorTheme`, `mergeThemes`, `createEditorThemeStyleVars`
 - `clearLexicalSelection`, `resolveLinkNodeKeyFromAnchor`
 
@@ -1000,6 +1023,7 @@ export function Editor() {
   - `CodeIntelligenceConfig`, `CodeIntelligenceCommands`
   - `CodeHighlightProvider`, `CodeHighlightProviderConfig`
   - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig` (UI labels use full language names)
+  - `loadPopularPrismLanguages`, `loadPrismLanguages`, `getDefaultPopularPrismLanguages`
 - Table/media/draggable:
   - `TableConfig`
   - `DraggableConfig`
@@ -1036,6 +1060,39 @@ Use metadata-free conversion when your source workflow should never emit `luthor
 const markdown = jsonToMarkdown(json, { metadataMode: 'none' });
 const html = jsonToHTML(json, { metadataMode: 'none' });
 ```
+
+## Source bridge options
+
+`jsonToMarkdown` and `jsonToHTML` support metadata policy controls:
+
+- `metadataMode: 'preserve' | 'none'`
+  - `'preserve'` keeps non-native metadata in `luthor:meta` envelopes.
+  - `'none'` drops envelope emission for metadata-free source output.
+- `bridgeFlavor: 'github' | 'luthor' | 'lexical-native'` (markdown bridge)
+  - `'github'` is default and keeps GitHub-compatible markdown behavior.
+
+```tsx
+import { jsonToMarkdown, jsonToHTML } from '@lyfie/luthor-headless';
+
+const markdown = jsonToMarkdown(json, {
+  bridgeFlavor: 'github',
+  metadataMode: 'none',
+});
+
+const html = jsonToHTML(json, {
+  metadataMode: 'none',
+});
+```
+
+## Optional Prism language preload API
+
+Code highlighting now exposes explicit Prism grammar preload helpers:
+
+- `getDefaultPopularPrismLanguages()`
+- `loadPopularPrismLanguages()`
+- `loadPrismLanguages([...])`
+
+Use these only when you want additional runtime control. The code extension already preloads a default popular set in normal usage.
 
 ## Custom extension example (`createExtension`)
 
@@ -1154,12 +1211,14 @@ Recent defaults:
 - Unsupported languages are normalized to plain text to avoid stale token classes when switching code languages.
 - Code block line numbers can be enabled/disabled through `CodeExtensionConfig.showLineNumbers`.
 - Syntax colors are applied only when your app loads `highlight.js` theme CSS (or equivalent custom `.hljs*` styles).
+- Prism preload helpers are exported for advanced control: `getDefaultPopularPrismLanguages`, `loadPopularPrismLanguages`, `loadPrismLanguages`.
 
 ## Included extensions and utilities
 
 - `codeExtension`
 - `codeIntelligenceExtension`
 - `codeFormatExtension`
+- `getDefaultPopularPrismLanguages`, `loadPopularPrismLanguages`, `loadPrismLanguages`
 - `markdownToJSON`, `jsonToMarkdown`
 - `htmlToJSON`, `jsonToHTML`
 
@@ -1243,6 +1302,27 @@ Use either a local/public stylesheet or a CDN stylesheet:
   - dark: `https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github-dark.min.css`
 
 Then switch URLs on your theme change callback so code block colors stay in sync.
+
+## Optional Prism preload control
+
+Use this when you want explicit preload behavior instead of relying only on default automatic preload:
+
+```tsx
+import {
+  getDefaultPopularPrismLanguages,
+  loadPopularPrismLanguages,
+  loadPrismLanguages,
+} from '@lyfie/luthor-headless';
+
+await loadPopularPrismLanguages();
+await loadPrismLanguages(['graphql', 'docker', 'toml']);
+console.log(getDefaultPopularPrismLanguages());
+```
+
+Notes:
+
+- `prismjs` is optional for `@lyfie/luthor-headless`.
+- If Prism components are unavailable, the editor still works and unsupported languages stay plain-text themed.
 
 ## Example: markdown bridge
 
@@ -1768,6 +1848,12 @@ Source implementation:
 4. The converter builds markdown or html from sanitized JSON.
 5. `appendMetadataEnvelopes(...)` appends envelopes as `<!-- luthor:meta v1 ... -->`.
 
+Bridge-mode controls:
+
+- `metadataMode: "preserve"` (default): emit metadata envelopes when required.
+- `metadataMode: "none"`: skip envelope emission for metadata-free source output.
+- `bridgeFlavor` on markdown bridge (`"github" | "luthor" | "lexical-native"`) controls markdown conversion behavior while respecting `metadataMode`.
+
 ## Import pipeline (`markdownToJSON` and `htmlToJSON`)
 
 1. `extractMetadataEnvelopes(...)` strips and parses envelope comments.
@@ -2079,6 +2165,15 @@ This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
 | `HTMLEditor` | HTML-first flow | `visual-only`, `visual`, `json`, `html` |
 | `SlashEditor` | Slash-first interactions | `visual-only`, `visual`, `json`, `markdown`, `html` |
 | `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual-only`, `visual`, `json`, `markdown`, `html` |
+
+## Metadata policy by preset family
+
+- Metadata-free by default:
+  - `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`
+  - Source bridges use `metadataMode: "none"` for clean markdown/html output.
+- Metadata-friendly by default:
+  - `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `SlashEditor`, `HeadlessEditorPreset`
+  - Source bridges preserve metadata only when a feature cannot be represented natively.
 
 ## Preset docs
 
@@ -2903,6 +2998,7 @@ Line-number behavior notes:
 
 - Wrapped markdown/html source rows are continuation rows and remain unnumbered to preserve logical line alignment.
 - Line numbers are reference-only and are excluded from copy behavior in both code blocks and source tabs.
+- Code token colors render only when host apps load highlight theme CSS (for example `highlight.js` styles or equivalent custom `.hljs*` rules).
 
 ## 2) Preset-specific prop layers
 

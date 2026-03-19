@@ -83,7 +83,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### @lyfie/luthor-headless
 - File: getting-started/luthor-headless.md
 - URL: https://www.luthor.fyi/docs/getting-started/luthor-headless/
-- Summary: @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Render a minimal headless editor Validate installation 1. The editor mounts and accepts input. 2. Toolbar buttons call typed commands ( toggleBold , toggleItalic ). 3. activeStates updates correctly whe...
+- Summary: @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Optional (recommended for richer code/emoji UX): Render a minimal headless editor Validate installation 1. The editor mounts and accepts input. 2. Toolbar buttons call typed commands ( toggleBold , togg...
 
 ### @lyfie/luthor
 - File: getting-started/luthor.md
@@ -98,7 +98,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Extensions and API
 - File: luthor-headless/extensions-and-api.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/extensions-and-api/
-- Summary: Extensions and API This page is the full API map for @lyfie/luthor headless . Core entry points createEditorSystem createExtension RichText and richTextExtension markdownToJSON , jsonToMarkdown , htmlToJSON , jsonToHTML appendMetadataEnvelopes , extractMetadataEnvelopes , rehydrateDocumentFromEnvelopes defaultLuthorThe...
+- Summary: Extensions and API This page is the full API map for @lyfie/luthor headless . Core entry points createEditorSystem createExtension RichText and richTextExtension markdownToJSON , jsonToMarkdown , htmlToJSON , jsonToHTML appendMetadataEnvelopes , extractMetadataEnvelopes , rehydrateDocumentFromEnvelopes MARKDOWN SUPPORT...
 
 ### Features
 - File: luthor-headless/features.md

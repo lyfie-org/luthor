@@ -13,6 +13,12 @@ Use `@lyfie/luthor-headless` when you need complete control over editor behavior
 npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
 ```
 
+Optional (recommended for richer code/emoji UX):
+
+```bash
+npm install highlight.js prismjs @emoji-mart/data
+```
+
 ## Render a minimal headless editor
 
 ```tsx
@@ -55,6 +61,11 @@ export function App() {
 3. `activeStates` updates correctly when formatting changes.
 4. No Lexical peer dependency warnings appear.
 
+If you enable code blocks:
+
+5. Load highlight CSS for token colors (`highlight.js` theme file or custom `.hljs*` styles).
+6. Verify language dropdown options show only languages supported by your active runtime tokenizer.
+
 ## Why headless
 
 - You control toolbar UX, command wiring, and layout.
@@ -72,3 +83,4 @@ export function App() {
 - [Extensions and API](/docs/luthor-headless/extensions-and-api/)
 - [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)
 - [Feature groups](/docs/luthor-headless/features/)
+- [Code and Devtools](/docs/luthor-headless/features/code-and-devtools/)

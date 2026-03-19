@@ -31,12 +31,18 @@ export function App() {
 - Feature-flag driven extension composition
 - Consistent imperative API on ref (`getJSON`, `getMarkdown`, `getHTML`, `injectJSON`)
 
+Metadata policy defaults:
+
+- Metadata-free presets: `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor` (`metadataMode: "none"` bridges).
+- Metadata-friendly presets: `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `SlashEditor`, `HeadlessEditorPreset` (preserve only non-representable metadata).
+
 ## Validate installation
 
 1. You can type in the editor.
 2. Toolbar and mode tabs render.
 3. No dependency or module resolution errors in your dev server.
 4. Export methods return valid JSON/Markdown/HTML from `ExtensiveEditorRef`.
+5. If using code blocks, highlight theme CSS is loaded for syntax colors in both light and dark modes.
 
 ## Pick a preset
 

@@ -29,6 +29,12 @@ Source implementation:
 4. The converter builds markdown or html from sanitized JSON.
 5. `appendMetadataEnvelopes(...)` appends envelopes as `<!-- luthor:meta v1 ... -->`.
 
+Bridge-mode controls:
+
+- `metadataMode: "preserve"` (default): emit metadata envelopes when required.
+- `metadataMode: "none"`: skip envelope emission for metadata-free source output.
+- `bridgeFlavor` on markdown bridge (`"github" | "luthor" | "lexical-native"`) controls markdown conversion behavior while respecting `metadataMode`.
+
 ## Import pipeline (`markdownToJSON` and `htmlToJSON`)
 
 1. `extractMetadataEnvelopes(...)` strips and parses envelope comments.

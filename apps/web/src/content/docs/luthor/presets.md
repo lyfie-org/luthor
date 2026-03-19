@@ -34,6 +34,15 @@ This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
 | `SlashEditor` | Slash-first interactions | `visual-only`, `visual`, `json`, `markdown`, `html` |
 | `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual-only`, `visual`, `json`, `markdown`, `html` |
 
+## Metadata policy by preset family
+
+- Metadata-free by default:
+  - `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`
+  - Source bridges use `metadataMode: "none"` for clean markdown/html output.
+- Metadata-friendly by default:
+  - `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `SlashEditor`, `HeadlessEditorPreset`
+  - Source bridges preserve metadata only when a feature cannot be represented natively.
+
 ## Preset docs
 
 - [Extensive Editor](/docs/luthor/presets/extensive-editor/)
