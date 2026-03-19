@@ -55,6 +55,26 @@ function findTopLevelNode(
   return document.root.children.filter((node) => node.type === type)[index];
 }
 
+function collectTextNodes(node: Record<string, unknown>): string[] {
+  const values: string[] = [];
+
+  if (node.type === "text" && typeof node.text === "string") {
+    values.push(node.text);
+  }
+
+  if (!Array.isArray(node.children)) {
+    return values;
+  }
+
+  for (const child of node.children) {
+    if (typeof child === "object" && child !== null && !Array.isArray(child)) {
+      values.push(...collectTextNodes(child as Record<string, unknown>));
+    }
+  }
+
+  return values;
+}
+
 describe("markdown bridge", () => {
   it("keeps simple markdown/json conversion stable", () => {
     const markdown = jsonToMarkdown(createSimpleDocument("Hello Markdown"));
@@ -245,6 +265,131 @@ describe("markdown bridge", () => {
     expect(exported).toContain("| Name | Role |");
     expect(exported).toContain("| Ada | Engineer |");
     expect(exported).not.toContain("luthor:meta v1");
+  });
+
+  it("uses external emoji dataset for shortcode conversion in metadata-free mode", () => {
+    const globalRecord = globalThis as Record<string, unknown>;
+    const previousEmojiMartData = globalRecord.__EMOJI_MART_DATA__;
+    const previousEmojiMart = globalRecord.EmojiMart;
+
+    globalRecord.__EMOJI_MART_DATA__ = {
+      emojis: {
+        rocket: {
+          shortcodes: ["rocket"],
+          skins: [{ native: "\u{1F6F8}" }],
+        },
+      },
+    };
+    delete globalRecord.EmojiMart;
+
+    try {
+      const parsed = markdownToJSON("## :rocket: Launch", {
+        metadataMode: "none",
+      }) as JsonDocument;
+      const heading = findTopLevelNode(parsed, "heading");
+      expect(heading).toBeDefined();
+      const headingText = collectTextNodes(heading as Record<string, unknown>).join("");
+      expect(headingText).toContain("\u{1F6F8} Launch");
+      expect(headingText).not.toContain(":rocket:");
+    } finally {
+      if (previousEmojiMartData === undefined) {
+        delete globalRecord.__EMOJI_MART_DATA__;
+      } else {
+        globalRecord.__EMOJI_MART_DATA__ = previousEmojiMartData;
+      }
+
+      if (previousEmojiMart === undefined) {
+        delete globalRecord.EmojiMart;
+      } else {
+        globalRecord.EmojiMart = previousEmojiMart;
+      }
+    }
+  });
+
+  it("imports README-style html wrappers, image badges, alignment, and emoji shortcodes in metadata-free mode", () => {
+    const globalRecord = globalThis as Record<string, unknown>;
+    const previousEmojiMartData = globalRecord.__EMOJI_MART_DATA__;
+    const previousEmojiMart = globalRecord.EmojiMart;
+
+    globalRecord.__EMOJI_MART_DATA__ = {
+      emojis: {
+        rocket: {
+          shortcodes: ["rocket"],
+          skins: [{ native: "\u{1F680}" }],
+        },
+        jigsaw: {
+          shortcodes: ["jigsaw"],
+          skins: [{ native: "\u{1F9E9}" }],
+        },
+      },
+    };
+    delete globalRecord.EmojiMart;
+
+    const markdown = [
+      "<div align=\"center\">",
+      "  <picture>",
+      "    <source media=\"(prefers-color-scheme: dark)\" srcset=\"dark.png\" />",
+      "    <img src=\"light.png\" alt=\"Luthor\" width=\"420\" />",
+      "  </picture>",
+      "  <p><strong>TypeScript-first rich text editor ecosystem.</strong></p>",
+      "  <p>:rocket: Production-ready presets + :jigsaw: extension runtime.</p>",
+      "</div>",
+      "",
+      "<div align=\"center\">",
+      "[![Project Status](https://img.shields.io/badge/status-stable)](https://github.com/lyfie-org/luthor)",
+      "</div>",
+      "",
+      "<p align=\"center\">",
+      "  <img src=\"preview.png\" alt=\"Preview\" width=\"960\" />",
+      "</p>",
+      "",
+      "## :rocket: Quick Start",
+      "",
+      "| Feature | Value |",
+      "| --- | --- |",
+      "| table | works |",
+    ].join("\n");
+
+    try {
+      const parsed = markdownToJSON(markdown, { metadataMode: "none" }) as JsonDocument;
+      const allText = parsed.root.children.flatMap((node) => collectTextNodes(node));
+
+      expect(allText.some((value) => value.includes("<div"))).toBe(false);
+      expect(allText.some((value) => value.includes("<picture"))).toBe(false);
+      expect(allText.some((value) => value.includes(":rocket:"))).toBe(false);
+      expect(allText.some((value) => value.includes("\u{1F680}"))).toBe(true);
+      expect(allText.some((value) => value.includes("\u{1F9E9}"))).toBe(true);
+
+      const heading = findTopLevelNode(parsed, "heading");
+      expect(heading).toBeDefined();
+      expect(collectTextNodes(heading as Record<string, unknown>).join("")).toContain("\u{1F680} Quick Start");
+
+      const imageNodes = parsed.root.children.filter((node) => node.type === "image");
+      expect(imageNodes.length).toBeGreaterThanOrEqual(3);
+      expect(
+        imageNodes.some((node) => node.alignment === "center"),
+      ).toBe(true);
+
+      const centeredParagraph = parsed.root.children.find(
+        (node) => node.type === "paragraph" && node.format === "center",
+      );
+      expect(centeredParagraph).toBeDefined();
+
+      const tableNode = findTopLevelNode(parsed, "table");
+      expect(tableNode).toBeDefined();
+    } finally {
+      if (previousEmojiMartData === undefined) {
+        delete globalRecord.__EMOJI_MART_DATA__;
+      } else {
+        globalRecord.__EMOJI_MART_DATA__ = previousEmojiMartData;
+      }
+
+      if (previousEmojiMart === undefined) {
+        delete globalRecord.EmojiMart;
+      } else {
+        globalRecord.EmojiMart = previousEmojiMart;
+      }
+    }
   });
 
   it("round-trips image nodes natively without metadata envelopes", () => {

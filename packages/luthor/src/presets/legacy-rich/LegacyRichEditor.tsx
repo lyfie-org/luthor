@@ -33,10 +33,10 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   superscript: false,
   link: true,
   horizontalRule: true,
-  table: false,
+  table: true,
   list: true,
   history: true,
-  image: false,
+  image: true,
   blockFormat: true,
   code: true,
   codeIntelligence: false,
@@ -58,8 +58,6 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
 const LEGACY_RICH_ENFORCED_FEATURE_FLAGS: FeatureFlagOverrides = {
   tabIndent: false,
   draggableBlock: false,
-  table: false,
-  image: false,
   iframeEmbed: false,
   youTubeEmbed: false,
   customNode: false,
@@ -80,7 +78,7 @@ export const LEGACY_RICH_TOOLBAR_LAYOUT: ToolbarLayout = {
       items: ["undo", "redo"],
     },
     {
-      items: ["blockFormat", "quote"],
+      items: ["blockFormat", "quote", "alignLeft", "alignCenter", "alignRight", "alignJustify"],
     },
     {
       items: ["bold", "italic", "strikethrough", "code", "link"],
@@ -89,7 +87,7 @@ export const LEGACY_RICH_TOOLBAR_LAYOUT: ToolbarLayout = {
       items: ["unorderedList", "orderedList", "checkList"],
     },
     {
-      items: ["codeBlock", "horizontalRule"],
+      items: ["codeBlock", "horizontalRule", "table", "image"],
     },
   ],
 };

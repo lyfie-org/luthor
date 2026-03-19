@@ -152,6 +152,39 @@ describe("html bridge", () => {
     expect(collectNodeText(secondNode as JsonNode)).toContain("Unsupported featureCard");
   });
 
+  it("normalizes align attributes and picture tags into native lexical structures", () => {
+    const html = [
+      "<div align=\"center\">",
+      "  <p>Centered line</p>",
+      "  <picture>",
+      "    <source media=\"(prefers-color-scheme: dark)\" srcset=\"dark.png\" />",
+      "    <img src=\"light.png\" alt=\"Logo\" width=\"420\" />",
+      "  </picture>",
+      "</div>",
+      "<p align=\"center\">",
+      "  <img src=\"preview.png\" alt=\"Preview\" width=\"960\" />",
+      "</p>",
+    ].join("\n");
+
+    const parsed = htmlToJSON(html, { metadataMode: "none" }) as JsonDocument;
+    const centeredParagraph = parsed.root.children.find(
+      (node) => node.type === "paragraph" && node.format === "center",
+    );
+    expect(centeredParagraph).toBeDefined();
+    expect(collectNodeText(centeredParagraph as JsonNode)).toContain("Centered line");
+
+    const nestedImages = parsed.root.children
+      .map((node) => findNestedNode(node, "image"))
+      .filter((node): node is JsonNode => node !== null);
+    expect(nestedImages.length).toBeGreaterThanOrEqual(2);
+    expect(
+      nestedImages.some((node) => typeof node.src === "string" && node.src.endsWith("/light.png")),
+    ).toBe(true);
+    expect(
+      nestedImages.some((node) => typeof node.src === "string" && node.src.endsWith("/preview.png")),
+    ).toBe(true);
+  });
+
   it("normalizes indentation-heavy pre-wrap html without creating formatter artifacts", () => {
     const formattedHtml = [
       "<p>",

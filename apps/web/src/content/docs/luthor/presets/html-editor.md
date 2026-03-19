@@ -30,7 +30,7 @@ export function App() {
 
 ## Behavior
 
-Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
+Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
 
 ## Default modes
 

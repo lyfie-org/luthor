@@ -29,7 +29,7 @@ describe("MDEditor", () => {
     expect(props.initialMode).toBe("visual");
   });
 
-  it("applies markdown-native defaults and disables metadata-dependent features", () => {
+  it("applies markdown-native defaults with metadata-free source conversion", () => {
     render(<MDEditor showDefaultContent={false} />);
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
@@ -48,19 +48,28 @@ describe("MDEditor", () => {
         link: true,
         list: true,
         blockFormat: true,
-        table: false,
-        image: false,
+        table: true,
+        image: true,
         iframeEmbed: false,
         youTubeEmbed: false,
         customNode: false,
         draggableBlock: false,
+        tabIndent: false,
       }),
     );
     expect(props.sourceMetadataMode).toBe("none");
     expect(
       props.toolbarLayout?.sections?.some((section) =>
-        (section.items ?? []).includes("table") ||
-        (section.items ?? []).includes("image") ||
+        (section.items ?? []).includes("table"),
+      ),
+    ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
+        (section.items ?? []).includes("image"),
+      ),
+    ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
         (section.items ?? []).includes("embed") ||
         (section.items ?? []).includes("indentList") ||
         (section.items ?? []).includes("outdentList"),

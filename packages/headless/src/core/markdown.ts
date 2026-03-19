@@ -643,6 +643,580 @@ function toEditorState(editor: ReturnType<typeof createMarkdownEditor>, input: u
   return editor.parseEditorState(serialized);
 }
 
+type BlockAlignment = "left" | "center" | "right" | "justify";
+
+type AlignmentMarker =
+  | { type: "start"; alignment: BlockAlignment }
+  | { type: "end" };
+
+const ALIGNMENT_START_MARKER_PREFIX = "[[LUTHOR_ALIGN_START:";
+const ALIGNMENT_START_MARKER_SUFFIX = "]]";
+const ALIGNMENT_END_MARKER = "[[LUTHOR_ALIGN_END]]";
+
+let cachedEmojiShortcodeLookup: ReadonlyMap<string, string> | null = null;
+let cachedEmojiShortcodeLookupSource: "global" | "module" | null = null;
+
+type EmojiMartSkinLike = {
+  native?: unknown;
+};
+
+type EmojiMartEntryLike = {
+  shortcodes?: unknown;
+  skins?: unknown;
+  native?: unknown;
+};
+
+type EmojiMartDatasetLike = {
+  emojis?: unknown;
+};
+
+function normalizeMarkdownLineBreaks(value: string): string {
+  return value.replace(/\r\n?/g, "\n");
+}
+
+function normalizeEmojiShortcode(value: string): string {
+  return value.trim().toLowerCase().replace(/^:+|:+$/g, "");
+}
+
+function toEmojiShortcodeArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => (typeof entry === "string" ? normalizeEmojiShortcode(entry) : ""))
+      .filter((entry) => entry.length > 0);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(/[,\s]+/)
+      .map((entry) => normalizeEmojiShortcode(entry))
+      .filter((entry) => entry.length > 0);
+  }
+
+  return [];
+}
+
+function extractNativeEmoji(entry: EmojiMartEntryLike): string | null {
+  if (typeof entry.native === "string" && entry.native.length > 0) {
+    return entry.native;
+  }
+
+  if (!Array.isArray(entry.skins)) {
+    return null;
+  }
+
+  for (const rawSkin of entry.skins) {
+    if (typeof rawSkin !== "object" || rawSkin === null || Array.isArray(rawSkin)) {
+      continue;
+    }
+
+    const skin = rawSkin as EmojiMartSkinLike;
+    if (typeof skin.native === "string" && skin.native.length > 0) {
+      return skin.native;
+    }
+  }
+
+  return null;
+}
+
+function createEmojiShortcodeLookup(rawData: unknown): ReadonlyMap<string, string> | null {
+  if (!rawData || typeof rawData !== "object" || Array.isArray(rawData)) {
+    return null;
+  }
+
+  const dataset = rawData as EmojiMartDatasetLike;
+  if (!dataset.emojis || typeof dataset.emojis !== "object" || Array.isArray(dataset.emojis)) {
+    return null;
+  }
+
+  const lookup = new Map<string, string>();
+  for (const [id, rawEntry] of Object.entries(dataset.emojis as Record<string, unknown>)) {
+    if (typeof rawEntry !== "object" || rawEntry === null || Array.isArray(rawEntry)) {
+      continue;
+    }
+
+    const entry = rawEntry as EmojiMartEntryLike;
+    const emoji = extractNativeEmoji(entry);
+    if (!emoji) {
+      continue;
+    }
+
+    const shortcodes = Array.from(
+      new Set([
+        normalizeEmojiShortcode(id),
+        ...toEmojiShortcodeArray(entry.shortcodes),
+      ].filter((shortcode) => shortcode.length > 0)),
+    );
+
+    for (const shortcode of shortcodes) {
+      if (!lookup.has(shortcode)) {
+        lookup.set(shortcode, emoji);
+      }
+    }
+  }
+
+  return lookup.size > 0 ? lookup : null;
+}
+
+function tryResolveEmojiShortcodesFromGlobalScope(): ReadonlyMap<string, string> | null {
+  const globalData = (
+    globalThis as Record<string, unknown> & {
+      EmojiMart?: { data?: unknown };
+    }
+  ).__EMOJI_MART_DATA__ ?? (globalThis as { EmojiMart?: { data?: unknown } }).EmojiMart?.data;
+  return createEmojiShortcodeLookup(globalData);
+}
+
+function tryResolveEmojiShortcodesFromModule(): ReadonlyMap<string, string> | null {
+  try {
+    const requireFunction = new Function(
+      "return typeof require === 'function' ? require : null;",
+    )() as ((moduleName: string) => unknown) | null;
+    if (!requireFunction) {
+      return null;
+    }
+
+    const imported = requireFunction("@emoji-mart/data") as {
+      default?: unknown;
+      data?: unknown;
+    };
+    return (
+      createEmojiShortcodeLookup(imported.default) ??
+      createEmojiShortcodeLookup(imported.data) ??
+      createEmojiShortcodeLookup(imported)
+    );
+  } catch {
+    return null;
+  }
+}
+
+function resolveEmojiShortcodeLookup(): ReadonlyMap<string, string> | null {
+  const fromGlobal = tryResolveEmojiShortcodesFromGlobalScope();
+  if (fromGlobal) {
+    cachedEmojiShortcodeLookup = fromGlobal;
+    cachedEmojiShortcodeLookupSource = "global";
+    return fromGlobal;
+  }
+
+  if (cachedEmojiShortcodeLookupSource === "global") {
+    cachedEmojiShortcodeLookup = null;
+    cachedEmojiShortcodeLookupSource = null;
+  }
+
+  if (cachedEmojiShortcodeLookup) {
+    return cachedEmojiShortcodeLookup;
+  }
+
+  const fromModule = tryResolveEmojiShortcodesFromModule();
+  if (fromModule) {
+    cachedEmojiShortcodeLookup = fromModule;
+    cachedEmojiShortcodeLookupSource = "module";
+    return fromModule;
+  }
+
+  return null;
+}
+
+function normalizeEmojiShortcodes(input: string): string {
+  const lookup = resolveEmojiShortcodeLookup();
+  if (!lookup) {
+    return input;
+  }
+
+  return input.replace(/:([a-z0-9_+-]+):/gi, (match, shortcode) => {
+    const normalizedShortcode = normalizeEmojiShortcode(String(shortcode));
+    return lookup.get(normalizedShortcode) ?? match;
+  });
+}
+
+function convertNestedImageLinksToMarkdownImages(input: string): string {
+  return input.replace(
+    /\[!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)\]\(([^)]+)\)/g,
+    (_match, alt, src, title, linkTarget) => {
+      void linkTarget;
+      let markdown = `![${String(alt)}](${String(src)}`;
+      if (typeof title === "string" && title.length > 0) {
+        markdown += ` "${title}"`;
+      }
+      markdown += ")";
+      return markdown;
+    },
+  );
+}
+
+function convertSimpleInlineHtmlToMarkdown(input: string): string {
+  return input
+    .replace(/<strong\b[^>]*>([\s\S]*?)<\/strong>/gi, "**$1**")
+    .replace(/<b\b[^>]*>([\s\S]*?)<\/b>/gi, "**$1**")
+    .replace(/<em\b[^>]*>([\s\S]*?)<\/em>/gi, "*$1*")
+    .replace(/<i\b[^>]*>([\s\S]*?)<\/i>/gi, "*$1*")
+    .replace(/<code\b[^>]*>([\s\S]*?)<\/code>/gi, "`$1`")
+    .replace(/<\/?span\b[^>]*>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#39;/gi, "'")
+    .replace(/<\/?[^>]+>/g, "");
+}
+
+function isBlockAlignment(value: string): value is BlockAlignment {
+  return value === "left" || value === "center" || value === "right" || value === "justify";
+}
+
+function parseHTMLAttributes(source: string): Record<string, string> {
+  const attributes: Record<string, string> = {};
+  const attributeRegex =
+    /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/g;
+
+  let match = attributeRegex.exec(source);
+  while (match) {
+    const key = (match[1] ?? "").trim().toLowerCase();
+    const value = (match[2] ?? match[3] ?? match[4] ?? "").trim();
+    if (key) {
+      attributes[key] = value;
+    }
+    match = attributeRegex.exec(source);
+  }
+
+  return attributes;
+}
+
+function extractAlignmentFromAttributes(attributes: Record<string, string>): BlockAlignment | null {
+  const alignValue = attributes.align?.trim().toLowerCase();
+  if (alignValue && isBlockAlignment(alignValue)) {
+    return alignValue;
+  }
+
+  const styleValue = attributes.style?.toLowerCase() ?? "";
+  if (styleValue) {
+    const textAlignMatch = styleValue.match(/text-align\s*:\s*(left|center|right|justify)\b/);
+    const textAlign = textAlignMatch?.[1]?.toLowerCase();
+    if (textAlign && isBlockAlignment(textAlign)) {
+      return textAlign;
+    }
+
+    const floatMatch = styleValue.match(/float\s*:\s*(left|right)\b/);
+    const floatValue = floatMatch?.[1]?.toLowerCase();
+    if (floatValue === "left" || floatValue === "right") {
+      return floatValue;
+    }
+  }
+
+  const classValue = attributes.class?.toLowerCase() ?? "";
+  if (classValue.includes("align-center")) {
+    return "center";
+  }
+  if (classValue.includes("align-left")) {
+    return "left";
+  }
+  if (classValue.includes("align-right")) {
+    return "right";
+  }
+
+  return null;
+}
+
+function extractAlignmentFromTag(tagSource: string): BlockAlignment | null {
+  return extractAlignmentFromAttributes(parseHTMLAttributes(tagSource));
+}
+
+function escapeMarkdownAltText(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/\]/g, "\\]");
+}
+
+function toImageAlignment(alignment: BlockAlignment | null): "left" | "center" | "right" | null {
+  if (alignment === "left" || alignment === "center" || alignment === "right") {
+    return alignment;
+  }
+
+  if (alignment === "justify") {
+    return "center";
+  }
+
+  return null;
+}
+
+function markdownImageFromHtmlTag(
+  tagSource: string,
+  inheritedAlignment: BlockAlignment | null = null,
+): string | null {
+  const imageTagMatch = tagSource.match(/<img\b[^>]*>/i);
+  if (!imageTagMatch) {
+    return null;
+  }
+
+  const attributes = parseHTMLAttributes(imageTagMatch[0]);
+  const src = attributes.src?.trim();
+  if (!src) {
+    return null;
+  }
+
+  const alt = attributes.alt?.trim() ?? "";
+  const title = attributes.title?.trim() ?? "";
+  const alignment = toImageAlignment(
+    extractAlignmentFromAttributes(attributes) ?? inheritedAlignment,
+  );
+
+  let markdown = `![${escapeMarkdownAltText(alt)}](${src}`;
+  if (title.length > 0) {
+    markdown += ` "${escapeMarkdownTitle(title)}"`;
+  }
+  markdown += ")";
+
+  if (alignment) {
+    markdown += ` <!-- align:${alignment} -->`;
+  }
+
+  return markdown;
+}
+
+function createAlignmentStartMarker(alignment: BlockAlignment): string {
+  return `${ALIGNMENT_START_MARKER_PREFIX}${alignment}${ALIGNMENT_START_MARKER_SUFFIX}`;
+}
+
+function preprocessMarkdownForMetadataFreeImport(markdown: string): string {
+  const lines = normalizeMarkdownLineBreaks(markdown).split("\n");
+  const output: string[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index] ?? "";
+    const trimmed = line.trim();
+
+    if (trimmed.length === 0) {
+      output.push(line);
+      continue;
+    }
+
+    const singleLineContainerMatch = trimmed.match(/^<(div|p)\b([^>]*)>([\s\S]*?)<\/\1>$/i);
+    if (singleLineContainerMatch) {
+      const alignment = extractAlignmentFromTag(trimmed);
+      const innerContent = singleLineContainerMatch[3] ?? "";
+      if (alignment) {
+        output.push(createAlignmentStartMarker(alignment));
+      }
+      const markdownImage = markdownImageFromHtmlTag(innerContent, alignment);
+      if (markdownImage) {
+        output.push(markdownImage);
+      } else {
+        const normalizedInline = normalizeEmojiShortcodes(
+          convertNestedImageLinksToMarkdownImages(convertSimpleInlineHtmlToMarkdown(innerContent)),
+        );
+        if (normalizedInline.trim().length > 0) {
+          output.push(normalizedInline);
+        }
+      }
+      if (alignment) {
+        output.push(ALIGNMENT_END_MARKER);
+      }
+      continue;
+    }
+
+    if (/^<picture\b/i.test(trimmed)) {
+      const pictureLines = [line];
+      while (index + 1 < lines.length) {
+        index += 1;
+        const nextLine = lines[index] ?? "";
+        pictureLines.push(nextLine);
+        if (/<\/picture>/i.test(nextLine)) {
+          break;
+        }
+      }
+
+      const pictureImage = markdownImageFromHtmlTag(pictureLines.join("\n"));
+      if (pictureImage) {
+        output.push(pictureImage);
+      }
+      continue;
+    }
+
+    if (/^<source\b/i.test(trimmed) || /^<\/?picture\b/i.test(trimmed)) {
+      continue;
+    }
+
+    const alignmentStartMatch = trimmed.match(/^<(div|p)\b([^>]*)>$/i);
+    if (alignmentStartMatch) {
+      const alignment = extractAlignmentFromTag(trimmed);
+      if (alignment) {
+        output.push(createAlignmentStartMarker(alignment));
+      }
+      continue;
+    }
+
+    if (/^<\/(div|p)>$/i.test(trimmed)) {
+      output.push(ALIGNMENT_END_MARKER);
+      continue;
+    }
+
+    if (/^<img\b[\s\S]*\/?>$/i.test(trimmed)) {
+      const markdownImage = markdownImageFromHtmlTag(trimmed);
+      if (markdownImage) {
+        output.push(markdownImage);
+        continue;
+      }
+    }
+
+    const paragraphMatch = trimmed.match(/^<p\b[^>]*>([\s\S]*?)<\/p>$/i);
+    if (paragraphMatch) {
+      const paragraphAlignment = extractAlignmentFromTag(trimmed);
+      const innerContent = paragraphMatch[1] ?? "";
+      if (paragraphAlignment) {
+        output.push(createAlignmentStartMarker(paragraphAlignment));
+      }
+      const markdownImage = markdownImageFromHtmlTag(innerContent, paragraphAlignment);
+      if (markdownImage) {
+        output.push(markdownImage);
+      } else {
+        const normalizedInline = normalizeEmojiShortcodes(
+          convertNestedImageLinksToMarkdownImages(convertSimpleInlineHtmlToMarkdown(innerContent)),
+        );
+        if (normalizedInline.trim().length > 0) {
+          output.push(normalizedInline);
+        }
+      }
+      if (paragraphAlignment) {
+        output.push(ALIGNMENT_END_MARKER);
+      }
+      continue;
+    }
+
+    const normalizedLine = normalizeEmojiShortcodes(convertNestedImageLinksToMarkdownImages(line));
+    output.push(normalizedLine);
+  }
+
+  return output.join("\n");
+}
+
+function isJsonRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getParagraphTextContent(node: JsonRecord): string | null {
+  if (node.type !== "paragraph" || !Array.isArray(node.children)) {
+    return null;
+  }
+
+  let content = "";
+  for (const child of node.children) {
+    if (!isJsonRecord(child)) {
+      return null;
+    }
+
+    if (child.type === "text") {
+      content += typeof child.text === "string" ? child.text : "";
+      continue;
+    }
+
+    if (child.type === "linebreak") {
+      content += "\n";
+      continue;
+    }
+
+    if (child.type === "tab") {
+      content += "\t";
+      continue;
+    }
+
+    return null;
+  }
+
+  return content;
+}
+
+function extractAlignmentMarker(node: JsonRecord): AlignmentMarker | null {
+  const text = getParagraphTextContent(node);
+  if (text === null) {
+    return null;
+  }
+
+  const trimmed = text.trim();
+  if (trimmed === ALIGNMENT_END_MARKER) {
+    return { type: "end" };
+  }
+
+  if (
+    trimmed.startsWith(ALIGNMENT_START_MARKER_PREFIX) &&
+    trimmed.endsWith(ALIGNMENT_START_MARKER_SUFFIX)
+  ) {
+    const alignmentValue = trimmed
+      .slice(ALIGNMENT_START_MARKER_PREFIX.length, trimmed.length - ALIGNMENT_START_MARKER_SUFFIX.length)
+      .trim()
+      .toLowerCase();
+    if (isBlockAlignment(alignmentValue)) {
+      return { type: "start", alignment: alignmentValue };
+    }
+  }
+
+  return null;
+}
+
+function applyAlignmentToNode(node: JsonRecord, alignment: BlockAlignment): void {
+  const type = typeof node.type === "string" ? node.type : "";
+  if (type === "image") {
+    const imageAlignment = toImageAlignment(alignment);
+    if (!imageAlignment) {
+      return;
+    }
+
+    const currentAlignment = node.alignment;
+    if (
+      currentAlignment === undefined ||
+      currentAlignment === null ||
+      currentAlignment === "" ||
+      currentAlignment === "none"
+    ) {
+      node.alignment = imageAlignment;
+    }
+    return;
+  }
+
+  if (
+    type === "paragraph" ||
+    type === "heading" ||
+    type === "quote" ||
+    type === "list" ||
+    type === "table" ||
+    type === "code"
+  ) {
+    node.format = alignment;
+  }
+}
+
+function applyAlignmentMarkersToDocument(document: JsonDocument): JsonDocument {
+  if (!isJsonRecord(document.root) || !Array.isArray(document.root.children)) {
+    return document;
+  }
+
+  const alignmentStack: BlockAlignment[] = [];
+  const normalizedChildren: unknown[] = [];
+
+  for (const child of document.root.children) {
+    if (!isJsonRecord(child)) {
+      normalizedChildren.push(child);
+      continue;
+    }
+
+    const marker = extractAlignmentMarker(child);
+    if (marker) {
+      if (marker.type === "start") {
+        alignmentStack.push(marker.alignment);
+      } else {
+        alignmentStack.pop();
+      }
+      continue;
+    }
+
+    const activeAlignment = alignmentStack[alignmentStack.length - 1];
+    if (activeAlignment) {
+      applyAlignmentToNode(child, activeAlignment);
+    }
+    normalizedChildren.push(child);
+  }
+
+  document.root.children = normalizedChildren;
+  return document;
+}
+
 function shouldPreserveMetadata(metadataMode: SourceMetadataMode | undefined): boolean {
   return metadataMode !== "none";
 }
@@ -662,16 +1236,23 @@ export function markdownToJSON(
     }
   }
 
+  const sourceContent = preserveMetadata
+    ? content
+    : preprocessMarkdownForMetadataFreeImport(content);
+
   const editor = createMarkdownEditor();
   editor.update(
     () => {
-      $convertFromMarkdownString(content, MARKDOWN_TRANSFORMERS);
+      $convertFromMarkdownString(sourceContent, MARKDOWN_TRANSFORMERS);
     },
     { discrete: true },
   );
 
   const baseDocument = editor.getEditorState().toJSON() as JsonDocument;
-  return rehydrateDocumentFromEnvelopes(baseDocument, envelopes);
+  const normalizedDocument = preserveMetadata
+    ? baseDocument
+    : applyAlignmentMarkersToDocument(baseDocument);
+  return rehydrateDocumentFromEnvelopes(normalizedDocument, envelopes);
 }
 
 export function jsonToMarkdown(

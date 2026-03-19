@@ -29,7 +29,7 @@ describe("HTMLEditor", () => {
     expect(props.initialMode).toBe("visual");
   });
 
-  it("enables html-safe markdown features and disables metadata-heavy features", () => {
+  it("enables html-safe core features with metadata-free source conversion", () => {
     render(<HTMLEditor showDefaultContent={false} />);
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
@@ -47,19 +47,28 @@ describe("HTMLEditor", () => {
         codeFormat: true,
         blockFormat: true,
         list: true,
-        table: false,
-        image: false,
+        table: true,
+        image: true,
         iframeEmbed: false,
         youTubeEmbed: false,
         customNode: false,
         draggableBlock: false,
+        tabIndent: false,
       }),
     );
     expect(props.sourceMetadataMode).toBe("none");
     expect(
       props.toolbarLayout?.sections?.some((section) =>
-        (section.items ?? []).includes("table") ||
-        (section.items ?? []).includes("image") ||
+        (section.items ?? []).includes("table"),
+      ),
+    ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
+        (section.items ?? []).includes("image"),
+      ),
+    ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
         (section.items ?? []).includes("embed") ||
         (section.items ?? []).includes("indentList") ||
         (section.items ?? []).includes("outdentList"),

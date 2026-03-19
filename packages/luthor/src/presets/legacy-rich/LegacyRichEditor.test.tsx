@@ -38,13 +38,29 @@ describe("LegacyRichEditor", () => {
     expect(props.initialMode).toBe("html");
   });
 
-  it("keeps metadata-heavy features disabled even with overrides", () => {
+  it("enables table and image support in the default metadata-free profile", () => {
+    render(<LegacyRichEditor showDefaultContent={false} />);
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      featureFlags?: Record<string, boolean>;
+    };
+
+    expect(props.featureFlags).toEqual(
+      expect.objectContaining({
+        table: true,
+        image: true,
+        tabIndent: false,
+      }),
+    );
+  });
+
+  it("keeps non-core rich features disabled even with overrides", () => {
     render(
       <LegacyRichEditor
         showDefaultContent={false}
         featureFlags={{
-          table: true,
-          image: true,
+          table: false,
+          image: false,
           iframeEmbed: true,
           youTubeEmbed: true,
           customNode: true,
@@ -80,5 +96,15 @@ describe("LegacyRichEditor", () => {
         (section.items ?? []).includes("outdentList"),
       ),
     ).toBe(false);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
+        (section.items ?? []).includes("table"),
+      ),
+    ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
+        (section.items ?? []).includes("image"),
+      ),
+    ).toBe(true);
   });
 });

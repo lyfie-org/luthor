@@ -291,6 +291,114 @@ function shouldCollapseToSingleSpace(previousText: string, nextText: string): bo
   return true;
 }
 
+type BlockAlignment = "left" | "center" | "right" | "justify";
+
+const ALIGNABLE_TEXT_TAGS = new Set([
+  "p",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "blockquote",
+  "li",
+  "td",
+  "th",
+  "pre",
+  "code",
+]);
+
+const ALIGN_CONTAINER_TAGS = new Set([
+  "div",
+  "section",
+  "article",
+  "main",
+  "header",
+  "footer",
+  "aside",
+  "nav",
+]);
+
+function isBlockAlignment(value: string): value is BlockAlignment {
+  return value === "left" || value === "center" || value === "right" || value === "justify";
+}
+
+function appendInlineStyle(element: HTMLElement, declaration: string): void {
+  const currentStyle = element.getAttribute("style")?.trim() ?? "";
+  if (!currentStyle) {
+    element.setAttribute("style", declaration);
+    return;
+  }
+
+  const styleWithTerminator = currentStyle.endsWith(";") ? currentStyle : `${currentStyle};`;
+  element.setAttribute("style", `${styleWithTerminator} ${declaration}`);
+}
+
+function applyImageAlignmentStyle(element: HTMLElement, alignment: BlockAlignment): void {
+  if (alignment === "center") {
+    appendInlineStyle(element, "display:block; margin-left:auto; margin-right:auto;");
+    return;
+  }
+
+  if (alignment === "left" || alignment === "right") {
+    appendInlineStyle(element, `float:${alignment};`);
+    return;
+  }
+}
+
+function normalizeAlignmentAttributes(parsedDocument: Document): void {
+  const alignCandidates = Array.from(parsedDocument.querySelectorAll<HTMLElement>("[align]"));
+  for (const element of alignCandidates) {
+    const alignValue = element.getAttribute("align")?.trim().toLowerCase() ?? "";
+    if (!isBlockAlignment(alignValue)) {
+      continue;
+    }
+
+    const tagName = element.tagName.toLowerCase();
+    if (tagName === "img") {
+      applyImageAlignmentStyle(element, alignValue);
+      element.removeAttribute("align");
+      continue;
+    }
+
+    appendInlineStyle(element, `text-align:${alignValue};`);
+
+    if (ALIGN_CONTAINER_TAGS.has(tagName)) {
+      for (const child of Array.from(element.children)) {
+        if (!(child instanceof HTMLElement)) {
+          continue;
+        }
+
+        const childTag = child.tagName.toLowerCase();
+        if (ALIGNABLE_TEXT_TAGS.has(childTag)) {
+          appendInlineStyle(child, `text-align:${alignValue};`);
+          continue;
+        }
+
+        if (childTag === "img") {
+          applyImageAlignmentStyle(child, alignValue);
+        }
+      }
+    }
+
+    element.removeAttribute("align");
+  }
+}
+
+function flattenPictureElements(parsedDocument: Document): void {
+  const pictures = Array.from(parsedDocument.querySelectorAll("picture"));
+  for (const picture of pictures) {
+    const fallbackImage = picture.querySelector("img");
+    if (!fallbackImage) {
+      picture.remove();
+      continue;
+    }
+
+    picture.replaceWith(fallbackImage.cloneNode(true));
+  }
+}
+
 function normalizeWhitespaceArtifacts(parsedDocument: Document): void {
   const preWrapCandidates = Array.from(parsedDocument.querySelectorAll<HTMLElement>("[style]"));
   for (const element of preWrapCandidates) {
@@ -383,6 +491,8 @@ export function htmlToJSON(
   editor.update(
     () => {
       const parsedDocument = new DOMParser().parseFromString(content, "text/html");
+      flattenPictureElements(parsedDocument);
+      normalizeAlignmentAttributes(parsedDocument);
       normalizeWhitespaceArtifacts(parsedDocument);
       const nodes = $generateNodesFromDOM(editor, parsedDocument);
       const root = $getRoot();

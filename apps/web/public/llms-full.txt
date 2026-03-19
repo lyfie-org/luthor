@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-19T04:55:17.064Z
+Generated at: 2026-03-19T05:25:58.419Z
 
 ## AI Agent Workflow
 
@@ -2404,7 +2404,7 @@ export function App() {
 
 ## Behavior
 
-Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
+Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
 
 ## Default modes
 
@@ -2463,10 +2463,12 @@ export function App() {
   - bold, italic, strikethrough, inline code
   - code block
   - links
+  - alignment controls (left/center/right/justify)
   - ordered/unordered/check lists (no nested list indent controls)
+  - tables and images
   - horizontal rule
 - Disabled by default to keep metadata-free markdown/html round trips:
-  - tables, images, embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
+  - embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
 - Source views:
   - `sourceFormat="both"` uses Visual/Markdown/HTML tabs
   - `sourceFormat="markdown"` uses Visual/JSON/Markdown tabs
@@ -2477,10 +2479,10 @@ export function App() {
 Default toolbar sections focus on writing and structure:
 
 - Undo/redo
-- Block format + quote
+- Block format + quote + alignment controls
 - Bold/italic/strikethrough/inline code/link
 - Ordered/unordered/checklist
-- Code block + horizontal rule
+- Code block + horizontal rule + table + image
 
 ---
 ## FILE: luthor/presets/md-editor.md
@@ -2519,7 +2521,7 @@ export function App() {
 
 ## Behavior
 
-Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and uses a metadata-free markdown/json bridge (no `luthor:meta` comments).
+Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and uses a metadata-free markdown/json bridge (no `luthor:meta` comments).
 
 ## Default modes
 
