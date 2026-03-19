@@ -97,9 +97,15 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 | `syntaxHighlighting` | `'auto' \| 'disabled'` | extension default | Controls code syntax highlighting behavior. |
 | `codeHighlightProvider` | `CodeHighlightProvider \| null` | `undefined` | Inject a concrete provider implementation. |
 | `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
+| `showLineNumbers` | `boolean` | `true` | Enables line numbers for visual code blocks and source tabs (`json`/`markdown`/`html`). |
 | `maxAutoDetectCodeLength` | `number` | `undefined` | Max code length for language autodetect. |
-| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`). |
+| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); dropdown labels use full names (for example, `TypeScript`, `JavaScript`, `Bash`). |
 | `maxListIndentation` | `number` | `8` | Maximum sub-indent levels below root list level. |
+
+Line-number behavior notes:
+
+- Wrapped markdown/html source rows are continuation rows and remain unnumbered to preserve logical line alignment.
+- Line numbers are reference-only and are excluded from copy behavior in both code blocks and source tabs.
 
 ## 2) Preset-specific prop layers
 
@@ -111,7 +117,7 @@ This page is the full prop contract for `@lyfie/luthor` presets.
   - `featureFlags?`
   - `compactToolbar?: boolean` (default `false`)
 - Forces mode profile:
-  - `availableModes = ["visual", "json"]`
+  - `availableModes = ["visual-only", "visual", "json"]`
 
 ### `SimpleEditorProps`
 
@@ -161,21 +167,21 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 
 - `sourceFormat` default: `'both'`
 - Mode sets by source format:
-  - `'both'` -> `['visual', 'markdown', 'html']`
-  - `'markdown'` -> `['visual', 'json', 'markdown']`
-  - `'html'` -> `['visual', 'json', 'html']`
+  - `'both'` -> `['visual-only', 'visual', 'markdown', 'html']`
+  - `'markdown'` -> `['visual-only', 'visual', 'json', 'markdown']`
+  - `'html'` -> `['visual-only', 'visual', 'json', 'html']`
 
 ### `MarkDownEditorProps`
 
 - Inherits `LegacyRichEditorProps`
 - Fixes source format to markdown
-- Allowed modes: `'visual' | 'json' | 'markdown'`
+- Allowed modes: `'visual-only' | 'visual' | 'json' | 'markdown'`
 
 ### `HTMLEditorProps`
 
 - Inherits `LegacyRichEditorProps`
 - Fixes source format to html
-- Allowed modes: `'visual' | 'json' | 'html'`
+- Allowed modes: `'visual-only' | 'visual' | 'json' | 'html'`
 
 ### `SlashEditorProps`
 
@@ -189,9 +195,9 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 
 ### `HeadlessEditorPresetProps`
 
-`HeadlessEditorPresetProps = Omit<ExtensiveEditorProps, "featureFlags" | "availableModes" | "initialMode" | "defaultEditorView"> & { initialMode?: 'visual' | 'json' | 'markdown' | 'html'; defaultEditorView?: same; featureFlags?: FeatureFlagOverrides }`
+`HeadlessEditorPresetProps = Omit<ExtensiveEditorProps, "featureFlags" | "availableModes" | "initialMode" | "defaultEditorView"> & { initialMode?: 'visual-only' | 'visual' | 'json' | 'markdown' | 'html'; defaultEditorView?: same; featureFlags?: FeatureFlagOverrides }`
 
-- Allowed modes fixed to: `['visual', 'json', 'markdown', 'html']`
+- Allowed modes fixed to: `['visual-only', 'visual', 'json', 'markdown', 'html']`
 - Uses lightweight feature policy defaults and enforcement.
 
 ## 3) Practical usage patterns

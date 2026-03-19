@@ -34,6 +34,18 @@ export {
   type HtmlBridgeOptions,
 } from "./html";
 export {
+  MARKDOWN_SUPPORTED_NODE_TYPES,
+  HTML_SUPPORTED_NODE_TYPES,
+  MARKDOWN_NATIVE_KEY_MAP,
+  HTML_NATIVE_KEY_MAP,
+  MARKDOWN_TEXT_NATIVE_FORMAT_MASK,
+  isDefaultBridgeValue,
+  isMarkdownRepresentable,
+  isHTMLRepresentable,
+  extractMarkdownMetadataPatch,
+  extractHTMLMetadataPatch,
+} from "./source-capability";
+export {
   appendMetadataEnvelopes,
   extractMetadataEnvelopes,
   prepareDocumentForBridge,

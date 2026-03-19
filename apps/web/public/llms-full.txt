@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-19T11:50:47.575Z
+Generated at: 2026-03-19T12:15:05.114Z
 
 ## AI Agent Workflow
 
@@ -252,14 +252,14 @@ Media support includes images, iframe embeds, and YouTube embeds, including alig
 
 ![Code block preview](/features/Feature8.gif)
 
-Code workflows include inline code formatting, block-level code nodes, language selection, auto-detection, and optional copy support.
+Code workflows include inline code formatting, block-level code nodes, language selection, auto-detection, optional copy support, and line numbers across visual code blocks plus source tabs.
 
 - Related commands:
   - `toggleCodeBlock`, `setCodeLanguage`, `autoDetectCodeLanguage`
   - `getCurrentCodeLanguage`, `copySelectedCodeBlock`
 - Related config:
   - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
-  - `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
+  - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
 
 | Package | Availability |
 | --- | --- |
@@ -751,7 +751,7 @@ export function App() {
 - [Compose Editor](/docs/luthor/presets/compose-editor/): focused drafting experience.
 - [Simple Editor](/docs/luthor/presets/simple-editor/): messaging input with send controls.
 - [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/): metadata-light native markdown/html profile.
-- [MD Editor](/docs/luthor/presets/md-editor/): markdown-focused wrapper.
+- [MarkDown Editor](/docs/luthor/presets/md-editor/): markdown-focused wrapper.
 - [HTML Editor](/docs/luthor/presets/html-editor/): HTML-focused wrapper.
 - [Slash Editor](/docs/luthor/presets/slash-editor/): slash-first command workflow.
 - [Headless Editor](/docs/luthor/presets/headless-editor-preset/): lightweight text-pill toolbar and source tabs.
@@ -996,10 +996,10 @@ export function Editor() {
   - `TextColorConfig`, `TextColorOption`
   - `TextHighlightConfig`, `TextHighlightOption`
 - Code:
-  - `CodeExtensionConfig`
+  - `CodeExtensionConfig` (`showLineNumbers` support for visual code blocks)
   - `CodeIntelligenceConfig`, `CodeIntelligenceCommands`
   - `CodeHighlightProvider`, `CodeHighlightProviderConfig`
-  - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig`
+  - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig` (UI labels use full language names)
 - Table/media/draggable:
   - `TableConfig`
   - `DraggableConfig`
@@ -1145,6 +1145,12 @@ description: Code blocks, syntax support, and markdown/json conversion tools.
 
 This group covers code editing and developer-facing conversion utilities.
 
+Recent defaults:
+
+- Code block language labels use full language names in UI (for example, `TypeScript`, `JavaScript`, `Bash`).
+- `bash` is included in the default language options.
+- Code block line numbers can be enabled/disabled through `CodeExtensionConfig.showLineNumbers`.
+
 ## Included extensions and utilities
 
 - `codeExtension`
@@ -1182,7 +1188,7 @@ function Toolbar() {
   return (
     <div>
       <button onClick={() => commands.toggleCodeBlock?.()}>Code Block</button>
-      <button onClick={() => commands.setCodeLanguage?.('ts')}>TypeScript</button>
+      <button onClick={() => commands.setCodeLanguage?.('typescript')}>TypeScript</button>
       <button onClick={() => void commands.autoDetectCodeLanguage?.()}>Auto detect</button>
       <button onClick={() => void commands.copySelectedCodeBlock?.()}>Copy code</button>
     </div>
@@ -1194,6 +1200,28 @@ export function App() {
     <Provider extensions={extensions}>
       <Toolbar />
       <RichText placeholder="Write docs with code..." />
+    </Provider>
+  );
+}
+```
+
+## Line number config example
+
+```tsx
+import {
+  createEditorSystem,
+  RichText,
+  richTextExtension,
+  codeExtension,
+} from '@lyfie/luthor-headless';
+
+const extensions = [richTextExtension, codeExtension.configure({ showLineNumbers: true })] as const;
+const { Provider } = createEditorSystem<typeof extensions>();
+
+export function App() {
+  return (
+    <Provider extensions={extensions}>
+      <RichText />
     </Provider>
   );
 }
@@ -2027,13 +2055,13 @@ This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
 | Preset | Best for | Mode profile |
 | --- | --- | --- |
 | `ExtensiveEditor` | Full-feature editor UI | `visual-editor`, `visual-only`, `json`, `markdown`, `html` |
-| `ComposeEditor` | Focused drafting UI | `visual`, `json` |
+| `ComposeEditor` | Focused drafting UI | `visual-only`, `visual`, `json` |
 | `SimpleEditor` | Chat/message input | `visual` only |
 | `LegacyRichEditor` | Metadata-light markdown/html-compatible flow | Depends on `sourceFormat` |
-| `MarkDownEditor` | Markdown-first flow | `visual`, `json`, `markdown` |
-| `HTMLEditor` | HTML-first flow | `visual`, `json`, `html` |
-| `SlashEditor` | Slash-first interactions | `visual`, `json`, `markdown`, `html` |
-| `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual`, `json`, `markdown`, `html` |
+| `MarkDownEditor` | Markdown-first flow | `visual-only`, `visual`, `json`, `markdown` |
+| `HTMLEditor` | HTML-first flow | `visual-only`, `visual`, `json`, `html` |
+| `SlashEditor` | Slash-first interactions | `visual-only`, `visual`, `json`, `markdown`, `html` |
+| `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual-only`, `visual`, `json`, `markdown`, `html` |
 
 ## Preset docs
 
@@ -2041,7 +2069,7 @@ This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
 - [Compose Editor](/docs/luthor/presets/compose-editor/)
 - [Simple Editor](/docs/luthor/presets/simple-editor/)
 - [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/)
-- [MD Editor](/docs/luthor/presets/md-editor/)
+- [MarkDown Editor](/docs/luthor/presets/md-editor/)
 - [HTML Editor](/docs/luthor/presets/html-editor/)
 - [Slash Editor](/docs/luthor/presets/slash-editor/)
 - [Headless Editor](/docs/luthor/presets/headless-editor-preset/)
@@ -2150,6 +2178,7 @@ export function App() {
 | Feature flags | All enabled by default |
 | Line height baseline | `minimumDefaultLineHeight = 1.5` |
 | List indentation | `maxListIndentation = 8` sub-indent levels |
+| Code/source line numbers | Enabled (`showLineNumbers = true`) |
 
 ## Core props (high signal)
 
@@ -2174,7 +2203,7 @@ export function App() {
   - `fontFamilyOptions`, `fontSizeOptions`, `lineHeightOptions`
   - `minimumDefaultLineHeight`, `scaleByRatio`
   - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
-  - `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
+  - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
   - `maxListIndentation`
 
 For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
@@ -2238,6 +2267,21 @@ Place these files in your app static assets:
 - `/public/highlightjs/github.css`
 - `/public/highlightjs/github-dark.css`
 
+## Code view line numbers
+
+Line numbers are enabled by default for:
+
+- Visual code blocks
+- JSON source view
+- Markdown source view
+- HTML source view
+
+Use `showLineNumbers={false}` to disable them globally for this preset instance.
+
+```tsx
+<ExtensiveEditor showLineNumbers={false} />
+```
+
 ## Ref API
 
 - `injectJSON(content: string): void`
@@ -2300,17 +2344,18 @@ export function App() {
 
 `HeadlessEditorPresetProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
 
-- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'`
-- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'`
+- `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'`
+- `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
+- `showLineNumbers`: `true` by default, applies to visual code blocks and JSON/Markdown/HTML source tabs
 
 ## Behavior
 
-Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, horizontal rule, hard break, undo/redo), supports Visual/JSON/Markdown/HTML tabs, and keeps metadata-heavy features disabled by default.
+Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, horizontal rule, hard break, undo/redo), supports Visual Only/Visual/JSON/Markdown/HTML tabs, and keeps metadata-heavy features disabled by default.
 
 ## Default mode profile
 
-- `availableModes`: `["visual", "json", "markdown", "html"]`
+- `availableModes`: `["visual-only", "visual", "json", "markdown", "html"]`
 
 ## Default feature profile
 
@@ -2401,10 +2446,17 @@ export function App() {
 - `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'html'`
 - `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'html'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
+- `showLineNumbers`: `true` by default, applies to visual code blocks and JSON/HTML source tabs
 
 ## Behavior
 
 Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual Only/Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
+
+Code view behavior:
+
+- Syntax highlighting follows your configured highlight provider/theme.
+- Line numbers are enabled by default and remain reference-only (not part of copied code text).
+- Wrapped source rows are rendered as continuation rows and are not renumbered.
 
 ## Default modes
 
@@ -2467,12 +2519,14 @@ export function App() {
   - ordered/unordered/check lists with indent/outdent controls for nested sublists
   - tables and images
   - horizontal rule
+  - theme toggle
 - Disabled by default to keep metadata-free markdown/html round trips:
-  - embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
+  - embeds, custom nodes, draggable block, emoji, slash/command palette
 - Source views:
   - `sourceFormat="both"` uses Visual Only/Visual/Markdown/HTML tabs
   - `sourceFormat="markdown"` uses Visual Only/Visual/JSON/Markdown tabs
   - `sourceFormat="html"` uses Visual Only/Visual/JSON/HTML tabs
+  - line numbers are enabled by default in visual code blocks and source tabs (`showLineNumbers=true`)
 
 ## Toolbar profile
 
@@ -2484,6 +2538,14 @@ Default toolbar sections focus on writing and structure:
 - Ordered/unordered/checklist
 - List style dropdown arrows are hidden in this preset family; each list button inserts the preset default list style directly.
 - Code block + horizontal rule + table + image
+- Theme toggle
+
+## Theme and syntax colors
+
+Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch `highlight.js` CSS for code color parity:
+
+- light: `/public/highlightjs/github.css`
+- dark: `/public/highlightjs/github-dark.css`
 
 ---
 ## FILE: luthor/presets/md-editor.md
@@ -2491,11 +2553,11 @@ Default toolbar sections focus on writing and structure:
 ---
 
 ---
-title: MD Editor
+title: MarkDown Editor
 description: Visual and markdown mode preset with mode-switch behavior.
 ---
 
-# MD Editor
+# MarkDown Editor
 
 Markdown-native preset with visual editing plus JSON/Markdown source tabs.
 
@@ -2519,10 +2581,17 @@ export function App() {
 - `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
 - `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
+- `showLineNumbers`: `true` by default, applies to visual code blocks and JSON/Markdown source tabs
 
 ## Behavior
 
 Provides GitHub-compatible markdown formatting (headings, links, quote, inline code, fenced code blocks, ordered/unordered/task lists, tables, images, horizontal rules, and alignment controls), supports common README-style inline HTML wrappers (`<div align>`, `<p align>`, `<picture>`, `<img>`, `<figure>/<figcaption>`), preserves linked badge images (`[![...]](...)`), restores GitHub alert and footnote syntax on export, keeps mermaid/math fences stable, uses Visual Only/Visual/JSON/Markdown tabs, keeps toolbar enabled, and treats markdown as the canonical source when switching between views.
+
+Code view behavior:
+
+- Syntax highlighting follows your configured highlight provider/theme.
+- Line numbers are enabled by default and remain reference-only (not part of copied code text).
+- Wrapped source rows are rendered as continuation rows and are not renumbered.
 
 Alignment details:
 - Imports both GitHub wrappers and legacy inline `<!-- align:* -->` hints.
@@ -2786,9 +2855,15 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 | `syntaxHighlighting` | `'auto' \| 'disabled'` | extension default | Controls code syntax highlighting behavior. |
 | `codeHighlightProvider` | `CodeHighlightProvider \| null` | `undefined` | Inject a concrete provider implementation. |
 | `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
+| `showLineNumbers` | `boolean` | `true` | Enables line numbers for visual code blocks and source tabs (`json`/`markdown`/`html`). |
 | `maxAutoDetectCodeLength` | `number` | `undefined` | Max code length for language autodetect. |
-| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`). |
+| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); dropdown labels use full names (for example, `TypeScript`, `JavaScript`, `Bash`). |
 | `maxListIndentation` | `number` | `8` | Maximum sub-indent levels below root list level. |
+
+Line-number behavior notes:
+
+- Wrapped markdown/html source rows are continuation rows and remain unnumbered to preserve logical line alignment.
+- Line numbers are reference-only and are excluded from copy behavior in both code blocks and source tabs.
 
 ## 2) Preset-specific prop layers
 
@@ -2800,7 +2875,7 @@ This page is the full prop contract for `@lyfie/luthor` presets.
   - `featureFlags?`
   - `compactToolbar?: boolean` (default `false`)
 - Forces mode profile:
-  - `availableModes = ["visual", "json"]`
+  - `availableModes = ["visual-only", "visual", "json"]`
 
 ### `SimpleEditorProps`
 
@@ -2850,21 +2925,21 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 
 - `sourceFormat` default: `'both'`
 - Mode sets by source format:
-  - `'both'` -> `['visual', 'markdown', 'html']`
-  - `'markdown'` -> `['visual', 'json', 'markdown']`
-  - `'html'` -> `['visual', 'json', 'html']`
+  - `'both'` -> `['visual-only', 'visual', 'markdown', 'html']`
+  - `'markdown'` -> `['visual-only', 'visual', 'json', 'markdown']`
+  - `'html'` -> `['visual-only', 'visual', 'json', 'html']`
 
 ### `MarkDownEditorProps`
 
 - Inherits `LegacyRichEditorProps`
 - Fixes source format to markdown
-- Allowed modes: `'visual' | 'json' | 'markdown'`
+- Allowed modes: `'visual-only' | 'visual' | 'json' | 'markdown'`
 
 ### `HTMLEditorProps`
 
 - Inherits `LegacyRichEditorProps`
 - Fixes source format to html
-- Allowed modes: `'visual' | 'json' | 'html'`
+- Allowed modes: `'visual-only' | 'visual' | 'json' | 'html'`
 
 ### `SlashEditorProps`
 
@@ -2878,9 +2953,9 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 
 ### `HeadlessEditorPresetProps`
 
-`HeadlessEditorPresetProps = Omit<ExtensiveEditorProps, "featureFlags" | "availableModes" | "initialMode" | "defaultEditorView"> & { initialMode?: 'visual' | 'json' | 'markdown' | 'html'; defaultEditorView?: same; featureFlags?: FeatureFlagOverrides }`
+`HeadlessEditorPresetProps = Omit<ExtensiveEditorProps, "featureFlags" | "availableModes" | "initialMode" | "defaultEditorView"> & { initialMode?: 'visual-only' | 'visual' | 'json' | 'markdown' | 'html'; defaultEditorView?: same; featureFlags?: FeatureFlagOverrides }`
 
-- Allowed modes fixed to: `['visual', 'json', 'markdown', 'html']`
+- Allowed modes fixed to: `['visual-only', 'visual', 'json', 'markdown', 'html']`
 - Uses lightweight feature policy defaults and enforcement.
 
 ## 3) Practical usage patterns

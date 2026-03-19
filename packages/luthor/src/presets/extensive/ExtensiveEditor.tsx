@@ -1700,7 +1700,7 @@ function ExtensiveEditorContent({
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Invalid format - could not parse content";
-      if (errorMode) {
+      if (errorMode && typeof window !== "undefined") {
         setSourceError({ mode: errorMode, error: errorMessage });
       }
     }

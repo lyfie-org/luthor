@@ -41,6 +41,26 @@ Luthor is an open-source rich text editor ecosystem designed for teams that want
 | `@lyfie/luthor` | Plug-and-play editor presets + polished UI | Shipping quickly with minimal setup | [npm](https://www.npmjs.com/package/@lyfie/luthor) |
 | `@lyfie/luthor-headless` | Headless extension runtime and typed editor system | Full UI control and custom workflows | [npm](https://www.npmjs.com/package/@lyfie/luthor-headless) |
 
+## :bookmark_tabs: Preset Metadata Policy
+
+Luthor now applies a strict source-metadata policy:
+
+- **Metadata-free presets**: `MarkDownEditor`, `HTMLEditor`, `LegacyRichEditor`
+  - These presets run with `sourceMetadataMode="none"` and avoid metadata envelopes by default.
+- **Metadata-friendly presets**: `ExtensiveEditor`, `SlashEditor`, `HeadlessEditorPreset`, `ComposeEditor`, `SimpleEditor`
+  - These presets preserve metadata only when an attribute is not natively representable in Markdown/HTML.
+
+Examples of metadata that can still be emitted in metadata-friendly presets:
+
+- Unsupported custom nodes
+- Markdown-non-native rich attrs (advanced table attrs, link `target`/`rel`, runtime image attrs, advanced embed attrs)
+- HTML-only non-native extras (for example frontmatter)
+
+Migration note:
+
+- Existing legacy metadata comments remain import-compatible.
+- Exporters now emit fewer metadata comments for representable features.
+
 ## :rocket: Quick Start
 
 ```bash

@@ -27,10 +27,17 @@ export function App() {
 - `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'html'`
 - `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'html'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
+- `showLineNumbers`: `true` by default, applies to visual code blocks and JSON/HTML source tabs
 
 ## Behavior
 
 Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual Only/Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
+
+Code view behavior:
+
+- Syntax highlighting follows your configured highlight provider/theme.
+- Line numbers are enabled by default and remain reference-only (not part of copied code text).
+- Wrapped source rows are rendered as continuation rows and are not renumbered.
 
 ## Default modes
 

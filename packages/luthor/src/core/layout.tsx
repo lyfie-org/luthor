@@ -129,7 +129,7 @@ function buildWrappedLineNumberText(
   const visualRows: string[] = [];
   for (let index = 0; index < lines.length; index += 1) {
     visualRows.push(`${index + 1}`);
-    const wrappedRows = estimateWrappedVisualRows(lines[index], columnsPerRow, tabSize);
+    const wrappedRows = estimateWrappedVisualRows(lines[index] ?? "", columnsPerRow, tabSize);
     for (let wrappedIndex = 1; wrappedIndex < wrappedRows; wrappedIndex += 1) {
       visualRows.push("");
     }

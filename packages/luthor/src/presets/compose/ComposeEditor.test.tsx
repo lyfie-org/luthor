@@ -22,6 +22,7 @@ describe("ComposeEditor", () => {
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as Record<string, unknown>;
     const featureFlags = props.featureFlags as Record<string, boolean>;
     expect(props.availableModes).toEqual(["visual-only", "visual", "json"]);
+    expect(props.sourceMetadataMode).toBeUndefined();
     expect(featureFlags.bold).toBe(true);
     expect(featureFlags.italic).toBe(true);
     expect(featureFlags.list).toBe(true);

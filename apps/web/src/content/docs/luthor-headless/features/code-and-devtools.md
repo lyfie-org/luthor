@@ -7,6 +7,12 @@ description: Code blocks, syntax support, and markdown/json conversion tools.
 
 This group covers code editing and developer-facing conversion utilities.
 
+Recent defaults:
+
+- Code block language labels use full language names in UI (for example, `TypeScript`, `JavaScript`, `Bash`).
+- `bash` is included in the default language options.
+- Code block line numbers can be enabled/disabled through `CodeExtensionConfig.showLineNumbers`.
+
 ## Included extensions and utilities
 
 - `codeExtension`
@@ -44,7 +50,7 @@ function Toolbar() {
   return (
     <div>
       <button onClick={() => commands.toggleCodeBlock?.()}>Code Block</button>
-      <button onClick={() => commands.setCodeLanguage?.('ts')}>TypeScript</button>
+      <button onClick={() => commands.setCodeLanguage?.('typescript')}>TypeScript</button>
       <button onClick={() => void commands.autoDetectCodeLanguage?.()}>Auto detect</button>
       <button onClick={() => void commands.copySelectedCodeBlock?.()}>Copy code</button>
     </div>
@@ -56,6 +62,28 @@ export function App() {
     <Provider extensions={extensions}>
       <Toolbar />
       <RichText placeholder="Write docs with code..." />
+    </Provider>
+  );
+}
+```
+
+## Line number config example
+
+```tsx
+import {
+  createEditorSystem,
+  RichText,
+  richTextExtension,
+  codeExtension,
+} from '@lyfie/luthor-headless';
+
+const extensions = [richTextExtension, codeExtension.configure({ showLineNumbers: true })] as const;
+const { Provider } = createEditorSystem<typeof extensions>();
+
+export function App() {
+  return (
+    <Provider extensions={extensions}>
+      <RichText />
     </Provider>
   );
 }

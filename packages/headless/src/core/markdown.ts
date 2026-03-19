@@ -38,12 +38,6 @@ import {
   type EditorState,
   type ElementNode,
   type LexicalNode,
-  IS_BOLD,
-  IS_CODE,
-  IS_HIGHLIGHT,
-  IS_ITALIC,
-  IS_STRIKETHROUGH,
-  IS_UNDERLINE,
 } from "lexical";
 import {
   ImageNode,
@@ -60,6 +54,10 @@ import {
   type JsonDocument,
   type MetadataEnvelope,
 } from "./metadata-envelope";
+import {
+  extractMarkdownMetadataPatch,
+  MARKDOWN_SUPPORTED_NODE_TYPES,
+} from "./source-capability";
 
 export type { JsonDocument } from "./metadata-envelope";
 
@@ -594,70 +592,8 @@ const MARKDOWN_TRANSFORMERS: Transformer[] = [
 ];
 
 const LEXICAL_NATIVE_MARKDOWN_TRANSFORMERS: Transformer[] = [...TRANSFORMERS];
-const MARKDOWN_SUPPORTED_NODE_TYPES = new Set<string>([
-  "root",
-  "paragraph",
-  "text",
-  "linebreak",
-  "tab",
-  "heading",
-  "quote",
-  "list",
-  "listitem",
-  "link",
-  "autolink",
-  "code",
-  "code-highlight",
-  "horizontalrule",
-  "image",
-  "iframe-embed",
-  "youtube-embed",
-  "table",
-  "tablerow",
-  "tablecell",
-]);
 
 type JsonRecord = Record<string, unknown>;
-
-const MARKDOWN_TEXT_NATIVE_FORMAT_MASK =
-  IS_BOLD |
-  IS_ITALIC |
-  IS_STRIKETHROUGH |
-  IS_CODE |
-  IS_HIGHLIGHT |
-  IS_UNDERLINE;
-
-const MARKDOWN_NATIVE_KEYS: Readonly<Record<string, ReadonlySet<string>>> = {
-  root: new Set(["type", "version", "children", "frontmatter"]),
-  paragraph: new Set(["type", "version", "children"]),
-  text: new Set(["type", "version", "text", "format"]),
-  linebreak: new Set(["type", "version"]),
-  tab: new Set(["type", "version"]),
-  heading: new Set(["type", "version", "tag", "children"]),
-  quote: new Set(["type", "version", "children"]),
-  list: new Set(["type", "version", "listType", "start", "children"]),
-  listitem: new Set(["type", "version", "value", "checked", "children"]),
-  link: new Set(["type", "version", "url", "title", "children"]),
-  autolink: new Set(["type", "version", "url", "title", "children"]),
-  code: new Set(["type", "version", "language", "children"]),
-  "code-highlight": new Set(["type", "version", "text", "highlightType"]),
-  horizontalrule: new Set(["type", "version"]),
-  image: new Set([
-    "type",
-    "version",
-    "src",
-    "alt",
-    "caption",
-    "linkHref",
-    "linkTitle",
-    "alignment",
-  ]),
-  "iframe-embed": new Set(["type", "version", "src", "caption"]),
-  "youtube-embed": new Set(["type", "version", "src", "caption"]),
-  table: new Set(["type", "version", "children"]),
-  tablerow: new Set(["type", "version", "children"]),
-  tablecell: new Set(["type", "version", "headerState", "format", "children"]),
-};
 
 function deepClone<T>(value: T): T {
   if (value === undefined) {
@@ -666,135 +602,11 @@ function deepClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function hasOwnEntries(record: JsonRecord): boolean {
-  return Object.keys(record).length > 0;
-}
-
-function isDefaultExtraValue(key: string, value: unknown): boolean {
-  switch (key) {
-    case "textFormat":
-      return value === 0;
-    case "textStyle":
-      return value === "";
-    case "format":
-      return value === "" || value === 0;
-    case "indent":
-      return value === 0;
-    case "direction":
-      return value === null;
-    case "detail":
-      return value === 0;
-    case "mode":
-      return value === "normal";
-    case "style":
-      return value === "" || value === null;
-    case "headerState":
-      return value === 0;
-    case "colSpan":
-    case "rowSpan":
-      return value === 1;
-    case "width":
-    case "height":
-      return value === null || value === undefined;
-    case "backgroundColor":
-      return value === null || value === "";
-    case "verticalAlign":
-      return value === null || value === undefined || value === "";
-    case "rowStriping":
-      return value === false;
-    case "frozenColumnCount":
-    case "frozenRowCount":
-      return value === 0;
-    case "colWidths":
-      return Array.isArray(value) && value.length === 0;
-    case "uploading":
-      return value === false || value === undefined;
-    case "title":
-      return value === "" || value === null || value === undefined;
-    default:
-      return false;
-  }
-}
-
-function isDefaultMarkdownExtraValue(type: string, key: string, value: unknown): boolean {
-  if (isDefaultExtraValue(key, value)) {
-    return true;
-  }
-
-  if (type === "iframe-embed") {
-    if (key === "width") {
-      return value === 640;
-    }
-    if (key === "height") {
-      return value === 360;
-    }
-    if (key === "alignment") {
-      return value === "center";
-    }
-  }
-
-  if (type === "youtube-embed") {
-    if (key === "width") {
-      return value === 640;
-    }
-    if (key === "height") {
-      return value === 360;
-    }
-    if (key === "alignment") {
-      return value === "center";
-    }
-    if (key === "start") {
-      return value === 0;
-    }
-  }
-
-  return false;
-}
-
-function extractMarkdownPatch(node: JsonRecord, type: string): JsonRecord | null {
-  const nativeKeys = MARKDOWN_NATIVE_KEYS[type];
-  if (!nativeKeys) {
-    return null;
-  }
-
-  const patch: JsonRecord = {};
-
-  for (const [key, value] of Object.entries(node)) {
-    if (key === "children" || key === "type") {
-      continue;
-    }
-
-    if (type === "text" && key === "format" && typeof value === "number") {
-      const extraBits = value & ~MARKDOWN_TEXT_NATIVE_FORMAT_MASK;
-      if (extraBits !== 0) {
-        patch.__luthorTextFormatExtra = extraBits;
-      }
-      continue;
-    }
-
-    if (nativeKeys.has(key)) {
-      continue;
-    }
-
-    if (value === undefined) {
-      continue;
-    }
-
-    if (isDefaultMarkdownExtraValue(type, key, value)) {
-      continue;
-    }
-
-    patch[key] = deepClone(value);
-  }
-
-  return hasOwnEntries(patch) ? patch : null;
-}
-
 function collectMarkdownPartialEnvelopes(input: unknown): MetadataEnvelope[] {
   return collectSupportedNodeMetadataPatches(input, {
     mode: "markdown",
     supportedNodeTypes: MARKDOWN_SUPPORTED_NODE_TYPES,
-    extractPatch: ({ node, type }) => extractMarkdownPatch(node, type),
+    extractPatch: ({ node, type }) => extractMarkdownMetadataPatch(node, type),
   });
 }
 

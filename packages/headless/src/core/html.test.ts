@@ -581,6 +581,66 @@ describe("html bridge", () => {
     expect(imageNode.alt).toBe("Example");
   });
 
+  it("round-trips linked images natively without metadata envelopes", () => {
+    const input = createDocument([
+      {
+        type: "image",
+        version: 1,
+        src: "https://example.com/badge.svg",
+        alt: "Build",
+        caption: "Build status",
+        linkHref: "https://example.com/docs",
+        linkTitle: "Docs",
+        alignment: "center",
+      },
+    ]);
+
+    const html = jsonToHTML(input);
+    expect(html).toContain("<a");
+    expect(html).toContain("https://example.com/docs");
+    expect(html).not.toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument;
+    const imageNode = findTopLevelNode(roundTrip, "image") as {
+      linkHref?: string;
+      linkTitle?: string;
+      caption?: string;
+      src?: string;
+    };
+    expect(String(imageNode?.src ?? "")).toContain("https://example.com/badge.svg");
+    expect(String(imageNode?.linkHref ?? "")).toContain("https://example.com/docs");
+    expect(imageNode?.linkTitle).toBe("Docs");
+    expect(imageNode?.caption).toBe("Build status");
+  });
+
+  it("preserves frontmatter in html mode via metadata envelopes", () => {
+    const input = {
+      root: {
+        type: "root",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        frontmatter: "---\ntitle: Demo\n---",
+        children: [paragraphNode([textNode("Body")])],
+      },
+    } satisfies JsonDocument & {
+      root: {
+        frontmatter: string;
+      };
+    };
+
+    const html = jsonToHTML(input);
+    expect(html).toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument & {
+      root: {
+        frontmatter?: string;
+      };
+    };
+    expect(roundTrip.root.frontmatter).toContain("title: Demo");
+  });
+
   it("round-trips iframe embed nodes", () => {
     const input = createDocument([
       {

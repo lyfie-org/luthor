@@ -44,7 +44,7 @@ export function App() {
 - [Compose Editor](/docs/luthor/presets/compose-editor/): focused drafting experience.
 - [Simple Editor](/docs/luthor/presets/simple-editor/): messaging input with send controls.
 - [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/): metadata-light native markdown/html profile.
-- [MD Editor](/docs/luthor/presets/md-editor/): markdown-focused wrapper.
+- [MarkDown Editor](/docs/luthor/presets/md-editor/): markdown-focused wrapper.
 - [HTML Editor](/docs/luthor/presets/html-editor/): HTML-focused wrapper.
 - [Slash Editor](/docs/luthor/presets/slash-editor/): slash-first command workflow.
 - [Headless Editor](/docs/luthor/presets/headless-editor-preset/): lightweight text-pill toolbar and source tabs.

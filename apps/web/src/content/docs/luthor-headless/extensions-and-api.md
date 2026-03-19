@@ -126,10 +126,10 @@ export function Editor() {
   - `TextColorConfig`, `TextColorOption`
   - `TextHighlightConfig`, `TextHighlightOption`
 - Code:
-  - `CodeExtensionConfig`
+  - `CodeExtensionConfig` (`showLineNumbers` support for visual code blocks)
   - `CodeIntelligenceConfig`, `CodeIntelligenceCommands`
   - `CodeHighlightProvider`, `CodeHighlightProviderConfig`
-  - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig`
+  - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig` (UI labels use full language names)
 - Table/media/draggable:
   - `TableConfig`
   - `DraggableConfig`

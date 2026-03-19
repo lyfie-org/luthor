@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { IS_BOLD, IS_SUBSCRIPT } from "lexical";
 import { jsonToMarkdown, markdownToJSON } from "./markdown";
 
@@ -7,6 +9,11 @@ type JsonDocument = {
     children: Array<Record<string, unknown>>;
   };
 };
+
+const README_CANONICAL_FIXTURE = readFileSync(
+  resolve(process.cwd(), "src/core/__fixtures__/readme-canonical.md"),
+  "utf8",
+);
 
 function createSimpleDocument(text: string): Record<string, unknown> {
   return {
@@ -744,6 +751,106 @@ describe("markdown bridge", () => {
     expect(exported).not.toContain("[badge-ref]:");
   });
 
+  it("does not emit metadata for default markdown-link attrs", () => {
+    const input = {
+      root: {
+        type: "root",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "paragraph",
+            version: 1,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [
+              {
+                type: "link",
+                version: 1,
+                url: "https://example.com/docs",
+                title: "Docs",
+                target: null,
+                rel: null,
+                children: [
+                  {
+                    type: "text",
+                    version: 1,
+                    text: "Docs",
+                    detail: 0,
+                    format: 0,
+                    mode: "normal",
+                    style: "",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const markdown = jsonToMarkdown(input);
+    expect(markdown).toContain("[Docs](https://example.com/docs \"Docs\")");
+    expect(markdown).not.toContain("luthor:meta v1");
+  });
+
+  it("emits metadata for non-native markdown-link attrs", () => {
+    const input = {
+      root: {
+        type: "root",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "paragraph",
+            version: 1,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [
+              {
+                type: "link",
+                version: 1,
+                url: "https://example.com/docs",
+                title: "Docs",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                children: [
+                  {
+                    type: "text",
+                    version: 1,
+                    text: "Docs",
+                    detail: 0,
+                    format: 0,
+                    mode: "normal",
+                    style: "",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const markdown = jsonToMarkdown(input);
+    expect(markdown).toContain("[Docs](https://example.com/docs \"Docs\")");
+    expect(markdown).toContain("luthor:meta v1");
+
+    const roundTrip = markdownToJSON(markdown) as JsonDocument;
+    const paragraph = findTopLevelNode(roundTrip, "paragraph") as {
+      children?: Array<{ target?: string; rel?: string }>;
+    };
+    const linkNode = paragraph.children?.[0];
+    expect(linkNode?.target).toBe("_blank");
+    expect(linkNode?.rel).toBe("noopener noreferrer");
+  });
+
   it("normalizes github alert blocks into rich blockquote content", () => {
     const markdown = [
       "> [!WARNING] API is unstable",
@@ -984,6 +1091,20 @@ describe("markdown bridge", () => {
         globalRecord.EmojiMart = previousEmojiMart;
       }
     }
+  });
+
+  it("keeps canonical README fixture metadata-free in markdown bridge", () => {
+    const parsed = markdownToJSON(README_CANONICAL_FIXTURE, {
+      metadataMode: "none",
+    }) as JsonDocument;
+
+    const metadataFreeExport = jsonToMarkdown(parsed, { metadataMode: "none" });
+    expect(metadataFreeExport).not.toContain("luthor:meta v1");
+    expect(metadataFreeExport).toContain("| Feature | Value |");
+    expect(metadataFreeExport).toContain("> [!NOTE]");
+
+    const preserveExport = jsonToMarkdown(parsed);
+    expect(preserveExport).toContain("luthor:meta v1");
   });
 
   it("does not leak internal alignment marker text for unclosed wrapper blocks", () => {

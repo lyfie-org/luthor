@@ -41,7 +41,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [luthor/presets/headless-editor-preset.md](https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/) - Headless Editor
 - [luthor/presets/html-editor.md](https://www.luthor.fyi/docs/luthor/presets/html-editor/) - HTML Editor
 - [luthor/presets/legacy-rich-editor.md](https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/) - Legacy Rich Editor
-- [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/) - MD Editor
+- [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/) - MarkDown Editor
 - [luthor/presets/simple-editor.md](https://www.luthor.fyi/docs/luthor/presets/simple-editor/) - Simple Editor
 - [luthor/presets/slash-editor.md](https://www.luthor.fyi/docs/luthor/presets/slash-editor/) - Slash Editor
 - [luthor/props-reference.md](https://www.luthor.fyi/docs/luthor/props-reference/) - Props Reference
@@ -108,7 +108,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Code and Devtools
 - File: luthor-headless/features/code-and-devtools.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/
-- Summary: Code and Devtools This group covers code editing and developer facing conversion utilities. Included extensions and utilities codeExtension codeIntelligenceExtension codeFormatExtension markdownToJSON , jsonToMarkdown htmlToJSON , jsonToHTML Key commands toggleCodeBlock setCodeLanguage autoDetectCodeLanguage getCurrent...
+- Summary: Code and Devtools This group covers code editing and developer facing conversion utilities. Recent defaults: Code block language labels use full language names in UI (for example, TypeScript , JavaScript , Bash ). bash is included in the default language options. Code block line numbers can be enabled/disabled through ...
 
 ### Customization and Theming
 - File: luthor-headless/features/customization-and-theming.md
@@ -168,7 +168,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Headless Editor
 - File: luthor/presets/headless-editor-preset.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/
-- Summary: Headless Editor HeadlessEditorPreset is a lightweight, source aware preset with a simple text pill toolbar. Usage Props HeadlessEditorPresetProps inherits ExtensiveEditorProps except featureFlags , availableModes , and source view mode props, then re adds constrained mode variants. initialMode : 'visual' (default) 'jso...
+- Summary: Headless Editor HeadlessEditorPreset is a lightweight, source aware preset with a simple text pill toolbar. Usage Props HeadlessEditorPresetProps inherits ExtensiveEditorProps except featureFlags , availableModes , and source view mode props, then re adds constrained mode variants. initialMode : 'visual' (default) 'vis...
 
 ### HTML Editor
 - File: luthor/presets/html-editor.md
@@ -180,10 +180,10 @@ This file helps AI agents discover and query Luthor docs quickly.
 - URL: https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/
 - Summary: title: Legacy Rich Editor description: Shared metadata free rich editor profile powering both MD and HTML presets. Legacy Rich Editor LegacyRichEditor is a shared metadata free editor profile that powers both MarkDownEditor and HTMLEditor . Use it when you want the same native feature set and switch only the source tab...
 
-### MD Editor
+### MarkDown Editor
 - File: luthor/presets/md-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/md-editor/
-- Summary: MD Editor Markdown native preset with visual editing plus JSON/Markdown source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="markdown" . Usage Props MarkDownEditorProps inherits LegacyRichEditorProps , then fixes source behavior to markdown. initialMode : 'visual' (default) 'visual only'...
+- Summary: MarkDown Editor Markdown native preset with visual editing plus JSON/Markdown source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="markdown" . Usage Props MarkDownEditorProps inherits LegacyRichEditorProps , then fixes source behavior to markdown. initialMode : 'visual' (default) 'visual...
 
 ### Simple Editor
 - File: luthor/presets/simple-editor.md

@@ -30,6 +30,7 @@ export function App() {
 | Feature flags | All enabled by default |
 | Line height baseline | `minimumDefaultLineHeight = 1.5` |
 | List indentation | `maxListIndentation = 8` sub-indent levels |
+| Code/source line numbers | Enabled (`showLineNumbers = true`) |
 
 ## Core props (high signal)
 
@@ -54,7 +55,7 @@ export function App() {
   - `fontFamilyOptions`, `fontSizeOptions`, `lineHeightOptions`
   - `minimumDefaultLineHeight`, `scaleByRatio`
   - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
-  - `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
+  - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
   - `maxListIndentation`
 
 For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
@@ -117,6 +118,21 @@ Place these files in your app static assets:
 
 - `/public/highlightjs/github.css`
 - `/public/highlightjs/github-dark.css`
+
+## Code view line numbers
+
+Line numbers are enabled by default for:
+
+- Visual code blocks
+- JSON source view
+- Markdown source view
+- HTML source view
+
+Use `showLineNumbers={false}` to disable them globally for this preset instance.
+
+```tsx
+<ExtensiveEditor showLineNumbers={false} />
+```
 
 ## Ref API
 

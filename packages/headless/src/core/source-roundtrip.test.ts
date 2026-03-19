@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { IS_BOLD, IS_SUBSCRIPT } from "lexical";
 import { htmlToJSON, jsonToHTML } from "./html";
 import { jsonToMarkdown, markdownToJSON } from "./markdown";
@@ -12,6 +14,11 @@ type JsonDocument = {
     children: JsonNode[];
   };
 };
+
+const README_CANONICAL_FIXTURE = readFileSync(
+  resolve(process.cwd(), "src/core/__fixtures__/readme-canonical.md"),
+  "utf8",
+);
 
 function findTopLevelNode(
   document: JsonDocument,
@@ -154,5 +161,72 @@ describe("cross-format save round-trips", () => {
     expect(iframeNode.provider).toBe("internal");
     expect(iframeNode.width).toBe(720);
     expect(iframeNode.height).toBe(405);
+  });
+
+  it("keeps linked-image attrs metadata-free across markdown/html chains", () => {
+    const input = {
+      root: {
+        type: "root",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "image",
+            version: 1,
+            src: "https://example.com/badge.svg",
+            alt: "Build",
+            caption: "Build badge",
+            alignment: "center",
+            linkHref: "https://example.com/docs",
+            linkTitle: "Docs",
+          },
+        ],
+      },
+    } satisfies JsonDocument;
+
+    const markdown = jsonToMarkdown(input);
+    expect(markdown).toContain("[![Build](https://example.com/badge.svg \"Build badge\")](https://example.com/docs \"Docs\")");
+    expect(markdown).not.toContain("luthor:meta v1");
+
+    const fromMarkdown = markdownToJSON(markdown) as JsonDocument;
+    const html = jsonToHTML(fromMarkdown);
+    expect(html).not.toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument;
+    const imageNode = findTopLevelNode(roundTrip, "image") as {
+      src?: string;
+      linkHref?: string;
+      linkTitle?: string;
+      caption?: string;
+    };
+
+    expect(String(imageNode.src ?? "")).toContain("https://example.com/badge.svg");
+    expect(String(imageNode.linkHref ?? "")).toContain("https://example.com/docs");
+    expect(imageNode.linkTitle).toBe("Docs");
+    expect(imageNode.caption).toBe("Build badge");
+  });
+
+  it("keeps canonical README fixture metadata-free across JSON/MD/HTML chains", () => {
+    const fromMarkdown = markdownToJSON(README_CANONICAL_FIXTURE, {
+      metadataMode: "none",
+    }) as JsonDocument;
+
+    const markdown = jsonToMarkdown(fromMarkdown);
+    expect(markdown).toContain("luthor:meta v1");
+
+    const markdownWithoutMetadata = jsonToMarkdown(fromMarkdown, {
+      metadataMode: "none",
+    });
+    expect(markdownWithoutMetadata).not.toContain("luthor:meta v1");
+
+    const html = jsonToHTML(fromMarkdown);
+    expect(html).not.toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument;
+    expect(findTopLevelNode(roundTrip, "table")).toBeDefined();
+    expect(findTopLevelNode(roundTrip, "heading")).toBeDefined();
+    expect(findTopLevelNode(roundTrip, "image")).toBeDefined();
   });
 });

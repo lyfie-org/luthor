@@ -44,12 +44,14 @@ export function App() {
   - ordered/unordered/check lists with indent/outdent controls for nested sublists
   - tables and images
   - horizontal rule
+  - theme toggle
 - Disabled by default to keep metadata-free markdown/html round trips:
-  - embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
+  - embeds, custom nodes, draggable block, emoji, slash/command palette
 - Source views:
   - `sourceFormat="both"` uses Visual Only/Visual/Markdown/HTML tabs
   - `sourceFormat="markdown"` uses Visual Only/Visual/JSON/Markdown tabs
   - `sourceFormat="html"` uses Visual Only/Visual/JSON/HTML tabs
+  - line numbers are enabled by default in visual code blocks and source tabs (`showLineNumbers=true`)
 
 ## Toolbar profile
 
@@ -61,3 +63,11 @@ Default toolbar sections focus on writing and structure:
 - Ordered/unordered/checklist
 - List style dropdown arrows are hidden in this preset family; each list button inserts the preset default list style directly.
 - Code block + horizontal rule + table + image
+- Theme toggle
+
+## Theme and syntax colors
+
+Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch `highlight.js` CSS for code color parity:
+
+- light: `/public/highlightjs/github.css`
+- dark: `/public/highlightjs/github-dark.css`

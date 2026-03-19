@@ -143,14 +143,14 @@ Media support includes images, iframe embeds, and YouTube embeds, including alig
 
 ![Code block preview](/features/Feature8.gif)
 
-Code workflows include inline code formatting, block-level code nodes, language selection, auto-detection, and optional copy support.
+Code workflows include inline code formatting, block-level code nodes, language selection, auto-detection, optional copy support, and line numbers across visual code blocks plus source tabs.
 
 - Related commands:
   - `toggleCodeBlock`, `setCodeLanguage`, `autoDetectCodeLanguage`
   - `getCurrentCodeLanguage`, `copySelectedCodeBlock`
 - Related config:
   - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
-  - `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
+  - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
 
 | Package | Availability |
 | --- | --- |

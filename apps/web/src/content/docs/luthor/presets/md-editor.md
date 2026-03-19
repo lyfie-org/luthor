@@ -1,9 +1,9 @@
 ---
-title: MD Editor
+title: MarkDown Editor
 description: Visual and markdown mode preset with mode-switch behavior.
 ---
 
-# MD Editor
+# MarkDown Editor
 
 Markdown-native preset with visual editing plus JSON/Markdown source tabs.
 
@@ -27,10 +27,17 @@ export function App() {
 - `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
 - `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
+- `showLineNumbers`: `true` by default, applies to visual code blocks and JSON/Markdown source tabs
 
 ## Behavior
 
 Provides GitHub-compatible markdown formatting (headings, links, quote, inline code, fenced code blocks, ordered/unordered/task lists, tables, images, horizontal rules, and alignment controls), supports common README-style inline HTML wrappers (`<div align>`, `<p align>`, `<picture>`, `<img>`, `<figure>/<figcaption>`), preserves linked badge images (`[![...]](...)`), restores GitHub alert and footnote syntax on export, keeps mermaid/math fences stable, uses Visual Only/Visual/JSON/Markdown tabs, keeps toolbar enabled, and treats markdown as the canonical source when switching between views.
+
+Code view behavior:
+
+- Syntax highlighting follows your configured highlight provider/theme.
+- Line numbers are enabled by default and remain reference-only (not part of copied code text).
+- Wrapped source rows are rendered as continuation rows and are not renumbered.
 
 Alignment details:
 - Imports both GitHub wrappers and legacy inline `<!-- align:* -->` hints.
