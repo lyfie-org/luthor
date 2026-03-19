@@ -6,6 +6,7 @@ import type {
   FontFamilyOption,
   FontSizeOption,
   LineHeightOption,
+  CodeGrammarPreloadMode,
   CodeLanguageOptionsConfig,
 } from "@lyfie/luthor-headless";
 
@@ -67,6 +68,7 @@ export type ExtensivePresetConfig = {
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
   showLineNumbers?: boolean;
+  grammarPreloadMode?: CodeGrammarPreloadMode;
 };
 
 export function createExtensivePreset(
@@ -83,6 +85,7 @@ export function createExtensivePreset(
       isCopyAllowed: config.isCopyAllowed,
       languageOptions: config.languageOptions,
       showLineNumbers: config.showLineNumbers,
+      grammarPreloadMode: config.grammarPreloadMode,
     })],
   };
 }

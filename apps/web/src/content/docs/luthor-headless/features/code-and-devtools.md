@@ -11,7 +11,8 @@ Recent defaults:
 
 - Code block language labels use full language names in UI (for example, `TypeScript`, `JavaScript`, `SQL`).
 - Default language options are filtered to languages that are actually supported by the active runtime tokenizer.
-- Built-in popular language preload covers: `bash`, `json`, `yaml`, `go`, `php`, `ruby`, `csharp`, `kotlin`, `jsx`, `tsx`, `graphql`, `docker`, `toml`, `lua`, `perl`, `r`, `scala`, `dart`.
+- Optional popular Prism grammar support covers: `bash`, `json`, `yaml`, `go`, `php`, `ruby`, `csharp`, `kotlin`, `jsx`, `tsx`, `graphql`, `docker`, `toml`, `lua`, `perl`, `r`, `scala`, `dart`.
+- `CodeExtension` defaults to `grammarPreloadMode: "lazy"` and loads grammars only when used by code blocks.
 - Combined with Lexical defaults, common dropdown languages include `TypeScript`, `JavaScript`, `JSX`, `TSX`, `JSON`, `Python`, `Java`, `C/C++`, `C#`, `Go`, `Rust`, `PHP`, `Ruby`, `Kotlin`, `Swift`, `SQL`, `PowerShell`, `GraphQL`, `Dockerfile`, `TOML`, `Lua`, `Perl`, `R`, `Scala`, `Dart`, `HTML`, `CSS`, `Markdown`, `XML`, and `YAML`.
 - Unsupported languages are normalized to plain text to avoid stale token classes when switching code languages.
 - Code block line numbers can be enabled/disabled through `CodeExtensionConfig.showLineNumbers`.
@@ -114,10 +115,15 @@ Use this when you want explicit preload behavior instead of relying only on defa
 
 ```tsx
 import {
+  codeExtension,
   getDefaultPopularPrismLanguages,
   loadPopularPrismLanguages,
   loadPrismLanguages,
 } from '@lyfie/luthor-headless';
+
+const codeExt = codeExtension.configure({
+  grammarPreloadMode: 'idle', // 'lazy' (default) | 'idle' | 'eager'
+});
 
 await loadPopularPrismLanguages();
 await loadPrismLanguages(['graphql', 'docker', 'toml']);

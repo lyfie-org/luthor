@@ -75,6 +75,7 @@ export {
   CodeExtension,
   codeExtension,
   type CodeExtensionConfig,
+  type CodeGrammarPreloadMode,
 } from "./formatting/CodeExtension";
 export {
   type CodeHighlightProvider,

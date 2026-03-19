@@ -34,6 +34,7 @@ import {
   TabIndentExtension,
   enterKeyBehaviorExtension,
   type CodeHighlightProvider,
+  type CodeGrammarPreloadMode,
   type CodeLanguageOptionsConfig,
   type Extension,
 } from "@lyfie/luthor-headless";
@@ -146,6 +147,7 @@ export type ExtensiveExtensionsConfig = {
   isDraggableBoxEnabled?: boolean;
   scaleByRatio?: boolean;
   syntaxHighlighting?: "auto" | "disabled";
+  grammarPreloadMode?: CodeGrammarPreloadMode;
   codeHighlightProvider?: CodeHighlightProvider | null;
   loadCodeHighlightProvider?: () => Promise<CodeHighlightProvider | null>;
   maxAutoDetectCodeLength?: number;
@@ -727,6 +729,7 @@ function buildExtensiveExtensions({
   isDraggableBoxEnabled,
   scaleByRatio,
   syntaxHighlighting,
+  grammarPreloadMode,
   codeHighlightProvider,
   loadCodeHighlightProvider,
   maxAutoDetectCodeLength,
@@ -758,6 +761,7 @@ function buildExtensiveExtensions({
   });
   (codeExtension as any).configure({
     syntaxHighlighting: syntaxHighlighting ?? "auto",
+    grammarPreloadMode: grammarPreloadMode ?? "lazy",
     provider: codeHighlightProvider ?? undefined,
     loadProvider: loadCodeHighlightProvider,
     showLineNumbers: showLineNumbers ?? true,

@@ -5,6 +5,7 @@ import {
   __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS,
 } from "./CodeIntelligenceExtension";
 import { describe, expect, it, vi } from "vitest";
+import { isKnownCodeLanguage } from "./codeLanguageSupport";
 
 describe("CodeIntelligenceExtension language options", () => {
   it("returns default language options when no override is provided", () => {
@@ -18,10 +19,10 @@ describe("CodeIntelligenceExtension language options", () => {
 
     expect(options).toContain("plain");
     expect(options).toContain("typescript");
-    expect(options.includes("bash")).toBe(supported.has("bash"));
-    expect(options).not.toContain("yaml");
+    expect(options).toContain("bash");
+    expect(options).toContain("yaml");
     options.forEach((option) => {
-      expect(supported.has(option)).toBe(true);
+      expect(supported.has(option) || isKnownCodeLanguage(option)).toBe(true);
     });
   });
 
@@ -49,7 +50,7 @@ describe("CodeIntelligenceExtension language options", () => {
 
     const options = extension.getLanguageOptionsSnapshot();
 
-    expect(options).toEqual(["js", "sql", "typescript"]);
+    expect(options).toEqual(["javascript", "sql", "typescript"]);
     expect(options).not.toContain("plain");
   });
 
@@ -105,7 +106,7 @@ describe("CodeIntelligenceExtension language options", () => {
 
     expect(extension.getThemeForLanguage?.("typescript")).toBe("hljs");
     expect(extension.getThemeForLanguage?.("javascript")).toBe("hljs");
-    expect(extension.getThemeForLanguage?.("tsx")).toBe("plain");
+    expect(extension.getThemeForLanguage?.("tsx")).toBe("hljs");
   });
 
   it("does not update code block language when the editor is non-editable", () => {

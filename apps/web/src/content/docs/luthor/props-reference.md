@@ -95,6 +95,7 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 | `minimumDefaultLineHeight` | `string \| number` | `1.5` | Validated and normalized; invalid values fall back to `1.5`. |
 | `scaleByRatio` | `boolean` | `false` | Used by image resize behavior. |
 | `syntaxHighlighting` | `'auto' \| 'disabled'` | extension default | Controls code syntax highlighting behavior. |
+| `grammarPreloadMode` | `'lazy' \| 'idle' \| 'eager'` | `'lazy'` | Controls when optional Prism grammars are loaded for code highlighting (`lazy`: on demand, `idle`: background warmup, `eager`: immediate warmup). |
 | `codeHighlightProvider` | `CodeHighlightProvider \| null` | `undefined` | Inject a concrete provider implementation. |
 | `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
 | `showLineNumbers` | `boolean` | `true` | Enables line numbers for visual code blocks and source tabs (`json`/`markdown`/`html`). |

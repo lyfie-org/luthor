@@ -1,8 +1,6 @@
 import {
-  getCodeLanguages,
   $isCodeNode,
   CodeNode,
-  normalizeCodeLang,
 } from "@lexical/code";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
@@ -31,6 +29,10 @@ import {
   type CodeHighlightProviderConfig,
   getFallbackCodeTheme,
 } from "./codeHighlightProvider";
+import {
+  normalizeCodeLanguageId,
+  normalizeKnownCodeLanguageId,
+} from "./codeLanguageSupport";
 
 const COPY_ICON_SVG =
   '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 9a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2V9Zm2 0h8v10h-8V9Zm-6 8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1h-2V5H5v10h1v2H5Z"/></svg>';
@@ -105,6 +107,7 @@ const LANGUAGE_LABEL_OVERRIDES: Record<string, string> = {
   graphql: "GraphQL",
   html: "HTML",
   java: "Java",
+  javascript: "JavaScript",
   json: "JSON",
   js: "JavaScript",
   jsx: "JSX",
@@ -839,57 +842,12 @@ function getCodeblockControlsPortalRoot(editor: LexicalEditor): HTMLElement | nu
 }
 
 function normalizeLanguage(language: string | null | undefined): string | null {
-  if (!language) return null;
-
-  const trimmed = language.trim().toLowerCase();
-  if (!trimmed || trimmed === "auto") return null;
-
-  const aliasNormalized = normalizeExtraLanguageAlias(trimmed);
-  const normalized = normalizeCodeLang(aliasNormalized);
-  if (!normalized || normalized === "auto") return null;
-
-  const finalLanguage = normalizeExtraLanguageAlias(normalized);
-  if (!isSupportedLanguage(finalLanguage)) {
+  const normalized = normalizeCodeLanguageId(language);
+  if (!normalized) {
     return null;
   }
 
-  return finalLanguage;
-}
-
-function normalizeExtraLanguageAlias(language: string): string {
-  switch (language) {
-    case "cs":
-      return "csharp";
-    case "golang":
-      return "go";
-    case "dockerfile":
-      return "docker";
-    case "kt":
-      return "kotlin";
-    case "rb":
-      return "ruby";
-    case "shell":
-    case "sh":
-      return "bash";
-    case "yml":
-      return "yaml";
-    default:
-      return language;
-  }
-}
-
-function isSupportedLanguage(language: string): boolean {
-  const normalized = language.trim().toLowerCase();
-  if (!normalized) {
-    return false;
-  }
-
-  const supported = new Set<string>(
-    getCodeLanguages()
-      .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
-      .filter((id): id is string => Boolean(id)),
-  );
-  return supported.has(normalized);
+  return normalizeKnownCodeLanguageId(normalized);
 }
 
 export const codeIntelligenceExtension = new CodeIntelligenceExtension();
@@ -961,7 +919,7 @@ function toSortedUniqueLanguageOptions(languageOptions: readonly string[]): stri
 
 function getLanguageDisplayLabel(languageId: string): string {
   const normalized = normalizeLanguage(languageId)
-    ?? normalizeCodeLang(languageId.trim().toLowerCase())
+    ?? normalizeCodeLanguageId(languageId)
     ?? languageId.trim().toLowerCase();
 
   if (!normalized) {

@@ -1,24 +1,11 @@
-import { getCodeLanguages, normalizeCodeLang } from "@lexical/code";
+import {
+  OPTIONAL_PRISM_LANGUAGE_IDS,
+  isRuntimeSupportedNormalizedCodeLanguageId,
+  normalizeCodeLanguageId,
+  refreshRuntimeSupportedCodeLanguages,
+} from "./codeLanguageSupport";
 
 type PrismLanguageLoader = () => Promise<unknown>;
-
-const LANGUAGE_ALIAS_MAP: Record<string, string> = {
-  csharp: "csharp",
-  cs: "csharp",
-  dockerfile: "docker",
-  golang: "go",
-  js: "javascript",
-  jsx: "jsx",
-  json: "json",
-  kt: "kotlin",
-  py: "python",
-  rb: "ruby",
-  sh: "bash",
-  shell: "bash",
-  ts: "typescript",
-  tsx: "tsx",
-  yml: "yaml",
-};
 
 const POPULAR_PRISM_LANGUAGE_LOADERS: Record<string, PrismLanguageLoader> = {
   bash: () => import("prismjs/components/prism-bash.js"),
@@ -42,50 +29,44 @@ const POPULAR_PRISM_LANGUAGE_LOADERS: Record<string, PrismLanguageLoader> = {
   yaml: () => import("prismjs/components/prism-yaml.js"),
 };
 
-const DEFAULT_POPULAR_PRISM_LANGUAGES = [
-  "bash",
-  "dart",
-  "docker",
-  "graphql",
-  "json",
-  "lua",
-  "perl",
-  "r",
-  "scala",
-  "toml",
-  "yaml",
-  "go",
-  "php",
-  "ruby",
-  "csharp",
-  "kotlin",
-  "jsx",
-  "tsx",
-] as const;
+const DEFAULT_POPULAR_PRISM_LANGUAGES = OPTIONAL_PRISM_LANGUAGE_IDS;
 
 let loadPopularPrismLanguagesPromise: Promise<string[]> | null = null;
+const languageLoadPromiseById = new Map<string, Promise<boolean>>();
 
-function normalizeLanguageId(language: string): string | null {
-  const trimmed = language.trim().toLowerCase();
-  if (!trimmed) {
-    return null;
+async function loadSinglePrismLanguage(normalizedLanguage: string): Promise<boolean> {
+  if (isRuntimeSupportedNormalizedCodeLanguageId(normalizedLanguage)) {
+    return false;
   }
 
-  const aliasNormalized = LANGUAGE_ALIAS_MAP[trimmed] ?? trimmed;
-  const lexicalNormalized = normalizeCodeLang(aliasNormalized);
-  if (!lexicalNormalized) {
-    return null;
+  const activeLoadPromise = languageLoadPromiseById.get(normalizedLanguage);
+  if (activeLoadPromise) {
+    return activeLoadPromise;
   }
 
-  return LANGUAGE_ALIAS_MAP[lexicalNormalized] ?? lexicalNormalized;
-}
+  const loader = POPULAR_PRISM_LANGUAGE_LOADERS[normalizedLanguage];
+  if (!loader) {
+    return false;
+  }
 
-function getNormalizedLoadedLanguageSet(): Set<string> {
-  return new Set(
-    getCodeLanguages()
-      .map((id) => normalizeLanguageId(id))
-      .filter((id): id is string => Boolean(id)),
-  );
+  const loadPromise = (async () => {
+    try {
+      await loader();
+    } catch {
+      return false;
+    }
+
+    const refreshed = refreshRuntimeSupportedCodeLanguages();
+    return refreshed.has(normalizedLanguage);
+  })();
+
+  languageLoadPromiseById.set(normalizedLanguage, loadPromise);
+
+  try {
+    return await loadPromise;
+  } finally {
+    languageLoadPromiseById.delete(normalizedLanguage);
+  }
 }
 
 export function getDefaultPopularPrismLanguages(): string[] {
@@ -95,33 +76,37 @@ export function getDefaultPopularPrismLanguages(): string[] {
 export async function loadPrismLanguages(
   languages: readonly string[],
 ): Promise<string[]> {
-  const loaded = getNormalizedLoadedLanguageSet();
   const newlyLoaded: string[] = [];
+  const normalizedLanguageQueue: string[] = [];
+  const seenRequested = new Set<string>();
+
+  refreshRuntimeSupportedCodeLanguages();
 
   for (const language of languages) {
-    const normalized = normalizeLanguageId(language);
+    const normalized = normalizeCodeLanguageId(language);
     if (!normalized) {
       continue;
     }
 
-    if (loaded.has(normalized)) {
+    if (seenRequested.has(normalized)) {
+      continue;
+    }
+    seenRequested.add(normalized);
+
+    if (isRuntimeSupportedNormalizedCodeLanguageId(normalized)) {
       continue;
     }
 
-    const loader = POPULAR_PRISM_LANGUAGE_LOADERS[normalized];
-    if (!loader) {
+    if (!POPULAR_PRISM_LANGUAGE_LOADERS[normalized]) {
       continue;
     }
 
-    try {
-      await loader();
-    } catch {
-      continue;
-    }
+    normalizedLanguageQueue.push(normalized);
+  }
 
-    const postLoad = getNormalizedLoadedLanguageSet();
-    if (postLoad.has(normalized)) {
-      loaded.add(normalized);
+  for (const normalized of normalizedLanguageQueue) {
+    const didLoad = await loadSinglePrismLanguage(normalized);
+    if (didLoad) {
       newlyLoaded.push(normalized);
     }
   }

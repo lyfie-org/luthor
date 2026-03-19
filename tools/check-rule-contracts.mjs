@@ -107,6 +107,23 @@ function collectDynamicImportSpecifiers(contents) {
   return specifiers;
 }
 
+function resolvePackageNameFromSpecifier(specifier) {
+  if (!specifier || specifier.startsWith(".") || specifier.startsWith("/")) {
+    return null;
+  }
+
+  if (specifier.startsWith("@")) {
+    const [scope, name] = specifier.split("/");
+    if (!scope || !name) {
+      return specifier;
+    }
+    return `${scope}/${name}`;
+  }
+
+  const [name] = specifier.split("/");
+  return name ?? specifier;
+}
+
 async function checkHeadlessDependencyPolicy() {
   const headlessPackagePath = path.join(ROOT, "packages", "headless", "package.json");
   const headlessPackageJson = await readJson(headlessPackagePath);
@@ -136,12 +153,13 @@ async function checkHeadlessDependencyPolicy() {
       if (specifier.startsWith(".") || specifier.startsWith("/")) {
         continue;
       }
+      const packageName = resolvePackageNameFromSpecifier(specifier) ?? specifier;
       if (
-        !optionalDependencies.has(specifier) &&
-        !optionalPeerDependencies.has(specifier)
+        !optionalDependencies.has(packageName) &&
+        !optionalPeerDependencies.has(packageName)
       ) {
         headlessViolations.push(
-          `${toWorkspacePath(absolutePath)} -> dynamic import "${specifier}" must be declared in optionalDependencies or optional peerDependencies`,
+          `${toWorkspacePath(absolutePath)} -> dynamic import "${specifier}" (package "${packageName}") must be declared in optionalDependencies or optional peerDependencies`,
         );
       }
     }

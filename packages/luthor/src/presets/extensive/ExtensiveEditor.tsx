@@ -74,6 +74,7 @@ import type {
   SlashCommandExtension,
   EmojiExtension,
   EmojiCatalogItem,
+  CodeGrammarPreloadMode,
   CodeHighlightProvider,
   CodeLanguageOptionsConfig,
   FontFamilyOption,
@@ -1970,6 +1971,7 @@ export interface ExtensiveEditorProps {
   markdownBridgeFlavor?: MarkdownBridgeFlavor;
   markdownSourceOfTruth?: boolean;
   syntaxHighlighting?: "auto" | "disabled";
+  grammarPreloadMode?: CodeGrammarPreloadMode;
   codeHighlightProvider?: CodeHighlightProvider | null;
   loadCodeHighlightProvider?: () => Promise<CodeHighlightProvider | null>;
   maxAutoDetectCodeLength?: number;
@@ -2029,6 +2031,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     markdownBridgeFlavor = "luthor",
     markdownSourceOfTruth = false,
     syntaxHighlighting,
+    grammarPreloadMode = "lazy",
     codeHighlightProvider,
     loadCodeHighlightProvider,
     maxAutoDetectCodeLength,
@@ -2108,6 +2111,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       [maxListIndentation],
     );
     const syntaxHighlightKey = syntaxHighlighting ?? "unset";
+    const grammarPreloadKey = grammarPreloadMode;
     const maxAutoDetectKey =
       typeof maxAutoDetectCodeLength === "number"
         ? maxAutoDetectCodeLength.toString()
@@ -2136,7 +2140,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       () => resolveFeatureFlags(effectiveFeatureFlags),
       [effectiveFeatureFlags],
     );
-    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${lineNumbersKey}::${languageOptionsKey}::${featureFlagsKey}`;
+    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${grammarPreloadKey}::${maxAutoDetectKey}::${copyAllowedKey}::${lineNumbersKey}::${languageOptionsKey}::${featureFlagsKey}`;
     const stableFontFamilyOptionsRef = useRef<readonly FontFamilyOption[] | undefined>(fontFamilyOptions);
     const stableFontSizeOptionsRef = useRef<readonly FontSizeOption[] | undefined>(fontSizeOptions);
     const stableLineHeightOptionsRef = useRef<readonly LineHeightOption[] | undefined>(lineHeightOptions);
@@ -2182,6 +2186,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         scaleByRatio,
         ...(syntaxHighlighting !== undefined
           ? { syntaxHighlighting }
+          : {}),
+        ...(grammarPreloadMode !== undefined
+          ? { grammarPreloadMode }
           : {}),
         ...(stableCodeHighlightProviderRef.current !== undefined
           ? { codeHighlightProvider: stableCodeHighlightProviderRef.current }

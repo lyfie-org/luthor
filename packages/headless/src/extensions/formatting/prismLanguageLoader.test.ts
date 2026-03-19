@@ -56,4 +56,17 @@ describe("prismLanguageLoader", () => {
     expect(loaded.has("perl")).toBe(true);
     expect(loaded.has("scala")).toBe(true);
   });
+
+  it("ignores duplicates and unknown language ids without throwing", async () => {
+    const newlyLoaded = await loadPrismLanguages([
+      "bash",
+      "bash",
+      "unknown-language",
+      "  ",
+      "dockerfile",
+    ]);
+
+    expect(newlyLoaded.filter((id) => id === "bash").length).toBeLessThanOrEqual(1);
+    expect(newlyLoaded.filter((id) => id === "docker").length).toBeLessThanOrEqual(1);
+  });
 });

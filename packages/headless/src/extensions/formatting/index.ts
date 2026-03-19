@@ -14,6 +14,7 @@ export {
   CodeExtension,
   codeExtension,
   type CodeExtensionConfig,
+  type CodeGrammarPreloadMode,
 } from "./CodeExtension";
 export {
   type CodeHighlightProvider,
