@@ -1296,6 +1296,148 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     });
   });
 
+  it("derives json output from markdown when markdownSourceOfTruth is enabled", async () => {
+    const importedDocument = { root: { children: [{ type: "paragraph", marker: "from-markdown-import" }] } };
+    const canonicalDocument = { root: { children: [{ type: "paragraph", marker: "from-canonical-markdown" }] } };
+    markdownToJSONMock
+      .mockReturnValueOnce(importedDocument)
+      .mockReturnValueOnce(canonicalDocument);
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown", "json"]}
+        markdownBridgeFlavor="lexical-native"
+        markdownSourceOfTruth
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("source-view"), {
+      target: { value: "## Canonical heading" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "json" }));
+
+    await waitFor(() => {
+      expect(markdownToJSONMock).toHaveBeenCalledWith("## Canonical heading", {
+        bridgeFlavor: "lexical-native",
+      });
+    });
+    expect(mockEditorApi.import.fromJSON).toHaveBeenCalledWith(importedDocument);
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue(JSON.stringify(canonicalDocument));
+    });
+    expect(mockEditorApi.export.toJSON).not.toHaveBeenCalled();
+  });
+
+  it("keeps canonical markdown unchanged across markdown->visual->markdown when visual content did not change", async () => {
+    const importedDocument = { root: { children: [{ type: "paragraph", marker: "from-markdown-import" }] } };
+    const markdownInput = [
+      "<div align=\"center\">",
+      "  <img src=\"preview.png\" alt=\"Preview\" />",
+      "</div>",
+    ].join("\n");
+    const lexicalUpdateListeners: Array<
+      (payload: { dirtyElements: Map<string, unknown>; dirtyLeaves: Set<string> }) => void
+    > = [];
+
+    markdownToJSONMock.mockReturnValue(importedDocument);
+    jsonToMarkdownMock.mockReturnValue("MUTATED_MARKDOWN");
+    mockEditorApi.lexical.registerUpdateListener.mockImplementation((listener: any) => {
+      lexicalUpdateListeners.push(listener);
+      return () => {};
+    });
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown"]}
+        markdownSourceOfTruth
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("source-view"), {
+      target: { value: markdownInput },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "visual-editor" }));
+
+    await waitFor(() => {
+      expect(markdownToJSONMock).toHaveBeenCalledWith(markdownInput);
+    });
+
+    lexicalUpdateListeners.forEach((listener) => {
+      listener({
+        dirtyElements: new Map(),
+        dirtyLeaves: new Set(),
+      });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "markdown" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue(markdownInput);
+    });
+    expect(jsonToMarkdownMock).not.toHaveBeenCalled();
+  });
+
+  it("does not mark canonical markdown stale from synchronous import updates", async () => {
+    const importedDocument = { root: { children: [{ type: "paragraph", marker: "from-markdown-import" }] } };
+    const markdownInput = [
+      "<div align=\"center\">",
+      "  <img src=\"preview.png\" alt=\"Preview\" />",
+      "</div>",
+    ].join("\n");
+    const lexicalUpdateListeners: Array<
+      (payload: { dirtyElements: Map<string, unknown>; dirtyLeaves: Set<string> }) => void
+    > = [];
+
+    markdownToJSONMock.mockReturnValue(importedDocument);
+    jsonToMarkdownMock.mockReturnValue("MUTATED_MARKDOWN");
+    mockEditorApi.lexical.registerUpdateListener.mockImplementation((listener: any) => {
+      lexicalUpdateListeners.push(listener);
+      return () => {};
+    });
+    mockEditorApi.import.fromJSON.mockImplementation(() => {
+      lexicalUpdateListeners.forEach((listener) => {
+        listener({
+          dirtyElements: new Map([["root", {}]]),
+          dirtyLeaves: new Set(),
+        });
+        listener({
+          dirtyElements: new Map([["paragraph", {}]]),
+          dirtyLeaves: new Set(["text"]),
+        });
+      });
+    });
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown"]}
+        markdownSourceOfTruth
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("source-view"), {
+      target: { value: markdownInput },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "visual-editor" }));
+
+    await waitFor(() => {
+      expect(markdownToJSONMock).toHaveBeenCalledWith(markdownInput);
+    });
+    expect(mockEditorApi.import.fromJSON).toHaveBeenCalledWith(importedDocument);
+
+    fireEvent.click(screen.getByRole("button", { name: "markdown" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue(markdownInput);
+    });
+    expect(jsonToMarkdownMock).not.toHaveBeenCalled();
+  });
+
   it("uses metadata-free bridge calls when sourceMetadataMode is none", async () => {
     const importedDocument = { root: { children: [{ type: "paragraph" }] } };
     const exportedDocument = { root: { children: [{ type: "paragraph", marker: "from-visual" }] } };

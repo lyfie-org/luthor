@@ -24,17 +24,17 @@ export function App() {
 
 `HTMLEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to HTML.
 
-- `initialMode`: `'visual' (default) | 'json' | 'html'`
-- `defaultEditorView`: `'visual' (default) | 'json' | 'html'`
+- `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'html'`
+- `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'html'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
 
 ## Behavior
 
-Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
+Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual Only/Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
 
 ## Default modes
 
-- `availableModes`: `["visual", "json", "html"]`
+- `availableModes`: `["visual-only", "visual", "json", "html"]`
 
 ## Good fit
 

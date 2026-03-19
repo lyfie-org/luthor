@@ -29,8 +29,8 @@ export function App() {
 `LegacyRichEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, `initialMode`, and `defaultEditorView`, then re-adds constrained variants:
 
 - `sourceFormat`: `'both' (default) | 'markdown' | 'html'`
-- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
-- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
+- `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
+- `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (metadata-heavy features remain disabled)
 
 ## Behavior
@@ -41,15 +41,15 @@ export function App() {
   - code block
   - links
   - alignment controls (left/center/right/justify)
-  - ordered/unordered/check lists (no nested list indent controls)
+  - ordered/unordered/check lists with indent/outdent controls for nested sublists
   - tables and images
   - horizontal rule
 - Disabled by default to keep metadata-free markdown/html round trips:
   - embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
 - Source views:
-  - `sourceFormat="both"` uses Visual/Markdown/HTML tabs
-  - `sourceFormat="markdown"` uses Visual/JSON/Markdown tabs
-  - `sourceFormat="html"` uses Visual/JSON/HTML tabs
+  - `sourceFormat="both"` uses Visual Only/Visual/Markdown/HTML tabs
+  - `sourceFormat="markdown"` uses Visual Only/Visual/JSON/Markdown tabs
+  - `sourceFormat="html"` uses Visual Only/Visual/JSON/HTML tabs
 
 ## Toolbar profile
 
@@ -59,4 +59,5 @@ Default toolbar sections focus on writing and structure:
 - Block format + quote + alignment controls
 - Bold/italic/strikethrough/inline code/link
 - Ordered/unordered/checklist
+- List style dropdown arrows are hidden in this preset family; each list button inserts the preset default list style directly.
 - Code block + horizontal rule + table + image

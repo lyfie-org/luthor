@@ -95,6 +95,8 @@ function ImageComponent({
   src,
   alt,
   caption,
+  linkHref,
+  linkTitle,
   alignment = "none",
   className = "",
   style,
@@ -348,7 +350,23 @@ function ImageComponent({
         }}
         onClick={isEditorEditable ? onClick : undefined}
       >
-        <img ref={imageRef} src={src} alt={alt} style={imgStyle} />
+        {linkHref ? (
+          <a
+            href={linkHref}
+            title={linkTitle}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(event) => {
+              if (isEditorEditable) {
+                event.preventDefault();
+              }
+            }}
+          >
+            <img ref={imageRef} src={src} alt={alt} style={imgStyle} />
+          </a>
+        ) : (
+          <img ref={imageRef} src={src} alt={alt} style={imgStyle} />
+        )}
         {resizable ? (
           <>
             <button
@@ -385,6 +403,10 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   __alt: string;
   /** Optional caption */
   __caption?: string;
+  /** Optional link wrapper URL for badge-style linked images */
+  __linkHref?: string;
+  /** Optional link title for badge-style linked images */
+  __linkTitle?: string;
   /** Alignment */
   __alignment: Alignment;
   /** CSS class name */
@@ -407,6 +429,8 @@ export class ImageNode extends DecoratorNode<ReactNode> {
       node.__src,
       node.__alt,
       node.__caption,
+      node.__linkHref,
+      node.__linkTitle,
       node.__alignment,
       node.__className,
       node.__style,
@@ -431,6 +455,8 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     src: string = "",
     alt: string = "",
     caption?: string,
+    linkHref?: string,
+    linkTitle?: string,
     alignment: Alignment = "none",
     className?: string,
     style?: CSSProperties,
@@ -444,6 +470,8 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     this.__src = src && src.length > 0 ? src : "";
     this.__alt = alt;
     this.__caption = caption;
+    this.__linkHref = linkHref;
+    this.__linkTitle = linkTitle;
     this.__alignment = alignment;
     this.__className = className;
     this.__style = style;
@@ -539,6 +567,12 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     writable.__caption = caption;
   }
 
+  setLink(linkHref?: string, linkTitle?: string): void {
+    const writable = this.getWritable();
+    writable.__linkHref = linkHref;
+    writable.__linkTitle = linkTitle;
+  }
+
   setAlignment(alignment: Alignment): void {
     const writable = this.getWritable();
     writable.__alignment = alignment;
@@ -608,6 +642,8 @@ export class ImageNode extends DecoratorNode<ReactNode> {
           src={this.__src}
           alt={this.__alt}
           caption={this.__caption}
+          linkHref={this.__linkHref}
+          linkTitle={this.__linkTitle}
           alignment={this.__alignment}
           className={this.__className}
           style={this.__style}
@@ -641,6 +677,8 @@ export function $createImageNode(
   src: string,
   alt: string,
   caption?: string,
+  linkHref?: string,
+  linkTitle?: string,
   alignment: Alignment = "none",
   className?: string,
   style?: CSSProperties,
@@ -655,6 +693,8 @@ export function $createImageNode(
     src,
     alt,
     caption,
+    linkHref,
+    linkTitle,
     alignment,
     className,
     style,
@@ -799,6 +839,8 @@ export class ImageExtension extends BaseExtension<
               src,
               payload.alt,
               payload.caption,
+              payload.linkHref,
+              payload.linkTitle,
               payload.alignment || this.config.defaultAlignment || "none",
               payload.className,
               payload.style,
@@ -966,6 +1008,8 @@ export class ImageExtension extends BaseExtension<
                     imageNode = $createImageNode(
                       src,
                       alt,
+                      undefined,
+                      undefined,
                       undefined,
                       "none",
                       undefined,
@@ -1186,7 +1230,111 @@ export const imageExtension = new ImageExtension();
  * - ![alt text](url "caption") <!-- align:left -->
  * - ![alt text](url "caption") <!-- align:center -->
  * - ![alt text](url "caption") <!-- align:right -->
+ * - [![badge](badge.svg "status")](https://example.com/docs)
  */
+function escapeMarkdownImageText(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\]/g, "\\]");
+}
+
+function unescapeMarkdownImageText(value: string): string {
+  return value.replace(/\\(["\\\]])/g, "$1");
+}
+
+type MarkdownImageDirectives = {
+  alignment: "left" | "center" | "right" | "none";
+  linkHref?: string;
+  linkTitle?: string;
+};
+
+function parseMarkdownImageLinkDirective(value: string): {
+  href: string;
+  title?: string;
+} | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const match = trimmed.match(
+    /^(<[^>\r\n]+>|[^\s]+)(?:\s+"((?:[^"\\]|\\.)*)")?$/,
+  );
+  if (!match || !match[1]) {
+    return null;
+  }
+
+  const hrefToken = match[1].trim();
+  const href = hrefToken.startsWith("<") && hrefToken.endsWith(">")
+    ? hrefToken.slice(1, -1).trim()
+    : hrefToken;
+  if (!href) {
+    return null;
+  }
+
+  const titleValue = typeof match[2] === "string" && match[2].length > 0
+    ? unescapeMarkdownImageText(match[2])
+    : undefined;
+
+  return {
+    href,
+    ...(titleValue ? { title: titleValue } : {}),
+  };
+}
+
+function parseMarkdownImageTrailingDirectives(
+  value: string,
+): MarkdownImageDirectives | null {
+  const directives: MarkdownImageDirectives = {
+    alignment: "none",
+  };
+
+  const trailing = value.trim();
+  if (!trailing) {
+    return directives;
+  }
+
+  const commentRegex = /<!--\s*([a-z-]+)\s*:\s*([\s\S]*?)\s*-->/gi;
+  let match = commentRegex.exec(trailing);
+  let lastIndex = 0;
+
+  while (match) {
+    const gap = trailing.slice(lastIndex, match.index);
+    if (gap.trim().length > 0) {
+      return null;
+    }
+
+    const key = (match[1] ?? "").trim().toLowerCase();
+    const rawValue = (match[2] ?? "").trim();
+
+    if (key === "align") {
+      const alignment = rawValue.toLowerCase();
+      if (alignment === "left" || alignment === "center" || alignment === "right") {
+        directives.alignment = alignment;
+      }
+    }
+
+    if (key === "link") {
+      const parsedLink = parseMarkdownImageLinkDirective(rawValue);
+      if (parsedLink) {
+        directives.linkHref = parsedLink.href;
+        directives.linkTitle = parsedLink.title;
+      }
+    }
+
+    lastIndex = commentRegex.lastIndex;
+    match = commentRegex.exec(trailing);
+  }
+
+  const suffix = trailing.slice(lastIndex);
+  if (suffix.trim().length > 0) {
+    return null;
+  }
+
+  return directives;
+}
+
 export const IMAGE_MARKDOWN_TRANSFORMER = {
   dependencies: [ImageNode],
   export: (node: LexicalNode) => {
@@ -1198,21 +1346,31 @@ export const IMAGE_MARKDOWN_TRANSFORMER = {
     const src = imageNode.__src || "";
     const alt = imageNode.__alt || "";
     const caption = imageNode.__caption || "";
+    const linkHref = imageNode.__linkHref?.trim() ?? "";
+    const linkTitle = imageNode.__linkTitle?.trim() ?? "";
     const alignment = imageNode.__alignment || "none";
 
     if (!src) {
       return null;
     }
 
-    // Build markdown image syntax
-    let markdown = `![${alt}](${src}`;
+    let imageMarkdown = `![${escapeMarkdownImageText(alt)}](${src}`;
     
     // Add caption as title if present
     if (caption) {
-      markdown += ` "${caption}"`;
+      imageMarkdown += ` "${escapeMarkdownImageText(caption)}"`;
     }
     
-    markdown += ")";
+    imageMarkdown += ")";
+
+    let markdown = linkHref
+      ? (() => {
+          const titlePart = linkTitle
+            ? ` "${escapeMarkdownImageText(linkTitle)}"`
+            : "";
+          return `[${imageMarkdown}](${linkHref}${titlePart})`;
+        })()
+      : imageMarkdown;
 
     // Add alignment as HTML comment if not 'none'
     if (alignment && alignment !== "none") {
@@ -1221,7 +1379,7 @@ export const IMAGE_MARKDOWN_TRANSFORMER = {
 
     return markdown;
   },
-  regExp: /^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)(?:\s*<!--\s*align:(left|center|right)\s*-->)?\s*$/,
+  regExp: /^!\[((?:\\.|[^\]])*)\]\(([^)\s]+)(?:\s+"((?:[^"\\]|\\.)*)")?\)(\s*(?:<!--[\s\S]*?-->\s*)*)$/,
   replace: (
     parentNode: ElementNode,
     _children: LexicalNode[],
@@ -1229,15 +1387,25 @@ export const IMAGE_MARKDOWN_TRANSFORMER = {
     isImport: boolean,
   ) => {
     void isImport;
-    const [, alt, src, caption, alignment] = match;
+    const [, alt, src, caption, trailingDirectives] = match;
 
     if (!src) return;
+    const parsedDirectives = parseMarkdownImageTrailingDirectives(
+      String(trailingDirectives ?? ""),
+    );
+    if (!parsedDirectives) {
+      return;
+    }
 
     const imageNode = $createImageNode(
       src,
-      alt || "",
-      caption || undefined,
-      (alignment as "left" | "center" | "right" | "none") || "none",
+      typeof alt === "string" ? unescapeMarkdownImageText(alt) : "",
+      typeof caption === "string" && caption.length > 0
+        ? unescapeMarkdownImageText(caption)
+        : undefined,
+      parsedDirectives.linkHref,
+      parsedDirectives.linkTitle,
+      parsedDirectives.alignment,
       undefined,
       undefined,
       undefined,

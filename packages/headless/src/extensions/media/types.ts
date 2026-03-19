@@ -16,6 +16,10 @@ export interface ImagePayload {
   alt: string;
   /** Optional caption */
   caption?: string;
+  /** Optional link wrapper URL for badge-style linked images */
+  linkHref?: string;
+  /** Optional link title for badge-style linked images */
+  linkTitle?: string;
   /** Alignment */
   alignment?: Alignment;
   /** CSS class name for styling */
@@ -58,6 +62,10 @@ export interface SerializedImageNode {
   alt: string;
   /** Optional caption */
   caption?: string;
+  /** Optional link wrapper URL for badge-style linked images */
+  linkHref?: string;
+  /** Optional link title for badge-style linked images */
+  linkTitle?: string;
   /** Alignment */
   alignment: Alignment;
   /** CSS class name */

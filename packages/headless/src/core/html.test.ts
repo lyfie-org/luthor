@@ -92,6 +92,16 @@ function findNestedNode(node: JsonNode, type: string): JsonNode | null {
   return null;
 }
 
+function countNodesByType(node: JsonNode, type: string): number {
+  let count = node.type === type ? 1 : 0;
+
+  for (const child of getChildren(node)) {
+    count += countNodesByType(child, type);
+  }
+
+  return count;
+}
+
 function roundTripJSON(input: JsonDocument): JsonDocument {
   return htmlToJSON(jsonToHTML(input)) as JsonDocument;
 }
@@ -290,6 +300,188 @@ describe("html bridge", () => {
     expect(listItems).toHaveLength(2);
     expect(collectNodeText(listItems[0])).toBe("First item");
     expect(collectNodeText(listItems[1])).toBe("Second item");
+  });
+
+  it("round-trips nested lists without metadata comments in metadata-free mode", () => {
+    const input = createDocument([
+      {
+        type: "list",
+        version: 1,
+        listType: "bullet",
+        start: 1,
+        tag: "ul",
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "listitem",
+            version: 1,
+            value: 1,
+            checked: null,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [
+              textNode("Parent item"),
+              {
+                type: "list",
+                version: 1,
+                listType: "bullet",
+                start: 1,
+                tag: "ul",
+                format: "",
+                indent: 0,
+                direction: null,
+                children: [
+                  {
+                    type: "listitem",
+                    version: 1,
+                    value: 1,
+                    checked: null,
+                    format: "",
+                    indent: 0,
+                    direction: null,
+                    children: [textNode("Child item")],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "listitem",
+            version: 1,
+            value: 2,
+            checked: null,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [textNode("Sibling item")],
+          },
+        ],
+      },
+    ]);
+
+    const html = jsonToHTML(input, { metadataMode: "none" });
+    expect(html).not.toContain("luthor:meta v1");
+    expect((html.match(/<ul\b/gi) ?? []).length).toBeGreaterThanOrEqual(2);
+
+    const roundTrip = htmlToJSON(html, { metadataMode: "none" }) as JsonDocument;
+    const list = findTopLevelNode(roundTrip, "list");
+    expect(list).toBeDefined();
+    expect(countNodesByType(list as JsonNode, "list")).toBeGreaterThanOrEqual(2);
+    expect(collectNodeText(list as JsonNode)).toContain("Parent item");
+    expect(collectNodeText(list as JsonNode)).toContain("Child item");
+    expect(collectNodeText(list as JsonNode)).toContain("Sibling item");
+  });
+
+  it("round-trips default ordered and checklist structures without metadata comments", () => {
+    const input = createDocument([
+      {
+        type: "list",
+        version: 1,
+        listType: "number",
+        start: 1,
+        tag: "ol",
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "listitem",
+            version: 1,
+            value: 1,
+            checked: null,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [
+              textNode("Ordered parent"),
+              {
+                type: "list",
+                version: 1,
+                listType: "number",
+                start: 1,
+                tag: "ol",
+                format: "",
+                indent: 0,
+                direction: null,
+                children: [
+                  {
+                    type: "listitem",
+                    version: 1,
+                    value: 1,
+                    checked: null,
+                    format: "",
+                    indent: 0,
+                    direction: null,
+                    children: [textNode("Ordered child")],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "listitem",
+            version: 1,
+            value: 2,
+            checked: null,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [textNode("Ordered sibling")],
+          },
+        ],
+      },
+      {
+        type: "list",
+        version: 1,
+        listType: "check",
+        start: 1,
+        tag: "ul",
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "listitem",
+            version: 1,
+            value: 1,
+            checked: false,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [textNode("Task parent")],
+          },
+          {
+            type: "listitem",
+            version: 1,
+            value: 2,
+            checked: true,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [textNode("Task child")],
+          },
+        ],
+      },
+    ]);
+
+    const html = jsonToHTML(input, { metadataMode: "none" });
+    expect(html).not.toContain("luthor:meta v1");
+    expect(html).toContain("<ol");
+    expect(html).toContain("Ordered parent");
+    expect(html).toContain("Ordered child");
+    expect(html).toContain("Task parent");
+    expect(html).toContain("Task child");
+
+    const roundTrip = htmlToJSON(html, { metadataMode: "none" }) as JsonDocument;
+    const allText = roundTrip.root.children.map((node) => collectNodeText(node)).join("\n");
+    expect(allText).toContain("Ordered parent");
+    expect(allText).toContain("Ordered child");
+    expect(allText).toContain("Ordered sibling");
+    expect(allText).toContain("Task parent");
+    expect(allText).toContain("Task child");
   });
 
   it("round-trips link nodes", () => {

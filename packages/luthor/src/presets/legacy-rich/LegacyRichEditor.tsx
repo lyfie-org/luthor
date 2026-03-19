@@ -9,9 +9,9 @@ import {
 } from "../extensive";
 import { PresetFeaturePolicy, joinClassNames } from "../_shared";
 
-export const LEGACY_RICH_MARKDOWN_MODES = ["visual", "json", "markdown"] as const;
-export const LEGACY_RICH_HTML_MODES = ["visual", "json", "html"] as const;
-export const LEGACY_RICH_DUAL_SOURCE_MODES = ["visual", "markdown", "html"] as const;
+export const LEGACY_RICH_MARKDOWN_MODES = ["visual-only", "visual", "json", "markdown"] as const;
+export const LEGACY_RICH_HTML_MODES = ["visual-only", "visual", "json", "html"] as const;
+export const LEGACY_RICH_DUAL_SOURCE_MODES = ["visual-only", "visual", "markdown", "html"] as const;
 
 export type LegacyRichSourceFormat = "markdown" | "html" | "both";
 export type LegacyRichEditorMode =
@@ -41,7 +41,7 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   code: true,
   codeIntelligence: false,
   codeFormat: true,
-  tabIndent: false,
+  tabIndent: true,
   enterKeyBehavior: true,
   iframeEmbed: false,
   youTubeEmbed: false,
@@ -56,7 +56,7 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
 };
 
 const LEGACY_RICH_ENFORCED_FEATURE_FLAGS: FeatureFlagOverrides = {
-  tabIndent: false,
+  tabIndent: true,
   draggableBlock: false,
   iframeEmbed: false,
   youTubeEmbed: false,
@@ -84,7 +84,7 @@ export const LEGACY_RICH_TOOLBAR_LAYOUT: ToolbarLayout = {
       items: ["bold", "italic", "strikethrough", "code", "link"],
     },
     {
-      items: ["unorderedList", "orderedList", "checkList"],
+      items: ["unorderedList", "orderedList", "checkList", "indentList", "outdentList"],
     },
     {
       items: ["codeBlock", "horizontalRule", "table", "image"],
@@ -109,6 +109,7 @@ export type LegacyRichEditorProps = Omit<
   | "initialMode"
   | "defaultEditorView"
   | "sourceMetadataMode"
+  | "isListStyleDropdownEnabled"
 > & {
   sourceFormat?: LegacyRichSourceFormat;
   initialMode?: LegacyRichEditorMode;
@@ -153,6 +154,7 @@ export const LegacyRichEditor = forwardRef<ExtensiveEditorRef, LegacyRichEditorP
         availableModes={availableModes}
         initialMode={resolvedInitialMode}
         sourceMetadataMode="none"
+        isListStyleDropdownEnabled={false}
         toolbarLayout={toolbarLayout ?? LEGACY_RICH_TOOLBAR_LAYOUT}
         featureFlags={LEGACY_RICH_FEATURE_POLICY.resolve(featureFlags)}
       />

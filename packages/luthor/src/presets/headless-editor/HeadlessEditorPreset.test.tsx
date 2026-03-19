@@ -191,6 +191,7 @@ describe("HeadlessEditorPreset", () => {
     );
 
     expect(screen.getByRole("button", { name: "Visual" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Visual Only" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "JSON" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "MD" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "HTML" })).toBeInTheDocument();

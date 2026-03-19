@@ -17,16 +17,18 @@ describe("HTMLEditor", () => {
     vi.clearAllMocks();
   });
 
-  it("locks modes to visual, json, and html", () => {
+  it("locks modes to visual-only, visual, json, and html", () => {
     render(<HTMLEditor showDefaultContent={false} />);
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
       availableModes?: string[];
       initialMode?: string;
+      isListStyleDropdownEnabled?: boolean;
     };
 
-    expect(props.availableModes).toEqual(["visual", "json", "html"]);
+    expect(props.availableModes).toEqual(["visual-only", "visual", "json", "html"]);
     expect(props.initialMode).toBe("visual");
+    expect(props.isListStyleDropdownEnabled).toBe(false);
   });
 
   it("enables html-safe core features with metadata-free source conversion", () => {
@@ -53,7 +55,7 @@ describe("HTMLEditor", () => {
         youTubeEmbed: false,
         customNode: false,
         draggableBlock: false,
-        tabIndent: false,
+        tabIndent: true,
       }),
     );
     expect(props.sourceMetadataMode).toBe("none");
@@ -69,9 +71,13 @@ describe("HTMLEditor", () => {
     ).toBe(true);
     expect(
       props.toolbarLayout?.sections?.some((section) =>
-        (section.items ?? []).includes("embed") ||
-        (section.items ?? []).includes("indentList") ||
+        (section.items ?? []).includes("indentList") &&
         (section.items ?? []).includes("outdentList"),
+      ),
+    ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
+        (section.items ?? []).includes("embed"),
       ),
     ).toBe(false);
   });

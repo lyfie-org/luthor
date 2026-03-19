@@ -173,7 +173,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### HTML Editor
 - File: luthor/presets/html-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/html-editor/
-- Summary: HTML Editor HTML focused preset with visual editing plus JSON/HTML source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="html" . Usage Props HTMLEditorProps inherits LegacyRichEditorProps , then fixes source behavior to HTML. initialMode : 'visual' (default) 'json' 'html' defaultEditorVie...
+- Summary: HTML Editor HTML focused preset with visual editing plus JSON/HTML source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="html" . Usage Props HTMLEditorProps inherits LegacyRichEditorProps , then fixes source behavior to HTML. initialMode : 'visual' (default) 'visual only' 'json' 'html' de...
 
 ### Legacy Rich Editor
 - File: luthor/presets/legacy-rich-editor.md
@@ -183,7 +183,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### MD Editor
 - File: luthor/presets/md-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/md-editor/
-- Summary: MD Editor Markdown native preset with visual editing plus JSON/Markdown source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="markdown" . Usage Props MDEditorProps inherits LegacyRichEditorProps , then fixes source behavior to markdown. initialMode : 'visual' (default) 'json' 'markdown' d...
+- Summary: MD Editor Markdown native preset with visual editing plus JSON/Markdown source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="markdown" . Usage Props MDEditorProps inherits LegacyRichEditorProps , then fixes source behavior to markdown. initialMode : 'visual' (default) 'visual only' 'json...
 
 ### Simple Editor
 - File: luthor/presets/simple-editor.md

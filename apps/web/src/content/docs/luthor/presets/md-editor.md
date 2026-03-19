@@ -24,17 +24,21 @@ export function App() {
 
 `MDEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to markdown.
 
-- `initialMode`: `'visual' (default) | 'json' | 'markdown'`
-- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown'`
+- `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
+- `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
 
 ## Behavior
 
-Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and uses a metadata-free markdown/json bridge (no `luthor:meta` comments).
+Provides GitHub-compatible markdown formatting (headings, links, quote, inline code, fenced code blocks, ordered/unordered/task lists, tables, images, horizontal rules, and alignment controls), supports common README-style inline HTML wrappers (`<div align>`, `<p align>`, `<picture>`, `<img>`, `<figure>/<figcaption>`), preserves linked badge images (`[![...]](...)`), restores GitHub alert and footnote syntax on export, keeps mermaid/math fences stable, uses Visual Only/Visual/JSON/Markdown tabs, keeps toolbar enabled, and treats markdown as the canonical source when switching between views.
+
+Alignment details:
+- Imports both GitHub wrappers and legacy inline `<!-- align:* -->` hints.
+- Metadata-free markdown export emits GitHub-friendly `<p align="...">` wrappers instead of alignment comments.
 
 ## Default modes
 
-- `availableModes`: `["visual", "json", "markdown"]`
+- `availableModes`: `["visual-only", "visual", "json", "markdown"]`
 
 ## Good fit
 

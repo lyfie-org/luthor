@@ -24,6 +24,7 @@ export {
   markdownToJSON,
   jsonToMarkdown,
   type JsonDocument,
+  type MarkdownBridgeFlavor,
   type SourceMetadataMode,
   type MarkdownBridgeOptions,
 } from "./markdown";

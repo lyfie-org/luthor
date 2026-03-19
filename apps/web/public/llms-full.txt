@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-19T05:25:58.419Z
+Generated at: 2026-03-19T08:48:46.529Z
 
 ## AI Agent Workflow
 
@@ -1931,7 +1931,7 @@ Disable selectively:
 
 Some presets enforce specific flags to protect preset contracts:
 
-- `LegacyRichEditor`: keeps metadata-heavy features off (`table`, `image`, embeds, custom nodes, draggable, palette/slash, emoji, theme toggle).
+- `LegacyRichEditor`: keeps advanced non-markdown features off (embeds, custom nodes, draggable, palette/slash, emoji, theme toggle) while keeping markdown-compatible structure/media features on (`table`, `image`, `horizontalRule`, block alignment, and list indentation).
 - `SlashEditor`: enforces `slashCommand: true` and `commandPalette: false`.
 - `HeadlessEditorPreset`: keeps a lightweight metadata-friendly profile.
 - `SimpleEditor`: hardcodes a minimal visual-only chat input profile.
@@ -2398,17 +2398,17 @@ export function App() {
 
 `HTMLEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to HTML.
 
-- `initialMode`: `'visual' (default) | 'json' | 'html'`
-- `defaultEditorView`: `'visual' (default) | 'json' | 'html'`
+- `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'html'`
+- `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'html'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
 
 ## Behavior
 
-Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
+Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual Only/Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
 
 ## Default modes
 
-- `availableModes`: `["visual", "json", "html"]`
+- `availableModes`: `["visual-only", "visual", "json", "html"]`
 
 ## Good fit
 
@@ -2452,8 +2452,8 @@ export function App() {
 `LegacyRichEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, `initialMode`, and `defaultEditorView`, then re-adds constrained variants:
 
 - `sourceFormat`: `'both' (default) | 'markdown' | 'html'`
-- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
-- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
+- `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
+- `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (metadata-heavy features remain disabled)
 
 ## Behavior
@@ -2464,15 +2464,15 @@ export function App() {
   - code block
   - links
   - alignment controls (left/center/right/justify)
-  - ordered/unordered/check lists (no nested list indent controls)
+  - ordered/unordered/check lists with indent/outdent controls for nested sublists
   - tables and images
   - horizontal rule
 - Disabled by default to keep metadata-free markdown/html round trips:
   - embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
 - Source views:
-  - `sourceFormat="both"` uses Visual/Markdown/HTML tabs
-  - `sourceFormat="markdown"` uses Visual/JSON/Markdown tabs
-  - `sourceFormat="html"` uses Visual/JSON/HTML tabs
+  - `sourceFormat="both"` uses Visual Only/Visual/Markdown/HTML tabs
+  - `sourceFormat="markdown"` uses Visual Only/Visual/JSON/Markdown tabs
+  - `sourceFormat="html"` uses Visual Only/Visual/JSON/HTML tabs
 
 ## Toolbar profile
 
@@ -2482,6 +2482,7 @@ Default toolbar sections focus on writing and structure:
 - Block format + quote + alignment controls
 - Bold/italic/strikethrough/inline code/link
 - Ordered/unordered/checklist
+- List style dropdown arrows are hidden in this preset family; each list button inserts the preset default list style directly.
 - Code block + horizontal rule + table + image
 
 ---
@@ -2515,17 +2516,21 @@ export function App() {
 
 `MDEditorProps` inherits `LegacyRichEditorProps`, then fixes source behavior to markdown.
 
-- `initialMode`: `'visual' (default) | 'json' | 'markdown'`
-- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown'`
+- `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
+- `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
 
 ## Behavior
 
-Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, tables, images, alignment controls, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and uses a metadata-free markdown/json bridge (no `luthor:meta` comments).
+Provides GitHub-compatible markdown formatting (headings, links, quote, inline code, fenced code blocks, ordered/unordered/task lists, tables, images, horizontal rules, and alignment controls), supports common README-style inline HTML wrappers (`<div align>`, `<p align>`, `<picture>`, `<img>`, `<figure>/<figcaption>`), preserves linked badge images (`[![...]](...)`), restores GitHub alert and footnote syntax on export, keeps mermaid/math fences stable, uses Visual Only/Visual/JSON/Markdown tabs, keeps toolbar enabled, and treats markdown as the canonical source when switching between views.
+
+Alignment details:
+- Imports both GitHub wrappers and legacy inline `<!-- align:* -->` hints.
+- Metadata-free markdown export emits GitHub-friendly `<p align="...">` wrappers instead of alignment comments.
 
 ## Default modes
 
-- `availableModes`: `["visual", "json", "markdown"]`
+- `availableModes`: `["visual-only", "visual", "json", "markdown"]`
 
 ## Good fit
 

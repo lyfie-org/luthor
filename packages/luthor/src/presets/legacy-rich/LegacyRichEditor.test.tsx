@@ -16,15 +16,17 @@ describe("LegacyRichEditor", () => {
     vi.clearAllMocks();
   });
 
-  it("uses visual, markdown, and html mode set by default", () => {
+  it("uses visual-only, visual, markdown, and html mode set by default", () => {
     render(<LegacyRichEditor showDefaultContent={false} />);
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
       availableModes?: string[];
       initialMode?: string;
+      isListStyleDropdownEnabled?: boolean;
     };
-    expect(props.availableModes).toEqual(["visual", "markdown", "html"]);
+    expect(props.availableModes).toEqual(["visual-only", "visual", "markdown", "html"]);
     expect(props.initialMode).toBe("visual");
+    expect(props.isListStyleDropdownEnabled).toBe(false);
   });
 
   it("switches to html mode set when sourceFormat is html", () => {
@@ -34,7 +36,7 @@ describe("LegacyRichEditor", () => {
       availableModes?: string[];
       initialMode?: string;
     };
-    expect(props.availableModes).toEqual(["visual", "json", "html"]);
+    expect(props.availableModes).toEqual(["visual-only", "visual", "json", "html"]);
     expect(props.initialMode).toBe("html");
   });
 
@@ -49,12 +51,12 @@ describe("LegacyRichEditor", () => {
       expect.objectContaining({
         table: true,
         image: true,
-        tabIndent: false,
+        tabIndent: true,
       }),
     );
   });
 
-  it("keeps non-core rich features disabled even with overrides", () => {
+  it("keeps non-core rich features disabled while preserving list indentation controls", () => {
     render(
       <LegacyRichEditor
         showDefaultContent={false}
@@ -65,7 +67,7 @@ describe("LegacyRichEditor", () => {
           youTubeEmbed: true,
           customNode: true,
           draggableBlock: true,
-          tabIndent: true,
+          tabIndent: false,
           themeToggle: true,
         }}
       />,
@@ -85,7 +87,7 @@ describe("LegacyRichEditor", () => {
         youTubeEmbed: false,
         customNode: false,
         draggableBlock: false,
-        tabIndent: false,
+        tabIndent: true,
         themeToggle: false,
       }),
     );
@@ -95,7 +97,7 @@ describe("LegacyRichEditor", () => {
         (section.items ?? []).includes("indentList") ||
         (section.items ?? []).includes("outdentList"),
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       props.toolbarLayout?.sections?.some((section) =>
         (section.items ?? []).includes("table"),

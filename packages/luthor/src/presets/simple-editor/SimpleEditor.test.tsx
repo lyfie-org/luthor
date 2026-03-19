@@ -37,11 +37,13 @@ describe("SimpleEditor", () => {
 
     const lastProps = extensivePropsSpy.mock.calls.at(-1)?.[0] as {
       featureFlags?: Record<string, boolean>;
+      availableModes?: string[];
       shortcutConfig?: {
         disabledCommandIds?: string[];
       };
     };
 
+    expect(lastProps.availableModes).toEqual(["visual-only", "visual"]);
     expect(lastProps.featureFlags).toEqual(
       expect.objectContaining({
         bold: true,

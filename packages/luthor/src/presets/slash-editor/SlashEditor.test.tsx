@@ -26,7 +26,7 @@ describe("SlashEditor", () => {
       featureFlags?: Record<string, boolean>;
     };
     expect(props.isToolbarEnabled).toBe(false);
-    expect(props.availableModes).toEqual(["visual", "json", "markdown", "html"]);
+    expect(props.availableModes).toEqual(["visual-only", "visual", "json", "markdown", "html"]);
     expect(props.slashCommandVisibility?.allowlist).toEqual(
       expect.arrayContaining([
         "format.bold",
