@@ -35,6 +35,7 @@ describe("MDEditor", () => {
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
       featureFlags?: Record<string, boolean>;
       toolbarLayout?: { sections?: Array<{ items?: string[] }> };
+      sourceMetadataMode?: string;
     };
 
     expect(props.featureFlags).toEqual(
@@ -55,11 +56,14 @@ describe("MDEditor", () => {
         draggableBlock: false,
       }),
     );
+    expect(props.sourceMetadataMode).toBe("none");
     expect(
       props.toolbarLayout?.sections?.some((section) =>
         (section.items ?? []).includes("table") ||
         (section.items ?? []).includes("image") ||
-        (section.items ?? []).includes("embed"),
+        (section.items ?? []).includes("embed") ||
+        (section.items ?? []).includes("indentList") ||
+        (section.items ?? []).includes("outdentList"),
       ),
     ).toBe(false);
   });

@@ -41,7 +41,7 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   code: true,
   codeIntelligence: false,
   codeFormat: true,
-  tabIndent: true,
+  tabIndent: false,
   enterKeyBehavior: true,
   iframeEmbed: false,
   youTubeEmbed: false,
@@ -56,6 +56,7 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
 };
 
 const LEGACY_RICH_ENFORCED_FEATURE_FLAGS: FeatureFlagOverrides = {
+  tabIndent: false,
   draggableBlock: false,
   table: false,
   image: false,
@@ -85,7 +86,7 @@ export const LEGACY_RICH_TOOLBAR_LAYOUT: ToolbarLayout = {
       items: ["bold", "italic", "strikethrough", "code", "link"],
     },
     {
-      items: ["unorderedList", "orderedList", "checkList", "indentList", "outdentList"],
+      items: ["unorderedList", "orderedList", "checkList"],
     },
     {
       items: ["codeBlock", "horizontalRule"],
@@ -105,7 +106,11 @@ function resolveLegacyRichModes(sourceFormat: LegacyRichSourceFormat): readonly 
 
 export type LegacyRichEditorProps = Omit<
   ExtensiveEditorProps,
-  "featureFlags" | "availableModes" | "initialMode" | "defaultEditorView"
+  | "featureFlags"
+  | "availableModes"
+  | "initialMode"
+  | "defaultEditorView"
+  | "sourceMetadataMode"
 > & {
   sourceFormat?: LegacyRichSourceFormat;
   initialMode?: LegacyRichEditorMode;
@@ -149,6 +154,7 @@ export const LegacyRichEditor = forwardRef<ExtensiveEditorRef, LegacyRichEditorP
         )}
         availableModes={availableModes}
         initialMode={resolvedInitialMode}
+        sourceMetadataMode="none"
         toolbarLayout={toolbarLayout ?? LEGACY_RICH_TOOLBAR_LAYOUT}
         featureFlags={LEGACY_RICH_FEATURE_POLICY.resolve(featureFlags)}
       />

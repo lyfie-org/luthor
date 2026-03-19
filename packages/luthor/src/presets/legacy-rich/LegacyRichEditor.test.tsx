@@ -49,6 +49,7 @@ describe("LegacyRichEditor", () => {
           youTubeEmbed: true,
           customNode: true,
           draggableBlock: true,
+          tabIndent: true,
           themeToggle: true,
         }}
       />,
@@ -56,6 +57,8 @@ describe("LegacyRichEditor", () => {
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
       featureFlags?: Record<string, boolean>;
+      sourceMetadataMode?: string;
+      toolbarLayout?: { sections?: Array<{ items?: string[] }> };
     };
 
     expect(props.featureFlags).toEqual(
@@ -66,8 +69,16 @@ describe("LegacyRichEditor", () => {
         youTubeEmbed: false,
         customNode: false,
         draggableBlock: false,
+        tabIndent: false,
         themeToggle: false,
       }),
     );
+    expect(props.sourceMetadataMode).toBe("none");
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
+        (section.items ?? []).includes("indentList") ||
+        (section.items ?? []).includes("outdentList"),
+      ),
+    ).toBe(false);
   });
 });

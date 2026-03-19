@@ -160,6 +160,13 @@ function SaveButton() {
 }
 ```
 
+Use metadata-free conversion when your source workflow should never emit `luthor:meta` comments:
+
+```tsx
+const markdown = jsonToMarkdown(json, { metadataMode: 'none' });
+const html = jsonToHTML(json, { metadataMode: 'none' });
+```
+
 ## Custom extension example (`createExtension`)
 
 ```tsx

@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-18T05:41:57.643Z
+Generated at: 2026-03-19T04:55:17.064Z
 
 ## AI Agent Workflow
 
@@ -1030,6 +1030,13 @@ function SaveButton() {
 }
 ```
 
+Use metadata-free conversion when your source workflow should never emit `luthor:meta` comments:
+
+```tsx
+const markdown = jsonToMarkdown(json, { metadataMode: 'none' });
+const html = jsonToHTML(json, { metadataMode: 'none' });
+```
+
 ## Custom extension example (`createExtension`)
 
 ```tsx
@@ -1758,7 +1765,9 @@ Legacy comments are still supported for backwards compatibility:
 
 ## Preset impact
 
-`LegacyRichEditor`, `MDEditor`, `HTMLEditor`, and `HeadlessEditorPreset` in `@lyfie/luthor` disable many metadata-heavy features by default to keep source workflows predictable.
+`LegacyRichEditor`, `MDEditor`, and `HTMLEditor` in `@lyfie/luthor` run in metadata-free bridge mode (`metadataMode: "none"`), so Markdown/HTML output does not include `luthor:meta` comments.
+
+`HeadlessEditorPreset` continues to use metadata-preserving bridge mode by default.
 
 ---
 ## FILE: luthor/architecture.md
@@ -2395,7 +2404,7 @@ export function App() {
 
 ## Behavior
 
-Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and disables metadata-heavy features by default.
+Provides HTML-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/HTML tabs, keeps toolbar enabled, and uses a metadata-free html/json bridge (no `luthor:meta` comments).
 
 ## Default modes
 
@@ -2454,9 +2463,9 @@ export function App() {
   - bold, italic, strikethrough, inline code
   - code block
   - links
-  - ordered/unordered/check lists + indentation
+  - ordered/unordered/check lists (no nested list indent controls)
   - horizontal rule
-- Disabled by default to keep metadata-light markdown/html round trips:
+- Disabled by default to keep metadata-free markdown/html round trips:
   - tables, images, embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
 - Source views:
   - `sourceFormat="both"` uses Visual/Markdown/HTML tabs
@@ -2470,7 +2479,7 @@ Default toolbar sections focus on writing and structure:
 - Undo/redo
 - Block format + quote
 - Bold/italic/strikethrough/inline code/link
-- Ordered/unordered/checklist + indent/outdent
+- Ordered/unordered/checklist
 - Code block + horizontal rule
 
 ---
@@ -2510,7 +2519,7 @@ export function App() {
 
 ## Behavior
 
-Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and disables metadata-heavy features by default.
+Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and uses a metadata-free markdown/json bridge (no `luthor:meta` comments).
 
 ## Default modes
 

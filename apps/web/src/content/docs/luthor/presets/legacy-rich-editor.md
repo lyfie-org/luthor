@@ -40,9 +40,9 @@ export function App() {
   - bold, italic, strikethrough, inline code
   - code block
   - links
-  - ordered/unordered/check lists + indentation
+  - ordered/unordered/check lists (no nested list indent controls)
   - horizontal rule
-- Disabled by default to keep metadata-light markdown/html round trips:
+- Disabled by default to keep metadata-free markdown/html round trips:
   - tables, images, embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
 - Source views:
   - `sourceFormat="both"` uses Visual/Markdown/HTML tabs
@@ -56,5 +56,5 @@ Default toolbar sections focus on writing and structure:
 - Undo/redo
 - Block format + quote
 - Bold/italic/strikethrough/inline code/link
-- Ordered/unordered/checklist + indent/outdent
+- Ordered/unordered/checklist
 - Code block + horizontal rule

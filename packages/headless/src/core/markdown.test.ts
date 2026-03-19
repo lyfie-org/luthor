@@ -112,6 +112,55 @@ describe("markdown bridge", () => {
     expect(restoredNode.payload).toEqual({ title: "AI Draft" });
   });
 
+  it("skips metadata envelopes when metadataMode is none", () => {
+    const input = {
+      root: {
+        type: "root",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "paragraph",
+            version: 1,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [
+              {
+                type: "text",
+                version: 1,
+                text: "Before",
+                detail: 0,
+                format: 0,
+                mode: "normal",
+                style: "",
+              },
+            ],
+          },
+          {
+            type: "featureCard",
+            version: 1,
+            payload: { title: "AI Draft" },
+          },
+        ],
+      },
+    };
+
+    const markdown = jsonToMarkdown(input, { metadataMode: "none" });
+    expect(markdown).not.toContain("luthor:meta v1");
+    expect(markdown).toContain("[Unsupported featureCard preserved in markdown metadata]");
+
+    const roundTrip = markdownToJSON(markdown, { metadataMode: "none" }) as JsonDocument;
+    const secondNode = roundTrip.root.children[1] as {
+      type?: string;
+      children?: Array<{ text?: string }>;
+    };
+    expect(secondNode.type).not.toBe("featureCard");
+    expect(secondNode.children?.[0]?.text ?? "").toContain("Unsupported featureCard");
+  });
+
   it("ignores malformed metadata comments without failing import", () => {
     const markdown = "Hello\n\n<!-- luthor:meta v1 {bad-json} -->";
     const document = markdownToJSON(markdown) as JsonDocument;

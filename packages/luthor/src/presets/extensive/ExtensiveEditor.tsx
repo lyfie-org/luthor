@@ -11,6 +11,7 @@ import {
   mergeThemes,
   RichText,
   type LuthorTheme,
+  type SourceMetadataMode,
 } from "@lyfie/luthor-headless";
 import {
   createExtensiveExtensions,
@@ -423,7 +424,11 @@ function toJSONInput(value: string): string {
   }
 }
 
-function serializeJSONToSource(mode: ExtensiveEditorSourceMode, document: unknown): string {
+function serializeJSONToSource(
+  mode: ExtensiveEditorSourceMode,
+  document: unknown,
+  sourceMetadataMode: SourceMetadataMode = "preserve",
+): string {
   const resolvedDocument = document ?? EMPTY_JSON_DOCUMENT;
 
   if (mode === "json") {
@@ -431,10 +436,16 @@ function serializeJSONToSource(mode: ExtensiveEditorSourceMode, document: unknow
   }
 
   if (mode === "markdown") {
-    return formatMarkdownSource(jsonToMarkdown(resolvedDocument));
+    const markdown = sourceMetadataMode === "none"
+      ? jsonToMarkdown(resolvedDocument, { metadataMode: "none" })
+      : jsonToMarkdown(resolvedDocument);
+    return formatMarkdownSource(markdown);
   }
 
-  return formatHTMLSource(jsonToHTML(resolvedDocument));
+  const html = sourceMetadataMode === "none"
+    ? jsonToHTML(resolvedDocument, { metadataMode: "none" })
+    : jsonToHTML(resolvedDocument);
+  return formatHTMLSource(html);
 }
 
 function normalizeFontFamilyOptionsKey(options?: readonly FontFamilyOption[]): string {
@@ -828,6 +839,7 @@ function ExtensiveEditorContent({
   commandPaletteShortcutOnly,
   featureFlags,
   editOnClick,
+  sourceMetadataMode,
 }: {
   isDark: boolean;
   toggleTheme: () => void;
@@ -855,6 +867,7 @@ function ExtensiveEditorContent({
   commandPaletteShortcutOnly: boolean;
   featureFlags: FeatureFlags;
   editOnClick: boolean;
+  sourceMetadataMode: SourceMetadataMode;
 }) {
   const {
     commands,
@@ -996,8 +1009,10 @@ function ExtensiveEditorContent({
         }, 100);
       };
       const getJSON = () => serializeJSONToSource("json", exportApi.toJSON());
-      const getMarkdown = () => serializeJSONToSource("markdown", exportApi.toJSON());
-      const getHTML = () => serializeJSONToSource("html", exportApi.toJSON());
+      const getMarkdown = () =>
+        serializeJSONToSource("markdown", exportApi.toJSON(), sourceMetadataMode);
+      const getHTML = () =>
+        serializeJSONToSource("html", exportApi.toJSON(), sourceMetadataMode);
       return {
         injectJSON,
         getJSON,
@@ -1005,7 +1020,7 @@ function ExtensiveEditorContent({
         getHTML,
       };
     },
-    [exportApi, importApi],
+    [exportApi, importApi, sourceMetadataMode],
   );
 
   useEffect(() => {
@@ -1274,9 +1289,17 @@ function ExtensiveEditorContent({
     }
 
     if (sourceMode === "markdown") {
-      importApi.fromJSON(markdownToJSON(sourceValue));
+      importApi.fromJSON(
+        sourceMetadataMode === "none"
+          ? markdownToJSON(sourceValue, { metadataMode: "none" })
+          : markdownToJSON(sourceValue),
+      );
     } else {
-      importApi.fromJSON(htmlToJSON(sourceValue));
+      importApi.fromJSON(
+        sourceMetadataMode === "none"
+          ? htmlToJSON(sourceValue, { metadataMode: "none" })
+          : htmlToJSON(sourceValue),
+      );
     }
 
     sourceDirtyRef.current[sourceMode] = false;
@@ -1285,7 +1308,7 @@ function ExtensiveEditorContent({
 
   const exportToSourceMode = (sourceMode: ExtensiveEditorSourceMode): string => {
     const visualDocument = exportApi.toJSON() ?? EMPTY_JSON_DOCUMENT;
-    return serializeJSONToSource(sourceMode, visualDocument);
+    return serializeJSONToSource(sourceMode, visualDocument, sourceMetadataMode);
   };
 
   const updateSourceModeContent = (
@@ -1629,6 +1652,7 @@ export interface ExtensiveEditorProps {
   editOnClick?: boolean;
   isDraggableBoxEnabled?: boolean;
   featureFlags?: FeatureFlagOverrides;
+  sourceMetadataMode?: SourceMetadataMode;
   syntaxHighlighting?: "auto" | "disabled";
   codeHighlightProvider?: CodeHighlightProvider | null;
   loadCodeHighlightProvider?: () => Promise<CodeHighlightProvider | null>;
@@ -1681,6 +1705,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     editOnClick = true,
     isDraggableBoxEnabled,
     featureFlags,
+    sourceMetadataMode = "preserve",
     syntaxHighlighting,
     codeHighlightProvider,
     loadCodeHighlightProvider,
@@ -1923,10 +1948,12 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         methods ?? {
           injectJSON: () => {},
           getJSON: () => serializeJSONToSource("json", EMPTY_JSON_DOCUMENT),
-          getMarkdown: () => serializeJSONToSource("markdown", EMPTY_JSON_DOCUMENT),
-          getHTML: () => serializeJSONToSource("html", EMPTY_JSON_DOCUMENT),
+          getMarkdown: () =>
+            serializeJSONToSource("markdown", EMPTY_JSON_DOCUMENT, sourceMetadataMode),
+          getHTML: () =>
+            serializeJSONToSource("html", EMPTY_JSON_DOCUMENT, sourceMetadataMode),
         },
-      [methods],
+      [methods, sourceMetadataMode],
     );
 
     const handleReady = (m: ExtensiveEditorRef) => {
@@ -1974,6 +2001,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             commandPaletteShortcutOnly={commandPaletteShortcutOnly}
             featureFlags={resolvedFeatureFlags}
             editOnClick={editOnClick}
+            sourceMetadataMode={sourceMetadataMode}
           />
         </Provider>
       </div>

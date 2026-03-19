@@ -1296,6 +1296,50 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     });
   });
 
+  it("uses metadata-free bridge calls when sourceMetadataMode is none", async () => {
+    const importedDocument = { root: { children: [{ type: "paragraph" }] } };
+    const exportedDocument = { root: { children: [{ type: "paragraph", marker: "from-visual" }] } };
+    const onReady = vi.fn();
+    markdownToJSONMock.mockReturnValueOnce(importedDocument);
+    mockEditorApi.export.toJSON.mockReturnValue(exportedDocument);
+    jsonToMarkdownMock.mockReturnValue("## heading");
+    jsonToHTMLMock.mockReturnValue("<p>heading</p>");
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        onReady={onReady}
+        sourceMetadataMode="none"
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown", "json"]}
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("source-view"), {
+      target: { value: "## Draft heading" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "json" }));
+
+    await waitFor(() => {
+      expect(markdownToJSONMock).toHaveBeenCalledWith("## Draft heading", {
+        metadataMode: "none",
+      });
+    });
+
+    const methods = onReady.mock.calls[0]?.[0] as {
+      getMarkdown: () => string;
+      getHTML: () => string;
+    };
+    expect(methods.getMarkdown()).toBe("## heading");
+    expect(methods.getHTML()).toBe("<p>heading</p>");
+    expect(jsonToMarkdownMock).toHaveBeenLastCalledWith(exportedDocument, {
+      metadataMode: "none",
+    });
+    expect(jsonToHTMLMock).toHaveBeenLastCalledWith(exportedDocument, {
+      metadataMode: "none",
+    });
+  });
+
   it("exposes JSON, markdown, and html getters through onReady methods", () => {
     const exportedDocument = { root: { children: [{ type: "paragraph", marker: "from-visual" }] } };
     const onReady = vi.fn();

@@ -30,8 +30,6 @@ export const legacyRichPreset: EditorPreset = {
     "unorderedList",
     "orderedList",
     "checkList",
-    "indentList",
-    "outdentList",
     "codeBlock",
     "horizontalRule",
   ],

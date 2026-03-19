@@ -61,6 +61,12 @@ import {
 
 export type { JsonDocument } from "./metadata-envelope";
 
+export type SourceMetadataMode = "preserve" | "none";
+
+export interface MarkdownBridgeOptions {
+  metadataMode?: SourceMetadataMode;
+}
+
 const HORIZONTAL_RULE_MARKDOWN_TRANSFORMER: ElementTransformer = {
   dependencies: [HorizontalRuleNode],
   export: (node: LexicalNode) => {
@@ -637,10 +643,23 @@ function toEditorState(editor: ReturnType<typeof createMarkdownEditor>, input: u
   return editor.parseEditorState(serialized);
 }
 
-export function markdownToJSON(markdown: string): JsonDocument {
-  const { content, envelopes, warnings } = extractMetadataEnvelopes(markdown);
-  for (const warning of warnings) {
-    console.warn(`[luthor-headless] ${warning}`);
+function shouldPreserveMetadata(metadataMode: SourceMetadataMode | undefined): boolean {
+  return metadataMode !== "none";
+}
+
+export function markdownToJSON(
+  markdown: string,
+  options?: MarkdownBridgeOptions,
+): JsonDocument {
+  const preserveMetadata = shouldPreserveMetadata(options?.metadataMode);
+  const { content, envelopes, warnings } = preserveMetadata
+    ? extractMetadataEnvelopes(markdown)
+    : { content: markdown, envelopes: [], warnings: [] as string[] };
+
+  if (preserveMetadata) {
+    for (const warning of warnings) {
+      console.warn(`[luthor-headless] ${warning}`);
+    }
   }
 
   const editor = createMarkdownEditor();
@@ -655,12 +674,16 @@ export function markdownToJSON(markdown: string): JsonDocument {
   return rehydrateDocumentFromEnvelopes(baseDocument, envelopes);
 }
 
-export function jsonToMarkdown(input: unknown): string {
+export function jsonToMarkdown(
+  input: unknown,
+  options?: MarkdownBridgeOptions,
+): string {
+  const preserveMetadata = shouldPreserveMetadata(options?.metadataMode);
   const prepared = prepareDocumentForBridge(input, {
     mode: "markdown",
     supportedNodeTypes: MARKDOWN_SUPPORTED_NODE_TYPES,
   });
-  const partialEnvelopes = collectMarkdownPartialEnvelopes(input);
+  const partialEnvelopes = preserveMetadata ? collectMarkdownPartialEnvelopes(input) : [];
   const editor = createMarkdownEditor();
   const editorState = toEditorState(editor, prepared.document);
   editor.setEditorState(editorState, { tag: "history-merge" });
@@ -668,6 +691,10 @@ export function jsonToMarkdown(input: unknown): string {
   const markdown = editorState.read(() => {
     return $convertToMarkdownString(MARKDOWN_TRANSFORMERS);
   });
+
+  if (!preserveMetadata) {
+    return markdown;
+  }
 
   return appendMetadataEnvelopes(markdown, [...prepared.envelopes, ...partialEnvelopes]);
 }

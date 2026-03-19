@@ -30,7 +30,7 @@ export function App() {
 
 ## Behavior
 
-Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and disables metadata-heavy features by default.
+Provides markdown-native formatting (headings, lists, links, quote, inline code, code block, horizontal rule), uses Visual/JSON/Markdown tabs, keeps toolbar enabled, and uses a metadata-free markdown/json bridge (no `luthor:meta` comments).
 
 ## Default modes
 

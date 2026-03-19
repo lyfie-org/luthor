@@ -24,6 +24,11 @@ import {
   type JsonDocument,
   type MetadataEnvelope,
 } from "./metadata-envelope";
+import type { SourceMetadataMode } from "./markdown";
+
+export interface HtmlBridgeOptions {
+  metadataMode?: SourceMetadataMode;
+}
 
 const HTML_SUPPORTED_NODE_TYPES = new Set<string>([
   "root",
@@ -354,11 +359,24 @@ function normalizeWhitespaceArtifacts(parsedDocument: Document): void {
   }
 }
 
-export function htmlToJSON(html: string): JsonDocument {
+function shouldPreserveMetadata(metadataMode: SourceMetadataMode | undefined): boolean {
+  return metadataMode !== "none";
+}
+
+export function htmlToJSON(
+  html: string,
+  options?: HtmlBridgeOptions,
+): JsonDocument {
   assertDOMSupport();
-  const { content, envelopes, warnings } = extractMetadataEnvelopes(html);
-  for (const warning of warnings) {
-    console.warn(`[luthor-headless] ${warning}`);
+  const preserveMetadata = shouldPreserveMetadata(options?.metadataMode);
+  const { content, envelopes, warnings } = preserveMetadata
+    ? extractMetadataEnvelopes(html)
+    : { content: html, envelopes: [], warnings: [] as string[] };
+
+  if (preserveMetadata) {
+    for (const warning of warnings) {
+      console.warn(`[luthor-headless] ${warning}`);
+    }
   }
 
   const editor = createHTMLEditor();
@@ -378,13 +396,17 @@ export function htmlToJSON(html: string): JsonDocument {
   return rehydrateDocumentFromEnvelopes(baseDocument, envelopes);
 }
 
-export function jsonToHTML(input: unknown): string {
+export function jsonToHTML(
+  input: unknown,
+  options?: HtmlBridgeOptions,
+): string {
   assertDOMSupport();
+  const preserveMetadata = shouldPreserveMetadata(options?.metadataMode);
   const prepared = prepareDocumentForBridge(input, {
     mode: "html",
     supportedNodeTypes: HTML_SUPPORTED_NODE_TYPES,
   });
-  const partialEnvelopes = collectHTMLPartialEnvelopes(input);
+  const partialEnvelopes = preserveMetadata ? collectHTMLPartialEnvelopes(input) : [];
   const editor = createHTMLEditor();
   const editorState = toEditorState(editor, prepared.document);
   editor.setEditorState(editorState, { tag: "history-merge" });
@@ -392,6 +414,10 @@ export function jsonToHTML(input: unknown): string {
   const html = editorState.read(() => {
     return $generateHtmlFromNodes(editor, null);
   });
+
+  if (!preserveMetadata) {
+    return html;
+  }
 
   return appendMetadataEnvelopes(html, [...prepared.envelopes, ...partialEnvelopes]);
 }

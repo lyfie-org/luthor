@@ -24,10 +24,13 @@ export {
   markdownToJSON,
   jsonToMarkdown,
   type JsonDocument,
+  type SourceMetadataMode,
+  type MarkdownBridgeOptions,
 } from "./markdown";
 export {
   htmlToJSON,
   jsonToHTML,
+  type HtmlBridgeOptions,
 } from "./html";
 export {
   appendMetadataEnvelopes,

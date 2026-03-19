@@ -129,6 +129,29 @@ describe("html bridge", () => {
     expect(restoredNode.payload).toEqual({ title: "AI Draft" });
   });
 
+  it("skips metadata envelopes when metadataMode is none", () => {
+    const input = createDocument([
+      paragraphNode([textNode("Before")]),
+      {
+        type: "featureCard",
+        version: 1,
+        payload: { title: "AI Draft" },
+      },
+    ]);
+
+    const html = jsonToHTML(input, { metadataMode: "none" });
+    expect(html).not.toContain("luthor:meta v1");
+    expect(html).toContain("[Unsupported featureCard preserved in html metadata]");
+
+    const roundTrip = htmlToJSON(html, { metadataMode: "none" }) as JsonDocument;
+    const secondNode = roundTrip.root.children[1] as {
+      type?: string;
+      children?: JsonNode[];
+    };
+    expect(secondNode.type).not.toBe("featureCard");
+    expect(collectNodeText(secondNode as JsonNode)).toContain("Unsupported featureCard");
+  });
+
   it("normalizes indentation-heavy pre-wrap html without creating formatter artifacts", () => {
     const formattedHtml = [
       "<p>",
