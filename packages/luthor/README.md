@@ -28,7 +28,7 @@
 ## Install
 
 ```bash
-pnpm add @lyfie/luthor react react-dom
+pnpm add @lyfie/luthor
 ```
 
 ## Quick Usage

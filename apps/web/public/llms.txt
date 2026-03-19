@@ -78,7 +78,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Installation
 - File: getting-started/installation.md
 - URL: https://www.luthor.fyi/docs/getting-started/installation/
-- Summary: Installation This page covers install, update, uninstall, and validation for both packages. Prerequisites Node.js =20 A React app using React 18 or 19 Install @lyfie/luthor npm pnpm yarn bun Install @lyfie/luthor headless npm Optional dependencies for headless highlight.js is optional but useful when code highlighting ...
+- Summary: Installation This page covers install, update, uninstall, and validation for both packages. Prerequisites Node.js =20 If you are integrating with React UI, use React 18 or 19 already present in your app. Install @lyfie/luthor npm pnpm yarn bun Install @lyfie/luthor headless npm Optional dependencies for headless highli...
 
 ### @lyfie/luthor-headless
 - File: getting-started/luthor-headless.md

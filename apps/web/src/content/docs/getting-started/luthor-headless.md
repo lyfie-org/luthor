@@ -10,7 +10,7 @@ Use `@lyfie/luthor-headless` when you need complete control over editor behavior
 ## Install
 
 ```bash
-npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
+npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils
 ```
 
 Optional (recommended for richer code/emoji UX):

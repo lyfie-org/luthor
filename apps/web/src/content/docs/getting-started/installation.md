@@ -10,32 +10,32 @@ This page covers install, update, uninstall, and validation for both packages.
 ## Prerequisites
 
 - Node.js `>=20`
-- A React app using React `18` or `19`
+- If you are integrating with React UI, use React `18` or `19` already present in your app.
 
 ## Install @lyfie/luthor
 
 ### npm
 
 ```bash
-npm install @lyfie/luthor react react-dom
+npm install @lyfie/luthor
 ```
 
 ### pnpm
 
 ```bash
-pnpm add @lyfie/luthor react react-dom
+pnpm add @lyfie/luthor
 ```
 
 ### yarn
 
 ```bash
-yarn add @lyfie/luthor react react-dom
+yarn add @lyfie/luthor
 ```
 
 ### bun
 
 ```bash
-bun add @lyfie/luthor react react-dom
+bun add @lyfie/luthor
 ```
 
 ## Install @lyfie/luthor-headless
@@ -43,7 +43,7 @@ bun add @lyfie/luthor react react-dom
 ### npm
 
 ```bash
-npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
+npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils
 ```
 
 ### Optional dependencies for headless
