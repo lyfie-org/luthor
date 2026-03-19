@@ -22,11 +22,13 @@ describe("SlashEditor", () => {
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
       isToolbarEnabled?: boolean;
       availableModes?: string[];
+      sourceMetadataMode?: string;
       slashCommandVisibility?: { allowlist?: string[] };
       featureFlags?: Record<string, boolean>;
     };
     expect(props.isToolbarEnabled).toBe(false);
-    expect(props.availableModes).toEqual(["visual", "json", "markdown", "html"]);
+    expect(props.availableModes).toEqual(["visual-only", "visual", "json", "markdown", "html"]);
+    expect(props.sourceMetadataMode).toBeUndefined();
     expect(props.slashCommandVisibility?.allowlist).toEqual(
       expect.arrayContaining([
         "format.bold",
@@ -71,5 +73,19 @@ describe("SlashEditor", () => {
       allowlist: ["insert.table"],
       denylist: ["insert.table"],
     });
+  });
+
+  it("forwards line number visibility to underlying editor", () => {
+    render(
+      <SlashEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      showLineNumbers?: boolean;
+    };
+    expect(props.showLineNumbers).toBe(false);
   });
 });

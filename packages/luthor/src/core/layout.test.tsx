@@ -80,6 +80,7 @@ describe("SourceView", () => {
 
     const textarea = container.querySelector("textarea") as HTMLTextAreaElement;
     expect(textarea.style.height).toBe("541px");
+    expect(container.querySelector(".luthor-source-view-line-numbers")).toBeInTheDocument();
   });
 
   it("keeps a visual-aligned minimum height for source modes", () => {
@@ -93,5 +94,89 @@ describe("SourceView", () => {
 
     const textarea = container.querySelector("textarea") as HTMLTextAreaElement;
     expect(textarea.style.height).toBe("400px");
+  });
+
+  it("renders non-selectable line numbers by default and syncs gutter scroll", () => {
+    const { container } = render(
+      <SourceView
+        value={"line 1\nline 2\nline 3"}
+        onChange={vi.fn()}
+        placeholder="Paste JSON..."
+      />,
+    );
+
+    const textarea = container.querySelector("textarea") as HTMLTextAreaElement;
+    const gutter = container.querySelector(".luthor-source-view-line-numbers") as HTMLDivElement;
+
+    expect(gutter.textContent).toContain("1");
+    expect(gutter.textContent).toContain("2");
+    expect(gutter.textContent).toContain("3");
+    expect(gutter.className).toContain("luthor-source-view-line-numbers");
+    expect(gutter).toHaveAttribute("aria-hidden", "true");
+
+    textarea.scrollTop = 42;
+    textarea.dispatchEvent(new Event("scroll"));
+    expect(gutter.scrollTop).toBe(42);
+  });
+
+  it("keeps wrapped line continuations unnumbered so logical lines stay aligned", () => {
+    vi.spyOn(HTMLTextAreaElement.prototype, "clientWidth", "get").mockReturnValue(84);
+
+    const { container } = render(
+      <SourceView
+        value={"12345678901\nline two"}
+        onChange={vi.fn()}
+        placeholder="Paste markdown..."
+        className="luthor-source-view--wrapped"
+        wrap="soft"
+      />,
+    );
+
+    const gutter = container.querySelector(".luthor-source-view-line-numbers") as HTMLDivElement;
+    expect(gutter.textContent).toBe("1\n\n2");
+  });
+
+  it("accounts for tab expansion while estimating wrapped continuation rows", () => {
+    vi.spyOn(HTMLTextAreaElement.prototype, "clientWidth", "get").mockReturnValue(84);
+    const originalGetComputedStyle = window.getComputedStyle;
+    vi.spyOn(window, "getComputedStyle").mockImplementation((element: Element) => {
+      const style = originalGetComputedStyle.call(window, element);
+      return {
+        ...style,
+        paddingLeft: "0px",
+        paddingRight: "0px",
+        fontSize: "14px",
+        tabSize: "4",
+      } as CSSStyleDeclaration;
+    });
+
+    const { container } = render(
+      <SourceView
+        value={"\t1234567\nline two"}
+        onChange={vi.fn()}
+        placeholder="Paste markdown..."
+        className="luthor-source-view--wrapped"
+        wrap="soft"
+      />,
+    );
+
+    const gutter = container.querySelector(".luthor-source-view-line-numbers") as HTMLDivElement;
+    expect(gutter.textContent).toBe("1\n\n2");
+  });
+
+  it("can disable line numbers", () => {
+    const { container } = render(
+      <SourceView
+        value={"line 1\nline 2"}
+        onChange={vi.fn()}
+        placeholder="Paste JSON..."
+        showLineNumbers={false}
+      />,
+    );
+
+    expect(container.querySelector(".luthor-source-view-line-numbers")).toBeNull();
+    const textarea = container.querySelector("textarea") as HTMLTextAreaElement;
+    expect(textarea.className).toContain("luthor-source-view");
+    expect(textarea.className).not.toContain("luthor-source-view--with-line-numbers");
   });
 });

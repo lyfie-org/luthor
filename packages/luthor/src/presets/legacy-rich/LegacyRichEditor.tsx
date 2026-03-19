@@ -9,9 +9,9 @@ import {
 } from "../extensive";
 import { PresetFeaturePolicy, joinClassNames } from "../_shared";
 
-export const LEGACY_RICH_MARKDOWN_MODES = ["visual", "json", "markdown"] as const;
-export const LEGACY_RICH_HTML_MODES = ["visual", "json", "html"] as const;
-export const LEGACY_RICH_DUAL_SOURCE_MODES = ["visual", "markdown", "html"] as const;
+export const LEGACY_RICH_MARKDOWN_MODES = ["visual-only", "visual", "json", "markdown"] as const;
+export const LEGACY_RICH_HTML_MODES = ["visual-only", "visual", "json", "html"] as const;
+export const LEGACY_RICH_DUAL_SOURCE_MODES = ["visual-only", "visual", "markdown", "html"] as const;
 
 export type LegacyRichSourceFormat = "markdown" | "html" | "both";
 export type LegacyRichEditorMode =
@@ -33,10 +33,10 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   superscript: false,
   link: true,
   horizontalRule: true,
-  table: false,
+  table: true,
   list: true,
   history: true,
-  image: false,
+  image: true,
   blockFormat: true,
   code: true,
   codeIntelligence: false,
@@ -52,20 +52,18 @@ export const LEGACY_RICH_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   emoji: false,
   draggableBlock: false,
   customNode: false,
-  themeToggle: false,
+  themeToggle: true,
 };
 
 const LEGACY_RICH_ENFORCED_FEATURE_FLAGS: FeatureFlagOverrides = {
+  tabIndent: true,
   draggableBlock: false,
-  table: false,
-  image: false,
   iframeEmbed: false,
   youTubeEmbed: false,
   customNode: false,
   emoji: false,
   commandPalette: false,
   slashCommand: false,
-  themeToggle: false,
 };
 
 const LEGACY_RICH_FEATURE_POLICY = new PresetFeaturePolicy<FeatureFlag>(
@@ -79,7 +77,7 @@ export const LEGACY_RICH_TOOLBAR_LAYOUT: ToolbarLayout = {
       items: ["undo", "redo"],
     },
     {
-      items: ["blockFormat", "quote"],
+      items: ["blockFormat", "quote", "alignLeft", "alignCenter", "alignRight", "alignJustify"],
     },
     {
       items: ["bold", "italic", "strikethrough", "code", "link"],
@@ -88,7 +86,10 @@ export const LEGACY_RICH_TOOLBAR_LAYOUT: ToolbarLayout = {
       items: ["unorderedList", "orderedList", "checkList", "indentList", "outdentList"],
     },
     {
-      items: ["codeBlock", "horizontalRule"],
+      items: ["codeBlock", "horizontalRule", "table", "image"],
+    },
+    {
+      items: ["themeToggle"],
     },
   ],
 };
@@ -105,7 +106,12 @@ function resolveLegacyRichModes(sourceFormat: LegacyRichSourceFormat): readonly 
 
 export type LegacyRichEditorProps = Omit<
   ExtensiveEditorProps,
-  "featureFlags" | "availableModes" | "initialMode" | "defaultEditorView"
+  | "featureFlags"
+  | "availableModes"
+  | "initialMode"
+  | "defaultEditorView"
+  | "sourceMetadataMode"
+  | "isListStyleDropdownEnabled"
 > & {
   sourceFormat?: LegacyRichSourceFormat;
   initialMode?: LegacyRichEditorMode;
@@ -149,6 +155,8 @@ export const LegacyRichEditor = forwardRef<ExtensiveEditorRef, LegacyRichEditorP
         )}
         availableModes={availableModes}
         initialMode={resolvedInitialMode}
+        sourceMetadataMode="none"
+        isListStyleDropdownEnabled={false}
         toolbarLayout={toolbarLayout ?? LEGACY_RICH_TOOLBAR_LAYOUT}
         featureFlags={LEGACY_RICH_FEATURE_POLICY.resolve(featureFlags)}
       />

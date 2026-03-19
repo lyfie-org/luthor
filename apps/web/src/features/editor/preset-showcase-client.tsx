@@ -7,7 +7,7 @@ import {
   HeadlessEditorPreset,
   HTMLEditor,
   LegacyRichEditor,
-  MDEditor,
+  MarkDownEditor,
   presetRegistry,
   SimpleEditor,
   type SimpleEditorSendPayload,
@@ -28,9 +28,13 @@ import {
   WEB_DEMO_SIMPLE_EDITOR_CONTENT,
   WEB_DEMO_SLASH_EDITOR_CONTENT,
 } from './demo-content';
+import {
+  syncHighlightThemeStylesheet,
+  type EditorTheme,
+} from './highlight-theme';
 import { isExternalWebsiteHref } from '@/utils/link';
 
-type Theme = 'light' | 'dark';
+type Theme = EditorTheme;
 
 const VISIBLE_PRESET_IDS = [
   'extensive',
@@ -114,7 +118,7 @@ const presetTag: Record<VisiblePresetId, string> = {
   compose: '<ComposeEditor />',
   'simple-editor': '<SimpleEditor />',
   'legacy-rich': '<LegacyRichEditor />',
-  'md-editor': '<MDEditor />',
+  'md-editor': '<MarkDownEditor />',
   'html-editor': '<HTMLEditor />',
   'slash-editor': '<SlashEditor />',
   'headless-editor': '<HeadlessEditorPreset />',
@@ -141,6 +145,7 @@ const defaultPresetDetails: PresetDetails = {
 type PresetRendererProps = {
   presetId: VisiblePresetId;
   siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
 };
 
 type PresetSurfaceProps = {
@@ -182,11 +187,18 @@ function PresetSurface({ children }: PresetSurfaceProps) {
   );
 }
 
-function ExtensiveExperience({ siteTheme }: { siteTheme: Theme }) {
+function ExtensiveExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
       <ExtensiveEditor
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         defaultContent={WEB_DEMO_EXTENSIVE_CONTENT}
         toolbarAlignment="center"
@@ -197,12 +209,19 @@ function ExtensiveExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function ComposeExperience({ siteTheme }: { siteTheme: Theme }) {
+function ComposeExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
       <ComposeEditor
         defaultContent={WEB_DEMO_COMPOSE_CONTENT}
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         compactToolbar
         placeholder="Write your customer follow-up..."
@@ -211,12 +230,19 @@ function ComposeExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function LegacyRichExperience({ siteTheme }: { siteTheme: Theme }) {
+function LegacyRichExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
       <LegacyRichEditor
         defaultContent={WEB_DEMO_LEGACY_RICH_CONTENT}
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         defaultEditorView="markdown"
       />
@@ -224,12 +250,19 @@ function LegacyRichExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function MDEditorExperience({ siteTheme }: { siteTheme: Theme }) {
+function MarkDownEditorExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
-      <MDEditor
+      <MarkDownEditor
         defaultContent={WEB_DEMO_MD_EDITOR_CONTENT}
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         defaultEditorView="markdown"
       />
@@ -237,12 +270,19 @@ function MDEditorExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function HTMLEditorExperience({ siteTheme }: { siteTheme: Theme }) {
+function HTMLEditorExperience({
+  siteTheme,
+  onEditorThemeChange,
+}: {
+  siteTheme: Theme;
+  onEditorThemeChange: (theme: Theme) => void;
+}) {
   return (
     <PresetSurface>
       <HTMLEditor
         defaultContent={WEB_DEMO_HTML_EDITOR_CONTENT}
         initialTheme={siteTheme}
+        onThemeChange={onEditorThemeChange}
         showDefaultContent={false}
         defaultEditorView="html"
       />
@@ -402,31 +442,40 @@ function SimpleEditorExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function PresetRenderer({ presetId, siteTheme }: PresetRendererProps) {
+function PresetRenderer({ presetId, siteTheme, onEditorThemeChange }: PresetRendererProps) {
   switch (presetId) {
     case 'compose':
-      return <ComposeExperience siteTheme={siteTheme} />;
+      return <ComposeExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
     case 'simple-editor':
       return <SimpleEditorExperience siteTheme={siteTheme} />;
     case 'legacy-rich':
-      return <LegacyRichExperience siteTheme={siteTheme} />;
+      return <LegacyRichExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
     case 'md-editor':
-      return <MDEditorExperience siteTheme={siteTheme} />;
+      return <MarkDownEditorExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
     case 'html-editor':
-      return <HTMLEditorExperience siteTheme={siteTheme} />;
+      return <HTMLEditorExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
     case 'slash-editor':
       return <SlashEditorExperience siteTheme={siteTheme} />;
     case 'headless-editor':
       return <HeadlessExperience siteTheme={siteTheme} />;
     case 'extensive':
     default:
-      return <ExtensiveExperience siteTheme={siteTheme} />;
+      return <ExtensiveExperience siteTheme={siteTheme} onEditorThemeChange={onEditorThemeChange} />;
   }
 }
 
 export function PresetShowcaseClient() {
   const [siteTheme, setSiteTheme] = useState<Theme>('light');
+  const [activeEditorTheme, setActiveEditorTheme] = useState<Theme>('light');
   const [selectedPresetId, setSelectedPresetId] = useState<VisiblePresetId>('extensive');
+
+  useEffect(() => {
+    setActiveEditorTheme(siteTheme);
+  }, [selectedPresetId, siteTheme]);
+
+  useEffect(() => {
+    syncHighlightThemeStylesheet(activeEditorTheme, { source: 'public' });
+  }, [activeEditorTheme]);
 
   useEffect(() => {
     setSiteTheme(resolveTheme());
@@ -497,7 +546,12 @@ export function PresetShowcaseClient() {
               <span />
             </div>
           </div>
-          <PresetRenderer key={`${selectedPresetId}-${siteTheme}`} presetId={selectedPresetId} siteTheme={siteTheme} />
+          <PresetRenderer
+            key={`${selectedPresetId}-${siteTheme}`}
+            presetId={selectedPresetId}
+            siteTheme={siteTheme}
+            onEditorThemeChange={setActiveEditorTheme}
+          />
         </div>
       </div>
     </div>

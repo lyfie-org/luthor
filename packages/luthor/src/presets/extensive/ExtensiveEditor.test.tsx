@@ -67,18 +67,21 @@ const {
       placeholder,
       className,
       wrap,
+      showLineNumbers,
     }: {
       value: string;
       onChange: (value: string) => void;
       placeholder: string;
       className?: string;
       wrap?: "soft" | "hard" | "off";
+      showLineNumbers?: boolean;
     }) => (
       <textarea
         data-testid="source-view"
         data-placeholder={placeholder}
         data-classname={className}
         data-wrap={wrap}
+        data-line-numbers={showLineNumbers ? "true" : "false"}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />
@@ -503,6 +506,27 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     expect(screen.getByTestId("toolbar")).toHaveClass("luthor-toolbar--align-right");
+  });
+
+  it("toggles inline code highlight styling without changing code block settings", () => {
+    const { container, rerender } = render(<ExtensiveEditor showDefaultContent={false} />);
+
+    expect(container.querySelector(".luthor-editor-wrapper")).toHaveAttribute(
+      "data-inline-code-highlighting",
+      "on",
+    );
+
+    rerender(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        inlineCodeHighlighting={false}
+      />,
+    );
+
+    expect(container.querySelector(".luthor-editor-wrapper")).toHaveAttribute(
+      "data-inline-code-highlighting",
+      "off",
+    );
   });
 
   it("hides toolbar when isToolbarEnabled is false and keeps command wiring active", () => {
@@ -948,6 +972,36 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
   });
 
+  it("passes line number visibility to extension factory", () => {
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    expect(createExtensiveExtensionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showLineNumbers: false,
+      }),
+    );
+  });
+
+  it("passes grammar preload mode to extension factory", () => {
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        grammarPreloadMode="idle"
+      />,
+    );
+
+    expect(createExtensiveExtensionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        grammarPreloadMode: "idle",
+      }),
+    );
+  });
+
   it("passes scaleByRatio to extension factory", () => {
     render(
       <ExtensiveEditor
@@ -1204,6 +1258,25 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
       "data-placeholder",
       "Paste JSON here",
     );
+    expect(screen.getByTestId("source-view")).toHaveAttribute(
+      "data-line-numbers",
+      "true",
+    );
+  });
+
+  it("disables source line numbers when showLineNumbers is false", () => {
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="json"
+        showLineNumbers={false}
+      />,
+    );
+
+    expect(screen.getByTestId("source-view")).toHaveAttribute(
+      "data-line-numbers",
+      "false",
+    );
   });
 
   it("supports mode-specific placeholder pass-through for markdown mode", () => {
@@ -1268,6 +1341,44 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
   });
 
+  it("hydrates markdown source mode on first render when defaultContent is provided", async () => {
+    const defaultDocument = { root: { children: [{ type: "paragraph", marker: "default-markdown" }] } };
+    jsonToMarkdownMock.mockReturnValue("## Prefilled markdown");
+
+    render(
+      <ExtensiveEditor
+        defaultContent={JSON.stringify(defaultDocument)}
+        showDefaultContent={false}
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown"]}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue("## Prefilled markdown");
+    });
+    expect(mockEditorApi.import.fromJSON).toHaveBeenCalledWith(defaultDocument);
+  });
+
+  it("hydrates html source mode on first render when defaultContent is provided", async () => {
+    const defaultDocument = { root: { children: [{ type: "paragraph", marker: "default-html" }] } };
+    jsonToHTMLMock.mockReturnValue("<p>Prefilled html</p>");
+
+    render(
+      <ExtensiveEditor
+        defaultContent={JSON.stringify(defaultDocument)}
+        showDefaultContent={false}
+        initialMode="html"
+        availableModes={["visual-editor", "html"]}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue("<p>Prefilled html</p>");
+    });
+    expect(mockEditorApi.import.fromJSON).toHaveBeenCalledWith(defaultDocument);
+  });
+
   it("routes markdown to json transitions through the visual import/export pipeline", async () => {
     const importedDocument = { root: { children: [{ type: "paragraph" }] } };
     const exportedDocument = { root: { children: [{ type: "paragraph", marker: "from-visual" }] } };
@@ -1293,6 +1404,192 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     expect(mockEditorApi.import.fromJSON).toHaveBeenCalledWith(importedDocument);
     await waitFor(() => {
       expect(screen.getByTestId("source-view")).toHaveValue(JSON.stringify(exportedDocument));
+    });
+  });
+
+  it("derives json output from markdown when markdownSourceOfTruth is enabled", async () => {
+    const importedDocument = { root: { children: [{ type: "paragraph", marker: "from-markdown-import" }] } };
+    const canonicalDocument = { root: { children: [{ type: "paragraph", marker: "from-canonical-markdown" }] } };
+    markdownToJSONMock
+      .mockReturnValueOnce(importedDocument)
+      .mockReturnValueOnce(canonicalDocument);
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown", "json"]}
+        markdownBridgeFlavor="lexical-native"
+        markdownSourceOfTruth
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("source-view"), {
+      target: { value: "## Canonical heading" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "json" }));
+
+    await waitFor(() => {
+      expect(markdownToJSONMock).toHaveBeenCalledWith("## Canonical heading", {
+        bridgeFlavor: "lexical-native",
+      });
+    });
+    expect(mockEditorApi.import.fromJSON).toHaveBeenCalledWith(importedDocument);
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue(JSON.stringify(canonicalDocument));
+    });
+    expect(mockEditorApi.export.toJSON).not.toHaveBeenCalled();
+  });
+
+  it("keeps canonical markdown unchanged across markdown->visual->markdown when visual content did not change", async () => {
+    const importedDocument = { root: { children: [{ type: "paragraph", marker: "from-markdown-import" }] } };
+    const markdownInput = [
+      "<div align=\"center\">",
+      "  <img src=\"preview.png\" alt=\"Preview\" />",
+      "</div>",
+    ].join("\n");
+    const lexicalUpdateListeners: Array<
+      (payload: { dirtyElements: Map<string, unknown>; dirtyLeaves: Set<string> }) => void
+    > = [];
+
+    markdownToJSONMock.mockReturnValue(importedDocument);
+    jsonToMarkdownMock.mockReturnValue("MUTATED_MARKDOWN");
+    mockEditorApi.lexical.registerUpdateListener.mockImplementation((listener: any) => {
+      lexicalUpdateListeners.push(listener);
+      return () => {};
+    });
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown"]}
+        markdownSourceOfTruth
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("source-view"), {
+      target: { value: markdownInput },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "visual-editor" }));
+
+    await waitFor(() => {
+      expect(markdownToJSONMock).toHaveBeenCalledWith(markdownInput);
+    });
+
+    lexicalUpdateListeners.forEach((listener) => {
+      listener({
+        dirtyElements: new Map(),
+        dirtyLeaves: new Set(),
+      });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "markdown" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue(markdownInput);
+    });
+    expect(jsonToMarkdownMock).not.toHaveBeenCalled();
+  });
+
+  it("does not mark canonical markdown stale from synchronous import updates", async () => {
+    const importedDocument = { root: { children: [{ type: "paragraph", marker: "from-markdown-import" }] } };
+    const markdownInput = [
+      "<div align=\"center\">",
+      "  <img src=\"preview.png\" alt=\"Preview\" />",
+      "</div>",
+    ].join("\n");
+    const lexicalUpdateListeners: Array<
+      (payload: { dirtyElements: Map<string, unknown>; dirtyLeaves: Set<string> }) => void
+    > = [];
+
+    markdownToJSONMock.mockReturnValue(importedDocument);
+    jsonToMarkdownMock.mockReturnValue("MUTATED_MARKDOWN");
+    mockEditorApi.lexical.registerUpdateListener.mockImplementation((listener: any) => {
+      lexicalUpdateListeners.push(listener);
+      return () => {};
+    });
+    mockEditorApi.import.fromJSON.mockImplementation(() => {
+      lexicalUpdateListeners.forEach((listener) => {
+        listener({
+          dirtyElements: new Map([["root", {}]]),
+          dirtyLeaves: new Set(),
+        });
+        listener({
+          dirtyElements: new Map([["paragraph", {}]]),
+          dirtyLeaves: new Set(["text"]),
+        });
+      });
+    });
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown"]}
+        markdownSourceOfTruth
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("source-view"), {
+      target: { value: markdownInput },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "visual-editor" }));
+
+    await waitFor(() => {
+      expect(markdownToJSONMock).toHaveBeenCalledWith(markdownInput);
+    });
+    expect(mockEditorApi.import.fromJSON).toHaveBeenCalledWith(importedDocument);
+
+    fireEvent.click(screen.getByRole("button", { name: "markdown" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("source-view")).toHaveValue(markdownInput);
+    });
+    expect(jsonToMarkdownMock).not.toHaveBeenCalled();
+  });
+
+  it("uses metadata-free bridge calls when sourceMetadataMode is none", async () => {
+    const importedDocument = { root: { children: [{ type: "paragraph" }] } };
+    const exportedDocument = { root: { children: [{ type: "paragraph", marker: "from-visual" }] } };
+    const onReady = vi.fn();
+    markdownToJSONMock.mockReturnValueOnce(importedDocument);
+    mockEditorApi.export.toJSON.mockReturnValue(exportedDocument);
+    jsonToMarkdownMock.mockReturnValue("## heading");
+    jsonToHTMLMock.mockReturnValue("<p>heading</p>");
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        onReady={onReady}
+        sourceMetadataMode="none"
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown", "json"]}
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("source-view"), {
+      target: { value: "## Draft heading" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "json" }));
+
+    await waitFor(() => {
+      expect(markdownToJSONMock).toHaveBeenCalledWith("## Draft heading", {
+        metadataMode: "none",
+      });
+    });
+
+    const methods = onReady.mock.calls[0]?.[0] as {
+      getMarkdown: () => string;
+      getHTML: () => string;
+    };
+    expect(methods.getMarkdown()).toBe("## heading");
+    expect(methods.getHTML()).toBe("<p>heading</p>");
+    expect(jsonToMarkdownMock).toHaveBeenLastCalledWith(exportedDocument, {
+      metadataMode: "none",
+    });
+    expect(jsonToHTMLMock).toHaveBeenLastCalledWith(exportedDocument, {
+      metadataMode: "none",
     });
   });
 

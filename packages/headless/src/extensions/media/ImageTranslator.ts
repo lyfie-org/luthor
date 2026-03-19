@@ -22,6 +22,10 @@ export type SerializedImageNode = Spread<
     alt: string;
     /** Optional caption */
     caption?: string;
+    /** Optional link wrapper URL for badge-style linked images */
+    linkHref?: string;
+    /** Optional link title for badge-style linked images */
+    linkTitle?: string;
     /** Alignment */
     alignment: "left" | "center" | "right" | "none";
     /** CSS class name */
@@ -78,6 +82,7 @@ export class ImageTranslator {
             }
             const img = domNode;
             const figure = img.closest("figure") as HTMLElement | null;
+            const link = img.closest("a[href]") as HTMLAnchorElement | null;
             const alignment = this.resolveAlignment(img, figure);
 
             // Extract caption from figure/figcaption if present
@@ -99,6 +104,8 @@ export class ImageTranslator {
                 img.src,
                 img.alt || "",
                 caption,
+                link?.getAttribute("href") || undefined,
+                link?.getAttribute("title") || undefined,
                 alignment,
                 img.className || undefined,
                 this.extractStyleObject(img),
@@ -135,6 +142,7 @@ export class ImageTranslator {
 
             const figcaption = figure.querySelector("figcaption");
             const caption = figcaption?.textContent || undefined;
+            const link = img.closest("a[href]") as HTMLAnchorElement | null;
             const alignment = this.resolveAlignment(img, figure);
 
             const widthAttr = img.getAttribute("width");
@@ -147,6 +155,8 @@ export class ImageTranslator {
                 img.src,
                 img.alt || "",
                 caption,
+                link?.getAttribute("href") || undefined,
+                link?.getAttribute("title") || undefined,
                 alignment,
                 img.className || undefined,
                 this.extractStyleObject(img),
@@ -189,6 +199,8 @@ export class ImageTranslator {
       src: node.__src,
       alt: node.__alt,
       caption: node.__caption,
+      linkHref: node.__linkHref,
+      linkTitle: node.__linkTitle,
       alignment: node.__alignment,
       className: node.__className,
       style: node.__style ? this.styleObjectToRecord(node.__style) : undefined,
@@ -209,6 +221,8 @@ export class ImageTranslator {
       src,
       alt,
       caption,
+      linkHref,
+      linkTitle,
       alignment,
       className,
       style,
@@ -225,6 +239,8 @@ export class ImageTranslator {
       src,
       alt,
       caption,
+      linkHref,
+      linkTitle,
       alignment,
       className,
       style ? this.recordToStyleObject(style) : undefined,
@@ -288,8 +304,20 @@ export class ImageTranslator {
     element.style.margin = "1rem 0";
     element.style.display = "block";
 
-    // Add image to figure
-    element.appendChild(img);
+    if (node.__linkHref) {
+      const anchor = document.createElement("a");
+      anchor.href = node.__linkHref;
+      if (node.__linkTitle) {
+        anchor.title = node.__linkTitle;
+      }
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      anchor.appendChild(img);
+      element.appendChild(anchor);
+    } else {
+      // Add image to figure
+      element.appendChild(img);
+    }
 
     // Add caption if present
     if (node.__caption) {

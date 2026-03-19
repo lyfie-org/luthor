@@ -164,7 +164,9 @@ function documentToJSONString(children: JSONNode[]): string {
 }
 
 function markdownToJSONString(markdownSource: string): string {
-  return JSON.stringify(headless.markdownToJSON(markdownSource));
+  return JSON.stringify(
+    headless.markdownToJSON(markdownSource, { bridgeFlavor: 'github' }),
+  );
 }
 
 function htmlToJSONString(htmlSource: string): string {

@@ -17,24 +17,27 @@ describe("HTMLEditor", () => {
     vi.clearAllMocks();
   });
 
-  it("locks modes to visual, json, and html", () => {
+  it("locks modes to visual-only, visual, json, and html", () => {
     render(<HTMLEditor showDefaultContent={false} />);
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
       availableModes?: string[];
       initialMode?: string;
+      isListStyleDropdownEnabled?: boolean;
     };
 
-    expect(props.availableModes).toEqual(["visual", "json", "html"]);
+    expect(props.availableModes).toEqual(["visual-only", "visual", "json", "html"]);
     expect(props.initialMode).toBe("visual");
+    expect(props.isListStyleDropdownEnabled).toBe(false);
   });
 
-  it("enables html-safe markdown features and disables metadata-heavy features", () => {
+  it("enables html-safe core features with metadata-free source conversion", () => {
     render(<HTMLEditor showDefaultContent={false} />);
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
       featureFlags?: Record<string, boolean>;
       toolbarLayout?: { sections?: Array<{ items?: string[] }> };
+      sourceMetadataMode?: string;
     };
 
     expect(props.featureFlags).toEqual(
@@ -46,18 +49,35 @@ describe("HTMLEditor", () => {
         codeFormat: true,
         blockFormat: true,
         list: true,
-        table: false,
-        image: false,
+        table: true,
+        image: true,
         iframeEmbed: false,
         youTubeEmbed: false,
         customNode: false,
         draggableBlock: false,
+        tabIndent: true,
+        themeToggle: true,
       }),
     );
+    expect(props.sourceMetadataMode).toBe("none");
     expect(
       props.toolbarLayout?.sections?.some((section) =>
-        (section.items ?? []).includes("table") ||
-        (section.items ?? []).includes("image") ||
+        (section.items ?? []).includes("table"),
+      ),
+    ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
+        (section.items ?? []).includes("image"),
+      ),
+    ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
+        (section.items ?? []).includes("indentList") &&
+        (section.items ?? []).includes("outdentList"),
+      ),
+    ).toBe(true);
+    expect(
+      props.toolbarLayout?.sections?.some((section) =>
         (section.items ?? []).includes("embed"),
       ),
     ).toBe(false);
@@ -84,5 +104,19 @@ describe("HTMLEditor", () => {
     expect(props.className).toContain("outer");
     expect(props.variantClassName).toContain("luthor-preset-html-editor__variant");
     expect(props.variantClassName).toContain("inner");
+  });
+
+  it("forwards line number visibility to underlying editor", () => {
+    render(
+      <HTMLEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      showLineNumbers?: boolean;
+    };
+    expect(props.showLineNumbers).toBe(false);
   });
 });

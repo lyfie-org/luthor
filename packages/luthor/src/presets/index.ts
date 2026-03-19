@@ -8,7 +8,7 @@ import {
 } from "./extensive";
 import { composePreset, ComposeEditor } from "./compose";
 import { simpleEditorPreset, SimpleEditor } from "./simple-editor";
-import { mdEditorPreset, MDEditor } from "./md-editor";
+import { mdEditorPreset, MarkDownEditor } from "./md-editor";
 import { htmlEditorPreset, HTMLEditor } from "./html-editor";
 import { legacyRichPreset, LegacyRichEditor } from "./legacy-rich";
 import { slashEditorPreset, SlashEditor } from "./slash-editor";
@@ -31,7 +31,7 @@ import type {
   SimpleEditorOutputFormat,
   SimpleToolbarButton,
 } from "./simple-editor";
-import type { MDEditorProps, MDEditorMode } from "./md-editor";
+import type { MarkDownEditorProps, MarkDownEditorMode } from "./md-editor";
 import type { HTMLEditorProps, HTMLEditorMode } from "./html-editor";
 import type {
   LegacyRichEditorProps,
@@ -67,7 +67,7 @@ export {
   simpleEditorPreset,
   SimpleEditor,
   mdEditorPreset,
-  MDEditor,
+  MarkDownEditor,
   htmlEditorPreset,
   HTMLEditor,
   legacyRichPreset,
@@ -93,8 +93,8 @@ export type {
   SimpleEditorOutputFormat,
   SimpleFormattingOptions,
   SimpleToolbarButton,
-  MDEditorProps,
-  MDEditorMode,
+  MarkDownEditorProps,
+  MarkDownEditorMode,
   HTMLEditorProps,
   HTMLEditorMode,
   LegacyRichEditorProps,

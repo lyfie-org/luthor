@@ -3,42 +3,24 @@
 import { ExtensiveEditor } from '@lyfie/luthor';
 import { useEffect, useState } from 'react';
 import { HOME_EXTENSIVE_SHORT_CONTENT } from './demo-content';
-
-type Theme = 'light' | 'dark';
-const HIGHLIGHT_THEME_LINK_ID = 'luthor-highlightjs-theme';
+import {
+  syncHighlightThemeStylesheet,
+  type EditorTheme,
+} from './highlight-theme';
 
 type ExtensiveEditorClientProps = {
-  siteTheme?: Theme;
+  siteTheme?: EditorTheme;
 };
 
 export function ExtensiveEditorClient({ siteTheme }: ExtensiveEditorClientProps) {
-  const [editorTheme, setEditorTheme] = useState<Theme>(siteTheme ?? 'light');
+  const [editorTheme, setEditorTheme] = useState<EditorTheme>(siteTheme ?? 'light');
 
   useEffect(() => {
     setEditorTheme(siteTheme ?? 'light');
   }, [siteTheme]);
 
   useEffect(() => {
-    const href =
-      editorTheme === 'dark'
-        ? '/highlightjs/github-dark.css'
-        : '/highlightjs/github.css';
-
-    const existing = document.getElementById(HIGHLIGHT_THEME_LINK_ID);
-    const link =
-      existing instanceof HTMLLinkElement
-        ? existing
-        : document.createElement('link');
-
-    if (!(existing instanceof HTMLLinkElement)) {
-      link.id = HIGHLIGHT_THEME_LINK_ID;
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-    }
-
-    if (link.href !== new URL(href, window.location.origin).href) {
-      link.href = href;
-    }
+    syncHighlightThemeStylesheet(editorTheme, { source: 'public' });
   }, [editorTheme]);
 
   return (

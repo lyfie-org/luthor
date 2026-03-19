@@ -436,6 +436,27 @@ export function collectSupportedNodeMetadataPatches(
   const baseDocument = normalizeDocument(input);
   const rootChildren = Array.isArray(baseDocument.root.children) ? baseDocument.root.children : [];
   const envelopes: MetadataEnvelope[] = [];
+  const rootType = typeof baseDocument.root.type === "string" ? baseDocument.root.type : "root";
+
+  if (rootType && options.supportedNodeTypes.has(rootType)) {
+    const rootPatch = options.extractPatch({
+      mode: options.mode,
+      type: rootType,
+      path: [],
+      node: baseDocument.root,
+    });
+
+    if (rootPatch && hasOwnEntries(rootPatch)) {
+      envelopes.push({
+        id: createEnvelopeId(rootType, [], envelopes.length + 1),
+        type: rootType,
+        path: [],
+        node: rootPatch,
+        fallback: "",
+        strategy: "merge",
+      });
+    }
+  }
 
   const visitChildren = (children: unknown[], parentPath: readonly number[]): void => {
     for (const [index, child] of children.entries()) {

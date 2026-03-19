@@ -21,6 +21,7 @@ export default defineConfig({
     "@lexical/table",
     "@lexical/utils",
     "highlight.js",
+    "prismjs",
   ],
   splitting: false,
   treeshake: true,

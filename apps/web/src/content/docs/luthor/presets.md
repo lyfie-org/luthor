@@ -26,13 +26,22 @@ This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
 | Preset | Best for | Mode profile |
 | --- | --- | --- |
 | `ExtensiveEditor` | Full-feature editor UI | `visual-editor`, `visual-only`, `json`, `markdown`, `html` |
-| `ComposeEditor` | Focused drafting UI | `visual`, `json` |
+| `ComposeEditor` | Focused drafting UI | `visual-only`, `visual`, `json` |
 | `SimpleEditor` | Chat/message input | `visual` only |
 | `LegacyRichEditor` | Metadata-light markdown/html-compatible flow | Depends on `sourceFormat` |
-| `MDEditor` | Markdown-first flow | `visual`, `json`, `markdown` |
-| `HTMLEditor` | HTML-first flow | `visual`, `json`, `html` |
-| `SlashEditor` | Slash-first interactions | `visual`, `json`, `markdown`, `html` |
-| `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual`, `json`, `markdown`, `html` |
+| `MarkDownEditor` | Markdown-first flow | `visual-only`, `visual`, `json`, `markdown` |
+| `HTMLEditor` | HTML-first flow | `visual-only`, `visual`, `json`, `html` |
+| `SlashEditor` | Slash-first interactions | `visual-only`, `visual`, `json`, `markdown`, `html` |
+| `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual-only`, `visual`, `json`, `markdown`, `html` |
+
+## Metadata policy by preset family
+
+- Metadata-free by default:
+  - `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`
+  - Source bridges use `metadataMode: "none"` for clean markdown/html output.
+- Metadata-friendly by default:
+  - `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `SlashEditor`, `HeadlessEditorPreset`
+  - Source bridges preserve metadata only when a feature cannot be represented natively.
 
 ## Preset docs
 
@@ -40,7 +49,7 @@ This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
 - [Compose Editor](/docs/luthor/presets/compose-editor/)
 - [Simple Editor](/docs/luthor/presets/simple-editor/)
 - [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/)
-- [MD Editor](/docs/luthor/presets/md-editor/)
+- [MarkDown Editor](/docs/luthor/presets/md-editor/)
 - [HTML Editor](/docs/luthor/presets/html-editor/)
 - [Slash Editor](/docs/luthor/presets/slash-editor/)
 - [Headless Editor](/docs/luthor/presets/headless-editor-preset/)

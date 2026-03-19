@@ -5,7 +5,7 @@ import {
   HeadlessEditorPreset,
   HTMLEditor,
   LegacyRichEditor,
-  MDEditor,
+  MarkDownEditor,
   SimpleEditor,
   SlashEditor,
 } from "@lyfie/luthor";
@@ -21,8 +21,11 @@ import {
   DEMO_SIMPLE_EDITOR_CONTENT,
   DEMO_SLASH_EDITOR_CONTENT,
 } from "./demo-content";
+import {
+  syncHighlightThemeStylesheet,
+  type EditorTheme,
+} from "./highlight-theme";
 import { useDemoTheme } from "./hooks/useDemoTheme";
-import "highlight.js/styles/github.css";
 
 type PresetId =
   | "extensive"
@@ -48,6 +51,7 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
 function App() {
   const { theme, toggleTheme } = useDemoTheme();
   const [preset, setPreset] = useState<PresetId>("extensive");
+  const [activeEditorTheme, setActiveEditorTheme] = useState<EditorTheme>(theme);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const extensiveEditorRef = useRef<ExtensiveEditorRef | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -60,6 +64,14 @@ function App() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    setActiveEditorTheme(theme);
+  }, [preset, theme]);
+
+  useEffect(() => {
+    syncHighlightThemeStylesheet(activeEditorTheme, { source: "public" });
+  }, [activeEditorTheme]);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -98,6 +110,8 @@ function App() {
           <ComposeEditor
             defaultContent={DEMO_COMPOSE_CONTENT}
             showDefaultContent={false}
+            initialTheme={theme}
+            onThemeChange={setActiveEditorTheme}
             compactToolbar
             placeholder="Write a draft..."
           />
@@ -107,6 +121,7 @@ function App() {
           <SimpleEditor
             defaultContent={DEMO_SIMPLE_EDITOR_CONTENT}
             showDefaultContent={false}
+            initialTheme={theme}
             placeholder="Type a message"
             maxHeight={220}
             minHeight={140}
@@ -126,14 +141,18 @@ function App() {
             defaultContent={DEMO_LEGACY_RICH_CONTENT}
             showDefaultContent={false}
             defaultEditorView="markdown"
+            initialTheme={theme}
+            onThemeChange={setActiveEditorTheme}
           />
         );
       case "md-editor":
         return (
-          <MDEditor
+          <MarkDownEditor
             defaultContent={DEMO_MD_EDITOR_CONTENT}
             showDefaultContent={false}
             defaultEditorView="markdown"
+            initialTheme={theme}
+            onThemeChange={setActiveEditorTheme}
           />
         );
       case "html-editor":
@@ -142,6 +161,8 @@ function App() {
             defaultContent={DEMO_HTML_EDITOR_CONTENT}
             showDefaultContent={false}
             defaultEditorView="html"
+            initialTheme={theme}
+            onThemeChange={setActiveEditorTheme}
           />
         );
       case "slash-editor":
@@ -149,6 +170,7 @@ function App() {
           <SlashEditor
             defaultContent={DEMO_SLASH_EDITOR_CONTENT}
             showDefaultContent={false}
+            initialTheme={theme}
           />
         );
       case "headless-editor":
@@ -156,6 +178,7 @@ function App() {
           <HeadlessEditorPreset
             defaultContent={DEMO_HEADLESS_PRESET_CONTENT}
             showDefaultContent={false}
+            initialTheme={theme}
           />
         );
       default:
@@ -164,6 +187,8 @@ function App() {
             ref={extensiveEditorRef}
             defaultContent={DEMO_EXTENSIVE_CONTENT}
             showDefaultContent={false}
+            initialTheme={theme}
+            onThemeChange={setActiveEditorTheme}
             placeholder={{
               visual: "Write your story...",
               json: "Paste JSON document...",
@@ -177,7 +202,7 @@ function App() {
           />
         );
     }
-  }, [preset]);
+  }, [theme, preset]);
 
   return (
     <div className="app-shell" data-theme={theme}>

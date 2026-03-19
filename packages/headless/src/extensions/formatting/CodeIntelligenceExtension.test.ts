@@ -1,15 +1,29 @@
+import { getCodeLanguages, normalizeCodeLang } from "@lexical/code";
 import type { LexicalEditor } from "lexical";
-import { CodeIntelligenceExtension } from "./CodeIntelligenceExtension";
+import {
+  CodeIntelligenceExtension,
+  __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS,
+} from "./CodeIntelligenceExtension";
 import { describe, expect, it, vi } from "vitest";
+import { isKnownCodeLanguage } from "./codeLanguageSupport";
 
 describe("CodeIntelligenceExtension language options", () => {
   it("returns default language options when no override is provided", () => {
     const extension = new CodeIntelligenceExtension();
     const options = extension.getLanguageOptionsSnapshot();
+    const supported = new Set(
+      getCodeLanguages()
+        .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
+        .filter((id): id is string => Boolean(id)),
+    );
 
     expect(options).toContain("plain");
     expect(options).toContain("typescript");
-    expect(options).not.toContain("yaml");
+    expect(options).toContain("bash");
+    expect(options).toContain("yaml");
+    options.forEach((option) => {
+      expect(supported.has(option) || isKnownCodeLanguage(option)).toBe(true);
+    });
   });
 
   it("appends custom language options and normalizes aliases", () => {
@@ -36,7 +50,7 @@ describe("CodeIntelligenceExtension language options", () => {
 
     const options = extension.getLanguageOptionsSnapshot();
 
-    expect(options).toEqual(["js", "sql", "typescript"]);
+    expect(options).toEqual(["javascript", "sql", "typescript"]);
     expect(options).not.toContain("plain");
   });
 
@@ -62,6 +76,19 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(() => extension.getLanguageOptionsSnapshot()).toThrow(/Invalid language option/);
   });
 
+  it("uses full language labels for canonical and alias identifiers", () => {
+    const { getLanguageDisplayLabel } = __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS;
+
+    expect(getLanguageDisplayLabel("js")).toBe("JavaScript");
+    expect(getLanguageDisplayLabel("javascript")).toBe("JavaScript");
+    expect(getLanguageDisplayLabel("py")).toBe("Python");
+    expect(getLanguageDisplayLabel("ts")).toBe("TypeScript");
+    expect(getLanguageDisplayLabel("text")).toBe("Plain Text");
+    expect(getLanguageDisplayLabel("txt")).toBe("Plain Text");
+    expect(getLanguageDisplayLabel("plain")).toBe("Plain Text");
+    expect(getLanguageDisplayLabel("bash")).toBe("Bash");
+  });
+
   it("uses plain fallback theme for plaintext-like languages", () => {
     const extension = new CodeIntelligenceExtension() as CodeIntelligenceExtension & {
       getThemeForLanguage?: (language: string | null | undefined) => string | null;
@@ -79,7 +106,7 @@ describe("CodeIntelligenceExtension language options", () => {
 
     expect(extension.getThemeForLanguage?.("typescript")).toBe("hljs");
     expect(extension.getThemeForLanguage?.("javascript")).toBe("hljs");
-    expect(extension.getThemeForLanguage?.("tsx")).toBe("plain");
+    expect(extension.getThemeForLanguage?.("tsx")).toBe("hljs");
   });
 
   it("does not update code block language when the editor is non-editable", () => {

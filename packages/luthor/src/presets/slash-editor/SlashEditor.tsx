@@ -7,7 +7,7 @@ import {
 } from "../extensive";
 import { PresetFeaturePolicy, joinClassNames } from "../_shared";
 
-export const SLASH_EDITOR_DEFAULT_MODES = ["visual", "json", "markdown", "html"] as const;
+export const SLASH_EDITOR_DEFAULT_MODES = ["visual-only", "visual", "json", "markdown", "html"] as const;
 
 const SLASH_EDITOR_DEFAULT_FLAGS: FeatureFlagOverrides = {
   bold: true,

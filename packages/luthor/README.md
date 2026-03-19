@@ -55,7 +55,7 @@ export function App() {
 - `ExtensiveEditor`
 - `ComposeEditor`
 - `SimpleEditor`
-- `MDEditor`
+- `MarkDownEditor`
 - `HTMLEditor`
 - `LegacyRichEditor`
 - `SlashEditor`

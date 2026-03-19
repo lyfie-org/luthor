@@ -29,6 +29,12 @@ Source implementation:
 4. The converter builds markdown or html from sanitized JSON.
 5. `appendMetadataEnvelopes(...)` appends envelopes as `<!-- luthor:meta v1 ... -->`.
 
+Bridge-mode controls:
+
+- `metadataMode: "preserve"` (default): emit metadata envelopes when required.
+- `metadataMode: "none"`: skip envelope emission for metadata-free source output.
+- `bridgeFlavor` on markdown bridge (`"github" | "luthor" | "lexical-native"`) controls markdown conversion behavior while respecting `metadataMode`.
+
 ## Import pipeline (`markdownToJSON` and `htmlToJSON`)
 
 1. `extractMetadataEnvelopes(...)` strips and parses envelope comments.
@@ -71,4 +77,6 @@ Legacy comments are still supported for backwards compatibility:
 
 ## Preset impact
 
-`LegacyRichEditor`, `MDEditor`, `HTMLEditor`, and `HeadlessEditorPreset` in `@lyfie/luthor` disable many metadata-heavy features by default to keep source workflows predictable.
+`LegacyRichEditor`, `MarkDownEditor`, and `HTMLEditor` in `@lyfie/luthor` run in metadata-free bridge mode (`metadataMode: "none"`), so Markdown/HTML output does not include `luthor:meta` comments.
+
+`HeadlessEditorPreset` continues to use metadata-preserving bridge mode by default.

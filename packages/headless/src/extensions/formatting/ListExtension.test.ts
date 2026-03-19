@@ -47,4 +47,38 @@ describe("ListExtension unordered pattern internals", () => {
       "plain",
     ]);
   });
+
+  it("clears unordered marker style tokens while preserving unrelated styles", () => {
+    let styleText = [
+      "--luthor-unordered-marker-kind: disc",
+      '--luthor-unordered-marker-content: "bullet"',
+      "color: red",
+    ].join("; ");
+    const node = {
+      getStyle: () => styleText,
+      setStyle: (nextStyle: string) => {
+        styleText = nextStyle;
+      },
+    };
+
+    __TEST_ONLY_LIST_INTERNALS.clearUnorderedMarkerStyleTokens(node);
+
+    expect(styleText).toContain("color: red");
+    expect(styleText).not.toContain("--luthor-unordered-marker-kind");
+    expect(styleText).not.toContain("--luthor-unordered-marker-content");
+  });
+
+  it("keeps style text unchanged when unordered marker style tokens are absent", () => {
+    let styleText = "color: red; font-weight: 600";
+    const node = {
+      getStyle: () => styleText,
+      setStyle: (nextStyle: string) => {
+        styleText = nextStyle;
+      },
+    };
+
+    __TEST_ONLY_LIST_INTERNALS.clearUnorderedMarkerStyleTokens(node);
+
+    expect(styleText).toBe("color: red; font-weight: 600");
+  });
 });

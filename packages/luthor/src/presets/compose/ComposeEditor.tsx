@@ -67,7 +67,7 @@ export const ComposeEditor = forwardRef<ExtensiveEditorRef, ComposeEditorProps>(
             compactToolbar ? "luthor-preset-compose__toolbar--compact" : undefined,
             toolbarClassName,
           )}
-          availableModes={["visual", "json"]}
+          availableModes={["visual-only", "visual", "json"]}
           featureFlags={COMPOSE_FEATURE_POLICY.resolve(featureFlags)}
         />
       </div>

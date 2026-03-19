@@ -69,7 +69,7 @@ Disable selectively:
 
 Some presets enforce specific flags to protect preset contracts:
 
-- `LegacyRichEditor`: keeps metadata-heavy features off (`table`, `image`, embeds, custom nodes, draggable, palette/slash, emoji, theme toggle).
+- `LegacyRichEditor`: keeps advanced non-markdown features off (embeds, custom nodes, draggable, palette/slash, emoji, theme toggle) while keeping markdown-compatible structure/media features on (`table`, `image`, `horizontalRule`, block alignment, and list indentation).
 - `SlashEditor`: enforces `slashCommand: true` and `commandPalette: false`.
 - `HeadlessEditorPreset`: keeps a lightweight metadata-friendly profile.
 - `SimpleEditor`: hardcodes a minimal visual-only chat input profile.

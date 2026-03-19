@@ -30,6 +30,7 @@ export function App() {
 | Feature flags | All enabled by default |
 | Line height baseline | `minimumDefaultLineHeight = 1.5` |
 | List indentation | `maxListIndentation = 8` sub-indent levels |
+| Code/source line numbers | Enabled (`showLineNumbers = true`) |
 
 ## Core props (high signal)
 
@@ -53,8 +54,9 @@ export function App() {
 - Typography/code options:
   - `fontFamilyOptions`, `fontSizeOptions`, `lineHeightOptions`
   - `minimumDefaultLineHeight`, `scaleByRatio`
-  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
-  - `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
+  - `syntaxHighlighting`, `grammarPreloadMode`, `codeHighlightProvider`, `loadCodeHighlightProvider`
+  - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
+  - `inlineCodeHighlighting` (toggle accented inline-code styling without affecting code blocks)
   - `maxListIndentation`
 
 For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
@@ -79,7 +81,10 @@ If source parsing fails, an inline source error panel is shown and visual conten
 
 ## Theme callback example (`highlight.js`)
 
-Use `onThemeChange` when host styling must follow editor theme state.
+Use `onThemeChange` when host styling must follow editor theme state.  
+Code token colors render only when your app loads highlight theme CSS (`highlight.js` or equivalent custom `.hljs*` styles).
+
+`ExtensiveEditor` supports common industry grammars (for example `bash`, `json`, `yaml`, `go`, `php`, `ruby`, `csharp`, `kotlin`, `jsx`, `tsx`, `graphql`, `docker`, `toml`, `lua`, `perl`, `r`, `scala`, `dart`) with lazy loading by default (`grammarPreloadMode="lazy"`).
 
 ```tsx
 'use client';
@@ -89,12 +94,25 @@ import { useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 const HIGHLIGHT_THEME_LINK_ID = 'luthor-highlightjs-theme';
+const SOURCE: 'public' | 'cdn' = 'public';
+const HIGHLIGHT_PATHS = {
+  public: {
+    light: '/highlightjs/github.css',
+    dark: '/highlightjs/github-dark.css',
+  },
+  cdn: {
+    light: 'https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css',
+    dark: 'https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github-dark.min.css',
+  },
+} as const;
 
 export function EditorWithHighlightTheme() {
   const [editorTheme, setEditorTheme] = useState<Theme>('light');
 
   useEffect(() => {
-    const href = editorTheme === 'dark' ? '/highlightjs/github-dark.css' : '/highlightjs/github.css';
+    const href = editorTheme === 'dark'
+      ? HIGHLIGHT_PATHS[SOURCE].dark
+      : HIGHLIGHT_PATHS[SOURCE].light;
     const existing = document.getElementById(HIGHLIGHT_THEME_LINK_ID);
     const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
 
@@ -113,10 +131,25 @@ export function EditorWithHighlightTheme() {
 }
 ```
 
-Place these files in your app static assets:
+If `SOURCE = 'public'`, place these files in your app static assets:
 
 - `/public/highlightjs/github.css`
 - `/public/highlightjs/github-dark.css`
+
+## Code view line numbers
+
+Line numbers are enabled by default for:
+
+- Visual code blocks
+- JSON source view
+- Markdown source view
+- HTML source view
+
+Use `showLineNumbers={false}` to disable them globally for this preset instance.
+
+```tsx
+<ExtensiveEditor showLineNumbers={false} />
+```
 
 ## Ref API
 

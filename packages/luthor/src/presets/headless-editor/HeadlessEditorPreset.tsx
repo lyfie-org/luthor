@@ -20,9 +20,10 @@ import { PresetFeaturePolicy, joinClassNames } from "../_shared";
 
 const { Provider, useEditor } = createEditorSystem<typeof extensiveExtensions>();
 
-export const HEADLESS_EDITOR_DEFAULT_MODES = ["visual", "json", "markdown", "html"] as const;
+export const HEADLESS_EDITOR_DEFAULT_MODES = ["visual-only", "visual", "json", "markdown", "html"] as const;
 
 const HEADLESS_MODE_LABELS = {
+  "visual-only": "Visual Only",
   visual: "Visual",
   json: "JSON",
   markdown: "MD",
@@ -145,7 +146,7 @@ type HeadlessActiveStates = {
   canRedo?: boolean;
 };
 
-type HeadlessEditorSourceMode = Exclude<HeadlessEditorPresetMode, "visual">;
+type HeadlessEditorSourceMode = Exclude<HeadlessEditorPresetMode, "visual" | "visual-only">;
 
 type HeadlessEditorContentState = {
   json: string;
@@ -209,6 +210,10 @@ function parseSourceToJSON(mode: HeadlessEditorSourceMode, value: string): unkno
   }
 }
 
+function isHeadlessVisualMode(mode: HeadlessEditorPresetMode): mode is "visual" | "visual-only" {
+  return mode === "visual" || mode === "visual-only";
+}
+
 function convertJSONToSource(mode: HeadlessEditorSourceMode, value: unknown): string {
   const parsed = parseVisualJSON(value);
   switch (mode) {
@@ -244,10 +249,12 @@ function resolvePlaceholders(
 function HeadlessEditorContent({
   initialMode,
   placeholders,
+  showLineNumbers,
   onReady,
 }: {
   initialMode: HeadlessEditorPresetMode;
   placeholders: HeadlessEditorContentState & { visual: string };
+  showLineNumbers: boolean;
   onReady?: (methods: HeadlessEditorMethods) => void;
 }) {
   const { activeStates, commands, export: exportApi, import: importApi } = useEditor();
@@ -317,8 +324,8 @@ function HeadlessEditorContent({
         return;
       }
 
-      if (mode === "visual") {
-        if (nextMode !== "visual") {
+      if (isHeadlessVisualMode(mode)) {
+        if (!isHeadlessVisualMode(nextMode)) {
           try {
             void syncSourceStateFromVisual();
             setSourceError(null);
@@ -339,9 +346,9 @@ function HeadlessEditorContent({
         const currentSource = sourceState[mode];
         const parsedJSON = setVisualFromSource(mode, currentSource);
 
-        if (nextMode === "visual") {
+        if (isHeadlessVisualMode(nextMode)) {
           setSourceError(null);
-          setMode("visual");
+          setMode(nextMode);
           return;
         }
 
@@ -401,7 +408,9 @@ function HeadlessEditorContent({
     commands.insertHardBreak?.();
   }, [commands, mode]);
 
-  const isVisualMode = mode === "visual";
+  const isVisualMode = isHeadlessVisualMode(mode);
+  const isEditableVisualMode = mode === "visual";
+  const isVisualOnlyMode = mode === "visual-only";
 
   return (
     <div className="luthor-editor" data-mode={mode}>
@@ -419,7 +428,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.bold ? " is-active" : ""}`}
           onClick={() => commands.toggleBold?.()}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Bold
         </button>
@@ -427,7 +436,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.italic ? " is-active" : ""}`}
           onClick={() => commands.toggleItalic?.()}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Italic
         </button>
@@ -435,7 +444,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.strikethrough ? " is-active" : ""}`}
           onClick={() => commands.toggleStrikethrough?.()}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Strike
         </button>
@@ -443,7 +452,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.code ? " is-active" : ""}`}
           onClick={() => commands.formatText?.("code")}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Code
         </button>
@@ -451,7 +460,7 @@ function HeadlessEditorContent({
           type="button"
           className="luthor-preset-headless-editor__button"
           onClick={clearMarks}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Clear marks
         </button>
@@ -459,7 +468,7 @@ function HeadlessEditorContent({
           type="button"
           className="luthor-preset-headless-editor__button"
           onClick={clearNodes}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Clear nodes
         </button>
@@ -467,7 +476,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.isParagraph ? " is-active" : ""}`}
           onClick={() => commands.toggleParagraph?.()}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Paragraph
         </button>
@@ -475,7 +484,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.isH1 ? " is-active" : ""}`}
           onClick={() => commands.toggleHeading?.("h1")}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           H1
         </button>
@@ -483,7 +492,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.isH2 ? " is-active" : ""}`}
           onClick={() => commands.toggleHeading?.("h2")}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           H2
         </button>
@@ -491,7 +500,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.isH3 ? " is-active" : ""}`}
           onClick={() => commands.toggleHeading?.("h3")}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           H3
         </button>
@@ -499,7 +508,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.isH4 ? " is-active" : ""}`}
           onClick={() => commands.toggleHeading?.("h4")}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           H4
         </button>
@@ -507,7 +516,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.isH5 ? " is-active" : ""}`}
           onClick={() => commands.toggleHeading?.("h5")}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           H5
         </button>
@@ -515,7 +524,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.isH6 ? " is-active" : ""}`}
           onClick={() => commands.toggleHeading?.("h6")}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           H6
         </button>
@@ -523,7 +532,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.unorderedList ? " is-active" : ""}`}
           onClick={() => commands.toggleUnorderedList?.()}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Bullet list
         </button>
@@ -531,7 +540,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.orderedList ? " is-active" : ""}`}
           onClick={() => commands.toggleOrderedList?.()}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Ordered list
         </button>
@@ -539,7 +548,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.isInCodeBlock ? " is-active" : ""}`}
           onClick={() => commands.toggleCodeBlock?.()}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Code block
         </button>
@@ -547,7 +556,7 @@ function HeadlessEditorContent({
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.isQuote ? " is-active" : ""}`}
           onClick={() => commands.toggleQuote?.()}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Blockquote
         </button>
@@ -555,7 +564,7 @@ function HeadlessEditorContent({
           type="button"
           className="luthor-preset-headless-editor__button"
           onClick={() => commands.insertHorizontalRule?.()}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Horizontal rule
         </button>
@@ -563,7 +572,7 @@ function HeadlessEditorContent({
           type="button"
           className="luthor-preset-headless-editor__button"
           onClick={insertHardBreak}
-          disabled={!isVisualMode}
+          disabled={!isEditableVisualMode}
         >
           Hard break
         </button>
@@ -571,7 +580,7 @@ function HeadlessEditorContent({
           type="button"
           className="luthor-preset-headless-editor__button"
           onClick={() => commands.undo?.()}
-          disabled={!isVisualMode || !typedActiveStates.canUndo}
+          disabled={!isEditableVisualMode || !typedActiveStates.canUndo}
         >
           Undo
         </button>
@@ -579,7 +588,7 @@ function HeadlessEditorContent({
           type="button"
           className="luthor-preset-headless-editor__button"
           onClick={() => commands.redo?.()}
-          disabled={!isVisualMode || !typedActiveStates.canRedo}
+          disabled={!isEditableVisualMode || !typedActiveStates.canRedo}
         >
           Redo
         </button>
@@ -591,6 +600,8 @@ function HeadlessEditorContent({
       >
         <RichText
           placeholder={placeholders.visual}
+          nonEditableVisualMode={isVisualOnlyMode}
+          onEditIntent={isVisualOnlyMode ? () => handleModeChange("visual") : undefined}
           classNames={{
             container: "luthor-richtext-container luthor-preset-headless-editor__container",
             contentEditable: "luthor-content-editable luthor-preset-headless-editor__content",
@@ -622,6 +633,7 @@ function HeadlessEditorContent({
                 }));
               }}
               placeholder={placeholders.json}
+              showLineNumbers={showLineNumbers}
             />
           )}
           {mode === "markdown" && (
@@ -636,6 +648,7 @@ function HeadlessEditorContent({
               placeholder={placeholders.markdown}
               className="luthor-source-view--wrapped"
               wrap="soft"
+              showLineNumbers={showLineNumbers}
             />
           )}
           {mode === "html" && (
@@ -650,6 +663,7 @@ function HeadlessEditorContent({
               placeholder={placeholders.html}
               className="luthor-source-view--wrapped"
               wrap="soft"
+              showLineNumbers={showLineNumbers}
             />
           )}
         </div>
@@ -671,6 +685,7 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
       showDefaultContent = true,
       initialMode = "visual",
       defaultEditorView,
+      showLineNumbers = true,
       featureFlags,
       ...unusedProps
     },
@@ -701,8 +716,9 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
       const parsedFlags = JSON.parse(extensionsKey) as FeatureFlagOverrides;
       return createExtensiveExtensions({
         featureFlags: parsedFlags,
+        showLineNumbers,
       });
-    }, [extensionsKey]);
+    }, [extensionsKey, showLineNumbers]);
 
     const [methods, setMethods] = useState<HeadlessEditorMethods | null>(null);
     const didHydrateDefaultContentRef = useRef(false);
@@ -761,6 +777,7 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
           <HeadlessEditorContent
             initialMode={resolvedInitialMode}
             placeholders={placeholders}
+            showLineNumbers={showLineNumbers}
             onReady={handleReady}
           />
         </Provider>

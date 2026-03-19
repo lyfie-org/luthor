@@ -92,6 +92,16 @@ function findNestedNode(node: JsonNode, type: string): JsonNode | null {
   return null;
 }
 
+function countNodesByType(node: JsonNode, type: string): number {
+  let count = node.type === type ? 1 : 0;
+
+  for (const child of getChildren(node)) {
+    count += countNodesByType(child, type);
+  }
+
+  return count;
+}
+
 function roundTripJSON(input: JsonDocument): JsonDocument {
   return htmlToJSON(jsonToHTML(input)) as JsonDocument;
 }
@@ -127,6 +137,62 @@ describe("html bridge", () => {
     };
     expect(restoredNode.type).toBe("featureCard");
     expect(restoredNode.payload).toEqual({ title: "AI Draft" });
+  });
+
+  it("skips metadata envelopes when metadataMode is none", () => {
+    const input = createDocument([
+      paragraphNode([textNode("Before")]),
+      {
+        type: "featureCard",
+        version: 1,
+        payload: { title: "AI Draft" },
+      },
+    ]);
+
+    const html = jsonToHTML(input, { metadataMode: "none" });
+    expect(html).not.toContain("luthor:meta v1");
+    expect(html).toContain("[Unsupported featureCard preserved in html metadata]");
+
+    const roundTrip = htmlToJSON(html, { metadataMode: "none" }) as JsonDocument;
+    const secondNode = roundTrip.root.children[1] as {
+      type?: string;
+      children?: JsonNode[];
+    };
+    expect(secondNode.type).not.toBe("featureCard");
+    expect(collectNodeText(secondNode as JsonNode)).toContain("Unsupported featureCard");
+  });
+
+  it("normalizes align attributes and picture tags into native lexical structures", () => {
+    const html = [
+      "<div align=\"center\">",
+      "  <p>Centered line</p>",
+      "  <picture>",
+      "    <source media=\"(prefers-color-scheme: dark)\" srcset=\"dark.png\" />",
+      "    <img src=\"light.png\" alt=\"Logo\" width=\"420\" />",
+      "  </picture>",
+      "</div>",
+      "<p align=\"center\">",
+      "  <img src=\"preview.png\" alt=\"Preview\" width=\"960\" />",
+      "</p>",
+    ].join("\n");
+
+    const parsed = htmlToJSON(html, { metadataMode: "none" }) as JsonDocument;
+    const centeredParagraph = parsed.root.children.find(
+      (node) => node.type === "paragraph" && node.format === "center",
+    );
+    expect(centeredParagraph).toBeDefined();
+    expect(collectNodeText(centeredParagraph as JsonNode)).toContain("Centered line");
+
+    const nestedImages = parsed.root.children
+      .map((node) => findNestedNode(node, "image"))
+      .filter((node): node is JsonNode => node !== null);
+    expect(nestedImages.length).toBeGreaterThanOrEqual(2);
+    expect(
+      nestedImages.some((node) => typeof node.src === "string" && node.src.endsWith("/light.png")),
+    ).toBe(true);
+    expect(
+      nestedImages.some((node) => typeof node.src === "string" && node.src.endsWith("/preview.png")),
+    ).toBe(true);
   });
 
   it("normalizes indentation-heavy pre-wrap html without creating formatter artifacts", () => {
@@ -236,6 +302,188 @@ describe("html bridge", () => {
     expect(collectNodeText(listItems[1])).toBe("Second item");
   });
 
+  it("round-trips nested lists without metadata comments in metadata-free mode", () => {
+    const input = createDocument([
+      {
+        type: "list",
+        version: 1,
+        listType: "bullet",
+        start: 1,
+        tag: "ul",
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "listitem",
+            version: 1,
+            value: 1,
+            checked: null,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [
+              textNode("Parent item"),
+              {
+                type: "list",
+                version: 1,
+                listType: "bullet",
+                start: 1,
+                tag: "ul",
+                format: "",
+                indent: 0,
+                direction: null,
+                children: [
+                  {
+                    type: "listitem",
+                    version: 1,
+                    value: 1,
+                    checked: null,
+                    format: "",
+                    indent: 0,
+                    direction: null,
+                    children: [textNode("Child item")],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "listitem",
+            version: 1,
+            value: 2,
+            checked: null,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [textNode("Sibling item")],
+          },
+        ],
+      },
+    ]);
+
+    const html = jsonToHTML(input, { metadataMode: "none" });
+    expect(html).not.toContain("luthor:meta v1");
+    expect((html.match(/<ul\b/gi) ?? []).length).toBeGreaterThanOrEqual(2);
+
+    const roundTrip = htmlToJSON(html, { metadataMode: "none" }) as JsonDocument;
+    const list = findTopLevelNode(roundTrip, "list");
+    expect(list).toBeDefined();
+    expect(countNodesByType(list as JsonNode, "list")).toBeGreaterThanOrEqual(2);
+    expect(collectNodeText(list as JsonNode)).toContain("Parent item");
+    expect(collectNodeText(list as JsonNode)).toContain("Child item");
+    expect(collectNodeText(list as JsonNode)).toContain("Sibling item");
+  });
+
+  it("round-trips default ordered and checklist structures without metadata comments", () => {
+    const input = createDocument([
+      {
+        type: "list",
+        version: 1,
+        listType: "number",
+        start: 1,
+        tag: "ol",
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "listitem",
+            version: 1,
+            value: 1,
+            checked: null,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [
+              textNode("Ordered parent"),
+              {
+                type: "list",
+                version: 1,
+                listType: "number",
+                start: 1,
+                tag: "ol",
+                format: "",
+                indent: 0,
+                direction: null,
+                children: [
+                  {
+                    type: "listitem",
+                    version: 1,
+                    value: 1,
+                    checked: null,
+                    format: "",
+                    indent: 0,
+                    direction: null,
+                    children: [textNode("Ordered child")],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "listitem",
+            version: 1,
+            value: 2,
+            checked: null,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [textNode("Ordered sibling")],
+          },
+        ],
+      },
+      {
+        type: "list",
+        version: 1,
+        listType: "check",
+        start: 1,
+        tag: "ul",
+        format: "",
+        indent: 0,
+        direction: null,
+        children: [
+          {
+            type: "listitem",
+            version: 1,
+            value: 1,
+            checked: false,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [textNode("Task parent")],
+          },
+          {
+            type: "listitem",
+            version: 1,
+            value: 2,
+            checked: true,
+            format: "",
+            indent: 0,
+            direction: null,
+            children: [textNode("Task child")],
+          },
+        ],
+      },
+    ]);
+
+    const html = jsonToHTML(input, { metadataMode: "none" });
+    expect(html).not.toContain("luthor:meta v1");
+    expect(html).toContain("<ol");
+    expect(html).toContain("Ordered parent");
+    expect(html).toContain("Ordered child");
+    expect(html).toContain("Task parent");
+    expect(html).toContain("Task child");
+
+    const roundTrip = htmlToJSON(html, { metadataMode: "none" }) as JsonDocument;
+    const allText = roundTrip.root.children.map((node) => collectNodeText(node)).join("\n");
+    expect(allText).toContain("Ordered parent");
+    expect(allText).toContain("Ordered child");
+    expect(allText).toContain("Ordered sibling");
+    expect(allText).toContain("Task parent");
+    expect(allText).toContain("Task child");
+  });
+
   it("round-trips link nodes", () => {
     const input = createDocument([
       paragraphNode([
@@ -331,6 +579,66 @@ describe("html bridge", () => {
     expect(imageNode.type).toBe("image");
     expect(imageNode.src).toContain("https://example.com/photo.jpg");
     expect(imageNode.alt).toBe("Example");
+  });
+
+  it("round-trips linked images natively without metadata envelopes", () => {
+    const input = createDocument([
+      {
+        type: "image",
+        version: 1,
+        src: "https://example.com/badge.svg",
+        alt: "Build",
+        caption: "Build status",
+        linkHref: "https://example.com/docs",
+        linkTitle: "Docs",
+        alignment: "center",
+      },
+    ]);
+
+    const html = jsonToHTML(input);
+    expect(html).toContain("<a");
+    expect(html).toContain("https://example.com/docs");
+    expect(html).not.toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument;
+    const imageNode = findTopLevelNode(roundTrip, "image") as {
+      linkHref?: string;
+      linkTitle?: string;
+      caption?: string;
+      src?: string;
+    };
+    expect(String(imageNode?.src ?? "")).toContain("https://example.com/badge.svg");
+    expect(String(imageNode?.linkHref ?? "")).toContain("https://example.com/docs");
+    expect(imageNode?.linkTitle).toBe("Docs");
+    expect(imageNode?.caption).toBe("Build status");
+  });
+
+  it("preserves frontmatter in html mode via metadata envelopes", () => {
+    const input = {
+      root: {
+        type: "root",
+        version: 1,
+        format: "",
+        indent: 0,
+        direction: null,
+        frontmatter: "---\ntitle: Demo\n---",
+        children: [paragraphNode([textNode("Body")])],
+      },
+    } satisfies JsonDocument & {
+      root: {
+        frontmatter: string;
+      };
+    };
+
+    const html = jsonToHTML(input);
+    expect(html).toContain("luthor:meta v1");
+
+    const roundTrip = htmlToJSON(html) as JsonDocument & {
+      root: {
+        frontmatter?: string;
+      };
+    };
+    expect(roundTrip.root.frontmatter).toContain("title: Demo");
   });
 
   it("round-trips iframe embed nodes", () => {

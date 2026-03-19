@@ -22,17 +22,18 @@ export function App() {
 
 `HeadlessEditorPresetProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, and source-view mode props, then re-adds constrained mode variants.
 
-- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'`
-- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'`
+- `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'`
+- `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'`
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (preset-enforced exclusions still apply)
+- `showLineNumbers`: `true` by default, applies to visual code blocks and JSON/Markdown/HTML source tabs
 
 ## Behavior
 
-Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, horizontal rule, hard break, undo/redo), supports Visual/JSON/Markdown/HTML tabs, and keeps metadata-heavy features disabled by default.
+Uses a text-pill toolbar (bold/italic/strike/inline code, block controls, lists, code block, quote, horizontal rule, hard break, undo/redo), supports Visual Only/Visual/JSON/Markdown/HTML tabs, and keeps metadata-heavy features disabled by default.
 
 ## Default mode profile
 
-- `availableModes`: `["visual", "json", "markdown", "html"]`
+- `availableModes`: `["visual-only", "visual", "json", "markdown", "html"]`
 
 ## Default feature profile
 

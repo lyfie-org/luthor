@@ -460,7 +460,7 @@ export function SimpleEditor({
               .filter(Boolean)
               .join(" ")}
             isToolbarEnabled={false}
-            availableModes={["visual"]}
+            availableModes={["visual-only", "visual"]}
             initialMode="visual"
             shortcutConfig={shortcutConfig}
             featureFlags={{

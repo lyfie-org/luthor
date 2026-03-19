@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as headless from "@lyfie/luthor-headless";
 
 const getJSONMock = vi.fn(
   () =>
@@ -37,11 +38,13 @@ describe("SimpleEditor", () => {
 
     const lastProps = extensivePropsSpy.mock.calls.at(-1)?.[0] as {
       featureFlags?: Record<string, boolean>;
+      availableModes?: string[];
       shortcutConfig?: {
         disabledCommandIds?: string[];
       };
     };
 
+    expect(lastProps.availableModes).toEqual(["visual-only", "visual"]);
     expect(lastProps.featureFlags).toEqual(
       expect.objectContaining({
         bold: true,
@@ -123,6 +126,31 @@ describe("SimpleEditor", () => {
         markdown: "Hello",
       }),
     );
+  });
+
+  it("uses preserve metadata markdown export path by default", () => {
+    const markdownSpy = vi
+      .spyOn(headless, "jsonToMarkdown")
+      .mockReturnValue("Hello");
+    const onSend = vi.fn();
+
+    const { container } = render(
+      <SimpleEditor onSend={onSend} showDefaultContent={false} submitOnEnter allowEmptySend />,
+    );
+
+    const wrapper = container.querySelector(".luthor-preset-simple-editor") as HTMLElement;
+    fireEvent.keyDown(wrapper, { key: "Enter" });
+
+    expect(markdownSpy).toHaveBeenCalled();
+    expect(markdownSpy.mock.calls.at(-1)?.[1]).toBeUndefined();
+    expect(onSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        format: "md",
+        markdown: "Hello",
+      }),
+    );
+
+    markdownSpy.mockRestore();
   });
 
   it("keeps Shift+Enter when allowShiftEnter is true", () => {

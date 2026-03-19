@@ -49,10 +49,11 @@ npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/
 ### Optional dependencies for headless
 
 ```bash
-npm install highlight.js @emoji-mart/data
+npm install highlight.js prismjs @emoji-mart/data
 ```
 
 `highlight.js` is optional but useful when code highlighting is enabled.  
+`prismjs` is optional and enables additional code grammar preloading for popular languages.  
 `@emoji-mart/data` is optional and used by richer emoji catalogs.
 
 ## Verify your install
@@ -84,7 +85,7 @@ npm uninstall @lyfie/luthor @lyfie/luthor-headless
 If you installed headless peers directly and want to remove them too:
 
 ```bash
-npm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils highlight.js @emoji-mart/data
+npm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils highlight.js prismjs @emoji-mart/data
 ```
 
 ## Common mistakes

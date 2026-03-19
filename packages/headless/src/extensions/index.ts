@@ -75,11 +75,17 @@ export {
   CodeExtension,
   codeExtension,
   type CodeExtensionConfig,
+  type CodeGrammarPreloadMode,
 } from "./formatting/CodeExtension";
 export {
   type CodeHighlightProvider,
   type CodeHighlightProviderConfig,
 } from "./formatting/codeHighlightProvider";
+export {
+  getDefaultPopularPrismLanguages,
+  loadPrismLanguages,
+  loadPopularPrismLanguages,
+} from "./formatting/prismLanguageLoader";
 export {
   CodeIntelligenceExtension,
   codeIntelligenceExtension,

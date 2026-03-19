@@ -37,6 +37,10 @@ Optional:
 pnpm add highlight.js @emoji-mart/data
 ```
 
+Code-block grammars for common languages
+(`bash`, `json`, `yaml`, `go`, `php`, `ruby`, `csharp`, `kotlin`, `jsx`, `tsx`, `graphql`, `docker`, `toml`, `lua`, `perl`, `r`, `scala`, `dart`) are supported with optional Prism loading.
+By default, `CodeExtension` uses lazy grammar loading and only fetches grammars when code blocks actually use them.
+
 ## Quick Usage
 
 ```tsx

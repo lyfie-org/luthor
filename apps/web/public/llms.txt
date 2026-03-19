@@ -41,7 +41,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [luthor/presets/headless-editor-preset.md](https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/) - Headless Editor
 - [luthor/presets/html-editor.md](https://www.luthor.fyi/docs/luthor/presets/html-editor/) - HTML Editor
 - [luthor/presets/legacy-rich-editor.md](https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/) - Legacy Rich Editor
-- [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/) - MD Editor
+- [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/) - MarkDown Editor
 - [luthor/presets/simple-editor.md](https://www.luthor.fyi/docs/luthor/presets/simple-editor/) - Simple Editor
 - [luthor/presets/slash-editor.md](https://www.luthor.fyi/docs/luthor/presets/slash-editor/) - Slash Editor
 - [luthor/props-reference.md](https://www.luthor.fyi/docs/luthor/props-reference/) - Props Reference
@@ -83,12 +83,12 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### @lyfie/luthor-headless
 - File: getting-started/luthor-headless.md
 - URL: https://www.luthor.fyi/docs/getting-started/luthor-headless/
-- Summary: @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Render a minimal headless editor Validate installation 1. The editor mounts and accepts input. 2. Toolbar buttons call typed commands ( toggleBold , toggleItalic ). 3. activeStates updates correctly whe...
+- Summary: @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Optional (recommended for richer code/emoji UX): Render a minimal headless editor Validate installation 1. The editor mounts and accepts input. 2. Toolbar buttons call typed commands ( toggleBold , togg...
 
 ### @lyfie/luthor
 - File: getting-started/luthor.md
 - URL: https://www.luthor.fyi/docs/getting-started/luthor/
-- Summary: @lyfie/luthor Use @lyfie/luthor when you want a production ready editor quickly with strong defaults. Install Render a basic editor What you get Preset components: ExtensiveEditor , ComposeEditor , SimpleEditor , LegacyRichEditor , MDEditor , HTMLEditor , SlashEditor , HeadlessEditorPreset Source mode workflows (JSON/M...
+- Summary: @lyfie/luthor Use @lyfie/luthor when you want a production ready editor quickly with strong defaults. Install Render a basic editor What you get Preset components: ExtensiveEditor , ComposeEditor , SimpleEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , SlashEditor , HeadlessEditorPreset Source mode workflows (...
 
 ### Architecture
 - File: luthor-headless/architecture.md
@@ -98,7 +98,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Extensions and API
 - File: luthor-headless/extensions-and-api.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/extensions-and-api/
-- Summary: Extensions and API This page is the full API map for @lyfie/luthor headless . Core entry points createEditorSystem createExtension RichText and richTextExtension markdownToJSON , jsonToMarkdown , htmlToJSON , jsonToHTML appendMetadataEnvelopes , extractMetadataEnvelopes , rehydrateDocumentFromEnvelopes defaultLuthorThe...
+- Summary: Extensions and API This page is the full API map for @lyfie/luthor headless . Core entry points createEditorSystem createExtension RichText and richTextExtension markdownToJSON , jsonToMarkdown , htmlToJSON , jsonToHTML appendMetadataEnvelopes , extractMetadataEnvelopes , rehydrateDocumentFromEnvelopes MARKDOWN SUPPORT...
 
 ### Features
 - File: luthor-headless/features.md
@@ -108,7 +108,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Code and Devtools
 - File: luthor-headless/features/code-and-devtools.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/
-- Summary: Code and Devtools This group covers code editing and developer facing conversion utilities. Included extensions and utilities codeExtension codeIntelligenceExtension codeFormatExtension markdownToJSON , jsonToMarkdown htmlToJSON , jsonToHTML Key commands toggleCodeBlock setCodeLanguage autoDetectCodeLanguage getCurrent...
+- Summary: Code and Devtools This group covers code editing and developer facing conversion utilities. Recent defaults: Code block language labels use full language names in UI (for example, TypeScript , JavaScript , SQL ). Default language options are filtered to languages that are actually supported by the active runtime tokeni...
 
 ### Customization and Theming
 - File: luthor-headless/features/customization-and-theming.md
@@ -168,22 +168,22 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Headless Editor
 - File: luthor/presets/headless-editor-preset.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/
-- Summary: Headless Editor HeadlessEditorPreset is a lightweight, source aware preset with a simple text pill toolbar. Usage Props HeadlessEditorPresetProps inherits ExtensiveEditorProps except featureFlags , availableModes , and source view mode props, then re adds constrained mode variants. initialMode : 'visual' (default) 'jso...
+- Summary: Headless Editor HeadlessEditorPreset is a lightweight, source aware preset with a simple text pill toolbar. Usage Props HeadlessEditorPresetProps inherits ExtensiveEditorProps except featureFlags , availableModes , and source view mode props, then re adds constrained mode variants. initialMode : 'visual' (default) 'vis...
 
 ### HTML Editor
 - File: luthor/presets/html-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/html-editor/
-- Summary: HTML Editor HTML focused preset with visual editing plus JSON/HTML source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="html" . Usage Props HTMLEditorProps inherits LegacyRichEditorProps , then fixes source behavior to HTML. initialMode : 'visual' (default) 'json' 'html' defaultEditorVie...
+- Summary: HTML Editor HTML focused preset with visual editing plus JSON/HTML source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="html" . Usage Props HTMLEditorProps inherits LegacyRichEditorProps , then fixes source behavior to HTML. initialMode : 'visual' (default) 'visual only' 'json' 'html' de...
 
 ### Legacy Rich Editor
 - File: luthor/presets/legacy-rich-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/
-- Summary: Legacy Rich Editor LegacyRichEditor is a shared metadata free editor profile that powers both MDEditor and HTMLEditor . Use it when you want the same native feature set and switch only the source tab mode between markdown and html. Usage Props LegacyRichEditorProps inherits ExtensiveEditorProps except featureFlags , av...
+- Summary: title: Legacy Rich Editor description: Shared metadata free rich editor profile powering both MD and HTML presets. Legacy Rich Editor LegacyRichEditor is a shared metadata free editor profile that powers both MarkDownEditor and HTMLEditor . Use it when you want the same native feature set and switch only the source tab...
 
-### MD Editor
+### MarkDown Editor
 - File: luthor/presets/md-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/md-editor/
-- Summary: MD Editor Markdown native preset with visual editing plus JSON/Markdown source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="markdown" . Usage Props MDEditorProps inherits LegacyRichEditorProps , then fixes source behavior to markdown. initialMode : 'visual' (default) 'json' 'markdown' d...
+- Summary: MarkDown Editor Markdown native preset with visual editing plus JSON/Markdown source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="markdown" . Usage Props MarkDownEditorProps inherits LegacyRichEditorProps , then fixes source behavior to markdown. initialMode : 'visual' (default) 'visual...
 
 ### Simple Editor
 - File: luthor/presets/simple-editor.md
@@ -198,5 +198,5 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Props Reference
 - File: luthor/props-reference.md
 - URL: https://www.luthor.fyi/docs/luthor/props-reference/
-- Summary: Props Reference This page is the full prop contract for @lyfie/luthor presets. Base preset: ExtensiveEditor Wrapper presets: ComposeEditor , SimpleEditor , LegacyRichEditor , MDEditor , HTMLEditor , SlashEditor , HeadlessEditorPreset 1) ExtensiveEditorProps (base contract) Content and mode Prop Type Default Notes defau...
+- Summary: Props Reference This page is the full prop contract for @lyfie/luthor presets. Base preset: ExtensiveEditor Wrapper presets: ComposeEditor , SimpleEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , SlashEditor , HeadlessEditorPreset 1) ExtensiveEditorProps (base contract) Content and mode Prop Type Default Notes...
 

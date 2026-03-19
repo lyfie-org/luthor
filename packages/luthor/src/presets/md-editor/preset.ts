@@ -2,9 +2,9 @@ import type { EditorPreset } from "..";
 import { createPresetEditorConfig } from "../../core/preset-config";
 import { createExtensiveExtensions } from "../extensive";
 import {
-  MDEditor,
+  MarkDownEditor,
   MD_EDITOR_DEFAULT_FEATURE_FLAGS,
-} from "./MDEditor";
+} from "./MarkDownEditor";
 
 export const mdEditorPreset: EditorPreset = {
   id: "md-editor",
@@ -14,13 +14,17 @@ export const mdEditorPreset: EditorPreset = {
     featureFlags: MD_EDITOR_DEFAULT_FEATURE_FLAGS,
   }),
   components: {
-    Editor: MDEditor,
+    Editor: MarkDownEditor,
   },
   toolbar: [
     "undo",
     "redo",
     "blockFormat",
     "quote",
+    "alignLeft",
+    "alignCenter",
+    "alignRight",
+    "alignJustify",
     "bold",
     "italic",
     "strikethrough",
@@ -31,6 +35,8 @@ export const mdEditorPreset: EditorPreset = {
     "orderedList",
     "checkList",
     "horizontalRule",
+    "table",
+    "image",
   ],
   config: createPresetEditorConfig("md-editor", "Write markdown..."),
   css: "md-editor/styles.css",

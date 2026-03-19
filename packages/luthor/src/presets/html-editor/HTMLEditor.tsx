@@ -8,7 +8,7 @@ import {
 import type { ExtensiveEditorRef } from "../extensive";
 import { joinClassNames } from "../_shared";
 
-export const HTML_EDITOR_DEFAULT_MODES = ["visual", "json", "html"] as const;
+export const HTML_EDITOR_DEFAULT_MODES = ["visual-only", "visual", "json", "html"] as const;
 export const HTML_EDITOR_DEFAULT_FEATURE_FLAGS = LEGACY_RICH_DEFAULT_FEATURE_FLAGS;
 export const HTML_EDITOR_TOOLBAR_LAYOUT = LEGACY_RICH_TOOLBAR_LAYOUT;
 

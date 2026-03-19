@@ -21,6 +21,8 @@ describe("ComposeEditor", () => {
 
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as Record<string, unknown>;
     const featureFlags = props.featureFlags as Record<string, boolean>;
+    expect(props.availableModes).toEqual(["visual-only", "visual", "json"]);
+    expect(props.sourceMetadataMode).toBeUndefined();
     expect(featureFlags.bold).toBe(true);
     expect(featureFlags.italic).toBe(true);
     expect(featureFlags.list).toBe(true);
@@ -34,5 +36,19 @@ describe("ComposeEditor", () => {
     const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as Record<string, unknown>;
     expect(props.variantClassName).toContain("luthor-preset-compose--compact");
     expect(props.toolbarClassName).toContain("luthor-preset-compose__toolbar--compact");
+  });
+
+  it("forwards line number visibility to underlying editor", () => {
+    render(
+      <ComposeEditor
+        showDefaultContent={false}
+        showLineNumbers={false}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      showLineNumbers?: boolean;
+    };
+    expect(props.showLineNumbers).toBe(false);
   });
 });

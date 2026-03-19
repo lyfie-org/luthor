@@ -34,6 +34,12 @@ function run(command, args, cwd) {
     stdio: "pipe",
     encoding: "utf8",
     shell: false,
+    env: {
+      ...process.env,
+      FORCE_COLOR: "0",
+      NO_COLOR: "1",
+      npm_config_color: "false",
+    },
   });
 
   if (result.error) {
@@ -48,14 +54,27 @@ function run(command, args, cwd) {
   return result.stdout.trim();
 }
 
+function parseNpmPackJson(output) {
+  const cleaned = output
+    .replace(/\u001b\[[0-9;]*[A-Za-z]/g, "")
+    .trim();
+  const start = cleaned.indexOf("[");
+  const end = cleaned.lastIndexOf("]");
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error(`Unable to parse npm pack JSON output:\n${cleaned}`);
+  }
+
+  return JSON.parse(cleaned.slice(start, end + 1));
+}
+
 function formatBytes(bytes) {
   return new Intl.NumberFormat("en-US").format(bytes);
 }
 
 async function getPackStats(pkg) {
   run("pnpm", ["build"], pkg.dir);
-  const output = run("npm", ["pack", "--json"], pkg.dir);
-  const [stats] = JSON.parse(output);
+  const output = run("npm", ["pack", "--json", "--ignore-scripts"], pkg.dir);
+  const [stats] = parseNpmPackJson(output);
   if (!stats) {
     throw new Error(`No pack output for ${pkg.displayName}`);
   }
@@ -107,6 +126,7 @@ async function main() {
   }
 
   if (shouldWrite) {
+    await fs.mkdir(path.dirname(REPORT_FILE), { recursive: true });
     await fs.writeFile(REPORT_FILE, toMarkdown(stats, budgets), "utf8");
   }
 

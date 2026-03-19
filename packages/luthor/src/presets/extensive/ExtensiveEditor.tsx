@@ -10,7 +10,9 @@ import {
   markdownToJSON,
   mergeThemes,
   RichText,
+  type MarkdownBridgeFlavor,
   type LuthorTheme,
+  type SourceMetadataMode,
 } from "@lyfie/luthor-headless";
 import {
   createExtensiveExtensions,
@@ -72,6 +74,7 @@ import type {
   SlashCommandExtension,
   EmojiExtension,
   EmojiCatalogItem,
+  CodeGrammarPreloadMode,
   CodeHighlightProvider,
   CodeLanguageOptionsConfig,
   FontFamilyOption,
@@ -423,7 +426,12 @@ function toJSONInput(value: string): string {
   }
 }
 
-function serializeJSONToSource(mode: ExtensiveEditorSourceMode, document: unknown): string {
+function serializeJSONToSource(
+  mode: ExtensiveEditorSourceMode,
+  document: unknown,
+  sourceMetadataMode: SourceMetadataMode = "preserve",
+  markdownBridgeFlavor: MarkdownBridgeFlavor = "luthor",
+): string {
   const resolvedDocument = document ?? EMPTY_JSON_DOCUMENT;
 
   if (mode === "json") {
@@ -431,10 +439,77 @@ function serializeJSONToSource(mode: ExtensiveEditorSourceMode, document: unknow
   }
 
   if (mode === "markdown") {
-    return formatMarkdownSource(jsonToMarkdown(resolvedDocument));
+    const markdown = markdownBridgeFlavor === "lexical-native"
+      ? jsonToMarkdown(resolvedDocument, { bridgeFlavor: "lexical-native" })
+      : sourceMetadataMode === "none"
+        ? jsonToMarkdown(resolvedDocument, { metadataMode: "none" })
+        : jsonToMarkdown(resolvedDocument);
+    return formatMarkdownSource(markdown);
   }
 
-  return formatHTMLSource(jsonToHTML(resolvedDocument));
+  const html = sourceMetadataMode === "none"
+    ? jsonToHTML(resolvedDocument, { metadataMode: "none" })
+    : jsonToHTML(resolvedDocument);
+  return formatHTMLSource(html);
+}
+
+function extractLeadingFrontmatterBlock(markdown: string): {
+  frontmatter: string | null;
+  body: string;
+} {
+  const normalized = markdown.replace(/\r\n?/g, "\n");
+  const lines = normalized.split("\n");
+  if (lines.length < 3) {
+    return { frontmatter: null, body: normalized };
+  }
+
+  const firstLine = (lines[0] ?? "").replace(/^\uFEFF/, "");
+  if (firstLine.trim() !== "---") {
+    return { frontmatter: null, body: normalized };
+  }
+
+  let closingIndex = -1;
+  for (let lineIndex = 1; lineIndex < lines.length; lineIndex += 1) {
+    const trimmed = (lines[lineIndex] ?? "").trim();
+    if (trimmed === "---" || trimmed === "...") {
+      closingIndex = lineIndex;
+      break;
+    }
+  }
+
+  if (closingIndex < 2) {
+    return { frontmatter: null, body: normalized };
+  }
+
+  const frontmatterBody = lines.slice(1, closingIndex).join("\n");
+  if (!/^[^#\n]*:/m.test(frontmatterBody)) {
+    return { frontmatter: null, body: normalized };
+  }
+
+  return {
+    frontmatter: lines.slice(0, closingIndex + 1).join("\n").trim(),
+    body: lines.slice(closingIndex + 1).join("\n"),
+  };
+}
+
+function mergePreservedFrontmatter(
+  previousCanonicalMarkdown: string,
+  nextVisualMarkdown: string,
+): string {
+  const previous = extractLeadingFrontmatterBlock(previousCanonicalMarkdown);
+  if (!previous.frontmatter) {
+    return nextVisualMarkdown;
+  }
+
+  const next = extractLeadingFrontmatterBlock(nextVisualMarkdown);
+  if (next.frontmatter) {
+    return nextVisualMarkdown;
+  }
+
+  const normalizedBody = nextVisualMarkdown.replace(/\r\n?/g, "\n").trim();
+  return normalizedBody.length > 0
+    ? `${previous.frontmatter}\n\n${normalizedBody}`
+    : `${previous.frontmatter}\n`;
 }
 
 function normalizeFontFamilyOptionsKey(options?: readonly FontFamilyOption[]): string {
@@ -826,8 +901,13 @@ function ExtensiveEditorContent({
   slashCommandVisibility,
   shortcutConfig,
   commandPaletteShortcutOnly,
+  isListStyleDropdownEnabled,
   featureFlags,
   editOnClick,
+  sourceMetadataMode,
+  markdownBridgeFlavor,
+  markdownSourceOfTruth,
+  showLineNumbers,
 }: {
   isDark: boolean;
   toggleTheme: () => void;
@@ -853,8 +933,13 @@ function ExtensiveEditorContent({
   slashCommandVisibility?: SlashCommandVisibility;
   shortcutConfig?: CommandShortcutConfig;
   commandPaletteShortcutOnly: boolean;
+  isListStyleDropdownEnabled: boolean;
   featureFlags: FeatureFlags;
   editOnClick: boolean;
+  sourceMetadataMode: SourceMetadataMode;
+  markdownBridgeFlavor: MarkdownBridgeFlavor;
+  markdownSourceOfTruth: boolean;
+  showLineNumbers: boolean;
 }) {
   const {
     commands,
@@ -970,6 +1055,10 @@ function ExtensiveEditorContent({
     markdown: false,
     html: false,
   });
+  const canonicalMarkdownRef = useRef("");
+  const canonicalMarkdownStaleRef = useRef(true);
+  const suppressCanonicalMarkdownStaleRef = useRef(false);
+  const suppressCanonicalMarkdownWhileImportingRef = useRef(false);
   const editorChangeCountRef = useRef(0);
   const pendingEditIntentRef = useRef<{ clientX: number; clientY: number } | null>(null);
 
@@ -984,20 +1073,126 @@ function ExtensiveEditorContent({
 
   const methods = useMemo<ExtensiveEditorRef>(
     () => {
+      const hydrateSourceSnapshots = (document: unknown) => {
+        const nextJson = serializeJSONToSource(
+          "json",
+          document,
+          sourceMetadataMode,
+          markdownBridgeFlavor,
+        );
+        const nextMarkdown = serializeJSONToSource(
+          "markdown",
+          document,
+          sourceMetadataMode,
+          markdownBridgeFlavor,
+        );
+        const nextHTML = serializeJSONToSource(
+          "html",
+          document,
+          sourceMetadataMode,
+          markdownBridgeFlavor,
+        );
+
+        setContent((previous) => (
+          previous.json === nextJson &&
+          previous.markdown === nextMarkdown &&
+          previous.html === nextHTML
+            ? previous
+            : {
+                json: nextJson,
+                markdown: nextMarkdown,
+                html: nextHTML,
+              }
+        ));
+
+        sourceDirtyRef.current.json = false;
+        sourceDirtyRef.current.markdown = false;
+        sourceDirtyRef.current.html = false;
+        markModeCached(cacheValidRef.current, "json");
+        markModeCached(cacheValidRef.current, "markdown");
+        markModeCached(cacheValidRef.current, "html");
+
+        if (markdownSourceOfTruth) {
+          canonicalMarkdownRef.current = nextMarkdown;
+          canonicalMarkdownStaleRef.current = false;
+        }
+      };
+
       const injectJSON = (value: string) => {
         setTimeout(() => {
           try {
             const parsed = JSON.parse(value);
             importApi.fromJSON(parsed);
+            hydrateSourceSnapshots(parsed);
           } catch (error) {
             console.error("Failed to inject JSON:", error);
             return;
           }
         }, 100);
       };
-      const getJSON = () => serializeJSONToSource("json", exportApi.toJSON());
-      const getMarkdown = () => serializeJSONToSource("markdown", exportApi.toJSON());
-      const getHTML = () => serializeJSONToSource("html", exportApi.toJSON());
+      const resolveMarkdownSnapshot = (): string => {
+        if (!markdownSourceOfTruth) {
+          return serializeJSONToSource(
+            "markdown",
+            exportApi.toJSON(),
+            sourceMetadataMode,
+            markdownBridgeFlavor,
+          );
+        }
+
+        if (canonicalMarkdownStaleRef.current) {
+          const nextMarkdown = serializeJSONToSource(
+            "markdown",
+            exportApi.toJSON(),
+            sourceMetadataMode,
+            markdownBridgeFlavor,
+          );
+          canonicalMarkdownRef.current = nextMarkdown;
+          canonicalMarkdownStaleRef.current = false;
+        }
+
+        return canonicalMarkdownRef.current;
+      };
+      const parseCanonicalMarkdownDocument = () => {
+        const markdown = resolveMarkdownSnapshot();
+        if (markdownBridgeFlavor === "lexical-native") {
+          return markdownToJSON(markdown, { bridgeFlavor: "lexical-native" });
+        }
+
+        return sourceMetadataMode === "none"
+          ? markdownToJSON(markdown, { metadataMode: "none" })
+          : markdownToJSON(markdown);
+      };
+      const getJSON = () => {
+        if (!markdownSourceOfTruth) {
+          return serializeJSONToSource("json", exportApi.toJSON());
+        }
+
+        return serializeJSONToSource(
+          "json",
+          parseCanonicalMarkdownDocument(),
+          sourceMetadataMode,
+          markdownBridgeFlavor,
+        );
+      };
+      const getMarkdown = () => resolveMarkdownSnapshot();
+      const getHTML = () => {
+        if (!markdownSourceOfTruth) {
+          return serializeJSONToSource(
+            "html",
+            exportApi.toJSON(),
+            sourceMetadataMode,
+            markdownBridgeFlavor,
+          );
+        }
+
+        return serializeJSONToSource(
+          "html",
+          parseCanonicalMarkdownDocument(),
+          sourceMetadataMode,
+          markdownBridgeFlavor,
+        );
+      };
       return {
         injectJSON,
         getJSON,
@@ -1005,7 +1200,13 @@ function ExtensiveEditorContent({
         getHTML,
       };
     },
-    [exportApi, importApi],
+    [
+      exportApi,
+      importApi,
+      markdownBridgeFlavor,
+      markdownSourceOfTruth,
+      sourceMetadataMode,
+    ],
   );
 
   useEffect(() => {
@@ -1249,43 +1450,159 @@ function ExtensiveEditorContent({
   useEffect(() => {
     if (!editor || !exportApi) return;
 
-    const unsubscribe = editor.registerUpdateListener(() => {
+    const unsubscribe = editor.registerUpdateListener(({
+      dirtyElements,
+      dirtyLeaves,
+    }: {
+      dirtyElements: Map<unknown, unknown>;
+      dirtyLeaves: Set<unknown>;
+    }) => {
+      const hasContentChanges =
+        dirtyElements.size > 0 || dirtyLeaves.size > 0;
+      if (!hasContentChanges) {
+        return;
+      }
+
       // When visual editor changes, mark all cached formats as stale
       // This prevents stale cache but doesn't do any actual export work
       editorChangeCountRef.current += 1;
       invalidateModeCache(cacheValidRef.current, ["visual-editor"]);
+      if (markdownSourceOfTruth) {
+        if (!isVisualEditorMode(mode)) {
+          return;
+        }
+
+        if (suppressCanonicalMarkdownWhileImportingRef.current) {
+          return;
+        }
+
+        if (suppressCanonicalMarkdownStaleRef.current) {
+          suppressCanonicalMarkdownStaleRef.current = false;
+          return;
+        }
+        canonicalMarkdownStaleRef.current = true;
+      }
     });
 
     return unsubscribe;
-  }, [editor, exportApi]);
+  }, [editor, exportApi, markdownSourceOfTruth, mode]);
 
-  const importFromSourceMode = (sourceMode: ExtensiveEditorSourceMode): void => {
-    const sourceValue = content[sourceMode];
+  const parseMarkdownSourceDocument = (sourceValue: string): unknown => {
+    if (markdownBridgeFlavor === "lexical-native") {
+      return markdownToJSON(sourceValue, {
+        bridgeFlavor: "lexical-native",
+      });
+    }
 
+    return sourceMetadataMode === "none"
+      ? markdownToJSON(sourceValue, { metadataMode: "none" })
+      : markdownToJSON(sourceValue);
+  };
+
+  const parseSourceModeDocument = (
+    sourceMode: ExtensiveEditorSourceMode,
+    sourceValue: string,
+  ): unknown => {
     if (sourceMode === "json") {
-      if (!sourceValue.trim()) {
-        importApi.fromJSON(createJSONDocumentFromText(""));
-        return;
-      }
-
-      const parsed = JSON.parse(sourceValue);
-      importApi.fromJSON(parsed);
-      return;
+      return sourceValue.trim()
+        ? JSON.parse(sourceValue)
+        : createJSONDocumentFromText("");
     }
 
     if (sourceMode === "markdown") {
-      importApi.fromJSON(markdownToJSON(sourceValue));
-    } else {
-      importApi.fromJSON(htmlToJSON(sourceValue));
+      return parseMarkdownSourceDocument(sourceValue);
     }
 
-    sourceDirtyRef.current[sourceMode] = false;
-    invalidateModeCache(cacheValidRef.current, ["visual-editor"]);
+    return sourceMetadataMode === "none"
+      ? htmlToJSON(sourceValue, { metadataMode: "none" })
+      : htmlToJSON(sourceValue);
   };
 
   const exportToSourceMode = (sourceMode: ExtensiveEditorSourceMode): string => {
     const visualDocument = exportApi.toJSON() ?? EMPTY_JSON_DOCUMENT;
-    return serializeJSONToSource(sourceMode, visualDocument);
+    return serializeJSONToSource(
+      sourceMode,
+      visualDocument,
+      sourceMetadataMode,
+      markdownBridgeFlavor,
+    );
+  };
+
+  const ensureCanonicalMarkdownFromVisual = (): string => {
+    const nextMarkdown = exportToSourceMode("markdown");
+    const mergedMarkdown = mergePreservedFrontmatter(
+      canonicalMarkdownRef.current,
+      nextMarkdown,
+    );
+    canonicalMarkdownRef.current = mergedMarkdown;
+    canonicalMarkdownStaleRef.current = false;
+    sourceDirtyRef.current.markdown = false;
+    markModeCached(cacheValidRef.current, "markdown");
+    setContent((previous) => (
+      previous.markdown === mergedMarkdown
+        ? previous
+        : {
+            ...previous,
+            markdown: mergedMarkdown,
+          }
+    ));
+    return mergedMarkdown;
+  };
+
+  const ensureCanonicalMarkdown = (): string => {
+    if (!markdownSourceOfTruth) {
+      return exportToSourceMode("markdown");
+    }
+
+    if (!canonicalMarkdownStaleRef.current) {
+      return canonicalMarkdownRef.current;
+    }
+
+    return ensureCanonicalMarkdownFromVisual();
+  };
+
+  const exportFromCanonicalMarkdown = (
+    targetMode: Exclude<ExtensiveEditorSourceMode, "markdown">,
+  ): string => {
+    const markdown = ensureCanonicalMarkdown();
+    const canonicalDocument = parseMarkdownSourceDocument(markdown);
+    return serializeJSONToSource(
+      targetMode,
+      canonicalDocument,
+      sourceMetadataMode,
+      markdownBridgeFlavor,
+    );
+  };
+
+  const importFromSourceMode = (sourceMode: ExtensiveEditorSourceMode): void => {
+    const sourceValue = content[sourceMode];
+    const parsed = parseSourceModeDocument(sourceMode, sourceValue);
+    const importingCanonicalMarkdown = markdownSourceOfTruth && sourceMode === "markdown";
+    if (markdownSourceOfTruth && sourceMode === "markdown") {
+      suppressCanonicalMarkdownStaleRef.current = true;
+    }
+    if (importingCanonicalMarkdown) {
+      suppressCanonicalMarkdownWhileImportingRef.current = true;
+    }
+    try {
+      importApi.fromJSON(parsed);
+    } finally {
+      if (importingCanonicalMarkdown) {
+        suppressCanonicalMarkdownWhileImportingRef.current = false;
+      }
+    }
+
+    if (markdownSourceOfTruth) {
+      if (sourceMode === "markdown") {
+        canonicalMarkdownRef.current = sourceValue;
+        canonicalMarkdownStaleRef.current = false;
+      } else {
+        canonicalMarkdownStaleRef.current = true;
+      }
+    }
+
+    sourceDirtyRef.current[sourceMode] = false;
+    invalidateModeCache(cacheValidRef.current, ["visual-editor"]);
   };
 
   const updateSourceModeContent = (
@@ -1295,6 +1612,10 @@ function ExtensiveEditorContent({
   ) => {
     setContent((prev) => ({ ...prev, [sourceMode]: value }));
     sourceDirtyRef.current[sourceMode] = options?.dirty === true;
+    if (markdownSourceOfTruth && sourceMode === "markdown") {
+      canonicalMarkdownRef.current = value;
+      canonicalMarkdownStaleRef.current = false;
+    }
   };
 
   const handleModeChange = async (newMode: ExtensiveEditorMode) => {
@@ -1323,6 +1644,14 @@ function ExtensiveEditorContent({
         }
       }
 
+      if (
+        markdownSourceOfTruth &&
+        canonicalMarkdownStaleRef.current &&
+        (isVisualEditorMode(currentMode) || (isSourceMode(currentMode) && currentMode !== "markdown"))
+      ) {
+        ensureCanonicalMarkdownFromVisual();
+      }
+
       if (isVisualEditorMode(currentMode) && !isVisualEditorMode(normalizedNextMode)) {
         if (editor) {
           clearLexicalSelection(editor);
@@ -1339,7 +1668,11 @@ function ExtensiveEditorContent({
           await new Promise((resolve) => setTimeout(resolve, 50));
           try {
             errorMode = targetMode;
-            const nextSource = exportToSourceMode(targetMode);
+            const nextSource = markdownSourceOfTruth
+              ? targetMode === "markdown"
+                ? ensureCanonicalMarkdown()
+                : exportFromCanonicalMarkdown(targetMode)
+              : exportToSourceMode(targetMode);
             updateSourceModeContent(targetMode, nextSource);
             markModeCached(cacheValidRef.current, targetMode);
             errorMode = null;
@@ -1368,7 +1701,7 @@ function ExtensiveEditorContent({
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Invalid format - could not parse content";
-      if (errorMode) {
+      if (errorMode && typeof window !== "undefined") {
         setSourceError({ mode: errorMode, error: errorMessage });
       }
     }
@@ -1432,6 +1765,7 @@ function ExtensiveEditorContent({
       toolbarStyleVars={toolbarStyleVars}
       headingOptions={resolvedHeadingOptions}
       paragraphLabel={paragraphLabel}
+      isListStyleDropdownEnabled={isListStyleDropdownEnabled}
       classNames={{
         toolbar: `luthor-toolbar luthor-toolbar--align-${toolbarAlignment}${toolbarClassName ? ` ${toolbarClassName}` : ""}`,
       }}
@@ -1513,6 +1847,7 @@ function ExtensiveEditorContent({
                 value={content.json}
                 onChange={(value) => updateSourceModeContent("json", value, { dirty: true })}
                 placeholder={jsonPlaceholder}
+                showLineNumbers={showLineNumbers}
               />
             )}
             {activeSourceMode === "markdown" && (
@@ -1522,6 +1857,7 @@ function ExtensiveEditorContent({
                 placeholder={markdownPlaceholder}
                 className="luthor-source-view--wrapped"
                 wrap="soft"
+                showLineNumbers={showLineNumbers}
               />
             )}
             {activeSourceMode === "html" && (
@@ -1531,6 +1867,7 @@ function ExtensiveEditorContent({
                 placeholder={htmlPlaceholder}
                 className="luthor-source-view--wrapped"
                 wrap="soft"
+                showLineNumbers={showLineNumbers}
               />
             )}
           </div>
@@ -1622,6 +1959,7 @@ export interface ExtensiveEditorProps {
   slashCommandVisibility?: SlashCommandVisibility;
   shortcutConfig?: CommandShortcutConfig;
   commandPaletteShortcutOnly?: boolean;
+  isListStyleDropdownEnabled?: boolean;
   /**
    * When enabled, clicking inside Visual Only view switches to editable Visual mode
    * and places the caret at the clicked coordinate (or nearest line).
@@ -1629,12 +1967,19 @@ export interface ExtensiveEditorProps {
   editOnClick?: boolean;
   isDraggableBoxEnabled?: boolean;
   featureFlags?: FeatureFlagOverrides;
+  sourceMetadataMode?: SourceMetadataMode;
+  markdownBridgeFlavor?: MarkdownBridgeFlavor;
+  markdownSourceOfTruth?: boolean;
   syntaxHighlighting?: "auto" | "disabled";
+  grammarPreloadMode?: CodeGrammarPreloadMode;
   codeHighlightProvider?: CodeHighlightProvider | null;
   loadCodeHighlightProvider?: () => Promise<CodeHighlightProvider | null>;
   maxAutoDetectCodeLength?: number;
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
+  showLineNumbers?: boolean;
+  /** Controls accent styling for inline code spans without affecting fenced code blocks. */
+  inlineCodeHighlighting?: boolean;
   /** Maximum list sub-indent levels (excluding top-level list). Default: 8 */
   maxListIndentation?: number;
 }
@@ -1678,15 +2023,22 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     slashCommandVisibility,
     shortcutConfig,
     commandPaletteShortcutOnly = false,
+    isListStyleDropdownEnabled = true,
     editOnClick = true,
     isDraggableBoxEnabled,
     featureFlags,
+    sourceMetadataMode = "preserve",
+    markdownBridgeFlavor = "luthor",
+    markdownSourceOfTruth = false,
     syntaxHighlighting,
+    grammarPreloadMode = "lazy",
     codeHighlightProvider,
     loadCodeHighlightProvider,
     maxAutoDetectCodeLength,
     isCopyAllowed = true,
     languageOptions,
+    showLineNumbers = true,
+    inlineCodeHighlighting = true,
     maxListIndentation = 8,
   }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
@@ -1759,6 +2111,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       [maxListIndentation],
     );
     const syntaxHighlightKey = syntaxHighlighting ?? "unset";
+    const grammarPreloadKey = grammarPreloadMode;
     const maxAutoDetectKey =
       typeof maxAutoDetectCodeLength === "number"
         ? maxAutoDetectCodeLength.toString()
@@ -1768,6 +2121,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       [languageOptions],
     );
     const copyAllowedKey = isCopyAllowed ? "copy-on" : "copy-off";
+    const lineNumbersKey = showLineNumbers ? "line-numbers-on" : "line-numbers-off";
     const effectiveFeatureFlags = useMemo<FeatureFlagOverrides | undefined>(() => {
       if (typeof isDraggableBoxEnabled !== "boolean") {
         return featureFlags;
@@ -1786,7 +2140,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       () => resolveFeatureFlags(effectiveFeatureFlags),
       [effectiveFeatureFlags],
     );
-    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${languageOptionsKey}::${featureFlagsKey}`;
+    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${grammarPreloadKey}::${maxAutoDetectKey}::${copyAllowedKey}::${lineNumbersKey}::${languageOptionsKey}::${featureFlagsKey}`;
     const stableFontFamilyOptionsRef = useRef<readonly FontFamilyOption[] | undefined>(fontFamilyOptions);
     const stableFontSizeOptionsRef = useRef<readonly FontSizeOption[] | undefined>(fontSizeOptions);
     const stableLineHeightOptionsRef = useRef<readonly LineHeightOption[] | undefined>(lineHeightOptions);
@@ -1833,6 +2187,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         ...(syntaxHighlighting !== undefined
           ? { syntaxHighlighting }
           : {}),
+        ...(grammarPreloadMode !== undefined
+          ? { grammarPreloadMode }
+          : {}),
         ...(stableCodeHighlightProviderRef.current !== undefined
           ? { codeHighlightProvider: stableCodeHighlightProviderRef.current }
           : {}),
@@ -1843,6 +2200,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
           ? { maxAutoDetectCodeLength }
           : {}),
         isCopyAllowed,
+        showLineNumbers,
         ...(stableLanguageOptionsRef.current !== undefined
           ? { languageOptions: stableLanguageOptionsRef.current }
           : {}),
@@ -1923,10 +2281,22 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         methods ?? {
           injectJSON: () => {},
           getJSON: () => serializeJSONToSource("json", EMPTY_JSON_DOCUMENT),
-          getMarkdown: () => serializeJSONToSource("markdown", EMPTY_JSON_DOCUMENT),
-          getHTML: () => serializeJSONToSource("html", EMPTY_JSON_DOCUMENT),
+          getMarkdown: () =>
+            serializeJSONToSource(
+              "markdown",
+              EMPTY_JSON_DOCUMENT,
+              sourceMetadataMode,
+              markdownBridgeFlavor,
+            ),
+          getHTML: () =>
+            serializeJSONToSource(
+              "html",
+              EMPTY_JSON_DOCUMENT,
+              sourceMetadataMode,
+              markdownBridgeFlavor,
+            ),
         },
-      [methods],
+      [markdownBridgeFlavor, methods, sourceMetadataMode],
     );
 
     const handleReady = (m: ExtensiveEditorRef) => {
@@ -1944,6 +2314,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         ref={wrapperRef}
         className={`luthor-preset luthor-preset-extensive luthor-editor-wrapper${isToolbarPinned ? " luthor-editor-wrapper--toolbar-pinned" : ""} ${variantClassName || ""} ${className || ""}`.trim()}
         data-editor-theme={editorTheme}
+        data-inline-code-highlighting={inlineCodeHighlighting ? "on" : "off"}
         style={wrapperStyleVars}
       >
         <Provider extensions={memoizedExtensions} config={{ theme: editorThemeConfig }}>
@@ -1972,8 +2343,13 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             slashCommandVisibility={slashCommandVisibility}
             shortcutConfig={shortcutConfig}
             commandPaletteShortcutOnly={commandPaletteShortcutOnly}
+            isListStyleDropdownEnabled={isListStyleDropdownEnabled}
             featureFlags={resolvedFeatureFlags}
             editOnClick={editOnClick}
+            sourceMetadataMode={sourceMetadataMode}
+            markdownBridgeFlavor={markdownBridgeFlavor}
+            markdownSourceOfTruth={markdownSourceOfTruth}
+            showLineNumbers={showLineNumbers}
           />
         </Provider>
       </div>

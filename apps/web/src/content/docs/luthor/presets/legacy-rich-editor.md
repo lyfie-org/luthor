@@ -5,7 +5,7 @@ description: Shared metadata-free rich editor profile powering both MD and HTML 
 
 # Legacy Rich Editor
 
-`LegacyRichEditor` is a shared metadata-free editor profile that powers both `MDEditor` and `HTMLEditor`.
+`LegacyRichEditor` is a shared metadata-free editor profile that powers both `MarkDownEditor` and `HTMLEditor`.
 
 Use it when you want the same native feature set and switch only the source tab mode between markdown and html.
 
@@ -29,8 +29,8 @@ export function App() {
 `LegacyRichEditorProps` inherits `ExtensiveEditorProps` except `featureFlags`, `availableModes`, `initialMode`, and `defaultEditorView`, then re-adds constrained variants:
 
 - `sourceFormat`: `'both' (default) | 'markdown' | 'html'`
-- `initialMode`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
-- `defaultEditorView`: `'visual' (default) | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
+- `initialMode`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
+- `defaultEditorView`: `'visual' (default) | 'visual-only' | 'json' | 'markdown' | 'html'` (validated against `sourceFormat`)
 - `featureFlags`: `undefined (default) | FeatureFlagOverrides` (metadata-heavy features remain disabled)
 
 ## Behavior
@@ -40,21 +40,38 @@ export function App() {
   - bold, italic, strikethrough, inline code
   - code block
   - links
-  - ordered/unordered/check lists + indentation
+  - alignment controls (left/center/right/justify)
+  - ordered/unordered/check lists with indent/outdent controls for nested sublists
+  - tables and images
   - horizontal rule
-- Disabled by default to keep metadata-light markdown/html round trips:
-  - tables, images, embeds, custom nodes, draggable block, emoji, slash/command palette, theme toggle
+  - theme toggle
+- Disabled by default to keep metadata-free markdown/html round trips:
+  - embeds, custom nodes, draggable block, emoji, slash/command palette
 - Source views:
-  - `sourceFormat="both"` uses Visual/Markdown/HTML tabs
-  - `sourceFormat="markdown"` uses Visual/JSON/Markdown tabs
-  - `sourceFormat="html"` uses Visual/JSON/HTML tabs
+  - `sourceFormat="both"` uses Visual Only/Visual/Markdown/HTML tabs
+  - `sourceFormat="markdown"` uses Visual Only/Visual/JSON/Markdown tabs
+  - `sourceFormat="html"` uses Visual Only/Visual/JSON/HTML tabs
+  - line numbers are enabled by default in visual code blocks and source tabs (`showLineNumbers=true`)
 
 ## Toolbar profile
 
 Default toolbar sections focus on writing and structure:
 
 - Undo/redo
-- Block format + quote
+- Block format + quote + alignment controls
 - Bold/italic/strikethrough/inline code/link
-- Ordered/unordered/checklist + indent/outdent
-- Code block + horizontal rule
+- Ordered/unordered/checklist
+- List style dropdown arrows are hidden in this preset family; each list button inserts the preset default list style directly.
+- Code block + horizontal rule + table + image
+- Theme toggle
+
+## Theme and syntax colors
+
+Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch `highlight.js` CSS for code color parity:
+
+- local/public (light): `/public/highlightjs/github.css`
+- local/public (dark): `/public/highlightjs/github-dark.css`
+- CDN (light): `https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css`
+- CDN (dark): `https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github-dark.min.css`
+
+Code tokens render with color only when these highlight styles (or equivalent custom `.hljs*` styles) are loaded.

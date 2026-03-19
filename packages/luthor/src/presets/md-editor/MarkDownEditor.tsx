@@ -1,29 +1,34 @@
 import { forwardRef } from "react";
+import type { ToolbarLayout } from "../../core";
+import type { ExtensiveEditorRef, FeatureFlagOverrides } from "../extensive";
 import type { LegacyRichEditorProps, LegacyRichEditorMode } from "../legacy-rich";
 import {
   LegacyRichEditor,
   LEGACY_RICH_DEFAULT_FEATURE_FLAGS,
   LEGACY_RICH_TOOLBAR_LAYOUT,
 } from "../legacy-rich";
-import type { ExtensiveEditorRef } from "../extensive";
 import { joinClassNames } from "../_shared";
 
-export const MD_EDITOR_DEFAULT_MODES = ["visual", "json", "markdown"] as const;
-export const MD_EDITOR_DEFAULT_FEATURE_FLAGS = LEGACY_RICH_DEFAULT_FEATURE_FLAGS;
-export const MD_EDITOR_TOOLBAR_LAYOUT = LEGACY_RICH_TOOLBAR_LAYOUT;
+export const MD_EDITOR_DEFAULT_MODES = ["visual-only", "visual", "json", "markdown"] as const;
+export const MD_EDITOR_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
+  ...LEGACY_RICH_DEFAULT_FEATURE_FLAGS,
+  codeIntelligence: true,
+};
 
-export type MDEditorMode = Exclude<LegacyRichEditorMode, "html">;
-export type MDEditorView = MDEditorMode;
+export const MD_EDITOR_TOOLBAR_LAYOUT: ToolbarLayout = LEGACY_RICH_TOOLBAR_LAYOUT;
 
-export type MDEditorProps = Omit<
+export type MarkDownEditorMode = Exclude<LegacyRichEditorMode, "html">;
+export type MarkDownEditorView = MarkDownEditorMode;
+
+export type MarkDownEditorProps = Omit<
   LegacyRichEditorProps,
   "sourceFormat" | "initialMode" | "defaultEditorView"
 > & {
-  initialMode?: MDEditorMode;
-  defaultEditorView?: MDEditorView;
+  initialMode?: MarkDownEditorMode;
+  defaultEditorView?: MarkDownEditorView;
 };
 
-export const MDEditor = forwardRef<ExtensiveEditorRef, MDEditorProps>(
+export const MarkDownEditor = forwardRef<ExtensiveEditorRef, MarkDownEditorProps>(
   (
     {
       className,
@@ -32,10 +37,16 @@ export const MDEditor = forwardRef<ExtensiveEditorRef, MDEditorProps>(
       toolbarLayout,
       initialMode = "visual",
       defaultEditorView,
+      featureFlags,
       ...props
     },
     ref,
   ) => {
+    const resolvedFeatureFlags: FeatureFlagOverrides = {
+      ...MD_EDITOR_DEFAULT_FEATURE_FLAGS,
+      ...(featureFlags ?? {}),
+    };
+
     return (
       <LegacyRichEditor
         ref={ref}
@@ -52,10 +63,13 @@ export const MDEditor = forwardRef<ExtensiveEditorRef, MDEditorProps>(
         sourceFormat="markdown"
         initialMode={initialMode}
         defaultEditorView={defaultEditorView}
+        markdownBridgeFlavor="github"
+        markdownSourceOfTruth
+        featureFlags={resolvedFeatureFlags}
         toolbarLayout={toolbarLayout ?? MD_EDITOR_TOOLBAR_LAYOUT}
       />
     );
   },
 );
 
-MDEditor.displayName = "MDEditor";
+MarkDownEditor.displayName = "MarkDownEditor";

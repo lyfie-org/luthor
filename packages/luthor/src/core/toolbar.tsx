@@ -966,6 +966,7 @@ export interface ToolbarProps {
   toolbarVisibility?: ToolbarVisibility;
   headingOptions?: readonly BlockHeadingLevel[];
   paragraphLabel?: string;
+  isListStyleDropdownEnabled?: boolean;
 }
 
 export function Toolbar({
@@ -982,6 +983,7 @@ export function Toolbar({
   toolbarVisibility,
   headingOptions,
   paragraphLabel,
+  isListStyleDropdownEnabled = true,
 }: ToolbarProps) {
   const { handlers, fileInputRef, gifInputRef } = useImageHandlers(commands, imageUploadHandler);
   const embedHandlers = useEmbedHandlers(commands);
@@ -1669,6 +1671,13 @@ export function Toolbar({
 
       case "unorderedList":
         if (!hasExtension("list")) return null;
+        if (!isListStyleDropdownEnabled) {
+          return (
+            <IconButton key="unorderedList" onClick={() => commands.toggleUnorderedList()} active={activeStates.unorderedList} title="Bullet List">
+              <ListIcon size={16} />
+            </IconButton>
+          );
+        }
         return (
           <div key="unorderedList" className="luthor-toolbar-split-button">
             <IconButton onClick={() => commands.toggleUnorderedList()} active={activeStates.unorderedList} title="Bullet List">
@@ -1711,6 +1720,13 @@ export function Toolbar({
 
       case "orderedList":
         if (!hasExtension("list")) return null;
+        if (!isListStyleDropdownEnabled) {
+          return (
+            <IconButton key="orderedList" onClick={() => commands.toggleOrderedList()} active={activeStates.orderedList} title="Numbered List">
+              <ListOrderedIcon size={16} />
+            </IconButton>
+          );
+        }
         return (
           <div key="orderedList" className="luthor-toolbar-split-button">
             <IconButton onClick={() => commands.toggleOrderedList()} active={activeStates.orderedList} title="Numbered List">
@@ -1753,6 +1769,13 @@ export function Toolbar({
 
       case "checkList":
         if (!hasExtension("list")) return null;
+        if (!isListStyleDropdownEnabled) {
+          return (
+            <IconButton key="checkList" onClick={() => commands.toggleCheckList()} active={activeStates.checkList} title="Checklist">
+              <ListCheckIcon size={16} />
+            </IconButton>
+          );
+        }
         return (
           <div key="checkList" className="luthor-toolbar-split-button">
             <IconButton onClick={() => commands.toggleCheckList()} active={activeStates.checkList} title="Checklist">

@@ -2,8 +2,11 @@ import {
   COMMAND_PRIORITY_LOW,
   KEY_TAB_COMMAND,
   LexicalEditor,
+  NodeKey,
+  $getNodeByKey,
   $getSelection,
   $isRangeSelection,
+  $nodesOfType,
 } from "lexical";
 import { $setBlocksType } from "@lexical/selection";
 import {
@@ -27,6 +30,10 @@ import {
   resolveCodeHighlightProvider,
   resolveCodeTokenizer,
 } from "./codeHighlightProvider";
+import {
+  loadPopularPrismLanguages,
+  loadPrismLanguages,
+} from "./prismLanguageLoader";
 
 /**
  * Commands exposed by the CodeExtension for toggling code blocks
@@ -44,10 +51,14 @@ export type CodeStateQueries = {
   isInCodeBlock: () => Promise<boolean>;
 };
 
+export type CodeGrammarPreloadMode = "lazy" | "idle" | "eager";
+
 export type CodeExtensionConfig = BaseExtensionConfig &
   CodeHighlightProviderConfig & {
     syntaxHighlighting?: "auto" | "disabled";
     tokenizer?: CodeTokenizer | null;
+    showLineNumbers?: boolean;
+    grammarPreloadMode?: CodeGrammarPreloadMode;
   };
 
 /**
@@ -82,11 +93,15 @@ export class CodeExtension extends BaseExtension<
   private static readonly MAX_CODE_TAB_DEPTH = 8;
 
   private codeHighlightProviderPromise: Promise<CodeHighlightProvider | null> | null = null;
+  private lineNumberTextCache = new Map<number, string>();
+  private appliedLineNumberNodeKeys = new Set<string>();
 
   constructor() {
     super("code", [ExtensionCategory.Toolbar]);
     this.config = {
       syntaxHighlighting: "auto",
+      showLineNumbers: true,
+      grammarPreloadMode: "lazy",
     };
   }
 
@@ -98,13 +113,73 @@ export class CodeExtension extends BaseExtension<
   register(editor: LexicalEditor): () => void {
     let unregisterCodeHighlighting = () => {};
     let didDispose = false;
+    let activeTokenizer: CodeTokenizer | null = null;
+    let hasQueuedUsedLanguagePreload = false;
+    let cancelIdlePopularPreload: (() => void) | null = null;
+    const syncCodeBlockLineNumbers = () => {
+      if (didDispose) {
+        return;
+      }
+      this.ensureCodeBlockLineNumbers(editor);
+    };
 
     const applyHighlighting = (tokenizer: CodeTokenizer) => {
+      activeTokenizer = tokenizer;
       unregisterCodeHighlighting();
       unregisterCodeHighlighting = registerCodeHighlighting(
         editor,
         tokenizer as Parameters<typeof registerCodeHighlighting>[1],
       );
+    };
+
+    const refreshCodeHighlighting = () => {
+      if (didDispose || !activeTokenizer) {
+        return;
+      }
+
+      applyHighlighting(activeTokenizer);
+      editor.update(() => {
+        $nodesOfType(CodeNode).forEach((node) => {
+          const language = node.getLanguage();
+          if (typeof language === "string" && language.trim().length > 0) {
+            node.setLanguage(language);
+          }
+        });
+      });
+    };
+
+    const preloadUsedCodeLanguages = async () => {
+      const usedLanguages = editor.getEditorState().read(() =>
+        $nodesOfType(CodeNode)
+          .map((node) => node.getLanguage())
+          .filter((language): language is string => typeof language === "string"),
+      );
+
+      if (usedLanguages.length === 0) {
+        return;
+      }
+
+      const newlyLoadedLanguages = await loadPrismLanguages(usedLanguages);
+      if (didDispose || newlyLoadedLanguages.length === 0) {
+        return;
+      }
+
+      refreshCodeHighlighting();
+    };
+
+    const queueUsedLanguagePreload = () => {
+      if (didDispose || hasQueuedUsedLanguagePreload) {
+        return;
+      }
+
+      hasQueuedUsedLanguagePreload = true;
+      queueMicrotask(() => {
+        hasQueuedUsedLanguagePreload = false;
+        if (didDispose) {
+          return;
+        }
+        void preloadUsedCodeLanguages();
+      });
     };
 
     if (this.config.syntaxHighlighting !== "disabled") {
@@ -115,8 +190,54 @@ export class CodeExtension extends BaseExtension<
           return;
         }
         applyHighlighting(tokenizer);
+        queueUsedLanguagePreload();
       });
+
+      const grammarPreloadMode = resolveGrammarPreloadMode(
+        this.config.grammarPreloadMode,
+      );
+
+      const preloadPopularLanguages = async () => {
+        const newlyLoadedLanguages = await loadPopularPrismLanguages();
+        if (didDispose || newlyLoadedLanguages.length === 0) {
+          return;
+        }
+        refreshCodeHighlighting();
+      };
+
+      if (grammarPreloadMode === "eager") {
+        void preloadPopularLanguages();
+      } else if (grammarPreloadMode === "idle") {
+        cancelIdlePopularPreload = scheduleIdleTask(() => {
+          void preloadPopularLanguages();
+        });
+      }
+
+      queueUsedLanguagePreload();
     }
+
+    const unregisterLineNumberUpdate = editor.registerUpdateListener(
+      ({ dirtyElements, dirtyLeaves }) => {
+        const hasContentChanges =
+          dirtyElements.size > 0 || dirtyLeaves.size > 0;
+        if (!hasContentChanges) {
+          return;
+        }
+
+        syncCodeBlockLineNumbers();
+
+        if (
+          this.config.syntaxHighlighting !== "disabled" &&
+          this.hasCodeNodeMutations(editor, dirtyElements, dirtyLeaves)
+        ) {
+          queueUsedLanguagePreload();
+        }
+      },
+    );
+
+    queueMicrotask(() => {
+      syncCodeBlockLineNumbers();
+    });
 
     const unregisterTabCommand = editor.registerCommand<KeyboardEvent>(
       KEY_TAB_COMMAND,
@@ -155,7 +276,11 @@ export class CodeExtension extends BaseExtension<
     return () => {
       didDispose = true;
       unregisterCodeHighlighting();
+      unregisterLineNumberUpdate();
       unregisterTabCommand();
+      cancelIdlePopularPreload?.();
+      cancelIdlePopularPreload = null;
+      this.appliedLineNumberNodeKeys.clear();
     };
   }
 
@@ -310,6 +435,38 @@ export class CodeExtension extends BaseExtension<
     return block ? this.getNodeFormat(block) : null;
   }
 
+  private hasCodeNodeMutations(
+    editor: LexicalEditor,
+    dirtyElements: Map<NodeKey, unknown>,
+    dirtyLeaves: Set<NodeKey>,
+  ): boolean {
+    const dirtyNodeKeys = new Set<NodeKey>();
+    dirtyElements.forEach((_, key) => {
+      dirtyNodeKeys.add(key);
+    });
+    dirtyLeaves.forEach((key) => {
+      dirtyNodeKeys.add(key);
+    });
+
+    if (dirtyNodeKeys.size === 0) {
+      return false;
+    }
+
+    return editor.getEditorState().read(() => {
+      for (const key of dirtyNodeKeys) {
+        let current = $getNodeByKey(key);
+        while (current) {
+          if ($isCodeNode(current)) {
+            return true;
+          }
+          current = current.getParent();
+        }
+      }
+
+      return false;
+    });
+  }
+
   private hasReachedCodeTabLimit(selection: any): boolean {
     const anchor = selection.anchor;
     const anchorNode = anchor.getNode();
@@ -326,7 +483,140 @@ export class CodeExtension extends BaseExtension<
 
     return leadingTabs >= CodeExtension.MAX_CODE_TAB_DEPTH;
   }
+
+  private ensureCodeBlockLineNumbers(editor: LexicalEditor): void {
+    const showLineNumbers = this.config.showLineNumbers !== false;
+    const snapshots = editor.getEditorState().read(() =>
+      $nodesOfType(CodeNode).map((node) => ({
+        key: node.getKey(),
+        lineCount: this.getCodeBlockLineCount(node.getTextContent()),
+      })),
+    );
+
+    const activeNodeKeys = new Set<string>();
+
+    snapshots.forEach(({ key, lineCount }) => {
+      activeNodeKeys.add(key);
+      const codeElement = editor.getElementByKey(key) as HTMLElement | null;
+      if (!codeElement) {
+        return;
+      }
+
+      if (!showLineNumbers) {
+        this.clearCodeBlockLineNumberAttributes(codeElement);
+        this.appliedLineNumberNodeKeys.delete(key);
+        return;
+      }
+
+      const normalizedLineCount = Math.max(1, lineCount);
+      const lineCountText = String(normalizedLineCount);
+      if (
+        codeElement.getAttribute("data-luthor-line-number-count") !== lineCountText ||
+        !codeElement.hasAttribute("data-luthor-line-numbers")
+      ) {
+        codeElement.setAttribute("data-luthor-line-number-count", lineCountText);
+        codeElement.setAttribute(
+          "data-luthor-line-numbers",
+          this.getCodeBlockLineNumberText(normalizedLineCount),
+        );
+        codeElement.style.setProperty(
+          "--luthor-code-line-number-gutter-width",
+          `${Math.max(2, lineCountText.length)}ch`,
+        );
+      }
+
+      codeElement.classList.add("luthor-code-block--line-numbers");
+      this.appliedLineNumberNodeKeys.add(key);
+    });
+
+    Array.from(this.appliedLineNumberNodeKeys).forEach((key) => {
+      if (showLineNumbers && activeNodeKeys.has(key)) {
+        return;
+      }
+
+      const codeElement = editor.getElementByKey(key) as HTMLElement | null;
+      if (codeElement) {
+        this.clearCodeBlockLineNumberAttributes(codeElement);
+      }
+      this.appliedLineNumberNodeKeys.delete(key);
+    });
+  }
+
+  private clearCodeBlockLineNumberAttributes(codeElement: HTMLElement): void {
+    codeElement.classList.remove("luthor-code-block--line-numbers");
+    codeElement.removeAttribute("data-luthor-line-numbers");
+    codeElement.removeAttribute("data-luthor-line-number-count");
+    codeElement.style.removeProperty("--luthor-code-line-number-gutter-width");
+  }
+
+  private getCodeBlockLineCount(content: string): number {
+    if (!content) {
+      return 1;
+    }
+
+    let count = 1;
+    for (let index = 0; index < content.length; index += 1) {
+      if (content[index] === "\n") {
+        count += 1;
+      }
+    }
+
+    return Math.max(1, count);
+  }
+
+  private getCodeBlockLineNumberText(lineCount: number): string {
+    const cached = this.lineNumberTextCache.get(lineCount);
+    if (cached) {
+      return cached;
+    }
+
+    const lineNumbers = Array.from({ length: lineCount }, (_, index) =>
+      String(index + 1),
+    ).join("\n");
+    this.lineNumberTextCache.set(lineCount, lineNumbers);
+    return lineNumbers;
+  }
 }
 
 export const codeExtension = new CodeExtension();
+
+function resolveGrammarPreloadMode(
+  mode: CodeGrammarPreloadMode | undefined,
+): CodeGrammarPreloadMode {
+  return mode ?? "lazy";
+}
+
+function scheduleIdleTask(task: () => void): () => void {
+  if (typeof window !== "undefined") {
+    const requestIdle = (
+      window as Window & {
+        requestIdleCallback?: (
+          callback: () => void,
+          options?: { timeout: number },
+        ) => number;
+      }
+    ).requestIdleCallback;
+    const cancelIdle = (
+      window as Window & {
+        cancelIdleCallback?: (handle: number) => void;
+      }
+    ).cancelIdleCallback;
+
+    if (typeof requestIdle === "function") {
+      const handle = requestIdle(task, { timeout: 500 });
+      return () => {
+        if (typeof cancelIdle === "function") {
+          cancelIdle(handle);
+        }
+      };
+    }
+  }
+
+  const timeout = setTimeout(task, 16);
+  return () => clearTimeout(timeout);
+}
+
+export const __TEST_ONLY_CODE_EXTENSION_INTERNALS = {
+  resolveGrammarPreloadMode,
+} as const;
 
