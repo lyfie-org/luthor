@@ -63,7 +63,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Capabilities
 - File: getting-started/capabilities.md
 - URL: https://www.luthor.fyi/docs/getting-started/capabilities/
-- Summary: Capabilities This page shows what Luthor can do today, in plain language, with quick package mapping. For Lexical engine internals, see: lexical.dev/docs . Capability index 1. Typography Controls 2. Essentials Done Right 3. Color and Highlight 4. Links and Structure 5. Lists 6. Indentation 7. Rich Embeds 8. Code Blocks...
+- Summary: title: Capabilities description: Complete feature overview for Luthor, with package availability and command level mapping. Capabilities This page shows what Luthor can do today, in plain language, with quick package mapping. For Lexical engine internals, see: lexical.dev/docs . Capability index 1. Typography Controls ...
 
 ### Contributor Guide
 - File: getting-started/contributor-guide.md
@@ -78,17 +78,17 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Installation
 - File: getting-started/installation.md
 - URL: https://www.luthor.fyi/docs/getting-started/installation/
-- Summary: Installation This page covers install, update, uninstall, and validation for both packages. Prerequisites Node.js =20 A React app using React 18 or 19 Install @lyfie/luthor npm pnpm yarn bun Install @lyfie/luthor headless npm Optional dependencies for headless highlight.js is optional but useful when code highlighting ...
+- Summary: title: Installation description: Install, update, and uninstall @lyfie/luthor and @lyfie/luthor headless. Installation This page covers install, update, uninstall, and validation for both packages. Prerequisites Node.js =20 A React app using React 18 or 19 Install @lyfie/luthor npm pnpm yarn bun Install @lyfie/luthor h...
 
 ### @lyfie/luthor-headless
 - File: getting-started/luthor-headless.md
 - URL: https://www.luthor.fyi/docs/getting-started/luthor-headless/
-- Summary: @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Render a minimal headless editor Validate installation 1. The editor mounts and accepts input. 2. Toolbar buttons call typed commands ( toggleBold , toggleItalic ). 3. activeStates updates correctly whe...
+- Summary: title: "@lyfie/luthor headless" description: Minimal setup and validation for @lyfie/luthor headless. @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Render a minimal headless editor Validate installation 1. The editor mounts and accepts input. 2. To...
 
 ### @lyfie/luthor
 - File: getting-started/luthor.md
 - URL: https://www.luthor.fyi/docs/getting-started/luthor/
-- Summary: @lyfie/luthor Use @lyfie/luthor when you want a production ready editor quickly with strong defaults. Install Render a basic editor What you get Preset components: ExtensiveEditor , ComposeEditor , SimpleEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , SlashEditor , HeadlessEditorPreset Source mode workflows (...
+- Summary: title: "@lyfie/luthor" description: Minimal setup and validation for the preset package. @lyfie/luthor Use @lyfie/luthor when you want a production ready editor quickly with strong defaults. Install Render a basic editor What you get Preset components: ExtensiveEditor , ComposeEditor , SimpleEditor , LegacyRichEditor ,...
 
 ### Architecture
 - File: luthor-headless/architecture.md
@@ -98,7 +98,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Extensions and API
 - File: luthor-headless/extensions-and-api.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/extensions-and-api/
-- Summary: Extensions and API This page is the full API map for @lyfie/luthor headless . Core entry points createEditorSystem createExtension RichText and richTextExtension markdownToJSON , jsonToMarkdown , htmlToJSON , jsonToHTML appendMetadataEnvelopes , extractMetadataEnvelopes , rehydrateDocumentFromEnvelopes defaultLuthorThe...
+- Summary: title: Extensions and API description: Extension catalog and API usage for createEditorSystem, RichText, and custom extension authoring in @lyfie/luthor headless. Extensions and API This page is the full API map for @lyfie/luthor headless . Core entry points createEditorSystem createExtension RichText and richTextExten...
 
 ### Features
 - File: luthor-headless/features.md
@@ -108,7 +108,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Code and Devtools
 - File: luthor-headless/features/code-and-devtools.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/
-- Summary: Code and Devtools This group covers code editing and developer facing conversion utilities. Recent defaults: Code block language labels use full language names in UI (for example, TypeScript , JavaScript , Bash ). bash is included in the default language options. Code block line numbers can be enabled/disabled through ...
+- Summary: title: Code and Devtools description: Code blocks, syntax support, and markdown/json conversion tools. Code and Devtools This group covers code editing and developer facing conversion utilities. Recent defaults: Code block language labels use full language names in UI (for example, TypeScript , JavaScript , Bash ). bas...
 
 ### Customization and Theming
 - File: luthor-headless/features/customization-and-theming.md
@@ -138,7 +138,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Metadata Comment System
 - File: luthor-headless/metadata-comment-system.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/metadata-comment-system/
-- Summary: Metadata Comment System When converting between JSON and Markdown/HTML, some node types or fields cannot be represented natively. @lyfie/luthor headless preserves that data in metadata envelopes stored as HTML comments. Envelope format Comments are appended to source output: Source implementation: packages/headless/src...
+- Summary: title: Metadata Comment System description: How luthor metadata envelopes preserve unsupported and non native data across JSON, Markdown, and HTML bridges. Metadata Comment System When converting between JSON and Markdown/HTML, some node types or fields cannot be represented natively. @lyfie/luthor headless preserves t...
 
 ### Architecture
 - File: luthor/architecture.md
@@ -148,27 +148,27 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Feature Flags
 - File: luthor/feature-flags.md
 - URL: https://www.luthor.fyi/docs/luthor/feature-flags/
-- Summary: Feature Flags @lyfie/luthor uses feature flags to control what each preset can do, without forking runtime logic. Source of truth Canonical keys are defined in packages/luthor/src/presets/extensive/extensions.tsx as EXTENSIVE FEATURE KEYS . Default behavior ExtensiveEditor starts with all feature flags enabled ( DEFAUL...
+- Summary: title: Feature Flags description: Complete feature flag model for @lyfie/luthor presets, including defaults, overrides, and preset enforcement. Feature Flags @lyfie/luthor uses feature flags to control what each preset can do, without forking runtime logic. Source of truth Canonical keys are defined in packages/luthor/...
 
 ### Presets
 - File: luthor/presets.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/
-- Summary: Presets @lyfie/luthor is built around presets. Each preset wraps ExtensiveEditor with a specific product profile. Contributor guides Architecture Props reference Feature flags Re exported headless API This gives you direct access to @lyfie/luthor headless APIs when needed. Preset matrix Preset Best for Mode profile Ext...
+- Summary: title: Presets description: Preset catalog for @lyfie/luthor, including per preset docs. Presets @lyfie/luthor is built around presets. Each preset wraps ExtensiveEditor with a specific product profile. Contributor guides Architecture Props reference Feature flags Re exported headless API This gives you direct access t...
 
 ### Compose Editor
 - File: luthor/presets/compose-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/compose-editor/
-- Summary: Compose Editor ComposeEditor is a focused drafting preset for writing flows where speed and clarity matter more than every possible feature. Usage Props ComposeEditorProps inherits all ExtensiveEditorProps except direct featureFlags , then adds: featureFlags : FeatureFlagOverrides (optional overrides) compactToolbar : ...
+- Summary: title: Compose Editor description: Focused rich text drafting preset with a compact, practical toolbar. Compose Editor ComposeEditor is a focused drafting preset for writing flows where speed and clarity matter more than every possible feature. Usage Props ComposeEditorProps inherits all ExtensiveEditorProps except dir...
 
 ### Extensive Editor
 - File: luthor/presets/extensive-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/extensive-editor/
-- Summary: Extensive Editor ExtensiveEditor is the base preset in @lyfie/luthor . Every other preset is a focused wrapper around this component. Usage Default behavior snapshot Category Default Theme initialTheme="light" Mode initialMode="visual editor" Available modes ["visual editor", "visual only", "json", "markdown", "html"] ...
+- Summary: title: Extensive Editor description: Full feature preset and core prop reference. Extensive Editor ExtensiveEditor is the base preset in @lyfie/luthor . Every other preset is a focused wrapper around this component. Usage Default behavior snapshot Category Default Theme initialTheme="light" Mode initialMode="visual edi...
 
 ### Headless Editor
 - File: luthor/presets/headless-editor-preset.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/
-- Summary: Headless Editor HeadlessEditorPreset is a lightweight, source aware preset with a simple text pill toolbar. Usage Props HeadlessEditorPresetProps inherits ExtensiveEditorProps except featureFlags , availableModes , and source view mode props, then re adds constrained mode variants. initialMode : 'visual' (default) 'vis...
+- Summary: title: Headless Editor description: Reference preset showing direct headless composition. Headless Editor HeadlessEditorPreset is a lightweight, source aware preset with a simple text pill toolbar. Usage Props HeadlessEditorPresetProps inherits ExtensiveEditorProps except featureFlags , availableModes , and source view...
 
 ### HTML Editor
 - File: luthor/presets/html-editor.md
@@ -193,10 +193,10 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Slash Editor
 - File: luthor/presets/slash-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/slash-editor/
-- Summary: Slash Editor SlashEditor is a slash first preset tuned for command driven writing. Usage Props SlashEditorProps inherits ExtensiveEditorProps except featureFlags and isToolbarEnabled , then re adds both. slashVisibility : undefined (default) SlashCommandVisibility isDraggableEnabled : true (default) false featureFlags ...
+- Summary: title: Slash Editor description: Slash first preset with draggable and command focused defaults. Slash Editor SlashEditor is a slash first preset tuned for command driven writing. Usage Props SlashEditorProps inherits ExtensiveEditorProps except featureFlags and isToolbarEnabled , then re adds both. slashVisibility : u...
 
 ### Props Reference
 - File: luthor/props-reference.md
 - URL: https://www.luthor.fyi/docs/luthor/props-reference/
-- Summary: Props Reference This page is the full prop contract for @lyfie/luthor presets. Base preset: ExtensiveEditor Wrapper presets: ComposeEditor , SimpleEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , SlashEditor , HeadlessEditorPreset 1) ExtensiveEditorProps (base contract) Content and mode Prop Type Default Notes...
+- Summary: title: Props Reference description: Complete prop and ref reference for ExtensiveEditor and all @lyfie/luthor preset wrappers. Props Reference This page is the full prop contract for @lyfie/luthor presets. Base preset: ExtensiveEditor Wrapper presets: ComposeEditor , SimpleEditor , LegacyRichEditor , MarkDownEditor , H...
 

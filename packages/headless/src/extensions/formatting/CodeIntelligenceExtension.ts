@@ -266,7 +266,7 @@ export class CodeIntelligenceExtension extends BaseExtension<
     if (!normalized || normalized === "plain") {
       return getFallbackCodeTheme();
     }
-    return "hljs";
+    return "prism";
   }
 
   private ensureCodeBlockThemes(editor: LexicalEditor): void {

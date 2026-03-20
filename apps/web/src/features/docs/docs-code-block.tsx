@@ -1,14 +1,16 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import hljs from 'highlight.js/lib/core';
-import bash from 'highlight.js/lib/languages/bash';
-import css from 'highlight.js/lib/languages/css';
-import javascript from 'highlight.js/lib/languages/javascript';
-import json from 'highlight.js/lib/languages/json';
-import markdown from 'highlight.js/lib/languages/markdown';
-import typescript from 'highlight.js/lib/languages/typescript';
-import xml from 'highlight.js/lib/languages/xml';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-markup';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-typescript';
 
 type PackageManager = 'npm' | 'yarn' | 'pnpm';
 
@@ -35,26 +37,23 @@ const RESERVED_PM_COMMANDS = new Set([
   'update',
 ]);
 
-let languagesRegistered = false;
-
-function registerHighlightLanguages() {
-  if (languagesRegistered) return;
-  hljs.registerLanguage('bash', bash);
-  hljs.registerLanguage('shell', bash);
-  hljs.registerLanguage('sh', bash);
-  hljs.registerLanguage('javascript', javascript);
-  hljs.registerLanguage('js', javascript);
-  hljs.registerLanguage('typescript', typescript);
-  hljs.registerLanguage('ts', typescript);
-  hljs.registerLanguage('tsx', typescript);
-  hljs.registerLanguage('json', json);
-  hljs.registerLanguage('css', css);
-  hljs.registerLanguage('html', xml);
-  hljs.registerLanguage('xml', xml);
-  hljs.registerLanguage('md', markdown);
-  hljs.registerLanguage('markdown', markdown);
-  languagesRegistered = true;
-}
+const PRISM_LANGUAGE_ALIASES: Record<string, string> = {
+  bash: 'bash',
+  shell: 'bash',
+  sh: 'bash',
+  css: 'css',
+  html: 'markup',
+  xml: 'markup',
+  javascript: 'javascript',
+  js: 'javascript',
+  json: 'json',
+  markdown: 'markdown',
+  md: 'markdown',
+  typescript: 'typescript',
+  ts: 'typescript',
+  tsx: 'tsx',
+  jsx: 'jsx',
+};
 
 function replaceSaveDevFlags(args: string, target: PackageManager): string {
   if (target === 'npm') return args;
@@ -161,6 +160,36 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function resolvePrismLanguage(language: string | undefined): string | null {
+  if (!language) {
+    return null;
+  }
+
+  const normalized = language.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  return PRISM_LANGUAGE_ALIASES[normalized] ?? normalized;
+}
+
+function highlightWithPrism(code: string, language: string | undefined): { html: string; className: string } {
+  const resolvedLanguage = resolvePrismLanguage(language);
+  if (!resolvedLanguage) {
+    return { html: escapeHtml(code), className: 'language-plain' };
+  }
+
+  const grammar = Prism.languages[resolvedLanguage];
+  if (!grammar) {
+    return { html: escapeHtml(code), className: `language-${resolvedLanguage}` };
+  }
+
+  return {
+    html: Prism.highlight(code, grammar, resolvedLanguage),
+    className: `language-${resolvedLanguage}`,
+  };
+}
+
 function highlightPmCode(code: string): string {
   const verbSet = new Set(['install', 'add', 'remove', 'uninstall', 'update', 'up', 'run', 'dlx', 'exec', 'create']);
   const managerSet = new Set(['npm', 'yarn', 'pnpm', 'npx']);
@@ -205,17 +234,10 @@ export function DocsCodeBlock({ code, language }: DocsCodeBlockProps) {
   const effectiveLanguage = pmVariants ? 'bash' : language;
   const highlighted = useMemo(() => {
     if (pmVariants) {
-      return { html: highlightPmCode(displayCode), className: 'hljs docs-pm-code language-bash' };
+      return { html: highlightPmCode(displayCode), className: 'docs-pm-code language-bash' };
     }
 
-    registerHighlightLanguages();
-    if (effectiveLanguage && hljs.getLanguage(effectiveLanguage)) {
-      const result = hljs.highlight(displayCode, { language: effectiveLanguage, ignoreIllegals: true });
-      return { html: result.value, className: `hljs language-${result.language ?? effectiveLanguage}` };
-    }
-    const result = hljs.highlightAuto(displayCode);
-    const className = result.language ? `hljs language-${result.language}` : 'hljs';
-    return { html: result.value, className };
+    return highlightWithPrism(displayCode, effectiveLanguage);
   }, [displayCode, effectiveLanguage, pmVariants]);
 
   async function copyCode() {

@@ -89,13 +89,13 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(extension.getThemeForLanguage?.(null)).toBe("plain");
   });
 
-  it("uses hljs theme for non-plaintext selected languages", () => {
+  it("uses prism theme for non-plaintext selected languages", () => {
     const extension = new CodeIntelligenceExtension() as CodeIntelligenceExtension & {
       getThemeForLanguage?: (language: string | null | undefined) => string | null;
     };
 
-    expect(extension.getThemeForLanguage?.("typescript")).toBe("hljs");
-    expect(extension.getThemeForLanguage?.("javascript")).toBe("hljs");
+    expect(extension.getThemeForLanguage?.("typescript")).toBe("prism");
+    expect(extension.getThemeForLanguage?.("javascript")).toBe("prism");
     expect(extension.getThemeForLanguage?.("tsx")).toBe("plain");
   });
 

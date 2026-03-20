@@ -2272,41 +2272,41 @@ a {
   word-break: break-word;
 }
 
-.doc-content .docs-code-block pre code.hljs {
+.doc-content .docs-code-block pre code[class*="language-"] {
   display: block;
   color: #d6e6f5;
 }
 
-.doc-content .docs-code-block .hljs-comment,
-.doc-content .docs-code-block .hljs-quote {
+.doc-content .docs-code-block .token.comment,
+.doc-content .docs-code-block .token.prolog {
   color: #8090a4;
 }
 
-.doc-content .docs-code-block .hljs-keyword,
-.doc-content .docs-code-block .hljs-selector-tag,
-.doc-content .docs-code-block .hljs-subst {
+.doc-content .docs-code-block .token.keyword,
+.doc-content .docs-code-block .token.selector,
+.doc-content .docs-code-block .token.atrule {
   color: #7cc2ff;
 }
 
-.doc-content .docs-code-block .hljs-string,
-.doc-content .docs-code-block .hljs-attr,
-.doc-content .docs-code-block .hljs-template-tag {
+.doc-content .docs-code-block .token.string,
+.doc-content .docs-code-block .token.attr-name,
+.doc-content .docs-code-block .token.attr-value {
   color: #91e6b6;
 }
 
-.doc-content .docs-code-block .hljs-number,
-.doc-content .docs-code-block .hljs-literal {
+.doc-content .docs-code-block .token.number,
+.doc-content .docs-code-block .token.boolean {
   color: #f8c981;
 }
 
-.doc-content .docs-code-block .hljs-title,
-.doc-content .docs-code-block .hljs-section,
-.doc-content .docs-code-block .hljs-type {
+.doc-content .docs-code-block .token.function,
+.doc-content .docs-code-block .token.class-name,
+.doc-content .docs-code-block .token.tag {
   color: #f39fc1;
 }
 
-.doc-content .docs-code-block .hljs-built_in,
-.doc-content .docs-code-block .hljs-class .hljs-title {
+.doc-content .docs-code-block .token.builtin,
+.doc-content .docs-code-block .token.namespace {
   color: #bca7ff;
 }
 

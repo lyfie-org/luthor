@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-19T12:15:05.114Z
+Generated at: 2026-03-20T05:27:58.448Z
 
 ## AI Agent Workflow
 
@@ -89,7 +89,7 @@ Show before/after behavior for mode switching and feature flags.
 
 - "Build a `SimpleEditor` chat input with `submitOnEnter` and right-side send button."
 - "Create a `SlashEditor` configuration that only allows heading/list/code block commands."
-- "Set up `codeHighlightProvider` and sync `onThemeChange` with `highlight.js` CSS."
+- "Set up `codeHighlightProvider` and sync `onThemeChange` with Prism theme CSS."
 - "Use `HeadlessEditorPreset` and save JSON/Markdown/HTML snapshots from ref methods."
 
 ## Keep docs and code in sync
@@ -474,7 +474,6 @@ Current compatibility in this repository:
   - `@lyfie/luthor` uses Lexical `^0.40.0` dependencies internally.
   - `@lyfie/luthor-headless` requires `lexical` and `@lexical/*` peers at `>=0.40.0`.
 - Optional:
-  - `highlight.js >=11.0.0` (optional peer for richer code highlighting).
   - `@emoji-mart/data` (optional dependency used by emoji workflows).
 
 ## Choose the right package quickly
@@ -569,10 +568,9 @@ npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/
 ### Optional dependencies for headless
 
 ```bash
-npm install highlight.js @emoji-mart/data
+npm install @emoji-mart/data
 ```
 
-`highlight.js` is optional but useful when code highlighting is enabled.  
 `@emoji-mart/data` is optional and used by richer emoji catalogs.
 
 ## Verify your install
@@ -604,7 +602,7 @@ npm uninstall @lyfie/luthor @lyfie/luthor-headless
 If you installed headless peers directly and want to remove them too:
 
 ```bash
-npm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils highlight.js @emoji-mart/data
+npm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils @emoji-mart/data
 ```
 
 ## Common mistakes
@@ -2226,7 +2224,7 @@ If source parsing fails, an inline source error panel is shown and visual conten
   - `plain`
 - Style tokens can be rehydrated from imported JSON.
 
-## Theme callback example (`highlight.js`)
+## Theme callback example (`Prism`)
 
 Use `onThemeChange` when host styling must follow editor theme state.
 
@@ -2237,18 +2235,18 @@ import { ExtensiveEditor } from '@lyfie/luthor';
 import { useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
-const HIGHLIGHT_THEME_LINK_ID = 'luthor-highlightjs-theme';
+const PRISM_THEME_LINK_ID = 'luthor-prism-theme';
 
-export function EditorWithHighlightTheme() {
+export function EditorWithPrismTheme() {
   const [editorTheme, setEditorTheme] = useState<Theme>('light');
 
   useEffect(() => {
-    const href = editorTheme === 'dark' ? '/highlightjs/github-dark.css' : '/highlightjs/github.css';
-    const existing = document.getElementById(HIGHLIGHT_THEME_LINK_ID);
+    const href = editorTheme === 'dark' ? '/prismjs/themes/prism-okaidia.css' : '/prismjs/themes/prism.css';
+    const existing = document.getElementById(PRISM_THEME_LINK_ID);
     const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
 
     if (!(existing instanceof HTMLLinkElement)) {
-      link.id = HIGHLIGHT_THEME_LINK_ID;
+      link.id = PRISM_THEME_LINK_ID;
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
@@ -2264,8 +2262,8 @@ export function EditorWithHighlightTheme() {
 
 Place these files in your app static assets:
 
-- `/public/highlightjs/github.css`
-- `/public/highlightjs/github-dark.css`
+- `/public/prismjs/themes/prism.css`
+- `/public/prismjs/themes/prism-okaidia.css`
 
 ## Code view line numbers
 
@@ -2542,10 +2540,10 @@ Default toolbar sections focus on writing and structure:
 
 ## Theme and syntax colors
 
-Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch `highlight.js` CSS for code color parity:
+Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch Prism theme CSS for code color parity:
 
-- light: `/public/highlightjs/github.css`
-- dark: `/public/highlightjs/github-dark.css`
+- light: `/public/prismjs/themes/prism.css`
+- dark: `/public/prismjs/themes/prism-okaidia.css`
 
 ---
 ## FILE: luthor/presets/md-editor.md

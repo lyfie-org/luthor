@@ -1825,7 +1825,7 @@
 	--luthor-syntax-variable: var(--luthor-muted-fg);
 }
 
-.luthor-editor-wrapper .hljs {
+.luthor-editor-wrapper .luthor-code-block[data-theme="prism"] {
 	color: var(--luthor-code-unhighlighted-fg, var(--luthor-fg));
 	background: var(--luthor-codeblock-bg, var(--luthor-muted)) !important;
 	padding: 10px;
