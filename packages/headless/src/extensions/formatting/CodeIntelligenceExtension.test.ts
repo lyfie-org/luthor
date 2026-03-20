@@ -12,8 +12,9 @@ describe("CodeIntelligenceExtension language options", () => {
 
     expect(options).toContain("plain");
     expect(options).toContain("typescript");
-    expect(options).toContain("bash");
+    expect(options).not.toContain("bash");
     expect(options).not.toContain("yaml");
+    expect(options).not.toContain("docker");
   });
 
   it("appends custom language options and normalizes aliases", () => {
@@ -77,6 +78,9 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(getLanguageDisplayLabel("txt")).toBe("Plain Text");
     expect(getLanguageDisplayLabel("plain")).toBe("Plain Text");
     expect(getLanguageDisplayLabel("bash")).toBe("Bash");
+    expect(getLanguageDisplayLabel("c#")).toBe("C#");
+    expect(getLanguageDisplayLabel("yml")).toBe("YAML");
+    expect(getLanguageDisplayLabel("dockerfile")).toBe("Docker");
   });
 
   it("uses plain fallback theme for plaintext-like languages", () => {

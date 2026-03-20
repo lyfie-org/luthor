@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-20T05:27:58.448Z
+Generated at: 2026-03-20T11:11:56.774Z
 
 ## AI Agent Workflow
 
@@ -253,6 +253,11 @@ Media support includes images, iframe embeds, and YouTube embeds, including alig
 ![Code block preview](/features/Feature8.gif)
 
 Code workflows include inline code formatting, block-level code nodes, language selection, auto-detection, optional copy support, and line numbers across visual code blocks plus source tabs.
+
+Preset runtime notes:
+
+- `@lyfie/luthor` ships with a built-in Prism grammar pack for common languages (`bash`, `json`, `yaml`, `go`, `csharp`, `docker`, `graphql`, `php`, `ruby`, `kotlin`, `toml`, `ini`, `json5`).
+- `@lyfie/luthor-headless` keeps language options runtime-truthful and only exposes grammars that are actually loaded.
 
 - Related commands:
   - `toggleCodeBlock`, `setCodeLanguage`, `autoDetectCodeLanguage`
@@ -997,7 +1002,7 @@ export function Editor() {
   - `CodeExtensionConfig` (`showLineNumbers` support for visual code blocks)
   - `CodeIntelligenceConfig`, `CodeIntelligenceCommands`
   - `CodeHighlightProvider`, `CodeHighlightProviderConfig`
-  - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig` (UI labels use full language names)
+  - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig` (UI labels use full language names; options are filtered to runtime-loaded grammars)
 - Table/media/draggable:
   - `TableConfig`
   - `DraggableConfig`
@@ -1146,8 +1151,20 @@ This group covers code editing and developer-facing conversion utilities.
 Recent defaults:
 
 - Code block language labels use full language names in UI (for example, `TypeScript`, `JavaScript`, `Bash`).
-- `bash` is included in the default language options.
+- Language options are filtered by runtime-loaded grammars (unsupported languages are excluded automatically).
 - Code block line numbers can be enabled/disabled through `CodeExtensionConfig.showLineNumbers`.
+
+Runtime support notes:
+
+- `@lyfie/luthor-headless` does not force-load Prism grammars. It only allows languages that the active runtime can actually tokenize.
+- If you want extra languages such as `bash`, `yaml`, or `docker`, load the matching Prism components in your app before mounting the editor.
+
+```ts
+import 'prismjs';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-yaml';
+import 'prismjs/components/prism-docker';
+```
 
 ## Included extensions and utilities
 
@@ -2177,6 +2194,7 @@ export function App() {
 | Line height baseline | `minimumDefaultLineHeight = 1.5` |
 | List indentation | `maxListIndentation = 8` sub-indent levels |
 | Code/source line numbers | Enabled (`showLineNumbers = true`) |
+| Prism grammar pack | Popular languages preloaded out of the box (`bash`, `json`, `yaml`, `go`, `csharp`, `docker`, `graphql`, `php`, `ruby`, `kotlin`, `toml`, `ini`, `json5`) |
 
 ## Core props (high signal)
 
@@ -2203,6 +2221,11 @@ export function App() {
   - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
   - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
   - `maxListIndentation`
+
+Code language support behavior:
+
+- `@lyfie/luthor` preloads a Prism language pack for common production languages, so language switching works without extra grammar installs in host apps.
+- The language dropdown only shows grammars that are actually loaded at runtime, which prevents stale token colors when switching languages.
 
 For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
 
@@ -2855,7 +2878,7 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 | `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
 | `showLineNumbers` | `boolean` | `true` | Enables line numbers for visual code blocks and source tabs (`json`/`markdown`/`html`). |
 | `maxAutoDetectCodeLength` | `number` | `undefined` | Max code length for language autodetect. |
-| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); dropdown labels use full names (for example, `TypeScript`, `JavaScript`, `Bash`). |
+| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); dropdown labels use full names and only include runtime-loaded grammars. `@lyfie/luthor` preloads common Prism grammars (`bash`, `json`, `yaml`, `go`, `csharp`, `docker`, `graphql`, `php`, `ruby`, `kotlin`, `toml`, `ini`, `json5`). |
 | `maxListIndentation` | `number` | `8` | Maximum sub-indent levels below root list level. |
 
 Line-number behavior notes:

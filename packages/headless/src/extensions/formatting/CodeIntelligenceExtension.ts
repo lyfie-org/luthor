@@ -17,6 +17,7 @@ import {
   $getSelection,
   $isRangeSelection,
   $nodesOfType,
+  HISTORY_MERGE_TAG,
 } from "lexical";
 import {
   ReactNode,
@@ -58,52 +59,87 @@ const DEFAULT_LANGUAGE_OPTIONS = [
   "plaintext",
   "typescript",
   "javascript",
-  "markdown",
-  "html",
-  "css",
-  "python",
   "bash",
-  "sql",
+  "powershell",
+  "python",
   "java",
   "c",
   "cpp",
+  "csharp",
+  "go",
   "rust",
-  "powershell",
+  "swift",
+  "kotlin",
+  "php",
+  "ruby",
+  "sql",
+  "markdown",
+  "html",
+  "css",
+  "json",
+  "json5",
+  "yaml",
+  "toml",
+  "ini",
+  "graphql",
+  "docker",
   "xml",
 ] as const;
 
-const ADDITIONAL_SUPPORTED_LANGUAGES = [
-  "bash",
-] as const;
+const LANGUAGE_ALIASES: Record<string, string> = {
+  "c#": "csharp",
+  cs: "csharp",
+  dockerfile: "docker",
+  kt: "kotlin",
+  ps1: "powershell",
+  pwsh: "powershell",
+  rb: "ruby",
+  sh: "bash",
+  shell: "bash",
+  yml: "yaml",
+  zsh: "bash",
+};
 
 const LANGUAGE_LABEL_OVERRIDES: Record<string, string> = {
   atom: "Atom",
   bash: "Bash",
   c: "C",
+  csharp: "C#",
   clike: "C-like",
   cpp: "C++",
   css: "CSS",
   diff: "Diff",
+  docker: "Docker",
+  go: "Go",
+  graphql: "GraphQL",
   html: "HTML",
+  ini: "INI",
   java: "Java",
+  json: "JSON",
+  json5: "JSON5",
   js: "JavaScript",
+  kotlin: "Kotlin",
   markup: "Markup",
   markdown: "Markdown",
   mathml: "MathML",
   objc: "Objective-C",
   objectivec: "Objective-C",
+  php: "PHP",
   plain: "Plain Text",
   powershell: "PowerShell",
   py: "Python",
+  ruby: "Ruby",
   rss: "RSS",
   rust: "Rust",
   sql: "SQL",
   ssml: "SSML",
   svg: "SVG",
   swift: "Swift",
+  toml: "TOML",
   txt: "Plain Text",
   typescript: "TypeScript",
   xml: "XML",
+  yaml: "YAML",
 };
 
 export type CodeIntelligenceConfig = CodeHighlightProviderConfig & {
@@ -174,7 +210,7 @@ export class CodeIntelligenceExtension extends BaseExtension<
         const theme = this.getThemeForLanguage(normalized);
         editor.update(() => {
           this.getSelectionCodeNodes().forEach((node) => {
-            node.setLanguage(normalized ?? null);
+            node.setLanguage(normalized ?? "plain");
             node.setTheme(theme);
           });
         });
@@ -223,7 +259,7 @@ export class CodeIntelligenceExtension extends BaseExtension<
 
         return {
           key: node.getKey(),
-          language: normalized ?? "plaintext",
+          language: normalized ?? "plain",
           text: node.getTextContent(),
         };
       }),
@@ -246,7 +282,7 @@ export class CodeIntelligenceExtension extends BaseExtension<
       }
 
       const normalized = normalizeLanguage(selectedLanguage);
-      node.setLanguage(normalized ?? null);
+      node.setLanguage(normalized ?? "plain");
       node.setTheme(this.getThemeForLanguage(normalized));
     });
   }
@@ -293,15 +329,20 @@ export class CodeIntelligenceExtension extends BaseExtension<
       return;
     }
 
-    editor.update(() => {
-      updates.forEach((entry) => {
-        const node = $getNodeByKey(entry.key);
-        if (!node || !$isCodeNode(node)) {
-          return;
-        }
-        node.setTheme(entry.nextTheme);
-      });
-    });
+    editor.update(
+      () => {
+        updates.forEach((entry) => {
+          const node = $getNodeByKey(entry.key);
+          if (!node || !$isCodeNode(node)) {
+            return;
+          }
+          node.setTheme(entry.nextTheme);
+        });
+      },
+      {
+        tag: HISTORY_MERGE_TAG,
+      },
+    );
   }
 
   private getSelectionCodeNodes(): CodeNode[] {
@@ -802,15 +843,8 @@ function getCodeblockControlsPortalRoot(editor: LexicalEditor): HTMLElement | nu
 }
 
 function normalizeLanguage(language: string | null | undefined): string | null {
-  if (!language) return null;
-
-  const trimmed = language.trim().toLowerCase();
-  if (!trimmed || trimmed === "auto") return null;
-
-  const normalized = normalizeCodeLang(trimmed);
-  if (!normalized || normalized === "auto") return null;
-
-  if (!isSupportedLanguage(normalized)) {
+  const normalized = toCanonicalLanguageId(language);
+  if (!normalized || !isSupportedLanguage(normalized)) {
     return null;
   }
 
@@ -818,27 +852,54 @@ function normalizeLanguage(language: string | null | undefined): string | null {
 }
 
 function isSupportedLanguage(language: string): boolean {
-  const normalized = language.trim().toLowerCase();
+  const normalized = toCanonicalLanguageId(language);
   if (!normalized) {
     return false;
   }
 
-  const canonicalOptions = getCodeLanguageOptions()
-    .map(([id]) => normalizeCodeLang(id.trim().toLowerCase()))
-    .filter(Boolean);
-  const runtimeLanguages = getCodeLanguages()
-    .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
-    .filter(Boolean);
-  const additionalLanguages = ADDITIONAL_SUPPORTED_LANGUAGES
-    .map((id) => normalizeCodeLang(id.trim().toLowerCase()))
-    .filter(Boolean);
+  return getSupportedLanguageIds().has(normalized);
+}
 
-  const supported = new Set<string>([
-    ...canonicalOptions,
-    ...runtimeLanguages,
-    ...additionalLanguages,
-  ]);
-  return supported.has(normalized);
+function getSupportedLanguageIds(): Set<string> {
+  const supported = new Set<string>();
+  const canonicalOptions = getCodeLanguageOptions()
+    .map(([id]) => toCanonicalLanguageId(id))
+    .filter((id): id is string => !!id);
+  const runtimeLanguages = getCodeLanguages()
+    .map((id) => toCanonicalLanguageId(id))
+    .filter((id): id is string => !!id);
+
+  canonicalOptions.forEach((id) => supported.add(id));
+  runtimeLanguages.forEach((id) => supported.add(id));
+  return supported;
+}
+
+function toCanonicalLanguageId(language: string | null | undefined): string | null {
+  if (!language) {
+    return null;
+  }
+
+  const trimmed = language.trim().toLowerCase();
+  if (!trimmed || trimmed === "auto") {
+    return null;
+  }
+
+  const withAlias = applyLanguageAlias(trimmed);
+  const normalized = normalizeCodeLang(withAlias);
+  if (!normalized || normalized === "auto") {
+    return null;
+  }
+
+  const canonical = applyLanguageAlias(normalized.trim().toLowerCase());
+  if (!canonical || canonical === "auto") {
+    return null;
+  }
+
+  return canonical;
+}
+
+function applyLanguageAlias(language: string): string {
+  return LANGUAGE_ALIASES[language] ?? language;
 }
 
 export const codeIntelligenceExtension = new CodeIntelligenceExtension();
@@ -910,7 +971,7 @@ function toSortedUniqueLanguageOptions(languageOptions: readonly string[]): stri
 
 function getLanguageDisplayLabel(languageId: string): string {
   const normalized = normalizeLanguage(languageId)
-    ?? normalizeCodeLang(languageId.trim().toLowerCase())
+    ?? toCanonicalLanguageId(languageId)
     ?? languageId.trim().toLowerCase();
 
   if (!normalized) {

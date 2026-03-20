@@ -145,6 +145,11 @@ Media support includes images, iframe embeds, and YouTube embeds, including alig
 
 Code workflows include inline code formatting, block-level code nodes, language selection, auto-detection, optional copy support, and line numbers across visual code blocks plus source tabs.
 
+Preset runtime notes:
+
+- `@lyfie/luthor` ships with a built-in Prism grammar pack for common languages (`bash`, `json`, `yaml`, `go`, `csharp`, `docker`, `graphql`, `php`, `ruby`, `kotlin`, `toml`, `ini`, `json5`).
+- `@lyfie/luthor-headless` keeps language options runtime-truthful and only exposes grammars that are actually loaded.
+
 - Related commands:
   - `toggleCodeBlock`, `setCodeLanguage`, `autoDetectCodeLanguage`
   - `getCurrentCodeLanguage`, `copySelectedCodeBlock`
