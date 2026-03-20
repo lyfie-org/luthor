@@ -147,14 +147,18 @@ Code workflows include inline code formatting, block-level code nodes, language 
 
 Preset runtime notes:
 
-- Host apps should load Prism and any required grammar components (for example `bash`, `json`, `yaml`, `docker`) before mounting editor presets.
-- `@lyfie/luthor-headless` keeps language options runtime-truthful and only exposes grammars that are actually loaded.
+- Prism is already installed transitively via `@lexical/code`.
+- `@lyfie/luthor` presets use Lexical default language options and default syntax token colors.
+- Syntax highlighting is enabled by default and can be disabled with `isSyntaxHighlightingEnabled={false}`.
+- Set `syntaxHighlightColorMode="custom"` with `syntaxHighlightColors` for app-defined light/dark palettes.
+- If a selected language is not loaded, the dropdown still shows that language while rendering falls back to plaintext tokens.
+- `@lyfie/luthor-headless` keeps runtime lightweight and does not preload an app-specific Prism language pack.
 
 - Related commands:
   - `toggleCodeBlock`, `setCodeLanguage`, `autoDetectCodeLanguage`
   - `getCurrentCodeLanguage`, `copySelectedCodeBlock`
 - Related config:
-  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
+  - `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `syntaxHighlightColors`
   - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
 
 | Package | Availability |
@@ -166,7 +170,7 @@ Preset runtime notes:
 
 ![Theme switching preview](/features/Feature9.gif)
 
-Theme support includes light/dark mode and callback hooks so host UI can stay in sync (for example, code highlighting theme CSS).
+Theme support includes light/dark mode and callback hooks so host UI can stay in sync.
 
 - Related props:
   - `initialTheme`, `onThemeChange`, `theme`, `editorThemeOverrides`

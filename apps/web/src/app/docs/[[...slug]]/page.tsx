@@ -33,6 +33,7 @@ const GROUP_ENTRY_ORDER: Partial<Record<NavGroupId, string[]>> = {
   getting_started: [
     '/docs/getting-started/',
     '/docs/getting-started/installation/',
+    '/docs/getting-started/dependencies/',
     '/docs/getting-started/contributor-guide/',
     '/docs/getting-started/ai-agents-and-vibe-coding/',
     '/docs/getting-started/capabilities/',

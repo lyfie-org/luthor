@@ -966,6 +966,60 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
   });
 
+  it("supports syntax highlighting opt-out with isSyntaxHighlightingEnabled", () => {
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        isSyntaxHighlightingEnabled={false}
+      />,
+    );
+
+    expect(createExtensiveExtensionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        syntaxHighlighting: "disabled",
+      }),
+    );
+  });
+
+  it("applies custom syntax colors for the active theme", () => {
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialTheme="dark"
+        syntaxHighlightColorMode="custom"
+        syntaxHighlightColors={{
+          light: { comment: "#111111" },
+          dark: { comment: "#222222" },
+        }}
+      />,
+    );
+
+    expect(createEditorThemeStyleVarsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        "--luthor-syntax-comment": "#222222",
+      }),
+    );
+  });
+
+  it("falls back to light custom syntax colors when dark colors are omitted", () => {
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialTheme="dark"
+        syntaxHighlightColorMode="custom"
+        syntaxHighlightColors={{
+          light: { keyword: "#333333" },
+        }}
+      />,
+    );
+
+    expect(createEditorThemeStyleVarsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        "--luthor-syntax-keyword": "#333333",
+      }),
+    );
+  });
+
   it("passes scaleByRatio to extension factory", () => {
     render(
       <ExtensiveEditor

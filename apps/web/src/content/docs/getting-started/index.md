@@ -57,11 +57,12 @@ If you use AI coding agents, load one of these files into agent context first, t
 
 1. [Introduction](/docs/getting-started/)
 2. [Installation](/docs/getting-started/installation/)
-3. [Contributor Guide](/docs/getting-started/contributor-guide/)
-4. [AI Agents and Vibe Coding](/docs/getting-started/ai-agents-and-vibe-coding/)
-5. [Capabilities](/docs/getting-started/capabilities/)
-6. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
-7. [@lyfie/luthor](/docs/getting-started/luthor/)
+3. [Dependency Graph](/docs/getting-started/dependencies/)
+4. [Contributor Guide](/docs/getting-started/contributor-guide/)
+5. [AI Agents and Vibe Coding](/docs/getting-started/ai-agents-and-vibe-coding/)
+6. [Capabilities](/docs/getting-started/capabilities/)
+7. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
+8. [@lyfie/luthor](/docs/getting-started/luthor/)
 
 ## Contributor deep dives
 

@@ -11,7 +11,6 @@ import {
 } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { syncPrismTheme } from "./utils/prism";
 import {
   DEMO_COMPOSE_CONTENT,
   DEMO_EXTENSIVE_CONTENT,
@@ -33,7 +32,6 @@ type PresetId =
   | "html-editor"
   | "slash-editor"
   | "headless-editor";
-type Theme = "light" | "dark";
 
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "extensive", label: "Extensive Editor" },
@@ -49,7 +47,6 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
 function App() {
   const { theme, toggleTheme } = useDemoTheme();
   const [preset, setPreset] = useState<PresetId>("extensive");
-  const [activeEditorTheme, setActiveEditorTheme] = useState<Theme>(theme);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const extensiveEditorRef = useRef<ExtensiveEditorRef | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -62,14 +59,6 @@ function App() {
       }
     };
   }, []);
-
-  useEffect(() => {
-    setActiveEditorTheme(theme);
-  }, [preset, theme]);
-
-  useEffect(() => {
-    syncPrismTheme(activeEditorTheme);
-  }, [activeEditorTheme]);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -109,7 +98,6 @@ function App() {
             defaultContent={DEMO_COMPOSE_CONTENT}
             showDefaultContent={false}
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
             compactToolbar
             placeholder="Write a draft..."
           />
@@ -140,7 +128,6 @@ function App() {
             showDefaultContent={false}
             defaultEditorView="markdown"
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
           />
         );
       case "md-editor":
@@ -150,7 +137,6 @@ function App() {
             showDefaultContent={false}
             defaultEditorView="markdown"
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
           />
         );
       case "html-editor":
@@ -160,7 +146,6 @@ function App() {
             showDefaultContent={false}
             defaultEditorView="html"
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
           />
         );
       case "slash-editor":
@@ -186,7 +171,6 @@ function App() {
             defaultContent={DEMO_EXTENSIVE_CONTENT}
             showDefaultContent={false}
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
             placeholder={{
               visual: "Write your story...",
               json: "Paste JSON document...",

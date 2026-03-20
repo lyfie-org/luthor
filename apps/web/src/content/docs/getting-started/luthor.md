@@ -30,6 +30,8 @@ export function App() {
 - Source mode workflows (JSON/Markdown/HTML where supported by the preset)
 - Feature-flag driven extension composition
 - Consistent imperative API on ref (`getJSON`, `getMarkdown`, `getHTML`, `injectJSON`)
+- Built-in syntax highlighting defaults aligned to Lexical language options and token colors
+- Opt-out support for syntax highlighting (`isSyntaxHighlightingEnabled={false}`)
 
 ## Validate installation
 
@@ -37,6 +39,32 @@ export function App() {
 2. Toolbar and mode tabs render.
 3. No dependency or module resolution errors in your dev server.
 4. Export methods return valid JSON/Markdown/HTML from `ExtensiveEditorRef`.
+
+## Syntax highlighting defaults
+
+`@lyfie/luthor` uses `@lexical/code` defaults for language options and Prism-backed tokenization.
+
+- No separate `prismjs` install is required for preset syntax highlighting.
+- No extra setup import is required for preset syntax highlighting.
+- If you configure a language that is not loaded, that language stays selected in the dropdown and rendering falls back to plaintext coloring.
+
+Turn it off when needed:
+
+```tsx
+<ExtensiveEditor isSyntaxHighlightingEnabled={false} />
+```
+
+Use custom token colors:
+
+```tsx
+<ExtensiveEditor
+  syntaxHighlightColorMode="custom"
+  syntaxHighlightColors={{
+    light: { keyword: "#7c3aed", string: "#047857" },
+    dark: { keyword: "#c4b5fd", string: "#86efac" },
+  }}
+/>
+```
 
 ## Pick a preset
 

@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-20T11:56:11.456Z
+Generated at: 2026-03-20T15:56:43.073Z
 
 ## AI Agent Workflow
 
@@ -89,7 +89,7 @@ Show before/after behavior for mode switching and feature flags.
 
 - "Build a `SimpleEditor` chat input with `submitOnEnter` and right-side send button."
 - "Create a `SlashEditor` configuration that only allows heading/list/code block commands."
-- "Set up `codeHighlightProvider` and sync `onThemeChange` with Prism theme CSS."
+- "Configure `ExtensiveEditor` syntax highlighting with default/custom/disabled modes."
 - "Use `HeadlessEditorPreset` and save JSON/Markdown/HTML snapshots from ref methods."
 
 ## Keep docs and code in sync
@@ -256,14 +256,18 @@ Code workflows include inline code formatting, block-level code nodes, language 
 
 Preset runtime notes:
 
-- Host apps should load Prism and any required grammar components (for example `bash`, `json`, `yaml`, `docker`) before mounting editor presets.
-- `@lyfie/luthor-headless` keeps language options runtime-truthful and only exposes grammars that are actually loaded.
+- Prism is already installed transitively via `@lexical/code`.
+- `@lyfie/luthor` presets use Lexical default language options and default syntax token colors.
+- Syntax highlighting is enabled by default and can be disabled with `isSyntaxHighlightingEnabled={false}`.
+- Set `syntaxHighlightColorMode="custom"` with `syntaxHighlightColors` for app-defined light/dark palettes.
+- If a selected language is not loaded, the dropdown still shows that language while rendering falls back to plaintext tokens.
+- `@lyfie/luthor-headless` keeps runtime lightweight and does not preload an app-specific Prism language pack.
 
 - Related commands:
   - `toggleCodeBlock`, `setCodeLanguage`, `autoDetectCodeLanguage`
   - `getCurrentCodeLanguage`, `copySelectedCodeBlock`
 - Related config:
-  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
+  - `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `syntaxHighlightColors`
   - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
 
 | Package | Availability |
@@ -275,7 +279,7 @@ Preset runtime notes:
 
 ![Theme switching preview](/features/Feature9.gif)
 
-Theme support includes light/dark mode and callback hooks so host UI can stay in sync (for example, code highlighting theme CSS).
+Theme support includes light/dark mode and callback hooks so host UI can stay in sync.
 
 - Related props:
   - `initialTheme`, `onThemeChange`, `theme`, `editorThemeOverrides`
@@ -439,6 +443,131 @@ pnpm -C apps/web run dev
 - Include before/after screenshots or GIFs for UX changes.
 
 ---
+## FILE: getting-started/dependencies.md
+## URL: https://www.luthor.fyi/docs/getting-started/dependencies/
+---
+
+---
+title: Dependency Graph
+description: Full dependency map for @lyfie/luthor and @lyfie/luthor-headless, including transitive paths for conflict debugging.
+---
+
+# Dependency Graph
+
+This page exists for one reason: help users fight dependency drama.
+
+It shows exactly which package depends on what, with explicit transitive paths so you can debug version conflicts quickly.
+
+## Scope and snapshot
+
+- This graph is based on the current repository versions (`@lyfie/luthor@2.7.7`, `@lyfie/luthor-headless@2.7.7`).
+- Paths shown here were generated from the production dependency tree in this monorepo.
+- Package managers may dedupe differently, but the package relationships stay the same.
+
+## `@lyfie/luthor-headless` baseline (clean contract)
+
+`@lyfie/luthor-headless` intentionally keeps required runtime dependencies at zero.
+
+- `dependencies`: none
+- `peerDependencies`: `lexical`, `@lexical/*`, `react`, `react-dom`
+- `optionalDependencies`: `@emoji-mart/data`
+
+This keeps headless lightweight, while still allowing optional features without forcing extra installs.
+
+## `@lyfie/luthor` direct dependency contract
+
+`@lyfie/luthor` is the plug-and-play package, so it ships with direct runtime dependencies:
+
+| Package | Type |
+| --- | --- |
+| `@lyfie/luthor-headless` | Non-lexical |
+| `lexical` | Lexical |
+| `@lexical/code` | Lexical |
+| `@lexical/html` | Lexical |
+| `@lexical/link` | Lexical |
+| `@lexical/list` | Lexical |
+| `@lexical/markdown` | Lexical |
+| `@lexical/react` | Lexical |
+| `@lexical/rich-text` | Lexical |
+| `@lexical/selection` | Lexical |
+| `@lexical/table` | Lexical |
+| `@lexical/utils` | Lexical |
+
+Peer dependencies for host apps:
+
+- `react`
+- `react-dom`
+
+## Non-lexical dependencies in `@lyfie/luthor` (conflict focus)
+
+These are the non-lexical packages currently present in the resolved production graph.
+
+| Package | How it is included | Example transitive path |
+| --- | --- | --- |
+| `@emoji-mart/data` | Transitive-only (optional via headless) | `@lyfie/luthor -> @lyfie/luthor-headless -> @emoji-mart/data` |
+| `@floating-ui/core` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @floating-ui/react -> @floating-ui/react-dom -> @floating-ui/dom -> @floating-ui/core` |
+| `@floating-ui/dom` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @floating-ui/react -> @floating-ui/react-dom -> @floating-ui/dom` |
+| `@floating-ui/react` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @floating-ui/react` |
+| `@floating-ui/react-dom` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @floating-ui/react -> @floating-ui/react-dom` |
+| `@floating-ui/utils` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @floating-ui/react -> @floating-ui/utils` |
+| `@lyfie/luthor-headless` | Direct dependency | `@lyfie/luthor -> @lyfie/luthor-headless` |
+| `@preact/signals-core` | Transitive-only | `@lyfie/luthor -> @lexical/link -> @lexical/extension -> @preact/signals-core` |
+| `isomorphic.js` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/yjs -> yjs -> lib0 -> isomorphic.js` |
+| `lib0` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/yjs -> yjs -> lib0` |
+| `prismjs` | Transitive-only | `@lyfie/luthor -> @lexical/code -> prismjs` |
+| `react` | Peer dependency | `@lyfie/luthor -> react` |
+| `react-dom` | Peer dependency | `@lyfie/luthor -> react-dom` |
+| `react-error-boundary` | Transitive-only | `@lyfie/luthor -> @lexical/react -> react-error-boundary` |
+| `scheduler` | Transitive-only | `@lyfie/luthor -> react-dom -> scheduler` |
+| `tabbable` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @floating-ui/react -> tabbable` |
+| `yjs` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/yjs -> yjs` |
+
+## Lexical sub-dependencies in `@lyfie/luthor`
+
+These are all lexical-family packages currently in the resolved production graph.
+
+| Package | How it is included | Example transitive path |
+| --- | --- | --- |
+| `@lexical/clipboard` | Transitive-only | `@lyfie/luthor -> @lexical/table -> @lexical/clipboard` |
+| `@lexical/code` | Direct dependency | `@lyfie/luthor -> @lexical/code` |
+| `@lexical/devtools-core` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/devtools-core` |
+| `@lexical/dragon` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/dragon` |
+| `@lexical/extension` | Transitive-only | `@lyfie/luthor -> @lexical/link -> @lexical/extension` |
+| `@lexical/hashtag` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/hashtag` |
+| `@lexical/history` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/history` |
+| `@lexical/html` | Direct dependency | `@lyfie/luthor -> @lexical/html` |
+| `@lexical/link` | Direct dependency | `@lyfie/luthor -> @lexical/link` |
+| `@lexical/list` | Direct dependency | `@lyfie/luthor -> @lexical/list` |
+| `@lexical/mark` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/mark` |
+| `@lexical/markdown` | Direct dependency | `@lyfie/luthor -> @lexical/markdown` |
+| `@lexical/offset` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/yjs -> @lexical/offset` |
+| `@lexical/overflow` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/overflow` |
+| `@lexical/plain-text` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/plain-text` |
+| `@lexical/react` | Direct dependency | `@lyfie/luthor -> @lexical/react` |
+| `@lexical/rich-text` | Direct dependency | `@lyfie/luthor -> @lexical/rich-text` |
+| `@lexical/selection` | Direct dependency | `@lyfie/luthor -> @lexical/selection` |
+| `@lexical/table` | Direct dependency | `@lyfie/luthor -> @lexical/table` |
+| `@lexical/text` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/text` |
+| `@lexical/utils` | Direct dependency | `@lyfie/luthor -> @lexical/utils` |
+| `@lexical/yjs` | Transitive-only | `@lyfie/luthor -> @lexical/react -> @lexical/yjs` |
+| `lexical` | Direct dependency | `@lyfie/luthor -> lexical` |
+
+## Prism behavior confirmation
+
+- `@lexical/code` depends on `prismjs`.
+- `@lyfie/luthor` does not declare `prismjs` directly.
+- Result: preset users still do not need an additional Prism install, because Prism comes transitively through `@lexical/code`.
+- App-level consumers that call Prism APIs directly (for example docs code-renderers) can add `prismjs` at the app layer.
+
+For headless setups, syntax highlighting can still be customized through `codeExtension` / `codeIntelligenceExtension`.
+
+## Practical conflict debugging workflow
+
+1. Run `pnpm --filter @lyfie/luthor why <package-name>` to see exact pull-in paths.
+2. Check whether the package is direct, peer, or transitive-only from the tables above.
+3. Resolve conflicts at the highest practical edge (usually your app lockfile or direct dependency constraints).
+
+---
 ## FILE: getting-started/index.md
 ## URL: https://www.luthor.fyi/docs/getting-started/
 ---
@@ -502,11 +631,12 @@ If you use AI coding agents, load one of these files into agent context first, t
 
 1. [Introduction](/docs/getting-started/)
 2. [Installation](/docs/getting-started/installation/)
-3. [Contributor Guide](/docs/getting-started/contributor-guide/)
-4. [AI Agents and Vibe Coding](/docs/getting-started/ai-agents-and-vibe-coding/)
-5. [Capabilities](/docs/getting-started/capabilities/)
-6. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
-7. [@lyfie/luthor](/docs/getting-started/luthor/)
+3. [Dependency Graph](/docs/getting-started/dependencies/)
+4. [Contributor Guide](/docs/getting-started/contributor-guide/)
+5. [AI Agents and Vibe Coding](/docs/getting-started/ai-agents-and-vibe-coding/)
+6. [Capabilities](/docs/getting-started/capabilities/)
+7. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
+8. [@lyfie/luthor](/docs/getting-started/luthor/)
 
 ## Contributor deep dives
 
@@ -562,6 +692,43 @@ yarn add @lyfie/luthor react react-dom
 bun add @lyfie/luthor react react-dom
 ```
 
+### Built-in Prism dependency (`@lyfie/luthor`)
+
+`@lyfie/luthor` depends on `@lexical/code`, and `@lexical/code` depends on `prismjs`.
+
+That means preset syntax highlighting works without a separate Prism install in your app.
+
+Preset defaults are ready out of the box:
+
+```tsx
+import { ExtensiveEditor } from "@lyfie/luthor";
+
+<ExtensiveEditor />;
+```
+
+- Default language options come from Lexical code language options.
+- Default token colors use Lexical/Prism-style defaults shipped in `@lyfie/luthor`.
+
+To opt out:
+
+```tsx
+<ExtensiveEditor isSyntaxHighlightingEnabled={false} />
+```
+
+To supply your own token palette:
+
+```tsx
+<ExtensiveEditor
+  syntaxHighlightColorMode="custom"
+  syntaxHighlightColors={{
+    light: { keyword: "#7c3aed", string: "#047857" },
+    dark: { keyword: "#c4b5fd", string: "#86efac" },
+  }}
+/>
+```
+
+Need the full transitive graph and conflict paths? See [Dependency Graph](/docs/getting-started/dependencies/).
+
 ## Install @lyfie/luthor-headless
 
 ### npm
@@ -569,6 +736,11 @@ bun add @lyfie/luthor react react-dom
 ```bash
 npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
 ```
+
+`@lexical/code` already includes `prismjs`, so no extra Prism package install is required.
+
+`@lyfie/luthor-headless` intentionally does not ship a preloaded app-level Prism language pack helper.
+For headless setups, load only the grammars/providers your app needs.
 
 ### Optional dependencies for headless
 
@@ -616,7 +788,9 @@ npm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdow
 2. Missing `@lyfie/luthor/styles.css` import when using presets.
 3. Mixing preset docs (`@lyfie/luthor`) with headless implementation code.
 4. React/Lexical version mismatch in lockfile.
-5. Forgetting to reinstall after switching package managers.
+5. Installing `prismjs` directly when your app does not use Prism APIs directly.
+6. Forgetting to reinstall after switching package managers.
+7. Skipping dependency path checks when debugging lockfile conflicts (use [Dependency Graph](/docs/getting-started/dependencies/) + `pnpm why`).
 
 ## Next steps
 
@@ -642,6 +816,10 @@ Use `@lyfie/luthor-headless` when you need complete control over editor behavior
 ```bash
 npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
 ```
+
+`@lexical/code` already installs `prismjs`, so you do not need an extra Prism dependency.
+`@lyfie/luthor-headless` stays lightweight and does not preload a Prism language bundle or theme helper.
+Default code highlighting works with Lexical-loaded grammars. If you need extra grammars or a custom tokenizer, configure your own runtime provider via `codeExtension` / `codeIntelligenceExtension`.
 
 ## Render a minimal headless editor
 
@@ -740,6 +918,8 @@ export function App() {
 - Source mode workflows (JSON/Markdown/HTML where supported by the preset)
 - Feature-flag driven extension composition
 - Consistent imperative API on ref (`getJSON`, `getMarkdown`, `getHTML`, `injectJSON`)
+- Built-in syntax highlighting defaults aligned to Lexical language options and token colors
+- Opt-out support for syntax highlighting (`isSyntaxHighlightingEnabled={false}`)
 
 ## Validate installation
 
@@ -747,6 +927,32 @@ export function App() {
 2. Toolbar and mode tabs render.
 3. No dependency or module resolution errors in your dev server.
 4. Export methods return valid JSON/Markdown/HTML from `ExtensiveEditorRef`.
+
+## Syntax highlighting defaults
+
+`@lyfie/luthor` uses `@lexical/code` defaults for language options and Prism-backed tokenization.
+
+- No separate `prismjs` install is required for preset syntax highlighting.
+- No extra setup import is required for preset syntax highlighting.
+- If you configure a language that is not loaded, that language stays selected in the dropdown and rendering falls back to plaintext coloring.
+
+Turn it off when needed:
+
+```tsx
+<ExtensiveEditor isSyntaxHighlightingEnabled={false} />
+```
+
+Use custom token colors:
+
+```tsx
+<ExtensiveEditor
+  syntaxHighlightColorMode="custom"
+  syntaxHighlightColors={{
+    light: { keyword: "#7c3aed", string: "#047857" },
+    dark: { keyword: "#c4b5fd", string: "#86efac" },
+  }}
+/>
+```
 
 ## Pick a preset
 
@@ -1151,20 +1357,15 @@ This group covers code editing and developer-facing conversion utilities.
 Recent defaults:
 
 - Code block language labels use full language names in UI (for example, `TypeScript`, `JavaScript`, `Bash`).
-- Language options are filtered by runtime-loaded grammars (unsupported languages are excluded automatically).
+- Default language options come from Lexical language options.
+- Unsupported selected languages remain visible in dropdowns and use plaintext fallback token colors.
 - Code block line numbers can be enabled/disabled through `CodeExtensionConfig.showLineNumbers`.
 
 Runtime support notes:
 
-- `@lyfie/luthor-headless` does not force-load Prism grammars. It only allows languages that the active runtime can actually tokenize.
-- If you want extra languages such as `bash`, `yaml`, or `docker`, load the matching Prism components in your app before mounting the editor.
-
-```ts
-import 'prismjs';
-import 'prismjs/components/prism-bash';
-import 'prismjs/components/prism-yaml';
-import 'prismjs/components/prism-docker';
-```
+- Prism comes transitively from `@lexical/code` (required peer for code blocks).
+- `@lyfie/luthor-headless` does not auto-register a Prism language pack.
+- Keep headless setups lightweight by loading only the grammars/providers your app needs.
 
 ## Included extensions and utilities
 
@@ -2194,7 +2395,8 @@ export function App() {
 | Line height baseline | `minimumDefaultLineHeight = 1.5` |
 | List indentation | `maxListIndentation = 8` sub-indent levels |
 | Code/source line numbers | Enabled (`showLineNumbers = true`) |
-| Prism grammar pack | Loaded by the host app (import Prism + required language components before mounting editors) |
+| Syntax highlighting | Enabled by default (`isSyntaxHighlightingEnabled = true`) |
+| Syntax language/options source | Lexical defaults from `@lexical/code` |
 
 ## Core props (high signal)
 
@@ -2218,14 +2420,15 @@ export function App() {
 - Typography/code options:
   - `fontFamilyOptions`, `fontSizeOptions`, `lineHeightOptions`
   - `minimumDefaultLineHeight`, `scaleByRatio`
-  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
+  - `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `syntaxHighlightColors`
   - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
   - `maxListIndentation`
 
 Code language support behavior:
 
-- `@lyfie/luthor` does not preload Prism grammars; host apps should import Prism and the grammar components they need.
-- The language dropdown only shows grammars that are actually loaded at runtime, which prevents stale token colors when switching languages.
+- No extra Prism setup import is required for presets.
+- Default dropdown options come from Lexical language options.
+- If a selected language is not loaded, the dropdown keeps that language selected and highlighting falls back to plaintext colors.
 
 For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
 
@@ -2247,46 +2450,41 @@ If source parsing fails, an inline source error panel is shown and visual conten
   - `plain`
 - Style tokens can be rehydrated from imported JSON.
 
-## Theme callback example (`Prism`)
+## Syntax Highlighting Controls
 
-Use `onThemeChange` when host styling must follow editor theme state.
+Disable syntax highlighting completely:
 
 ```tsx
-'use client';
-
-import { ExtensiveEditor } from '@lyfie/luthor';
-import { useEffect, useState } from 'react';
-
-type Theme = 'light' | 'dark';
-const PRISM_THEME_LINK_ID = 'luthor-prism-theme';
-
-export function EditorWithPrismTheme() {
-  const [editorTheme, setEditorTheme] = useState<Theme>('light');
-
-  useEffect(() => {
-    const href = editorTheme === 'dark' ? '/prismjs/themes/prism-okaidia.css' : '/prismjs/themes/prism.css';
-    const existing = document.getElementById(PRISM_THEME_LINK_ID);
-    const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
-
-    if (!(existing instanceof HTMLLinkElement)) {
-      link.id = PRISM_THEME_LINK_ID;
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-    }
-
-    if (link.href !== new URL(href, window.location.origin).href) {
-      link.href = href;
-    }
-  }, [editorTheme]);
-
-  return <ExtensiveEditor initialTheme="light" onThemeChange={setEditorTheme} />;
-}
+<ExtensiveEditor isSyntaxHighlightingEnabled={false} />
 ```
 
-Place these files in your app static assets:
+Use custom syntax token colors:
 
-- `/public/prismjs/themes/prism.css`
-- `/public/prismjs/themes/prism-okaidia.css`
+```tsx
+<ExtensiveEditor
+  syntaxHighlightColorMode="custom"
+  syntaxHighlightColors={{
+    light: {
+      comment: "#6a737d",
+      keyword: "#a626a4",
+      string: "#50a14f",
+      number: "#986801",
+      function: "#4078f2",
+      variable: "#e45649",
+    },
+    dark: {
+      comment: "#6272a4",
+      keyword: "#ff79c6",
+      string: "#50fa7b",
+      number: "#bd93f9",
+      function: "#8be9fd",
+      variable: "#ffb86c",
+    },
+  }}
+/>
+```
+
+If you only provide `light`, those values are reused in dark mode.
 
 ## Code view line numbers
 
@@ -2563,10 +2761,11 @@ Default toolbar sections focus on writing and structure:
 
 ## Theme and syntax colors
 
-Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch Prism theme CSS for code color parity:
+Syntax highlighting is enabled by default in this preset family and uses Lexical default language options with the preset default syntax token colors.
 
-- light: `/public/prismjs/themes/prism.css`
-- dark: `/public/prismjs/themes/prism-okaidia.css`
+- Keep defaults: no extra setup needed.
+- Disable syntax highlighting: `isSyntaxHighlightingEnabled={false}`.
+- Customize token colors: use `syntaxHighlightColorMode="custom"` + `syntaxHighlightColors`.
 
 ---
 ## FILE: luthor/presets/md-editor.md
@@ -2873,12 +3072,12 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 | `lineHeightOptions` | `readonly LineHeightOption[]` | built-in list | Includes default and common ratios. |
 | `minimumDefaultLineHeight` | `string \| number` | `1.5` | Validated and normalized; invalid values fall back to `1.5`. |
 | `scaleByRatio` | `boolean` | `false` | Used by image resize behavior. |
-| `syntaxHighlighting` | `'auto' \| 'disabled'` | extension default | Controls code syntax highlighting behavior. |
-| `codeHighlightProvider` | `CodeHighlightProvider \| null` | `undefined` | Inject a concrete provider implementation. |
-| `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
+| `isSyntaxHighlightingEnabled` | `boolean` | `true` | Preset-level syntax highlight on/off switch. |
+| `syntaxHighlightColorMode` | `'lexical' \| 'custom'` | `'lexical'` | Uses default preset token colors in `lexical` mode, or `syntaxHighlightColors` in `custom` mode. |
+| `syntaxHighlightColors` | `{ light?: SyntaxHighlightColorTokens; dark?: SyntaxHighlightColorTokens }` | `undefined` | Custom token palette map. If `dark` is omitted, `light` is reused for dark mode. |
 | `showLineNumbers` | `boolean` | `true` | Enables line numbers for visual code blocks and source tabs (`json`/`markdown`/`html`). |
 | `maxAutoDetectCodeLength` | `number` | `undefined` | Max code length for language autodetect. |
-| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); dropdown labels use full names and only include runtime-loaded grammars. Import Prism plus the language components you need in the host app for those options to appear. |
+| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list/config (`mode`, `values`). Default options come from Lexical language options. Unsupported selected languages remain selected and render with plaintext fallback colors. |
 | `maxListIndentation` | `number` | `8` | Maximum sub-indent levels below root list level. |
 
 Line-number behavior notes:

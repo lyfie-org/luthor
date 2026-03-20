@@ -31,6 +31,19 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(options).toContain("sql");
   });
 
+  it("keeps unsupported configured options for selection while falling back to plain highlighting", () => {
+    const extension = new CodeIntelligenceExtension().configure({
+      languageOptions: {
+        mode: "replace",
+        values: ["bash", "typescript"],
+      },
+    }) as CodeIntelligenceExtension;
+
+    const options = extension.getLanguageOptionsSnapshot();
+
+    expect(options).toEqual(["bash", "typescript"]);
+  });
+
   it("replaces defaults when mode is replace", () => {
     const extension = new CodeIntelligenceExtension().configure({
       languageOptions: {
@@ -109,6 +122,7 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(extension.getThemeForLanguage?.("typescript")).toBe("prism");
     expect(extension.getThemeForLanguage?.("javascript")).toBe("prism");
     expect(extension.getThemeForLanguage?.("tsx")).toBe("plain");
+    expect(extension.getThemeForLanguage?.("bash")).toBe("plain");
   });
 
   it("does not update code block language when the editor is non-editable", () => {

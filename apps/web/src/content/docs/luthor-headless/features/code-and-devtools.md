@@ -10,20 +10,15 @@ This group covers code editing and developer-facing conversion utilities.
 Recent defaults:
 
 - Code block language labels use full language names in UI (for example, `TypeScript`, `JavaScript`, `Bash`).
-- Language options are filtered by runtime-loaded grammars (unsupported languages are excluded automatically).
+- Default language options come from Lexical language options.
+- Unsupported selected languages remain visible in dropdowns and use plaintext fallback token colors.
 - Code block line numbers can be enabled/disabled through `CodeExtensionConfig.showLineNumbers`.
 
 Runtime support notes:
 
-- `@lyfie/luthor-headless` does not force-load Prism grammars. It only allows languages that the active runtime can actually tokenize.
-- If you want extra languages such as `bash`, `yaml`, or `docker`, load the matching Prism components in your app before mounting the editor.
-
-```ts
-import 'prismjs';
-import 'prismjs/components/prism-bash';
-import 'prismjs/components/prism-yaml';
-import 'prismjs/components/prism-docker';
-```
+- Prism comes transitively from `@lexical/code` (required peer for code blocks).
+- `@lyfie/luthor-headless` does not auto-register a Prism language pack.
+- Keep headless setups lightweight by loading only the grammars/providers your app needs.
 
 ## Included extensions and utilities
 

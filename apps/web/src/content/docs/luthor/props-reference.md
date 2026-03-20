@@ -94,12 +94,12 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 | `lineHeightOptions` | `readonly LineHeightOption[]` | built-in list | Includes default and common ratios. |
 | `minimumDefaultLineHeight` | `string \| number` | `1.5` | Validated and normalized; invalid values fall back to `1.5`. |
 | `scaleByRatio` | `boolean` | `false` | Used by image resize behavior. |
-| `syntaxHighlighting` | `'auto' \| 'disabled'` | extension default | Controls code syntax highlighting behavior. |
-| `codeHighlightProvider` | `CodeHighlightProvider \| null` | `undefined` | Inject a concrete provider implementation. |
-| `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
+| `isSyntaxHighlightingEnabled` | `boolean` | `true` | Preset-level syntax highlight on/off switch. |
+| `syntaxHighlightColorMode` | `'lexical' \| 'custom'` | `'lexical'` | Uses default preset token colors in `lexical` mode, or `syntaxHighlightColors` in `custom` mode. |
+| `syntaxHighlightColors` | `{ light?: SyntaxHighlightColorTokens; dark?: SyntaxHighlightColorTokens }` | `undefined` | Custom token palette map. If `dark` is omitted, `light` is reused for dark mode. |
 | `showLineNumbers` | `boolean` | `true` | Enables line numbers for visual code blocks and source tabs (`json`/`markdown`/`html`). |
 | `maxAutoDetectCodeLength` | `number` | `undefined` | Max code length for language autodetect. |
-| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); dropdown labels use full names and only include runtime-loaded grammars. Import Prism plus the language components you need in the host app for those options to appear. |
+| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list/config (`mode`, `values`). Default options come from Lexical language options. Unsupported selected languages remain selected and render with plaintext fallback colors. |
 | `maxListIndentation` | `number` | `8` | Maximum sub-indent levels below root list level. |
 
 Line-number behavior notes:

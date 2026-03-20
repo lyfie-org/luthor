@@ -13,6 +13,10 @@ Use `@lyfie/luthor-headless` when you need complete control over editor behavior
 npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
 ```
 
+`@lexical/code` already installs `prismjs`, so you do not need an extra Prism dependency.
+`@lyfie/luthor-headless` stays lightweight and does not preload a Prism language bundle or theme helper.
+Default code highlighting works with Lexical-loaded grammars. If you need extra grammars or a custom tokenizer, configure your own runtime provider via `codeExtension` / `codeIntelligenceExtension`.
+
 ## Render a minimal headless editor
 
 ```tsx

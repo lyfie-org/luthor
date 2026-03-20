@@ -1,5 +1,6 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
+  createEditorThemeStyleVars,
   createEditorSystem,
   htmlToJSON,
   jsonToHTML,
@@ -7,7 +8,17 @@ import {
   markdownToJSON,
   RichText,
 } from "@lyfie/luthor-headless";
-import { ModeTabs, SourceView, formatHTMLSource, formatJSONSource, formatMarkdownSource } from "../../core";
+import {
+  ModeTabs,
+  SourceView,
+  formatHTMLSource,
+  formatJSONSource,
+  formatMarkdownSource,
+  type EditorThemeOverrides,
+  type SyntaxHighlightColorMode,
+  type SyntaxHighlightColors,
+  type SyntaxHighlightColorTokens,
+} from "../../core";
 import {
   createExtensiveExtensions,
   extensiveExtensions,
@@ -40,6 +51,17 @@ const DEFAULT_VISUAL_PLACEHOLDER = "Start writing...";
 const DEFAULT_JSON_PLACEHOLDER = "Enter JSON document content...";
 const DEFAULT_MARKDOWN_PLACEHOLDER = "Enter Markdown content...";
 const DEFAULT_HTML_PLACEHOLDER = "Enter HTML content...";
+
+const SYNTAX_COLOR_TOKEN_TO_VAR: ReadonlyArray<
+  readonly [keyof SyntaxHighlightColorTokens, keyof EditorThemeOverrides]
+> = [
+  ["comment", "--luthor-syntax-comment"],
+  ["keyword", "--luthor-syntax-keyword"],
+  ["string", "--luthor-syntax-string"],
+  ["number", "--luthor-syntax-number"],
+  ["function", "--luthor-syntax-function"],
+  ["variable", "--luthor-syntax-variable"],
+] as const;
 
 const EMPTY_DOCUMENT = {
   root: {
@@ -176,6 +198,39 @@ export type HeadlessEditorPresetProps = Omit<
   defaultEditorView?: HeadlessEditorPresetMode;
   featureFlags?: FeatureFlagOverrides;
 };
+
+function createSyntaxHighlightThemeOverrides(
+  mode: SyntaxHighlightColorMode,
+  syntaxColors: SyntaxHighlightColors | undefined,
+  activeTheme: "light" | "dark",
+): EditorThemeOverrides | undefined {
+  if (mode !== "custom" || !syntaxColors) {
+    return undefined;
+  }
+
+  const lightColors = syntaxColors.light;
+  const darkColors = syntaxColors.dark ?? lightColors;
+  const palette =
+    activeTheme === "dark"
+      ? (darkColors ?? lightColors)
+      : (lightColors ?? darkColors);
+
+  if (!palette) {
+    return undefined;
+  }
+
+  const overrides: Partial<EditorThemeOverrides> = {};
+  for (const [token, cssVar] of SYNTAX_COLOR_TOKEN_TO_VAR) {
+    const value = palette[token];
+    if (typeof value === "string" && value.trim().length > 0) {
+      overrides[cssVar] = value;
+    }
+  }
+
+  return Object.keys(overrides).length > 0
+    ? (overrides as EditorThemeOverrides)
+    : undefined;
+}
 
 function sanitizeErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message.trim()) {
@@ -686,6 +741,13 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
       initialMode = "visual",
       defaultEditorView,
       showLineNumbers = true,
+      editorThemeOverrides,
+      isSyntaxHighlightingEnabled = true,
+      syntaxHighlightColorMode = "lexical",
+      syntaxHighlightColors,
+      maxAutoDetectCodeLength,
+      isCopyAllowed = true,
+      languageOptions,
       featureFlags,
       ...unusedProps
     },
@@ -706,19 +768,51 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
       () => HEADLESS_EDITOR_FEATURE_POLICY.resolve(featureFlags),
       [featureFlags],
     );
-
-    const extensionsKey = useMemo(
-      () => JSON.stringify(resolvedFeatureFlags),
-      [resolvedFeatureFlags],
+    const resolvedSyntaxHighlighting = useMemo<"auto" | "disabled">(
+      () => (isSyntaxHighlightingEnabled ? "auto" : "disabled"),
+      [isSyntaxHighlightingEnabled],
     );
+    const syntaxHighlightThemeOverrides = useMemo(
+      () =>
+        createSyntaxHighlightThemeOverrides(
+          syntaxHighlightColorMode,
+          syntaxHighlightColors,
+          editorTheme,
+        ),
+      [editorTheme, syntaxHighlightColorMode, syntaxHighlightColors],
+    );
+    const resolvedEditorThemeOverrides = useMemo<EditorThemeOverrides | undefined>(() => {
+      if (!editorThemeOverrides && !syntaxHighlightThemeOverrides) {
+        return undefined;
+      }
+
+      return {
+        ...(editorThemeOverrides ?? {}),
+        ...(syntaxHighlightThemeOverrides ?? {}),
+      };
+    }, [editorThemeOverrides, syntaxHighlightThemeOverrides]);
+    const wrapperStyleVars = useMemo<CSSProperties | undefined>(() => {
+      const editorThemeVars = createEditorThemeStyleVars(resolvedEditorThemeOverrides);
+      return editorThemeVars as CSSProperties | undefined;
+    }, [resolvedEditorThemeOverrides]);
 
     const presetExtensions = useMemo(() => {
-      const parsedFlags = JSON.parse(extensionsKey) as FeatureFlagOverrides;
       return createExtensiveExtensions({
-        featureFlags: parsedFlags,
+        featureFlags: resolvedFeatureFlags,
+        syntaxHighlighting: resolvedSyntaxHighlighting,
+        maxAutoDetectCodeLength,
+        isCopyAllowed,
+        languageOptions,
         showLineNumbers,
       });
-    }, [extensionsKey, showLineNumbers]);
+    }, [
+      isCopyAllowed,
+      languageOptions,
+      maxAutoDetectCodeLength,
+      resolvedFeatureFlags,
+      resolvedSyntaxHighlighting,
+      showLineNumbers,
+    ]);
 
     const [methods, setMethods] = useState<HeadlessEditorMethods | null>(null);
     const didHydrateDefaultContentRef = useRef(false);
@@ -772,6 +866,7 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
           className,
         )}
         data-editor-theme={editorTheme}
+        style={wrapperStyleVars}
       >
         <Provider extensions={presetExtensions}>
           <HeadlessEditorContent

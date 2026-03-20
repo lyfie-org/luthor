@@ -31,7 +31,8 @@ export function App() {
 | Line height baseline | `minimumDefaultLineHeight = 1.5` |
 | List indentation | `maxListIndentation = 8` sub-indent levels |
 | Code/source line numbers | Enabled (`showLineNumbers = true`) |
-| Prism grammar pack | Loaded by the host app (import Prism + required language components before mounting editors) |
+| Syntax highlighting | Enabled by default (`isSyntaxHighlightingEnabled = true`) |
+| Syntax language/options source | Lexical defaults from `@lexical/code` |
 
 ## Core props (high signal)
 
@@ -55,14 +56,15 @@ export function App() {
 - Typography/code options:
   - `fontFamilyOptions`, `fontSizeOptions`, `lineHeightOptions`
   - `minimumDefaultLineHeight`, `scaleByRatio`
-  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
+  - `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `syntaxHighlightColors`
   - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
   - `maxListIndentation`
 
 Code language support behavior:
 
-- `@lyfie/luthor` does not preload Prism grammars; host apps should import Prism and the grammar components they need.
-- The language dropdown only shows grammars that are actually loaded at runtime, which prevents stale token colors when switching languages.
+- No extra Prism setup import is required for presets.
+- Default dropdown options come from Lexical language options.
+- If a selected language is not loaded, the dropdown keeps that language selected and highlighting falls back to plaintext colors.
 
 For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
 
@@ -84,46 +86,41 @@ If source parsing fails, an inline source error panel is shown and visual conten
   - `plain`
 - Style tokens can be rehydrated from imported JSON.
 
-## Theme callback example (`Prism`)
+## Syntax Highlighting Controls
 
-Use `onThemeChange` when host styling must follow editor theme state.
+Disable syntax highlighting completely:
 
 ```tsx
-'use client';
-
-import { ExtensiveEditor } from '@lyfie/luthor';
-import { useEffect, useState } from 'react';
-
-type Theme = 'light' | 'dark';
-const PRISM_THEME_LINK_ID = 'luthor-prism-theme';
-
-export function EditorWithPrismTheme() {
-  const [editorTheme, setEditorTheme] = useState<Theme>('light');
-
-  useEffect(() => {
-    const href = editorTheme === 'dark' ? '/prismjs/themes/prism-okaidia.css' : '/prismjs/themes/prism.css';
-    const existing = document.getElementById(PRISM_THEME_LINK_ID);
-    const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
-
-    if (!(existing instanceof HTMLLinkElement)) {
-      link.id = PRISM_THEME_LINK_ID;
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-    }
-
-    if (link.href !== new URL(href, window.location.origin).href) {
-      link.href = href;
-    }
-  }, [editorTheme]);
-
-  return <ExtensiveEditor initialTheme="light" onThemeChange={setEditorTheme} />;
-}
+<ExtensiveEditor isSyntaxHighlightingEnabled={false} />
 ```
 
-Place these files in your app static assets:
+Use custom syntax token colors:
 
-- `/public/prismjs/themes/prism.css`
-- `/public/prismjs/themes/prism-okaidia.css`
+```tsx
+<ExtensiveEditor
+  syntaxHighlightColorMode="custom"
+  syntaxHighlightColors={{
+    light: {
+      comment: "#6a737d",
+      keyword: "#a626a4",
+      string: "#50a14f",
+      number: "#986801",
+      function: "#4078f2",
+      variable: "#e45649",
+    },
+    dark: {
+      comment: "#6272a4",
+      keyword: "#ff79c6",
+      string: "#50fa7b",
+      number: "#bd93f9",
+      function: "#8be9fd",
+      variable: "#ffb86c",
+    },
+  }}
+/>
+```
+
+If you only provide `light`, those values are reused in dark mode.
 
 ## Code view line numbers
 

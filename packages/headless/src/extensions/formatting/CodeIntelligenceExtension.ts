@@ -55,36 +55,7 @@ export type CodeLanguageOptionsConfig = {
   values: readonly string[];
 };
 
-const DEFAULT_LANGUAGE_OPTIONS = [
-  "plaintext",
-  "typescript",
-  "javascript",
-  "bash",
-  "powershell",
-  "python",
-  "java",
-  "c",
-  "cpp",
-  "csharp",
-  "go",
-  "rust",
-  "swift",
-  "kotlin",
-  "php",
-  "ruby",
-  "sql",
-  "markdown",
-  "html",
-  "css",
-  "json",
-  "json5",
-  "yaml",
-  "toml",
-  "ini",
-  "graphql",
-  "docker",
-  "xml",
-] as const;
+const DEFAULT_LANGUAGE_OPTION_FALLBACK = ["plain"] as const;
 
 const LANGUAGE_ALIASES: Record<string, string> = {
   "c#": "csharp",
@@ -206,11 +177,11 @@ export class CodeIntelligenceExtension extends BaseExtension<
   getCommands(editor: LexicalEditor): CodeIntelligenceCommands {
     return {
       setCodeLanguage: (language: string) => {
-        const normalized = normalizeLanguage(language);
-        const theme = this.getThemeForLanguage(normalized);
+        const normalizedSelection = normalizeLanguageSelection(language) ?? "plain";
+        const theme = this.getThemeForLanguage(normalizedSelection);
         editor.update(() => {
           this.getSelectionCodeNodes().forEach((node) => {
-            node.setLanguage(normalized ?? "plain");
+            node.setLanguage(normalizedSelection);
             node.setTheme(theme);
           });
         });
@@ -255,7 +226,7 @@ export class CodeIntelligenceExtension extends BaseExtension<
   getCodeBlocksSnapshot(editor: LexicalEditor): CodeBlockSnapshot[] {
     return editor.getEditorState().read(() =>
       $nodesOfType(CodeNode).map((node) => {
-        const normalized = normalizeLanguage(node.getLanguage());
+        const normalized = normalizeLanguageSelection(node.getLanguage());
 
         return {
           key: node.getKey(),
@@ -281,8 +252,8 @@ export class CodeIntelligenceExtension extends BaseExtension<
         return;
       }
 
-      const normalized = normalizeLanguage(selectedLanguage);
-      node.setLanguage(normalized ?? "plain");
+      const normalized = normalizeLanguageSelection(selectedLanguage) ?? "plain";
+      node.setLanguage(normalized);
       node.setTheme(this.getThemeForLanguage(normalized));
     });
   }
@@ -375,9 +346,12 @@ export class CodeIntelligenceExtension extends BaseExtension<
   }
 
   private getLanguageOptions(): string[] {
-    const normalizedDefaultLanguages = DEFAULT_LANGUAGE_OPTIONS
-      .map((lang) => normalizeLanguage(lang))
+    const lexicalDefaults = getSafeCodeLanguageOptions()
+      .map((lang) => normalizeLanguageSelection(lang))
       .filter((lang): lang is string => !!lang);
+    const normalizedDefaultLanguages = lexicalDefaults.length
+      ? lexicalDefaults
+      : [...DEFAULT_LANGUAGE_OPTION_FALLBACK];
 
     const languageOptionsConfig = resolveLanguageOptionsConfig(
       this.config.languageOptions,
@@ -435,6 +409,11 @@ type CodeBlockControlModel = {
   top: number;
   left: number;
   width: number;
+};
+
+type LanguageOptionEntry = {
+  id: string;
+  label: string;
 };
 
 const CODEBLOCK_HEADER_HEIGHT = 34;
@@ -675,6 +654,10 @@ function CodeBlockControlsPlugin({
       { className: "luthor-codeblock-controls-layer", "aria-hidden": false },
       controls.map((control) => {
         const feedbackState = copyStateByNodeKey[control.key];
+        const availableOptions = getLanguageOptionsForControl(
+          languageOptionEntries,
+          control.language,
+        );
         const copyClassName = [
           "luthor-codeblock-copy",
           feedbackState === "copied" ? "is-copied" : "",
@@ -719,7 +702,7 @@ function CodeBlockControlsPlugin({
                   handleLanguageChange(control.key, target.value);
                 },
               },
-              languageOptionEntries.map((option) =>
+              availableOptions.map((option) =>
                 createElement("option", { key: option.id, value: option.id }, option.label),
               ),
             ),
@@ -780,6 +763,28 @@ function areControlModelsEqual(
   }
 
   return true;
+}
+
+function getLanguageOptionsForControl(
+  entries: readonly LanguageOptionEntry[],
+  selectedLanguage: string,
+): LanguageOptionEntry[] {
+  if (!selectedLanguage) {
+    return [...entries];
+  }
+
+  const hasSelection = entries.some((entry) => entry.id === selectedLanguage);
+  if (hasSelection) {
+    return [...entries];
+  }
+
+  return [
+    ...entries,
+    {
+      id: selectedLanguage,
+      label: getLanguageDisplayLabel(selectedLanguage),
+    },
+  ];
 }
 
 async function writeTextToClipboard(text: string): Promise<boolean> {
@@ -849,6 +854,10 @@ function normalizeLanguage(language: string | null | undefined): string | null {
   }
 
   return normalized;
+}
+
+function normalizeLanguageSelection(language: string | null | undefined): string | null {
+  return toCanonicalLanguageId(language);
 }
 
 function isSupportedLanguage(language: string): boolean {
@@ -964,11 +973,11 @@ function normalizeConfiguredLanguageOptions(
       continue;
     }
 
-    const normalizedValue = normalizeLanguage(rawValue);
+    const normalizedValue = normalizeLanguageSelection(rawValue);
     if (!normalizedValue) {
       throw new Error(
         `[CodeIntelligenceExtension] Invalid language option "${option}". ` +
-          `Use a supported language ID or alias (excluding "auto").`,
+          `Use a non-empty language ID or alias (excluding "auto").`,
       );
     }
 

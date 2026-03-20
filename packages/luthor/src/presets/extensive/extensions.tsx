@@ -33,7 +33,6 @@ import {
   codeFormatExtension,
   TabIndentExtension,
   enterKeyBehaviorExtension,
-  type CodeHighlightProvider,
   type CodeLanguageOptionsConfig,
   type Extension,
 } from "@lyfie/luthor-headless";
@@ -146,8 +145,6 @@ export type ExtensiveExtensionsConfig = {
   isDraggableBoxEnabled?: boolean;
   scaleByRatio?: boolean;
   syntaxHighlighting?: "auto" | "disabled";
-  codeHighlightProvider?: CodeHighlightProvider | null;
-  loadCodeHighlightProvider?: () => Promise<CodeHighlightProvider | null>;
   maxAutoDetectCodeLength?: number;
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
@@ -727,8 +724,6 @@ function buildExtensiveExtensions({
   isDraggableBoxEnabled,
   scaleByRatio,
   syntaxHighlighting,
-  codeHighlightProvider,
-  loadCodeHighlightProvider,
   maxAutoDetectCodeLength,
   isCopyAllowed,
   languageOptions,
@@ -758,13 +753,9 @@ function buildExtensiveExtensions({
   });
   (codeExtension as any).configure({
     syntaxHighlighting: syntaxHighlighting ?? "auto",
-    provider: codeHighlightProvider ?? undefined,
-    loadProvider: loadCodeHighlightProvider,
     showLineNumbers: showLineNumbers ?? true,
   });
   (codeIntelligenceExtension as any).configure({
-    provider: codeHighlightProvider ?? undefined,
-    loadProvider: loadCodeHighlightProvider,
     maxAutoDetectLength: maxAutoDetectCodeLength,
     isCopyAllowed: isCopyAllowed ?? true,
     languageOptions,

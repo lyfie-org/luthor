@@ -343,6 +343,22 @@ export interface DefaultSettings {
 
 export type EditorThemeOverrides = LuthorEditorThemeOverrides;
 
+export type SyntaxHighlightColorMode = "lexical" | "custom";
+
+export type SyntaxHighlightColorTokens = Partial<{
+  comment: string;
+  keyword: string;
+  string: string;
+  number: string;
+  function: string;
+  variable: string;
+}>;
+
+export type SyntaxHighlightColors = {
+  light?: SyntaxHighlightColorTokens;
+  dark?: SyntaxHighlightColorTokens;
+};
+
 export type ToolbarPosition = "top" | "bottom";
 
 export type ToolbarAlignment = "left" | "center" | "right";

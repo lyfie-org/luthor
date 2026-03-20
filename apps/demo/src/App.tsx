@@ -1,6 +1,7 @@
 import {
   ComposeEditor,
   ExtensiveEditor,
+  type ExtensiveEditorProps,
   type ExtensiveEditorRef,
   HeadlessEditorPreset,
   HTMLEditor,
@@ -11,7 +12,6 @@ import {
 } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { syncPrismTheme } from "./utils/prism";
 import {
   DEMO_COMPOSE_CONTENT,
   DEMO_EXTENSIVE_CONTENT,
@@ -33,7 +33,7 @@ type PresetId =
   | "html-editor"
   | "slash-editor"
   | "headless-editor";
-type Theme = "light" | "dark";
+type SyntaxFlavor = "default" | "custom" | "disabled";
 
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "extensive", label: "Extensive Editor" },
@@ -49,7 +49,7 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
 function App() {
   const { theme, toggleTheme } = useDemoTheme();
   const [preset, setPreset] = useState<PresetId>("extensive");
-  const [activeEditorTheme, setActiveEditorTheme] = useState<Theme>(theme);
+  const [syntaxFlavor, setSyntaxFlavor] = useState<SyntaxFlavor>("default");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const extensiveEditorRef = useRef<ExtensiveEditorRef | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -63,13 +63,41 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    setActiveEditorTheme(theme);
-  }, [preset, theme]);
+  const syntaxThemeColors = useMemo(
+    () => ({
+      light: {
+        comment: "#6a737d",
+        keyword: "#a626a4",
+        string: "#50a14f",
+        number: "#986801",
+        function: "#4078f2",
+        variable: "#e45649",
+      },
+      dark: {
+        comment: "#6272a4",
+        keyword: "#ff79c6",
+        string: "#50fa7b",
+        number: "#bd93f9",
+        function: "#8be9fd",
+        variable: "#ffb86c",
+      },
+    }),
+    [],
+  );
 
-  useEffect(() => {
-    syncPrismTheme(activeEditorTheme);
-  }, [activeEditorTheme]);
+  const syntaxPresetProps = useMemo<
+    Pick<
+      ExtensiveEditorProps,
+      "isSyntaxHighlightingEnabled" | "syntaxHighlightColorMode" | "syntaxHighlightColors"
+    >
+  >(
+    () => ({
+      isSyntaxHighlightingEnabled: syntaxFlavor !== "disabled",
+      syntaxHighlightColorMode: syntaxFlavor === "custom" ? "custom" : "lexical",
+      syntaxHighlightColors: syntaxFlavor === "custom" ? syntaxThemeColors : undefined,
+    }),
+    [syntaxFlavor, syntaxThemeColors],
+  );
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -92,6 +120,7 @@ function App() {
     }
 
     const snapshot = {
+      syntaxFlavor,
       json: methods.getJSON(),
       markdown: methods.getMarkdown(),
       html: methods.getHTML(),
@@ -106,10 +135,10 @@ function App() {
       case "compose":
         return (
           <ComposeEditor
+            {...syntaxPresetProps}
             defaultContent={DEMO_COMPOSE_CONTENT}
             showDefaultContent={false}
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
             compactToolbar
             placeholder="Write a draft..."
           />
@@ -136,36 +165,37 @@ function App() {
       case "legacy-rich":
         return (
           <LegacyRichEditor
+            {...syntaxPresetProps}
             defaultContent={DEMO_LEGACY_RICH_CONTENT}
             showDefaultContent={false}
             defaultEditorView="markdown"
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
           />
         );
       case "md-editor":
         return (
           <MarkDownEditor
+            {...syntaxPresetProps}
             defaultContent={DEMO_MD_EDITOR_CONTENT}
             showDefaultContent={false}
             defaultEditorView="markdown"
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
           />
         );
       case "html-editor":
         return (
           <HTMLEditor
+            {...syntaxPresetProps}
             defaultContent={DEMO_HTML_EDITOR_CONTENT}
             showDefaultContent={false}
             defaultEditorView="html"
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
           />
         );
       case "slash-editor":
         return (
           <SlashEditor
+            {...syntaxPresetProps}
             defaultContent={DEMO_SLASH_EDITOR_CONTENT}
             showDefaultContent={false}
             initialTheme={theme}
@@ -174,6 +204,7 @@ function App() {
       case "headless-editor":
         return (
           <HeadlessEditorPreset
+            {...syntaxPresetProps}
             defaultContent={DEMO_HEADLESS_PRESET_CONTENT}
             showDefaultContent={false}
             initialTheme={theme}
@@ -183,10 +214,10 @@ function App() {
         return (
           <ExtensiveEditor
             ref={extensiveEditorRef}
+            {...syntaxPresetProps}
             defaultContent={DEMO_EXTENSIVE_CONTENT}
             showDefaultContent={false}
             initialTheme={theme}
-            onThemeChange={setActiveEditorTheme}
             placeholder={{
               visual: "Write your story...",
               json: "Paste JSON document...",
@@ -200,7 +231,7 @@ function App() {
           />
         );
     }
-  }, [theme, preset]);
+  }, [preset, syntaxPresetProps, theme]);
 
   return (
     <div className="app-shell" data-theme={theme}>
@@ -231,6 +262,23 @@ function App() {
               >
                 Save
               </button>
+            </div>
+          </div>
+          <div className="control-group">
+            <label className="control-label" htmlFor="syntax-flavor-select">
+              Syntax
+            </label>
+            <div className="control-row">
+              <select
+                id="syntax-flavor-select"
+                className="preset-select"
+                value={syntaxFlavor}
+                onChange={(event) => setSyntaxFlavor(event.target.value as SyntaxFlavor)}
+              >
+                <option value="default">Default colors</option>
+                <option value="custom">Custom colors</option>
+                <option value="disabled">Disabled</option>
+              </select>
             </div>
           </div>
           <button className="theme-toggle" type="button" onClick={toggleTheme}>

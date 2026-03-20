@@ -17,15 +17,13 @@
   },
   "dependencies": {
     "@emoji-mart/data": "1.2.1",
-    "@lyfie/luthor": "2.7.7",
-    "prismjs": "1.30.0",
+    "@lyfie/luthor": "2.7.8",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@types/node": "^20.19.33",
-    "@types/prismjs": "^1.26.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",

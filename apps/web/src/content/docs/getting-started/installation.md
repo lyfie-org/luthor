@@ -38,6 +38,43 @@ yarn add @lyfie/luthor react react-dom
 bun add @lyfie/luthor react react-dom
 ```
 
+### Built-in Prism dependency (`@lyfie/luthor`)
+
+`@lyfie/luthor` depends on `@lexical/code`, and `@lexical/code` depends on `prismjs`.
+
+That means preset syntax highlighting works without a separate Prism install in your app.
+
+Preset defaults are ready out of the box:
+
+```tsx
+import { ExtensiveEditor } from "@lyfie/luthor";
+
+<ExtensiveEditor />;
+```
+
+- Default language options come from Lexical code language options.
+- Default token colors use Lexical/Prism-style defaults shipped in `@lyfie/luthor`.
+
+To opt out:
+
+```tsx
+<ExtensiveEditor isSyntaxHighlightingEnabled={false} />
+```
+
+To supply your own token palette:
+
+```tsx
+<ExtensiveEditor
+  syntaxHighlightColorMode="custom"
+  syntaxHighlightColors={{
+    light: { keyword: "#7c3aed", string: "#047857" },
+    dark: { keyword: "#c4b5fd", string: "#86efac" },
+  }}
+/>
+```
+
+Need the full transitive graph and conflict paths? See [Dependency Graph](/docs/getting-started/dependencies/).
+
 ## Install @lyfie/luthor-headless
 
 ### npm
@@ -45,6 +82,11 @@ bun add @lyfie/luthor react react-dom
 ```bash
 npm install @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/list @lexical/markdown @lexical/react @lexical/rich-text @lexical/selection @lexical/table @lexical/utils react react-dom
 ```
+
+`@lexical/code` already includes `prismjs`, so no extra Prism package install is required.
+
+`@lyfie/luthor-headless` intentionally does not ship a preloaded app-level Prism language pack helper.
+For headless setups, load only the grammars/providers your app needs.
 
 ### Optional dependencies for headless
 
@@ -92,7 +134,9 @@ npm uninstall lexical @lexical/code @lexical/link @lexical/list @lexical/markdow
 2. Missing `@lyfie/luthor/styles.css` import when using presets.
 3. Mixing preset docs (`@lyfie/luthor`) with headless implementation code.
 4. React/Lexical version mismatch in lockfile.
-5. Forgetting to reinstall after switching package managers.
+5. Installing `prismjs` directly when your app does not use Prism APIs directly.
+6. Forgetting to reinstall after switching package managers.
+7. Skipping dependency path checks when debugging lockfile conflicts (use [Dependency Graph](/docs/getting-started/dependencies/) + `pnpm why`).
 
 ## Next steps
 

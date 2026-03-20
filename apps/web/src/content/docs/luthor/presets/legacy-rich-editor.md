@@ -67,7 +67,8 @@ Default toolbar sections focus on writing and structure:
 
 ## Theme and syntax colors
 
-Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch Prism theme CSS for code color parity:
+Syntax highlighting is enabled by default in this preset family and uses Lexical default language options with the preset default syntax token colors.
 
-- light: `/public/prismjs/themes/prism.css`
-- dark: `/public/prismjs/themes/prism-okaidia.css`
+- Keep defaults: no extra setup needed.
+- Disable syntax highlighting: `isSyntaxHighlightingEnabled={false}`.
+- Customize token colors: use `syntaxHighlightColorMode="custom"` + `syntaxHighlightColors`.

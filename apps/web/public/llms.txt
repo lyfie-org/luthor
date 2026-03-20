@@ -19,6 +19,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [getting-started/ai-agents-and-vibe-coding.md](https://www.luthor.fyi/docs/getting-started/ai-agents-and-vibe-coding/) - AI Agents and Vibe Coding
 - [getting-started/capabilities.md](https://www.luthor.fyi/docs/getting-started/capabilities/) - Capabilities
 - [getting-started/contributor-guide.md](https://www.luthor.fyi/docs/getting-started/contributor-guide/) - Contributor Guide
+- [getting-started/dependencies.md](https://www.luthor.fyi/docs/getting-started/dependencies/) - Dependency Graph
 - [getting-started/index.md](https://www.luthor.fyi/docs/getting-started/) - Introduction
 - [getting-started/installation.md](https://www.luthor.fyi/docs/getting-started/installation/) - Installation
 - [getting-started/luthor-headless.md](https://www.luthor.fyi/docs/getting-started/luthor-headless/) - @lyfie/luthor-headless
@@ -70,6 +71,11 @@ This file helps AI agents discover and query Luthor docs quickly.
 - URL: https://www.luthor.fyi/docs/getting-started/contributor-guide/
 - Summary: Contributor Guide This is the fastest path for contributors working on @lyfie/luthor and @lyfie/luthor headless . Prerequisites Node =20 pnpm@10.4.1 Monorepo map packages/headless : headless runtime, extension system, conversion bridges, theme utilities. packages/luthor : preset package built on top of headless. apps/d...
 
+### Dependency Graph
+- File: getting-started/dependencies.md
+- URL: https://www.luthor.fyi/docs/getting-started/dependencies/
+- Summary: Dependency Graph This page exists for one reason: help users fight dependency drama. It shows exactly which package depends on what, with explicit transitive paths so you can debug version conflicts quickly. Scope and snapshot This graph is based on the current repository versions ( @lyfie/luthor@2.7.7 , @lyfie/luthor ...
+
 ### Introduction
 - File: getting-started/index.md
 - URL: https://www.luthor.fyi/docs/getting-started/
@@ -78,12 +84,12 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Installation
 - File: getting-started/installation.md
 - URL: https://www.luthor.fyi/docs/getting-started/installation/
-- Summary: title: Installation description: Install, update, and uninstall @lyfie/luthor and @lyfie/luthor headless. Installation This page covers install, update, uninstall, and validation for both packages. Prerequisites Node.js =20 A React app using React 18 or 19 Install @lyfie/luthor npm pnpm yarn bun Install @lyfie/luthor h...
+- Summary: title: Installation description: Install, update, and uninstall @lyfie/luthor and @lyfie/luthor headless. Installation This page covers install, update, uninstall, and validation for both packages. Prerequisites Node.js =20 A React app using React 18 or 19 Install @lyfie/luthor npm pnpm yarn bun Built in Prism dependen...
 
 ### @lyfie/luthor-headless
 - File: getting-started/luthor-headless.md
 - URL: https://www.luthor.fyi/docs/getting-started/luthor-headless/
-- Summary: title: "@lyfie/luthor headless" description: Minimal setup and validation for @lyfie/luthor headless. @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Render a minimal headless editor Validate installation 1. The editor mounts and accepts input. 2. To...
+- Summary: title: "@lyfie/luthor headless" description: Minimal setup and validation for @lyfie/luthor headless. @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install @lexical/code already installs prismjs , so you do not need an extra Prism dependency. @lyfie/luthor...
 
 ### @lyfie/luthor
 - File: getting-started/luthor.md
@@ -108,7 +114,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Code and Devtools
 - File: luthor-headless/features/code-and-devtools.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/
-- Summary: title: Code and Devtools description: Code blocks, syntax support, and markdown/json conversion tools. Code and Devtools This group covers code editing and developer facing conversion utilities. Recent defaults: Code block language labels use full language names in UI (for example, TypeScript , JavaScript , Bash ). Lan...
+- Summary: title: Code and Devtools description: Code blocks, syntax support, and markdown/json conversion tools. Code and Devtools This group covers code editing and developer facing conversion utilities. Recent defaults: Code block language labels use full language names in UI (for example, TypeScript , JavaScript , Bash ). Def...
 
 ### Customization and Theming
 - File: luthor-headless/features/customization-and-theming.md

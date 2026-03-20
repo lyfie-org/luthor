@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   createExtensiveExtensionsMock,
+  createEditorThemeStyleVarsMock,
   providerMock,
   richTextMock,
   sourceViewMock,
@@ -13,6 +14,7 @@ const {
   jsonToHTMLMock,
 } = vi.hoisted(() => ({
   createExtensiveExtensionsMock: vi.fn(() => []),
+  createEditorThemeStyleVarsMock: vi.fn((overrides?: Record<string, string>) => overrides),
   providerMock: vi.fn(),
   richTextMock: vi.fn(({ placeholder }: { placeholder?: string }) => (
     <div data-testid="richtext">{placeholder}</div>
@@ -144,6 +146,7 @@ vi.mock("@lyfie/luthor-headless", () => ({
   htmlToJSON: htmlToJSONMock,
   jsonToMarkdown: jsonToMarkdownMock,
   jsonToHTML: jsonToHTMLMock,
+  createEditorThemeStyleVars: createEditorThemeStyleVarsMock,
 }));
 
 import { HeadlessEditorPreset } from "./HeadlessEditorPreset";
@@ -246,6 +249,45 @@ describe("HeadlessEditorPreset", () => {
 
     expect(extensionConfig.showLineNumbers).toBe(false);
     expect(screen.getByTestId("source-view")).toHaveAttribute("data-line-numbers", "false");
+  });
+
+  it("supports syntax highlighting opt-out with isSyntaxHighlightingEnabled", () => {
+    render(
+      <HeadlessEditorPreset
+        showDefaultContent={false}
+        isSyntaxHighlightingEnabled={false}
+      />,
+    );
+
+    const extensionConfig = createExtensiveExtensionsMock.mock.calls.at(-1)?.[0] as {
+      syntaxHighlighting?: "auto" | "disabled";
+    };
+
+    expect(extensionConfig.syntaxHighlighting).toBe("disabled");
+  });
+
+  it("applies custom syntax colors when custom mode is enabled", () => {
+    render(
+      <HeadlessEditorPreset
+        showDefaultContent={false}
+        syntaxHighlightColorMode="custom"
+        syntaxHighlightColors={{
+          light: {
+            comment: "#111111",
+            keyword: "#222222",
+          },
+        }}
+      />,
+    );
+
+    const wrapper = document.querySelector(".luthor-preset-headless-editor") as HTMLElement;
+    expect(wrapper.style.getPropertyValue("--luthor-syntax-comment")).toBe("#111111");
+    expect(wrapper.style.getPropertyValue("--luthor-syntax-keyword")).toBe("#222222");
+    expect(createEditorThemeStyleVarsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        "--luthor-syntax-comment": "#111111",
+      }),
+    );
   });
 
   it("supports wrapper classes and defaultEditorView mode aliases", () => {
