@@ -12,6 +12,7 @@
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
     "@lyfie/luthor": "workspace:*",
+    "prismjs": "^1.30.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

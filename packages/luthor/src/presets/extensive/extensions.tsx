@@ -39,7 +39,6 @@ import {
 } from "@lyfie/luthor-headless";
 import type { ReactNode } from "react";
 import { createFloatingToolbarExtension, setFloatingToolbarContext } from "../../core";
-import { ensurePrismLanguagePackLoaded } from "./prismLanguagePack";
 
 export { setFloatingToolbarContext };
 
@@ -737,7 +736,6 @@ function buildExtensiveExtensions({
   maxListIndentation,
 }: ExtensiveExtensionsConfig = {}) {
   const resolvedFeatureFlags = resolveFeatureFlags(featureFlags);
-  ensurePrismLanguagePackLoaded();
   const enabled = (feature: FeatureFlag) => isFeatureEnabled(resolvedFeatureFlags, feature);
   const isDraggableFeatureEnabled =
     (isDraggableBoxEnabled ?? true) && enabled("draggableBlock");

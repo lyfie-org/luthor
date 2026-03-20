@@ -22,6 +22,7 @@ import {
   DEMO_SLASH_EDITOR_CONTENT,
 } from "./demo-content";
 import { useDemoTheme } from "./hooks/useDemoTheme";
+import { syncPrismTheme } from "./utils/prism";
 
 type PresetId =
   | "extensive"
@@ -34,8 +35,6 @@ type PresetId =
   | "headless-editor";
 type Theme = "light" | "dark";
 
-const PRISM_THEME_LINK_ID = "luthor-prism-theme";
-
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "extensive", label: "Extensive Editor" },
   { value: "compose", label: "Compose Editor" },
@@ -46,30 +45,6 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "slash-editor", label: "Slash Editor" },
   { value: "headless-editor", label: "Headless Editor" },
 ];
-
-function syncPrismTheme(theme: Theme): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  const href = theme === "dark"
-    ? "/prismjs/themes/prism-okaidia.css"
-    : "/prismjs/themes/prism.css";
-  const existing = document.getElementById(PRISM_THEME_LINK_ID);
-  const link = existing instanceof HTMLLinkElement
-    ? existing
-    : document.createElement("link");
-
-  if (!(existing instanceof HTMLLinkElement)) {
-    link.id = PRISM_THEME_LINK_ID;
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-  }
-
-  if (link.href !== new URL(href, window.location.origin).href) {
-    link.href = href;
-  }
-}
 
 function App() {
   const { theme, toggleTheme } = useDemoTheme();

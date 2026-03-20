@@ -68,7 +68,8 @@ describe("CodeIntelligenceExtension language options", () => {
   });
 
   it("uses full language labels for canonical and alias identifiers", () => {
-    const { getLanguageDisplayLabel } = __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS;
+    const { getLanguageDisplayLabel, getSafeCodeLanguageOptions, getSafeRuntimeCodeLanguages } =
+      __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS;
 
     expect(getLanguageDisplayLabel("js")).toBe("JavaScript");
     expect(getLanguageDisplayLabel("javascript")).toBe("JavaScript");
@@ -81,6 +82,13 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(getLanguageDisplayLabel("c#")).toBe("C#");
     expect(getLanguageDisplayLabel("yml")).toBe("YAML");
     expect(getLanguageDisplayLabel("dockerfile")).toBe("Docker");
+
+    expect(getSafeCodeLanguageOptions(() => {
+      throw new Error("unavailable");
+    })).toEqual([]);
+    expect(getSafeRuntimeCodeLanguages(() => {
+      throw new Error("unavailable");
+    })).toEqual([]);
   });
 
   it("uses plain fallback theme for plaintext-like languages", () => {

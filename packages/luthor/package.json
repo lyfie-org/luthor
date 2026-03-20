@@ -66,14 +66,12 @@
     "@lexical/table": "^0.40.0",
     "@lexical/utils": "^0.40.0",
     "@lyfie/luthor-headless": "workspace:*",
-    "lexical": "^0.40.0",
-    "prismjs": "^1.30.0"
+    "lexical": "^0.40.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^20.19.33",
-    "@types/prismjs": "^1.26.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@testing-library/jest-dom": "^6.9.1",

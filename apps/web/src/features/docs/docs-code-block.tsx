@@ -1,16 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Prism from 'prismjs';
-import 'prismjs/components/prism-bash';
-import 'prismjs/components/prism-css';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-json';
-import 'prismjs/components/prism-jsx';
-import 'prismjs/components/prism-markdown';
-import 'prismjs/components/prism-markup';
-import 'prismjs/components/prism-tsx';
-import 'prismjs/components/prism-typescript';
+import { highlightWithPrism } from '@/utils/prism-client';
 
 type PackageManager = 'npm' | 'yarn' | 'pnpm';
 
@@ -36,24 +27,6 @@ const RESERVED_PM_COMMANDS = new Set([
   'up',
   'update',
 ]);
-
-const PRISM_LANGUAGE_ALIASES: Record<string, string> = {
-  bash: 'bash',
-  shell: 'bash',
-  sh: 'bash',
-  css: 'css',
-  html: 'markup',
-  xml: 'markup',
-  javascript: 'javascript',
-  js: 'javascript',
-  json: 'json',
-  markdown: 'markdown',
-  md: 'markdown',
-  typescript: 'typescript',
-  ts: 'typescript',
-  tsx: 'tsx',
-  jsx: 'jsx',
-};
 
 function replaceSaveDevFlags(args: string, target: PackageManager): string {
   if (target === 'npm') return args;
@@ -158,36 +131,6 @@ function escapeHtml(value: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-function resolvePrismLanguage(language: string | undefined): string | null {
-  if (!language) {
-    return null;
-  }
-
-  const normalized = language.trim().toLowerCase();
-  if (!normalized) {
-    return null;
-  }
-
-  return PRISM_LANGUAGE_ALIASES[normalized] ?? normalized;
-}
-
-function highlightWithPrism(code: string, language: string | undefined): { html: string; className: string } {
-  const resolvedLanguage = resolvePrismLanguage(language);
-  if (!resolvedLanguage) {
-    return { html: escapeHtml(code), className: 'language-plain' };
-  }
-
-  const grammar = Prism.languages[resolvedLanguage];
-  if (!grammar) {
-    return { html: escapeHtml(code), className: `language-${resolvedLanguage}` };
-  }
-
-  return {
-    html: Prism.highlight(code, grammar, resolvedLanguage),
-    className: `language-${resolvedLanguage}`,
-  };
 }
 
 function highlightPmCode(code: string): string {
