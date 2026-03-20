@@ -1,5 +1,6 @@
 'use client';
 
+import { syncPrismTheme } from '@/utils/prism-client';
 import {
   ComposeEditor,
   type EditorPreset,
@@ -28,7 +29,6 @@ import {
   WEB_DEMO_SIMPLE_EDITOR_CONTENT,
   WEB_DEMO_SLASH_EDITOR_CONTENT,
 } from './demo-content';
-import { syncPrismTheme } from '@/utils/prism-client';
 import { isExternalWebsiteHref } from '@/utils/link';
 
 type Theme = 'light' | 'dark';

@@ -1,9 +1,9 @@
 'use client';
 
+import { syncPrismTheme } from '@/utils/prism-client';
 import { ExtensiveEditor } from '@lyfie/luthor';
 import { useEffect, useState } from 'react';
 import { HOME_EXTENSIVE_SHORT_CONTENT } from './demo-content';
-import { syncPrismTheme } from '@/utils/prism-client';
 
 type Theme = 'light' | 'dark';
 
