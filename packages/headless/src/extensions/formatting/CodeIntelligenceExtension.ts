@@ -862,16 +862,39 @@ function isSupportedLanguage(language: string): boolean {
 
 function getSupportedLanguageIds(): Set<string> {
   const supported = new Set<string>();
-  const canonicalOptions = getCodeLanguageOptions()
-    .map(([id]) => toCanonicalLanguageId(id))
+  const canonicalOptions = getSafeCodeLanguageOptions()
+    .map((id) => toCanonicalLanguageId(id))
     .filter((id): id is string => !!id);
-  const runtimeLanguages = getCodeLanguages()
+  const runtimeLanguages = getSafeRuntimeCodeLanguages()
     .map((id) => toCanonicalLanguageId(id))
     .filter((id): id is string => !!id);
 
   canonicalOptions.forEach((id) => supported.add(id));
   runtimeLanguages.forEach((id) => supported.add(id));
+  if (supported.size === 0) {
+    supported.add("plain");
+  }
   return supported;
+}
+
+function getSafeCodeLanguageOptions(
+  readCodeLanguageOptions: () => readonly [string, string][] = getCodeLanguageOptions,
+): string[] {
+  try {
+    return readCodeLanguageOptions().map(([id]) => id);
+  } catch {
+    return [];
+  }
+}
+
+function getSafeRuntimeCodeLanguages(
+  readCodeLanguages: () => string[] = getCodeLanguages,
+): string[] {
+  try {
+    return readCodeLanguages();
+  } catch {
+    return [];
+  }
 }
 
 function toCanonicalLanguageId(language: string | null | undefined): string | null {
@@ -1001,4 +1024,6 @@ function humanizeLanguageIdentifier(languageId: string): string {
 
 export const __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS = {
   getLanguageDisplayLabel,
+  getSafeCodeLanguageOptions,
+  getSafeRuntimeCodeLanguages,
 } as const;

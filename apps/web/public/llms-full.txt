@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-20T11:11:56.774Z
+Generated at: 2026-03-20T11:56:11.456Z
 
 ## AI Agent Workflow
 
@@ -256,7 +256,7 @@ Code workflows include inline code formatting, block-level code nodes, language 
 
 Preset runtime notes:
 
-- `@lyfie/luthor` ships with a built-in Prism grammar pack for common languages (`bash`, `json`, `yaml`, `go`, `csharp`, `docker`, `graphql`, `php`, `ruby`, `kotlin`, `toml`, `ini`, `json5`).
+- Host apps should load Prism and any required grammar components (for example `bash`, `json`, `yaml`, `docker`) before mounting editor presets.
 - `@lyfie/luthor-headless` keeps language options runtime-truthful and only exposes grammars that are actually loaded.
 
 - Related commands:
@@ -2194,7 +2194,7 @@ export function App() {
 | Line height baseline | `minimumDefaultLineHeight = 1.5` |
 | List indentation | `maxListIndentation = 8` sub-indent levels |
 | Code/source line numbers | Enabled (`showLineNumbers = true`) |
-| Prism grammar pack | Popular languages preloaded out of the box (`bash`, `json`, `yaml`, `go`, `csharp`, `docker`, `graphql`, `php`, `ruby`, `kotlin`, `toml`, `ini`, `json5`) |
+| Prism grammar pack | Loaded by the host app (import Prism + required language components before mounting editors) |
 
 ## Core props (high signal)
 
@@ -2224,7 +2224,7 @@ export function App() {
 
 Code language support behavior:
 
-- `@lyfie/luthor` preloads a Prism language pack for common production languages, so language switching works without extra grammar installs in host apps.
+- `@lyfie/luthor` does not preload Prism grammars; host apps should import Prism and the grammar components they need.
 - The language dropdown only shows grammars that are actually loaded at runtime, which prevents stale token colors when switching languages.
 
 For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
@@ -2878,7 +2878,7 @@ This page is the full prop contract for `@lyfie/luthor` presets.
 | `loadCodeHighlightProvider` | `() => Promise<CodeHighlightProvider \| null>` | `undefined` | Lazy loader for provider implementation. |
 | `showLineNumbers` | `boolean` | `true` | Enables line numbers for visual code blocks and source tabs (`json`/`markdown`/`html`). |
 | `maxAutoDetectCodeLength` | `number` | `undefined` | Max code length for language autodetect. |
-| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); dropdown labels use full names and only include runtime-loaded grammars. `@lyfie/luthor` preloads common Prism grammars (`bash`, `json`, `yaml`, `go`, `csharp`, `docker`, `graphql`, `php`, `ruby`, `kotlin`, `toml`, `ini`, `json5`). |
+| `languageOptions` | `readonly string[] \| CodeLanguageOptionsConfig` | `undefined` | Language option list or config object (`mode`, `values`); dropdown labels use full names and only include runtime-loaded grammars. Import Prism plus the language components you need in the host app for those options to appear. |
 | `maxListIndentation` | `number` | `8` | Maximum sub-indent levels below root list level. |
 
 Line-number behavior notes:

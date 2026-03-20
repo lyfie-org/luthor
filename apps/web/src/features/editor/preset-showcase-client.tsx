@@ -28,10 +28,10 @@ import {
   WEB_DEMO_SIMPLE_EDITOR_CONTENT,
   WEB_DEMO_SLASH_EDITOR_CONTENT,
 } from './demo-content';
+import { syncPrismTheme } from '@/utils/prism-client';
 import { isExternalWebsiteHref } from '@/utils/link';
 
 type Theme = 'light' | 'dark';
-const PRISM_THEME_LINK_ID = 'luthor-prism-theme';
 
 const VISIBLE_PRESET_IDS = [
   'extensive',
@@ -174,26 +174,6 @@ function formatTime(timestamp: number): string {
     hour: 'numeric',
     minute: '2-digit',
   }).format(timestamp);
-}
-
-function syncPrismTheme(theme: Theme): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const href = theme === 'dark' ? '/prismjs/themes/prism-okaidia.css' : '/prismjs/themes/prism.css';
-  const existing = document.getElementById(PRISM_THEME_LINK_ID);
-  const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
-
-  if (!(existing instanceof HTMLLinkElement)) {
-    link.id = PRISM_THEME_LINK_ID;
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-  }
-
-  if (link.href !== new URL(href, window.location.origin).href) {
-    link.href = href;
-  }
 }
 
 function PresetSurface({ children }: PresetSurfaceProps) {

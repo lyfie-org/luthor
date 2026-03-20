@@ -31,7 +31,7 @@ export function App() {
 | Line height baseline | `minimumDefaultLineHeight = 1.5` |
 | List indentation | `maxListIndentation = 8` sub-indent levels |
 | Code/source line numbers | Enabled (`showLineNumbers = true`) |
-| Prism grammar pack | Popular languages preloaded out of the box (`bash`, `json`, `yaml`, `go`, `csharp`, `docker`, `graphql`, `php`, `ruby`, `kotlin`, `toml`, `ini`, `json5`) |
+| Prism grammar pack | Loaded by the host app (import Prism + required language components before mounting editors) |
 
 ## Core props (high signal)
 
@@ -61,7 +61,7 @@ export function App() {
 
 Code language support behavior:
 
-- `@lyfie/luthor` preloads a Prism language pack for common production languages, so language switching works without extra grammar installs in host apps.
+- `@lyfie/luthor` does not preload Prism grammars; host apps should import Prism and the grammar components they need.
 - The language dropdown only shows grammars that are actually loaded at runtime, which prevents stale token colors when switching languages.
 
 For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
