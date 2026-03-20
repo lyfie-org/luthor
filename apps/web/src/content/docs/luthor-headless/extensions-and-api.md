@@ -129,7 +129,7 @@ export function Editor() {
   - `CodeExtensionConfig` (`showLineNumbers` support for visual code blocks)
   - `CodeIntelligenceConfig`, `CodeIntelligenceCommands`
   - `CodeHighlightProvider`, `CodeHighlightProviderConfig`
-  - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig` (UI labels use full language names)
+  - `CodeLanguageOptionsMode`, `CodeLanguageOptionsConfig` (UI labels use full language names; options are filtered to runtime-loaded grammars)
 - Table/media/draggable:
   - `TableConfig`
   - `DraggableConfig`

@@ -65,7 +65,7 @@ Show before/after behavior for mode switching and feature flags.
 
 - "Build a `SimpleEditor` chat input with `submitOnEnter` and right-side send button."
 - "Create a `SlashEditor` configuration that only allows heading/list/code block commands."
-- "Set up `codeHighlightProvider` and sync `onThemeChange` with `highlight.js` CSS."
+- "Set up `codeHighlightProvider` and sync `onThemeChange` with Prism theme CSS."
 - "Use `HeadlessEditorPreset` and save JSON/Markdown/HTML snapshots from ref methods."
 
 ## Keep docs and code in sync

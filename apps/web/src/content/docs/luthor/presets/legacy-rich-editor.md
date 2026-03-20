@@ -67,7 +67,7 @@ Default toolbar sections focus on writing and structure:
 
 ## Theme and syntax colors
 
-Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch `highlight.js` CSS for code color parity:
+Because `themeToggle` is enabled in this preset family, wire `onThemeChange` to switch Prism theme CSS for code color parity:
 
-- light: `/public/highlightjs/github.css`
-- dark: `/public/highlightjs/github-dark.css`
+- light: `/public/prismjs/themes/prism.css`
+- dark: `/public/prismjs/themes/prism-okaidia.css`

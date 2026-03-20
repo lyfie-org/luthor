@@ -34,7 +34,6 @@ Current compatibility in this repository:
   - `@lyfie/luthor` uses Lexical `^0.40.0` dependencies internally.
   - `@lyfie/luthor-headless` requires `lexical` and `@lexical/*` peers at `>=0.40.0`.
 - Optional:
-  - `highlight.js >=11.0.0` (optional peer for richer code highlighting).
   - `@emoji-mart/data` (optional dependency used by emoji workflows).
 
 ## Choose the right package quickly

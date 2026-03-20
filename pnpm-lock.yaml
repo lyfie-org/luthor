@@ -32,9 +32,6 @@ importers:
       '@lyfie/luthor':
         specifier: workspace:*
         version: link:../../packages/luthor
-      highlight.js:
-        specifier: ^11.11.1
-        version: 11.11.1
       react:
         specifier: ^19.2.0
         version: 19.2.4
@@ -78,12 +75,12 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
-      highlight.js:
-        specifier: ^11.11.1
-        version: 11.11.1
       next:
         specifier: ^15.5.2
         version: 15.5.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      prismjs:
+        specifier: ^1.30.0
+        version: 1.30.0
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -100,6 +97,9 @@ importers:
       '@types/node':
         specifier: ^20.19.9
         version: 20.19.33
+      '@types/prismjs':
+        specifier: ^1.26.5
+        version: 1.26.6
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
@@ -185,9 +185,6 @@ importers:
       '@lexical/utils':
         specifier: '>=0.40.0'
         version: 0.40.0
-      highlight.js:
-        specifier: '>=11.0.0'
-        version: 11.11.1
       lexical:
         specifier: '>=0.40.0'
         version: 0.40.0
@@ -277,6 +274,9 @@ importers:
       lexical:
         specifier: ^0.40.0
         version: 0.40.0
+      prismjs:
+        specifier: ^1.30.0
+        version: 1.30.0
       react:
         specifier: ^18.0.0 || ^19.0.0
         version: 19.2.4
@@ -299,6 +299,9 @@ importers:
       '@types/node':
         specifier: ^20.19.33
         version: 20.19.33
+      '@types/prismjs':
+        specifier: ^1.26.5
+        version: 1.26.6
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
@@ -2977,6 +2980,9 @@ packages:
   '@types/node@20.19.33':
     resolution: {integrity: sha512-Rs1bVAIdBs5gbTIKza/tgpMuG1k3U/UMJLWecIMxNdJFDMzcM5LOiLVRYh3PilWEYDIeUDv7bpiHPLPsbydGcw==}
 
+  '@types/prismjs@1.26.6':
+    resolution: {integrity: sha512-vqlvI7qlMvcCBbVe0AKAb4f97//Hy0EBTaiW8AalRnG/xAN5zOiWWyrNqNXeq8+KAuvRewjCVY1+IPxk4RdNYw==}
+
   '@types/react-dom@19.2.3':
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
     peerDependencies:
@@ -3944,10 +3950,6 @@ packages:
 
   hast-util-whitespace@3.0.0:
     resolution: {integrity: sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw==}
-
-  highlight.js@11.11.1:
-    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
-    engines: {node: '>=12.0.0'}
 
   html-encoding-sniffer@4.0.0:
     resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
@@ -8747,6 +8749,8 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/prismjs@1.26.6': {}
+
   '@types/react-dom@19.2.3(@types/react@19.2.14)':
     dependencies:
       '@types/react': 19.2.14
@@ -9944,8 +9948,6 @@ snapshots:
   hast-util-whitespace@3.0.0:
     dependencies:
       '@types/hast': 3.0.4
-
-  highlight.js@11.11.1: {}
 
   html-encoding-sniffer@4.0.0:
     dependencies:

@@ -34,7 +34,7 @@ pnpm add @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/lis
 Optional:
 
 ```bash
-pnpm add highlight.js @emoji-mart/data
+pnpm add @emoji-mart/data
 ```
 
 ## Quick Usage
@@ -85,7 +85,7 @@ export function Editor() {
 - Node: `>=20` (workspace development)
 - React: `^18.0.0 || ^19.0.0`
 - Lexical + `@lexical/*`: `>=0.40.0`
-- Optional `highlight.js`: `>=11.0.0`
+- Optional `@emoji-mart/data`: `^1.2.1`
 
 ## Documentation
 

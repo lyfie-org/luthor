@@ -31,6 +31,7 @@ export function App() {
 | Line height baseline | `minimumDefaultLineHeight = 1.5` |
 | List indentation | `maxListIndentation = 8` sub-indent levels |
 | Code/source line numbers | Enabled (`showLineNumbers = true`) |
+| Prism grammar pack | Popular languages preloaded out of the box (`bash`, `json`, `yaml`, `go`, `csharp`, `docker`, `graphql`, `php`, `ruby`, `kotlin`, `toml`, `ini`, `json5`) |
 
 ## Core props (high signal)
 
@@ -58,6 +59,11 @@ export function App() {
   - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
   - `maxListIndentation`
 
+Code language support behavior:
+
+- `@lyfie/luthor` preloads a Prism language pack for common production languages, so language switching works without extra grammar installs in host apps.
+- The language dropdown only shows grammars that are actually loaded at runtime, which prevents stale token colors when switching languages.
+
 For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
 
 ## Mode behavior details
@@ -78,7 +84,7 @@ If source parsing fails, an inline source error panel is shown and visual conten
   - `plain`
 - Style tokens can be rehydrated from imported JSON.
 
-## Theme callback example (`highlight.js`)
+## Theme callback example (`Prism`)
 
 Use `onThemeChange` when host styling must follow editor theme state.
 
@@ -89,18 +95,18 @@ import { ExtensiveEditor } from '@lyfie/luthor';
 import { useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
-const HIGHLIGHT_THEME_LINK_ID = 'luthor-highlightjs-theme';
+const PRISM_THEME_LINK_ID = 'luthor-prism-theme';
 
-export function EditorWithHighlightTheme() {
+export function EditorWithPrismTheme() {
   const [editorTheme, setEditorTheme] = useState<Theme>('light');
 
   useEffect(() => {
-    const href = editorTheme === 'dark' ? '/highlightjs/github-dark.css' : '/highlightjs/github.css';
-    const existing = document.getElementById(HIGHLIGHT_THEME_LINK_ID);
+    const href = editorTheme === 'dark' ? '/prismjs/themes/prism-okaidia.css' : '/prismjs/themes/prism.css';
+    const existing = document.getElementById(PRISM_THEME_LINK_ID);
     const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
 
     if (!(existing instanceof HTMLLinkElement)) {
-      link.id = HIGHLIGHT_THEME_LINK_ID;
+      link.id = PRISM_THEME_LINK_ID;
       link.rel = 'stylesheet';
       document.head.appendChild(link);
     }
@@ -116,8 +122,8 @@ export function EditorWithHighlightTheme() {
 
 Place these files in your app static assets:
 
-- `/public/highlightjs/github.css`
-- `/public/highlightjs/github-dark.css`
+- `/public/prismjs/themes/prism.css`
+- `/public/prismjs/themes/prism-okaidia.css`
 
 ## Code view line numbers
 

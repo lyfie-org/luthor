@@ -12,8 +12,9 @@ describe("CodeIntelligenceExtension language options", () => {
 
     expect(options).toContain("plain");
     expect(options).toContain("typescript");
-    expect(options).toContain("bash");
+    expect(options).not.toContain("bash");
     expect(options).not.toContain("yaml");
+    expect(options).not.toContain("docker");
   });
 
   it("appends custom language options and normalizes aliases", () => {
@@ -77,6 +78,9 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(getLanguageDisplayLabel("txt")).toBe("Plain Text");
     expect(getLanguageDisplayLabel("plain")).toBe("Plain Text");
     expect(getLanguageDisplayLabel("bash")).toBe("Bash");
+    expect(getLanguageDisplayLabel("c#")).toBe("C#");
+    expect(getLanguageDisplayLabel("yml")).toBe("YAML");
+    expect(getLanguageDisplayLabel("dockerfile")).toBe("Docker");
   });
 
   it("uses plain fallback theme for plaintext-like languages", () => {
@@ -89,13 +93,13 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(extension.getThemeForLanguage?.(null)).toBe("plain");
   });
 
-  it("uses hljs theme for non-plaintext selected languages", () => {
+  it("uses prism theme for non-plaintext selected languages", () => {
     const extension = new CodeIntelligenceExtension() as CodeIntelligenceExtension & {
       getThemeForLanguage?: (language: string | null | undefined) => string | null;
     };
 
-    expect(extension.getThemeForLanguage?.("typescript")).toBe("hljs");
-    expect(extension.getThemeForLanguage?.("javascript")).toBe("hljs");
+    expect(extension.getThemeForLanguage?.("typescript")).toBe("prism");
+    expect(extension.getThemeForLanguage?.("javascript")).toBe("prism");
     expect(extension.getThemeForLanguage?.("tsx")).toBe("plain");
   });
 

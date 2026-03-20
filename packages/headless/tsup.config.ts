@@ -20,7 +20,6 @@ export default defineConfig({
     "@lexical/selection",
     "@lexical/table",
     "@lexical/utils",
-    "highlight.js",
   ],
   splitting: false,
   treeshake: true,

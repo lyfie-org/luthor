@@ -34,7 +34,7 @@ type PresetId =
   | "headless-editor";
 type Theme = "light" | "dark";
 
-const HIGHLIGHT_THEME_LINK_ID = "luthor-highlightjs-theme";
+const PRISM_THEME_LINK_ID = "luthor-prism-theme";
 
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "extensive", label: "Extensive Editor" },
@@ -47,21 +47,21 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "headless-editor", label: "Headless Editor" },
 ];
 
-function syncHighlightTheme(theme: Theme): void {
+function syncPrismTheme(theme: Theme): void {
   if (typeof window === "undefined") {
     return;
   }
 
   const href = theme === "dark"
-    ? "/highlightjs/github-dark.css"
-    : "/highlightjs/github.css";
-  const existing = document.getElementById(HIGHLIGHT_THEME_LINK_ID);
+    ? "/prismjs/themes/prism-okaidia.css"
+    : "/prismjs/themes/prism.css";
+  const existing = document.getElementById(PRISM_THEME_LINK_ID);
   const link = existing instanceof HTMLLinkElement
     ? existing
     : document.createElement("link");
 
   if (!(existing instanceof HTMLLinkElement)) {
-    link.id = HIGHLIGHT_THEME_LINK_ID;
+    link.id = PRISM_THEME_LINK_ID;
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }
@@ -93,7 +93,7 @@ function App() {
   }, [preset, theme]);
 
   useEffect(() => {
-    syncHighlightTheme(activeEditorTheme);
+    syncPrismTheme(activeEditorTheme);
   }, [activeEditorTheme]);
 
   const showToast = (message: string) => {
