@@ -364,7 +364,8 @@ const HTML_EDITOR_SOURCE = `<h1>HTML Editor</h1>
   <li>Code blocks and links</li>
 </ul>
 <blockquote>Great for HTML-first migration strategies.</blockquote>
-<pre><code class="language-html">&lt;section&gt;Production-safe content&lt;/section&gt;</code></pre>
+<pre><code class="language-html">var a = 10; 
+var b = 100;</code></pre>
 <hr />
 <p><a href="/docs/luthor/presets/html-editor/">Open HTML preset docs</a></p>`;
 
