@@ -43,6 +43,7 @@ describe("SlashEditor", () => {
     const featureFlags = props.featureFlags ?? {};
     expect(featureFlags.slashCommand).toBe(true);
     expect(featureFlags.draggableBlock).toBe(true);
+    expect(featureFlags.codeIntelligence).toBe(true);
     expect(featureFlags.commandPalette).toBe(false);
     expect(featureFlags.image).toBe(false);
     expect(featureFlags.iframeEmbed).toBe(false);
@@ -56,6 +57,21 @@ describe("SlashEditor", () => {
     };
     const featureFlags = props.featureFlags ?? {};
     expect(featureFlags.draggableBlock).toBe(false);
+  });
+
+  it("allows overriding code intelligence through featureFlags", () => {
+    render(
+      <SlashEditor
+        showDefaultContent={false}
+        featureFlags={{ codeIntelligence: false }}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      featureFlags?: Record<string, boolean>;
+    };
+    const featureFlags = props.featureFlags ?? {};
+    expect(featureFlags.codeIntelligence).toBe(false);
   });
 
   it("accepts explicit slash visibility overrides", () => {

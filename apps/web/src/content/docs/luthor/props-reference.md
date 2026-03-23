@@ -147,6 +147,16 @@ Use this page for exact prop names and discovery tokens.
 | Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |
 | List depth | `maxListIndentation` |
 
+## Preset-level code intelligence toggle
+
+- `ExtensiveEditor`, `ComposeEditor`, `SlashEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.
+- `SimpleEditor` supports scoped `featureFlags.codeIntelligence`.
+
+~~~tsx
+<SlashEditor featureFlags={{ codeIntelligence: false }} />
+<SimpleEditor featureFlags={{ codeIntelligence: true }} />
+~~~
+
 ## Full `ExtensiveEditorProps` index
 
 - `className`

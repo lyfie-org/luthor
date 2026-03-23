@@ -46,6 +46,21 @@ Use `LegacyRichEditor` when migrating older markdown/html workflows and you need
 - `sourceFormat="html"`: `visual-only`, `visual`, `json`, `html`.
 - `sourceFormat="both"`: `visual-only`, `visual`, `markdown`, `html`.
 
+## Preset props
+
+- `sourceFormat`: Chooses which source tabs are available (`markdown`, `html`, or `both`).
+- `initialMode`: Sets initial active mode.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<LegacyRichEditor
+  sourceFormat="both"
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { LegacyRichEditor } from '@lyfie/luthor';

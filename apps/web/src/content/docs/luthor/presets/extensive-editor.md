@@ -49,6 +49,20 @@ Use `ExtensiveEditor` when you want full formatting, media, code, and command wo
 - Default modes: `visual-editor`, `visual-only`, `json`, `markdown`, `html`.
 - Default initial mode: `visual-editor`.
 
+## Preset props
+
+- `featureFlags`: Toggle individual preset capabilities. Use `featureFlags.codeIntelligence` to turn code intelligence on/off.
+- `availableModes`: Restrict visible mode tabs and allowed mode switching targets.
+- `maxListIndentation`: Caps nested list depth in visual editing.
+
+## Code intelligence toggle
+
+~~~tsx
+<ExtensiveEditor
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { ExtensiveEditor } from '@lyfie/luthor';

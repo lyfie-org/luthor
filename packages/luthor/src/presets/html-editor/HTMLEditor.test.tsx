@@ -46,6 +46,7 @@ describe("HTMLEditor", () => {
         italic: true,
         strikethrough: true,
         code: true,
+        codeIntelligence: true,
         codeFormat: true,
         blockFormat: true,
         list: true,
@@ -118,5 +119,19 @@ describe("HTMLEditor", () => {
       showLineNumbers?: boolean;
     };
     expect(props.showLineNumbers).toBe(false);
+  });
+
+  it("allows overriding code intelligence through featureFlags", () => {
+    render(
+      <HTMLEditor
+        showDefaultContent={false}
+        featureFlags={{ codeIntelligence: false }}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      featureFlags?: Record<string, boolean>;
+    };
+    expect(props.featureFlags?.codeIntelligence).toBe(false);
   });
 });

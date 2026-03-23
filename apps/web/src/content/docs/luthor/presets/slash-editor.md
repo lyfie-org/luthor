@@ -46,6 +46,20 @@ Use `SlashEditor` when command discovery should be slash-driven and toolbar usag
 - Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.
 - Toolbar is off by default.
 
+## Preset props
+
+- `slashVisibility`: Controls slash command allow/deny lists.
+- `isDraggableEnabled`: Enables or disables draggable block handles.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<SlashEditor
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { SlashEditor } from '@lyfie/luthor';

@@ -2393,7 +2393,7 @@ a {
   box-shadow: var(--shadow-sm);
   padding: 0.8rem 0.85rem;
   position: sticky;
-  top: calc(var(--space-6) + 0.5rem);
+  top: calc(var(--space-6) + 2rem);
   animation: section-in 320ms ease-out both;
 }
 

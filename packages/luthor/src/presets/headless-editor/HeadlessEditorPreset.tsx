@@ -113,7 +113,7 @@ export const HEADLESS_EDITOR_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   image: false,
   blockFormat: true,
   code: true,
-  codeIntelligence: false,
+  codeIntelligence: true,
   codeFormat: true,
   tabIndent: true,
   enterKeyBehavior: true,
@@ -432,9 +432,19 @@ function HeadlessEditorContent({
     if (typedActiveStates.bold) commands.toggleBold?.();
     if (typedActiveStates.italic) commands.toggleItalic?.();
     if (typedActiveStates.strikethrough) commands.toggleStrikethrough?.();
-    if (typedActiveStates.code) commands.formatText?.("code");
+    if (!typedActiveStates.isInCodeBlock && typedActiveStates.code) {
+      commands.formatText?.("code");
+    }
     commands.removeLink?.();
-  }, [commands, mode, typedActiveStates.bold, typedActiveStates.code, typedActiveStates.italic, typedActiveStates.strikethrough]);
+  }, [
+    commands,
+    mode,
+    typedActiveStates.bold,
+    typedActiveStates.code,
+    typedActiveStates.isInCodeBlock,
+    typedActiveStates.italic,
+    typedActiveStates.strikethrough,
+  ]);
 
   const clearNodes = useCallback(() => {
     if (mode !== "visual") {
@@ -506,8 +516,13 @@ function HeadlessEditorContent({
         <button
           type="button"
           className={`luthor-preset-headless-editor__button${typedActiveStates.code ? " is-active" : ""}`}
-          onClick={() => commands.formatText?.("code")}
-          disabled={!isEditableVisualMode}
+          onClick={() => {
+            if (typedActiveStates.isInCodeBlock) {
+              return;
+            }
+            commands.formatText?.("code");
+          }}
+          disabled={!isEditableVisualMode || typedActiveStates.isInCodeBlock}
         >
           Code
         </button>

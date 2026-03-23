@@ -16,6 +16,7 @@ import {
   ExtensiveEditor,
   type ExtensiveEditorProps,
   type ExtensiveEditorRef,
+  type FeatureFlagOverrides,
 } from "../extensive";
 import type { ShortcutBindingOverride, ShortcutConfig } from "../../core";
 
@@ -106,6 +107,11 @@ export type SimpleEditorProps = {
   sendButtonAriaLabel?: string;
   sendButtonClassName?: string;
   scrollAreaClassName?: string;
+  /**
+   * Scoped feature flag overrides for SimpleEditor.
+   * Currently supports only `codeIntelligence`.
+   */
+  featureFlags?: Pick<FeatureFlagOverrides, "codeIntelligence">;
 };
 
 function toCssSize(value: SizeValue): string {
@@ -241,6 +247,7 @@ export function SimpleEditor({
   sendButtonAriaLabel = "Send message",
   sendButtonClassName,
   scrollAreaClassName,
+  featureFlags,
 }: SimpleEditorProps) {
   const editorRef = useRef<ExtensiveEditorRef | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -482,7 +489,7 @@ export function SimpleEditor({
               image: false,
               blockFormat: false,
               code: false,
-              codeIntelligence: false,
+              codeIntelligence: featureFlags?.codeIntelligence ?? false,
               codeFormat: false,
               iframeEmbed: false,
               youTubeEmbed: false,

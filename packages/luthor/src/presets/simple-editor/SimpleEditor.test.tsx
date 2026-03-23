@@ -51,6 +51,7 @@ describe("SimpleEditor", () => {
         italic: true,
         strikethrough: true,
         code: false,
+        codeIntelligence: false,
         codeFormat: false,
         underline: false,
         list: false,
@@ -98,6 +99,23 @@ describe("SimpleEditor", () => {
         }),
       }),
     );
+  });
+
+  it("allows toggling code intelligence through scoped featureFlags prop", () => {
+    render(
+      <SimpleEditor
+        showDefaultContent={false}
+        featureFlags={{ codeIntelligence: true }}
+      />,
+    );
+
+    const lastProps = extensivePropsSpy.mock.calls.at(-1)?.[0] as {
+      featureFlags?: Record<string, boolean>;
+    };
+
+    expect(lastProps.featureFlags?.codeIntelligence).toBe(true);
+    expect(lastProps.featureFlags?.code).toBe(false);
+    expect(lastProps.featureFlags?.codeFormat).toBe(false);
   });
 
   it("does not submit on Enter by default", () => {

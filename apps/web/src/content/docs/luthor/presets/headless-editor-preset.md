@@ -10,8 +10,8 @@ keywords:
   - "source mode"
 props:
   - "initialMode"
+  - "defaultEditorView"
   - "featureFlags"
-  - "sourceMetadataMode"
 exports:
   - "HeadlessEditorPreset"
   - "headlessEditorPreset"
@@ -44,6 +44,20 @@ Use `HeadlessEditorPreset` when you want a compact preset that still exposes JSO
 ## Mode profile
 
 - Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.
+
+## Preset props
+
+- `initialMode`: Sets the first active mode when no `defaultEditorView` is provided.
+- `defaultEditorView`: Alias for initial mode selection; useful when binding mode via config objects.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<HeadlessEditorPreset
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
 
 ~~~tsx
 import '@lyfie/luthor/styles.css';

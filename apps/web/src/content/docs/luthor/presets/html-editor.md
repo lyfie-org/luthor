@@ -11,6 +11,7 @@ keywords:
 props:
   - "initialMode"
   - "defaultEditorView"
+  - "featureFlags"
 exports:
   - "HTMLEditor"
   - "htmlEditorPreset"
@@ -42,6 +43,21 @@ Use `HTMLEditor` when HTML output is a first-class editing artifact.
 ## Mode profile
 
 - Modes: `visual-only`, `visual`, `json`, `html`.
+
+## Preset props
+
+- `initialMode`: Sets initial active mode.
+- `defaultEditorView`: Alias for initial mode selection.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<HTMLEditor
+  initialMode="html"
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
 
 ~~~tsx
 import '@lyfie/luthor/styles.css';

@@ -45,6 +45,21 @@ Use `MarkDownEditor` when markdown text is your primary source-of-truth.
 - Modes: `visual-only`, `visual`, `json`, `markdown`.
 - Sets `markdownBridgeFlavor="github"` and `markdownSourceOfTruth`.
 
+## Preset props
+
+- `initialMode`: Sets initial active mode.
+- `defaultEditorView`: Alias for initial mode selection.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<MarkDownEditor
+  initialMode="markdown"
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { MarkDownEditor } from '@lyfie/luthor';

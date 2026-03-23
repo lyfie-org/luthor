@@ -51,6 +51,7 @@ describe("LegacyRichEditor", () => {
       expect.objectContaining({
         table: true,
         image: true,
+        codeIntelligence: true,
         tabIndent: true,
         themeToggle: true,
       }),
@@ -70,6 +71,7 @@ describe("LegacyRichEditor", () => {
           draggableBlock: true,
           tabIndent: false,
           themeToggle: false,
+          codeIntelligence: false,
         }}
       />,
     );
@@ -90,6 +92,7 @@ describe("LegacyRichEditor", () => {
         draggableBlock: false,
         tabIndent: true,
         themeToggle: false,
+        codeIntelligence: false,
       }),
     );
     expect(props.sourceMetadataMode).toBe("none");

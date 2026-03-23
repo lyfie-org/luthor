@@ -14,6 +14,7 @@ props:
   - "allowShiftEnter"
   - "onSend"
   - "outputFormat"
+  - "featureFlags"
 exports:
   - "SimpleEditor"
   - "simpleEditorPreset"
@@ -45,6 +46,22 @@ Use `SimpleEditor` when you need compact input, send actions, and controlled out
 ## Mode profile
 
 - Modes: `visual-only`, `visual`.
+
+## Preset props
+
+- `submitOnEnter`: Sends content on Enter key.
+- `allowShiftEnter`: Keeps Shift+Enter as line break when `submitOnEnter` is enabled.
+- `onSend`: Callback that receives markdown/json payload based on `outputFormat`.
+- `outputFormat`: Chooses `md` or `json` as `payload.text`.
+- `featureFlags`: Scoped overrides for SimpleEditor; currently supports `featureFlags.codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<SimpleEditor
+  featureFlags={{ codeIntelligence: true }}
+/>
+~~~
 
 ~~~tsx
 import '@lyfie/luthor/styles.css';

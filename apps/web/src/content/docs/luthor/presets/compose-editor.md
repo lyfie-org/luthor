@@ -43,6 +43,20 @@ Use `ComposeEditor` for comments, replies, short updates, and other compact comp
 
 - Modes: `visual-only`, `visual`, `json`.
 
+## Preset props
+
+- `compactToolbar`: Reduces toolbar footprint for dense composer layouts.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<ComposeEditor
+  compactToolbar
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { ComposeEditor } from '@lyfie/luthor';

@@ -182,6 +182,7 @@ describe("HeadlessEditorPreset", () => {
         italic: true,
         strikethrough: true,
         code: true,
+        codeIntelligence: true,
         codeFormat: true,
         list: true,
         blockFormat: true,
@@ -219,6 +220,7 @@ describe("HeadlessEditorPreset", () => {
           table: true,
           commandPalette: true,
           bold: false,
+          codeIntelligence: false,
         }}
       />,
     );
@@ -232,6 +234,7 @@ describe("HeadlessEditorPreset", () => {
     expect(extensionConfig.featureFlags?.themeToggle).toBe(false);
     expect(extensionConfig.featureFlags?.table).toBe(false);
     expect(extensionConfig.featureFlags?.commandPalette).toBe(false);
+    expect(extensionConfig.featureFlags?.codeIntelligence).toBe(false);
   });
 
   it("passes line number visibility to extension factory and source views", () => {
@@ -390,7 +393,7 @@ describe("HeadlessEditorPreset", () => {
     expect(mockEditorApi.commands.toggleBold).toHaveBeenCalled();
     expect(mockEditorApi.commands.toggleItalic).toHaveBeenCalled();
     expect(mockEditorApi.commands.toggleStrikethrough).toHaveBeenCalled();
-    expect(mockEditorApi.commands.formatText).toHaveBeenCalledWith("code");
+    expect(mockEditorApi.commands.formatText).not.toHaveBeenCalled();
     expect(mockEditorApi.commands.removeLink).toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "Clear nodes" }));
@@ -407,6 +410,22 @@ describe("HeadlessEditorPreset", () => {
     fireEvent.click(screen.getByRole("button", { name: "Redo" }));
     expect(mockEditorApi.commands.undo).toHaveBeenCalled();
     expect(mockEditorApi.commands.redo).toHaveBeenCalled();
+  });
+
+  it("disables inline code controls while the selection is inside a code block", () => {
+    mockEditorApi.activeStates = {
+      ...mockEditorApi.activeStates,
+      isInCodeBlock: true,
+      code: true,
+    };
+
+    render(<HeadlessEditorPreset showDefaultContent={false} />);
+
+    const codeButton = screen.getByRole("button", { name: "Code" });
+    expect(codeButton).toBeDisabled();
+
+    fireEvent.click(codeButton);
+    expect(mockEditorApi.commands.formatText).not.toHaveBeenCalled();
   });
 
   it("calls onReady only once even if editor api references change across rerenders", () => {
