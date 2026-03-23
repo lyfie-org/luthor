@@ -5572,8 +5572,8 @@ export const docsIndex = [
     "title": "Compose Editor",
     "navTitle": "Compose Editor",
     "description": "Compact preset profile for message composition and lightweight authoring flows.",
-    "content": "\r\n# Compose Editor\r\n\r\nThis preset keeps authoring focused and lightweight.\r\n\r\n## When to use this\r\n\r\nUse `ComposeEditor` for comments, replies, short updates, and other compact composer flows.\r\n\r\n## Mode profile\r\n\r\n- Modes: `visual-only`, `visual`, `json`.\r\n\r\n~~~tsx\r\nimport '@lyfie/luthor/styles.css';\r\nimport { ComposeEditor } from '@lyfie/luthor';\r\n\r\nexport function App() {\r\n  return <ComposeEditor compactToolbar placeholder=\"Write a reply...\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Compose Editor This preset keeps authoring focused and lightweight. When to use this Use ComposeEditor for comments, replies, short updates, and other compact composer flows. Mode profile - Modes: visual-only , visual , json . tsx import '@lyfie/luthor/styles.css'; import { ComposeEditor } from '@lyfie/luthor'; export function App() { return ; }",
+    "content": "\r\n# Compose Editor\r\n\r\nThis preset keeps authoring focused and lightweight.\r\n\r\n## When to use this\r\n\r\nUse `ComposeEditor` for comments, replies, short updates, and other compact composer flows.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`, `json`.\n\n## Preset props\n\n- `compactToolbar`: Reduces toolbar footprint for dense composer layouts.\n- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<ComposeEditor\n  compactToolbar\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { ComposeEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <ComposeEditor compactToolbar placeholder=\"Write a reply...\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
+    "plainContent": "Compose Editor This preset keeps authoring focused and lightweight. When to use this Use ComposeEditor for comments, replies, short updates, and other compact composer flows. Mode profile - Modes: visual-only , visual , json . Preset props - compactToolbar : Reduces toolbar footprint for dense composer layouts. - featureFlags : Optional per-feature overrides. Includes codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { ComposeEditor } from '@lyfie/luthor'; export function App() { return ; }",
     "sections": [
       {
         "heading": "Overview",
@@ -5591,7 +5591,19 @@ export const docsIndex = [
         "heading": "Mode profile",
         "id": "mode-profile",
         "level": 2,
-        "text": "- Modes: visual-only , visual , json . tsx import '@lyfie/luthor/styles.css'; import { ComposeEditor } from '@lyfie/luthor'; export function App() { return ; }"
+        "text": "- Modes: visual-only , visual , json ."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- compactToolbar : Reduces toolbar footprint for dense composer layouts. - featureFlags : Optional per-feature overrides. Includes codeIntelligence ."
+      },
+      {
+        "heading": "Code intelligence toggle",
+        "id": "code-intelligence-toggle",
+        "level": 2,
+        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { ComposeEditor } from '@lyfie/luthor'; export function App() { return ; }"
       }
     ],
     "headings": [
@@ -5604,11 +5616,21 @@ export const docsIndex = [
         "level": 2,
         "text": "Mode profile",
         "id": "mode-profile"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Code intelligence toggle",
+        "id": "code-intelligence-toggle"
       }
     ],
     "urlPath": "/docs/luthor/presets/compose-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/compose-editor.md",
-    "updatedAt": "2026-03-20T17:40:45.131Z",
+    "updatedAt": "2026-03-23T06:33:09.423Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -5727,8 +5749,8 @@ export const docsIndex = [
     "title": "Extensive Editor",
     "navTitle": "Extensive Editor",
     "description": "Full preset profile with all core features enabled and broad mode support.",
-    "content": "\r\n# Extensive Editor\r\n\r\nThis preset is the broadest out-of-box profile.\r\n\r\n## When to use this\r\n\r\nUse `ExtensiveEditor` when you want full formatting, media, code, and command workflows in one preset.\r\n\r\n## Mode profile\r\n\r\n- Default modes: `visual-editor`, `visual-only`, `json`, `markdown`, `html`.\r\n- Default initial mode: `visual-editor`.\r\n\r\n~~~tsx\r\nimport '@lyfie/luthor/styles.css';\r\nimport { ExtensiveEditor } from '@lyfie/luthor';\r\n\r\nexport function App() {\r\n  return <ExtensiveEditor placeholder=\"Write anything...\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Extensive Editor This preset is the broadest out-of-box profile. When to use this Use ExtensiveEditor when you want full formatting, media, code, and command workflows in one preset. Mode profile - Default modes: visual-editor , visual-only , json , markdown , html . - Default initial mode: visual-editor . tsx import '@lyfie/luthor/styles.css'; import { ExtensiveEditor } from '@lyfie/luthor'; export function App() { return ; }",
+    "content": "\r\n# Extensive Editor\r\n\r\nThis preset is the broadest out-of-box profile.\r\n\r\n## When to use this\r\n\r\nUse `ExtensiveEditor` when you want full formatting, media, code, and command workflows in one preset.\r\n\r\n## Mode profile\n\n- Default modes: `visual-editor`, `visual-only`, `json`, `markdown`, `html`.\n- Default initial mode: `visual-editor`.\n\n## Preset props\n\n- `featureFlags`: Toggle individual preset capabilities. Use `featureFlags.codeIntelligence` to turn code intelligence on/off.\n- `availableModes`: Restrict visible mode tabs and allowed mode switching targets.\n- `maxListIndentation`: Caps nested list depth in visual editing.\n\n## Code intelligence toggle\n\n~~~tsx\n<ExtensiveEditor\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { ExtensiveEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <ExtensiveEditor placeholder=\"Write anything...\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
+    "plainContent": "Extensive Editor This preset is the broadest out-of-box profile. When to use this Use ExtensiveEditor when you want full formatting, media, code, and command workflows in one preset. Mode profile - Default modes: visual-editor , visual-only , json , markdown , html . - Default initial mode: visual-editor . Preset props - featureFlags : Toggle individual preset capabilities. Use featureFlags.codeIntelligence to turn code intelligence on/off. - availableModes : Restrict visible mode tabs and allowed mode switching targets. - maxListIndentation : Caps nested list depth in visual editing. Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { ExtensiveEditor } from '@lyfie/luthor'; export function App() { return ; }",
     "sections": [
       {
         "heading": "Overview",
@@ -5746,7 +5768,19 @@ export const docsIndex = [
         "heading": "Mode profile",
         "id": "mode-profile",
         "level": 2,
-        "text": "- Default modes: visual-editor , visual-only , json , markdown , html . - Default initial mode: visual-editor . tsx import '@lyfie/luthor/styles.css'; import { ExtensiveEditor } from '@lyfie/luthor'; export function App() { return ; }"
+        "text": "- Default modes: visual-editor , visual-only , json , markdown , html . - Default initial mode: visual-editor ."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- featureFlags : Toggle individual preset capabilities. Use featureFlags.codeIntelligence to turn code intelligence on/off. - availableModes : Restrict visible mode tabs and allowed mode switching targets. - maxListIndentation : Caps nested list depth in visual editing."
+      },
+      {
+        "heading": "Code intelligence toggle",
+        "id": "code-intelligence-toggle",
+        "level": 2,
+        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { ExtensiveEditor } from '@lyfie/luthor'; export function App() { return ; }"
       }
     ],
     "headings": [
@@ -5759,11 +5793,21 @@ export const docsIndex = [
         "level": 2,
         "text": "Mode profile",
         "id": "mode-profile"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Code intelligence toggle",
+        "id": "code-intelligence-toggle"
       }
     ],
     "urlPath": "/docs/luthor/presets/extensive-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/extensive-editor.md",
-    "updatedAt": "2026-03-20T17:40:45.139Z",
+    "updatedAt": "2026-03-23T06:32:28.369Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -5904,8 +5948,8 @@ export const docsIndex = [
     "title": "Headless Editor Preset",
     "navTitle": "Headless Editor Preset",
     "description": "Preset wrapper that demonstrates source mode handling and controlled bridge behavior on top of extensive extensions.",
-    "content": "\r\n# Headless Editor Preset\r\n\r\nThis preset offers a constrained profile for source-mode-centric use cases.\r\n\r\n## When to use this\r\n\r\nUse `HeadlessEditorPreset` when you want a compact preset that still exposes JSON/Markdown/HTML mode transitions.\r\n\r\n## Mode profile\r\n\r\n- Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.\r\n\r\n~~~tsx\r\nimport '@lyfie/luthor/styles.css';\r\nimport { HeadlessEditorPreset } from '@lyfie/luthor';\r\n\r\nexport function App() {\r\n  return <HeadlessEditorPreset initialMode=\"visual\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Headless Editor Preset This preset offers a constrained profile for source-mode-centric use cases. When to use this Use HeadlessEditorPreset when you want a compact preset that still exposes JSON/Markdown/HTML mode transitions. Mode profile - Modes: visual-only , visual , json , markdown , html . tsx import '@lyfie/luthor/styles.css'; import { HeadlessEditorPreset } from '@lyfie/luthor'; export function App() { return ; }",
+    "content": "\r\n# Headless Editor Preset\r\n\r\nThis preset offers a constrained profile for source-mode-centric use cases.\r\n\r\n## When to use this\r\n\r\nUse `HeadlessEditorPreset` when you want a compact preset that still exposes JSON/Markdown/HTML mode transitions.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.\n\n## Preset props\n\n- `initialMode`: Sets the first active mode when no `defaultEditorView` is provided.\n- `defaultEditorView`: Alias for initial mode selection; useful when binding mode via config objects.\n- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<HeadlessEditorPreset\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { HeadlessEditorPreset } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <HeadlessEditorPreset initialMode=\"visual\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
+    "plainContent": "Headless Editor Preset This preset offers a constrained profile for source-mode-centric use cases. When to use this Use HeadlessEditorPreset when you want a compact preset that still exposes JSON/Markdown/HTML mode transitions. Mode profile - Modes: visual-only , visual , json , markdown , html . Preset props - initialMode : Sets the first active mode when no defaultEditorView is provided. - defaultEditorView : Alias for initial mode selection; useful when binding mode via config objects. - featureFlags : Optional per-feature overrides. Includes codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { HeadlessEditorPreset } from '@lyfie/luthor'; export function App() { return ; }",
     "sections": [
       {
         "heading": "Overview",
@@ -5923,7 +5967,19 @@ export const docsIndex = [
         "heading": "Mode profile",
         "id": "mode-profile",
         "level": 2,
-        "text": "- Modes: visual-only , visual , json , markdown , html . tsx import '@lyfie/luthor/styles.css'; import { HeadlessEditorPreset } from '@lyfie/luthor'; export function App() { return ; }"
+        "text": "- Modes: visual-only , visual , json , markdown , html ."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- initialMode : Sets the first active mode when no defaultEditorView is provided. - defaultEditorView : Alias for initial mode selection; useful when binding mode via config objects. - featureFlags : Optional per-feature overrides. Includes codeIntelligence ."
+      },
+      {
+        "heading": "Code intelligence toggle",
+        "id": "code-intelligence-toggle",
+        "level": 2,
+        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { HeadlessEditorPreset } from '@lyfie/luthor'; export function App() { return ; }"
       }
     ],
     "headings": [
@@ -5936,11 +5992,21 @@ export const docsIndex = [
         "level": 2,
         "text": "Mode profile",
         "id": "mode-profile"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Code intelligence toggle",
+        "id": "code-intelligence-toggle"
       }
     ],
     "urlPath": "/docs/luthor/presets/headless-editor-preset/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/headless-editor-preset.md",
-    "updatedAt": "2026-03-20T17:40:45.147Z",
+    "updatedAt": "2026-03-23T06:32:41.690Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -5951,8 +6017,8 @@ export const docsIndex = [
     ],
     "props": [
       "initialMode",
-      "featureFlags",
-      "sourceMetadataMode"
+      "defaultEditorView",
+      "featureFlags"
     ],
     "exports": [
       "HeadlessEditorPreset",
@@ -5987,6 +6053,7 @@ export const docsIndex = [
       "code",
       "codeblock",
       "controlled",
+      "defaulteditorview",
       "demonstrates",
       "edit",
       "edit.redo",
@@ -6012,7 +6079,6 @@ export const docsIndex = [
       "redo",
       "source",
       "source mode",
-      "sourcemetadatamode",
       "that",
       "top",
       "undo",
@@ -6020,6 +6086,7 @@ export const docsIndex = [
     ],
     "searchTokenBuckets": {
       "keywords": [
+        "defaulteditorview",
         "editor",
         "featureflags",
         "headless",
@@ -6029,13 +6096,12 @@ export const docsIndex = [
         "mode",
         "preset",
         "source",
-        "source mode",
-        "sourcemetadatamode"
+        "source mode"
       ],
       "props": [
+        "defaulteditorview",
         "featureflags",
-        "initialmode",
-        "sourcemetadatamode"
+        "initialmode"
       ],
       "exports": [
         "headlesseditorpreset"
@@ -6070,8 +6136,8 @@ export const docsIndex = [
     "title": "HTML Editor",
     "navTitle": "HTML Editor",
     "description": "HTML-focused preset profile built on LegacyRichEditor for source-first HTML editing.",
-    "content": "\r\n# HTML Editor\r\n\r\nThis preset is optimized for HTML source editing flows.\r\n\r\n## When to use this\r\n\r\nUse `HTMLEditor` when HTML output is a first-class editing artifact.\r\n\r\n## Mode profile\r\n\r\n- Modes: `visual-only`, `visual`, `json`, `html`.\r\n\r\n~~~tsx\r\nimport '@lyfie/luthor/styles.css';\r\nimport { HTMLEditor } from '@lyfie/luthor';\r\n\r\nexport function App() {\r\n  return <HTMLEditor initialMode=\"html\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "HTML Editor This preset is optimized for HTML source editing flows. When to use this Use HTMLEditor when HTML output is a first-class editing artifact. Mode profile - Modes: visual-only , visual , json , html . tsx import '@lyfie/luthor/styles.css'; import { HTMLEditor } from '@lyfie/luthor'; export function App() { return ; }",
+    "content": "\r\n# HTML Editor\r\n\r\nThis preset is optimized for HTML source editing flows.\r\n\r\n## When to use this\r\n\r\nUse `HTMLEditor` when HTML output is a first-class editing artifact.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`, `json`, `html`.\n\n## Preset props\n\n- `initialMode`: Sets initial active mode.\n- `defaultEditorView`: Alias for initial mode selection.\n- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<HTMLEditor\n  initialMode=\"html\"\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { HTMLEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <HTMLEditor initialMode=\"html\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
+    "plainContent": "HTML Editor This preset is optimized for HTML source editing flows. When to use this Use HTMLEditor when HTML output is a first-class editing artifact. Mode profile - Modes: visual-only , visual , json , html . Preset props - initialMode : Sets initial active mode. - defaultEditorView : Alias for initial mode selection. - featureFlags : Optional per-feature overrides. Includes codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { HTMLEditor } from '@lyfie/luthor'; export function App() { return ; }",
     "sections": [
       {
         "heading": "Overview",
@@ -6089,7 +6155,19 @@ export const docsIndex = [
         "heading": "Mode profile",
         "id": "mode-profile",
         "level": 2,
-        "text": "- Modes: visual-only , visual , json , html . tsx import '@lyfie/luthor/styles.css'; import { HTMLEditor } from '@lyfie/luthor'; export function App() { return ; }"
+        "text": "- Modes: visual-only , visual , json , html ."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- initialMode : Sets initial active mode. - defaultEditorView : Alias for initial mode selection. - featureFlags : Optional per-feature overrides. Includes codeIntelligence ."
+      },
+      {
+        "heading": "Code intelligence toggle",
+        "id": "code-intelligence-toggle",
+        "level": 2,
+        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { HTMLEditor } from '@lyfie/luthor'; export function App() { return ; }"
       }
     ],
     "headings": [
@@ -6102,11 +6180,21 @@ export const docsIndex = [
         "level": 2,
         "text": "Mode profile",
         "id": "mode-profile"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Code intelligence toggle",
+        "id": "code-intelligence-toggle"
       }
     ],
     "urlPath": "/docs/luthor/presets/html-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/html-editor.md",
-    "updatedAt": "2026-03-20T17:40:45.156Z",
+    "updatedAt": "2026-03-23T06:32:55.520Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -6117,7 +6205,8 @@ export const docsIndex = [
     ],
     "props": [
       "initialMode",
-      "defaultEditorView"
+      "defaultEditorView",
+      "featureFlags"
     ],
     "exports": [
       "HTMLEditor",
@@ -6150,6 +6239,7 @@ export const docsIndex = [
       "defaulteditorview",
       "editing",
       "editor",
+      "featureflags",
       "first",
       "focused",
       "for",
@@ -6180,6 +6270,7 @@ export const docsIndex = [
       "keywords": [
         "defaulteditorview",
         "editor",
+        "featureflags",
         "html",
         "html source mode",
         "html-editor",
@@ -6190,6 +6281,7 @@ export const docsIndex = [
       ],
       "props": [
         "defaulteditorview",
+        "featureflags",
         "initialmode"
       ],
       "exports": [
@@ -6225,8 +6317,8 @@ export const docsIndex = [
     "title": "Legacy Rich Editor",
     "navTitle": "Legacy Rich Editor",
     "description": "Legacy-compatible rich editor profile with metadata-free bridge mode and constrained defaults.",
-    "content": "\r\n# Legacy Rich Editor\r\n\r\nThis preset preserves legacy compatibility with stricter source behavior.\r\n\r\n## When to use this\r\n\r\nUse `LegacyRichEditor` when migrating older markdown/html workflows and you need metadata-free bridge mode.\r\n\r\n## Mode profile\r\n\r\n- `sourceFormat=\"markdown\"`: `visual-only`, `visual`, `json`, `markdown`.\r\n- `sourceFormat=\"html\"`: `visual-only`, `visual`, `json`, `html`.\r\n- `sourceFormat=\"both\"`: `visual-only`, `visual`, `markdown`, `html`.\r\n\r\n~~~tsx\r\nimport '@lyfie/luthor/styles.css';\r\nimport { LegacyRichEditor } from '@lyfie/luthor';\r\n\r\nexport function App() {\r\n  return <LegacyRichEditor sourceFormat=\"both\" initialMode=\"visual\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Legacy Rich Editor This preset preserves legacy compatibility with stricter source behavior. When to use this Use LegacyRichEditor when migrating older markdown/html workflows and you need metadata-free bridge mode. Mode profile - sourceFormat=\"markdown\" : visual-only , visual , json , markdown . - sourceFormat=\"html\" : visual-only , visual , json , html . - sourceFormat=\"both\" : visual-only , visual , markdown , html . tsx import '@lyfie/luthor/styles.css'; import { LegacyRichEditor } from '@lyfie/luthor'; export function App() { return ; }",
+    "content": "\r\n# Legacy Rich Editor\r\n\r\nThis preset preserves legacy compatibility with stricter source behavior.\r\n\r\n## When to use this\r\n\r\nUse `LegacyRichEditor` when migrating older markdown/html workflows and you need metadata-free bridge mode.\r\n\r\n## Mode profile\n\n- `sourceFormat=\"markdown\"`: `visual-only`, `visual`, `json`, `markdown`.\n- `sourceFormat=\"html\"`: `visual-only`, `visual`, `json`, `html`.\n- `sourceFormat=\"both\"`: `visual-only`, `visual`, `markdown`, `html`.\n\n## Preset props\n\n- `sourceFormat`: Chooses which source tabs are available (`markdown`, `html`, or `both`).\n- `initialMode`: Sets initial active mode.\n- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<LegacyRichEditor\n  sourceFormat=\"both\"\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { LegacyRichEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <LegacyRichEditor sourceFormat=\"both\" initialMode=\"visual\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
+    "plainContent": "Legacy Rich Editor This preset preserves legacy compatibility with stricter source behavior. When to use this Use LegacyRichEditor when migrating older markdown/html workflows and you need metadata-free bridge mode. Mode profile - sourceFormat=\"markdown\" : visual-only , visual , json , markdown . - sourceFormat=\"html\" : visual-only , visual , json , html . - sourceFormat=\"both\" : visual-only , visual , markdown , html . Preset props - sourceFormat : Chooses which source tabs are available ( markdown , html , or both ). - initialMode : Sets initial active mode. - featureFlags : Optional per-feature overrides. Includes codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { LegacyRichEditor } from '@lyfie/luthor'; export function App() { return ; }",
     "sections": [
       {
         "heading": "Overview",
@@ -6244,7 +6336,19 @@ export const docsIndex = [
         "heading": "Mode profile",
         "id": "mode-profile",
         "level": 2,
-        "text": "- sourceFormat=\"markdown\" : visual-only , visual , json , markdown . - sourceFormat=\"html\" : visual-only , visual , json , html . - sourceFormat=\"both\" : visual-only , visual , markdown , html . tsx import '@lyfie/luthor/styles.css'; import { LegacyRichEditor } from '@lyfie/luthor'; export function App() { return ; }"
+        "text": "- sourceFormat=\"markdown\" : visual-only , visual , json , markdown . - sourceFormat=\"html\" : visual-only , visual , json , html . - sourceFormat=\"both\" : visual-only , visual , markdown , html ."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- sourceFormat : Chooses which source tabs are available ( markdown , html , or both ). - initialMode : Sets initial active mode. - featureFlags : Optional per-feature overrides. Includes codeIntelligence ."
+      },
+      {
+        "heading": "Code intelligence toggle",
+        "id": "code-intelligence-toggle",
+        "level": 2,
+        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { LegacyRichEditor } from '@lyfie/luthor'; export function App() { return ; }"
       }
     ],
     "headings": [
@@ -6257,11 +6361,21 @@ export const docsIndex = [
         "level": 2,
         "text": "Mode profile",
         "id": "mode-profile"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Code intelligence toggle",
+        "id": "code-intelligence-toggle"
       }
     ],
     "urlPath": "/docs/luthor/presets/legacy-rich-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/legacy-rich-editor.md",
-    "updatedAt": "2026-03-20T17:40:45.164Z",
+    "updatedAt": "2026-03-23T06:32:48.837Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -6387,8 +6501,8 @@ export const docsIndex = [
     "title": "Markdown Editor",
     "navTitle": "Markdown Editor",
     "description": "Markdown-focused preset profile built on LegacyRichEditor with markdown source of truth behavior.",
-    "content": "\r\n# Markdown Editor\r\n\r\nThis preset is optimized for markdown-driven editing.\r\n\r\n## When to use this\r\n\r\nUse `MarkDownEditor` when markdown text is your primary source-of-truth.\r\n\r\n## Mode profile\r\n\r\n- Modes: `visual-only`, `visual`, `json`, `markdown`.\r\n- Sets `markdownBridgeFlavor=\"github\"` and `markdownSourceOfTruth`.\r\n\r\n~~~tsx\r\nimport '@lyfie/luthor/styles.css';\r\nimport { MarkDownEditor } from '@lyfie/luthor';\r\n\r\nexport function App() {\r\n  return <MarkDownEditor initialMode=\"markdown\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Markdown Editor This preset is optimized for markdown-driven editing. When to use this Use MarkDownEditor when markdown text is your primary source-of-truth. Mode profile - Modes: visual-only , visual , json , markdown . - Sets markdownBridgeFlavor=\"github\" and markdownSourceOfTruth . tsx import '@lyfie/luthor/styles.css'; import { MarkDownEditor } from '@lyfie/luthor'; export function App() { return ; }",
+    "content": "\r\n# Markdown Editor\r\n\r\nThis preset is optimized for markdown-driven editing.\r\n\r\n## When to use this\r\n\r\nUse `MarkDownEditor` when markdown text is your primary source-of-truth.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`, `json`, `markdown`.\n- Sets `markdownBridgeFlavor=\"github\"` and `markdownSourceOfTruth`.\n\n## Preset props\n\n- `initialMode`: Sets initial active mode.\n- `defaultEditorView`: Alias for initial mode selection.\n- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<MarkDownEditor\n  initialMode=\"markdown\"\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { MarkDownEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <MarkDownEditor initialMode=\"markdown\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
+    "plainContent": "Markdown Editor This preset is optimized for markdown-driven editing. When to use this Use MarkDownEditor when markdown text is your primary source-of-truth. Mode profile - Modes: visual-only , visual , json , markdown . - Sets markdownBridgeFlavor=\"github\" and markdownSourceOfTruth . Preset props - initialMode : Sets initial active mode. - defaultEditorView : Alias for initial mode selection. - featureFlags : Optional per-feature overrides. Includes codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { MarkDownEditor } from '@lyfie/luthor'; export function App() { return ; }",
     "sections": [
       {
         "heading": "Overview",
@@ -6406,7 +6520,19 @@ export const docsIndex = [
         "heading": "Mode profile",
         "id": "mode-profile",
         "level": 2,
-        "text": "- Modes: visual-only , visual , json , markdown . - Sets markdownBridgeFlavor=\"github\" and markdownSourceOfTruth . tsx import '@lyfie/luthor/styles.css'; import { MarkDownEditor } from '@lyfie/luthor'; export function App() { return ; }"
+        "text": "- Modes: visual-only , visual , json , markdown . - Sets markdownBridgeFlavor=\"github\" and markdownSourceOfTruth ."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- initialMode : Sets initial active mode. - defaultEditorView : Alias for initial mode selection. - featureFlags : Optional per-feature overrides. Includes codeIntelligence ."
+      },
+      {
+        "heading": "Code intelligence toggle",
+        "id": "code-intelligence-toggle",
+        "level": 2,
+        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { MarkDownEditor } from '@lyfie/luthor'; export function App() { return ; }"
       }
     ],
     "headings": [
@@ -6419,11 +6545,21 @@ export const docsIndex = [
         "level": 2,
         "text": "Mode profile",
         "id": "mode-profile"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Code intelligence toggle",
+        "id": "code-intelligence-toggle"
       }
     ],
     "urlPath": "/docs/luthor/presets/md-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/md-editor.md",
-    "updatedAt": "2026-03-20T17:40:45.176Z",
+    "updatedAt": "2026-03-23T06:33:02.020Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -6542,8 +6678,8 @@ export const docsIndex = [
     "title": "Simple Editor",
     "navTitle": "Simple Editor",
     "description": "Chat-style preset with minimal formatting and send workflows.",
-    "content": "\r\n# Simple Editor\r\n\r\nThis preset is optimized for chat/message composition.\r\n\r\n## When to use this\r\n\r\nUse `SimpleEditor` when you need compact input, send actions, and controlled output payloads.\r\n\r\n## Mode profile\r\n\r\n- Modes: `visual-only`, `visual`.\r\n\r\n~~~tsx\r\nimport '@lyfie/luthor/styles.css';\r\nimport { SimpleEditor } from '@lyfie/luthor';\r\n\r\nexport function App() {\r\n  return (\r\n    <SimpleEditor\r\n      submitOnEnter\r\n      outputFormat=\"md\"\r\n      onSend={(payload) => console.log(payload.markdown)}\r\n    />\r\n  );\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Simple Editor This preset is optimized for chat/message composition. When to use this Use SimpleEditor when you need compact input, send actions, and controlled output payloads. Mode profile - Modes: visual-only , visual . tsx import '@lyfie/luthor/styles.css'; import { SimpleEditor } from '@lyfie/luthor'; export function App() { return ( console.log(payload.markdown)} / ); }",
+    "content": "\r\n# Simple Editor\r\n\r\nThis preset is optimized for chat/message composition.\r\n\r\n## When to use this\r\n\r\nUse `SimpleEditor` when you need compact input, send actions, and controlled output payloads.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`.\n\n## Preset props\n\n- `submitOnEnter`: Sends content on Enter key.\n- `allowShiftEnter`: Keeps Shift+Enter as line break when `submitOnEnter` is enabled.\n- `onSend`: Callback that receives markdown/json payload based on `outputFormat`.\n- `outputFormat`: Chooses `md` or `json` as `payload.text`.\n- `featureFlags`: Scoped overrides for SimpleEditor; currently supports `featureFlags.codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<SimpleEditor\n  featureFlags={{ codeIntelligence: true }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { SimpleEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return (\r\n    <SimpleEditor\r\n      submitOnEnter\r\n      outputFormat=\"md\"\r\n      onSend={(payload) => console.log(payload.markdown)}\r\n    />\r\n  );\r\n}\r\n~~~\r\n\r\n\r\n",
+    "plainContent": "Simple Editor This preset is optimized for chat/message composition. When to use this Use SimpleEditor when you need compact input, send actions, and controlled output payloads. Mode profile - Modes: visual-only , visual . Preset props - submitOnEnter : Sends content on Enter key. - allowShiftEnter : Keeps Shift+Enter as line break when submitOnEnter is enabled. - onSend : Callback that receives markdown/json payload based on outputFormat . - outputFormat : Chooses md or json as payload.text . - featureFlags : Scoped overrides for SimpleEditor; currently supports featureFlags.codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { SimpleEditor } from '@lyfie/luthor'; export function App() { return ( console.log(payload.markdown)} / ); }",
     "sections": [
       {
         "heading": "Overview",
@@ -6561,7 +6697,19 @@ export const docsIndex = [
         "heading": "Mode profile",
         "id": "mode-profile",
         "level": 2,
-        "text": "- Modes: visual-only , visual . tsx import '@lyfie/luthor/styles.css'; import { SimpleEditor } from '@lyfie/luthor'; export function App() { return ( console.log(payload.markdown)} / ); }"
+        "text": "- Modes: visual-only , visual ."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- submitOnEnter : Sends content on Enter key. - allowShiftEnter : Keeps Shift+Enter as line break when submitOnEnter is enabled. - onSend : Callback that receives markdown/json payload based on outputFormat . - outputFormat : Chooses md or json as payload.text . - featureFlags : Scoped overrides for SimpleEditor; currently supports featureFlags.codeIntelligence ."
+      },
+      {
+        "heading": "Code intelligence toggle",
+        "id": "code-intelligence-toggle",
+        "level": 2,
+        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { SimpleEditor } from '@lyfie/luthor'; export function App() { return ( console.log(payload.markdown)} / ); }"
       }
     ],
     "headings": [
@@ -6574,11 +6722,21 @@ export const docsIndex = [
         "level": 2,
         "text": "Mode profile",
         "id": "mode-profile"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Code intelligence toggle",
+        "id": "code-intelligence-toggle"
       }
     ],
     "urlPath": "/docs/luthor/presets/simple-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/simple-editor.md",
-    "updatedAt": "2026-03-20T17:40:45.182Z",
+    "updatedAt": "2026-03-23T06:33:17.750Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -6592,7 +6750,8 @@ export const docsIndex = [
       "submitOnEnter",
       "allowShiftEnter",
       "onSend",
-      "outputFormat"
+      "outputFormat",
+      "featureFlags"
     ],
     "exports": [
       "SimpleEditor",
@@ -6626,6 +6785,7 @@ export const docsIndex = [
       "chat input",
       "chat-style preset with minimal formatting and send workflows.",
       "editor",
+      "featureflags",
       "format",
       "format.bold",
       "format.italic",
@@ -6657,6 +6817,7 @@ export const docsIndex = [
         "button",
         "chat",
         "chat input",
+        "featureflags",
         "input",
         "onsend",
         "outputformat",
@@ -6667,6 +6828,7 @@ export const docsIndex = [
       ],
       "props": [
         "allowshiftenter",
+        "featureflags",
         "onsend",
         "outputformat",
         "submitonenter"
@@ -6702,8 +6864,8 @@ export const docsIndex = [
     "title": "Slash Editor",
     "navTitle": "Slash Editor",
     "description": "Slash-command-first preset profile with allowlist defaults and optional draggable behavior.",
-    "content": "\r\n# Slash Editor\r\n\r\nThis preset is optimized for slash menu workflows.\r\n\r\n## When to use this\r\n\r\nUse `SlashEditor` when command discovery should be slash-driven and toolbar usage is secondary.\r\n\r\n## Mode profile\r\n\r\n- Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.\r\n- Toolbar is off by default.\r\n\r\n~~~tsx\r\nimport '@lyfie/luthor/styles.css';\r\nimport { SlashEditor } from '@lyfie/luthor';\r\n\r\nexport function App() {\r\n  return <SlashEditor placeholder=\"Type / for commands\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Slash Editor This preset is optimized for slash menu workflows. When to use this Use SlashEditor when command discovery should be slash-driven and toolbar usage is secondary. Mode profile - Modes: visual-only , visual , json , markdown , html . - Toolbar is off by default. tsx import '@lyfie/luthor/styles.css'; import { SlashEditor } from '@lyfie/luthor'; export function App() { return ; }",
+    "content": "\r\n# Slash Editor\r\n\r\nThis preset is optimized for slash menu workflows.\r\n\r\n## When to use this\r\n\r\nUse `SlashEditor` when command discovery should be slash-driven and toolbar usage is secondary.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.\n- Toolbar is off by default.\n\n## Preset props\n\n- `slashVisibility`: Controls slash command allow/deny lists.\n- `isDraggableEnabled`: Enables or disables draggable block handles.\n- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<SlashEditor\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { SlashEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <SlashEditor placeholder=\"Type / for commands\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
+    "plainContent": "Slash Editor This preset is optimized for slash menu workflows. When to use this Use SlashEditor when command discovery should be slash-driven and toolbar usage is secondary. Mode profile - Modes: visual-only , visual , json , markdown , html . - Toolbar is off by default. Preset props - slashVisibility : Controls slash command allow/deny lists. - isDraggableEnabled : Enables or disables draggable block handles. - featureFlags : Optional per-feature overrides. Includes codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { SlashEditor } from '@lyfie/luthor'; export function App() { return ; }",
     "sections": [
       {
         "heading": "Overview",
@@ -6721,7 +6883,19 @@ export const docsIndex = [
         "heading": "Mode profile",
         "id": "mode-profile",
         "level": 2,
-        "text": "- Modes: visual-only , visual , json , markdown , html . - Toolbar is off by default. tsx import '@lyfie/luthor/styles.css'; import { SlashEditor } from '@lyfie/luthor'; export function App() { return ; }"
+        "text": "- Modes: visual-only , visual , json , markdown , html . - Toolbar is off by default."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- slashVisibility : Controls slash command allow/deny lists. - isDraggableEnabled : Enables or disables draggable block handles. - featureFlags : Optional per-feature overrides. Includes codeIntelligence ."
+      },
+      {
+        "heading": "Code intelligence toggle",
+        "id": "code-intelligence-toggle",
+        "level": 2,
+        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { SlashEditor } from '@lyfie/luthor'; export function App() { return ; }"
       }
     ],
     "headings": [
@@ -6734,11 +6908,21 @@ export const docsIndex = [
         "level": 2,
         "text": "Mode profile",
         "id": "mode-profile"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Code intelligence toggle",
+        "id": "code-intelligence-toggle"
       }
     ],
     "urlPath": "/docs/luthor/presets/slash-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/slash-editor.md",
-    "updatedAt": "2026-03-20T17:40:45.190Z",
+    "updatedAt": "2026-03-23T06:32:34.208Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -6861,8 +7045,8 @@ export const docsIndex = [
     "title": "Props Reference",
     "navTitle": "Props Reference",
     "description": "Reference index for ExtensiveEditorProps and common preset prop surfaces, including mode and bridge controls.",
-    "content": "\r\n# Props Reference\r\n\r\nUse this page for exact prop names and discovery tokens.\r\n\r\n## What this page answers\r\n\r\n- Which props control modes, source bridges, and feature gates?\r\n\r\n## High-signal props\r\n\r\n| Area | Props |\r\n| --- | --- |\r\n| Mode control | `initialMode`, `defaultEditorView`, `availableModes` |\r\n| Feature gating | `featureFlags`, `headingOptions`, `slashCommandVisibility` |\r\n| Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |\r\n| Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |\r\n| List depth | `maxListIndentation` |\r\n\r\n## Full `ExtensiveEditorProps` index\r\n\r\n- `className`\r\n- `onReady`\r\n- `initialTheme`\r\n- `onThemeChange`\r\n- `theme`\r\n- `defaultContent`\r\n- `showDefaultContent`\r\n- `placeholder`\r\n- `defaultEditorView`\r\n- `initialMode`\r\n- `isEditorViewTabsVisible`\r\n- `isEditorViewsTabVisible`\r\n- `availableModes`\r\n- `variantClassName`\r\n- `toolbarLayout`\r\n- `toolbarVisibility`\r\n- `toolbarPosition`\r\n- `toolbarAlignment`\r\n- `toolbarClassName`\r\n- `toolbarStyleVars`\r\n- `quoteClassName`\r\n- `quoteStyleVars`\r\n- `defaultSettings`\r\n- `editorThemeOverrides`\r\n- `isToolbarEnabled`\r\n- `isToolbarPinned`\r\n- `fontFamilyOptions`\r\n- `fontSizeOptions`\r\n- `lineHeightOptions`\r\n- `minimumDefaultLineHeight`\r\n- `scaleByRatio`\r\n- `headingOptions`\r\n- `paragraphLabel`\r\n- `syncHeadingOptionsWithCommands`\r\n- `slashCommandVisibility`\r\n- `shortcutConfig`\r\n- `commandPaletteShortcutOnly`\r\n- `isListStyleDropdownEnabled`\r\n- `editOnClick`\r\n- `isDraggableBoxEnabled`\r\n- `featureFlags`\r\n- `sourceMetadataMode`\r\n- `markdownBridgeFlavor`\r\n- `markdownSourceOfTruth`\r\n- `isSyntaxHighlightingEnabled`\r\n- `syntaxHighlightColorMode`\r\n- `syntaxHighlightColors`\r\n- `maxAutoDetectCodeLength`\r\n- `isCopyAllowed`\r\n- `languageOptions`\r\n- `showLineNumbers`\r\n- `maxListIndentation`\r\n\r\n\r\n",
-    "plainContent": "Props Reference Use this page for exact prop names and discovery tokens. What this page answers - Which props control modes, source bridges, and feature gates? High-signal props Area Props --- --- Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation Full ExtensiveEditorProps index - className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation",
+    "content": "\r\n# Props Reference\r\n\r\nUse this page for exact prop names and discovery tokens.\r\n\r\n## What this page answers\r\n\r\n- Which props control modes, source bridges, and feature gates?\r\n\r\n## High-signal props\r\n\r\n| Area | Props |\r\n| --- | --- |\r\n| Mode control | `initialMode`, `defaultEditorView`, `availableModes` |\r\n| Feature gating | `featureFlags`, `headingOptions`, `slashCommandVisibility` |\r\n| Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |\r\n| Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |\n| List depth | `maxListIndentation` |\n\n## Preset-level code intelligence toggle\n\n- `ExtensiveEditor`, `ComposeEditor`, `SlashEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.\n- `SimpleEditor` supports scoped `featureFlags.codeIntelligence`.\n\n~~~tsx\n<SlashEditor featureFlags={{ codeIntelligence: false }} />\n<SimpleEditor featureFlags={{ codeIntelligence: true }} />\n~~~\n\n## Full `ExtensiveEditorProps` index\n\r\n- `className`\r\n- `onReady`\r\n- `initialTheme`\r\n- `onThemeChange`\r\n- `theme`\r\n- `defaultContent`\r\n- `showDefaultContent`\r\n- `placeholder`\r\n- `defaultEditorView`\r\n- `initialMode`\r\n- `isEditorViewTabsVisible`\r\n- `isEditorViewsTabVisible`\r\n- `availableModes`\r\n- `variantClassName`\r\n- `toolbarLayout`\r\n- `toolbarVisibility`\r\n- `toolbarPosition`\r\n- `toolbarAlignment`\r\n- `toolbarClassName`\r\n- `toolbarStyleVars`\r\n- `quoteClassName`\r\n- `quoteStyleVars`\r\n- `defaultSettings`\r\n- `editorThemeOverrides`\r\n- `isToolbarEnabled`\r\n- `isToolbarPinned`\r\n- `fontFamilyOptions`\r\n- `fontSizeOptions`\r\n- `lineHeightOptions`\r\n- `minimumDefaultLineHeight`\r\n- `scaleByRatio`\r\n- `headingOptions`\r\n- `paragraphLabel`\r\n- `syncHeadingOptionsWithCommands`\r\n- `slashCommandVisibility`\r\n- `shortcutConfig`\r\n- `commandPaletteShortcutOnly`\r\n- `isListStyleDropdownEnabled`\r\n- `editOnClick`\r\n- `isDraggableBoxEnabled`\r\n- `featureFlags`\r\n- `sourceMetadataMode`\r\n- `markdownBridgeFlavor`\r\n- `markdownSourceOfTruth`\r\n- `isSyntaxHighlightingEnabled`\r\n- `syntaxHighlightColorMode`\r\n- `syntaxHighlightColors`\r\n- `maxAutoDetectCodeLength`\r\n- `isCopyAllowed`\r\n- `languageOptions`\r\n- `showLineNumbers`\r\n- `maxListIndentation`\r\n\r\n\r\n",
+    "plainContent": "Props Reference Use this page for exact prop names and discovery tokens. What this page answers - Which props control modes, source bridges, and feature gates? High-signal props Area Props --- --- Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation Preset-level code intelligence toggle - ExtensiveEditor , ComposeEditor , SlashEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and HeadlessEditorPreset use featureFlags.codeIntelligence . - SimpleEditor supports scoped featureFlags.codeIntelligence . tsx Full ExtensiveEditorProps index - className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation",
     "sections": [
       {
         "heading": "Overview",
@@ -6881,6 +7065,12 @@ export const docsIndex = [
         "id": "high-signal-props",
         "level": 2,
         "text": "Area Props --- --- Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation"
+      },
+      {
+        "heading": "Preset-level code intelligence toggle",
+        "id": "preset-level-code-intelligence-toggle",
+        "level": 2,
+        "text": "- ExtensiveEditor , ComposeEditor , SlashEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and HeadlessEditorPreset use featureFlags.codeIntelligence . - SimpleEditor supports scoped featureFlags.codeIntelligence . tsx"
       },
       {
         "heading": "Full `ExtensiveEditorProps` index",
@@ -6902,13 +7092,18 @@ export const docsIndex = [
       },
       {
         "level": 2,
+        "text": "Preset-level code intelligence toggle",
+        "id": "preset-level-code-intelligence-toggle"
+      },
+      {
+        "level": 2,
         "text": "Full `ExtensiveEditorProps` index",
         "id": "full-extensiveeditorprops-index"
       }
     ],
     "urlPath": "/docs/luthor/props-reference/",
     "sourcePath": "apps/web/src/content/docs/luthor/props-reference.md",
-    "updatedAt": "2026-03-20T17:40:45.123Z",
+    "updatedAt": "2026-03-23T06:33:27.886Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "prop",

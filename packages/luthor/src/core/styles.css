@@ -1684,6 +1684,7 @@
 
 .luthor-code-block {
 	display: block;
+	box-sizing: border-box;
 	padding: 12px;
 	margin: 12px 0;
 	line-height: 1.6;
@@ -1713,6 +1714,7 @@
 
 .luthor-codeblock-controls {
 	position: absolute;
+	box-sizing: border-box;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;

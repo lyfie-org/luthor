@@ -237,12 +237,12 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Headless Editor Preset
 - File: luthor/presets/headless-editor-preset.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/
-- Summary: title: "Headless Editor Preset" description: "Preset wrapper that demonstrates source mode handling and controlled bridge behavior on top of extensive extensions." package: "luthor" docType: "reference" surface: "preset" keywords: "HeadlessEditorPreset" "headless editor preset" "source mode" props: "initialMode" "featu...
+- Summary: title: "Headless Editor Preset" description: "Preset wrapper that demonstrates source mode handling and controlled bridge behavior on top of extensive extensions." package: "luthor" docType: "reference" surface: "preset" keywords: "HeadlessEditorPreset" "headless editor preset" "source mode" props: "initialMode" "defau...
 
 ### HTML Editor
 - File: luthor/presets/html-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/html-editor/
-- Summary: title: "HTML Editor" description: "HTML focused preset profile built on LegacyRichEditor for source first HTML editing." package: "luthor" docType: "reference" surface: "preset" keywords: "HTMLEditor" "html editor" "html source mode" props: "initialMode" "defaultEditorView" exports: "HTMLEditor" "htmlEditorPreset" comm...
+- Summary: title: "HTML Editor" description: "HTML focused preset profile built on LegacyRichEditor for source first HTML editing." package: "luthor" docType: "reference" surface: "preset" keywords: "HTMLEditor" "html editor" "html source mode" props: "initialMode" "defaultEditorView" "featureFlags" exports: "HTMLEditor" "htmlEdi...
 
 ### Legacy Rich Editor
 - File: luthor/presets/legacy-rich-editor.md
@@ -257,7 +257,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Simple Editor
 - File: luthor/presets/simple-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/simple-editor/
-- Summary: title: "Simple Editor" description: "Chat style preset with minimal formatting and send workflows." package: "luthor" docType: "reference" surface: "preset" keywords: "SimpleEditor" "chat input" "send button" "submitOnEnter" props: "submitOnEnter" "allowShiftEnter" "onSend" "outputFormat" exports: "SimpleEditor" "simpl...
+- Summary: title: "Simple Editor" description: "Chat style preset with minimal formatting and send workflows." package: "luthor" docType: "reference" surface: "preset" keywords: "SimpleEditor" "chat input" "send button" "submitOnEnter" props: "submitOnEnter" "allowShiftEnter" "onSend" "outputFormat" "featureFlags" exports: "Simpl...
 
 ### Slash Editor
 - File: luthor/presets/slash-editor.md

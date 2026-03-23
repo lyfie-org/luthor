@@ -8,6 +8,7 @@ import {
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   registerMarkdownShortcuts,
+  type Transformer,
   TRANSFORMERS,
 } from "@lexical/markdown";
 import { createPortal } from "react-dom";
@@ -138,9 +139,13 @@ export class CodeIntelligenceExtension extends BaseExtension<
   register(editor: LexicalEditor): () => void {
     this.languageOptions = this.getLanguageOptions();
 
-    const unregisterMarkdownShortcuts = registerMarkdownShortcuts(
+    const markdownShortcutTransformers = resolveMarkdownShortcutTransformers(
       editor,
       TRANSFORMERS,
+    );
+    const unregisterMarkdownShortcuts = registerMarkdownShortcuts(
+      editor,
+      markdownShortcutTransformers,
     );
 
     const unregisterUpdate = editor.registerUpdateListener(
@@ -1035,4 +1040,21 @@ export const __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS = {
   getLanguageDisplayLabel,
   getSafeCodeLanguageOptions,
   getSafeRuntimeCodeLanguages,
+  resolveMarkdownShortcutTransformers,
 } as const;
+
+function resolveMarkdownShortcutTransformers(
+  editor: LexicalEditor,
+  transformers: readonly Transformer[],
+): Transformer[] {
+  return transformers.filter((transformer) => {
+    const dependencyList = (transformer as { dependencies?: readonly unknown[] }).dependencies;
+    if (!Array.isArray(dependencyList) || dependencyList.length === 0) {
+      return true;
+    }
+
+    return dependencyList.every((dependencyNode) =>
+      editor.hasNode(dependencyNode as Parameters<LexicalEditor["hasNode"]>[0]),
+    );
+  });
+}

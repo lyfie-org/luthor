@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-23T06:08:50.420Z
+Generated at: 2026-03-23T08:18:00.859Z
 
 ## AI Agent Workflow
 
@@ -2572,6 +2572,20 @@ Use `ComposeEditor` for comments, replies, short updates, and other compact comp
 
 - Modes: `visual-only`, `visual`, `json`.
 
+## Preset props
+
+- `compactToolbar`: Reduces toolbar footprint for dense composer layouts.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<ComposeEditor
+  compactToolbar
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { ComposeEditor } from '@lyfie/luthor';
@@ -2637,6 +2651,20 @@ Use `ExtensiveEditor` when you want full formatting, media, code, and command wo
 - Default modes: `visual-editor`, `visual-only`, `json`, `markdown`, `html`.
 - Default initial mode: `visual-editor`.
 
+## Preset props
+
+- `featureFlags`: Toggle individual preset capabilities. Use `featureFlags.codeIntelligence` to turn code intelligence on/off.
+- `availableModes`: Restrict visible mode tabs and allowed mode switching targets.
+- `maxListIndentation`: Caps nested list depth in visual editing.
+
+## Code intelligence toggle
+
+~~~tsx
+<ExtensiveEditor
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { ExtensiveEditor } from '@lyfie/luthor';
@@ -2663,8 +2691,8 @@ keywords:
   - "source mode"
 props:
   - "initialMode"
+  - "defaultEditorView"
   - "featureFlags"
-  - "sourceMetadataMode"
 exports:
   - "HeadlessEditorPreset"
   - "headlessEditorPreset"
@@ -2698,6 +2726,20 @@ Use `HeadlessEditorPreset` when you want a compact preset that still exposes JSO
 
 - Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.
 
+## Preset props
+
+- `initialMode`: Sets the first active mode when no `defaultEditorView` is provided.
+- `defaultEditorView`: Alias for initial mode selection; useful when binding mode via config objects.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<HeadlessEditorPreset
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { HeadlessEditorPreset } from '@lyfie/luthor';
@@ -2725,6 +2767,7 @@ keywords:
 props:
   - "initialMode"
   - "defaultEditorView"
+  - "featureFlags"
 exports:
   - "HTMLEditor"
   - "htmlEditorPreset"
@@ -2756,6 +2799,21 @@ Use `HTMLEditor` when HTML output is a first-class editing artifact.
 ## Mode profile
 
 - Modes: `visual-only`, `visual`, `json`, `html`.
+
+## Preset props
+
+- `initialMode`: Sets initial active mode.
+- `defaultEditorView`: Alias for initial mode selection.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<HTMLEditor
+  initialMode="html"
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
 
 ~~~tsx
 import '@lyfie/luthor/styles.css';
@@ -2819,6 +2877,21 @@ Use `LegacyRichEditor` when migrating older markdown/html workflows and you need
 - `sourceFormat="html"`: `visual-only`, `visual`, `json`, `html`.
 - `sourceFormat="both"`: `visual-only`, `visual`, `markdown`, `html`.
 
+## Preset props
+
+- `sourceFormat`: Chooses which source tabs are available (`markdown`, `html`, or `both`).
+- `initialMode`: Sets initial active mode.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<LegacyRichEditor
+  sourceFormat="both"
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { LegacyRichEditor } from '@lyfie/luthor';
@@ -2880,6 +2953,21 @@ Use `MarkDownEditor` when markdown text is your primary source-of-truth.
 - Modes: `visual-only`, `visual`, `json`, `markdown`.
 - Sets `markdownBridgeFlavor="github"` and `markdownSourceOfTruth`.
 
+## Preset props
+
+- `initialMode`: Sets initial active mode.
+- `defaultEditorView`: Alias for initial mode selection.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<MarkDownEditor
+  initialMode="markdown"
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
 ~~~tsx
 import '@lyfie/luthor/styles.css';
 import { MarkDownEditor } from '@lyfie/luthor';
@@ -2910,6 +2998,7 @@ props:
   - "allowShiftEnter"
   - "onSend"
   - "outputFormat"
+  - "featureFlags"
 exports:
   - "SimpleEditor"
   - "simpleEditorPreset"
@@ -2941,6 +3030,22 @@ Use `SimpleEditor` when you need compact input, send actions, and controlled out
 ## Mode profile
 
 - Modes: `visual-only`, `visual`.
+
+## Preset props
+
+- `submitOnEnter`: Sends content on Enter key.
+- `allowShiftEnter`: Keeps Shift+Enter as line break when `submitOnEnter` is enabled.
+- `onSend`: Callback that receives markdown/json payload based on `outputFormat`.
+- `outputFormat`: Chooses `md` or `json` as `payload.text`.
+- `featureFlags`: Scoped overrides for SimpleEditor; currently supports `featureFlags.codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<SimpleEditor
+  featureFlags={{ codeIntelligence: true }}
+/>
+~~~
 
 ~~~tsx
 import '@lyfie/luthor/styles.css';
@@ -3009,6 +3114,20 @@ Use `SlashEditor` when command discovery should be slash-driven and toolbar usag
 
 - Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.
 - Toolbar is off by default.
+
+## Preset props
+
+- `slashVisibility`: Controls slash command allow/deny lists.
+- `isDraggableEnabled`: Enables or disables draggable block handles.
+- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<SlashEditor
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
 
 ~~~tsx
 import '@lyfie/luthor/styles.css';
@@ -3172,6 +3291,16 @@ Use this page for exact prop names and discovery tokens.
 | Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |
 | Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |
 | List depth | `maxListIndentation` |
+
+## Preset-level code intelligence toggle
+
+- `ExtensiveEditor`, `ComposeEditor`, `SlashEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.
+- `SimpleEditor` supports scoped `featureFlags.codeIntelligence`.
+
+~~~tsx
+<SlashEditor featureFlags={{ codeIntelligence: false }} />
+<SimpleEditor featureFlags={{ codeIntelligence: true }} />
+~~~
 
 ## Full `ExtensiveEditorProps` index
 

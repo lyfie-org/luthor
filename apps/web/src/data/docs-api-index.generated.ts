@@ -2894,6 +2894,7 @@ export const docsApiIndex = [
     "navGroup": "luthor",
     "searchTokenBuckets": {
       "keywords": [
+        "defaulteditorview",
         "editor",
         "featureflags",
         "headless",
@@ -2903,13 +2904,12 @@ export const docsApiIndex = [
         "mode",
         "preset",
         "source",
-        "source mode",
-        "sourcemetadatamode"
+        "source mode"
       ],
       "props": [
+        "defaulteditorview",
         "featureflags",
-        "initialmode",
-        "sourcemetadatamode"
+        "initialmode"
       ],
       "exports": [
         "headlesseditorpreset"
@@ -2943,6 +2943,7 @@ export const docsApiIndex = [
       "code",
       "codeblock",
       "controlled",
+      "defaulteditorview",
       "demonstrates",
       "edit",
       "edit.redo",
@@ -2968,7 +2969,6 @@ export const docsApiIndex = [
       "redo",
       "source",
       "source mode",
-      "sourcemetadatamode",
       "that",
       "top",
       "undo",
@@ -2986,6 +2986,7 @@ export const docsApiIndex = [
       "keywords": [
         "defaulteditorview",
         "editor",
+        "featureflags",
         "html",
         "html source mode",
         "html-editor",
@@ -2996,6 +2997,7 @@ export const docsApiIndex = [
       ],
       "props": [
         "defaulteditorview",
+        "featureflags",
         "initialmode"
       ],
       "exports": [
@@ -3029,6 +3031,7 @@ export const docsApiIndex = [
       "defaulteditorview",
       "editing",
       "editor",
+      "featureflags",
       "first",
       "focused",
       "for",
@@ -3236,6 +3239,7 @@ export const docsApiIndex = [
         "button",
         "chat",
         "chat input",
+        "featureflags",
         "input",
         "onsend",
         "outputformat",
@@ -3246,6 +3250,7 @@ export const docsApiIndex = [
       ],
       "props": [
         "allowshiftenter",
+        "featureflags",
         "onsend",
         "outputformat",
         "submitonenter"
@@ -3280,6 +3285,7 @@ export const docsApiIndex = [
       "chat input",
       "chat-style preset with minimal formatting and send workflows.",
       "editor",
+      "featureflags",
       "format",
       "format.bold",
       "format.italic",

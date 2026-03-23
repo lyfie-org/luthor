@@ -104,6 +104,50 @@ describe("CodeIntelligenceExtension language options", () => {
     })).toEqual([]);
   });
 
+  it("filters markdown shortcut transformers by editor node dependencies", () => {
+    const { resolveMarkdownShortcutTransformers } =
+      __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS;
+
+    const linkNode = class {
+      static getType() {
+        return "link";
+      }
+    };
+    const codeNode = class {
+      static getType() {
+        return "code";
+      }
+    };
+
+    const editor = {
+      hasNode: (node: unknown) => node !== linkNode,
+    } as unknown as LexicalEditor;
+
+    const transformers = [
+      {
+        type: "text-match",
+        dependencies: [linkNode],
+      },
+      {
+        type: "multiline-element",
+        dependencies: [codeNode],
+      },
+      {
+        type: "text-format",
+      },
+    ] as const;
+
+    const filtered = resolveMarkdownShortcutTransformers(
+      editor,
+      transformers as unknown as Parameters<typeof resolveMarkdownShortcutTransformers>[1],
+    );
+
+    expect(filtered).toHaveLength(2);
+    expect(filtered).toContain(transformers[1]);
+    expect(filtered).toContain(transformers[2]);
+    expect(filtered).not.toContain(transformers[0]);
+  });
+
   it("uses plain fallback theme for plaintext-like languages", () => {
     const extension = new CodeIntelligenceExtension() as CodeIntelligenceExtension & {
       getThemeForLanguage?: (language: string | null | undefined) => string | null;
