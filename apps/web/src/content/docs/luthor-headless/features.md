@@ -1,17 +1,46 @@
 ---
-title: Features
-description: Grouped feature documentation for @lyfie/luthor-headless.
+title: "Features"
+description: "Feature group index for headless runtime extensions and command surfaces."
+package: "headless"
+docType: "guide"
+surface: "extension"
+keywords:
+  - "features index"
+  - "typography"
+  - "lists"
+  - "media"
+  - "code"
+  - "productivity"
+props:
+  []
+exports:
+  - "createEditorSystem"
+commands:
+  - "insert.table"
+  - "palette.show"
+  - "format.bold"
+extensions:
+  - "richTextExtension"
+  - "listExtension"
+  - "codeExtension"
+  - "slashCommandExtension"
+nodes:
+  []
+frameworks:
+  []
+lastVerifiedFrom:
+  - "packages/headless/src/extensions/index.ts"
+navGroup: "luthor_headless"
+navOrder: 50
 ---
 
 # Features
 
-Feature docs are grouped by real implementation areas so you can find APIs faster.
+Use this page as the entry index for runtime capability groups.
 
-## Contributor guides
+## What this page answers
 
-- [Architecture](/docs/luthor-headless/architecture/)
-- [Extensions and API](/docs/luthor-headless/extensions-and-api/)
-- [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)
+- Which feature page should I read first?
 
 ## Feature groups
 
@@ -22,32 +51,4 @@ Feature docs are grouped by real implementation areas so you can find APIs faste
 - [Interaction and Productivity](/docs/luthor-headless/features/interaction-and-productivity/)
 - [Customization and Theming](/docs/luthor-headless/features/customization-and-theming/)
 
-For deeper engine-level capability details, see the official Lexical docs: [lexical.dev/docs](https://lexical.dev/docs/intro).
 
-## Base runtime example
-
-```tsx
-import { createEditorSystem, RichText, richTextExtension } from '@lyfie/luthor-headless';
-
-const extensions = [richTextExtension] as const;
-const { Provider } = createEditorSystem<typeof extensions>();
-
-export function App() {
-  return (
-    <Provider extensions={extensions}>
-      <RichText placeholder="Write here..." />
-    </Provider>
-  );
-}
-```
-
-## How to read this section
-
-- Each feature-group page lists:
-  - extensions involved
-  - high-signal commands
-  - practical setup examples
-- If you are building a preset-like experience in your app, start with:
-  1. Typography and Text
-  2. Structure and Lists
-  3. Interaction and Productivity

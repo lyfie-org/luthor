@@ -1864,6 +1864,13 @@ a {
   align-content: start;
 }
 
+.docs-main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 260px);
+  gap: var(--space-3);
+  align-items: start;
+}
+
 .docs-sidebar {
   position: static;
   align-self: start;
@@ -2085,6 +2092,19 @@ a {
   color: var(--muted);
   font-size: 0.88rem;
   line-height: 1.5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+}
+
+.docs-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  background: color-mix(in srgb, var(--bg-elevated) 90%, var(--surface) 10%);
 }
 
 .docs-meta a {
@@ -2120,6 +2140,12 @@ a {
   margin-bottom: 0.8rem;
   font-family: var(--font-display), var(--font-body), sans-serif;
   letter-spacing: -0.02em;
+}
+
+.doc-content h2[id],
+.doc-content h3[id],
+.doc-content h4[id] {
+  scroll-margin-top: 6rem;
 }
 
 .doc-content p,
@@ -2360,6 +2386,55 @@ a {
   transform: translateX(-1px);
 }
 
+.docs-toc {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  padding: 0.8rem 0.85rem;
+  position: sticky;
+  top: calc(var(--space-6) + 2rem);
+  animation: section-in 320ms ease-out both;
+}
+
+.docs-toc h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.86rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.docs-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.docs-toc li a {
+  display: block;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  padding: 0.2rem 0.35rem;
+  border-radius: 8px;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.docs-toc li a:hover {
+  color: var(--text);
+  background: var(--surface);
+  transform: translateX(1px);
+}
+
+.docs-toc li[data-level='3'] a {
+  padding-left: 0.9rem;
+  font-size: 0.77rem;
+}
+
 .not-found {
   text-align: center;
 }
@@ -2530,8 +2605,17 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .docs-main-layout {
+    grid-template-columns: 1fr;
+  }
+
   .docs-sidebar {
     max-height: none;
+  }
+
+  .docs-toc {
+    position: static;
+    top: auto;
   }
 
   .docs-breadcrumbs {

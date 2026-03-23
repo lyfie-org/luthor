@@ -29,7 +29,7 @@ const SLASH_EDITOR_DEFAULT_FLAGS: FeatureFlagOverrides = {
   image: false,
   blockFormat: true,
   code: true,
-  codeIntelligence: false,
+  codeIntelligence: true,
   codeFormat: true,
   tabIndent: true,
   enterKeyBehavior: true,

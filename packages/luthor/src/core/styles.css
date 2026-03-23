@@ -47,12 +47,12 @@
   --luthor-floating-border-active: var(--luthor-border-active);
   --luthor-floating-accent: var(--luthor-accent);
   --luthor-floating-accent-fg: var(--luthor-bg);
-	--luthor-syntax-comment: #64748b;
-	--luthor-syntax-keyword: #64748b;
-	--luthor-syntax-string: #64748b;
-	--luthor-syntax-number: #64748b;
-	--luthor-syntax-function: #64748b;
-	--luthor-syntax-variable: #64748b;
+		--luthor-syntax-comment: #708090;
+		--luthor-syntax-keyword: #07a;
+		--luthor-syntax-string: #690;
+		--luthor-syntax-number: #905;
+		--luthor-syntax-function: #dd4a68;
+		--luthor-syntax-variable: #9a6e3a;
 }
 
 /* Dark theme variables */
@@ -104,12 +104,12 @@
   --luthor-floating-border-active: var(--luthor-border-active);
   --luthor-floating-accent: var(--luthor-accent);
   --luthor-floating-accent-fg: var(--luthor-bg);
-	--luthor-syntax-comment: #8b949e;
-	--luthor-syntax-keyword: #8b949e;
-	--luthor-syntax-string: #8b949e;
-	--luthor-syntax-number: #8b949e;
-	--luthor-syntax-function: #8b949e;
-	--luthor-syntax-variable: #8b949e;
+		--luthor-syntax-comment: #708090;
+		--luthor-syntax-keyword: #07a;
+		--luthor-syntax-string: #690;
+		--luthor-syntax-number: #905;
+		--luthor-syntax-function: #dd4a68;
+		--luthor-syntax-variable: #9a6e3a;
 }
 
 .luthor-preset-extensive.luthor-editor-wrapper {
@@ -1684,6 +1684,7 @@
 
 .luthor-code-block {
 	display: block;
+	box-sizing: border-box;
 	padding: 12px;
 	margin: 12px 0;
 	line-height: 1.6;
@@ -1713,6 +1714,7 @@
 
 .luthor-codeblock-controls {
 	position: absolute;
+	box-sizing: border-box;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -1818,6 +1820,7 @@
 }
 
 .luthor-code-block[data-theme="plain"] {
+	--luthor-syntax-comment: var(--luthor-muted-fg);
 	--luthor-syntax-keyword: var(--luthor-muted-fg);
 	--luthor-syntax-string: var(--luthor-muted-fg);
 	--luthor-syntax-number: var(--luthor-muted-fg);
@@ -1867,30 +1870,52 @@
 :where(.luthor-code-doctype),
 :where(.luthor-code-cdata),
 :where(.luthor-code-punctuation),
+:where(.luthor-code-namespace) {
+	color: var(--luthor-syntax-comment, var(--luthor-muted-fg));
+	font-weight: inherit;
+}
+
+:where(.luthor-code-keyword),
+:where(.luthor-code-atrule),
 :where(.luthor-code-operator),
-:where(.luthor-code-namespace),
-:where(.luthor-code-property),
-:where(.luthor-code-tag),
-:where(.luthor-code-constant),
-:where(.luthor-code-symbol),
-:where(.luthor-code-deleted),
-:where(.luthor-code-boolean),
-:where(.luthor-code-number),
-:where(.luthor-code-attr),
-:where(.luthor-code-selector),
+:where(.luthor-code-important) {
+	color: var(--luthor-syntax-keyword, var(--luthor-muted-fg));
+	font-weight: inherit;
+}
+
 :where(.luthor-code-string),
 :where(.luthor-code-char),
-:where(.luthor-code-builtin),
-:where(.luthor-code-inserted),
+:where(.luthor-code-regex),
+:where(.luthor-code-url),
+:where(.luthor-code-inserted) {
+	color: var(--luthor-syntax-string, var(--luthor-muted-fg));
+	font-weight: inherit;
+}
+
+:where(.luthor-code-number),
+:where(.luthor-code-boolean),
+:where(.luthor-code-constant) {
+	color: var(--luthor-syntax-number, var(--luthor-muted-fg));
+	font-weight: inherit;
+}
+
 :where(.luthor-code-function),
 :where(.luthor-code-class),
 :where(.luthor-code-class-name),
-:where(.luthor-code-keyword),
-:where(.luthor-code-atrule),
-:where(.luthor-code-regex),
+:where(.luthor-code-builtin) {
+	color: var(--luthor-syntax-function, var(--luthor-muted-fg));
+	font-weight: inherit;
+}
+
 :where(.luthor-code-variable),
-:where(.luthor-code-important) {
-	color: var(--luthor-syntax-string, var(--luthor-muted-fg));
+:where(.luthor-code-property),
+:where(.luthor-code-tag),
+:where(.luthor-code-attr),
+:where(.luthor-code-selector),
+:where(.luthor-code-symbol),
+:where(.luthor-code-entity),
+:where(.luthor-code-deleted) {
+	color: var(--luthor-syntax-variable, var(--luthor-muted-fg));
 	font-weight: inherit;
 }
 

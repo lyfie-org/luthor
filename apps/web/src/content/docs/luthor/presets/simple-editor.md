@@ -1,84 +1,81 @@
 ---
-title: Simple Editor
-description: Constrained message editor preset with send controls.
+title: "Simple Editor"
+description: "Chat-style preset with minimal formatting and send workflows."
+package: "luthor"
+docType: "reference"
+surface: "preset"
+keywords:
+  - "SimpleEditor"
+  - "chat input"
+  - "send button"
+  - "submitOnEnter"
+props:
+  - "submitOnEnter"
+  - "allowShiftEnter"
+  - "onSend"
+  - "outputFormat"
+  - "featureFlags"
+exports:
+  - "SimpleEditor"
+  - "simpleEditorPreset"
+  - "SimpleEditorProps"
+commands:
+  - "format.bold"
+  - "format.italic"
+extensions:
+  []
+nodes:
+  - "paragraph"
+  - "text"
+frameworks:
+  - "react"
+lastVerifiedFrom:
+  - "packages/luthor/src/presets/simple-editor/SimpleEditor.tsx"
+navGroup: "luthor"
+navOrder: 80
 ---
 
 # Simple Editor
 
-`SimpleEditor` is a constrained message-editor preset.
+This preset is optimized for chat/message composition.
 
-It keeps formatting intentionally minimal and supports send workflows out of the box.
+## When to use this
 
-## Usage
+Use `SimpleEditor` when you need compact input, send actions, and controlled output payloads.
 
-```tsx
-import { SimpleEditor } from '@lyfie/luthor';
+## Mode profile
+
+- Modes: `visual-only`, `visual`.
+
+## Preset props
+
+- `submitOnEnter`: Sends content on Enter key.
+- `allowShiftEnter`: Keeps Shift+Enter as line break when `submitOnEnter` is enabled.
+- `onSend`: Callback that receives markdown/json payload based on `outputFormat`.
+- `outputFormat`: Chooses `md` or `json` as `payload.text`.
+- `featureFlags`: Scoped overrides for SimpleEditor; currently supports `featureFlags.codeIntelligence`.
+
+## Code intelligence toggle
+
+~~~tsx
+<SimpleEditor
+  featureFlags={{ codeIntelligence: true }}
+/>
+~~~
+
+~~~tsx
 import '@lyfie/luthor/styles.css';
+import { SimpleEditor } from '@lyfie/luthor';
 
 export function App() {
   return (
     <SimpleEditor
-      placeholder="Type a message"
       submitOnEnter
-      allowShiftEnter
       outputFormat="md"
-      onSend={({ text }) => {
-        console.log(text);
-      }}
+      onSend={(payload) => console.log(payload.markdown)}
     />
   );
 }
-```
+~~~
 
-## Props
-
-`SimpleEditorProps` is purpose-built for message input:
-
-- `formattingOptions`: `SimpleFormattingOptions` (`bold`, `italic`, `strikethrough`)
-- `onSend`: `(payload: SimpleEditorSendPayload) => void`
-- `outputFormat`: `'md' (default) | 'json'`
-- `clearOnSend`: `true (default) | false`
-- `allowEmptySend`: `false (default) | true`
-- `submitOnEnter`: `false (default) | true`
-- `allowShiftEnter`: `true (default) | false`
-- `showSendButton`: `true (default) | false`
-- `sendButtonPlacement`: `'inside' (default) | 'right'`
-- `sendButtonContent`: `ReactNode` (default `'Send'`)
-- `sendButtonAriaLabel`: `string` (default `'Send message'`)
-- `sendButtonClassName`: `string`
-- `showBottomToolbar`: `true (default) | false`
-- `toolbarButtons`: `readonly SimpleToolbarButton[]`
-- `toolbarClassName`: `string`
-- `toolbarStyle`: `CSSProperties`
-- `scrollAreaClassName`: `string`
-- `minHeight` / `maxHeight` / `minWidth` / `maxWidth`
-
-## Behavior
-
-- Allows only bold, italic, and strikethrough formatting.
-- Always runs visual mode only.
-- Uses custom shortcut defaults for chat-style typing.
-- Supports auto-grow until `maxHeight`, then internal scrolling.
-- Supports click-to-place-caret in the nearest line of text.
-
-## `SimpleEditorSendPayload`
-
-`onSend` receives:
-
-- `format`: `'md' | 'json'`
-- `text`: output text in the selected `outputFormat`
-- `markdown`: markdown representation of current content
-- `json`: JSON representation of current content
-
-## Example: right-side send button
-
-```tsx
-<SimpleEditor
-  sendButtonPlacement="right"
-  submitOnEnter
-  onSend={({ markdown }) => {
-    console.log(markdown);
-  }}
-/>
-```
 

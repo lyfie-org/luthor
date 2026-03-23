@@ -1,0 +1,908 @@
+---
+title: "Exports Map"
+description: "Complete export map for @lyfie/luthor and @lyfie/luthor-headless."
+package: "shared"
+docType: "reference"
+surface: "tooling"
+keywords:
+  - "exports map"
+  - "@lyfie/luthor exports"
+  - "@lyfie/luthor-headless exports"
+props:
+  - "className"
+  - "onReady"
+  - "initialTheme"
+  - "onThemeChange"
+  - "theme"
+  - "defaultContent"
+  - "showDefaultContent"
+  - "placeholder"
+  - "defaultEditorView"
+  - "initialMode"
+  - "isEditorViewTabsVisible"
+  - "isEditorViewsTabVisible"
+  - "availableModes"
+  - "variantClassName"
+  - "toolbarLayout"
+  - "toolbarVisibility"
+  - "toolbarPosition"
+  - "toolbarAlignment"
+  - "toolbarClassName"
+  - "toolbarStyleVars"
+  - "quoteClassName"
+  - "quoteStyleVars"
+  - "defaultSettings"
+  - "editorThemeOverrides"
+  - "isToolbarEnabled"
+  - "isToolbarPinned"
+  - "fontFamilyOptions"
+  - "fontSizeOptions"
+  - "lineHeightOptions"
+  - "minimumDefaultLineHeight"
+  - "scaleByRatio"
+  - "headingOptions"
+  - "paragraphLabel"
+  - "syncHeadingOptionsWithCommands"
+  - "slashCommandVisibility"
+  - "shortcutConfig"
+  - "commandPaletteShortcutOnly"
+  - "isListStyleDropdownEnabled"
+  - "editOnClick"
+  - "isDraggableBoxEnabled"
+  - "featureFlags"
+  - "sourceMetadataMode"
+  - "markdownBridgeFlavor"
+  - "markdownSourceOfTruth"
+  - "isSyntaxHighlightingEnabled"
+  - "syntaxHighlightColorMode"
+  - "syntaxHighlightColors"
+  - "maxAutoDetectCodeLength"
+  - "isCopyAllowed"
+  - "languageOptions"
+  - "showLineNumbers"
+  - "maxListIndentation"
+exports:
+  - "AlignCenterIcon"
+  - "AlignJustifyIcon"
+  - "AlignLeftIcon"
+  - "AlignRightIcon"
+  - "BLOCK_HEADING_LEVELS"
+  - "BlockFormat"
+  - "BlockHeadingLevel"
+  - "BoldIcon"
+  - "Button"
+  - "ChevronDownIcon"
+  - "ClassNameToken"
+  - "CloseIcon"
+  - "CodeBlockIcon"
+  - "CodeIcon"
+  - "CodeIntelligenceCommands"
+  - "CodeIntelligenceConfig"
+  - "codeIntelligenceExtension"
+  - "CodeIntelligenceExtension"
+  - "CommandConfig"
+  - "CommandGenerationOptions"
+  - "CommandIcon"
+  - "CommandPalette"
+  - "commandsToCommandPaletteItems"
+  - "commandsToSlashCommandItems"
+  - "ComposeEditor"
+  - "ComposeEditorProps"
+  - "composePreset"
+  - "CoreEditorActiveStates"
+  - "CoreEditorCommands"
+  - "CoreEditorMode"
+  - "CoreTheme"
+  - "CoreToolbarClassNames"
+  - "createDefaultSettingsStyleVarRecord"
+  - "createExtensiveExtensions"
+  - "createExtensivePreset"
+  - "createFeatureGuardedCommands"
+  - "createFloatingToolbarExtension"
+  - "createModeCache"
+  - "createPresetEditorConfig"
+  - "DEFAULT_TOOLBAR_LAYOUT"
+  - "DefaultSettings"
+  - "Dialog"
+  - "Dropdown"
+  - "EditorPreset"
+  - "EditorThemeOverrides"
+  - "EmojiIcon"
+  - "EmojiSuggestionMenu"
+  - "ExtensiveEditor"
+  - "ExtensiveEditorMode"
+  - "ExtensiveEditorProps"
+  - "ExtensiveEditorRef"
+  - "extensiveExtensions"
+  - "ExtensiveExtensionsConfig"
+  - "extensivePreset"
+  - "ExtensivePresetConfig"
+  - "EyeIcon"
+  - "FeatureFlag"
+  - "FeatureFlagOverrides"
+  - "FeatureFlags"
+  - "FeatureFlagsLike"
+  - "FeatureShortcutSpec"
+  - "FileCodeIcon"
+  - "filterToolbarLayout"
+  - "FloatingToolbar"
+  - "FloatingToolbarProps"
+  - "formatHTMLSource"
+  - "formatJSONSource"
+  - "formatMarkdownSource"
+  - "generateCommands"
+  - "headless"
+  - "headlessEditorPreset"
+  - "HeadlessEditorPreset"
+  - "HeadlessEditorPresetProps"
+  - "HighlighterIcon"
+  - "HTMLEditor"
+  - "HTMLEditorMode"
+  - "htmlEditorPreset"
+  - "HTMLEditorProps"
+  - "IconButton"
+  - "ImageAlignment"
+  - "ImageIcon"
+  - "IndentIcon"
+  - "InsertImageConfig"
+  - "InsertTableConfig"
+  - "invalidateModeCache"
+  - "isEditableCommandTarget"
+  - "isModeCached"
+  - "isShortcutMatch"
+  - "isToolbarItemSupported"
+  - "isToolbarItemVisible"
+  - "ItalicIcon"
+  - "joinClassNames"
+  - "KeyboardShortcut"
+  - "LegacyRichEditor"
+  - "LegacyRichEditorMode"
+  - "LegacyRichEditorProps"
+  - "legacyRichPreset"
+  - "LegacyRichSourceFormat"
+  - "LinkHoverBubble"
+  - "LinkHoverBubbleProps"
+  - "LinkIcon"
+  - "ListCheckIcon"
+  - "ListIcon"
+  - "ListOrderedIcon"
+  - "MarkDownEditor"
+  - "MarkDownEditorMode"
+  - "MarkDownEditorProps"
+  - "markModeCached"
+  - "mdEditorPreset"
+  - "mergeToolbarVisibilityWithFeatures"
+  - "MinusIcon"
+  - "ModeTabs"
+  - "MoonIcon"
+  - "normalizeStyleVarsKey"
+  - "OutdentIcon"
+  - "PaletteIcon"
+  - "PencilIcon"
+  - "PresetFeatureOverrides"
+  - "PresetFeaturePolicy"
+  - "PresetModeCache"
+  - "presetRegistry"
+  - "QuoteIcon"
+  - "QuoteStyleVars"
+  - "RedoIcon"
+  - "registerKeyboardShortcuts"
+  - "SearchIcon"
+  - "Select"
+  - "setFloatingToolbarContext"
+  - "ShortcutBindingOverride"
+  - "ShortcutConfig"
+  - "SimpleEditor"
+  - "SimpleEditorOutputFormat"
+  - "simpleEditorPreset"
+  - "SimpleEditorProps"
+  - "SimpleEditorSendPayload"
+  - "SimpleFormattingOptions"
+  - "SimpleToolbarButton"
+  - "SlashCommandMenu"
+  - "SlashCommandVisibility"
+  - "SlashCommandVisibilityFilters"
+  - "SlashCommandVisibilitySelection"
+  - "SlashEditor"
+  - "slashEditorPreset"
+  - "SlashEditorProps"
+  - "SourceView"
+  - "StrikethroughIcon"
+  - "StyleVarRecord"
+  - "StyleVarValueRecord"
+  - "SubscriptIcon"
+  - "SunIcon"
+  - "SuperscriptIcon"
+  - "SyntaxHighlightColorMode"
+  - "SyntaxHighlightColors"
+  - "SyntaxHighlightColorTokens"
+  - "TableIcon"
+  - "TextAlignment"
+  - "Toolbar"
+  - "ToolbarAlignment"
+  - "ToolbarFeatureMap"
+  - "ToolbarItemType"
+  - "ToolbarLayout"
+  - "ToolbarPosition"
+  - "ToolbarProps"
+  - "ToolbarSection"
+  - "ToolbarStyleVars"
+  - "ToolbarVisibility"
+  - "TRADITIONAL_TOOLBAR_LAYOUT"
+  - "TypeIcon"
+  - "UnderlineIcon"
+  - "UndoIcon"
+  - "UnlinkIcon"
+  - "UploadIcon"
+  - "Alignment"
+  - "appendMetadataEnvelopes"
+  - "BaseCommands"
+  - "BaseExtension"
+  - "BaseExtensionConfig"
+  - "BaseProvider"
+  - "blockFormatExtension"
+  - "BlockFormatExtension"
+  - "boldExtension"
+  - "BoldExtension"
+  - "BridgeMode"
+  - "clearLexicalSelection"
+  - "codeExtension"
+  - "CodeExtension"
+  - "CodeExtensionConfig"
+  - "codeFormatExtension"
+  - "CodeFormatExtension"
+  - "CodeHighlightProvider"
+  - "CodeHighlightProviderConfig"
+  - "CodeIntelligenceCommands"
+  - "CodeIntelligenceConfig"
+  - "codeIntelligenceExtension"
+  - "CodeIntelligenceExtension"
+  - "CodeLanguageOptionsConfig"
+  - "CodeLanguageOptionsMode"
+  - "CommandPaletteCommands"
+  - "commandPaletteExtension"
+  - "CommandPaletteExtension"
+  - "CommandPaletteItem"
+  - "CommandPaletteStateQueries"
+  - "ContextMenuCommands"
+  - "ContextMenuConfig"
+  - "contextMenuExtension"
+  - "ContextMenuExtension"
+  - "ContextMenuItem"
+  - "ContextMenuStateQueries"
+  - "createCustomNodeExtension"
+  - "createEditorSystem"
+  - "createEditorThemeStyleVars"
+  - "createExtension"
+  - "defaultLuthorTheme"
+  - "draggableBlockExtension"
+  - "DraggableBlockExtension"
+  - "DraggableCommands"
+  - "DraggableConfig"
+  - "DraggableStateQueries"
+  - "EditorConfig"
+  - "EditorContextType"
+  - "EmojiCatalogAdapter"
+  - "EmojiCatalogItem"
+  - "EmojiCommands"
+  - "EmojiConfig"
+  - "emojiExtension"
+  - "EmojiExtension"
+  - "EmojiStateQueries"
+  - "EmojiSuggestionState"
+  - "enterKeyBehaviorExtension"
+  - "EnterKeyBehaviorExtension"
+  - "Extension"
+  - "ExtensionCategory"
+  - "ExtractCommands"
+  - "ExtractedMetadataEnvelopes"
+  - "extractHTMLMetadataPatch"
+  - "extractMarkdownMetadataPatch"
+  - "extractMetadataEnvelopes"
+  - "ExtractNames"
+  - "ExtractPlugins"
+  - "ExtractStateQueries"
+  - "FloatingCommands"
+  - "FloatingConfig"
+  - "FloatingStateQueries"
+  - "floatingToolbarExtension"
+  - "FloatingToolbarExtension"
+  - "FontCssLoadStrategy"
+  - "FontFamilyConfig"
+  - "fontFamilyExtension"
+  - "FontFamilyExtension"
+  - "FontFamilyOption"
+  - "FontSizeConfig"
+  - "fontSizeExtension"
+  - "FontSizeExtension"
+  - "FontSizeOption"
+  - "historyExtension"
+  - "HistoryExtension"
+  - "horizontalRuleExtension"
+  - "HorizontalRuleExtension"
+  - "HTML_NATIVE_KEY_MAP"
+  - "HTML_SUPPORTED_NODE_TYPES"
+  - "HtmlBridgeOptions"
+  - "htmlToJSON"
+  - "iframeEmbedExtension"
+  - "IframeEmbedExtension"
+  - "ImageCommands"
+  - "ImageComponentProps"
+  - "imageExtension"
+  - "ImageExtension"
+  - "ImageExtensionConfig"
+  - "ImagePayload"
+  - "ImageStateQueries"
+  - "isDefaultBridgeValue"
+  - "isHTMLRepresentable"
+  - "isLuthorTheme"
+  - "isMarkdownRepresentable"
+  - "italicExtension"
+  - "ItalicExtension"
+  - "JsonDocument"
+  - "jsonToHTML"
+  - "jsonToMarkdown"
+  - "LexicalEditor"
+  - "LexicalNodeRegistration"
+  - "LIGHTWEIGHT_EMOJI_CATALOG"
+  - "LineHeightConfig"
+  - "lineHeightExtension"
+  - "LineHeightExtension"
+  - "LineHeightOption"
+  - "linkExtension"
+  - "LinkExtension"
+  - "listExtension"
+  - "ListExtension"
+  - "LUTHOR_EDITOR_THEME_TOKENS"
+  - "LuthorEditorThemeOverrides"
+  - "LuthorEditorThemeToken"
+  - "LuthorTheme"
+  - "MARKDOWN_NATIVE_KEY_MAP"
+  - "MARKDOWN_SUPPORTED_NODE_TYPES"
+  - "MARKDOWN_TEXT_NATIVE_FORMAT_MASK"
+  - "MarkdownBridgeFlavor"
+  - "MarkdownBridgeOptions"
+  - "markdownToJSON"
+  - "mergeThemes"
+  - "MetadataEnvelope"
+  - "PreparedBridgeDocument"
+  - "prepareDocumentForBridge"
+  - "rehydrateDocumentFromEnvelopes"
+  - "resolveLinkNodeKeyFromAnchor"
+  - "RichText"
+  - "RichTextComponentProps"
+  - "RichTextConfig"
+  - "richTextExtension"
+  - "SerializedImageNode"
+  - "SlashCommandCommands"
+  - "SlashCommandConfig"
+  - "slashCommandExtension"
+  - "SlashCommandExtension"
+  - "SlashCommandItem"
+  - "SlashCommandMenuState"
+  - "SlashCommandStateQueries"
+  - "SourceMetadataMode"
+  - "strikethroughExtension"
+  - "StrikethroughExtension"
+  - "subscriptExtension"
+  - "SubscriptExtension"
+  - "superscriptExtension"
+  - "SuperscriptExtension"
+  - "tabIndentExtension"
+  - "TabIndentExtension"
+  - "TableConfig"
+  - "tableExtension"
+  - "TableExtension"
+  - "TextColorConfig"
+  - "textColorExtension"
+  - "TextColorExtension"
+  - "TextColorOption"
+  - "TextFormatExtension"
+  - "TextHighlightConfig"
+  - "textHighlightExtension"
+  - "TextHighlightExtension"
+  - "TextHighlightOption"
+  - "ToolbarItem"
+  - "underlineExtension"
+  - "UnderlineExtension"
+  - "useBaseEditor"
+  - "youTubeEmbedExtension"
+  - "YouTubeEmbedExtension"
+commands:
+  - "block.align-center"
+  - "block.align-justify"
+  - "block.align-left"
+  - "block.align-right"
+  - "block.code-language"
+  - "block.code-language.auto"
+  - "block.codeblock"
+  - "block.heading1"
+  - "block.heading2"
+  - "block.heading3"
+  - "block.heading4"
+  - "block.heading5"
+  - "block.heading6"
+  - "block.paragraph"
+  - "block.quote"
+  - "edit.redo"
+  - "edit.undo"
+  - "format.bold"
+  - "format.code"
+  - "format.italic"
+  - "format.strikethrough"
+  - "format.subscript"
+  - "format.superscript"
+  - "format.underline"
+  - "insert.emoji"
+  - "insert.gif"
+  - "insert.horizontal-rule"
+  - "insert.iframe"
+  - "insert.image"
+  - "insert.table"
+  - "insert.youtube"
+  - "link.insert"
+  - "link.remove"
+  - "list.bullet"
+  - "list.check"
+  - "list.numbered"
+  - "palette.show"
+extensions:
+  - "BaseExtension"
+  - "blockFormatExtension"
+  - "BlockFormatExtension"
+  - "boldExtension"
+  - "BoldExtension"
+  - "codeExtension"
+  - "CodeExtension"
+  - "codeFormatExtension"
+  - "CodeFormatExtension"
+  - "codeIntelligenceExtension"
+  - "CodeIntelligenceExtension"
+  - "commandPaletteExtension"
+  - "CommandPaletteExtension"
+  - "contextMenuExtension"
+  - "ContextMenuExtension"
+  - "createCustomNodeExtension"
+  - "createExtension"
+  - "draggableBlockExtension"
+  - "DraggableBlockExtension"
+  - "emojiExtension"
+  - "EmojiExtension"
+  - "enterKeyBehaviorExtension"
+  - "EnterKeyBehaviorExtension"
+  - "Extension"
+  - "floatingToolbarExtension"
+  - "FloatingToolbarExtension"
+  - "fontFamilyExtension"
+  - "FontFamilyExtension"
+  - "fontSizeExtension"
+  - "FontSizeExtension"
+  - "historyExtension"
+  - "HistoryExtension"
+  - "horizontalRuleExtension"
+  - "HorizontalRuleExtension"
+  - "iframeEmbedExtension"
+  - "IframeEmbedExtension"
+  - "imageExtension"
+  - "ImageExtension"
+  - "italicExtension"
+  - "ItalicExtension"
+  - "lineHeightExtension"
+  - "LineHeightExtension"
+  - "linkExtension"
+  - "LinkExtension"
+  - "listExtension"
+  - "ListExtension"
+  - "richTextExtension"
+  - "slashCommandExtension"
+  - "SlashCommandExtension"
+  - "strikethroughExtension"
+  - "StrikethroughExtension"
+  - "subscriptExtension"
+  - "SubscriptExtension"
+  - "superscriptExtension"
+  - "SuperscriptExtension"
+  - "tabIndentExtension"
+  - "TabIndentExtension"
+  - "tableExtension"
+  - "TableExtension"
+  - "textColorExtension"
+  - "TextColorExtension"
+  - "TextFormatExtension"
+  - "textHighlightExtension"
+  - "TextHighlightExtension"
+  - "underlineExtension"
+  - "UnderlineExtension"
+  - "youTubeEmbedExtension"
+  - "YouTubeEmbedExtension"
+nodes:
+  - "root"
+  - "paragraph"
+  - "text"
+  - "linebreak"
+  - "tab"
+  - "heading"
+  - "quote"
+  - "list"
+  - "listitem"
+  - "link"
+  - "autolink"
+  - "code"
+  - "code-highlight"
+  - "horizontalrule"
+  - "image"
+  - "iframe-embed"
+  - "youtube-embed"
+  - "table"
+  - "tablerow"
+  - "tablecell"
+frameworks:
+  []
+lastVerifiedFrom:
+  - "packages/luthor/dist/index.d.ts"
+  - "packages/headless/dist/index.d.ts"
+navGroup: "reference"
+navOrder: 20
+---
+
+# Exports Map
+
+This page is the canonical export inventory.
+
+## What this page answers
+
+- Which public exports are available from each package?
+
+## @lyfie/luthor exports
+
+- `AlignCenterIcon`
+- `AlignJustifyIcon`
+- `AlignLeftIcon`
+- `AlignRightIcon`
+- `BLOCK_HEADING_LEVELS`
+- `BlockFormat`
+- `BlockHeadingLevel`
+- `BoldIcon`
+- `Button`
+- `ChevronDownIcon`
+- `ClassNameToken`
+- `CloseIcon`
+- `CodeBlockIcon`
+- `CodeIcon`
+- `CodeIntelligenceCommands`
+- `CodeIntelligenceConfig`
+- `codeIntelligenceExtension`
+- `CodeIntelligenceExtension`
+- `CommandConfig`
+- `CommandGenerationOptions`
+- `CommandIcon`
+- `CommandPalette`
+- `commandsToCommandPaletteItems`
+- `commandsToSlashCommandItems`
+- `ComposeEditor`
+- `ComposeEditorProps`
+- `composePreset`
+- `CoreEditorActiveStates`
+- `CoreEditorCommands`
+- `CoreEditorMode`
+- `CoreTheme`
+- `CoreToolbarClassNames`
+- `createDefaultSettingsStyleVarRecord`
+- `createExtensiveExtensions`
+- `createExtensivePreset`
+- `createFeatureGuardedCommands`
+- `createFloatingToolbarExtension`
+- `createModeCache`
+- `createPresetEditorConfig`
+- `DEFAULT_TOOLBAR_LAYOUT`
+- `DefaultSettings`
+- `Dialog`
+- `Dropdown`
+- `EditorPreset`
+- `EditorThemeOverrides`
+- `EmojiIcon`
+- `EmojiSuggestionMenu`
+- `ExtensiveEditor`
+- `ExtensiveEditorMode`
+- `ExtensiveEditorProps`
+- `ExtensiveEditorRef`
+- `extensiveExtensions`
+- `ExtensiveExtensionsConfig`
+- `extensivePreset`
+- `ExtensivePresetConfig`
+- `EyeIcon`
+- `FeatureFlag`
+- `FeatureFlagOverrides`
+- `FeatureFlags`
+- `FeatureFlagsLike`
+- `FeatureShortcutSpec`
+- `FileCodeIcon`
+- `filterToolbarLayout`
+- `FloatingToolbar`
+- `FloatingToolbarProps`
+- `formatHTMLSource`
+- `formatJSONSource`
+- `formatMarkdownSource`
+- `generateCommands`
+- `headless`
+- `headlessEditorPreset`
+- `HeadlessEditorPreset`
+- `HeadlessEditorPresetProps`
+- `HighlighterIcon`
+- `HTMLEditor`
+- `HTMLEditorMode`
+- `htmlEditorPreset`
+- `HTMLEditorProps`
+- `IconButton`
+- `ImageAlignment`
+- `ImageIcon`
+- `IndentIcon`
+- `InsertImageConfig`
+- `InsertTableConfig`
+- `invalidateModeCache`
+- `isEditableCommandTarget`
+- `isModeCached`
+- `isShortcutMatch`
+- `isToolbarItemSupported`
+- `isToolbarItemVisible`
+- `ItalicIcon`
+- `joinClassNames`
+- `KeyboardShortcut`
+- `LegacyRichEditor`
+- `LegacyRichEditorMode`
+- `LegacyRichEditorProps`
+- `legacyRichPreset`
+- `LegacyRichSourceFormat`
+- `LinkHoverBubble`
+- `LinkHoverBubbleProps`
+- `LinkIcon`
+- `ListCheckIcon`
+- `ListIcon`
+- `ListOrderedIcon`
+- `MarkDownEditor`
+- `MarkDownEditorMode`
+- `MarkDownEditorProps`
+- `markModeCached`
+- `mdEditorPreset`
+- `mergeToolbarVisibilityWithFeatures`
+- `MinusIcon`
+- `ModeTabs`
+- `MoonIcon`
+- `normalizeStyleVarsKey`
+- `OutdentIcon`
+- `PaletteIcon`
+- `PencilIcon`
+- `PresetFeatureOverrides`
+- `PresetFeaturePolicy`
+- `PresetModeCache`
+- `presetRegistry`
+- `QuoteIcon`
+- `QuoteStyleVars`
+- `RedoIcon`
+- `registerKeyboardShortcuts`
+- `SearchIcon`
+- `Select`
+- `setFloatingToolbarContext`
+- `ShortcutBindingOverride`
+- `ShortcutConfig`
+- `SimpleEditor`
+- `SimpleEditorOutputFormat`
+- `simpleEditorPreset`
+- `SimpleEditorProps`
+- `SimpleEditorSendPayload`
+- `SimpleFormattingOptions`
+- `SimpleToolbarButton`
+- `SlashCommandMenu`
+- `SlashCommandVisibility`
+- `SlashCommandVisibilityFilters`
+- `SlashCommandVisibilitySelection`
+- `SlashEditor`
+- `slashEditorPreset`
+- `SlashEditorProps`
+- `SourceView`
+- `StrikethroughIcon`
+- `StyleVarRecord`
+- `StyleVarValueRecord`
+- `SubscriptIcon`
+- `SunIcon`
+- `SuperscriptIcon`
+- `SyntaxHighlightColorMode`
+- `SyntaxHighlightColors`
+- `SyntaxHighlightColorTokens`
+- `TableIcon`
+- `TextAlignment`
+- `Toolbar`
+- `ToolbarAlignment`
+- `ToolbarFeatureMap`
+- `ToolbarItemType`
+- `ToolbarLayout`
+- `ToolbarPosition`
+- `ToolbarProps`
+- `ToolbarSection`
+- `ToolbarStyleVars`
+- `ToolbarVisibility`
+- `TRADITIONAL_TOOLBAR_LAYOUT`
+- `TypeIcon`
+- `UnderlineIcon`
+- `UndoIcon`
+- `UnlinkIcon`
+- `UploadIcon`
+
+## @lyfie/luthor-headless exports
+
+- `Alignment`
+- `appendMetadataEnvelopes`
+- `BaseCommands`
+- `BaseExtension`
+- `BaseExtensionConfig`
+- `BaseProvider`
+- `blockFormatExtension`
+- `BlockFormatExtension`
+- `boldExtension`
+- `BoldExtension`
+- `BridgeMode`
+- `clearLexicalSelection`
+- `codeExtension`
+- `CodeExtension`
+- `CodeExtensionConfig`
+- `codeFormatExtension`
+- `CodeFormatExtension`
+- `CodeHighlightProvider`
+- `CodeHighlightProviderConfig`
+- `CodeIntelligenceCommands`
+- `CodeIntelligenceConfig`
+- `codeIntelligenceExtension`
+- `CodeIntelligenceExtension`
+- `CodeLanguageOptionsConfig`
+- `CodeLanguageOptionsMode`
+- `CommandPaletteCommands`
+- `commandPaletteExtension`
+- `CommandPaletteExtension`
+- `CommandPaletteItem`
+- `CommandPaletteStateQueries`
+- `ContextMenuCommands`
+- `ContextMenuConfig`
+- `contextMenuExtension`
+- `ContextMenuExtension`
+- `ContextMenuItem`
+- `ContextMenuStateQueries`
+- `createCustomNodeExtension`
+- `createEditorSystem`
+- `createEditorThemeStyleVars`
+- `createExtension`
+- `defaultLuthorTheme`
+- `draggableBlockExtension`
+- `DraggableBlockExtension`
+- `DraggableCommands`
+- `DraggableConfig`
+- `DraggableStateQueries`
+- `EditorConfig`
+- `EditorContextType`
+- `EmojiCatalogAdapter`
+- `EmojiCatalogItem`
+- `EmojiCommands`
+- `EmojiConfig`
+- `emojiExtension`
+- `EmojiExtension`
+- `EmojiStateQueries`
+- `EmojiSuggestionState`
+- `enterKeyBehaviorExtension`
+- `EnterKeyBehaviorExtension`
+- `Extension`
+- `ExtensionCategory`
+- `ExtractCommands`
+- `ExtractedMetadataEnvelopes`
+- `extractHTMLMetadataPatch`
+- `extractMarkdownMetadataPatch`
+- `extractMetadataEnvelopes`
+- `ExtractNames`
+- `ExtractPlugins`
+- `ExtractStateQueries`
+- `FloatingCommands`
+- `FloatingConfig`
+- `FloatingStateQueries`
+- `floatingToolbarExtension`
+- `FloatingToolbarExtension`
+- `FontCssLoadStrategy`
+- `FontFamilyConfig`
+- `fontFamilyExtension`
+- `FontFamilyExtension`
+- `FontFamilyOption`
+- `FontSizeConfig`
+- `fontSizeExtension`
+- `FontSizeExtension`
+- `FontSizeOption`
+- `historyExtension`
+- `HistoryExtension`
+- `horizontalRuleExtension`
+- `HorizontalRuleExtension`
+- `HTML_NATIVE_KEY_MAP`
+- `HTML_SUPPORTED_NODE_TYPES`
+- `HtmlBridgeOptions`
+- `htmlToJSON`
+- `iframeEmbedExtension`
+- `IframeEmbedExtension`
+- `ImageCommands`
+- `ImageComponentProps`
+- `imageExtension`
+- `ImageExtension`
+- `ImageExtensionConfig`
+- `ImagePayload`
+- `ImageStateQueries`
+- `isDefaultBridgeValue`
+- `isHTMLRepresentable`
+- `isLuthorTheme`
+- `isMarkdownRepresentable`
+- `italicExtension`
+- `ItalicExtension`
+- `JsonDocument`
+- `jsonToHTML`
+- `jsonToMarkdown`
+- `LexicalEditor`
+- `LexicalNodeRegistration`
+- `LIGHTWEIGHT_EMOJI_CATALOG`
+- `LineHeightConfig`
+- `lineHeightExtension`
+- `LineHeightExtension`
+- `LineHeightOption`
+- `linkExtension`
+- `LinkExtension`
+- `listExtension`
+- `ListExtension`
+- `LUTHOR_EDITOR_THEME_TOKENS`
+- `LuthorEditorThemeOverrides`
+- `LuthorEditorThemeToken`
+- `LuthorTheme`
+- `MARKDOWN_NATIVE_KEY_MAP`
+- `MARKDOWN_SUPPORTED_NODE_TYPES`
+- `MARKDOWN_TEXT_NATIVE_FORMAT_MASK`
+- `MarkdownBridgeFlavor`
+- `MarkdownBridgeOptions`
+- `markdownToJSON`
+- `mergeThemes`
+- `MetadataEnvelope`
+- `PreparedBridgeDocument`
+- `prepareDocumentForBridge`
+- `rehydrateDocumentFromEnvelopes`
+- `resolveLinkNodeKeyFromAnchor`
+- `RichText`
+- `RichTextComponentProps`
+- `RichTextConfig`
+- `richTextExtension`
+- `SerializedImageNode`
+- `SlashCommandCommands`
+- `SlashCommandConfig`
+- `slashCommandExtension`
+- `SlashCommandExtension`
+- `SlashCommandItem`
+- `SlashCommandMenuState`
+- `SlashCommandStateQueries`
+- `SourceMetadataMode`
+- `strikethroughExtension`
+- `StrikethroughExtension`
+- `subscriptExtension`
+- `SubscriptExtension`
+- `superscriptExtension`
+- `SuperscriptExtension`
+- `tabIndentExtension`
+- `TabIndentExtension`
+- `TableConfig`
+- `tableExtension`
+- `TableExtension`
+- `TextColorConfig`
+- `textColorExtension`
+- `TextColorExtension`
+- `TextColorOption`
+- `TextFormatExtension`
+- `TextHighlightConfig`
+- `textHighlightExtension`
+- `TextHighlightExtension`
+- `TextHighlightOption`
+- `ToolbarItem`
+- `underlineExtension`
+- `UnderlineExtension`
+- `useBaseEditor`
+- `youTubeEmbedExtension`
+- `YouTubeEmbedExtension`
+
+

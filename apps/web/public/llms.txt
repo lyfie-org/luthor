@@ -19,12 +19,19 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [getting-started/ai-agents-and-vibe-coding.md](https://www.luthor.fyi/docs/getting-started/ai-agents-and-vibe-coding/) - AI Agents and Vibe Coding
 - [getting-started/capabilities.md](https://www.luthor.fyi/docs/getting-started/capabilities/) - Capabilities
 - [getting-started/contributor-guide.md](https://www.luthor.fyi/docs/getting-started/contributor-guide/) - Contributor Guide
-- [getting-started/index.md](https://www.luthor.fyi/docs/getting-started/) - Introduction
+- [getting-started/dependencies.md](https://www.luthor.fyi/docs/getting-started/dependencies/) - Dependencies
+- [getting-started/index.md](https://www.luthor.fyi/docs/getting-started/) - Getting Started
 - [getting-started/installation.md](https://www.luthor.fyi/docs/getting-started/installation/) - Installation
-- [getting-started/luthor-headless.md](https://www.luthor.fyi/docs/getting-started/luthor-headless/) - @lyfie/luthor-headless
-- [getting-started/luthor.md](https://www.luthor.fyi/docs/getting-started/luthor/) - @lyfie/luthor
-- [luthor-headless/architecture.md](https://www.luthor.fyi/docs/luthor-headless/architecture/) - Architecture
+- [getting-started/quickstart-headless.md](https://www.luthor.fyi/docs/getting-started/quickstart-headless/) - Quickstart: @lyfie/luthor-headless
+- [getting-started/quickstart-luthor.md](https://www.luthor.fyi/docs/getting-started/quickstart-luthor/) - Quickstart: @lyfie/luthor
+- [integrations/astro.md](https://www.luthor.fyi/docs/integrations/astro/) - Astro Integration
+- [integrations/nextjs.md](https://www.luthor.fyi/docs/integrations/nextjs/) - Next.js Integration
+- [integrations/react.md](https://www.luthor.fyi/docs/integrations/react/) - React Integration
+- [integrations/remix.md](https://www.luthor.fyi/docs/integrations/remix/) - Remix Integration
+- [integrations/vite.md](https://www.luthor.fyi/docs/integrations/vite/) - Vite Integration
+- [luthor-headless/architecture.md](https://www.luthor.fyi/docs/luthor-headless/architecture/) - @lyfie/luthor-headless Architecture
 - [luthor-headless/extensions-and-api.md](https://www.luthor.fyi/docs/luthor-headless/extensions-and-api/) - Extensions and API
+- [luthor-headless/extensions-reference.md](https://www.luthor.fyi/docs/luthor-headless/extensions-reference/) - Extensions Reference
 - [luthor-headless/features.md](https://www.luthor.fyi/docs/luthor-headless/features/) - Features
 - [luthor-headless/features/code-and-devtools.md](https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/) - Code and Devtools
 - [luthor-headless/features/customization-and-theming.md](https://www.luthor.fyi/docs/luthor-headless/features/customization-and-theming/) - Customization and Theming
@@ -33,18 +40,25 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [luthor-headless/features/structure-and-lists.md](https://www.luthor.fyi/docs/luthor-headless/features/structure-and-lists/) - Structure and Lists
 - [luthor-headless/features/typography-and-text.md](https://www.luthor.fyi/docs/luthor-headless/features/typography-and-text/) - Typography and Text
 - [luthor-headless/metadata-comment-system.md](https://www.luthor.fyi/docs/luthor-headless/metadata-comment-system/) - Metadata Comment System
-- [luthor/architecture.md](https://www.luthor.fyi/docs/luthor/architecture/) - Architecture
+- [luthor-headless/nodes-and-bridges-reference.md](https://www.luthor.fyi/docs/luthor-headless/nodes-and-bridges-reference/) - Nodes and Bridges Reference
+- [luthor-headless/overview.md](https://www.luthor.fyi/docs/luthor-headless/overview/) - @lyfie/luthor-headless Overview
+- [luthor/architecture.md](https://www.luthor.fyi/docs/luthor/architecture/) - @lyfie/luthor Architecture
+- [luthor/commands-reference.md](https://www.luthor.fyi/docs/luthor/commands-reference/) - Commands Reference
 - [luthor/feature-flags.md](https://www.luthor.fyi/docs/luthor/feature-flags/) - Feature Flags
-- [luthor/presets.md](https://www.luthor.fyi/docs/luthor/presets/) - Presets
+- [luthor/overview.md](https://www.luthor.fyi/docs/luthor/overview/) - @lyfie/luthor Overview
+- [luthor/presets.md](https://www.luthor.fyi/docs/luthor/presets/) - Presets Catalog
 - [luthor/presets/compose-editor.md](https://www.luthor.fyi/docs/luthor/presets/compose-editor/) - Compose Editor
 - [luthor/presets/extensive-editor.md](https://www.luthor.fyi/docs/luthor/presets/extensive-editor/) - Extensive Editor
-- [luthor/presets/headless-editor-preset.md](https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/) - Headless Editor
+- [luthor/presets/headless-editor-preset.md](https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/) - Headless Editor Preset
 - [luthor/presets/html-editor.md](https://www.luthor.fyi/docs/luthor/presets/html-editor/) - HTML Editor
 - [luthor/presets/legacy-rich-editor.md](https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/) - Legacy Rich Editor
-- [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/) - MarkDown Editor
+- [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/) - Markdown Editor
 - [luthor/presets/simple-editor.md](https://www.luthor.fyi/docs/luthor/presets/simple-editor/) - Simple Editor
 - [luthor/presets/slash-editor.md](https://www.luthor.fyi/docs/luthor/presets/slash-editor/) - Slash Editor
 - [luthor/props-reference.md](https://www.luthor.fyi/docs/luthor/props-reference/) - Props Reference
+- [reference/exports-map.md](https://www.luthor.fyi/docs/reference/exports-map/) - Exports Map
+- [reference/preset-selector.md](https://www.luthor.fyi/docs/reference/preset-selector/) - Preset Selector
+- [reference/search-guide.md](https://www.luthor.fyi/docs/reference/search-guide/) - Search Guide
 
 ## AI Agent Workflow
 
@@ -58,145 +72,215 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### AI Agents and Vibe Coding
 - File: getting-started/ai-agents-and-vibe-coding.md
 - URL: https://www.luthor.fyi/docs/getting-started/ai-agents-and-vibe-coding/
-- Summary: AI Agents and Vibe Coding If you use AI coding agents, this page is for you. Luthor publishes two docs artifacts specifically for agent context: /llms.txt : lightweight index and structured docs map. /llms full.txt : full markdown corpus from all docs pages. Which file should I load? Use /llms.txt when your agent alrea...
+- Summary: title: "AI Agents and Vibe Coding" description: "Use llms.txt and llms full.txt with strict API grounded prompts and verification workflow." package: "shared" docType: "guide" surface: "tooling" keywords: "llms.txt" "llms full.txt" "ai agent workflow" "prompting" props: [] exports: [] commands: "insert.table" "format.b...
 
 ### Capabilities
 - File: getting-started/capabilities.md
 - URL: https://www.luthor.fyi/docs/getting-started/capabilities/
-- Summary: title: Capabilities description: Complete feature overview for Luthor, with package availability and command level mapping. Capabilities This page shows what Luthor can do today, in plain language, with quick package mapping. For Lexical engine internals, see: lexical.dev/docs . Capability index 1. Typography Controls ...
+- Summary: title: "Capabilities" description: "Capability matrix across presets and headless runtime with direct links to command, prop, and extension references." package: "shared" docType: "concept" surface: "tooling" keywords: "capabilities" "commands" "props" "extensions" "nodes" props: "maxListIndentation" "languageOptions" ...
 
 ### Contributor Guide
 - File: getting-started/contributor-guide.md
 - URL: https://www.luthor.fyi/docs/getting-started/contributor-guide/
-- Summary: Contributor Guide This is the fastest path for contributors working on @lyfie/luthor and @lyfie/luthor headless . Prerequisites Node =20 pnpm@10.4.1 Monorepo map packages/headless : headless runtime, extension system, conversion bridges, theme utilities. packages/luthor : preset package built on top of headless. apps/d...
+- Summary: title: "Contributor Guide" description: "Contributor workflow, validation checklist, and docs maintenance rules for this monorepo." package: "contributor" docType: "guide" surface: "tooling" keywords: "contributing" "monorepo" "lint" "build" "tests" "docs sync" props: [] exports: [] commands: [] extensions: [] nodes: [...
 
-### Introduction
+### Dependencies
+- File: getting-started/dependencies.md
+- URL: https://www.luthor.fyi/docs/getting-started/dependencies/
+- Summary: title: "Dependencies" description: "Dependency contract for presets and headless runtime, including optional dependencies and peer expectations." package: "shared" docType: "concept" surface: "tooling" keywords: "dependency graph" "peer dependencies" "optionalDependencies" "lexical" props: [] exports: "@lyfie/luthor" "...
+
+### Getting Started
 - File: getting-started/index.md
 - URL: https://www.luthor.fyi/docs/getting-started/
-- Summary: Introduction Luthor has two packages, and each one solves a different problem: @lyfie/luthor Use this when you want a production ready editor fast. Ships with prebuilt editor presets and UI. Includes @lyfie/luthor headless internally. Best when you want to ship quickly with solid defaults. @lyfie/luthor headless Use th...
+- Summary: title: "Getting Started" description: "Choose the right package, understand the docs structure, and start with the fastest path." package: "shared" docType: "guide" surface: "tooling" keywords: "getting started" "choose package" "luthor" "luthor headless" "quickstart" props: [] exports: "@lyfie/luthor" "@lyfie/luthor h...
 
 ### Installation
 - File: getting-started/installation.md
 - URL: https://www.luthor.fyi/docs/getting-started/installation/
-- Summary: title: Installation description: Install, update, and uninstall @lyfie/luthor and @lyfie/luthor headless. Installation This page covers install, update, uninstall, and validation for both packages. Prerequisites Node.js =20 A React app using React 18 or 19 Install @lyfie/luthor npm pnpm yarn bun Install @lyfie/luthor h...
+- Summary: title: "Installation" description: "Install @lyfie/luthor or @lyfie/luthor headless with minimal setup commands and CSS notes." package: "shared" docType: "guide" surface: "tooling" keywords: "installation" "pnpm" "npm" "yarn" "bun" "css import" props: [] exports: "ExtensiveEditor" "createEditorSystem" commands: [] ext...
 
-### @lyfie/luthor-headless
-- File: getting-started/luthor-headless.md
-- URL: https://www.luthor.fyi/docs/getting-started/luthor-headless/
-- Summary: title: "@lyfie/luthor headless" description: Minimal setup and validation for @lyfie/luthor headless. @lyfie/luthor headless Use @lyfie/luthor headless when you need complete control over editor behavior and UI. Install Render a minimal headless editor Validate installation 1. The editor mounts and accepts input. 2. To...
+### Quickstart: @lyfie/luthor-headless
+- File: getting-started/quickstart-headless.md
+- URL: https://www.luthor.fyi/docs/getting-started/quickstart-headless/
+- Summary: title: "Quickstart: @lyfie/luthor headless" description: "Minimal headless runtime setup with typed extension composition in TSX examples." package: "headless" docType: "tutorial" surface: "extension" keywords: "quickstart" "createEditorSystem" "headless runtime" "extensions" props: [] exports: "createEditorSystem" "Ri...
 
-### @lyfie/luthor
-- File: getting-started/luthor.md
-- URL: https://www.luthor.fyi/docs/getting-started/luthor/
-- Summary: title: "@lyfie/luthor" description: Minimal setup and validation for the preset package. @lyfie/luthor Use @lyfie/luthor when you want a production ready editor quickly with strong defaults. Install Render a basic editor What you get Preset components: ExtensiveEditor , ComposeEditor , SimpleEditor , LegacyRichEditor ,...
+### Quickstart: @lyfie/luthor
+- File: getting-started/quickstart-luthor.md
+- URL: https://www.luthor.fyi/docs/getting-started/quickstart-luthor/
+- Summary: title: "Quickstart: @lyfie/luthor" description: "Minimal preset setup for production ready editor UI with TSX examples." package: "luthor" docType: "tutorial" surface: "preset" keywords: "quickstart" "ExtensiveEditor" "preset editor" "react" props: "placeholder" "featureFlags" "availableModes" exports: "ExtensiveEditor...
 
-### Architecture
+### Astro Integration
+- File: integrations/astro.md
+- URL: https://www.luthor.fyi/docs/integrations/astro/
+- Summary: title: "Astro Integration" description: "Astro + React integration pattern using client hydration directives for editor rendering." package: "integrations" docType: "integration" surface: "tooling" keywords: "astro integration" "client:only" "react renderer" props: [] exports: "ExtensiveEditor" commands: [] extensions:...
+
+### Next.js Integration
+- File: integrations/nextjs.md
+- URL: https://www.luthor.fyi/docs/integrations/nextjs/
+- Summary: title: "Next.js Integration" description: "Next.js client boundary integration for presets and headless runtime with TSX examples." package: "integrations" docType: "integration" surface: "tooling" keywords: "nextjs integration" "use client" "dynamic import" props: [] exports: "ExtensiveEditor" commands: [] extensions:...
+
+### React Integration
+- File: integrations/react.md
+- URL: https://www.luthor.fyi/docs/integrations/react/
+- Summary: title: "React Integration" description: "React integration baseline for presets and headless runtime with TSX examples." package: "integrations" docType: "integration" surface: "tooling" keywords: "react integration" "ExtensiveEditor" "createEditorSystem" props: "placeholder" exports: "ExtensiveEditor" "createEditorSys...
+
+### Remix Integration
+- File: integrations/remix.md
+- URL: https://www.luthor.fyi/docs/integrations/remix/
+- Summary: title: "Remix Integration" description: "Remix integration pattern for client rendered editor surfaces with TSX examples." package: "integrations" docType: "integration" surface: "tooling" keywords: "remix integration" "client rendering" "editor route" props: [] exports: "ExtensiveEditor" commands: [] extensions: [] no...
+
+### Vite Integration
+- File: integrations/vite.md
+- URL: https://www.luthor.fyi/docs/integrations/vite/
+- Summary: title: "Vite Integration" description: "Vite integration baseline for fast local setup with presets or headless runtime." package: "integrations" docType: "integration" surface: "tooling" keywords: "vite integration" "react vite" "local dev" props: [] exports: "ExtensiveEditor" commands: [] extensions: [] nodes: [] fra...
+
+### @lyfie/luthor-headless Architecture
 - File: luthor-headless/architecture.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/architecture/
-- Summary: @lyfie/luthor headless Architecture @lyfie/luthor headless is a typed extension runtime built on Lexical. No preset UI is forced on you. You mount extensions, then build UI from typed commands and activeStates . High level runtime flow 1. Define an extension array. 2. Create a typed system with createEditorSystem<typeo...
+- Summary: title: "@lyfie/luthor headless Architecture" description: "Runtime architecture for provider lifecycle, extension registration, commands, and state queries." package: "headless" docType: "concept" surface: "extension" keywords: "architecture" "Provider" "commands" "activeStates" "stateQueries" props: [] exports: "creat...
 
 ### Extensions and API
 - File: luthor-headless/extensions-and-api.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/extensions-and-api/
-- Summary: title: Extensions and API description: Extension catalog and API usage for createEditorSystem, RichText, and custom extension authoring in @lyfie/luthor headless. Extensions and API This page is the full API map for @lyfie/luthor headless . Core entry points createEditorSystem createExtension RichText and richTextExten...
+- Summary: title: "Extensions and API" description: "Extension categories, API contracts, and how to compose command/state surfaces safely." package: "headless" docType: "guide" surface: "extension" keywords: "extensions" "createExtension" "ExtensionCategory" "commands API" props: [] exports: "createExtension" "ExtensionCategory"...
+
+### Extensions Reference
+- File: luthor-headless/extensions-reference.md
+- URL: https://www.luthor.fyi/docs/luthor-headless/extensions-reference/
+- Summary: title: "Extensions Reference" description: "Reference index of extension class and instance exports from @lyfie/luthor headless." package: "headless" docType: "reference" surface: "extension" keywords: "extensions reference" "BaseExtension" "blockFormatExtension" "BlockFormatExtension" "boldExtension" "BoldExtension" "...
 
 ### Features
 - File: luthor-headless/features.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/
-- Summary: Features Feature docs are grouped by real implementation areas so you can find APIs faster. Contributor guides Architecture Extensions and API Metadata comment system Feature groups Typography and Text Structure and Lists Media and Embeds Code and Devtools Interaction and Productivity Customization and Theming For deep...
+- Summary: title: "Features" description: "Feature group index for headless runtime extensions and command surfaces." package: "headless" docType: "guide" surface: "extension" keywords: "features index" "typography" "lists" "media" "code" "productivity" props: [] exports: "createEditorSystem" commands: "insert.table" "palette.sho...
 
 ### Code and Devtools
 - File: luthor-headless/features/code-and-devtools.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/
-- Summary: title: Code and Devtools description: Code blocks, syntax support, and markdown/json conversion tools. Code and Devtools This group covers code editing and developer facing conversion utilities. Recent defaults: Code block language labels use full language names in UI (for example, TypeScript , JavaScript , Bash ). Lan...
+- Summary: title: "Code and Devtools" description: "Code block, code intelligence, and source bridge conversion surfaces for developer heavy workflows." package: "headless" docType: "reference" surface: "extension" keywords: "codeExtension" "codeIntelligenceExtension" "jsonToMarkdown" "markdownToJSON" props: [] exports: "codeExte...
 
 ### Customization and Theming
 - File: luthor-headless/features/customization-and-theming.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/customization-and-theming/
-- Summary: Customization and Theming This group covers custom node composition and theme token control. Included APIs createCustomNodeExtension createExtension defaultLuthorTheme mergeThemes createEditorThemeStyleVars Example: custom extension Example: theme override Practical notes Keep custom nodes small and composable. Use typ...
+- Summary: title: "Customization and Theming" description: "Theme utilities and custom node extension composition for product specific editor behavior." package: "headless" docType: "reference" surface: "extension" keywords: "createCustomNodeExtension" "defaultLuthorTheme" "mergeThemes" "createEditorThemeStyleVars" props: [] expo...
 
 ### Interaction and Productivity
 - File: luthor-headless/features/interaction-and-productivity.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/interaction-and-productivity/
-- Summary: Interaction and Productivity This group covers keyboard first workflows and contextual editing tools. Included extensions historyExtension enterKeyBehaviorExtension commandPaletteExtension slashCommandExtension floatingToolbarExtension contextMenuExtension emojiExtension draggableBlockExtension Key commands History: un...
+- Summary: title: "Interaction and Productivity" description: "History, slash, command palette, emoji, context menu, floating toolbar, and draggable interactions." package: "headless" docType: "reference" surface: "extension" keywords: "historyExtension" "slashCommandExtension" "commandPaletteExtension" "emojiExtension" props: []...
 
 ### Media and Embeds
 - File: luthor-headless/features/media-and-embeds.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/media-and-embeds/
-- Summary: Media and Embeds This group covers image, iframe, and YouTube workflows. Included extensions imageExtension iframeEmbedExtension youTubeEmbedExtension Key commands Image: insertImage setImageAlignment setImageCaption getImageCaption iframe: insertIframeEmbed setIframeEmbedAlignment resizeIframeEmbed setIframeEmbedCapti...
+- Summary: title: "Media and Embeds" description: "Image, iframe, and YouTube extension surfaces and associated node behavior." package: "headless" docType: "reference" surface: "extension" keywords: "imageExtension" "iframeEmbedExtension" "youTubeEmbedExtension" props: [] exports: "imageExtension" "iframeEmbedExtension" "youTube...
 
 ### Structure and Lists
 - File: luthor-headless/features/structure-and-lists.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/structure-and-lists/
-- Summary: Structure and Lists This group covers links, block structure, list systems, horizontal rules, and tables. Included extensions linkExtension blockFormatExtension listExtension tableExtension horizontalRuleExtension tabIndentExtension Key commands Links: insertLink , updateLink , removeLink getCurrentLink , getLinkByKey ...
+- Summary: title: "Structure and Lists" description: "Document structure, list behavior, tables, links, and indentation controls." package: "headless" docType: "reference" surface: "extension" keywords: "listExtension" "tabIndentExtension" "tableExtension" "linkExtension" props: [] exports: "listExtension" "tabIndentExtension" "t...
 
 ### Typography and Text
 - File: luthor-headless/features/typography-and-text.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/typography-and-text/
-- Summary: Typography and Text This group covers text formatting, typography controls, and text emphasis. Included extensions boldExtension , italicExtension , underlineExtension , strikethroughExtension subscriptExtension , superscriptExtension , codeFormatExtension fontFamilyExtension , fontSizeExtension , lineHeightExtension t...
+- Summary: title: "Typography and Text" description: "Formatting and typography extension surfaces for fonts, line height, color, and highlights." package: "headless" docType: "reference" surface: "extension" keywords: "bold" "italic" "underline" "fontFamilyExtension" "textColorExtension" props: [] exports: "boldExtension" "itali...
 
 ### Metadata Comment System
 - File: luthor-headless/metadata-comment-system.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/metadata-comment-system/
-- Summary: title: Metadata Comment System description: How luthor metadata envelopes preserve unsupported and non native data across JSON, Markdown, and HTML bridges. Metadata Comment System When converting between JSON and Markdown/HTML, some node types or fields cannot be represented natively. @lyfie/luthor headless preserves t...
+- Summary: title: "Metadata Comment System" description: "Metadata envelope behavior for markdown/html bridges and preservation rules for unsupported fields." package: "headless" docType: "reference" surface: "bridge" keywords: "metadata envelope" "appendMetadataEnvelopes" "rehydrateDocumentFromEnvelopes" "metadataMode" props: []...
 
-### Architecture
+### Nodes and Bridges Reference
+- File: luthor-headless/nodes-and-bridges-reference.md
+- URL: https://www.luthor.fyi/docs/luthor-headless/nodes-and-bridges-reference/
+- Summary: title: "Nodes and Bridges Reference" description: "Supported node sets, representability constraints, and metadata envelope bridge behavior." package: "headless" docType: "reference" surface: "node" keywords: "nodes" "bridges" "metadataMode" "isMarkdownRepresentable" "isHTMLRepresentable" props: [] exports: "MARKDOWN S...
+
+### @lyfie/luthor-headless Overview
+- File: luthor-headless/overview.md
+- URL: https://www.luthor.fyi/docs/luthor-headless/overview/
+- Summary: title: "@lyfie/luthor headless Overview" description: "Headless runtime overview, core exports, and extension first architecture choices." package: "headless" docType: "guide" surface: "extension" keywords: "luthor headless" "createEditorSystem" "extension first" props: [] exports: "createEditorSystem" "createExtension...
+
+### @lyfie/luthor Architecture
 - File: luthor/architecture.md
 - URL: https://www.luthor.fyi/docs/luthor/architecture/
-- Summary: @lyfie/luthor Architecture @lyfie/luthor is the preset layer on top of @lyfie/luthor headless . It gives you ready made editor components, while still using typed extension composition under the hood. High level flow 1. A preset component (for example ExtensiveEditor ) receives props. 2. Preset policy resolves allowed ...
+- Summary: title: "@lyfie/luthor Architecture" description: "Preset stack architecture from package exports to core command generation and extension assembly." package: "luthor" docType: "concept" surface: "preset" keywords: "architecture" "preset stack" "commands" "feature policy" props: "featureFlags" "shortcutConfig" "slashCom...
+
+### Commands Reference
+- File: luthor/commands-reference.md
+- URL: https://www.luthor.fyi/docs/luthor/commands-reference/
+- Summary: title: "Commands Reference" description: "Dedicated command ID reference for @lyfie/luthor, including generated heading commands." package: "luthor" docType: "reference" surface: "command" keywords: "commands reference" "command ids" "block.align center" "block.align justify" "block.align left" "block.align right" "blo...
 
 ### Feature Flags
 - File: luthor/feature-flags.md
 - URL: https://www.luthor.fyi/docs/luthor/feature-flags/
-- Summary: title: Feature Flags description: Complete feature flag model for @lyfie/luthor presets, including defaults, overrides, and preset enforcement. Feature Flags @lyfie/luthor uses feature flags to control what each preset can do, without forking runtime logic. Source of truth Canonical keys are defined in packages/luthor/...
+- Summary: title: "Feature Flags" description: "Complete feature flag set, defaults, and preset level enforcement behavior for @lyfie/luthor." package: "luthor" docType: "reference" surface: "preset" keywords: "feature flags" "bold" "italic" "underline" "strikethrough" "fontFamily" "fontSize" "lineHeight" "textColor" "textHighlig...
 
-### Presets
+### @lyfie/luthor Overview
+- File: luthor/overview.md
+- URL: https://www.luthor.fyi/docs/luthor/overview/
+- Summary: title: "@lyfie/luthor Overview" description: "Preset package overview, export surfaces, and when to choose @lyfie/luthor over headless runtime." package: "luthor" docType: "guide" surface: "preset" keywords: "@lyfie/luthor" "presets" "ExtensiveEditor" "presetRegistry" props: "featureFlags" "availableModes" exports: "Ex...
+
+### Presets Catalog
 - File: luthor/presets.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/
-- Summary: title: Presets description: Preset catalog for @lyfie/luthor, including per preset docs. Presets @lyfie/luthor is built around presets. Each preset wraps ExtensiveEditor with a specific product profile. Contributor guides Architecture Props reference Feature flags Re exported headless API This gives you direct access t...
+- Summary: title: "Presets Catalog" description: "Catalog of all @lyfie/luthor preset exports and presetRegistry keys with quick navigation links." package: "luthor" docType: "reference" surface: "preset" keywords: "presets" "presetRegistry" "extensive" "compose" "simple editor" "legacy rich" "md editor" "html editor" "slash edit...
 
 ### Compose Editor
 - File: luthor/presets/compose-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/compose-editor/
-- Summary: title: Compose Editor description: Focused rich text drafting preset with a compact, practical toolbar. Compose Editor ComposeEditor is a focused drafting preset for writing flows where speed and clarity matter more than every possible feature. Usage Props ComposeEditorProps inherits all ExtensiveEditorProps except dir...
+- Summary: title: "Compose Editor" description: "Compact preset profile for message composition and lightweight authoring flows." package: "luthor" docType: "reference" surface: "preset" keywords: "ComposeEditor" "compose preset" "compact toolbar" props: "compactToolbar" "featureFlags" exports: "ComposeEditor" "composePreset" com...
 
 ### Extensive Editor
 - File: luthor/presets/extensive-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/extensive-editor/
-- Summary: title: Extensive Editor description: Full feature preset and core prop reference. Extensive Editor ExtensiveEditor is the base preset in @lyfie/luthor . Every other preset is a focused wrapper around this component. Usage Default behavior snapshot Category Default Theme initialTheme="light" Mode initialMode="visual edi...
+- Summary: title: "Extensive Editor" description: "Full preset profile with all core features enabled and broad mode support." package: "luthor" docType: "reference" surface: "preset" keywords: "ExtensiveEditor" "extensive preset" "full editor" props: "featureFlags" "availableModes" "maxListIndentation" exports: "ExtensiveEditor"...
 
-### Headless Editor
+### Headless Editor Preset
 - File: luthor/presets/headless-editor-preset.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/
-- Summary: title: Headless Editor description: Reference preset showing direct headless composition. Headless Editor HeadlessEditorPreset is a lightweight, source aware preset with a simple text pill toolbar. Usage Props HeadlessEditorPresetProps inherits ExtensiveEditorProps except featureFlags , availableModes , and source view...
+- Summary: title: "Headless Editor Preset" description: "Preset wrapper that demonstrates source mode handling and controlled bridge behavior on top of extensive extensions." package: "luthor" docType: "reference" surface: "preset" keywords: "HeadlessEditorPreset" "headless editor preset" "source mode" props: "initialMode" "defau...
 
 ### HTML Editor
 - File: luthor/presets/html-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/html-editor/
-- Summary: HTML Editor HTML focused preset with visual editing plus JSON/HTML source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="html" . Usage Props HTMLEditorProps inherits LegacyRichEditorProps , then fixes source behavior to HTML. initialMode : 'visual' (default) 'visual only' 'json' 'html' de...
+- Summary: title: "HTML Editor" description: "HTML focused preset profile built on LegacyRichEditor for source first HTML editing." package: "luthor" docType: "reference" surface: "preset" keywords: "HTMLEditor" "html editor" "html source mode" props: "initialMode" "defaultEditorView" "featureFlags" exports: "HTMLEditor" "htmlEdi...
 
 ### Legacy Rich Editor
 - File: luthor/presets/legacy-rich-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/
-- Summary: title: Legacy Rich Editor description: Shared metadata free rich editor profile powering both MD and HTML presets. Legacy Rich Editor LegacyRichEditor is a shared metadata free editor profile that powers both MarkDownEditor and HTMLEditor . Use it when you want the same native feature set and switch only the source tab...
+- Summary: title: "Legacy Rich Editor" description: "Legacy compatible rich editor profile with metadata free bridge mode and constrained defaults." package: "luthor" docType: "reference" surface: "preset" keywords: "LegacyRichEditor" "legacy rich" "metadataMode none" props: "sourceFormat" "initialMode" "featureFlags" exports: "L...
 
-### MarkDown Editor
+### Markdown Editor
 - File: luthor/presets/md-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/md-editor/
-- Summary: MarkDown Editor Markdown native preset with visual editing plus JSON/Markdown source tabs. Internally this preset is a LegacyRichEditor wrapper with sourceFormat="markdown" . Usage Props MarkDownEditorProps inherits LegacyRichEditorProps , then fixes source behavior to markdown. initialMode : 'visual' (default) 'visual...
+- Summary: title: "Markdown Editor" description: "Markdown focused preset profile built on LegacyRichEditor with markdown source of truth behavior." package: "luthor" docType: "reference" surface: "preset" keywords: "MarkDownEditor" "md editor" "markdownSourceOfTruth" props: "initialMode" "defaultEditorView" "featureFlags" export...
 
 ### Simple Editor
 - File: luthor/presets/simple-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/simple-editor/
-- Summary: Simple Editor SimpleEditor is a constrained message editor preset. It keeps formatting intentionally minimal and supports send workflows out of the box. Usage Props SimpleEditorProps is purpose built for message input: formattingOptions : SimpleFormattingOptions ( bold , italic , strikethrough ) onSend : (payload: Simp...
+- Summary: title: "Simple Editor" description: "Chat style preset with minimal formatting and send workflows." package: "luthor" docType: "reference" surface: "preset" keywords: "SimpleEditor" "chat input" "send button" "submitOnEnter" props: "submitOnEnter" "allowShiftEnter" "onSend" "outputFormat" "featureFlags" exports: "Simpl...
 
 ### Slash Editor
 - File: luthor/presets/slash-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/slash-editor/
-- Summary: title: Slash Editor description: Slash first preset with draggable and command focused defaults. Slash Editor SlashEditor is a slash first preset tuned for command driven writing. Usage Props SlashEditorProps inherits ExtensiveEditorProps except featureFlags and isToolbarEnabled , then re adds both. slashVisibility : u...
+- Summary: title: "Slash Editor" description: "Slash command first preset profile with allowlist defaults and optional draggable behavior." package: "luthor" docType: "reference" surface: "preset" keywords: "SlashEditor" "slash commands" "allowlist" props: "slashVisibility" "isDraggableEnabled" "featureFlags" exports: "SlashEdito...
 
 ### Props Reference
 - File: luthor/props-reference.md
 - URL: https://www.luthor.fyi/docs/luthor/props-reference/
-- Summary: title: Props Reference description: Complete prop and ref reference for ExtensiveEditor and all @lyfie/luthor preset wrappers. Props Reference This page is the full prop contract for @lyfie/luthor presets. Base preset: ExtensiveEditor Wrapper presets: ComposeEditor , SimpleEditor , LegacyRichEditor , MarkDownEditor , H...
+- Summary: title: "Props Reference" description: "Reference index for ExtensiveEditorProps and common preset prop surfaces, including mode and bridge controls." package: "luthor" docType: "reference" surface: "prop" keywords: "props reference" "ExtensiveEditorProps" "className" "onReady" "initialTheme" "onThemeChange" "theme" "de...
+
+### Exports Map
+- File: reference/exports-map.md
+- URL: https://www.luthor.fyi/docs/reference/exports-map/
+- Summary: title: "Exports Map" description: "Complete export map for @lyfie/luthor and @lyfie/luthor headless." package: "shared" docType: "reference" surface: "tooling" keywords: "exports map" "@lyfie/luthor exports" "@lyfie/luthor headless exports" props: "className" "onReady" "initialTheme" "onThemeChange" "theme" "defaultCon...
+
+### Preset Selector
+- File: reference/preset-selector.md
+- URL: https://www.luthor.fyi/docs/reference/preset-selector/
+- Summary: title: "Preset Selector" description: "Decision matrix for choosing the right preset by workflow, source mode profile, and feature policy." package: "luthor" docType: "reference" surface: "preset" keywords: "preset selector" "decision matrix" "extensive" "compose" "simple editor" "legacy rich" "md editor" "html editor"...
+
+### Search Guide
+- File: reference/search-guide.md
+- URL: https://www.luthor.fyi/docs/reference/search-guide/
+- Summary: title: "Search Guide" description: "Docs search syntax, token matching behavior, and filter examples for fast API discovery." package: "shared" docType: "reference" surface: "tooling" keywords: "search guide" "pkg filter" "type filter" "surface filter" props: "maxListIndentation" exports: "ExtensiveEditorProps" "create...
 

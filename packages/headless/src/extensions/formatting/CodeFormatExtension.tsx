@@ -1,5 +1,6 @@
 import { TextFormatExtension } from "@lyfie/luthor-headless/extensions/base";
-import type { LexicalEditor } from "lexical";
+import { $isCodeNode } from "@lexical/code";
+import { $getSelection, $isRangeSelection, type LexicalEditor, type LexicalNode } from "lexical";
 
 /**
  * CodeFormatExtension - Provides inline code text formatting functionality
@@ -19,6 +20,20 @@ import type { LexicalEditor } from "lexical";
 export class CodeFormatExtension extends TextFormatExtension<"code"> {
   constructor() {
     super("code");
+  }
+
+  getCommands(editor: LexicalEditor): { toggleCode: () => void } {
+    const baseCommands = super.getCommands(editor) as { toggleCode: () => void };
+
+    return {
+      toggleCode: () => {
+        if (this.isSelectionInsideCodeBlock(editor)) {
+          return;
+        }
+
+        baseCommands.toggleCode();
+      },
+    };
   }
 
   register(editor: LexicalEditor): () => void {
@@ -127,6 +142,36 @@ export class CodeFormatExtension extends TextFormatExtension<"code"> {
       root.removeEventListener("click", handleClick, true);
       unregisterBase();
     };
+  }
+
+  private isSelectionInsideCodeBlock(editor: LexicalEditor): boolean {
+    let isInsideCodeBlock = false;
+
+    editor.getEditorState().read(() => {
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) {
+        return;
+      }
+
+      isInsideCodeBlock = selection
+        .getNodes()
+        .some((node) => this.hasCodeNodeAncestor(node));
+    });
+
+    return isInsideCodeBlock;
+  }
+
+  private hasCodeNodeAncestor(node: LexicalNode | null): boolean {
+    let current: LexicalNode | null = node;
+
+    while (current) {
+      if ($isCodeNode(current)) {
+        return true;
+      }
+      current = current.getParent();
+    }
+
+    return false;
   }
 }
 

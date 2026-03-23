@@ -176,3 +176,4 @@ apps/web/.vscode
 tmp-*
 .blogs/Pub*
 .blogs/Readme*
+apps/web/docs-rewrite-qa-report.md

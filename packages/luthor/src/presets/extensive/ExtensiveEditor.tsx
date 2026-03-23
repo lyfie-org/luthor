@@ -48,6 +48,9 @@ import {
   type QuoteStyleVars,
   type DefaultSettings,
   type EditorThemeOverrides,
+  type SyntaxHighlightColorMode,
+  type SyntaxHighlightColors,
+  type SyntaxHighlightColorTokens,
   type ToolbarLayout,
   type ToolbarVisibility,
   type ToolbarPosition,
@@ -74,7 +77,6 @@ import type {
   SlashCommandExtension,
   EmojiExtension,
   EmojiCatalogItem,
-  CodeHighlightProvider,
   CodeLanguageOptionsConfig,
   FontFamilyOption,
   FontSizeOption,
@@ -105,6 +107,17 @@ const DEFAULT_MARKDOWN_PLACEHOLDER = "Enter Markdown content...";
 const DEFAULT_HTML_PLACEHOLDER = "Enter HTML content...";
 const NON_VISIBLE_OVERFLOW_VALUES = new Set(["auto", "scroll", "overlay"]);
 
+const SYNTAX_COLOR_TOKEN_TO_VAR: ReadonlyArray<
+  readonly [keyof SyntaxHighlightColorTokens, keyof EditorThemeOverrides]
+> = [
+  ["comment", "--luthor-syntax-comment"],
+  ["keyword", "--luthor-syntax-keyword"],
+  ["string", "--luthor-syntax-string"],
+  ["number", "--luthor-syntax-number"],
+  ["function", "--luthor-syntax-function"],
+  ["variable", "--luthor-syntax-variable"],
+] as const;
+
 type ExtensiveEditorCanonicalMode = Exclude<ExtensiveEditorMode, "visual">;
 type ExtensiveEditorSourceMode = Exclude<
   ExtensiveEditorCanonicalMode,
@@ -130,6 +143,39 @@ function hasExtensiveMode(
   mode: ExtensiveEditorCanonicalMode,
 ): boolean {
   return modes.some((candidate) => toCanonicalExtensiveMode(candidate) === mode);
+}
+
+function createSyntaxHighlightThemeOverrides(
+  mode: SyntaxHighlightColorMode,
+  syntaxColors: SyntaxHighlightColors | undefined,
+  activeTheme: "light" | "dark",
+): EditorThemeOverrides | undefined {
+  if (mode !== "custom" || !syntaxColors) {
+    return undefined;
+  }
+
+  const lightColors = syntaxColors.light;
+  const darkColors = syntaxColors.dark ?? lightColors;
+  const palette =
+    activeTheme === "dark"
+      ? (darkColors ?? lightColors)
+      : (lightColors ?? darkColors);
+
+  if (!palette) {
+    return undefined;
+  }
+
+  const overrides: Partial<EditorThemeOverrides> = {};
+  for (const [token, cssVar] of SYNTAX_COLOR_TOKEN_TO_VAR) {
+    const value = palette[token];
+    if (typeof value === "string" && value.trim().length > 0) {
+      overrides[cssVar] = value;
+    }
+  }
+
+  return Object.keys(overrides).length > 0
+    ? (overrides as EditorThemeOverrides)
+    : undefined;
 }
 
 function isSourceMode(mode: ExtensiveEditorMode | ExtensiveEditorCanonicalMode): mode is ExtensiveEditorSourceMode {
@@ -1969,9 +2015,13 @@ export interface ExtensiveEditorProps {
   sourceMetadataMode?: SourceMetadataMode;
   markdownBridgeFlavor?: MarkdownBridgeFlavor;
   markdownSourceOfTruth?: boolean;
-  syntaxHighlighting?: "auto" | "disabled";
-  codeHighlightProvider?: CodeHighlightProvider | null;
-  loadCodeHighlightProvider?: () => Promise<CodeHighlightProvider | null>;
+  /**
+   * Convenience opt-out switch for preset syntax highlighting.
+   * Defaults to true.
+   */
+  isSyntaxHighlightingEnabled?: boolean;
+  syntaxHighlightColorMode?: SyntaxHighlightColorMode;
+  syntaxHighlightColors?: SyntaxHighlightColors;
   maxAutoDetectCodeLength?: number;
   isCopyAllowed?: boolean;
   languageOptions?: readonly string[] | CodeLanguageOptionsConfig;
@@ -2026,9 +2076,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     sourceMetadataMode = "preserve",
     markdownBridgeFlavor = "luthor",
     markdownSourceOfTruth = false,
-    syntaxHighlighting,
-    codeHighlightProvider,
-    loadCodeHighlightProvider,
+    isSyntaxHighlightingEnabled = true,
+    syntaxHighlightColorMode = "lexical",
+    syntaxHighlightColors,
     maxAutoDetectCodeLength,
     isCopyAllowed = true,
     languageOptions,
@@ -2104,7 +2154,11 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       () => normalizeMaxListIndentationKey(maxListIndentation),
       [maxListIndentation],
     );
-    const syntaxHighlightKey = syntaxHighlighting ?? "unset";
+    const resolvedSyntaxHighlighting = useMemo<"auto" | "disabled">(
+      () => (isSyntaxHighlightingEnabled ? "auto" : "disabled"),
+      [isSyntaxHighlightingEnabled],
+    );
+    const syntaxHighlightKey = resolvedSyntaxHighlighting;
     const maxAutoDetectKey =
       typeof maxAutoDetectCodeLength === "number"
         ? maxAutoDetectCodeLength.toString()
@@ -2142,17 +2196,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     const stableLanguageOptionsRef = useRef<
       readonly string[] | CodeLanguageOptionsConfig | undefined
     >(languageOptions);
-    const stableCodeHighlightProviderRef = useRef<CodeHighlightProvider | null | undefined>(codeHighlightProvider);
-    const stableLoadCodeHighlightProviderRef = useRef<
-      (() => Promise<CodeHighlightProvider | null>) | undefined
-    >(loadCodeHighlightProvider);
     const stableExtensionsKeyRef = useRef(extensionsKey);
 
-    if (
-      stableExtensionsKeyRef.current !== extensionsKey ||
-      stableCodeHighlightProviderRef.current !== codeHighlightProvider ||
-      stableLoadCodeHighlightProviderRef.current !== loadCodeHighlightProvider
-    ) {
+    if (stableExtensionsKeyRef.current !== extensionsKey) {
       stableExtensionsKeyRef.current = extensionsKey;
       stableFontFamilyOptionsRef.current = fontFamilyOptions;
       stableFontSizeOptionsRef.current = fontSizeOptions;
@@ -2160,8 +2206,6 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       stableMinimumDefaultLineHeightRef.current = minimumDefaultLineHeight;
       stableFeatureFlagsRef.current = effectiveFeatureFlags;
       stableLanguageOptionsRef.current = languageOptions;
-      stableCodeHighlightProviderRef.current = codeHighlightProvider;
-      stableLoadCodeHighlightProviderRef.current = loadCodeHighlightProvider;
     }
 
     const memoizedExtensionsRef = useRef<{
@@ -2177,15 +2221,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         minimumDefaultLineHeight: stableMinimumDefaultLineHeightRef.current,
         maxListIndentation: Number(maxListIndentationKey),
         scaleByRatio,
-        ...(syntaxHighlighting !== undefined
-          ? { syntaxHighlighting }
-          : {}),
-        ...(stableCodeHighlightProviderRef.current !== undefined
-          ? { codeHighlightProvider: stableCodeHighlightProviderRef.current }
-          : {}),
-        ...(stableLoadCodeHighlightProviderRef.current !== undefined
-          ? { loadCodeHighlightProvider: stableLoadCodeHighlightProviderRef.current }
-          : {}),
+        syntaxHighlighting: resolvedSyntaxHighlighting,
         ...(maxAutoDetectCodeLength !== undefined
           ? { maxAutoDetectCodeLength }
           : {}),
@@ -2217,9 +2253,28 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         quote: `${mergedTheme.quote ?? ""} ${quoteClassName}`.trim(),
       };
     }, [theme, quoteClassName]);
+    const syntaxHighlightThemeOverrides = useMemo(
+      () =>
+        createSyntaxHighlightThemeOverrides(
+          syntaxHighlightColorMode,
+          syntaxHighlightColors,
+          editorTheme,
+        ),
+      [editorTheme, syntaxHighlightColorMode, syntaxHighlightColors],
+    );
+    const resolvedEditorThemeOverrides = useMemo<EditorThemeOverrides | undefined>(() => {
+      if (!editorThemeOverrides && !syntaxHighlightThemeOverrides) {
+        return undefined;
+      }
+
+      return {
+        ...(editorThemeOverrides ?? {}),
+        ...(syntaxHighlightThemeOverrides ?? {}),
+      };
+    }, [editorThemeOverrides, syntaxHighlightThemeOverrides]);
     const editorThemeOverridesKey = useMemo(
-      () => normalizeStyleVarsKey(editorThemeOverrides),
-      [editorThemeOverrides],
+      () => normalizeStyleVarsKey(resolvedEditorThemeOverrides),
+      [resolvedEditorThemeOverrides],
     );
     const quoteStyleVarsKey = useMemo(
       () => normalizeStyleVarsKey(quoteStyleVars),
@@ -2239,7 +2294,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       void editorThemeOverridesKey;
       void quoteStyleVarsKey;
       const defaultVars = defaultSettingsVars as CSSProperties | undefined;
-      const editorThemeVars = createEditorThemeStyleVars(editorThemeOverrides);
+      const editorThemeVars = createEditorThemeStyleVars(resolvedEditorThemeOverrides);
       const quoteVars = quoteStyleVars as CSSProperties | undefined;
       const lineHeightVars = {
         "--luthor-default-line-height": minimumDefaultLineHeightKey,
@@ -2257,7 +2312,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     }, [
       minimumDefaultLineHeightKey,
       defaultSettingsVars,
-      editorThemeOverrides,
+      resolvedEditorThemeOverrides,
       quoteStyleVars,
       defaultSettingsKey,
       editorThemeOverridesKey,

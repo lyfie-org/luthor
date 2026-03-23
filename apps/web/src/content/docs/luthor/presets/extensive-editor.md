@@ -1,174 +1,75 @@
 ---
-title: Extensive Editor
-description: Full-feature preset and core prop reference.
+title: "Extensive Editor"
+description: "Full preset profile with all core features enabled and broad mode support."
+package: "luthor"
+docType: "reference"
+surface: "preset"
+keywords:
+  - "ExtensiveEditor"
+  - "extensive preset"
+  - "full editor"
+props:
+  - "featureFlags"
+  - "availableModes"
+  - "maxListIndentation"
+exports:
+  - "ExtensiveEditor"
+  - "extensivePreset"
+  - "createExtensivePreset"
+commands:
+  - "palette.show"
+  - "insert.table"
+  - "format.bold"
+extensions:
+  []
+nodes:
+  - "table"
+  - "image"
+  - "iframe-embed"
+  - "youtube-embed"
+frameworks:
+  - "react"
+lastVerifiedFrom:
+  - "packages/luthor/src/presets/extensive/ExtensiveEditor.tsx"
+  - "packages/luthor/src/presets/extensive/extensions.tsx"
+navGroup: "luthor"
+navOrder: 60
 ---
 
 # Extensive Editor
 
-`ExtensiveEditor` is the base preset in `@lyfie/luthor`.  
-Every other preset is a focused wrapper around this component.
+This preset is the broadest out-of-box profile.
 
-## Usage
+## When to use this
 
-```tsx
-import { ExtensiveEditor } from '@lyfie/luthor';
+Use `ExtensiveEditor` when you want full formatting, media, code, and command workflows in one preset.
+
+## Mode profile
+
+- Default modes: `visual-editor`, `visual-only`, `json`, `markdown`, `html`.
+- Default initial mode: `visual-editor`.
+
+## Preset props
+
+- `featureFlags`: Toggle individual preset capabilities. Use `featureFlags.codeIntelligence` to turn code intelligence on/off.
+- `availableModes`: Restrict visible mode tabs and allowed mode switching targets.
+- `maxListIndentation`: Caps nested list depth in visual editing.
+
+## Code intelligence toggle
+
+~~~tsx
+<ExtensiveEditor
+  featureFlags={{ codeIntelligence: false }}
+/>
+~~~
+
+~~~tsx
 import '@lyfie/luthor/styles.css';
+import { ExtensiveEditor } from '@lyfie/luthor';
 
 export function App() {
   return <ExtensiveEditor placeholder="Write anything..." />;
 }
-```
+~~~
 
-## Default behavior snapshot
 
-| Category | Default |
-| --- | --- |
-| Theme | `initialTheme="light"` |
-| Mode | `initialMode="visual-editor"` |
-| Available modes | `["visual-editor", "visual-only", "json", "markdown", "html"]` |
-| Toolbar | Enabled, top, left-aligned |
-| Feature flags | All enabled by default |
-| Line height baseline | `minimumDefaultLineHeight = 1.5` |
-| List indentation | `maxListIndentation = 8` sub-indent levels |
-| Code/source line numbers | Enabled (`showLineNumbers = true`) |
-| Prism grammar pack | Loaded by the host app (import Prism + required language components before mounting editors) |
-
-## Core props (high signal)
-
-- Content and mode:
-  - `defaultContent`, `showDefaultContent`, `placeholder`
-  - `initialMode`, `defaultEditorView`, `availableModes`
-  - `isEditorViewTabsVisible` (`isEditorViewsTabVisible` legacy alias)
-- Toolbar:
-  - `isToolbarEnabled`, `isToolbarPinned`
-  - `toolbarPosition`, `toolbarAlignment`, `toolbarLayout`, `toolbarVisibility`
-  - `toolbarClassName`, `toolbarStyleVars`
-- Editing behavior:
-  - `featureFlags`
-  - `editOnClick` (promote `visual-only` to editable `visual-editor`)
-  - `headingOptions`, `paragraphLabel`, `syncHeadingOptionsWithCommands`
-  - `slashCommandVisibility`, `shortcutConfig`, `commandPaletteShortcutOnly`
-- Theme and style:
-  - `theme`, `editorThemeOverrides`
-  - `initialTheme`, `onThemeChange`
-  - `defaultSettings`, `quoteClassName`, `quoteStyleVars`
-- Typography/code options:
-  - `fontFamilyOptions`, `fontSizeOptions`, `lineHeightOptions`
-  - `minimumDefaultLineHeight`, `scaleByRatio`
-  - `syntaxHighlighting`, `codeHighlightProvider`, `loadCodeHighlightProvider`
-  - `showLineNumbers`, `maxAutoDetectCodeLength`, `isCopyAllowed`, `languageOptions`
-  - `maxListIndentation`
-
-Code language support behavior:
-
-- `@lyfie/luthor` does not preload Prism grammars; host apps should import Prism and the grammar components they need.
-- The language dropdown only shows grammars that are actually loaded at runtime, which prevents stale token colors when switching languages.
-
-For the full prop-by-prop contract, including every field, see [Props Reference](/docs/luthor/props-reference/).
-
-## Mode behavior details
-
-- `visual-editor`: normal editable visual mode.
-- `visual-only`: read mode visual surface. If `editOnClick` is true (default), click can promote to editable mode and place caret near click point.
-- `visual`: accepted legacy alias that maps internally to `visual-editor`.
-- `json`, `markdown`, `html`: source modes with conversion validation on switch.
-
-If source parsing fails, an inline source error panel is shown and visual content is preserved.
-
-## Lists in Extensive
-
-- Ordered, unordered, and checklist styles are supported.
-- `maxListIndentation` applies to all list types.
-- Checklist variants:
-  - `strikethrough` (default)
-  - `plain`
-- Style tokens can be rehydrated from imported JSON.
-
-## Theme callback example (`Prism`)
-
-Use `onThemeChange` when host styling must follow editor theme state.
-
-```tsx
-'use client';
-
-import { ExtensiveEditor } from '@lyfie/luthor';
-import { useEffect, useState } from 'react';
-
-type Theme = 'light' | 'dark';
-const PRISM_THEME_LINK_ID = 'luthor-prism-theme';
-
-export function EditorWithPrismTheme() {
-  const [editorTheme, setEditorTheme] = useState<Theme>('light');
-
-  useEffect(() => {
-    const href = editorTheme === 'dark' ? '/prismjs/themes/prism-okaidia.css' : '/prismjs/themes/prism.css';
-    const existing = document.getElementById(PRISM_THEME_LINK_ID);
-    const link = existing instanceof HTMLLinkElement ? existing : document.createElement('link');
-
-    if (!(existing instanceof HTMLLinkElement)) {
-      link.id = PRISM_THEME_LINK_ID;
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-    }
-
-    if (link.href !== new URL(href, window.location.origin).href) {
-      link.href = href;
-    }
-  }, [editorTheme]);
-
-  return <ExtensiveEditor initialTheme="light" onThemeChange={setEditorTheme} />;
-}
-```
-
-Place these files in your app static assets:
-
-- `/public/prismjs/themes/prism.css`
-- `/public/prismjs/themes/prism-okaidia.css`
-
-## Code view line numbers
-
-Line numbers are enabled by default for:
-
-- Visual code blocks
-- JSON source view
-- Markdown source view
-- HTML source view
-
-Use `showLineNumbers={false}` to disable them globally for this preset instance.
-
-```tsx
-<ExtensiveEditor showLineNumbers={false} />
-```
-
-## Ref API
-
-- `injectJSON(content: string): void`
-- `getJSON(): string`
-- `getMarkdown(): string`
-- `getHTML(): string`
-
-```tsx
-import { useRef } from 'react';
-import { ExtensiveEditor, type ExtensiveEditorRef } from '@lyfie/luthor';
-
-export function SaveExample() {
-  const editorRef = useRef<ExtensiveEditorRef>(null);
-
-  const save = () => {
-    const methods = editorRef.current;
-    if (!methods) return;
-    console.log({
-      json: methods.getJSON(),
-      markdown: methods.getMarkdown(),
-      html: methods.getHTML(),
-    });
-  };
-
-  return (
-    <>
-      <button onClick={save}>Save</button>
-      <ExtensiveEditor ref={editorRef} />
-    </>
-  );
-}
-```

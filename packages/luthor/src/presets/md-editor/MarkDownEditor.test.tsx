@@ -159,4 +159,18 @@ describe("MarkDownEditor", () => {
     };
     expect(props.showLineNumbers).toBe(false);
   });
+
+  it("allows overriding code intelligence through featureFlags", () => {
+    render(
+      <MarkDownEditor
+        showDefaultContent={false}
+        featureFlags={{ codeIntelligence: false }}
+      />,
+    );
+
+    const props = extensiveEditorMock.mock.calls.at(-1)?.[0] as {
+      featureFlags?: Record<string, boolean>;
+    };
+    expect(props.featureFlags?.codeIntelligence).toBe(false);
+  });
 });

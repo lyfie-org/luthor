@@ -1,13 +1,22 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { highlightWithPrism } from '@/utils/prism-client';
 
 type PackageManager = 'npm' | 'yarn' | 'pnpm';
 
+export type DocsCodeTab = {
+  id: string;
+  label: string;
+  code: string;
+  language?: string;
+};
+
 type DocsCodeBlockProps = {
   code: string;
   language?: string;
+  tabs?: DocsCodeTab[];
+  defaultTabId?: string;
 };
 
 const PACKAGE_MANAGERS: PackageManager[] = ['npm', 'yarn', 'pnpm'];
@@ -169,12 +178,35 @@ function highlightPmCode(code: string): string {
     .join('\n');
 }
 
-export function DocsCodeBlock({ code, language }: DocsCodeBlockProps) {
-  const [activePm, setActivePm] = useState<PackageManager>('npm');
+export function DocsCodeBlock({ code, language, tabs, defaultTabId }: DocsCodeBlockProps) {
+  const [activeTabId, setActiveTabId] = useState<string>(defaultTabId ?? tabs?.[0]?.id ?? 'npm');
   const [copyLabel, setCopyLabel] = useState('Copy');
-  const pmVariants = useMemo(() => toPmVariants(code), [code]);
-  const displayCode = pmVariants ? pmVariants[activePm] : code;
-  const effectiveLanguage = pmVariants ? 'bash' : language;
+  const pmVariants = useMemo(() => (tabs && tabs.length > 0 ? null : toPmVariants(code)), [code, tabs]);
+
+  const tabOptions = useMemo<DocsCodeTab[]>(() => {
+    if (tabs && tabs.length > 0) return tabs;
+    if (!pmVariants) return [];
+    return PACKAGE_MANAGERS.map((pm) => ({
+      id: pm,
+      label: pm,
+      code: pmVariants[pm],
+      language: 'bash',
+    }));
+  }, [pmVariants, tabs]);
+
+  const resolvedDefaultTabId = useMemo(() => {
+    if (defaultTabId && tabOptions.some((tab) => tab.id === defaultTabId)) return defaultTabId;
+    return tabOptions[0]?.id ?? '';
+  }, [defaultTabId, tabOptions]);
+
+  useEffect(() => {
+    if (!resolvedDefaultTabId) return;
+    setActiveTabId(resolvedDefaultTabId);
+  }, [resolvedDefaultTabId, code]);
+
+  const activeTab = tabOptions.find((tab) => tab.id === activeTabId) ?? tabOptions[0];
+  const displayCode = activeTab?.code ?? code;
+  const effectiveLanguage = activeTab?.language ?? (pmVariants ? 'bash' : language);
   const highlighted = useMemo(() => {
     if (pmVariants) {
       return { html: highlightPmCode(displayCode), className: 'docs-pm-code language-bash' };
@@ -197,18 +229,18 @@ export function DocsCodeBlock({ code, language }: DocsCodeBlockProps) {
   return (
     <div className="docs-code-block">
       <div className="docs-code-toolbar">
-        {pmVariants ? (
-          <div className="docs-code-tabs" role="tablist" aria-label="Package manager">
-            {PACKAGE_MANAGERS.map((pm) => (
+        {tabOptions.length > 0 ? (
+          <div className="docs-code-tabs" role="tablist" aria-label={tabs ? 'Code variant' : 'Package manager'}>
+            {tabOptions.map((tab) => (
               <button
-                key={pm}
+                key={tab.id}
                 type="button"
                 role="tab"
-                aria-selected={activePm === pm}
-                className={`docs-code-tab ${activePm === pm ? 'is-active' : ''}`}
-                onClick={() => setActivePm(pm)}
+                aria-selected={activeTab?.id === tab.id}
+                className={`docs-code-tab ${activeTab?.id === tab.id ? 'is-active' : ''}`}
+                onClick={() => setActiveTabId(tab.id)}
               >
-                {pm}
+                {tab.label}
               </button>
             ))}
           </div>

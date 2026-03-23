@@ -26,7 +26,10 @@ function createRect(top: number, left: number, width: number, height: number) {
   } as DOMRect;
 }
 
-function setupReadOnlyPluginHarness(initialEditable: boolean) {
+function setupReadOnlyPluginHarness(
+  initialEditable: boolean,
+  language: string = "plaintext",
+) {
   const richTextContainer = document.createElement("div");
   richTextContainer.className = "luthor-richtext-container";
   const root = document.createElement("div");
@@ -48,7 +51,7 @@ function setupReadOnlyPluginHarness(initialEditable: boolean) {
 
   const snapshot = {
     key: "code-node-1",
-    language: "plaintext",
+    language,
     text: "console.log('hello');",
   };
 
@@ -118,5 +121,15 @@ describe("CodeIntelligenceExtension read-only language controls", () => {
       const updatedSelect = screen.getByLabelText("Code language") as HTMLSelectElement;
       expect(updatedSelect.disabled).toBe(false);
     });
+  });
+
+  it("keeps unsupported language selected in dropdown", async () => {
+    const { extension } = setupReadOnlyPluginHarness(true, "bash");
+
+    render(<>{extension.getPlugins()}</>);
+
+    const select = (await screen.findByLabelText("Code language")) as HTMLSelectElement;
+    expect(select.value).toBe("bash");
+    expect(screen.getByRole("option", { name: "Bash" })).toBeInTheDocument();
   });
 });

@@ -8,9 +8,14 @@ import React, {
 } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $isCodeNode } from "@lexical/code";
 import {
+  $getSelection,
+  $isRangeSelection,
   FORMAT_TEXT_COMMAND,
   COMMAND_PRIORITY_EDITOR,
+  type LexicalNode,
+  type LexicalEditor,
   PASTE_COMMAND,
   SerializedEditorState,
   SerializedLexicalNode,
@@ -70,6 +75,38 @@ class ReadonlyExtensionsAPI implements ExtensionsAPIContract {
 
 const readonlyExtensionsAPI = new ReadonlyExtensionsAPI();
 
+function hasCodeNodeAncestor(node: LexicalNode | null): boolean {
+  let current: LexicalNode | null = node;
+  while (current) {
+    if ($isCodeNode(current)) {
+      return true;
+    }
+    current = current.getParent();
+  }
+
+  return false;
+}
+
+function isSelectionInsideCodeBlock(editor: LexicalEditor | null): boolean {
+  if (!editor) {
+    return false;
+  }
+
+  let isInsideCodeBlock = false;
+  editor.getEditorState().read(() => {
+    const selection = $getSelection();
+    if (!$isRangeSelection(selection)) {
+      return;
+    }
+
+    isInsideCodeBlock = selection
+      .getNodes()
+      .some((node) => hasCodeNodeAncestor(node));
+  });
+
+  return isInsideCodeBlock;
+}
+
 /**
  * Creates a typed editor system based on the provided extensions array.
  * This factory function generates a Provider component and useEditor hook
@@ -113,6 +150,9 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
       () => ({
         formatText: (format: TextFormatType, value?: boolean | string) => {
           void value;
+          if (format === "code" && isSelectionInsideCodeBlock(editor)) {
+            return false;
+          }
           return editor?.dispatchCommand(FORMAT_TEXT_COMMAND, format);
         },
       }),

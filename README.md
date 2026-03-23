@@ -76,6 +76,13 @@ export function App() {
 }
 ```
 
+Syntax highlighting notes:
+
+- `prismjs` is already installed transitively through `@lexical/code`.
+- `@lyfie/luthor` presets use Lexical default language options and syntax tokens by default.
+- Disable per preset with `isSyntaxHighlightingEnabled={false}`.
+- Customize tokens with `syntaxHighlightColorMode="custom"` and `syntaxHighlightColors`.
+
 Need full control?
 
 ```bash

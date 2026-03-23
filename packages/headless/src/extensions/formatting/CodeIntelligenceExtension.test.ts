@@ -31,6 +31,19 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(options).toContain("sql");
   });
 
+  it("keeps unsupported configured options for selection while falling back to plain highlighting", () => {
+    const extension = new CodeIntelligenceExtension().configure({
+      languageOptions: {
+        mode: "replace",
+        values: ["bash", "typescript"],
+      },
+    }) as CodeIntelligenceExtension;
+
+    const options = extension.getLanguageOptionsSnapshot();
+
+    expect(options).toEqual(["bash", "typescript"]);
+  });
+
   it("replaces defaults when mode is replace", () => {
     const extension = new CodeIntelligenceExtension().configure({
       languageOptions: {
@@ -91,6 +104,50 @@ describe("CodeIntelligenceExtension language options", () => {
     })).toEqual([]);
   });
 
+  it("filters markdown shortcut transformers by editor node dependencies", () => {
+    const { resolveMarkdownShortcutTransformers } =
+      __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS;
+
+    const linkNode = class {
+      static getType() {
+        return "link";
+      }
+    };
+    const codeNode = class {
+      static getType() {
+        return "code";
+      }
+    };
+
+    const editor = {
+      hasNode: (node: unknown) => node !== linkNode,
+    } as unknown as LexicalEditor;
+
+    const transformers = [
+      {
+        type: "text-match",
+        dependencies: [linkNode],
+      },
+      {
+        type: "multiline-element",
+        dependencies: [codeNode],
+      },
+      {
+        type: "text-format",
+      },
+    ] as const;
+
+    const filtered = resolveMarkdownShortcutTransformers(
+      editor,
+      transformers as unknown as Parameters<typeof resolveMarkdownShortcutTransformers>[1],
+    );
+
+    expect(filtered).toHaveLength(2);
+    expect(filtered).toContain(transformers[1]);
+    expect(filtered).toContain(transformers[2]);
+    expect(filtered).not.toContain(transformers[0]);
+  });
+
   it("uses plain fallback theme for plaintext-like languages", () => {
     const extension = new CodeIntelligenceExtension() as CodeIntelligenceExtension & {
       getThemeForLanguage?: (language: string | null | undefined) => string | null;
@@ -109,6 +166,7 @@ describe("CodeIntelligenceExtension language options", () => {
     expect(extension.getThemeForLanguage?.("typescript")).toBe("prism");
     expect(extension.getThemeForLanguage?.("javascript")).toBe("prism");
     expect(extension.getThemeForLanguage?.("tsx")).toBe("plain");
+    expect(extension.getThemeForLanguage?.("bash")).toBe("plain");
   });
 
   it("does not update code block language when the editor is non-editable", () => {

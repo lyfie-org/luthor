@@ -1,80 +1,51 @@
 ---
-title: Media and Embeds
-description: Image, iframe, and YouTube embedding features.
+title: "Media and Embeds"
+description: "Image, iframe, and YouTube extension surfaces and associated node behavior."
+package: "headless"
+docType: "reference"
+surface: "extension"
+keywords:
+  - "imageExtension"
+  - "iframeEmbedExtension"
+  - "youTubeEmbedExtension"
+props:
+  []
+exports:
+  - "imageExtension"
+  - "iframeEmbedExtension"
+  - "youTubeEmbedExtension"
+commands:
+  - "insert.image"
+  - "insert.iframe"
+  - "insert.youtube"
+extensions:
+  - "imageExtension"
+  - "iframeEmbedExtension"
+  - "youTubeEmbedExtension"
+nodes:
+  - "image"
+  - "iframe-embed"
+  - "youtube-embed"
+frameworks:
+  []
+lastVerifiedFrom:
+  - "packages/headless/src/extensions/media/index.ts"
+navGroup: "luthor_headless"
+navOrder: 80
 ---
 
 # Media and Embeds
 
-This group covers image, iframe, and YouTube workflows.
+This group covers media insertion and embed node behavior.
 
-## Included extensions
+## What this page answers
+
+- Which extensions support image and embeds?
+
+## Extension set
 
 - `imageExtension`
 - `iframeEmbedExtension`
 - `youTubeEmbedExtension`
 
-## Key commands
 
-- Image:
-  - `insertImage`
-  - `setImageAlignment`
-  - `setImageCaption`
-  - `getImageCaption`
-- iframe:
-  - `insertIframeEmbed`
-  - `setIframeEmbedAlignment`
-  - `resizeIframeEmbed`
-  - `setIframeEmbedCaption`
-  - `getIframeEmbedCaption`
-  - `updateIframeEmbedUrl`
-  - `getIframeEmbedUrl`
-- YouTube:
-  - `insertYouTubeEmbed`
-  - `setYouTubeEmbedAlignment`
-  - `resizeYouTubeEmbed`
-  - `setYouTubeEmbedCaption`
-  - `getYouTubeEmbedCaption`
-  - `updateYouTubeEmbedUrl`
-  - `getYouTubeEmbedUrl`
-
-## Example
-
-```tsx
-import {
-  createEditorSystem,
-  RichText,
-  richTextExtension,
-  imageExtension,
-  iframeEmbedExtension,
-  youTubeEmbedExtension,
-} from '@lyfie/luthor-headless';
-
-const extensions = [
-  richTextExtension,
-  imageExtension,
-  iframeEmbedExtension,
-  youTubeEmbedExtension,
-] as const;
-
-const { Provider, useEditor } = createEditorSystem<typeof extensions>();
-
-function Toolbar() {
-  const { commands } = useEditor();
-  return (
-    <div>
-      <button onClick={() => commands.insertImage?.({ src: '/demo/image.png', alt: 'Demo' })}>Image</button>
-      <button onClick={() => commands.insertIframeEmbed?.('https://example.com')}>Iframe</button>
-      <button onClick={() => commands.insertYouTubeEmbed?.('https://www.youtube.com/watch?v=dQw4w9WgXcQ')}>YouTube</button>
-    </div>
-  );
-}
-
-export function App() {
-  return (
-    <Provider extensions={extensions}>
-      <Toolbar />
-      <RichText placeholder="Add media..." />
-    </Provider>
-  );
-}
-```
