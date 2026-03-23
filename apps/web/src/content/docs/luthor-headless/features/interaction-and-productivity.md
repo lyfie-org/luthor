@@ -1,81 +1,60 @@
 ---
-title: Interaction and Productivity
-description: Slash commands, command palette, shortcuts, history, and contextual UI.
+title: "Interaction and Productivity"
+description: "History, slash, command palette, emoji, context menu, floating toolbar, and draggable interactions."
+package: "headless"
+docType: "reference"
+surface: "extension"
+keywords:
+  - "historyExtension"
+  - "slashCommandExtension"
+  - "commandPaletteExtension"
+  - "emojiExtension"
+props:
+  []
+exports:
+  - "historyExtension"
+  - "slashCommandExtension"
+  - "commandPaletteExtension"
+  - "emojiExtension"
+  - "floatingToolbarExtension"
+  - "contextMenuExtension"
+  - "draggableBlockExtension"
+  - "enterKeyBehaviorExtension"
+commands:
+  - "edit.undo"
+  - "edit.redo"
+  - "palette.show"
+extensions:
+  - "historyExtension"
+  - "slashCommandExtension"
+  - "commandPaletteExtension"
+  - "emojiExtension"
+  - "floatingToolbarExtension"
+  - "contextMenuExtension"
+  - "draggableBlockExtension"
+  - "enterKeyBehaviorExtension"
+nodes:
+  []
+frameworks:
+  []
+lastVerifiedFrom:
+  - "packages/headless/src/extensions/core/index.ts"
+navGroup: "luthor_headless"
+navOrder: 100
 ---
 
 # Interaction and Productivity
 
-This group covers keyboard-first workflows and contextual editing tools.
+This group covers workflow speed and command discovery.
 
-## Included extensions
+## What this page answers
 
-- `historyExtension`
-- `enterKeyBehaviorExtension`
-- `commandPaletteExtension`
-- `slashCommandExtension`
-- `floatingToolbarExtension`
-- `contextMenuExtension`
-- `emojiExtension`
-- `draggableBlockExtension`
+- Which extensions handle keyboard-first productivity and overlays?
 
-## Key commands
+## Extension set
 
-- History:
-  - `undo`, `redo`
-- Command palette:
-  - `showCommandPalette`, `hideCommandPalette`
-  - `registerCommand`, `unregisterCommand`
-- Slash commands:
-  - `registerSlashCommand`, `unregisterSlashCommand`
-  - `setSlashCommands`, `executeSlashCommand`, `closeSlashMenu`
-- Emoji:
-  - `insertEmoji`, `executeEmojiSuggestion`, `closeEmojiSuggestions`
-  - `getEmojiSuggestions`, `getEmojiCatalog`, `resolveEmojiShortcode`
-- Draggable/context:
-  - extension-driven UI behavior through draggable/context menu plugins
-- Enter behavior:
-  - `insertHardBreak` (from enter key behavior support)
+- `historyExtension`, `enterKeyBehaviorExtension`
+- `commandPaletteExtension`, `slashCommandExtension`
+- `emojiExtension`, `floatingToolbarExtension`, `contextMenuExtension`, `draggableBlockExtension`
 
-## Example
 
-```tsx
-import {
-  createEditorSystem,
-  RichText,
-  richTextExtension,
-  historyExtension,
-  commandPaletteExtension,
-  slashCommandExtension,
-  draggableBlockExtension,
-} from '@lyfie/luthor-headless';
-
-const extensions = [
-  richTextExtension,
-  historyExtension,
-  commandPaletteExtension,
-  slashCommandExtension,
-  draggableBlockExtension,
-] as const;
-
-const { Provider, useEditor } = createEditorSystem<typeof extensions>();
-
-function Toolbar() {
-  const { commands } = useEditor();
-  return (
-    <div>
-      <button onClick={() => commands.undo?.()}>Undo</button>
-      <button onClick={() => commands.redo?.()}>Redo</button>
-      <button onClick={() => commands.showCommandPalette?.()}>Palette</button>
-    </div>
-  );
-}
-
-export function App() {
-  return (
-    <Provider extensions={extensions}>
-      <Toolbar />
-      <RichText placeholder="Type '/' for commands..." />
-    </Provider>
-  );
-}
-```

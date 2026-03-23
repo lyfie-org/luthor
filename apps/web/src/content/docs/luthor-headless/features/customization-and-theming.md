@@ -1,68 +1,70 @@
 ---
-title: Customization and Theming
-description: Custom nodes, theme tokens, and extension-level customization.
+title: "Customization and Theming"
+description: "Theme utilities and custom node extension composition for product-specific editor behavior."
+package: "headless"
+docType: "reference"
+surface: "extension"
+keywords:
+  - "createCustomNodeExtension"
+  - "defaultLuthorTheme"
+  - "mergeThemes"
+  - "createEditorThemeStyleVars"
+props:
+  []
+exports:
+  - "createCustomNodeExtension"
+  - "defaultLuthorTheme"
+  - "mergeThemes"
+  - "createEditorThemeStyleVars"
+commands:
+  []
+extensions:
+  - "createCustomNodeExtension"
+  - "createExtension"
+nodes:
+  - "root"
+  - "paragraph"
+  - "text"
+  - "linebreak"
+  - "tab"
+  - "heading"
+  - "quote"
+  - "list"
+  - "listitem"
+  - "link"
+  - "autolink"
+  - "code"
+  - "code-highlight"
+  - "horizontalrule"
+  - "image"
+  - "iframe-embed"
+  - "youtube-embed"
+  - "table"
+  - "tablerow"
+  - "tablecell"
+frameworks:
+  []
+lastVerifiedFrom:
+  - "packages/headless/src/extensions/custom/CustomNodeExtension.tsx"
+  - "packages/headless/src/core/theme.ts"
+navGroup: "luthor_headless"
+navOrder: 110
 ---
 
 # Customization and Theming
 
-This group covers custom node composition and theme token control.
+This group covers theming and custom-node extension composition.
 
-## Included APIs
+## What this page answers
 
-- `createCustomNodeExtension`
-- `createExtension`
+- Which APIs control theme tokens?
+- How do I add custom structured nodes?
+
+## Core APIs
+
 - `defaultLuthorTheme`
 - `mergeThemes`
 - `createEditorThemeStyleVars`
+- `createCustomNodeExtension`
 
-## Example: custom extension
 
-```tsx
-import {
-  createEditorSystem,
-  RichText,
-  richTextExtension,
-  createCustomNodeExtension,
-} from '@lyfie/luthor-headless';
-
-const calloutExtension = createCustomNodeExtension({
-  key: 'callout',
-  category: 'block',
-  nodeType: 'element',
-  createNode: ({ $createParagraphNode, $createTextNode }) => {
-    const node = $createParagraphNode();
-    node.append($createTextNode('Callout block'));
-    return node;
-  },
-});
-
-const extensions = [richTextExtension, calloutExtension] as const;
-const { Provider } = createEditorSystem<typeof extensions>();
-
-export function App() {
-  return (
-    <Provider extensions={extensions}>
-      <RichText placeholder="Custom editor..." />
-    </Provider>
-  );
-}
-```
-
-## Example: theme override
-
-```ts
-import { mergeThemes, defaultLuthorTheme } from '@lyfie/luthor-headless';
-
-const theme = mergeThemes(defaultLuthorTheme, {
-  colors: {
-    background: '#0b1020',
-    foreground: '#f8fafc',
-  },
-});
-```
-
-## Practical notes
-
-- Keep custom nodes small and composable.
-- Use typed payloads in custom node creation to avoid implicit schema drift.
-- Prefer token-level theme overrides over ad-hoc CSS overrides whenever possible.

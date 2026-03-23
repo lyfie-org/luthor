@@ -1,0 +1,311 @@
+---
+title: "Extensions Reference"
+description: "Reference index of extension class and instance exports from @lyfie/luthor-headless."
+package: "headless"
+docType: "reference"
+surface: "extension"
+keywords:
+  - "extensions reference"
+  - "BaseExtension"
+  - "blockFormatExtension"
+  - "BlockFormatExtension"
+  - "boldExtension"
+  - "BoldExtension"
+  - "codeExtension"
+  - "CodeExtension"
+  - "codeFormatExtension"
+  - "CodeFormatExtension"
+  - "codeIntelligenceExtension"
+  - "CodeIntelligenceExtension"
+  - "commandPaletteExtension"
+  - "CommandPaletteExtension"
+  - "contextMenuExtension"
+  - "ContextMenuExtension"
+  - "createCustomNodeExtension"
+  - "createExtension"
+  - "draggableBlockExtension"
+  - "DraggableBlockExtension"
+  - "emojiExtension"
+  - "EmojiExtension"
+  - "enterKeyBehaviorExtension"
+  - "EnterKeyBehaviorExtension"
+  - "Extension"
+  - "floatingToolbarExtension"
+  - "FloatingToolbarExtension"
+  - "fontFamilyExtension"
+  - "FontFamilyExtension"
+  - "fontSizeExtension"
+  - "FontSizeExtension"
+  - "historyExtension"
+  - "HistoryExtension"
+  - "horizontalRuleExtension"
+  - "HorizontalRuleExtension"
+  - "iframeEmbedExtension"
+  - "IframeEmbedExtension"
+  - "imageExtension"
+  - "ImageExtension"
+  - "italicExtension"
+  - "ItalicExtension"
+  - "lineHeightExtension"
+  - "LineHeightExtension"
+  - "linkExtension"
+  - "LinkExtension"
+  - "listExtension"
+  - "ListExtension"
+  - "richTextExtension"
+  - "slashCommandExtension"
+  - "SlashCommandExtension"
+  - "strikethroughExtension"
+  - "StrikethroughExtension"
+  - "subscriptExtension"
+  - "SubscriptExtension"
+  - "superscriptExtension"
+  - "SuperscriptExtension"
+  - "tabIndentExtension"
+  - "TabIndentExtension"
+  - "tableExtension"
+  - "TableExtension"
+  - "textColorExtension"
+  - "TextColorExtension"
+  - "TextFormatExtension"
+  - "textHighlightExtension"
+  - "TextHighlightExtension"
+  - "underlineExtension"
+  - "UnderlineExtension"
+  - "youTubeEmbedExtension"
+  - "YouTubeEmbedExtension"
+props:
+  []
+exports:
+  - "BaseExtension"
+  - "blockFormatExtension"
+  - "BlockFormatExtension"
+  - "boldExtension"
+  - "BoldExtension"
+  - "codeExtension"
+  - "CodeExtension"
+  - "codeFormatExtension"
+  - "CodeFormatExtension"
+  - "codeIntelligenceExtension"
+  - "CodeIntelligenceExtension"
+  - "commandPaletteExtension"
+  - "CommandPaletteExtension"
+  - "contextMenuExtension"
+  - "ContextMenuExtension"
+  - "createCustomNodeExtension"
+  - "createExtension"
+  - "draggableBlockExtension"
+  - "DraggableBlockExtension"
+  - "emojiExtension"
+  - "EmojiExtension"
+  - "enterKeyBehaviorExtension"
+  - "EnterKeyBehaviorExtension"
+  - "Extension"
+  - "floatingToolbarExtension"
+  - "FloatingToolbarExtension"
+  - "fontFamilyExtension"
+  - "FontFamilyExtension"
+  - "fontSizeExtension"
+  - "FontSizeExtension"
+  - "historyExtension"
+  - "HistoryExtension"
+  - "horizontalRuleExtension"
+  - "HorizontalRuleExtension"
+  - "iframeEmbedExtension"
+  - "IframeEmbedExtension"
+  - "imageExtension"
+  - "ImageExtension"
+  - "italicExtension"
+  - "ItalicExtension"
+  - "lineHeightExtension"
+  - "LineHeightExtension"
+  - "linkExtension"
+  - "LinkExtension"
+  - "listExtension"
+  - "ListExtension"
+  - "richTextExtension"
+  - "slashCommandExtension"
+  - "SlashCommandExtension"
+  - "strikethroughExtension"
+  - "StrikethroughExtension"
+  - "subscriptExtension"
+  - "SubscriptExtension"
+  - "superscriptExtension"
+  - "SuperscriptExtension"
+  - "tabIndentExtension"
+  - "TabIndentExtension"
+  - "tableExtension"
+  - "TableExtension"
+  - "textColorExtension"
+  - "TextColorExtension"
+  - "TextFormatExtension"
+  - "textHighlightExtension"
+  - "TextHighlightExtension"
+  - "underlineExtension"
+  - "UnderlineExtension"
+  - "youTubeEmbedExtension"
+  - "YouTubeEmbedExtension"
+commands:
+  []
+extensions:
+  - "BaseExtension"
+  - "blockFormatExtension"
+  - "BlockFormatExtension"
+  - "boldExtension"
+  - "BoldExtension"
+  - "codeExtension"
+  - "CodeExtension"
+  - "codeFormatExtension"
+  - "CodeFormatExtension"
+  - "codeIntelligenceExtension"
+  - "CodeIntelligenceExtension"
+  - "commandPaletteExtension"
+  - "CommandPaletteExtension"
+  - "contextMenuExtension"
+  - "ContextMenuExtension"
+  - "createCustomNodeExtension"
+  - "createExtension"
+  - "draggableBlockExtension"
+  - "DraggableBlockExtension"
+  - "emojiExtension"
+  - "EmojiExtension"
+  - "enterKeyBehaviorExtension"
+  - "EnterKeyBehaviorExtension"
+  - "Extension"
+  - "floatingToolbarExtension"
+  - "FloatingToolbarExtension"
+  - "fontFamilyExtension"
+  - "FontFamilyExtension"
+  - "fontSizeExtension"
+  - "FontSizeExtension"
+  - "historyExtension"
+  - "HistoryExtension"
+  - "horizontalRuleExtension"
+  - "HorizontalRuleExtension"
+  - "iframeEmbedExtension"
+  - "IframeEmbedExtension"
+  - "imageExtension"
+  - "ImageExtension"
+  - "italicExtension"
+  - "ItalicExtension"
+  - "lineHeightExtension"
+  - "LineHeightExtension"
+  - "linkExtension"
+  - "LinkExtension"
+  - "listExtension"
+  - "ListExtension"
+  - "richTextExtension"
+  - "slashCommandExtension"
+  - "SlashCommandExtension"
+  - "strikethroughExtension"
+  - "StrikethroughExtension"
+  - "subscriptExtension"
+  - "SubscriptExtension"
+  - "superscriptExtension"
+  - "SuperscriptExtension"
+  - "tabIndentExtension"
+  - "TabIndentExtension"
+  - "tableExtension"
+  - "TableExtension"
+  - "textColorExtension"
+  - "TextColorExtension"
+  - "TextFormatExtension"
+  - "textHighlightExtension"
+  - "TextHighlightExtension"
+  - "underlineExtension"
+  - "UnderlineExtension"
+  - "youTubeEmbedExtension"
+  - "YouTubeEmbedExtension"
+nodes:
+  []
+frameworks:
+  []
+lastVerifiedFrom:
+  - "packages/headless/src/extensions/index.ts"
+  - "packages/headless/src/extensions/core/index.ts"
+  - "packages/headless/src/extensions/formatting/index.ts"
+  - "packages/headless/src/extensions/media/index.ts"
+navGroup: "luthor_headless"
+navOrder: 120
+---
+
+# Extensions Reference
+
+This page is the source-of-truth export index for runtime extensions.
+
+## What this page answers
+
+- Which extension symbols are publicly exported?
+
+## Exported extension symbols
+
+- `BaseExtension`
+- `blockFormatExtension`
+- `BlockFormatExtension`
+- `boldExtension`
+- `BoldExtension`
+- `codeExtension`
+- `CodeExtension`
+- `codeFormatExtension`
+- `CodeFormatExtension`
+- `codeIntelligenceExtension`
+- `CodeIntelligenceExtension`
+- `commandPaletteExtension`
+- `CommandPaletteExtension`
+- `contextMenuExtension`
+- `ContextMenuExtension`
+- `createCustomNodeExtension`
+- `createExtension`
+- `draggableBlockExtension`
+- `DraggableBlockExtension`
+- `emojiExtension`
+- `EmojiExtension`
+- `enterKeyBehaviorExtension`
+- `EnterKeyBehaviorExtension`
+- `Extension`
+- `floatingToolbarExtension`
+- `FloatingToolbarExtension`
+- `fontFamilyExtension`
+- `FontFamilyExtension`
+- `fontSizeExtension`
+- `FontSizeExtension`
+- `historyExtension`
+- `HistoryExtension`
+- `horizontalRuleExtension`
+- `HorizontalRuleExtension`
+- `iframeEmbedExtension`
+- `IframeEmbedExtension`
+- `imageExtension`
+- `ImageExtension`
+- `italicExtension`
+- `ItalicExtension`
+- `lineHeightExtension`
+- `LineHeightExtension`
+- `linkExtension`
+- `LinkExtension`
+- `listExtension`
+- `ListExtension`
+- `richTextExtension`
+- `slashCommandExtension`
+- `SlashCommandExtension`
+- `strikethroughExtension`
+- `StrikethroughExtension`
+- `subscriptExtension`
+- `SubscriptExtension`
+- `superscriptExtension`
+- `SuperscriptExtension`
+- `tabIndentExtension`
+- `TabIndentExtension`
+- `tableExtension`
+- `TableExtension`
+- `textColorExtension`
+- `TextColorExtension`
+- `TextFormatExtension`
+- `textHighlightExtension`
+- `TextHighlightExtension`
+- `underlineExtension`
+- `UnderlineExtension`
+- `youTubeEmbedExtension`
+- `YouTubeEmbedExtension`
+
+

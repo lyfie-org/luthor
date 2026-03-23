@@ -1,46 +1,65 @@
 ---
-title: Presets
-description: Preset catalog for @lyfie/luthor, including per-preset docs.
+title: "Presets Catalog"
+description: "Catalog of all @lyfie/luthor preset exports and presetRegistry keys with quick navigation links."
+package: "luthor"
+docType: "reference"
+surface: "preset"
+keywords:
+  - "presets"
+  - "presetRegistry"
+  - "extensive"
+  - "compose"
+  - "simple-editor"
+  - "legacy-rich"
+  - "md-editor"
+  - "html-editor"
+  - "slash-editor"
+  - "headless-editor"
+props:
+  - "featureFlags"
+  - "availableModes"
+exports:
+  - "presetRegistry"
+  - "ExtensiveEditor"
+  - "ComposeEditor"
+  - "SimpleEditor"
+  - "LegacyRichEditor"
+  - "MarkDownEditor"
+  - "HTMLEditor"
+  - "SlashEditor"
+  - "HeadlessEditorPreset"
+commands:
+  []
+extensions:
+  []
+nodes:
+  []
+frameworks:
+  - "react"
+lastVerifiedFrom:
+  - "packages/luthor/src/presets/index.ts"
+navGroup: "luthor"
+navOrder: 50
 ---
 
-# Presets
+# Presets Catalog
 
-`@lyfie/luthor` is built around presets. Each preset wraps `ExtensiveEditor` with a specific product profile.
+This page maps preset exports to registry keys and reference pages.
 
-## Contributor guides
+## What this page answers
 
-- [Architecture](/docs/luthor/architecture/)
-- [Props reference](/docs/luthor/props-reference/)
-- [Feature flags](/docs/luthor/feature-flags/)
+- Which presets exist?
+- Which registry key maps to each preset?
 
-## Re-exported headless API
-
-```ts
-import { headless } from '@lyfie/luthor';
-```
-
-This gives you direct access to `@lyfie/luthor-headless` APIs when needed.
-
-## Preset matrix
-
-| Preset | Best for | Mode profile |
+| Preset export | Registry key | Page |
 | --- | --- | --- |
-| `ExtensiveEditor` | Full-feature editor UI | `visual-editor`, `visual-only`, `json`, `markdown`, `html` |
-| `ComposeEditor` | Focused drafting UI | `visual-only`, `visual`, `json` |
-| `SimpleEditor` | Chat/message input | `visual` only |
-| `LegacyRichEditor` | Metadata-light markdown/html-compatible flow | Depends on `sourceFormat` |
-| `MarkDownEditor` | Markdown-first flow | `visual-only`, `visual`, `json`, `markdown` |
-| `HTMLEditor` | HTML-first flow | `visual-only`, `visual`, `json`, `html` |
-| `SlashEditor` | Slash-first interactions | `visual-only`, `visual`, `json`, `markdown`, `html` |
-| `HeadlessEditorPreset` | Lightweight rich text + source tabs | `visual-only`, `visual`, `json`, `markdown`, `html` |
+| `ExtensiveEditor` | `extensive` | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |
+| `ComposeEditor` | `compose` | [Compose Editor](/docs/luthor/presets/compose-editor/) |
+| `SimpleEditor` | `simple-editor` | [Simple Editor](/docs/luthor/presets/simple-editor/) |
+| `LegacyRichEditor` | `legacy-rich` | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |
+| `MarkDownEditor` | `md-editor` | [Markdown Editor](/docs/luthor/presets/md-editor/) |
+| `HTMLEditor` | `html-editor` | [HTML Editor](/docs/luthor/presets/html-editor/) |
+| `SlashEditor` | `slash-editor` | [Slash Editor](/docs/luthor/presets/slash-editor/) |
+| `HeadlessEditorPreset` | `headless-editor` | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |
 
-## Preset docs
 
-- [Extensive Editor](/docs/luthor/presets/extensive-editor/)
-- [Compose Editor](/docs/luthor/presets/compose-editor/)
-- [Simple Editor](/docs/luthor/presets/simple-editor/)
-- [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/)
-- [MarkDown Editor](/docs/luthor/presets/md-editor/)
-- [HTML Editor](/docs/luthor/presets/html-editor/)
-- [Slash Editor](/docs/luthor/presets/slash-editor/)
-- [Headless Editor](/docs/luthor/presets/headless-editor-preset/)

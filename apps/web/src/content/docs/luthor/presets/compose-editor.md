@@ -1,62 +1,55 @@
 ---
-title: Compose Editor
-description: Focused rich text drafting preset with a compact, practical toolbar.
+title: "Compose Editor"
+description: "Compact preset profile for message composition and lightweight authoring flows."
+package: "luthor"
+docType: "reference"
+surface: "preset"
+keywords:
+  - "ComposeEditor"
+  - "compose preset"
+  - "compact toolbar"
+props:
+  - "compactToolbar"
+  - "featureFlags"
+exports:
+  - "ComposeEditor"
+  - "composePreset"
+commands:
+  - "format.bold"
+  - "format.italic"
+  - "link.insert"
+extensions:
+  []
+nodes:
+  - "paragraph"
+  - "list"
+frameworks:
+  - "react"
+lastVerifiedFrom:
+  - "packages/luthor/src/presets/compose/ComposeEditor.tsx"
+navGroup: "luthor"
+navOrder: 70
 ---
 
 # Compose Editor
 
-`ComposeEditor` is a focused drafting preset for writing flows where speed and clarity matter more than every possible feature.
+This preset keeps authoring focused and lightweight.
 
-## Usage
+## When to use this
 
-```tsx
-import { ComposeEditor } from '@lyfie/luthor';
+Use `ComposeEditor` for comments, replies, short updates, and other compact composer flows.
+
+## Mode profile
+
+- Modes: `visual-only`, `visual`, `json`.
+
+~~~tsx
 import '@lyfie/luthor/styles.css';
+import { ComposeEditor } from '@lyfie/luthor';
 
 export function App() {
-  return (
-    <ComposeEditor
-      compactToolbar
-      placeholder="Write your draft..."
-    />
-  );
+  return <ComposeEditor compactToolbar placeholder="Write a reply..." />;
 }
-```
+~~~
 
-## Props
-
-`ComposeEditorProps` inherits all `ExtensiveEditorProps` except direct `featureFlags`, then adds:
-
-- `featureFlags`: `FeatureFlagOverrides` (optional overrides)
-- `compactToolbar`: `false (default) | true`
-
-## Default mode profile
-
-- `availableModes`: `["visual", "json"]`
-- Toolbar is enabled by default (inherited from `ExtensiveEditor`).
-
-## Default feature profile
-
-Enabled by default:
-
-- `bold`, `italic`, `underline`, `strikethrough`
-- `list`, `history`, `link`, `blockFormat`, `codeFormat`
-
-Disabled by default:
-
-- `image`, `table`, `iframeEmbed`, `youTubeEmbed`
-- `emoji`, `floatingToolbar`, `contextMenu`
-- `commandPalette`, `slashCommand`
-- `draggableBlock`, `customNode`
-
-## Behavior
-
-- Great for writing drafts, briefs, notes, and long-form content where rich media is optional.
-- Keeps the surface clean while still allowing the core writing commands most teams use daily.
-- Supports user-provided `featureFlags` overrides so you can selectively re-enable disabled features.
-
-## Related pages
-
-- [Extensive Editor](/docs/luthor/presets/extensive-editor/)
-- [Feature Flags](/docs/luthor/feature-flags/)
 

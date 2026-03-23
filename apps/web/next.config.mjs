@@ -9,6 +9,40 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
   },
+  async redirects() {
+    return [
+      {
+        source: '/docs/getting-started/luthor/',
+        destination: '/docs/luthor/overview/',
+        permanent: true,
+      },
+      {
+        source: '/docs/getting-started/luthor-headless/',
+        destination: '/docs/luthor-headless/overview/',
+        permanent: true,
+      },
+      {
+        source: '/docs/luthor/',
+        destination: '/docs/luthor/overview/',
+        permanent: true,
+      },
+      {
+        source: '/docs/luthor-headless/',
+        destination: '/docs/luthor-headless/overview/',
+        permanent: true,
+      },
+      {
+        source: '/docs/integrations/',
+        destination: '/docs/integrations/react/',
+        permanent: true,
+      },
+      {
+        source: '/docs/reference/',
+        destination: '/docs/reference/search-guide/',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

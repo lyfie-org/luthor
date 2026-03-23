@@ -1,74 +1,68 @@
 ---
-title: Introduction
-description: What @lyfie/luthor and @lyfie/luthor-headless are, and when to use each package.
+title: "Getting Started"
+description: "Choose the right package, understand the docs structure, and start with the fastest path."
+package: "shared"
+docType: "guide"
+surface: "tooling"
+keywords:
+  - "getting started"
+  - "choose package"
+  - "luthor"
+  - "luthor-headless"
+  - "quickstart"
+props:
+  []
+exports:
+  - "@lyfie/luthor"
+  - "@lyfie/luthor-headless"
+commands:
+  []
+extensions:
+  []
+nodes:
+  []
+frameworks:
+  - "react"
+  - "nextjs"
+  - "astro"
+  - "remix"
+  - "vite"
+lastVerifiedFrom:
+  - "packages/luthor/src/index.ts"
+  - "packages/headless/src/index.ts"
+  - "apps/web/scripts/sync-docs.mjs"
+navGroup: "start_here"
+navOrder: 10
 ---
 
-# Introduction
+# Getting Started
 
-Luthor has two packages, and each one solves a different problem:
+Use this section to pick the right package and ship your first editor quickly.
 
-## @lyfie/luthor
+## What this page answers
 
-Use this when you want a production-ready editor fast.
+- Which package should I install?
+- What order should I read the docs in?
+- Where are the API references for props, commands, extensions, and exports?
 
-- Ships with prebuilt editor presets and UI.
-- Includes `@lyfie/luthor-headless` internally.
-- Best when you want to ship quickly with solid defaults.
+## Choose a package
 
-## @lyfie/luthor-headless
+- Pick `@lyfie/luthor` when you want a production-ready preset UI.
+- Pick `@lyfie/luthor-headless` when you want full UI and extension control.
 
-Use this when you want full control over UI and behavior.
+## Read in this order
 
-- Extension-first architecture.
-- Bring your own toolbar and app UX.
-- Best for custom product-specific editor experiences.
+1. [Installation](/docs/getting-started/installation/)
+2. [Dependencies](/docs/getting-started/dependencies/)
+3. [Capabilities](/docs/getting-started/capabilities/)
+4. [Quickstart: @lyfie/luthor](/docs/getting-started/quickstart-luthor/)
+5. [Quickstart: @lyfie/luthor-headless](/docs/getting-started/quickstart-headless/)
 
-## Compatibility
+## Reference entry points
 
-Current compatibility in this repository:
+- Presets package: [@lyfie/luthor Overview](/docs/luthor/overview/)
+- Runtime package: [@lyfie/luthor-headless Overview](/docs/luthor-headless/overview/)
+- Full exports map: [Exports Map](/docs/reference/exports-map/)
+- Search syntax and filters: [Search Guide](/docs/reference/search-guide/)
 
-- React: `^18.0.0 || ^19.0.0`
-- React DOM: `^18.0.0 || ^19.0.0`
-- TypeScript/TSX: fully supported
-- Lexical:
-  - `@lyfie/luthor` uses Lexical `^0.40.0` dependencies internally.
-  - `@lyfie/luthor-headless` requires `lexical` and `@lexical/*` peers at `>=0.40.0`.
-- Optional:
-  - `@emoji-mart/data` (optional dependency used by emoji workflows).
 
-## Choose the right package quickly
-
-| Need | Best package |
-| --- | --- |
-| "I want a polished editor now." | `@lyfie/luthor` |
-| "I want full control over toolbar, behavior, and UI." | `@lyfie/luthor-headless` |
-| "I want both: ship now, customize later." | Start with `@lyfie/luthor`, then move specific flows to headless as needed. |
-
-## AI agents and vibe coding
-
-Luthor ships machine-readable docs artifacts:
-
-- `/llms.txt` for lightweight indexing and discovery.
-- `/llms-full.txt` for the full documentation corpus.
-
-If you use AI coding agents, load one of these files into agent context first, then ask implementation questions against your codebase. See the full walkthrough: [AI Agents and Vibe Coding](/docs/getting-started/ai-agents-and-vibe-coding/).
-
-## Recommended path
-
-1. [Introduction](/docs/getting-started/)
-2. [Installation](/docs/getting-started/installation/)
-3. [Dependency Graph](/docs/getting-started/dependencies/)
-4. [Contributor Guide](/docs/getting-started/contributor-guide/)
-5. [AI Agents and Vibe Coding](/docs/getting-started/ai-agents-and-vibe-coding/)
-6. [Capabilities](/docs/getting-started/capabilities/)
-7. [@lyfie/luthor-headless](/docs/getting-started/luthor-headless/)
-8. [@lyfie/luthor](/docs/getting-started/luthor/)
-
-## Contributor deep dives
-
-- [@lyfie/luthor architecture](/docs/luthor/architecture/)
-- [@lyfie/luthor props reference](/docs/luthor/props-reference/)
-- [@lyfie/luthor feature flags](/docs/luthor/feature-flags/)
-- [@lyfie/luthor-headless architecture](/docs/luthor-headless/architecture/)
-- [@lyfie/luthor-headless extensions and API](/docs/luthor-headless/extensions-and-api/)
-- [Metadata comment system](/docs/luthor-headless/metadata-comment-system/)

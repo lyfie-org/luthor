@@ -1,76 +1,69 @@
 ---
-title: Metadata Comment System
-description: How luthor metadata envelopes preserve unsupported and non-native data across JSON, Markdown, and HTML bridges.
+title: "Metadata Comment System"
+description: "Metadata envelope behavior for markdown/html bridges and preservation rules for unsupported fields."
+package: "headless"
+docType: "reference"
+surface: "bridge"
+keywords:
+  - "metadata envelope"
+  - "appendMetadataEnvelopes"
+  - "rehydrateDocumentFromEnvelopes"
+  - "metadataMode"
+props:
+  []
+exports:
+  - "appendMetadataEnvelopes"
+  - "extractMetadataEnvelopes"
+  - "rehydrateDocumentFromEnvelopes"
+  - "prepareDocumentForBridge"
+commands:
+  []
+extensions:
+  []
+nodes:
+  - "root"
+  - "paragraph"
+  - "text"
+  - "linebreak"
+  - "tab"
+  - "heading"
+  - "quote"
+  - "list"
+  - "listitem"
+  - "link"
+  - "autolink"
+  - "code"
+  - "code-highlight"
+  - "horizontalrule"
+  - "image"
+  - "iframe-embed"
+  - "youtube-embed"
+  - "table"
+  - "tablerow"
+  - "tablecell"
+frameworks:
+  []
+lastVerifiedFrom:
+  - "packages/headless/src/core/metadata-envelope.ts"
+  - "packages/headless/src/core/markdown.ts"
+  - "packages/headless/src/core/html.ts"
+navGroup: "luthor_headless"
+navOrder: 40
 ---
 
 # Metadata Comment System
 
-When converting between JSON and Markdown/HTML, some node types or fields cannot be represented natively.
+This is the source-of-truth page for bridge metadata envelopes.
 
-`@lyfie/luthor-headless` preserves that data in metadata envelopes stored as HTML comments.
+## What this page answers
 
-## Envelope format
+- How are unsupported fields preserved across markdown/html bridges?
+- What does `metadataMode` change?
 
-Comments are appended to source output:
+## Behavior summary
 
-```html
-<!-- luthor:meta v1 {"id":"featureCard:1:1","type":"featureCard","path":[1],"node":{"type":"featureCard","version":1,"payload":{"title":"AI Draft"}},"fallback":"[Unsupported featureCard preserved in markdown metadata]"} -->
-```
+- `metadataMode: "preserve"` keeps `luthor:meta v1` envelopes.
+- `metadataMode: "none"` skips envelope append/extract.
+- Import rehydration is tolerant to malformed or unknown envelopes.
 
-Source implementation:
 
-- `packages/headless/src/core/metadata-envelope.ts`
-
-## Export pipeline (`jsonToMarkdown` and `jsonToHTML`)
-
-1. `prepareDocumentForBridge(...)` sanitizes the JSON for source-safe conversion.
-2. Unsupported node types are replaced with fallback text and stored in envelopes.
-3. Supported nodes with non-native fields generate patch envelopes.
-4. The converter builds markdown or html from sanitized JSON.
-5. `appendMetadataEnvelopes(...)` appends envelopes as `<!-- luthor:meta v1 ... -->`.
-
-## Import pipeline (`markdownToJSON` and `htmlToJSON`)
-
-1. `extractMetadataEnvelopes(...)` strips and parses envelope comments.
-2. Markdown or HTML content is converted to base JSON.
-3. `rehydrateDocumentFromEnvelopes(...)` restores preserved data.
-
-## Why two restoration strategies exist
-
-- `replace`: for unsupported node types. The original node is restored by path.
-- `merge`: for supported node types where extra metadata must be patched back onto native fields.
-
-## Markdown-specific behavior
-
-`markdown.ts` intentionally keeps markdown-editable fields native (for example image alt text and embed captions) while storing non-native extras in merge envelopes. This supports manual markdown edits without losing richer metadata.
-
-Legacy comments are still supported for backwards compatibility:
-
-- `<!-- luthor:iframe {...} -->`
-- `<!-- luthor:youtube {...} -->`
-
-## Safety guarantees
-
-- Unknown envelope versions are ignored with warnings.
-- Malformed JSON payloads are ignored safely.
-- Envelopes missing required fields are ignored.
-- Import continues with valid content even when some envelopes are invalid.
-
-## Contributor rules
-
-- If you add a new node type with non-native fields, update supported-type sets and patch extraction logic in both `markdown.ts` and `html.ts`.
-- Keep `ENVELOPE_VERSION` stable unless the format truly changes.
-- Add round-trip tests in `packages/headless/src/core/metadata-envelope.test.ts`, `packages/headless/src/core/markdown.test.ts`, and `packages/headless/src/core/html.test.ts`.
-
-## Debugging checklist
-
-1. Export JSON to markdown or html and confirm `luthor:meta v1` comments appear when expected.
-2. Edit source manually and re-import.
-3. Verify metadata fields survive round-trip.
-4. Check console warnings for ignored or malformed envelopes.
-
-## Preset impact
-
-`LegacyRichEditor`, `MarkDownEditor`, and `HTMLEditor` in `@lyfie/luthor` run in metadata-free bridge mode (`metadataMode: "none"`), so Markdown/HTML output does not include `luthor:meta` comments.
-
-`HeadlessEditorPreset` continues to use metadata-preserving bridge mode by default.
