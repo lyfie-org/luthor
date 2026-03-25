@@ -11,10 +11,8 @@
 
 [![Project Status](https://img.shields.io/badge/status-stable%20release%20%7C%20internal%20QA-yellowgreen?style=for-the-badge)](https://github.com/lyfie-org/luthor)
 
-[![Quality Gates](https://img.shields.io/github/actions/workflow/status/lyfie-org/luthor/quality-gates.yml?branch=main&label=quality%20gates&style=for-the-badge)](https://github.com/lyfie-org/luthor/actions/workflows/quality-gates.yml)
 [![Publish Packages](https://img.shields.io/github/actions/workflow/status/lyfie-org/luthor/publish-packages.yml?branch=main&label=publish&style=for-the-badge)](https://github.com/lyfie-org/luthor/actions/workflows/publish-packages.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/lyfie-org/luthor?style=for-the-badge)](https://github.com/lyfie-org/luthor/releases)
-[![Last Commit](https://img.shields.io/github/last-commit/lyfie-org/luthor/main?style=for-the-badge)](https://github.com/lyfie-org/luthor/commits/main)
 [![NPM - @lyfie/luthor](https://img.shields.io/npm/v/@lyfie/luthor?style=for-the-badge&label=@lyfie/luthor)](https://www.npmjs.com/package/@lyfie/luthor)
 [![NPM - @lyfie/luthor-headless](https://img.shields.io/npm/v/@lyfie/luthor-headless?style=for-the-badge&label=@lyfie/luthor-headless)](https://www.npmjs.com/package/@lyfie/luthor-headless)
 
