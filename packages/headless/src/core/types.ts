@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { LexicalEditor } from "lexical";
 import { ReactNode, CSSProperties } from "react";
 import { Extension } from "@lyfie/luthor-headless/extensions";

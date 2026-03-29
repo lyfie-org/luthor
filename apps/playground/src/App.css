@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 .docs-toolbar {
   --luthor-toolbar-bg: color-mix(in srgb, #fff7ed 75%, white 25%);
   --luthor-toolbar-section-border: #fdba74;

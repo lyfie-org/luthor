@@ -1,4 +1,11 @@
 /**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
+/**
  * Luthor editor extensions
  *
  * Exports all available extensions for the Luthor editor system.

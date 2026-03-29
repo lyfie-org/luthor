@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 /* Theme variables for layout consistency */
 .luthor-preset-extensive.luthor-editor-wrapper[data-editor-theme="light"] {
   --luthor-bg: #ffffff;

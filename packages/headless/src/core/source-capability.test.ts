@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { describe, expect, it } from "vitest";
 import { IS_BOLD, IS_SUBSCRIPT } from "lexical";
 import {

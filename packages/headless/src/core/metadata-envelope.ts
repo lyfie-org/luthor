@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 const ENVELOPE_PREFIX = "luthor:meta";
 const ENVELOPE_VERSION = 1;
 const ENVELOPE_REGEX = /<!--\s*luthor:meta\s+v(\d+)\s+({[\s\S]*?})\s*-->/g;

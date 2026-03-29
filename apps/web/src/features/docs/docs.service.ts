@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { docsIndex } from '@/data/docs-index.generated';
 import { docsApiIndex } from '@/data/docs-api-index.generated';
 

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { headless } from '@lyfie/luthor';
 
 type JSONNode = Record<string, unknown>;
@@ -364,7 +371,8 @@ const HTML_EDITOR_SOURCE = `<h1>HTML Editor</h1>
   <li>Code blocks and links</li>
 </ul>
 <blockquote>Great for HTML-first migration strategies.</blockquote>
-<pre><code class="language-html">&lt;section&gt;Production-safe content&lt;/section&gt;</code></pre>
+<pre><code class="language-html">var a = 10; 
+var b = 100;</code></pre>
 <hr />
 <p><a href="/docs/luthor/presets/html-editor/">Open HTML preset docs</a></p>`;
 

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 'use client';
 
 import { ArrowSquareOut, BookOpen, Code, GithubLogo, List, MoonStars, PlayCircle, Sun, X } from '@phosphor-icons/react';
