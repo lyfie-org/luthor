@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import type { DefaultSettings, ToolbarItemType, ToolbarVisibility } from "../../core";
 
 export type PresetModeCache<TMode extends string> = Set<TMode>;

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { BookOpenText, Coffee, Cube, GithubLogo, Package, PlayCircle, RocketLaunch } from '@phosphor-icons/react/dist/ssr';
 import Link from 'next/link';
 import {

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import React from "react";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";

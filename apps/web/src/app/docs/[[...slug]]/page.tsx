@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import type { Metadata } from 'next';
 import { ArrowLeft, ArrowRight, BookOpenText, House, Package, RocketLaunch, SquaresFour, Stack } from '@phosphor-icons/react/dist/ssr';
 import Link from 'next/link';

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import type { Metadata } from 'next';
 import { Manrope, Sora } from 'next/font/google';
 import '@lyfie/luthor/styles.css';

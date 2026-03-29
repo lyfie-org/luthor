@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { useEffect, useRef, useState } from "react";
 import type { CommandPaletteItem } from "@lyfie/luthor-headless";
 import { SearchIcon, CommandIcon } from "./icons";

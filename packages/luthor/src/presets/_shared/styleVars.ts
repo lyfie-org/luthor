@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import type { DefaultSettings, StyleVarRecord, StyleVarValueRecord } from "./types";
 
 export function normalizeStyleVarsKey(styleVars?: StyleVarValueRecord): string {

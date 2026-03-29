@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/config/site';
 import { getAllDocs } from '@/features/docs/docs.service';

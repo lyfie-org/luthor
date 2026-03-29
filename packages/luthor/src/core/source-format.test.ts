@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { describe, expect, it } from "vitest";
 import { htmlToJSON, jsonToHTML } from "@lyfie/luthor-headless";
 import { formatHTMLSource, formatMarkdownSource } from "./source-format";

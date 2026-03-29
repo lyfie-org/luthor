@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 export function formatCompact(value: number | null | undefined): string {
   if (typeof value !== 'number') return 'N/A';
   return new Intl.NumberFormat('en-US', {

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { SITE_URL } from '@/config/site';
 
 const SITE_ORIGIN = new URL(SITE_URL).origin;

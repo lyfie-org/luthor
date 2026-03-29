@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { describe, expect, it } from "vitest";
 import { __TEST_ONLY_LIST_INTERNALS } from "./ListExtension";
 

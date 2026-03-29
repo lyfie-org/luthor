@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
 import { LexicalEditor, $getNodeByKey, $getSelection, $isRangeSelection, $isTextNode } from "lexical";
 import React from "react";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
