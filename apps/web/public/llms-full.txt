@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-03-23T08:18:00.859Z
+Generated at: 2026-04-17T04:44:00.114Z
 
 ## AI Agent Workflow
 
@@ -2610,10 +2610,14 @@ keywords:
   - "ExtensiveEditor"
   - "extensive preset"
   - "full editor"
+  - "imageUploadHandler"
+  - "gifUploadHandler"
 props:
   - "featureFlags"
   - "availableModes"
   - "maxListIndentation"
+  - "imageUploadHandler"
+  - "gifUploadHandler"
 exports:
   - "ExtensiveEditor"
   - "extensivePreset"
@@ -2656,6 +2660,21 @@ Use `ExtensiveEditor` when you want full formatting, media, code, and command wo
 - `featureFlags`: Toggle individual preset capabilities. Use `featureFlags.codeIntelligence` to turn code intelligence on/off.
 - `availableModes`: Restrict visible mode tabs and allowed mode switching targets.
 - `maxListIndentation`: Caps nested list depth in visual editing.
+- `imageUploadHandler`: Intercepts local image file uploads from the toolbar.
+- `gifUploadHandler`: Intercepts local GIF uploads. Falls back to `imageUploadHandler` when omitted.
+
+## Custom upload hooks
+
+~~~tsx
+<ExtensiveEditor
+  imageUploadHandler={async (file) => uploadToCdn(file)}
+  gifUploadHandler={async (file) => uploadGifToMediaStore(file)}
+/>
+~~~
+
+If `gifUploadHandler` is not provided, GIF file uploads use `imageUploadHandler`.
+
+For production handlers, return a persistent URL from your storage service. Returning `blob:` URLs from handlers is fine for quick prototypes, but dev StrictMode remount cycles can revoke blob URLs and cause temporary `ERR_FILE_NOT_FOUND` preview errors.
 
 ## Code intelligence toggle
 
@@ -3178,6 +3197,8 @@ keywords:
   - "editorThemeOverrides"
   - "isToolbarEnabled"
   - "isToolbarPinned"
+  - "imageUploadHandler"
+  - "gifUploadHandler"
   - "fontFamilyOptions"
   - "fontSizeOptions"
   - "lineHeightOptions"
@@ -3231,6 +3252,8 @@ props:
   - "editorThemeOverrides"
   - "isToolbarEnabled"
   - "isToolbarPinned"
+  - "imageUploadHandler"
+  - "gifUploadHandler"
   - "fontFamilyOptions"
   - "fontSizeOptions"
   - "lineHeightOptions"
@@ -3330,6 +3353,8 @@ Use this page for exact prop names and discovery tokens.
 - `editorThemeOverrides`
 - `isToolbarEnabled`
 - `isToolbarPinned`
+- `imageUploadHandler`
+- `gifUploadHandler`
 - `fontFamilyOptions`
 - `fontSizeOptions`
 - `lineHeightOptions`

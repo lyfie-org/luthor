@@ -14,10 +14,13 @@ export {
   isFeatureEnabled,
 } from "./extensions";
 export { ExtensiveEditor } from "./ExtensiveEditor";
-export type { 
-    ExtensiveEditorRef, 
-    ExtensiveEditorProps, 
-    ExtensiveEditorMode } from "./ExtensiveEditor";
+export type {
+  ExtensiveEditorRef,
+  ExtensiveEditorProps,
+  ExtensiveEditorMode,
+  ImageUploadHandler,
+  GifUploadHandler,
+} from "./ExtensiveEditor";
 export type {
   ExtensiveExtensionsConfig,
   FeatureFlag,

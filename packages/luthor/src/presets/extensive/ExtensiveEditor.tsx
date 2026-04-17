@@ -326,6 +326,9 @@ export interface ExtensiveEditorRef {
   getHTML: () => string;
 }
 
+export type ImageUploadHandler = (file: File) => Promise<string>;
+export type GifUploadHandler = (file: File) => Promise<string>;
+
 type JsonTextNode = {
   type: "text";
   version: 1;
@@ -946,6 +949,8 @@ function ExtensiveEditorContent({
   toolbarStyleVars,
   isToolbarEnabled,
   isToolbarPinned,
+  imageUploadHandler,
+  gifUploadHandler,
   isEditorViewTabsVisible,
   headingOptions,
   paragraphLabel,
@@ -978,6 +983,8 @@ function ExtensiveEditorContent({
   toolbarStyleVars?: ToolbarStyleVars;
   isToolbarEnabled: boolean;
   isToolbarPinned: boolean;
+  imageUploadHandler?: ImageUploadHandler;
+  gifUploadHandler?: GifUploadHandler;
   isEditorViewTabsVisible: boolean;
   headingOptions?: readonly BlockHeadingLevel[];
   paragraphLabel?: string;
@@ -1057,6 +1064,24 @@ function ExtensiveEditorContent({
     [toolbarVisibility, featureFlags],
   );
   const isDraggableBoxEnabled = featureFlags.draggableBlock !== false;
+  const extensionImageUploadHandler = useMemo<ImageUploadHandler | undefined>(() => {
+    const imageExtension = extensions.find((extension: any) => extension.name === "image") as
+      | { config?: { uploadHandler?: ImageUploadHandler } }
+      | undefined;
+    return imageExtension?.config?.uploadHandler;
+  }, [extensions]);
+  const fallbackUploadHandler = useMemo<ImageUploadHandler>(
+    () => (file) => {
+      if (extensionImageUploadHandler) {
+        return Promise.resolve(extensionImageUploadHandler(file));
+      }
+      return Promise.resolve(URL.createObjectURL(file));
+    },
+    [extensionImageUploadHandler],
+  );
+  const resolvedImageUploadHandler = imageUploadHandler ?? fallbackUploadHandler;
+  const resolvedGifUploadHandler =
+    gifUploadHandler ?? imageUploadHandler ?? fallbackUploadHandler;
   const slashCommandVisibilityKey = normalizeSlashCommandVisibilityKey(slashCommandVisibility);
   const stableSlashCommandVisibilityRef = useRef<SlashCommandVisibility | undefined>(slashCommandVisibility);
   const stableSlashCommandVisibilityKeyRef = useRef(slashCommandVisibilityKey);
@@ -1811,7 +1836,8 @@ function ExtensiveEditorContent({
           safeCommands.showCommandPalette();
         }
       }}
-      imageUploadHandler={(file) => ((extensions.find((ext: any) => ext.name === "image") as any)?.config?.uploadHandler?.(file) ?? Promise.resolve(URL.createObjectURL(file)))}
+      imageUploadHandler={resolvedImageUploadHandler}
+      gifUploadHandler={resolvedGifUploadHandler}
       layout={toolbarLayout ?? TRADITIONAL_TOOLBAR_LAYOUT}
       toolbarVisibility={resolvedToolbarVisibility}
       toolbarStyleVars={toolbarStyleVars}
@@ -2000,6 +2026,8 @@ export interface ExtensiveEditorProps {
   editorThemeOverrides?: EditorThemeOverrides;
   isToolbarEnabled?: boolean;
   isToolbarPinned?: boolean;
+  imageUploadHandler?: ImageUploadHandler;
+  gifUploadHandler?: GifUploadHandler;
   fontFamilyOptions?: readonly FontFamilyOption[];
   fontSizeOptions?: readonly FontSizeOption[];
   lineHeightOptions?: readonly LineHeightOption[];
@@ -2065,6 +2093,8 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     editorThemeOverrides,
     isToolbarEnabled = true,
     isToolbarPinned = false,
+    imageUploadHandler,
+    gifUploadHandler,
     fontFamilyOptions,
     fontSizeOptions,
     lineHeightOptions,
@@ -2387,6 +2417,8 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             toolbarStyleVars={toolbarStyleVars}
             isToolbarEnabled={isToolbarEnabled}
             isToolbarPinned={isToolbarPinned}
+            imageUploadHandler={imageUploadHandler}
+            gifUploadHandler={gifUploadHandler}
             isEditorViewTabsVisible={resolvedIsEditorViewTabsVisible}
             headingOptions={headingOptions}
             paragraphLabel={paragraphLabel}

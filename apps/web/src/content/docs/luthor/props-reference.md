@@ -33,6 +33,8 @@ keywords:
   - "editorThemeOverrides"
   - "isToolbarEnabled"
   - "isToolbarPinned"
+  - "imageUploadHandler"
+  - "gifUploadHandler"
   - "fontFamilyOptions"
   - "fontSizeOptions"
   - "lineHeightOptions"
@@ -86,6 +88,8 @@ props:
   - "editorThemeOverrides"
   - "isToolbarEnabled"
   - "isToolbarPinned"
+  - "imageUploadHandler"
+  - "gifUploadHandler"
   - "fontFamilyOptions"
   - "fontSizeOptions"
   - "lineHeightOptions"
@@ -185,6 +189,8 @@ Use this page for exact prop names and discovery tokens.
 - `editorThemeOverrides`
 - `isToolbarEnabled`
 - `isToolbarPinned`
+- `imageUploadHandler`
+- `gifUploadHandler`
 - `fontFamilyOptions`
 - `fontSizeOptions`
 - `lineHeightOptions`

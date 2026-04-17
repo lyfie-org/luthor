@@ -777,7 +777,11 @@ function ColorPickerButton({
   );
 }
 
-function useImageHandlers(commands: CoreEditorCommands, imageUploadHandler?: (file: File) => Promise<string>) {
+function useImageHandlers(
+  commands: CoreEditorCommands,
+  imageUploadHandler?: (file: File) => Promise<string>,
+  gifUploadHandler?: (file: File) => Promise<string>,
+) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const gifInputRef = useRef<HTMLInputElement>(null);
 
@@ -827,9 +831,10 @@ function useImageHandlers(commands: CoreEditorCommands, imageUploadHandler?: (fi
         }
 
         let src: string;
-        if (imageUploadHandler) {
+        const effectiveGifUploadHandler = gifUploadHandler ?? imageUploadHandler;
+        if (effectiveGifUploadHandler) {
           try {
-            src = await imageUploadHandler(file);
+            src = await effectiveGifUploadHandler(file);
           } catch {
             alert("Failed to upload GIF");
             return;
@@ -849,7 +854,7 @@ function useImageHandlers(commands: CoreEditorCommands, imageUploadHandler?: (fi
         commands.setImageCaption(newCaption);
       },
     }),
-    [commands, imageUploadHandler],
+    [commands, imageUploadHandler, gifUploadHandler],
   );
 
   return { handlers, fileInputRef, gifInputRef };
@@ -967,6 +972,7 @@ export interface ToolbarProps {
   toggleTheme: () => void;
   onCommandPaletteOpen?: () => void;
   imageUploadHandler?: (file: File) => Promise<string>;
+  gifUploadHandler?: (file: File) => Promise<string>;
   classNames?: CoreToolbarClassNames;
   toolbarStyleVars?: ToolbarStyleVars;
   layout?: ToolbarLayout;
@@ -984,6 +990,7 @@ export function Toolbar({
   toggleTheme,
   onCommandPaletteOpen,
   imageUploadHandler,
+  gifUploadHandler,
   classNames,
   toolbarStyleVars,
   layout,
@@ -992,7 +999,11 @@ export function Toolbar({
   paragraphLabel,
   isListStyleDropdownEnabled = true,
 }: ToolbarProps) {
-  const { handlers, fileInputRef, gifInputRef } = useImageHandlers(commands, imageUploadHandler);
+  const { handlers, fileInputRef, gifInputRef } = useImageHandlers(
+    commands,
+    imageUploadHandler,
+    gifUploadHandler,
+  );
   const embedHandlers = useEmbedHandlers(commands);
   const hasAnyEmbedExtension = hasExtension("iframeEmbed") || hasExtension("youtubeEmbed");
   const isAnyEmbedSelected =
