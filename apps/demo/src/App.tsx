@@ -53,6 +53,31 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "headless-editor", label: "Headless Editor" },
 ];
 
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string" && reader.result.length > 0) {
+        resolve(reader.result);
+        return;
+      }
+      reject(new Error("Unable to read file content as data URL."));
+    };
+    reader.onerror = () => {
+      reject(reader.error ?? new Error("Unable to read file content as data URL."));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+async function demoUploadToStablePreviewUrl(file: File, kind: "IMAGE" | "GIF"): Promise<string> {
+  console.log(`${kind} handler`, file.name, file.type, file.size);
+  // Data URLs keep demo previews stable during React StrictMode remounts in local dev.
+  return readFileAsDataUrl(file);
+}
+
 function App() {
   const { theme, toggleTheme } = useDemoTheme();
   const [preset, setPreset] = useState<PresetId>("extensive");
@@ -235,6 +260,8 @@ function App() {
             availableModes={["visual-only", "visual-editor", "json", "markdown", "html"]}
             initialMode="visual-only"
             editOnClick={false}
+            imageUploadHandler={(file) => demoUploadToStablePreviewUrl(file, "IMAGE")}
+            gifUploadHandler={(file) => demoUploadToStablePreviewUrl(file, "GIF")}
           />
         );
     }

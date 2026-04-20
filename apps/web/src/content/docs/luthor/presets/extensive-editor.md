@@ -8,10 +8,14 @@ keywords:
   - "ExtensiveEditor"
   - "extensive preset"
   - "full editor"
+  - "imageUploadHandler"
+  - "gifUploadHandler"
 props:
   - "featureFlags"
   - "availableModes"
   - "maxListIndentation"
+  - "imageUploadHandler"
+  - "gifUploadHandler"
 exports:
   - "ExtensiveEditor"
   - "extensivePreset"
@@ -54,6 +58,21 @@ Use `ExtensiveEditor` when you want full formatting, media, code, and command wo
 - `featureFlags`: Toggle individual preset capabilities. Use `featureFlags.codeIntelligence` to turn code intelligence on/off.
 - `availableModes`: Restrict visible mode tabs and allowed mode switching targets.
 - `maxListIndentation`: Caps nested list depth in visual editing.
+- `imageUploadHandler`: Intercepts local image file uploads from the toolbar.
+- `gifUploadHandler`: Intercepts local GIF uploads. Falls back to `imageUploadHandler` when omitted.
+
+## Custom upload hooks
+
+~~~tsx
+<ExtensiveEditor
+  imageUploadHandler={async (file) => uploadToCdn(file)}
+  gifUploadHandler={async (file) => uploadGifToMediaStore(file)}
+/>
+~~~
+
+If `gifUploadHandler` is not provided, GIF file uploads use `imageUploadHandler`.
+
+For production handlers, return a persistent URL from your storage service. Returning `blob:` URLs from handlers is fine for quick prototypes, but dev StrictMode remount cycles can revoke blob URLs and cause temporary `ERR_FILE_NOT_FOUND` preview errors.
 
 ## Code intelligence toggle
 

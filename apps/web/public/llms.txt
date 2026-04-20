@@ -232,7 +232,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Extensive Editor
 - File: luthor/presets/extensive-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/extensive-editor/
-- Summary: title: "Extensive Editor" description: "Full preset profile with all core features enabled and broad mode support." package: "luthor" docType: "reference" surface: "preset" keywords: "ExtensiveEditor" "extensive preset" "full editor" props: "featureFlags" "availableModes" "maxListIndentation" exports: "ExtensiveEditor"...
+- Summary: title: "Extensive Editor" description: "Full preset profile with all core features enabled and broad mode support." package: "luthor" docType: "reference" surface: "preset" keywords: "ExtensiveEditor" "extensive preset" "full editor" "imageUploadHandler" "gifUploadHandler" props: "featureFlags" "availableModes" "maxLis...
 
 ### Headless Editor Preset
 - File: luthor/presets/headless-editor-preset.md

@@ -533,6 +533,129 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     expect(toolbarCall.toolbarVisibility).toEqual(toolbarVisibility);
   });
 
+  it("forwards explicit imageUploadHandler to Toolbar", () => {
+    const imageUploadHandler = vi.fn(async () => "https://cdn.example.com/image.png");
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        imageUploadHandler={imageUploadHandler}
+      />,
+    );
+
+    const toolbarCall = toolbarMock.mock.calls.at(-1)?.[0] as {
+      imageUploadHandler?: unknown;
+    };
+    expect(toolbarCall.imageUploadHandler).toBe(imageUploadHandler);
+  });
+
+  it("forwards explicit gifUploadHandler to Toolbar", () => {
+    const gifUploadHandler = vi.fn(async () => "https://cdn.example.com/animated.gif");
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        gifUploadHandler={gifUploadHandler}
+      />,
+    );
+
+    const toolbarCall = toolbarMock.mock.calls.at(-1)?.[0] as {
+      gifUploadHandler?: unknown;
+    };
+    expect(toolbarCall.gifUploadHandler).toBe(gifUploadHandler);
+  });
+
+  it("keeps extension upload handler fallback when no upload props are provided", async () => {
+    const extensionUploadHandler = vi.fn(async (file: File) => `https://uploads.example.com/${file.name}`);
+    mockEditorApi.extensions = [
+      {
+        name: "image",
+        config: {
+          uploadHandler: extensionUploadHandler,
+        },
+      },
+    ];
+
+    render(<ExtensiveEditor showDefaultContent={false} />);
+
+    const toolbarCall = toolbarMock.mock.calls.at(-1)?.[0] as {
+      imageUploadHandler?: (file: File) => Promise<string>;
+      gifUploadHandler?: (file: File) => Promise<string>;
+    };
+    const imageFile = new File(["image"], "photo.png", { type: "image/png" });
+    const gifFile = new File(["gif"], "anim.gif", { type: "image/gif" });
+
+    await expect(toolbarCall.imageUploadHandler?.(imageFile)).resolves.toBe(
+      "https://uploads.example.com/photo.png",
+    );
+    await expect(toolbarCall.gifUploadHandler?.(gifFile)).resolves.toBe(
+      "https://uploads.example.com/anim.gif",
+    );
+    expect(extensionUploadHandler).toHaveBeenNthCalledWith(1, imageFile);
+    expect(extensionUploadHandler).toHaveBeenNthCalledWith(2, gifFile);
+  });
+
+  it("falls back to URL.createObjectURL when extension upload handler is unavailable", async () => {
+    const originalCreateObjectURL = URL.createObjectURL;
+    const createObjectURLMock = vi.fn(
+      (file: File | Blob) => `blob:${(file as File).name ?? "upload"}`,
+    );
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: createObjectURLMock,
+    });
+
+    try {
+      render(<ExtensiveEditor showDefaultContent={false} />);
+
+      const toolbarCall = toolbarMock.mock.calls.at(-1)?.[0] as {
+        imageUploadHandler?: (file: File) => Promise<string>;
+        gifUploadHandler?: (file: File) => Promise<string>;
+      };
+      const imageFile = new File(["image"], "fallback-image.png", { type: "image/png" });
+      const gifFile = new File(["gif"], "fallback-anim.gif", { type: "image/gif" });
+
+      await expect(toolbarCall.imageUploadHandler?.(imageFile)).resolves.toBe(
+        "blob:fallback-image.png",
+      );
+      await expect(toolbarCall.gifUploadHandler?.(gifFile)).resolves.toBe(
+        "blob:fallback-anim.gif",
+      );
+      expect(createObjectURLMock).toHaveBeenNthCalledWith(1, imageFile);
+      expect(createObjectURLMock).toHaveBeenNthCalledWith(2, gifFile);
+    } finally {
+      if (originalCreateObjectURL) {
+        Object.defineProperty(URL, "createObjectURL", {
+          configurable: true,
+          value: originalCreateObjectURL,
+        });
+      } else {
+        Reflect.deleteProperty(URL, "createObjectURL");
+      }
+    }
+  });
+
+  it("uses imageUploadHandler as GIF fallback when gifUploadHandler is omitted", async () => {
+    const imageUploadHandler = vi.fn(async (file: File) => `https://cdn.example.com/${file.name}`);
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        imageUploadHandler={imageUploadHandler}
+      />,
+    );
+
+    const toolbarCall = toolbarMock.mock.calls.at(-1)?.[0] as {
+      gifUploadHandler?: (file: File) => Promise<string>;
+    };
+    const gifFile = new File(["gif"], "fallback.gif", { type: "image/gif" });
+
+    await expect(toolbarCall.gifUploadHandler?.(gifFile)).resolves.toBe(
+      "https://cdn.example.com/fallback.gif",
+    );
+    expect(imageUploadHandler).toHaveBeenCalledWith(gifFile);
+  });
+
   it("passes headingOptions and paragraphLabel to toolbar and command wiring by default", () => {
     const headingOptions = ["h2", "h4"] as const;
 
