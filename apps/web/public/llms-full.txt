@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-04-17T04:44:00.114Z
+Generated at: 2026-05-29T02:40:22.717Z
 
 ## AI Agent Workflow
 
@@ -2338,7 +2338,6 @@ frameworks:
   []
 lastVerifiedFrom:
   - "packages/luthor/src/presets/extensive/extensions.tsx"
-  - "packages/luthor/src/presets/slash-editor/SlashEditor.tsx"
   - "packages/luthor/src/presets/headless-editor/HeadlessEditorPreset.tsx"
 navGroup: "luthor"
 navOrder: 30
@@ -2415,7 +2414,6 @@ props:
   - "availableModes"
 exports:
   - "ExtensiveEditor"
-  - "ComposeEditor"
   - "presetRegistry"
 commands:
   - "palette.show"
@@ -2449,7 +2447,7 @@ navOrder: 10
 
 ## Key exports
 
-- Preset components: `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
+- Preset components: `ExtensiveEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `HeadlessEditorPreset`
 - Registry and factories: `presetRegistry`, `createExtensivePreset`, `createExtensiveExtensions`
 - Shared command layer: `generateCommands`, `registerKeyboardShortcuts`
 
@@ -2468,12 +2466,9 @@ keywords:
   - "presets"
   - "presetRegistry"
   - "extensive"
-  - "compose"
-  - "simple-editor"
   - "legacy-rich"
   - "md-editor"
   - "html-editor"
-  - "slash-editor"
   - "headless-editor"
 props:
   - "featureFlags"
@@ -2481,12 +2476,9 @@ props:
 exports:
   - "presetRegistry"
   - "ExtensiveEditor"
-  - "ComposeEditor"
-  - "SimpleEditor"
   - "LegacyRichEditor"
   - "MarkDownEditor"
   - "HTMLEditor"
-  - "SlashEditor"
   - "HeadlessEditorPreset"
 commands:
   []
@@ -2514,86 +2506,10 @@ This page maps preset exports to registry keys and reference pages.
 | Preset export | Registry key | Page |
 | --- | --- | --- |
 | `ExtensiveEditor` | `extensive` | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |
-| `ComposeEditor` | `compose` | [Compose Editor](/docs/luthor/presets/compose-editor/) |
-| `SimpleEditor` | `simple-editor` | [Simple Editor](/docs/luthor/presets/simple-editor/) |
 | `LegacyRichEditor` | `legacy-rich` | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |
 | `MarkDownEditor` | `md-editor` | [Markdown Editor](/docs/luthor/presets/md-editor/) |
 | `HTMLEditor` | `html-editor` | [HTML Editor](/docs/luthor/presets/html-editor/) |
-| `SlashEditor` | `slash-editor` | [Slash Editor](/docs/luthor/presets/slash-editor/) |
 | `HeadlessEditorPreset` | `headless-editor` | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |
-
----
-## FILE: luthor/presets/compose-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/compose-editor/
----
-
----
-title: "Compose Editor"
-description: "Compact preset profile for message composition and lightweight authoring flows."
-package: "luthor"
-docType: "reference"
-surface: "preset"
-keywords:
-  - "ComposeEditor"
-  - "compose preset"
-  - "compact toolbar"
-props:
-  - "compactToolbar"
-  - "featureFlags"
-exports:
-  - "ComposeEditor"
-  - "composePreset"
-commands:
-  - "format.bold"
-  - "format.italic"
-  - "link.insert"
-extensions:
-  []
-nodes:
-  - "paragraph"
-  - "list"
-frameworks:
-  - "react"
-lastVerifiedFrom:
-  - "packages/luthor/src/presets/compose/ComposeEditor.tsx"
-navGroup: "luthor"
-navOrder: 70
----
-
-# Compose Editor
-
-This preset keeps authoring focused and lightweight.
-
-## When to use this
-
-Use `ComposeEditor` for comments, replies, short updates, and other compact composer flows.
-
-## Mode profile
-
-- Modes: `visual-only`, `visual`, `json`.
-
-## Preset props
-
-- `compactToolbar`: Reduces toolbar footprint for dense composer layouts.
-- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
-
-## Code intelligence toggle
-
-~~~tsx
-<ComposeEditor
-  compactToolbar
-  featureFlags={{ codeIntelligence: false }}
-/>
-~~~
-
-~~~tsx
-import '@lyfie/luthor/styles.css';
-import { ComposeEditor } from '@lyfie/luthor';
-
-export function App() {
-  return <ComposeEditor compactToolbar placeholder="Write a reply..." />;
-}
-~~~
 
 ---
 ## FILE: luthor/presets/extensive-editor.md
@@ -2997,167 +2913,6 @@ export function App() {
 ~~~
 
 ---
-## FILE: luthor/presets/simple-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/simple-editor/
----
-
----
-title: "Simple Editor"
-description: "Chat-style preset with minimal formatting and send workflows."
-package: "luthor"
-docType: "reference"
-surface: "preset"
-keywords:
-  - "SimpleEditor"
-  - "chat input"
-  - "send button"
-  - "submitOnEnter"
-props:
-  - "submitOnEnter"
-  - "allowShiftEnter"
-  - "onSend"
-  - "outputFormat"
-  - "featureFlags"
-exports:
-  - "SimpleEditor"
-  - "simpleEditorPreset"
-  - "SimpleEditorProps"
-commands:
-  - "format.bold"
-  - "format.italic"
-extensions:
-  []
-nodes:
-  - "paragraph"
-  - "text"
-frameworks:
-  - "react"
-lastVerifiedFrom:
-  - "packages/luthor/src/presets/simple-editor/SimpleEditor.tsx"
-navGroup: "luthor"
-navOrder: 80
----
-
-# Simple Editor
-
-This preset is optimized for chat/message composition.
-
-## When to use this
-
-Use `SimpleEditor` when you need compact input, send actions, and controlled output payloads.
-
-## Mode profile
-
-- Modes: `visual-only`, `visual`.
-
-## Preset props
-
-- `submitOnEnter`: Sends content on Enter key.
-- `allowShiftEnter`: Keeps Shift+Enter as line break when `submitOnEnter` is enabled.
-- `onSend`: Callback that receives markdown/json payload based on `outputFormat`.
-- `outputFormat`: Chooses `md` or `json` as `payload.text`.
-- `featureFlags`: Scoped overrides for SimpleEditor; currently supports `featureFlags.codeIntelligence`.
-
-## Code intelligence toggle
-
-~~~tsx
-<SimpleEditor
-  featureFlags={{ codeIntelligence: true }}
-/>
-~~~
-
-~~~tsx
-import '@lyfie/luthor/styles.css';
-import { SimpleEditor } from '@lyfie/luthor';
-
-export function App() {
-  return (
-    <SimpleEditor
-      submitOnEnter
-      outputFormat="md"
-      onSend={(payload) => console.log(payload.markdown)}
-    />
-  );
-}
-~~~
-
----
-## FILE: luthor/presets/slash-editor.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/slash-editor/
----
-
----
-title: "Slash Editor"
-description: "Slash-command-first preset profile with allowlist defaults and optional draggable behavior."
-package: "luthor"
-docType: "reference"
-surface: "preset"
-keywords:
-  - "SlashEditor"
-  - "slash commands"
-  - "allowlist"
-props:
-  - "slashVisibility"
-  - "isDraggableEnabled"
-  - "featureFlags"
-exports:
-  - "SlashEditor"
-  - "slashEditorPreset"
-commands:
-  - "block.heading1"
-  - "list.bullet"
-  - "insert.table"
-extensions:
-  []
-nodes:
-  - "list"
-  - "heading"
-  - "table"
-frameworks:
-  - "react"
-lastVerifiedFrom:
-  - "packages/luthor/src/presets/slash-editor/SlashEditor.tsx"
-navGroup: "luthor"
-navOrder: 120
----
-
-# Slash Editor
-
-This preset is optimized for slash menu workflows.
-
-## When to use this
-
-Use `SlashEditor` when command discovery should be slash-driven and toolbar usage is secondary.
-
-## Mode profile
-
-- Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.
-- Toolbar is off by default.
-
-## Preset props
-
-- `slashVisibility`: Controls slash command allow/deny lists.
-- `isDraggableEnabled`: Enables or disables draggable block handles.
-- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
-
-## Code intelligence toggle
-
-~~~tsx
-<SlashEditor
-  featureFlags={{ codeIntelligence: false }}
-/>
-~~~
-
-~~~tsx
-import '@lyfie/luthor/styles.css';
-import { SlashEditor } from '@lyfie/luthor';
-
-export function App() {
-  return <SlashEditor placeholder="Type / for commands" />;
-}
-~~~
-
----
 ## FILE: luthor/props-reference.md
 ## URL: https://www.luthor.fyi/docs/luthor/props-reference/
 ---
@@ -3317,12 +3072,10 @@ Use this page for exact prop names and discovery tokens.
 
 ## Preset-level code intelligence toggle
 
-- `ExtensiveEditor`, `ComposeEditor`, `SlashEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.
-- `SimpleEditor` supports scoped `featureFlags.codeIntelligence`.
+- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.
 
 ~~~tsx
-<SlashEditor featureFlags={{ codeIntelligence: false }} />
-<SimpleEditor featureFlags={{ codeIntelligence: true }} />
+<ExtensiveEditor featureFlags={{ codeIntelligence: false }} />
 ~~~
 
 ## Full `ExtensiveEditorProps` index
@@ -3475,9 +3228,6 @@ exports:
   - "CommandPalette"
   - "commandsToCommandPaletteItems"
   - "commandsToSlashCommandItems"
-  - "ComposeEditor"
-  - "ComposeEditorProps"
-  - "composePreset"
   - "CoreEditorActiveStates"
   - "CoreEditorCommands"
   - "CoreEditorMode"
@@ -3581,20 +3331,10 @@ exports:
   - "setFloatingToolbarContext"
   - "ShortcutBindingOverride"
   - "ShortcutConfig"
-  - "SimpleEditor"
-  - "SimpleEditorOutputFormat"
-  - "simpleEditorPreset"
-  - "SimpleEditorProps"
-  - "SimpleEditorSendPayload"
-  - "SimpleFormattingOptions"
-  - "SimpleToolbarButton"
   - "SlashCommandMenu"
   - "SlashCommandVisibility"
   - "SlashCommandVisibilityFilters"
   - "SlashCommandVisibilitySelection"
-  - "SlashEditor"
-  - "slashEditorPreset"
-  - "SlashEditorProps"
   - "SourceView"
   - "StrikethroughIcon"
   - "StyleVarRecord"
@@ -3968,9 +3708,6 @@ This page is the canonical export inventory.
 - `CommandPalette`
 - `commandsToCommandPaletteItems`
 - `commandsToSlashCommandItems`
-- `ComposeEditor`
-- `ComposeEditorProps`
-- `composePreset`
 - `CoreEditorActiveStates`
 - `CoreEditorCommands`
 - `CoreEditorMode`
@@ -4074,20 +3811,10 @@ This page is the canonical export inventory.
 - `setFloatingToolbarContext`
 - `ShortcutBindingOverride`
 - `ShortcutConfig`
-- `SimpleEditor`
-- `SimpleEditorOutputFormat`
-- `simpleEditorPreset`
-- `SimpleEditorProps`
-- `SimpleEditorSendPayload`
-- `SimpleFormattingOptions`
-- `SimpleToolbarButton`
 - `SlashCommandMenu`
 - `SlashCommandVisibility`
 - `SlashCommandVisibilityFilters`
 - `SlashCommandVisibilitySelection`
-- `SlashEditor`
-- `slashEditorPreset`
-- `SlashEditorProps`
 - `SourceView`
 - `StrikethroughIcon`
 - `StyleVarRecord`
@@ -4309,12 +4036,9 @@ keywords:
   - "preset selector"
   - "decision matrix"
   - "extensive"
-  - "compose"
-  - "simple-editor"
   - "legacy-rich"
   - "md-editor"
   - "html-editor"
-  - "slash-editor"
   - "headless-editor"
 props:
   - "featureFlags"
@@ -4323,12 +4047,9 @@ props:
 exports:
   - "presetRegistry"
   - "ExtensiveEditor"
-  - "ComposeEditor"
-  - "SimpleEditor"
   - "LegacyRichEditor"
   - "MarkDownEditor"
   - "HTMLEditor"
-  - "SlashEditor"
   - "HeadlessEditorPreset"
 commands:
   []
@@ -4355,12 +4076,9 @@ Use this table to choose the right preset quickly.
 | Need | Preset |
 | --- | --- |
 | Full capability, broad modes | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |
-| Compact composer | [Compose Editor](/docs/luthor/presets/compose-editor/) |
-| Chat-style input with send flow | [Simple Editor](/docs/luthor/presets/simple-editor/) |
 | Legacy-compatible rich editing | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |
 | Markdown-focused source of truth | [Markdown Editor](/docs/luthor/presets/md-editor/) |
 | HTML-focused source workflows | [HTML Editor](/docs/luthor/presets/html-editor/) |
-| Slash-command-first authoring | [Slash Editor](/docs/luthor/presets/slash-editor/) |
 | Constrained source-mode preset | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |
 
 ---

@@ -47,14 +47,11 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [luthor/feature-flags.md](https://www.luthor.fyi/docs/luthor/feature-flags/) - Feature Flags
 - [luthor/overview.md](https://www.luthor.fyi/docs/luthor/overview/) - @lyfie/luthor Overview
 - [luthor/presets.md](https://www.luthor.fyi/docs/luthor/presets/) - Presets Catalog
-- [luthor/presets/compose-editor.md](https://www.luthor.fyi/docs/luthor/presets/compose-editor/) - Compose Editor
 - [luthor/presets/extensive-editor.md](https://www.luthor.fyi/docs/luthor/presets/extensive-editor/) - Extensive Editor
 - [luthor/presets/headless-editor-preset.md](https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/) - Headless Editor Preset
 - [luthor/presets/html-editor.md](https://www.luthor.fyi/docs/luthor/presets/html-editor/) - HTML Editor
 - [luthor/presets/legacy-rich-editor.md](https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/) - Legacy Rich Editor
 - [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/) - Markdown Editor
-- [luthor/presets/simple-editor.md](https://www.luthor.fyi/docs/luthor/presets/simple-editor/) - Simple Editor
-- [luthor/presets/slash-editor.md](https://www.luthor.fyi/docs/luthor/presets/slash-editor/) - Slash Editor
 - [luthor/props-reference.md](https://www.luthor.fyi/docs/luthor/props-reference/) - Props Reference
 - [reference/exports-map.md](https://www.luthor.fyi/docs/reference/exports-map/) - Exports Map
 - [reference/preset-selector.md](https://www.luthor.fyi/docs/reference/preset-selector/) - Preset Selector
@@ -222,12 +219,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Presets Catalog
 - File: luthor/presets.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/
-- Summary: title: "Presets Catalog" description: "Catalog of all @lyfie/luthor preset exports and presetRegistry keys with quick navigation links." package: "luthor" docType: "reference" surface: "preset" keywords: "presets" "presetRegistry" "extensive" "compose" "simple editor" "legacy rich" "md editor" "html editor" "slash edit...
-
-### Compose Editor
-- File: luthor/presets/compose-editor.md
-- URL: https://www.luthor.fyi/docs/luthor/presets/compose-editor/
-- Summary: title: "Compose Editor" description: "Compact preset profile for message composition and lightweight authoring flows." package: "luthor" docType: "reference" surface: "preset" keywords: "ComposeEditor" "compose preset" "compact toolbar" props: "compactToolbar" "featureFlags" exports: "ComposeEditor" "composePreset" com...
+- Summary: title: "Presets Catalog" description: "Catalog of all @lyfie/luthor preset exports and presetRegistry keys with quick navigation links." package: "luthor" docType: "reference" surface: "preset" keywords: "presets" "presetRegistry" "extensive" "legacy rich" "md editor" "html editor" "headless editor" props: "featureFlag...
 
 ### Extensive Editor
 - File: luthor/presets/extensive-editor.md
@@ -254,16 +246,6 @@ This file helps AI agents discover and query Luthor docs quickly.
 - URL: https://www.luthor.fyi/docs/luthor/presets/md-editor/
 - Summary: title: "Markdown Editor" description: "Markdown focused preset profile built on LegacyRichEditor with markdown source of truth behavior." package: "luthor" docType: "reference" surface: "preset" keywords: "MarkDownEditor" "md editor" "markdownSourceOfTruth" props: "initialMode" "defaultEditorView" "featureFlags" export...
 
-### Simple Editor
-- File: luthor/presets/simple-editor.md
-- URL: https://www.luthor.fyi/docs/luthor/presets/simple-editor/
-- Summary: title: "Simple Editor" description: "Chat style preset with minimal formatting and send workflows." package: "luthor" docType: "reference" surface: "preset" keywords: "SimpleEditor" "chat input" "send button" "submitOnEnter" props: "submitOnEnter" "allowShiftEnter" "onSend" "outputFormat" "featureFlags" exports: "Simpl...
-
-### Slash Editor
-- File: luthor/presets/slash-editor.md
-- URL: https://www.luthor.fyi/docs/luthor/presets/slash-editor/
-- Summary: title: "Slash Editor" description: "Slash command first preset profile with allowlist defaults and optional draggable behavior." package: "luthor" docType: "reference" surface: "preset" keywords: "SlashEditor" "slash commands" "allowlist" props: "slashVisibility" "isDraggableEnabled" "featureFlags" exports: "SlashEdito...
-
 ### Props Reference
 - File: luthor/props-reference.md
 - URL: https://www.luthor.fyi/docs/luthor/props-reference/
@@ -277,7 +259,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Preset Selector
 - File: reference/preset-selector.md
 - URL: https://www.luthor.fyi/docs/reference/preset-selector/
-- Summary: title: "Preset Selector" description: "Decision matrix for choosing the right preset by workflow, source mode profile, and feature policy." package: "luthor" docType: "reference" surface: "preset" keywords: "preset selector" "decision matrix" "extensive" "compose" "simple editor" "legacy rich" "md editor" "html editor"...
+- Summary: title: "Preset Selector" description: "Decision matrix for choosing the right preset by workflow, source mode profile, and feature policy." package: "luthor" docType: "reference" surface: "preset" keywords: "preset selector" "decision matrix" "extensive" "legacy rich" "md editor" "html editor" "headless editor" props: ...
 
 ### Search Guide
 - File: reference/search-guide.md

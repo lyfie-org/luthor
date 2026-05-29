@@ -8,12 +8,9 @@ keywords:
   - "presets"
   - "presetRegistry"
   - "extensive"
-  - "compose"
-  - "simple-editor"
   - "legacy-rich"
   - "md-editor"
   - "html-editor"
-  - "slash-editor"
   - "headless-editor"
 props:
   - "featureFlags"
@@ -21,12 +18,9 @@ props:
 exports:
   - "presetRegistry"
   - "ExtensiveEditor"
-  - "ComposeEditor"
-  - "SimpleEditor"
   - "LegacyRichEditor"
   - "MarkDownEditor"
   - "HTMLEditor"
-  - "SlashEditor"
   - "HeadlessEditorPreset"
 commands:
   []
@@ -54,12 +48,9 @@ This page maps preset exports to registry keys and reference pages.
 | Preset export | Registry key | Page |
 | --- | --- | --- |
 | `ExtensiveEditor` | `extensive` | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |
-| `ComposeEditor` | `compose` | [Compose Editor](/docs/luthor/presets/compose-editor/) |
-| `SimpleEditor` | `simple-editor` | [Simple Editor](/docs/luthor/presets/simple-editor/) |
 | `LegacyRichEditor` | `legacy-rich` | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |
 | `MarkDownEditor` | `md-editor` | [Markdown Editor](/docs/luthor/presets/md-editor/) |
 | `HTMLEditor` | `html-editor` | [HTML Editor](/docs/luthor/presets/html-editor/) |
-| `SlashEditor` | `slash-editor` | [Slash Editor](/docs/luthor/presets/slash-editor/) |
 | `HeadlessEditorPreset` | `headless-editor` | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |
 
 

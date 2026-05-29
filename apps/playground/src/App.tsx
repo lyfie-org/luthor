@@ -6,48 +6,36 @@
  */
 
 import {
-  ComposeEditor,
   ExtensiveEditor,
   type ExtensiveEditorRef,
   HeadlessEditorPreset,
   HTMLEditor,
   LegacyRichEditor,
   MarkDownEditor,
-  SimpleEditor,
-  SlashEditor,
 } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  DEMO_COMPOSE_CONTENT,
   DEMO_EXTENSIVE_CONTENT,
   DEMO_HEADLESS_PRESET_CONTENT,
   DEMO_HTML_EDITOR_CONTENT,
   DEMO_LEGACY_RICH_CONTENT,
   DEMO_MD_EDITOR_CONTENT,
-  DEMO_SIMPLE_EDITOR_CONTENT,
-  DEMO_SLASH_EDITOR_CONTENT,
 } from "./demo-content";
 import { useDemoTheme } from "./hooks/useDemoTheme";
 
 type PresetId =
   | "extensive"
-  | "compose"
-  | "simple-editor"
   | "legacy-rich"
   | "md-editor"
   | "html-editor"
-  | "slash-editor"
   | "headless-editor";
 
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "extensive", label: "Extensive Editor" },
-  { value: "compose", label: "Compose Editor" },
-  { value: "simple-editor", label: "Simple Editor" },
   { value: "legacy-rich", label: "Legacy Rich Editor" },
   { value: "md-editor", label: "MD Editor" },
   { value: "html-editor", label: "HTML Editor" },
-  { value: "slash-editor", label: "Slash Editor" },
   { value: "headless-editor", label: "Headless Editor" },
 ];
 
@@ -99,35 +87,6 @@ function App() {
 
   const presetNode = useMemo(() => {
     switch (preset) {
-      case "compose":
-        return (
-          <ComposeEditor
-            defaultContent={DEMO_COMPOSE_CONTENT}
-            showDefaultContent={false}
-            initialTheme={theme}
-            compactToolbar
-            placeholder="Write a draft..."
-          />
-        );
-      case "simple-editor":
-        return (
-          <SimpleEditor
-            defaultContent={DEMO_SIMPLE_EDITOR_CONTENT}
-            showDefaultContent={false}
-            initialTheme={theme}
-            placeholder="Type a message"
-            maxHeight={220}
-            minHeight={140}
-            submitOnEnter={false}
-            showBottomToolbar={false}
-            sendButtonPlacement="inside"
-            outputFormat="md"
-            formattingOptions={{ bold: true, italic: true, strikethrough: true }}
-            onSend={({ format, text }) => {
-              console.log("simple-editor-send", { format, text });
-            }}
-          />
-        );
       case "legacy-rich":
         return (
           <LegacyRichEditor
@@ -152,14 +111,6 @@ function App() {
             defaultContent={DEMO_HTML_EDITOR_CONTENT}
             showDefaultContent={false}
             defaultEditorView="html"
-            initialTheme={theme}
-          />
-        );
-      case "slash-editor":
-        return (
-          <SlashEditor
-            defaultContent={DEMO_SLASH_EDITOR_CONTENT}
-            showDefaultContent={false}
             initialTheme={theme}
           />
         );

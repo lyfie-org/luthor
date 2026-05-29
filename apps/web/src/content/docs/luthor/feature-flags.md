@@ -55,7 +55,6 @@ frameworks:
   []
 lastVerifiedFrom:
   - "packages/luthor/src/presets/extensive/extensions.tsx"
-  - "packages/luthor/src/presets/slash-editor/SlashEditor.tsx"
   - "packages/luthor/src/presets/headless-editor/HeadlessEditorPreset.tsx"
 navGroup: "luthor"
 navOrder: 30

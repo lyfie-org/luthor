@@ -343,38 +343,6 @@ export const WEB_DEMO_EXTENSIVE_CONTENT = documentToJSONString([
   ]),
 ]);
 
-export const WEB_DEMO_COMPOSE_CONTENT = documentToJSONString([
-  headingNode('h2', 'Compose Editor: Focused Drafting'),
-  paragraphNode([
-    textNode('Compose keeps the authoring flow tight while still preserving '),
-    textNode('JSON', 1),
-    textNode(' export compatibility.'),
-  ]),
-  paragraphNode([
-    textNode('Use this preset for outbound replies, support responses, and short editorial drafts.'),
-  ]),
-  listNode('bullet', 'ul', [
-    listItemNode([paragraphNode([textNode('Essential formatting and clean toolbar density')])], 1),
-    listItemNode([paragraphNode([textNode('Visual + JSON modes for reliable persistence')])], 2),
-  ]),
-  paragraphNode([
-    textNode('Escalation summary: ', 1),
-    textNode('The API limit was reached at 09:42 UTC. We retried with exponential backoff and restored service in 7 minutes.'),
-  ]),
-]);
-
-export const WEB_DEMO_SIMPLE_EDITOR_CONTENT = documentToJSONString([
-  paragraphNode([
-    textNode('Quick update: '),
-    textNode('bold', 1),
-    textNode(', '),
-    textNode('italic', 2),
-    textNode(', and '),
-    textNode('strikethrough', 4),
-    textNode(' are available in this lightweight composer.'),
-  ]),
-]);
-
 const LEGACY_RICH_MARKDOWN_SOURCE = `# Legacy Rich Editor
 
 This preset prioritizes **metadata-free** markdown/html compatibility.
@@ -424,39 +392,6 @@ const HTML_EDITOR_SOURCE = `<h1>HTML Editor</h1>
 export const WEB_DEMO_LEGACY_RICH_CONTENT = markdownToJSONString(LEGACY_RICH_MARKDOWN_SOURCE);
 export const WEB_DEMO_MD_EDITOR_CONTENT = markdownToJSONString(MD_EDITOR_SOURCE);
 export const WEB_DEMO_HTML_EDITOR_CONTENT = htmlToJSONString(HTML_EDITOR_SOURCE);
-
-export const WEB_DEMO_SLASH_EDITOR_CONTENT = documentToJSONString([
-  headingNode('h2', 'Slash Editor: Keyboard-First Workflow'),
-  paragraphNode([
-    textNode('Type '),
-    textNode('/', 16),
-    textNode(' to open command suggestions and insert structured blocks quickly.'),
-  ]),
-  listNode('bullet', 'ul', [
-    listItemNode([paragraphNode([textNode('Slash command allowlist is curated for fast authoring')])], 1),
-    listItemNode([paragraphNode([textNode('Draggable blocks help reorder sections without copy/paste')])], 2),
-  ]),
-  tableNode([
-    [
-      { text: 'Shortcut', isHeader: true, width: 260 },
-      { text: 'Action', isHeader: true, width: 320 },
-    ],
-    [
-      { text: '/', width: 260 },
-      { text: 'Open slash menu', width: 320 },
-    ],
-    [
-      { text: 'Tab / Shift+Tab', width: 260 },
-      { text: 'Indent / outdent list context', width: 320 },
-    ],
-  ]),
-  codeNode('markdown', ['# Draft section', '', '- Capture key outcomes', '- Move blocks to prioritize']),
-  {
-    type: 'horizontalrule',
-    version: 1,
-  },
-  paragraphNode([textNode('This profile is ideal for Notion-like structured writing surfaces.')]),
-]);
 
 export const WEB_DEMO_HEADLESS_PRESET_CONTENT = documentToJSONString([
   headingNode('h1', 'Headless Preset: Lightweight Controls'),

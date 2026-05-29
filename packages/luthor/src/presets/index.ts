@@ -13,12 +13,9 @@ import {
   extensiveExtensions,
   createExtensiveExtensions,
 } from "./extensive";
-import { composePreset, ComposeEditor } from "./compose";
-import { simpleEditorPreset, SimpleEditor } from "./simple-editor";
 import { mdEditorPreset, MarkDownEditor } from "./md-editor";
 import { htmlEditorPreset, HTMLEditor } from "./html-editor";
 import { legacyRichPreset, LegacyRichEditor } from "./legacy-rich";
-import { slashEditorPreset, SlashEditor } from "./slash-editor";
 import { headlessEditorPreset, HeadlessEditorPreset } from "./headless-editor";
 import type {
   ExtensiveEditorMode,
@@ -32,14 +29,6 @@ import type {
   FeatureFlagOverrides,
   ExtensivePresetConfig,
 } from "./extensive";
-import type { ComposeEditorProps } from "./compose";
-import type {
-  SimpleFormattingOptions,
-  SimpleEditorProps,
-  SimpleEditorSendPayload,
-  SimpleEditorOutputFormat,
-  SimpleToolbarButton,
-} from "./simple-editor";
 import type { MarkDownEditorProps, MarkDownEditorMode } from "./md-editor";
 import type { HTMLEditorProps, HTMLEditorMode } from "./html-editor";
 import type {
@@ -47,7 +36,6 @@ import type {
   LegacyRichEditorMode,
   LegacyRichSourceFormat,
 } from "./legacy-rich";
-import type { SlashEditorProps } from "./slash-editor";
 import type { HeadlessEditorPresetProps } from "./headless-editor";
 
 export { createPresetEditorConfig } from "../core/preset-config";
@@ -71,18 +59,12 @@ export {
   ExtensiveEditor,
   extensiveExtensions,
   createExtensiveExtensions,
-  composePreset,
-  ComposeEditor,
-  simpleEditorPreset,
-  SimpleEditor,
   mdEditorPreset,
   MarkDownEditor,
   htmlEditorPreset,
   HTMLEditor,
   legacyRichPreset,
   LegacyRichEditor,
-  slashEditorPreset,
-  SlashEditor,
   headlessEditorPreset,
   HeadlessEditorPreset,
 };
@@ -98,12 +80,6 @@ export type {
   FeatureFlags,
   FeatureFlagOverrides,
   ExtensivePresetConfig,
-  ComposeEditorProps,
-  SimpleEditorProps,
-  SimpleEditorSendPayload,
-  SimpleEditorOutputFormat,
-  SimpleFormattingOptions,
-  SimpleToolbarButton,
   MarkDownEditorProps,
   MarkDownEditorMode,
   HTMLEditorProps,
@@ -111,17 +87,13 @@ export type {
   LegacyRichEditorProps,
   LegacyRichEditorMode,
   LegacyRichSourceFormat,
-  SlashEditorProps,
   HeadlessEditorPresetProps,
 };
 
 export const presetRegistry: Record<string, EditorPreset> = {
   extensive: extensivePreset,
-  compose: composePreset,
-  "simple-editor": simpleEditorPreset,
   "legacy-rich": legacyRichPreset,
   "md-editor": mdEditorPreset,
   "html-editor": htmlEditorPreset,
-  "slash-editor": slashEditorPreset,
   "headless-editor": headlessEditorPreset,
 };

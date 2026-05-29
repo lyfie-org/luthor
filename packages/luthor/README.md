@@ -53,12 +53,9 @@ export function App() {
 ## Presets Included
 
 - `ExtensiveEditor`
-- `ComposeEditor`
-- `SimpleEditor`
 - `MarkDownEditor`
 - `HTMLEditor`
 - `LegacyRichEditor`
-- `SlashEditor`
 - `HeadlessEditorPreset`
 
 ## Compatibility
