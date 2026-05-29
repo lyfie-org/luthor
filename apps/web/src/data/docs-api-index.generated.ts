@@ -2561,7 +2561,6 @@ export const docsApiIndex = [
         "featureflags"
       ],
       "exports": [
-        "composeeditor",
         "extensiveeditor",
         "presetregistry"
       ],
@@ -2583,7 +2582,6 @@ export const docsApiIndex = [
       "and",
       "availablemodes",
       "choose",
-      "composeeditor",
       "export",
       "extensiveeditor",
       "featureflags",
@@ -2617,7 +2615,6 @@ export const docsApiIndex = [
     "searchTokenBuckets": {
       "keywords": [
         "availablemodes",
-        "compose",
         "editor",
         "extensive",
         "featureflags",
@@ -2631,26 +2628,19 @@ export const docsApiIndex = [
         "md-editor",
         "presetregistry",
         "presets",
-        "rich",
-        "simple",
-        "simple-editor",
-        "slash",
-        "slash-editor"
+        "rich"
       ],
       "props": [
         "availablemodes",
         "featureflags"
       ],
       "exports": [
-        "composeeditor",
         "extensiveeditor",
         "headlesseditorpreset",
         "htmleditor",
         "legacyricheditor",
         "markdowneditor",
-        "presetregistry",
-        "simpleeditor",
-        "slasheditor"
+        "presetregistry"
       ],
       "commands": [],
       "extensions": [],
@@ -2666,8 +2656,6 @@ export const docsApiIndex = [
       "availablemodes",
       "catalog",
       "catalog of all @lyfie/luthor preset exports and presetregistry keys with quick navigation links.",
-      "compose",
-      "composeeditor",
       "editor",
       "exports",
       "extensive",
@@ -2697,94 +2685,7 @@ export const docsApiIndex = [
       "quick",
       "react",
       "rich",
-      "simple",
-      "simple-editor",
-      "simpleeditor",
-      "slash",
-      "slash-editor",
-      "slasheditor",
       "with"
-    ]
-  },
-  {
-    "urlPath": "/docs/luthor/presets/compose-editor/",
-    "title": "Compose Editor",
-    "package": "luthor",
-    "docType": "reference",
-    "surface": "preset",
-    "navGroup": "luthor",
-    "searchTokenBuckets": {
-      "keywords": [
-        "compact",
-        "compact toolbar",
-        "compacttoolbar",
-        "compose",
-        "compose preset",
-        "composeeditor",
-        "featureflags",
-        "preset",
-        "toolbar"
-      ],
-      "props": [
-        "compacttoolbar",
-        "featureflags"
-      ],
-      "exports": [
-        "composeeditor",
-        "composepreset"
-      ],
-      "commands": [
-        "bold",
-        "format",
-        "format.bold",
-        "format.italic",
-        "insert",
-        "italic",
-        "link",
-        "link.insert"
-      ],
-      "extensions": [],
-      "nodes": [
-        "list",
-        "paragraph"
-      ],
-      "frameworks": [
-        "react"
-      ]
-    },
-    "searchTokens": [
-      "and",
-      "authoring",
-      "bold",
-      "compact",
-      "compact preset profile for message composition and lightweight authoring flows.",
-      "compact toolbar",
-      "compacttoolbar",
-      "compose",
-      "compose editor",
-      "compose preset",
-      "composeeditor",
-      "composepreset",
-      "composition",
-      "editor",
-      "featureflags",
-      "flows",
-      "for",
-      "format",
-      "format.bold",
-      "format.italic",
-      "insert",
-      "italic",
-      "lightweight",
-      "link",
-      "link.insert",
-      "list",
-      "message",
-      "paragraph",
-      "preset",
-      "profile",
-      "react",
-      "toolbar"
     ]
   },
   {
@@ -3233,176 +3134,6 @@ export const docsApiIndex = [
     ]
   },
   {
-    "urlPath": "/docs/luthor/presets/simple-editor/",
-    "title": "Simple Editor",
-    "package": "luthor",
-    "docType": "reference",
-    "surface": "preset",
-    "navGroup": "luthor",
-    "searchTokenBuckets": {
-      "keywords": [
-        "allowshiftenter",
-        "button",
-        "chat",
-        "chat input",
-        "featureflags",
-        "input",
-        "onsend",
-        "outputformat",
-        "send",
-        "send button",
-        "simpleeditor",
-        "submitonenter"
-      ],
-      "props": [
-        "allowshiftenter",
-        "featureflags",
-        "onsend",
-        "outputformat",
-        "submitonenter"
-      ],
-      "exports": [
-        "simpleeditor",
-        "simpleeditorpreset",
-        "simpleeditorprops"
-      ],
-      "commands": [
-        "bold",
-        "format",
-        "format.bold",
-        "format.italic",
-        "italic"
-      ],
-      "extensions": [],
-      "nodes": [
-        "paragraph",
-        "text"
-      ],
-      "frameworks": [
-        "react"
-      ]
-    },
-    "searchTokens": [
-      "allowshiftenter",
-      "and",
-      "bold",
-      "button",
-      "chat",
-      "chat input",
-      "chat-style preset with minimal formatting and send workflows.",
-      "editor",
-      "featureflags",
-      "format",
-      "format.bold",
-      "format.italic",
-      "formatting",
-      "input",
-      "italic",
-      "minimal",
-      "onsend",
-      "outputformat",
-      "paragraph",
-      "preset",
-      "react",
-      "send",
-      "send button",
-      "simple",
-      "simple editor",
-      "simpleeditor",
-      "simpleeditorpreset",
-      "simpleeditorprops",
-      "style",
-      "submitonenter",
-      "text",
-      "with",
-      "workflows"
-    ]
-  },
-  {
-    "urlPath": "/docs/luthor/presets/slash-editor/",
-    "title": "Slash Editor",
-    "package": "luthor",
-    "docType": "reference",
-    "surface": "preset",
-    "navGroup": "luthor",
-    "searchTokenBuckets": {
-      "keywords": [
-        "allowlist",
-        "commands",
-        "featureflags",
-        "isdraggableenabled",
-        "slash",
-        "slash commands",
-        "slasheditor",
-        "slashvisibility"
-      ],
-      "props": [
-        "featureflags",
-        "isdraggableenabled",
-        "slashvisibility"
-      ],
-      "exports": [
-        "slasheditor",
-        "slasheditorpreset"
-      ],
-      "commands": [
-        "block",
-        "block.heading1",
-        "bullet",
-        "heading1",
-        "insert",
-        "insert.table",
-        "list",
-        "list.bullet",
-        "table"
-      ],
-      "extensions": [],
-      "nodes": [
-        "heading",
-        "list",
-        "table"
-      ],
-      "frameworks": [
-        "react"
-      ]
-    },
-    "searchTokens": [
-      "allowlist",
-      "and",
-      "behavior",
-      "block",
-      "block.heading1",
-      "bullet",
-      "command",
-      "commands",
-      "defaults",
-      "draggable",
-      "editor",
-      "featureflags",
-      "first",
-      "heading",
-      "heading1",
-      "insert",
-      "insert.table",
-      "isdraggableenabled",
-      "list",
-      "list.bullet",
-      "optional",
-      "preset",
-      "profile",
-      "react",
-      "slash",
-      "slash commands",
-      "slash editor",
-      "slash-command-first preset profile with allowlist defaults and optional draggable behavior.",
-      "slasheditor",
-      "slasheditorpreset",
-      "slashvisibility",
-      "table",
-      "with"
-    ]
-  },
-  {
     "urlPath": "/docs/luthor/props-reference/",
     "title": "Props Reference",
     "package": "luthor",
@@ -3783,9 +3514,6 @@ export const docsApiIndex = [
         "commandpalettestatequeries",
         "commandstocommandpaletteitems",
         "commandstoslashcommanditems",
-        "composeeditor",
-        "composeeditorprops",
-        "composepreset",
         "contextmenucommands",
         "contextmenuconfig",
         "contextmenuextension",
@@ -3999,13 +3727,6 @@ export const docsApiIndex = [
         "setfloatingtoolbarcontext",
         "shortcutbindingoverride",
         "shortcutconfig",
-        "simpleeditor",
-        "simpleeditoroutputformat",
-        "simpleeditorpreset",
-        "simpleeditorprops",
-        "simpleeditorsendpayload",
-        "simpleformattingoptions",
-        "simpletoolbarbutton",
         "slashcommandcommands",
         "slashcommandconfig",
         "slashcommandextension",
@@ -4016,9 +3737,6 @@ export const docsApiIndex = [
         "slashcommandvisibility",
         "slashcommandvisibilityfilters",
         "slashcommandvisibilityselection",
-        "slasheditor",
-        "slasheditorpreset",
-        "slasheditorprops",
         "sourcemetadatamode",
         "sourceview",
         "strikethroughextension",
@@ -4304,9 +4022,6 @@ export const docsApiIndex = [
       "commandstoslashcommanditems",
       "complete",
       "complete export map for @lyfie/luthor and @lyfie/luthor-headless.",
-      "composeeditor",
-      "composeeditorprops",
-      "composepreset",
       "contextmenucommands",
       "contextmenuconfig",
       "contextmenuextension",
@@ -4610,13 +4325,6 @@ export const docsApiIndex = [
       "show",
       "showdefaultcontent",
       "showlinenumbers",
-      "simpleeditor",
-      "simpleeditoroutputformat",
-      "simpleeditorpreset",
-      "simpleeditorprops",
-      "simpleeditorsendpayload",
-      "simpleformattingoptions",
-      "simpletoolbarbutton",
       "slashcommandcommands",
       "slashcommandconfig",
       "slashcommandextension",
@@ -4627,9 +4335,6 @@ export const docsApiIndex = [
       "slashcommandvisibility",
       "slashcommandvisibilityfilters",
       "slashcommandvisibilityselection",
-      "slasheditor",
-      "slasheditorpreset",
-      "slasheditorprops",
       "sourcemetadatamode",
       "sourceview",
       "strikethrough",
@@ -4708,7 +4413,6 @@ export const docsApiIndex = [
     "searchTokenBuckets": {
       "keywords": [
         "availablemodes",
-        "compose",
         "decision",
         "decision matrix",
         "editor",
@@ -4727,11 +4431,7 @@ export const docsApiIndex = [
         "preset",
         "preset selector",
         "rich",
-        "selector",
-        "simple",
-        "simple-editor",
-        "slash",
-        "slash-editor"
+        "selector"
       ],
       "props": [
         "availablemodes",
@@ -4739,15 +4439,12 @@ export const docsApiIndex = [
         "initialmode"
       ],
       "exports": [
-        "composeeditor",
         "extensiveeditor",
         "headlesseditorpreset",
         "htmleditor",
         "legacyricheditor",
         "markdowneditor",
-        "presetregistry",
-        "simpleeditor",
-        "slasheditor"
+        "presetregistry"
       ],
       "commands": [],
       "extensions": [],
@@ -4761,8 +4458,6 @@ export const docsApiIndex = [
       "availablemodes",
       "by",
       "choosing",
-      "compose",
-      "composeeditor",
       "decision",
       "decision matrix",
       "decision matrix for choosing the right preset by workflow, source mode profile, and feature policy.",
@@ -4796,12 +4491,6 @@ export const docsApiIndex = [
       "rich",
       "right",
       "selector",
-      "simple",
-      "simple-editor",
-      "simpleeditor",
-      "slash",
-      "slash-editor",
-      "slasheditor",
       "source",
       "the",
       "workflow,"

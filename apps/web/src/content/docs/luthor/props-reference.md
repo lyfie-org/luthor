@@ -153,12 +153,10 @@ Use this page for exact prop names and discovery tokens.
 
 ## Preset-level code intelligence toggle
 
-- `ExtensiveEditor`, `ComposeEditor`, `SlashEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.
-- `SimpleEditor` supports scoped `featureFlags.codeIntelligence`.
+- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.
 
 ~~~tsx
-<SlashEditor featureFlags={{ codeIntelligence: false }} />
-<SimpleEditor featureFlags={{ codeIntelligence: true }} />
+<ExtensiveEditor featureFlags={{ codeIntelligence: false }} />
 ~~~
 
 ## Full `ExtensiveEditorProps` index

@@ -11,12 +11,9 @@ export default defineConfig({
   entry: [
     "src/index.ts",
     "src/presets/extensive/index.ts",
-    "src/presets/compose/index.ts",
-    "src/presets/simple-editor/index.ts",
     "src/presets/legacy-rich/index.ts",
     "src/presets/md-editor/index.ts",
     "src/presets/html-editor/index.ts",
-    "src/presets/slash-editor/index.ts",
     "src/presets/headless-editor/index.ts",
   ],
   format: ["esm"],

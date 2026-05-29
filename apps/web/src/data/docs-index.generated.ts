@@ -5076,7 +5076,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/feature-flags/",
     "sourcePath": "apps/web/src/content/docs/luthor/feature-flags.md",
-    "updatedAt": "2026-03-20T17:40:45.080Z",
+    "updatedAt": "2026-05-29T02:31:18.145Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -5130,7 +5130,6 @@ export const docsIndex = [
     "frameworks": [],
     "lastVerifiedFrom": [
       "packages/luthor/src/presets/extensive/extensions.tsx",
-      "packages/luthor/src/presets/slash-editor/SlashEditor.tsx",
       "packages/luthor/src/presets/headless-editor/HeadlessEditorPreset.tsx"
     ],
     "navGroup": "luthor",
@@ -5252,8 +5251,8 @@ export const docsIndex = [
     "title": "@lyfie/luthor Overview",
     "navTitle": "@lyfie/luthor Overview",
     "description": "Preset package overview, export surfaces, and when to choose @lyfie/luthor over headless runtime.",
-    "content": "\r\n# @lyfie/luthor Overview\r\n\r\n`@lyfie/luthor` ships preset editors on top of the headless runtime.\r\n\r\n## What this page answers\r\n\r\n- What does the preset package export?\r\n- When should I choose presets?\r\n\r\n## Use this package when\r\n\r\n- You need a production UI fast.\r\n- You want source modes, toolbar, and feature gates prewired.\r\n- You still need override hooks through props.\r\n\r\n## Key exports\r\n\r\n- Preset components: `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`\r\n- Registry and factories: `presetRegistry`, `createExtensivePreset`, `createExtensiveExtensions`\r\n- Shared command layer: `generateCommands`, `registerKeyboardShortcuts`\r\n\r\n\r\n",
-    "plainContent": "@lyfie/luthor Overview @lyfie/luthor ships preset editors on top of the headless runtime. What this page answers - What does the preset package export? - When should I choose presets? Use this package when - You need a production UI fast. - You want source modes, toolbar, and feature gates prewired. - You still need override hooks through props. Key exports - Preset components: ExtensiveEditor , ComposeEditor , SimpleEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , SlashEditor , HeadlessEditorPreset - Registry and factories: presetRegistry , createExtensivePreset , createExtensiveExtensions - Shared command layer: generateCommands , registerKeyboardShortcuts",
+    "content": "\r\n# @lyfie/luthor Overview\r\n\r\n`@lyfie/luthor` ships preset editors on top of the headless runtime.\r\n\r\n## What this page answers\r\n\r\n- What does the preset package export?\r\n- When should I choose presets?\r\n\r\n## Use this package when\r\n\r\n- You need a production UI fast.\r\n- You want source modes, toolbar, and feature gates prewired.\r\n- You still need override hooks through props.\r\n\r\n## Key exports\r\n\r\n- Preset components: `ExtensiveEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `HeadlessEditorPreset`\n- Registry and factories: `presetRegistry`, `createExtensivePreset`, `createExtensiveExtensions`\n- Shared command layer: `generateCommands`, `registerKeyboardShortcuts`\n\r\n\r\n",
+    "plainContent": "@lyfie/luthor Overview @lyfie/luthor ships preset editors on top of the headless runtime. What this page answers - What does the preset package export? - When should I choose presets? Use this package when - You need a production UI fast. - You want source modes, toolbar, and feature gates prewired. - You still need override hooks through props. Key exports - Preset components: ExtensiveEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , HeadlessEditorPreset - Registry and factories: presetRegistry , createExtensivePreset , createExtensiveExtensions - Shared command layer: generateCommands , registerKeyboardShortcuts",
     "sections": [
       {
         "heading": "Overview",
@@ -5277,7 +5276,7 @@ export const docsIndex = [
         "heading": "Key exports",
         "id": "key-exports",
         "level": 2,
-        "text": "- Preset components: ExtensiveEditor , ComposeEditor , SimpleEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , SlashEditor , HeadlessEditorPreset - Registry and factories: presetRegistry , createExtensivePreset , createExtensiveExtensions - Shared command layer: generateCommands , registerKeyboardShortcuts"
+        "text": "- Preset components: ExtensiveEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , HeadlessEditorPreset - Registry and factories: presetRegistry , createExtensivePreset , createExtensiveExtensions - Shared command layer: generateCommands , registerKeyboardShortcuts"
       }
     ],
     "headings": [
@@ -5299,7 +5298,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/overview/",
     "sourcePath": "apps/web/src/content/docs/luthor/overview.md",
-    "updatedAt": "2026-03-20T17:40:45.099Z",
+    "updatedAt": "2026-05-29T02:31:18.143Z",
     "package": "luthor",
     "docType": "guide",
     "surface": "preset",
@@ -5315,7 +5314,6 @@ export const docsIndex = [
     ],
     "exports": [
       "ExtensiveEditor",
-      "ComposeEditor",
       "presetRegistry"
     ],
     "commands": [
@@ -5340,7 +5338,6 @@ export const docsIndex = [
       "and",
       "availablemodes",
       "choose",
-      "composeeditor",
       "export",
       "extensiveeditor",
       "featureflags",
@@ -5379,7 +5376,6 @@ export const docsIndex = [
         "featureflags"
       ],
       "exports": [
-        "composeeditor",
         "extensiveeditor",
         "presetregistry"
       ],
@@ -5403,8 +5399,8 @@ export const docsIndex = [
     "title": "Presets Catalog",
     "navTitle": "Presets Catalog",
     "description": "Catalog of all @lyfie/luthor preset exports and presetRegistry keys with quick navigation links.",
-    "content": "\r\n# Presets Catalog\r\n\r\nThis page maps preset exports to registry keys and reference pages.\r\n\r\n## What this page answers\r\n\r\n- Which presets exist?\r\n- Which registry key maps to each preset?\r\n\r\n| Preset export | Registry key | Page |\r\n| --- | --- | --- |\r\n| `ExtensiveEditor` | `extensive` | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |\r\n| `ComposeEditor` | `compose` | [Compose Editor](/docs/luthor/presets/compose-editor/) |\r\n| `SimpleEditor` | `simple-editor` | [Simple Editor](/docs/luthor/presets/simple-editor/) |\r\n| `LegacyRichEditor` | `legacy-rich` | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |\r\n| `MarkDownEditor` | `md-editor` | [Markdown Editor](/docs/luthor/presets/md-editor/) |\r\n| `HTMLEditor` | `html-editor` | [HTML Editor](/docs/luthor/presets/html-editor/) |\r\n| `SlashEditor` | `slash-editor` | [Slash Editor](/docs/luthor/presets/slash-editor/) |\r\n| `HeadlessEditorPreset` | `headless-editor` | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |\r\n\r\n\r\n",
-    "plainContent": "Presets Catalog This page maps preset exports to registry keys and reference pages. What this page answers - Which presets exist? - Which registry key maps to each preset? Preset export Registry key Page --- --- --- ExtensiveEditor extensive Extensive Editor ComposeEditor compose Compose Editor SimpleEditor simple-editor Simple Editor LegacyRichEditor legacy-rich Legacy Rich Editor MarkDownEditor md-editor Markdown Editor HTMLEditor html-editor HTML Editor SlashEditor slash-editor Slash Editor HeadlessEditorPreset headless-editor Headless Editor Preset",
+    "content": "\r\n# Presets Catalog\r\n\r\nThis page maps preset exports to registry keys and reference pages.\r\n\r\n## What this page answers\r\n\r\n- Which presets exist?\r\n- Which registry key maps to each preset?\r\n\r\n| Preset export | Registry key | Page |\n| --- | --- | --- |\n| `ExtensiveEditor` | `extensive` | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |\n| `LegacyRichEditor` | `legacy-rich` | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |\n| `MarkDownEditor` | `md-editor` | [Markdown Editor](/docs/luthor/presets/md-editor/) |\n| `HTMLEditor` | `html-editor` | [HTML Editor](/docs/luthor/presets/html-editor/) |\n| `HeadlessEditorPreset` | `headless-editor` | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |\n\r\n\r\n",
+    "plainContent": "Presets Catalog This page maps preset exports to registry keys and reference pages. What this page answers - Which presets exist? - Which registry key maps to each preset? Preset export Registry key Page --- --- --- ExtensiveEditor extensive Extensive Editor LegacyRichEditor legacy-rich Legacy Rich Editor MarkDownEditor md-editor Markdown Editor HTMLEditor html-editor HTML Editor HeadlessEditorPreset headless-editor Headless Editor Preset",
     "sections": [
       {
         "heading": "Overview",
@@ -5416,7 +5412,7 @@ export const docsIndex = [
         "heading": "What this page answers",
         "id": "what-this-page-answers",
         "level": 2,
-        "text": "- Which presets exist? - Which registry key maps to each preset? Preset export Registry key Page --- --- --- ExtensiveEditor extensive Extensive Editor ComposeEditor compose Compose Editor SimpleEditor simple-editor Simple Editor LegacyRichEditor legacy-rich Legacy Rich Editor MarkDownEditor md-editor Markdown Editor HTMLEditor html-editor HTML Editor SlashEditor slash-editor Slash Editor HeadlessEditorPreset headless-editor Headless Editor Preset"
+        "text": "- Which presets exist? - Which registry key maps to each preset? Preset export Registry key Page --- --- --- ExtensiveEditor extensive Extensive Editor LegacyRichEditor legacy-rich Legacy Rich Editor MarkDownEditor md-editor Markdown Editor HTMLEditor html-editor HTML Editor HeadlessEditorPreset headless-editor Headless Editor Preset"
       }
     ],
     "headings": [
@@ -5428,7 +5424,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/presets/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets.md",
-    "updatedAt": "2026-03-20T17:40:45.115Z",
+    "updatedAt": "2026-05-29T02:31:18.142Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -5436,12 +5432,9 @@ export const docsIndex = [
       "presets",
       "presetRegistry",
       "extensive",
-      "compose",
-      "simple-editor",
       "legacy-rich",
       "md-editor",
       "html-editor",
-      "slash-editor",
       "headless-editor"
     ],
     "props": [
@@ -5451,12 +5444,9 @@ export const docsIndex = [
     "exports": [
       "presetRegistry",
       "ExtensiveEditor",
-      "ComposeEditor",
-      "SimpleEditor",
       "LegacyRichEditor",
       "MarkDownEditor",
       "HTMLEditor",
-      "SlashEditor",
       "HeadlessEditorPreset"
     ],
     "commands": [],
@@ -5478,8 +5468,6 @@ export const docsIndex = [
       "availablemodes",
       "catalog",
       "catalog of all @lyfie/luthor preset exports and presetregistry keys with quick navigation links.",
-      "compose",
-      "composeeditor",
       "editor",
       "exports",
       "extensive",
@@ -5509,18 +5497,11 @@ export const docsIndex = [
       "quick",
       "react",
       "rich",
-      "simple",
-      "simple-editor",
-      "simpleeditor",
-      "slash",
-      "slash-editor",
-      "slasheditor",
       "with"
     ],
     "searchTokenBuckets": {
       "keywords": [
         "availablemodes",
-        "compose",
         "editor",
         "extensive",
         "featureflags",
@@ -5534,207 +5515,23 @@ export const docsIndex = [
         "md-editor",
         "presetregistry",
         "presets",
-        "rich",
-        "simple",
-        "simple-editor",
-        "slash",
-        "slash-editor"
+        "rich"
       ],
       "props": [
         "availablemodes",
         "featureflags"
       ],
       "exports": [
-        "composeeditor",
         "extensiveeditor",
         "headlesseditorpreset",
         "htmleditor",
         "legacyricheditor",
         "markdowneditor",
-        "presetregistry",
-        "simpleeditor",
-        "slasheditor"
+        "presetregistry"
       ],
       "commands": [],
       "extensions": [],
       "nodes": [],
-      "frameworks": [
-        "react"
-      ]
-    }
-  },
-  {
-    "slug": [
-      "luthor",
-      "presets",
-      "compose-editor"
-    ],
-    "title": "Compose Editor",
-    "navTitle": "Compose Editor",
-    "description": "Compact preset profile for message composition and lightweight authoring flows.",
-    "content": "\r\n# Compose Editor\r\n\r\nThis preset keeps authoring focused and lightweight.\r\n\r\n## When to use this\r\n\r\nUse `ComposeEditor` for comments, replies, short updates, and other compact composer flows.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`, `json`.\n\n## Preset props\n\n- `compactToolbar`: Reduces toolbar footprint for dense composer layouts.\n- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<ComposeEditor\n  compactToolbar\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { ComposeEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <ComposeEditor compactToolbar placeholder=\"Write a reply...\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Compose Editor This preset keeps authoring focused and lightweight. When to use this Use ComposeEditor for comments, replies, short updates, and other compact composer flows. Mode profile - Modes: visual-only , visual , json . Preset props - compactToolbar : Reduces toolbar footprint for dense composer layouts. - featureFlags : Optional per-feature overrides. Includes codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { ComposeEditor } from '@lyfie/luthor'; export function App() { return ; }",
-    "sections": [
-      {
-        "heading": "Overview",
-        "id": "overview",
-        "level": 1,
-        "text": "Compose Editor This preset keeps authoring focused and lightweight."
-      },
-      {
-        "heading": "When to use this",
-        "id": "when-to-use-this",
-        "level": 2,
-        "text": "Use ComposeEditor for comments, replies, short updates, and other compact composer flows."
-      },
-      {
-        "heading": "Mode profile",
-        "id": "mode-profile",
-        "level": 2,
-        "text": "- Modes: visual-only , visual , json ."
-      },
-      {
-        "heading": "Preset props",
-        "id": "preset-props",
-        "level": 2,
-        "text": "- compactToolbar : Reduces toolbar footprint for dense composer layouts. - featureFlags : Optional per-feature overrides. Includes codeIntelligence ."
-      },
-      {
-        "heading": "Code intelligence toggle",
-        "id": "code-intelligence-toggle",
-        "level": 2,
-        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { ComposeEditor } from '@lyfie/luthor'; export function App() { return ; }"
-      }
-    ],
-    "headings": [
-      {
-        "level": 2,
-        "text": "When to use this",
-        "id": "when-to-use-this"
-      },
-      {
-        "level": 2,
-        "text": "Mode profile",
-        "id": "mode-profile"
-      },
-      {
-        "level": 2,
-        "text": "Preset props",
-        "id": "preset-props"
-      },
-      {
-        "level": 2,
-        "text": "Code intelligence toggle",
-        "id": "code-intelligence-toggle"
-      }
-    ],
-    "urlPath": "/docs/luthor/presets/compose-editor/",
-    "sourcePath": "apps/web/src/content/docs/luthor/presets/compose-editor.md",
-    "updatedAt": "2026-03-23T06:33:09.423Z",
-    "package": "luthor",
-    "docType": "reference",
-    "surface": "preset",
-    "keywords": [
-      "ComposeEditor",
-      "compose preset",
-      "compact toolbar"
-    ],
-    "props": [
-      "compactToolbar",
-      "featureFlags"
-    ],
-    "exports": [
-      "ComposeEditor",
-      "composePreset"
-    ],
-    "commands": [
-      "format.bold",
-      "format.italic",
-      "link.insert"
-    ],
-    "extensions": [],
-    "nodes": [
-      "paragraph",
-      "list"
-    ],
-    "frameworks": [
-      "react"
-    ],
-    "lastVerifiedFrom": [
-      "packages/luthor/src/presets/compose/ComposeEditor.tsx"
-    ],
-    "navGroup": "luthor",
-    "navOrder": 70,
-    "navHidden": false,
-    "searchTokens": [
-      "and",
-      "authoring",
-      "bold",
-      "compact",
-      "compact preset profile for message composition and lightweight authoring flows.",
-      "compact toolbar",
-      "compacttoolbar",
-      "compose",
-      "compose editor",
-      "compose preset",
-      "composeeditor",
-      "composepreset",
-      "composition",
-      "editor",
-      "featureflags",
-      "flows",
-      "for",
-      "format",
-      "format.bold",
-      "format.italic",
-      "insert",
-      "italic",
-      "lightweight",
-      "link",
-      "link.insert",
-      "list",
-      "message",
-      "paragraph",
-      "preset",
-      "profile",
-      "react",
-      "toolbar"
-    ],
-    "searchTokenBuckets": {
-      "keywords": [
-        "compact",
-        "compact toolbar",
-        "compacttoolbar",
-        "compose",
-        "compose preset",
-        "composeeditor",
-        "featureflags",
-        "preset",
-        "toolbar"
-      ],
-      "props": [
-        "compacttoolbar",
-        "featureflags"
-      ],
-      "exports": [
-        "composeeditor",
-        "composepreset"
-      ],
-      "commands": [
-        "bold",
-        "format",
-        "format.bold",
-        "format.italic",
-        "insert",
-        "italic",
-        "link",
-        "link.insert"
-      ],
-      "extensions": [],
-      "nodes": [
-        "list",
-        "paragraph"
-      ],
       "frameworks": [
         "react"
       ]
@@ -6693,381 +6490,13 @@ export const docsIndex = [
   {
     "slug": [
       "luthor",
-      "presets",
-      "simple-editor"
-    ],
-    "title": "Simple Editor",
-    "navTitle": "Simple Editor",
-    "description": "Chat-style preset with minimal formatting and send workflows.",
-    "content": "\r\n# Simple Editor\r\n\r\nThis preset is optimized for chat/message composition.\r\n\r\n## When to use this\r\n\r\nUse `SimpleEditor` when you need compact input, send actions, and controlled output payloads.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`.\n\n## Preset props\n\n- `submitOnEnter`: Sends content on Enter key.\n- `allowShiftEnter`: Keeps Shift+Enter as line break when `submitOnEnter` is enabled.\n- `onSend`: Callback that receives markdown/json payload based on `outputFormat`.\n- `outputFormat`: Chooses `md` or `json` as `payload.text`.\n- `featureFlags`: Scoped overrides for SimpleEditor; currently supports `featureFlags.codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<SimpleEditor\n  featureFlags={{ codeIntelligence: true }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { SimpleEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return (\r\n    <SimpleEditor\r\n      submitOnEnter\r\n      outputFormat=\"md\"\r\n      onSend={(payload) => console.log(payload.markdown)}\r\n    />\r\n  );\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Simple Editor This preset is optimized for chat/message composition. When to use this Use SimpleEditor when you need compact input, send actions, and controlled output payloads. Mode profile - Modes: visual-only , visual . Preset props - submitOnEnter : Sends content on Enter key. - allowShiftEnter : Keeps Shift+Enter as line break when submitOnEnter is enabled. - onSend : Callback that receives markdown/json payload based on outputFormat . - outputFormat : Chooses md or json as payload.text . - featureFlags : Scoped overrides for SimpleEditor; currently supports featureFlags.codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { SimpleEditor } from '@lyfie/luthor'; export function App() { return ( console.log(payload.markdown)} / ); }",
-    "sections": [
-      {
-        "heading": "Overview",
-        "id": "overview",
-        "level": 1,
-        "text": "Simple Editor This preset is optimized for chat/message composition."
-      },
-      {
-        "heading": "When to use this",
-        "id": "when-to-use-this",
-        "level": 2,
-        "text": "Use SimpleEditor when you need compact input, send actions, and controlled output payloads."
-      },
-      {
-        "heading": "Mode profile",
-        "id": "mode-profile",
-        "level": 2,
-        "text": "- Modes: visual-only , visual ."
-      },
-      {
-        "heading": "Preset props",
-        "id": "preset-props",
-        "level": 2,
-        "text": "- submitOnEnter : Sends content on Enter key. - allowShiftEnter : Keeps Shift+Enter as line break when submitOnEnter is enabled. - onSend : Callback that receives markdown/json payload based on outputFormat . - outputFormat : Chooses md or json as payload.text . - featureFlags : Scoped overrides for SimpleEditor; currently supports featureFlags.codeIntelligence ."
-      },
-      {
-        "heading": "Code intelligence toggle",
-        "id": "code-intelligence-toggle",
-        "level": 2,
-        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { SimpleEditor } from '@lyfie/luthor'; export function App() { return ( console.log(payload.markdown)} / ); }"
-      }
-    ],
-    "headings": [
-      {
-        "level": 2,
-        "text": "When to use this",
-        "id": "when-to-use-this"
-      },
-      {
-        "level": 2,
-        "text": "Mode profile",
-        "id": "mode-profile"
-      },
-      {
-        "level": 2,
-        "text": "Preset props",
-        "id": "preset-props"
-      },
-      {
-        "level": 2,
-        "text": "Code intelligence toggle",
-        "id": "code-intelligence-toggle"
-      }
-    ],
-    "urlPath": "/docs/luthor/presets/simple-editor/",
-    "sourcePath": "apps/web/src/content/docs/luthor/presets/simple-editor.md",
-    "updatedAt": "2026-03-23T06:33:17.750Z",
-    "package": "luthor",
-    "docType": "reference",
-    "surface": "preset",
-    "keywords": [
-      "SimpleEditor",
-      "chat input",
-      "send button",
-      "submitOnEnter"
-    ],
-    "props": [
-      "submitOnEnter",
-      "allowShiftEnter",
-      "onSend",
-      "outputFormat",
-      "featureFlags"
-    ],
-    "exports": [
-      "SimpleEditor",
-      "simpleEditorPreset",
-      "SimpleEditorProps"
-    ],
-    "commands": [
-      "format.bold",
-      "format.italic"
-    ],
-    "extensions": [],
-    "nodes": [
-      "paragraph",
-      "text"
-    ],
-    "frameworks": [
-      "react"
-    ],
-    "lastVerifiedFrom": [
-      "packages/luthor/src/presets/simple-editor/SimpleEditor.tsx"
-    ],
-    "navGroup": "luthor",
-    "navOrder": 80,
-    "navHidden": false,
-    "searchTokens": [
-      "allowshiftenter",
-      "and",
-      "bold",
-      "button",
-      "chat",
-      "chat input",
-      "chat-style preset with minimal formatting and send workflows.",
-      "editor",
-      "featureflags",
-      "format",
-      "format.bold",
-      "format.italic",
-      "formatting",
-      "input",
-      "italic",
-      "minimal",
-      "onsend",
-      "outputformat",
-      "paragraph",
-      "preset",
-      "react",
-      "send",
-      "send button",
-      "simple",
-      "simple editor",
-      "simpleeditor",
-      "simpleeditorpreset",
-      "simpleeditorprops",
-      "style",
-      "submitonenter",
-      "text",
-      "with",
-      "workflows"
-    ],
-    "searchTokenBuckets": {
-      "keywords": [
-        "allowshiftenter",
-        "button",
-        "chat",
-        "chat input",
-        "featureflags",
-        "input",
-        "onsend",
-        "outputformat",
-        "send",
-        "send button",
-        "simpleeditor",
-        "submitonenter"
-      ],
-      "props": [
-        "allowshiftenter",
-        "featureflags",
-        "onsend",
-        "outputformat",
-        "submitonenter"
-      ],
-      "exports": [
-        "simpleeditor",
-        "simpleeditorpreset",
-        "simpleeditorprops"
-      ],
-      "commands": [
-        "bold",
-        "format",
-        "format.bold",
-        "format.italic",
-        "italic"
-      ],
-      "extensions": [],
-      "nodes": [
-        "paragraph",
-        "text"
-      ],
-      "frameworks": [
-        "react"
-      ]
-    }
-  },
-  {
-    "slug": [
-      "luthor",
-      "presets",
-      "slash-editor"
-    ],
-    "title": "Slash Editor",
-    "navTitle": "Slash Editor",
-    "description": "Slash-command-first preset profile with allowlist defaults and optional draggable behavior.",
-    "content": "\r\n# Slash Editor\r\n\r\nThis preset is optimized for slash menu workflows.\r\n\r\n## When to use this\r\n\r\nUse `SlashEditor` when command discovery should be slash-driven and toolbar usage is secondary.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.\n- Toolbar is off by default.\n\n## Preset props\n\n- `slashVisibility`: Controls slash command allow/deny lists.\n- `isDraggableEnabled`: Enables or disables draggable block handles.\n- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<SlashEditor\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { SlashEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <SlashEditor placeholder=\"Type / for commands\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Slash Editor This preset is optimized for slash menu workflows. When to use this Use SlashEditor when command discovery should be slash-driven and toolbar usage is secondary. Mode profile - Modes: visual-only , visual , json , markdown , html . - Toolbar is off by default. Preset props - slashVisibility : Controls slash command allow/deny lists. - isDraggableEnabled : Enables or disables draggable block handles. - featureFlags : Optional per-feature overrides. Includes codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { SlashEditor } from '@lyfie/luthor'; export function App() { return ; }",
-    "sections": [
-      {
-        "heading": "Overview",
-        "id": "overview",
-        "level": 1,
-        "text": "Slash Editor This preset is optimized for slash menu workflows."
-      },
-      {
-        "heading": "When to use this",
-        "id": "when-to-use-this",
-        "level": 2,
-        "text": "Use SlashEditor when command discovery should be slash-driven and toolbar usage is secondary."
-      },
-      {
-        "heading": "Mode profile",
-        "id": "mode-profile",
-        "level": 2,
-        "text": "- Modes: visual-only , visual , json , markdown , html . - Toolbar is off by default."
-      },
-      {
-        "heading": "Preset props",
-        "id": "preset-props",
-        "level": 2,
-        "text": "- slashVisibility : Controls slash command allow/deny lists. - isDraggableEnabled : Enables or disables draggable block handles. - featureFlags : Optional per-feature overrides. Includes codeIntelligence ."
-      },
-      {
-        "heading": "Code intelligence toggle",
-        "id": "code-intelligence-toggle",
-        "level": 2,
-        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { SlashEditor } from '@lyfie/luthor'; export function App() { return ; }"
-      }
-    ],
-    "headings": [
-      {
-        "level": 2,
-        "text": "When to use this",
-        "id": "when-to-use-this"
-      },
-      {
-        "level": 2,
-        "text": "Mode profile",
-        "id": "mode-profile"
-      },
-      {
-        "level": 2,
-        "text": "Preset props",
-        "id": "preset-props"
-      },
-      {
-        "level": 2,
-        "text": "Code intelligence toggle",
-        "id": "code-intelligence-toggle"
-      }
-    ],
-    "urlPath": "/docs/luthor/presets/slash-editor/",
-    "sourcePath": "apps/web/src/content/docs/luthor/presets/slash-editor.md",
-    "updatedAt": "2026-03-23T06:32:34.208Z",
-    "package": "luthor",
-    "docType": "reference",
-    "surface": "preset",
-    "keywords": [
-      "SlashEditor",
-      "slash commands",
-      "allowlist"
-    ],
-    "props": [
-      "slashVisibility",
-      "isDraggableEnabled",
-      "featureFlags"
-    ],
-    "exports": [
-      "SlashEditor",
-      "slashEditorPreset"
-    ],
-    "commands": [
-      "block.heading1",
-      "list.bullet",
-      "insert.table"
-    ],
-    "extensions": [],
-    "nodes": [
-      "list",
-      "heading",
-      "table"
-    ],
-    "frameworks": [
-      "react"
-    ],
-    "lastVerifiedFrom": [
-      "packages/luthor/src/presets/slash-editor/SlashEditor.tsx"
-    ],
-    "navGroup": "luthor",
-    "navOrder": 120,
-    "navHidden": false,
-    "searchTokens": [
-      "allowlist",
-      "and",
-      "behavior",
-      "block",
-      "block.heading1",
-      "bullet",
-      "command",
-      "commands",
-      "defaults",
-      "draggable",
-      "editor",
-      "featureflags",
-      "first",
-      "heading",
-      "heading1",
-      "insert",
-      "insert.table",
-      "isdraggableenabled",
-      "list",
-      "list.bullet",
-      "optional",
-      "preset",
-      "profile",
-      "react",
-      "slash",
-      "slash commands",
-      "slash editor",
-      "slash-command-first preset profile with allowlist defaults and optional draggable behavior.",
-      "slasheditor",
-      "slasheditorpreset",
-      "slashvisibility",
-      "table",
-      "with"
-    ],
-    "searchTokenBuckets": {
-      "keywords": [
-        "allowlist",
-        "commands",
-        "featureflags",
-        "isdraggableenabled",
-        "slash",
-        "slash commands",
-        "slasheditor",
-        "slashvisibility"
-      ],
-      "props": [
-        "featureflags",
-        "isdraggableenabled",
-        "slashvisibility"
-      ],
-      "exports": [
-        "slasheditor",
-        "slasheditorpreset"
-      ],
-      "commands": [
-        "block",
-        "block.heading1",
-        "bullet",
-        "heading1",
-        "insert",
-        "insert.table",
-        "list",
-        "list.bullet",
-        "table"
-      ],
-      "extensions": [],
-      "nodes": [
-        "heading",
-        "list",
-        "table"
-      ],
-      "frameworks": [
-        "react"
-      ]
-    }
-  },
-  {
-    "slug": [
-      "luthor",
       "props-reference"
     ],
     "title": "Props Reference",
     "navTitle": "Props Reference",
     "description": "Reference index for ExtensiveEditorProps and common preset prop surfaces, including mode and bridge controls.",
-    "content": "\r\n# Props Reference\r\n\r\nUse this page for exact prop names and discovery tokens.\r\n\r\n## What this page answers\r\n\r\n- Which props control modes, source bridges, and feature gates?\r\n\r\n## High-signal props\r\n\r\n| Area | Props |\r\n| --- | --- |\r\n| Mode control | `initialMode`, `defaultEditorView`, `availableModes` |\r\n| Feature gating | `featureFlags`, `headingOptions`, `slashCommandVisibility` |\r\n| Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |\r\n| Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |\n| List depth | `maxListIndentation` |\n\n## Preset-level code intelligence toggle\n\n- `ExtensiveEditor`, `ComposeEditor`, `SlashEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.\n- `SimpleEditor` supports scoped `featureFlags.codeIntelligence`.\n\n~~~tsx\n<SlashEditor featureFlags={{ codeIntelligence: false }} />\n<SimpleEditor featureFlags={{ codeIntelligence: true }} />\n~~~\n\n## Full `ExtensiveEditorProps` index\n\r\n- `className`\r\n- `onReady`\r\n- `initialTheme`\r\n- `onThemeChange`\r\n- `theme`\r\n- `defaultContent`\r\n- `showDefaultContent`\r\n- `placeholder`\r\n- `defaultEditorView`\r\n- `initialMode`\r\n- `isEditorViewTabsVisible`\r\n- `isEditorViewsTabVisible`\r\n- `availableModes`\r\n- `variantClassName`\r\n- `toolbarLayout`\r\n- `toolbarVisibility`\r\n- `toolbarPosition`\r\n- `toolbarAlignment`\r\n- `toolbarClassName`\r\n- `toolbarStyleVars`\r\n- `quoteClassName`\r\n- `quoteStyleVars`\r\n- `defaultSettings`\r\n- `editorThemeOverrides`\r\n- `isToolbarEnabled`\n- `isToolbarPinned`\n- `imageUploadHandler`\n- `gifUploadHandler`\n- `fontFamilyOptions`\n- `fontSizeOptions`\r\n- `lineHeightOptions`\r\n- `minimumDefaultLineHeight`\r\n- `scaleByRatio`\r\n- `headingOptions`\r\n- `paragraphLabel`\r\n- `syncHeadingOptionsWithCommands`\r\n- `slashCommandVisibility`\r\n- `shortcutConfig`\r\n- `commandPaletteShortcutOnly`\r\n- `isListStyleDropdownEnabled`\r\n- `editOnClick`\r\n- `isDraggableBoxEnabled`\r\n- `featureFlags`\r\n- `sourceMetadataMode`\r\n- `markdownBridgeFlavor`\r\n- `markdownSourceOfTruth`\r\n- `isSyntaxHighlightingEnabled`\r\n- `syntaxHighlightColorMode`\r\n- `syntaxHighlightColors`\r\n- `maxAutoDetectCodeLength`\r\n- `isCopyAllowed`\r\n- `languageOptions`\r\n- `showLineNumbers`\r\n- `maxListIndentation`\r\n\r\n\r\n",
-    "plainContent": "Props Reference Use this page for exact prop names and discovery tokens. What this page answers - Which props control modes, source bridges, and feature gates? High-signal props Area Props --- --- Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation Preset-level code intelligence toggle - ExtensiveEditor , ComposeEditor , SlashEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and HeadlessEditorPreset use featureFlags.codeIntelligence . - SimpleEditor supports scoped featureFlags.codeIntelligence . tsx Full ExtensiveEditorProps index - className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation",
+    "content": "\r\n# Props Reference\r\n\r\nUse this page for exact prop names and discovery tokens.\r\n\r\n## What this page answers\r\n\r\n- Which props control modes, source bridges, and feature gates?\r\n\r\n## High-signal props\r\n\r\n| Area | Props |\r\n| --- | --- |\r\n| Mode control | `initialMode`, `defaultEditorView`, `availableModes` |\r\n| Feature gating | `featureFlags`, `headingOptions`, `slashCommandVisibility` |\r\n| Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |\r\n| Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |\n| List depth | `maxListIndentation` |\n\n## Preset-level code intelligence toggle\n\n- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.\n\n~~~tsx\n<ExtensiveEditor featureFlags={{ codeIntelligence: false }} />\n~~~\n\n## Full `ExtensiveEditorProps` index\n\r\n- `className`\r\n- `onReady`\r\n- `initialTheme`\r\n- `onThemeChange`\r\n- `theme`\r\n- `defaultContent`\r\n- `showDefaultContent`\r\n- `placeholder`\r\n- `defaultEditorView`\r\n- `initialMode`\r\n- `isEditorViewTabsVisible`\r\n- `isEditorViewsTabVisible`\r\n- `availableModes`\r\n- `variantClassName`\r\n- `toolbarLayout`\r\n- `toolbarVisibility`\r\n- `toolbarPosition`\r\n- `toolbarAlignment`\r\n- `toolbarClassName`\r\n- `toolbarStyleVars`\r\n- `quoteClassName`\r\n- `quoteStyleVars`\r\n- `defaultSettings`\r\n- `editorThemeOverrides`\r\n- `isToolbarEnabled`\n- `isToolbarPinned`\n- `imageUploadHandler`\n- `gifUploadHandler`\n- `fontFamilyOptions`\n- `fontSizeOptions`\r\n- `lineHeightOptions`\r\n- `minimumDefaultLineHeight`\r\n- `scaleByRatio`\r\n- `headingOptions`\r\n- `paragraphLabel`\r\n- `syncHeadingOptionsWithCommands`\r\n- `slashCommandVisibility`\r\n- `shortcutConfig`\r\n- `commandPaletteShortcutOnly`\r\n- `isListStyleDropdownEnabled`\r\n- `editOnClick`\r\n- `isDraggableBoxEnabled`\r\n- `featureFlags`\r\n- `sourceMetadataMode`\r\n- `markdownBridgeFlavor`\r\n- `markdownSourceOfTruth`\r\n- `isSyntaxHighlightingEnabled`\r\n- `syntaxHighlightColorMode`\r\n- `syntaxHighlightColors`\r\n- `maxAutoDetectCodeLength`\r\n- `isCopyAllowed`\r\n- `languageOptions`\r\n- `showLineNumbers`\r\n- `maxListIndentation`\r\n\r\n\r\n",
+    "plainContent": "Props Reference Use this page for exact prop names and discovery tokens. What this page answers - Which props control modes, source bridges, and feature gates? High-signal props Area Props --- --- Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation Preset-level code intelligence toggle - ExtensiveEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and HeadlessEditorPreset use featureFlags.codeIntelligence . tsx Full ExtensiveEditorProps index - className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation",
     "sections": [
       {
         "heading": "Overview",
@@ -7091,7 +6520,7 @@ export const docsIndex = [
         "heading": "Preset-level code intelligence toggle",
         "id": "preset-level-code-intelligence-toggle",
         "level": 2,
-        "text": "- ExtensiveEditor , ComposeEditor , SlashEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and HeadlessEditorPreset use featureFlags.codeIntelligence . - SimpleEditor supports scoped featureFlags.codeIntelligence . tsx"
+        "text": "- ExtensiveEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and HeadlessEditorPreset use featureFlags.codeIntelligence . tsx"
       },
       {
         "heading": "Full `ExtensiveEditorProps` index",
@@ -7124,7 +6553,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/props-reference/",
     "sourcePath": "apps/web/src/content/docs/luthor/props-reference.md",
-    "updatedAt": "2026-04-17T04:27:33.117Z",
+    "updatedAt": "2026-05-29T02:31:18.144Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "prop",
@@ -7469,8 +6898,8 @@ export const docsIndex = [
     "title": "Exports Map",
     "navTitle": "Exports Map",
     "description": "Complete export map for @lyfie/luthor and @lyfie/luthor-headless.",
-    "content": "\r\n# Exports Map\r\n\r\nThis page is the canonical export inventory.\r\n\r\n## What this page answers\r\n\r\n- Which public exports are available from each package?\r\n\r\n## @lyfie/luthor exports\r\n\r\n- `AlignCenterIcon`\r\n- `AlignJustifyIcon`\r\n- `AlignLeftIcon`\r\n- `AlignRightIcon`\r\n- `BLOCK_HEADING_LEVELS`\r\n- `BlockFormat`\r\n- `BlockHeadingLevel`\r\n- `BoldIcon`\r\n- `Button`\r\n- `ChevronDownIcon`\r\n- `ClassNameToken`\r\n- `CloseIcon`\r\n- `CodeBlockIcon`\r\n- `CodeIcon`\r\n- `CodeIntelligenceCommands`\r\n- `CodeIntelligenceConfig`\r\n- `codeIntelligenceExtension`\r\n- `CodeIntelligenceExtension`\r\n- `CommandConfig`\r\n- `CommandGenerationOptions`\r\n- `CommandIcon`\r\n- `CommandPalette`\r\n- `commandsToCommandPaletteItems`\r\n- `commandsToSlashCommandItems`\r\n- `ComposeEditor`\r\n- `ComposeEditorProps`\r\n- `composePreset`\r\n- `CoreEditorActiveStates`\r\n- `CoreEditorCommands`\r\n- `CoreEditorMode`\r\n- `CoreTheme`\r\n- `CoreToolbarClassNames`\r\n- `createDefaultSettingsStyleVarRecord`\r\n- `createExtensiveExtensions`\r\n- `createExtensivePreset`\r\n- `createFeatureGuardedCommands`\r\n- `createFloatingToolbarExtension`\r\n- `createModeCache`\r\n- `createPresetEditorConfig`\r\n- `DEFAULT_TOOLBAR_LAYOUT`\r\n- `DefaultSettings`\r\n- `Dialog`\r\n- `Dropdown`\r\n- `EditorPreset`\r\n- `EditorThemeOverrides`\r\n- `EmojiIcon`\r\n- `EmojiSuggestionMenu`\r\n- `ExtensiveEditor`\r\n- `ExtensiveEditorMode`\r\n- `ExtensiveEditorProps`\r\n- `ExtensiveEditorRef`\r\n- `extensiveExtensions`\r\n- `ExtensiveExtensionsConfig`\r\n- `extensivePreset`\r\n- `ExtensivePresetConfig`\r\n- `EyeIcon`\r\n- `FeatureFlag`\r\n- `FeatureFlagOverrides`\r\n- `FeatureFlags`\r\n- `FeatureFlagsLike`\r\n- `FeatureShortcutSpec`\r\n- `FileCodeIcon`\r\n- `filterToolbarLayout`\r\n- `FloatingToolbar`\r\n- `FloatingToolbarProps`\r\n- `formatHTMLSource`\r\n- `formatJSONSource`\r\n- `formatMarkdownSource`\r\n- `generateCommands`\r\n- `headless`\r\n- `headlessEditorPreset`\r\n- `HeadlessEditorPreset`\r\n- `HeadlessEditorPresetProps`\r\n- `HighlighterIcon`\r\n- `HTMLEditor`\r\n- `HTMLEditorMode`\r\n- `htmlEditorPreset`\r\n- `HTMLEditorProps`\r\n- `IconButton`\r\n- `ImageAlignment`\r\n- `ImageIcon`\r\n- `IndentIcon`\r\n- `InsertImageConfig`\r\n- `InsertTableConfig`\r\n- `invalidateModeCache`\r\n- `isEditableCommandTarget`\r\n- `isModeCached`\r\n- `isShortcutMatch`\r\n- `isToolbarItemSupported`\r\n- `isToolbarItemVisible`\r\n- `ItalicIcon`\r\n- `joinClassNames`\r\n- `KeyboardShortcut`\r\n- `LegacyRichEditor`\r\n- `LegacyRichEditorMode`\r\n- `LegacyRichEditorProps`\r\n- `legacyRichPreset`\r\n- `LegacyRichSourceFormat`\r\n- `LinkHoverBubble`\r\n- `LinkHoverBubbleProps`\r\n- `LinkIcon`\r\n- `ListCheckIcon`\r\n- `ListIcon`\r\n- `ListOrderedIcon`\r\n- `MarkDownEditor`\r\n- `MarkDownEditorMode`\r\n- `MarkDownEditorProps`\r\n- `markModeCached`\r\n- `mdEditorPreset`\r\n- `mergeToolbarVisibilityWithFeatures`\r\n- `MinusIcon`\r\n- `ModeTabs`\r\n- `MoonIcon`\r\n- `normalizeStyleVarsKey`\r\n- `OutdentIcon`\r\n- `PaletteIcon`\r\n- `PencilIcon`\r\n- `PresetFeatureOverrides`\r\n- `PresetFeaturePolicy`\r\n- `PresetModeCache`\r\n- `presetRegistry`\r\n- `QuoteIcon`\r\n- `QuoteStyleVars`\r\n- `RedoIcon`\r\n- `registerKeyboardShortcuts`\r\n- `SearchIcon`\r\n- `Select`\r\n- `setFloatingToolbarContext`\r\n- `ShortcutBindingOverride`\r\n- `ShortcutConfig`\r\n- `SimpleEditor`\r\n- `SimpleEditorOutputFormat`\r\n- `simpleEditorPreset`\r\n- `SimpleEditorProps`\r\n- `SimpleEditorSendPayload`\r\n- `SimpleFormattingOptions`\r\n- `SimpleToolbarButton`\r\n- `SlashCommandMenu`\r\n- `SlashCommandVisibility`\r\n- `SlashCommandVisibilityFilters`\r\n- `SlashCommandVisibilitySelection`\r\n- `SlashEditor`\r\n- `slashEditorPreset`\r\n- `SlashEditorProps`\r\n- `SourceView`\r\n- `StrikethroughIcon`\r\n- `StyleVarRecord`\r\n- `StyleVarValueRecord`\r\n- `SubscriptIcon`\r\n- `SunIcon`\r\n- `SuperscriptIcon`\r\n- `SyntaxHighlightColorMode`\r\n- `SyntaxHighlightColors`\r\n- `SyntaxHighlightColorTokens`\r\n- `TableIcon`\r\n- `TextAlignment`\r\n- `Toolbar`\r\n- `ToolbarAlignment`\r\n- `ToolbarFeatureMap`\r\n- `ToolbarItemType`\r\n- `ToolbarLayout`\r\n- `ToolbarPosition`\r\n- `ToolbarProps`\r\n- `ToolbarSection`\r\n- `ToolbarStyleVars`\r\n- `ToolbarVisibility`\r\n- `TRADITIONAL_TOOLBAR_LAYOUT`\r\n- `TypeIcon`\r\n- `UnderlineIcon`\r\n- `UndoIcon`\r\n- `UnlinkIcon`\r\n- `UploadIcon`\r\n\r\n## @lyfie/luthor-headless exports\r\n\r\n- `Alignment`\r\n- `appendMetadataEnvelopes`\r\n- `BaseCommands`\r\n- `BaseExtension`\r\n- `BaseExtensionConfig`\r\n- `BaseProvider`\r\n- `blockFormatExtension`\r\n- `BlockFormatExtension`\r\n- `boldExtension`\r\n- `BoldExtension`\r\n- `BridgeMode`\r\n- `clearLexicalSelection`\r\n- `codeExtension`\r\n- `CodeExtension`\r\n- `CodeExtensionConfig`\r\n- `codeFormatExtension`\r\n- `CodeFormatExtension`\r\n- `CodeHighlightProvider`\r\n- `CodeHighlightProviderConfig`\r\n- `CodeIntelligenceCommands`\r\n- `CodeIntelligenceConfig`\r\n- `codeIntelligenceExtension`\r\n- `CodeIntelligenceExtension`\r\n- `CodeLanguageOptionsConfig`\r\n- `CodeLanguageOptionsMode`\r\n- `CommandPaletteCommands`\r\n- `commandPaletteExtension`\r\n- `CommandPaletteExtension`\r\n- `CommandPaletteItem`\r\n- `CommandPaletteStateQueries`\r\n- `ContextMenuCommands`\r\n- `ContextMenuConfig`\r\n- `contextMenuExtension`\r\n- `ContextMenuExtension`\r\n- `ContextMenuItem`\r\n- `ContextMenuStateQueries`\r\n- `createCustomNodeExtension`\r\n- `createEditorSystem`\r\n- `createEditorThemeStyleVars`\r\n- `createExtension`\r\n- `defaultLuthorTheme`\r\n- `draggableBlockExtension`\r\n- `DraggableBlockExtension`\r\n- `DraggableCommands`\r\n- `DraggableConfig`\r\n- `DraggableStateQueries`\r\n- `EditorConfig`\r\n- `EditorContextType`\r\n- `EmojiCatalogAdapter`\r\n- `EmojiCatalogItem`\r\n- `EmojiCommands`\r\n- `EmojiConfig`\r\n- `emojiExtension`\r\n- `EmojiExtension`\r\n- `EmojiStateQueries`\r\n- `EmojiSuggestionState`\r\n- `enterKeyBehaviorExtension`\r\n- `EnterKeyBehaviorExtension`\r\n- `Extension`\r\n- `ExtensionCategory`\r\n- `ExtractCommands`\r\n- `ExtractedMetadataEnvelopes`\r\n- `extractHTMLMetadataPatch`\r\n- `extractMarkdownMetadataPatch`\r\n- `extractMetadataEnvelopes`\r\n- `ExtractNames`\r\n- `ExtractPlugins`\r\n- `ExtractStateQueries`\r\n- `FloatingCommands`\r\n- `FloatingConfig`\r\n- `FloatingStateQueries`\r\n- `floatingToolbarExtension`\r\n- `FloatingToolbarExtension`\r\n- `FontCssLoadStrategy`\r\n- `FontFamilyConfig`\r\n- `fontFamilyExtension`\r\n- `FontFamilyExtension`\r\n- `FontFamilyOption`\r\n- `FontSizeConfig`\r\n- `fontSizeExtension`\r\n- `FontSizeExtension`\r\n- `FontSizeOption`\r\n- `historyExtension`\r\n- `HistoryExtension`\r\n- `horizontalRuleExtension`\r\n- `HorizontalRuleExtension`\r\n- `HTML_NATIVE_KEY_MAP`\r\n- `HTML_SUPPORTED_NODE_TYPES`\r\n- `HtmlBridgeOptions`\r\n- `htmlToJSON`\r\n- `iframeEmbedExtension`\r\n- `IframeEmbedExtension`\r\n- `ImageCommands`\r\n- `ImageComponentProps`\r\n- `imageExtension`\r\n- `ImageExtension`\r\n- `ImageExtensionConfig`\r\n- `ImagePayload`\r\n- `ImageStateQueries`\r\n- `isDefaultBridgeValue`\r\n- `isHTMLRepresentable`\r\n- `isLuthorTheme`\r\n- `isMarkdownRepresentable`\r\n- `italicExtension`\r\n- `ItalicExtension`\r\n- `JsonDocument`\r\n- `jsonToHTML`\r\n- `jsonToMarkdown`\r\n- `LexicalEditor`\r\n- `LexicalNodeRegistration`\r\n- `LIGHTWEIGHT_EMOJI_CATALOG`\r\n- `LineHeightConfig`\r\n- `lineHeightExtension`\r\n- `LineHeightExtension`\r\n- `LineHeightOption`\r\n- `linkExtension`\r\n- `LinkExtension`\r\n- `listExtension`\r\n- `ListExtension`\r\n- `LUTHOR_EDITOR_THEME_TOKENS`\r\n- `LuthorEditorThemeOverrides`\r\n- `LuthorEditorThemeToken`\r\n- `LuthorTheme`\r\n- `MARKDOWN_NATIVE_KEY_MAP`\r\n- `MARKDOWN_SUPPORTED_NODE_TYPES`\r\n- `MARKDOWN_TEXT_NATIVE_FORMAT_MASK`\r\n- `MarkdownBridgeFlavor`\r\n- `MarkdownBridgeOptions`\r\n- `markdownToJSON`\r\n- `mergeThemes`\r\n- `MetadataEnvelope`\r\n- `PreparedBridgeDocument`\r\n- `prepareDocumentForBridge`\r\n- `rehydrateDocumentFromEnvelopes`\r\n- `resolveLinkNodeKeyFromAnchor`\r\n- `RichText`\r\n- `RichTextComponentProps`\r\n- `RichTextConfig`\r\n- `richTextExtension`\r\n- `SerializedImageNode`\r\n- `SlashCommandCommands`\r\n- `SlashCommandConfig`\r\n- `slashCommandExtension`\r\n- `SlashCommandExtension`\r\n- `SlashCommandItem`\r\n- `SlashCommandMenuState`\r\n- `SlashCommandStateQueries`\r\n- `SourceMetadataMode`\r\n- `strikethroughExtension`\r\n- `StrikethroughExtension`\r\n- `subscriptExtension`\r\n- `SubscriptExtension`\r\n- `superscriptExtension`\r\n- `SuperscriptExtension`\r\n- `tabIndentExtension`\r\n- `TabIndentExtension`\r\n- `TableConfig`\r\n- `tableExtension`\r\n- `TableExtension`\r\n- `TextColorConfig`\r\n- `textColorExtension`\r\n- `TextColorExtension`\r\n- `TextColorOption`\r\n- `TextFormatExtension`\r\n- `TextHighlightConfig`\r\n- `textHighlightExtension`\r\n- `TextHighlightExtension`\r\n- `TextHighlightOption`\r\n- `ToolbarItem`\r\n- `underlineExtension`\r\n- `UnderlineExtension`\r\n- `useBaseEditor`\r\n- `youTubeEmbedExtension`\r\n- `YouTubeEmbedExtension`\r\n\r\n\r\n",
-    "plainContent": "Exports Map This page is the canonical export inventory. What this page answers - Which public exports are available from each package? @lyfie/luthor exports - AlignCenterIcon - AlignJustifyIcon - AlignLeftIcon - AlignRightIcon - BLOCK HEADING LEVELS - BlockFormat - BlockHeadingLevel - BoldIcon - Button - ChevronDownIcon - ClassNameToken - CloseIcon - CodeBlockIcon - CodeIcon - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CommandConfig - CommandGenerationOptions - CommandIcon - CommandPalette - commandsToCommandPaletteItems - commandsToSlashCommandItems - ComposeEditor - ComposeEditorProps - composePreset - CoreEditorActiveStates - CoreEditorCommands - CoreEditorMode - CoreTheme - CoreToolbarClassNames - createDefaultSettingsStyleVarRecord - createExtensiveExtensions - createExtensivePreset - createFeatureGuardedCommands - createFloatingToolbarExtension - createModeCache - createPresetEditorConfig - DEFAULT TOOLBAR LAYOUT - DefaultSettings - Dialog - Dropdown - EditorPreset - EditorThemeOverrides - EmojiIcon - EmojiSuggestionMenu - ExtensiveEditor - ExtensiveEditorMode - ExtensiveEditorProps - ExtensiveEditorRef - extensiveExtensions - ExtensiveExtensionsConfig - extensivePreset - ExtensivePresetConfig - EyeIcon - FeatureFlag - FeatureFlagOverrides - FeatureFlags - FeatureFlagsLike - FeatureShortcutSpec - FileCodeIcon - filterToolbarLayout - FloatingToolbar - FloatingToolbarProps - formatHTMLSource - formatJSONSource - formatMarkdownSource - generateCommands - headless - headlessEditorPreset - HeadlessEditorPreset - HeadlessEditorPresetProps - HighlighterIcon - HTMLEditor - HTMLEditorMode - htmlEditorPreset - HTMLEditorProps - IconButton - ImageAlignment - ImageIcon - IndentIcon - InsertImageConfig - InsertTableConfig - invalidateModeCache - isEditableCommandTarget - isModeCached - isShortcutMatch - isToolbarItemSupported - isToolbarItemVisible - ItalicIcon - joinClassNames - KeyboardShortcut - LegacyRichEditor - LegacyRichEditorMode - LegacyRichEditorProps - legacyRichPreset - LegacyRichSourceFormat - LinkHoverBubble - LinkHoverBubbleProps - LinkIcon - ListCheckIcon - ListIcon - ListOrderedIcon - MarkDownEditor - MarkDownEditorMode - MarkDownEditorProps - markModeCached - mdEditorPreset - mergeToolbarVisibilityWithFeatures - MinusIcon - ModeTabs - MoonIcon - normalizeStyleVarsKey - OutdentIcon - PaletteIcon - PencilIcon - PresetFeatureOverrides - PresetFeaturePolicy - PresetModeCache - presetRegistry - QuoteIcon - QuoteStyleVars - RedoIcon - registerKeyboardShortcuts - SearchIcon - Select - setFloatingToolbarContext - ShortcutBindingOverride - ShortcutConfig - SimpleEditor - SimpleEditorOutputFormat - simpleEditorPreset - SimpleEditorProps - SimpleEditorSendPayload - SimpleFormattingOptions - SimpleToolbarButton - SlashCommandMenu - SlashCommandVisibility - SlashCommandVisibilityFilters - SlashCommandVisibilitySelection - SlashEditor - slashEditorPreset - SlashEditorProps - SourceView - StrikethroughIcon - StyleVarRecord - StyleVarValueRecord - SubscriptIcon - SunIcon - SuperscriptIcon - SyntaxHighlightColorMode - SyntaxHighlightColors - SyntaxHighlightColorTokens - TableIcon - TextAlignment - Toolbar - ToolbarAlignment - ToolbarFeatureMap - ToolbarItemType - ToolbarLayout - ToolbarPosition - ToolbarProps - ToolbarSection - ToolbarStyleVars - ToolbarVisibility - TRADITIONAL TOOLBAR LAYOUT - TypeIcon - UnderlineIcon - UndoIcon - UnlinkIcon - UploadIcon @lyfie/luthor-headless exports - Alignment - appendMetadataEnvelopes - BaseCommands - BaseExtension - BaseExtensionConfig - BaseProvider - blockFormatExtension - BlockFormatExtension - boldExtension - BoldExtension - BridgeMode - clearLexicalSelection - codeExtension - CodeExtension - CodeExtensionConfig - codeFormatExtension - CodeFormatExtension - CodeHighlightProvider - CodeHighlightProviderConfig - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CodeLanguageOptionsConfig - CodeLanguageOptionsMode - CommandPaletteCommands - commandPaletteExtension - CommandPaletteExtension - CommandPaletteItem - CommandPaletteStateQueries - ContextMenuCommands - ContextMenuConfig - contextMenuExtension - ContextMenuExtension - ContextMenuItem - ContextMenuStateQueries - createCustomNodeExtension - createEditorSystem - createEditorThemeStyleVars - createExtension - defaultLuthorTheme - draggableBlockExtension - DraggableBlockExtension - DraggableCommands - DraggableConfig - DraggableStateQueries - EditorConfig - EditorContextType - EmojiCatalogAdapter - EmojiCatalogItem - EmojiCommands - EmojiConfig - emojiExtension - EmojiExtension - EmojiStateQueries - EmojiSuggestionState - enterKeyBehaviorExtension - EnterKeyBehaviorExtension - Extension - ExtensionCategory - ExtractCommands - ExtractedMetadataEnvelopes - extractHTMLMetadataPatch - extractMarkdownMetadataPatch - extractMetadataEnvelopes - ExtractNames - ExtractPlugins - ExtractStateQueries - FloatingCommands - FloatingConfig - FloatingStateQueries - floatingToolbarExtension - FloatingToolbarExtension - FontCssLoadStrategy - FontFamilyConfig - fontFamilyExtension - FontFamilyExtension - FontFamilyOption - FontSizeConfig - fontSizeExtension - FontSizeExtension - FontSizeOption - historyExtension - HistoryExtension - horizontalRuleExtension - HorizontalRuleExtension - HTML NATIVE KEY MAP - HTML SUPPORTED NODE TYPES - HtmlBridgeOptions - htmlToJSON - iframeEmbedExtension - IframeEmbedExtension - ImageCommands - ImageComponentProps - imageExtension - ImageExtension - ImageExtensionConfig - ImagePayload - ImageStateQueries - isDefaultBridgeValue - isHTMLRepresentable - isLuthorTheme - isMarkdownRepresentable - italicExtension - ItalicExtension - JsonDocument - jsonToHTML - jsonToMarkdown - LexicalEditor - LexicalNodeRegistration - LIGHTWEIGHT EMOJI CATALOG - LineHeightConfig - lineHeightExtension - LineHeightExtension - LineHeightOption - linkExtension - LinkExtension - listExtension - ListExtension - LUTHOR EDITOR THEME TOKENS - LuthorEditorThemeOverrides - LuthorEditorThemeToken - LuthorTheme - MARKDOWN NATIVE KEY MAP - MARKDOWN SUPPORTED NODE TYPES - MARKDOWN TEXT NATIVE FORMAT MASK - MarkdownBridgeFlavor - MarkdownBridgeOptions - markdownToJSON - mergeThemes - MetadataEnvelope - PreparedBridgeDocument - prepareDocumentForBridge - rehydrateDocumentFromEnvelopes - resolveLinkNodeKeyFromAnchor - RichText - RichTextComponentProps - RichTextConfig - richTextExtension - SerializedImageNode - SlashCommandCommands - SlashCommandConfig - slashCommandExtension - SlashCommandExtension - SlashCommandItem - SlashCommandMenuState - SlashCommandStateQueries - SourceMetadataMode - strikethroughExtension - StrikethroughExtension - subscriptExtension - SubscriptExtension - superscriptExtension - SuperscriptExtension - tabIndentExtension - TabIndentExtension - TableConfig - tableExtension - TableExtension - TextColorConfig - textColorExtension - TextColorExtension - TextColorOption - TextFormatExtension - TextHighlightConfig - textHighlightExtension - TextHighlightExtension - TextHighlightOption - ToolbarItem - underlineExtension - UnderlineExtension - useBaseEditor - youTubeEmbedExtension - YouTubeEmbedExtension",
+    "content": "\r\n# Exports Map\r\n\r\nThis page is the canonical export inventory.\r\n\r\n## What this page answers\r\n\r\n- Which public exports are available from each package?\r\n\r\n## @lyfie/luthor exports\r\n\r\n- `AlignCenterIcon`\r\n- `AlignJustifyIcon`\r\n- `AlignLeftIcon`\r\n- `AlignRightIcon`\r\n- `BLOCK_HEADING_LEVELS`\r\n- `BlockFormat`\r\n- `BlockHeadingLevel`\r\n- `BoldIcon`\r\n- `Button`\r\n- `ChevronDownIcon`\r\n- `ClassNameToken`\r\n- `CloseIcon`\r\n- `CodeBlockIcon`\r\n- `CodeIcon`\r\n- `CodeIntelligenceCommands`\r\n- `CodeIntelligenceConfig`\r\n- `codeIntelligenceExtension`\r\n- `CodeIntelligenceExtension`\r\n- `CommandConfig`\r\n- `CommandGenerationOptions`\r\n- `CommandIcon`\r\n- `CommandPalette`\r\n- `commandsToCommandPaletteItems`\r\n- `commandsToSlashCommandItems`\r\n- `CoreEditorActiveStates`\n- `CoreEditorCommands`\r\n- `CoreEditorMode`\r\n- `CoreTheme`\r\n- `CoreToolbarClassNames`\r\n- `createDefaultSettingsStyleVarRecord`\r\n- `createExtensiveExtensions`\r\n- `createExtensivePreset`\r\n- `createFeatureGuardedCommands`\r\n- `createFloatingToolbarExtension`\r\n- `createModeCache`\r\n- `createPresetEditorConfig`\r\n- `DEFAULT_TOOLBAR_LAYOUT`\r\n- `DefaultSettings`\r\n- `Dialog`\r\n- `Dropdown`\r\n- `EditorPreset`\r\n- `EditorThemeOverrides`\r\n- `EmojiIcon`\r\n- `EmojiSuggestionMenu`\r\n- `ExtensiveEditor`\r\n- `ExtensiveEditorMode`\r\n- `ExtensiveEditorProps`\r\n- `ExtensiveEditorRef`\r\n- `extensiveExtensions`\r\n- `ExtensiveExtensionsConfig`\r\n- `extensivePreset`\r\n- `ExtensivePresetConfig`\r\n- `EyeIcon`\r\n- `FeatureFlag`\r\n- `FeatureFlagOverrides`\r\n- `FeatureFlags`\r\n- `FeatureFlagsLike`\r\n- `FeatureShortcutSpec`\r\n- `FileCodeIcon`\r\n- `filterToolbarLayout`\r\n- `FloatingToolbar`\r\n- `FloatingToolbarProps`\r\n- `formatHTMLSource`\r\n- `formatJSONSource`\r\n- `formatMarkdownSource`\r\n- `generateCommands`\r\n- `headless`\r\n- `headlessEditorPreset`\r\n- `HeadlessEditorPreset`\r\n- `HeadlessEditorPresetProps`\r\n- `HighlighterIcon`\r\n- `HTMLEditor`\r\n- `HTMLEditorMode`\r\n- `htmlEditorPreset`\r\n- `HTMLEditorProps`\r\n- `IconButton`\r\n- `ImageAlignment`\r\n- `ImageIcon`\r\n- `IndentIcon`\r\n- `InsertImageConfig`\r\n- `InsertTableConfig`\r\n- `invalidateModeCache`\r\n- `isEditableCommandTarget`\r\n- `isModeCached`\r\n- `isShortcutMatch`\r\n- `isToolbarItemSupported`\r\n- `isToolbarItemVisible`\r\n- `ItalicIcon`\r\n- `joinClassNames`\r\n- `KeyboardShortcut`\r\n- `LegacyRichEditor`\r\n- `LegacyRichEditorMode`\r\n- `LegacyRichEditorProps`\r\n- `legacyRichPreset`\r\n- `LegacyRichSourceFormat`\r\n- `LinkHoverBubble`\r\n- `LinkHoverBubbleProps`\r\n- `LinkIcon`\r\n- `ListCheckIcon`\r\n- `ListIcon`\r\n- `ListOrderedIcon`\r\n- `MarkDownEditor`\r\n- `MarkDownEditorMode`\r\n- `MarkDownEditorProps`\r\n- `markModeCached`\r\n- `mdEditorPreset`\r\n- `mergeToolbarVisibilityWithFeatures`\r\n- `MinusIcon`\r\n- `ModeTabs`\r\n- `MoonIcon`\r\n- `normalizeStyleVarsKey`\r\n- `OutdentIcon`\r\n- `PaletteIcon`\r\n- `PencilIcon`\r\n- `PresetFeatureOverrides`\r\n- `PresetFeaturePolicy`\r\n- `PresetModeCache`\r\n- `presetRegistry`\r\n- `QuoteIcon`\r\n- `QuoteStyleVars`\r\n- `RedoIcon`\r\n- `registerKeyboardShortcuts`\r\n- `SearchIcon`\r\n- `Select`\r\n- `setFloatingToolbarContext`\r\n- `ShortcutBindingOverride`\r\n- `ShortcutConfig`\r\n- `SlashCommandMenu`\n- `SlashCommandVisibility`\n- `SlashCommandVisibilityFilters`\n- `SlashCommandVisibilitySelection`\n- `SourceView`\n- `StrikethroughIcon`\r\n- `StyleVarRecord`\r\n- `StyleVarValueRecord`\r\n- `SubscriptIcon`\r\n- `SunIcon`\r\n- `SuperscriptIcon`\r\n- `SyntaxHighlightColorMode`\r\n- `SyntaxHighlightColors`\r\n- `SyntaxHighlightColorTokens`\r\n- `TableIcon`\r\n- `TextAlignment`\r\n- `Toolbar`\r\n- `ToolbarAlignment`\r\n- `ToolbarFeatureMap`\r\n- `ToolbarItemType`\r\n- `ToolbarLayout`\r\n- `ToolbarPosition`\r\n- `ToolbarProps`\r\n- `ToolbarSection`\r\n- `ToolbarStyleVars`\r\n- `ToolbarVisibility`\r\n- `TRADITIONAL_TOOLBAR_LAYOUT`\r\n- `TypeIcon`\r\n- `UnderlineIcon`\r\n- `UndoIcon`\r\n- `UnlinkIcon`\r\n- `UploadIcon`\r\n\r\n## @lyfie/luthor-headless exports\r\n\r\n- `Alignment`\r\n- `appendMetadataEnvelopes`\r\n- `BaseCommands`\r\n- `BaseExtension`\r\n- `BaseExtensionConfig`\r\n- `BaseProvider`\r\n- `blockFormatExtension`\r\n- `BlockFormatExtension`\r\n- `boldExtension`\r\n- `BoldExtension`\r\n- `BridgeMode`\r\n- `clearLexicalSelection`\r\n- `codeExtension`\r\n- `CodeExtension`\r\n- `CodeExtensionConfig`\r\n- `codeFormatExtension`\r\n- `CodeFormatExtension`\r\n- `CodeHighlightProvider`\r\n- `CodeHighlightProviderConfig`\r\n- `CodeIntelligenceCommands`\r\n- `CodeIntelligenceConfig`\r\n- `codeIntelligenceExtension`\r\n- `CodeIntelligenceExtension`\r\n- `CodeLanguageOptionsConfig`\r\n- `CodeLanguageOptionsMode`\r\n- `CommandPaletteCommands`\r\n- `commandPaletteExtension`\r\n- `CommandPaletteExtension`\r\n- `CommandPaletteItem`\r\n- `CommandPaletteStateQueries`\r\n- `ContextMenuCommands`\r\n- `ContextMenuConfig`\r\n- `contextMenuExtension`\r\n- `ContextMenuExtension`\r\n- `ContextMenuItem`\r\n- `ContextMenuStateQueries`\r\n- `createCustomNodeExtension`\r\n- `createEditorSystem`\r\n- `createEditorThemeStyleVars`\r\n- `createExtension`\r\n- `defaultLuthorTheme`\r\n- `draggableBlockExtension`\r\n- `DraggableBlockExtension`\r\n- `DraggableCommands`\r\n- `DraggableConfig`\r\n- `DraggableStateQueries`\r\n- `EditorConfig`\r\n- `EditorContextType`\r\n- `EmojiCatalogAdapter`\r\n- `EmojiCatalogItem`\r\n- `EmojiCommands`\r\n- `EmojiConfig`\r\n- `emojiExtension`\r\n- `EmojiExtension`\r\n- `EmojiStateQueries`\r\n- `EmojiSuggestionState`\r\n- `enterKeyBehaviorExtension`\r\n- `EnterKeyBehaviorExtension`\r\n- `Extension`\r\n- `ExtensionCategory`\r\n- `ExtractCommands`\r\n- `ExtractedMetadataEnvelopes`\r\n- `extractHTMLMetadataPatch`\r\n- `extractMarkdownMetadataPatch`\r\n- `extractMetadataEnvelopes`\r\n- `ExtractNames`\r\n- `ExtractPlugins`\r\n- `ExtractStateQueries`\r\n- `FloatingCommands`\r\n- `FloatingConfig`\r\n- `FloatingStateQueries`\r\n- `floatingToolbarExtension`\r\n- `FloatingToolbarExtension`\r\n- `FontCssLoadStrategy`\r\n- `FontFamilyConfig`\r\n- `fontFamilyExtension`\r\n- `FontFamilyExtension`\r\n- `FontFamilyOption`\r\n- `FontSizeConfig`\r\n- `fontSizeExtension`\r\n- `FontSizeExtension`\r\n- `FontSizeOption`\r\n- `historyExtension`\r\n- `HistoryExtension`\r\n- `horizontalRuleExtension`\r\n- `HorizontalRuleExtension`\r\n- `HTML_NATIVE_KEY_MAP`\r\n- `HTML_SUPPORTED_NODE_TYPES`\r\n- `HtmlBridgeOptions`\r\n- `htmlToJSON`\r\n- `iframeEmbedExtension`\r\n- `IframeEmbedExtension`\r\n- `ImageCommands`\r\n- `ImageComponentProps`\r\n- `imageExtension`\r\n- `ImageExtension`\r\n- `ImageExtensionConfig`\r\n- `ImagePayload`\r\n- `ImageStateQueries`\r\n- `isDefaultBridgeValue`\r\n- `isHTMLRepresentable`\r\n- `isLuthorTheme`\r\n- `isMarkdownRepresentable`\r\n- `italicExtension`\r\n- `ItalicExtension`\r\n- `JsonDocument`\r\n- `jsonToHTML`\r\n- `jsonToMarkdown`\r\n- `LexicalEditor`\r\n- `LexicalNodeRegistration`\r\n- `LIGHTWEIGHT_EMOJI_CATALOG`\r\n- `LineHeightConfig`\r\n- `lineHeightExtension`\r\n- `LineHeightExtension`\r\n- `LineHeightOption`\r\n- `linkExtension`\r\n- `LinkExtension`\r\n- `listExtension`\r\n- `ListExtension`\r\n- `LUTHOR_EDITOR_THEME_TOKENS`\r\n- `LuthorEditorThemeOverrides`\r\n- `LuthorEditorThemeToken`\r\n- `LuthorTheme`\r\n- `MARKDOWN_NATIVE_KEY_MAP`\r\n- `MARKDOWN_SUPPORTED_NODE_TYPES`\r\n- `MARKDOWN_TEXT_NATIVE_FORMAT_MASK`\r\n- `MarkdownBridgeFlavor`\r\n- `MarkdownBridgeOptions`\r\n- `markdownToJSON`\r\n- `mergeThemes`\r\n- `MetadataEnvelope`\r\n- `PreparedBridgeDocument`\r\n- `prepareDocumentForBridge`\r\n- `rehydrateDocumentFromEnvelopes`\r\n- `resolveLinkNodeKeyFromAnchor`\r\n- `RichText`\r\n- `RichTextComponentProps`\r\n- `RichTextConfig`\r\n- `richTextExtension`\r\n- `SerializedImageNode`\r\n- `SlashCommandCommands`\r\n- `SlashCommandConfig`\r\n- `slashCommandExtension`\r\n- `SlashCommandExtension`\r\n- `SlashCommandItem`\r\n- `SlashCommandMenuState`\r\n- `SlashCommandStateQueries`\r\n- `SourceMetadataMode`\r\n- `strikethroughExtension`\r\n- `StrikethroughExtension`\r\n- `subscriptExtension`\r\n- `SubscriptExtension`\r\n- `superscriptExtension`\r\n- `SuperscriptExtension`\r\n- `tabIndentExtension`\r\n- `TabIndentExtension`\r\n- `TableConfig`\r\n- `tableExtension`\r\n- `TableExtension`\r\n- `TextColorConfig`\r\n- `textColorExtension`\r\n- `TextColorExtension`\r\n- `TextColorOption`\r\n- `TextFormatExtension`\r\n- `TextHighlightConfig`\r\n- `textHighlightExtension`\r\n- `TextHighlightExtension`\r\n- `TextHighlightOption`\r\n- `ToolbarItem`\r\n- `underlineExtension`\r\n- `UnderlineExtension`\r\n- `useBaseEditor`\r\n- `youTubeEmbedExtension`\r\n- `YouTubeEmbedExtension`\r\n\r\n\r\n",
+    "plainContent": "Exports Map This page is the canonical export inventory. What this page answers - Which public exports are available from each package? @lyfie/luthor exports - AlignCenterIcon - AlignJustifyIcon - AlignLeftIcon - AlignRightIcon - BLOCK HEADING LEVELS - BlockFormat - BlockHeadingLevel - BoldIcon - Button - ChevronDownIcon - ClassNameToken - CloseIcon - CodeBlockIcon - CodeIcon - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CommandConfig - CommandGenerationOptions - CommandIcon - CommandPalette - commandsToCommandPaletteItems - commandsToSlashCommandItems - CoreEditorActiveStates - CoreEditorCommands - CoreEditorMode - CoreTheme - CoreToolbarClassNames - createDefaultSettingsStyleVarRecord - createExtensiveExtensions - createExtensivePreset - createFeatureGuardedCommands - createFloatingToolbarExtension - createModeCache - createPresetEditorConfig - DEFAULT TOOLBAR LAYOUT - DefaultSettings - Dialog - Dropdown - EditorPreset - EditorThemeOverrides - EmojiIcon - EmojiSuggestionMenu - ExtensiveEditor - ExtensiveEditorMode - ExtensiveEditorProps - ExtensiveEditorRef - extensiveExtensions - ExtensiveExtensionsConfig - extensivePreset - ExtensivePresetConfig - EyeIcon - FeatureFlag - FeatureFlagOverrides - FeatureFlags - FeatureFlagsLike - FeatureShortcutSpec - FileCodeIcon - filterToolbarLayout - FloatingToolbar - FloatingToolbarProps - formatHTMLSource - formatJSONSource - formatMarkdownSource - generateCommands - headless - headlessEditorPreset - HeadlessEditorPreset - HeadlessEditorPresetProps - HighlighterIcon - HTMLEditor - HTMLEditorMode - htmlEditorPreset - HTMLEditorProps - IconButton - ImageAlignment - ImageIcon - IndentIcon - InsertImageConfig - InsertTableConfig - invalidateModeCache - isEditableCommandTarget - isModeCached - isShortcutMatch - isToolbarItemSupported - isToolbarItemVisible - ItalicIcon - joinClassNames - KeyboardShortcut - LegacyRichEditor - LegacyRichEditorMode - LegacyRichEditorProps - legacyRichPreset - LegacyRichSourceFormat - LinkHoverBubble - LinkHoverBubbleProps - LinkIcon - ListCheckIcon - ListIcon - ListOrderedIcon - MarkDownEditor - MarkDownEditorMode - MarkDownEditorProps - markModeCached - mdEditorPreset - mergeToolbarVisibilityWithFeatures - MinusIcon - ModeTabs - MoonIcon - normalizeStyleVarsKey - OutdentIcon - PaletteIcon - PencilIcon - PresetFeatureOverrides - PresetFeaturePolicy - PresetModeCache - presetRegistry - QuoteIcon - QuoteStyleVars - RedoIcon - registerKeyboardShortcuts - SearchIcon - Select - setFloatingToolbarContext - ShortcutBindingOverride - ShortcutConfig - SlashCommandMenu - SlashCommandVisibility - SlashCommandVisibilityFilters - SlashCommandVisibilitySelection - SourceView - StrikethroughIcon - StyleVarRecord - StyleVarValueRecord - SubscriptIcon - SunIcon - SuperscriptIcon - SyntaxHighlightColorMode - SyntaxHighlightColors - SyntaxHighlightColorTokens - TableIcon - TextAlignment - Toolbar - ToolbarAlignment - ToolbarFeatureMap - ToolbarItemType - ToolbarLayout - ToolbarPosition - ToolbarProps - ToolbarSection - ToolbarStyleVars - ToolbarVisibility - TRADITIONAL TOOLBAR LAYOUT - TypeIcon - UnderlineIcon - UndoIcon - UnlinkIcon - UploadIcon @lyfie/luthor-headless exports - Alignment - appendMetadataEnvelopes - BaseCommands - BaseExtension - BaseExtensionConfig - BaseProvider - blockFormatExtension - BlockFormatExtension - boldExtension - BoldExtension - BridgeMode - clearLexicalSelection - codeExtension - CodeExtension - CodeExtensionConfig - codeFormatExtension - CodeFormatExtension - CodeHighlightProvider - CodeHighlightProviderConfig - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CodeLanguageOptionsConfig - CodeLanguageOptionsMode - CommandPaletteCommands - commandPaletteExtension - CommandPaletteExtension - CommandPaletteItem - CommandPaletteStateQueries - ContextMenuCommands - ContextMenuConfig - contextMenuExtension - ContextMenuExtension - ContextMenuItem - ContextMenuStateQueries - createCustomNodeExtension - createEditorSystem - createEditorThemeStyleVars - createExtension - defaultLuthorTheme - draggableBlockExtension - DraggableBlockExtension - DraggableCommands - DraggableConfig - DraggableStateQueries - EditorConfig - EditorContextType - EmojiCatalogAdapter - EmojiCatalogItem - EmojiCommands - EmojiConfig - emojiExtension - EmojiExtension - EmojiStateQueries - EmojiSuggestionState - enterKeyBehaviorExtension - EnterKeyBehaviorExtension - Extension - ExtensionCategory - ExtractCommands - ExtractedMetadataEnvelopes - extractHTMLMetadataPatch - extractMarkdownMetadataPatch - extractMetadataEnvelopes - ExtractNames - ExtractPlugins - ExtractStateQueries - FloatingCommands - FloatingConfig - FloatingStateQueries - floatingToolbarExtension - FloatingToolbarExtension - FontCssLoadStrategy - FontFamilyConfig - fontFamilyExtension - FontFamilyExtension - FontFamilyOption - FontSizeConfig - fontSizeExtension - FontSizeExtension - FontSizeOption - historyExtension - HistoryExtension - horizontalRuleExtension - HorizontalRuleExtension - HTML NATIVE KEY MAP - HTML SUPPORTED NODE TYPES - HtmlBridgeOptions - htmlToJSON - iframeEmbedExtension - IframeEmbedExtension - ImageCommands - ImageComponentProps - imageExtension - ImageExtension - ImageExtensionConfig - ImagePayload - ImageStateQueries - isDefaultBridgeValue - isHTMLRepresentable - isLuthorTheme - isMarkdownRepresentable - italicExtension - ItalicExtension - JsonDocument - jsonToHTML - jsonToMarkdown - LexicalEditor - LexicalNodeRegistration - LIGHTWEIGHT EMOJI CATALOG - LineHeightConfig - lineHeightExtension - LineHeightExtension - LineHeightOption - linkExtension - LinkExtension - listExtension - ListExtension - LUTHOR EDITOR THEME TOKENS - LuthorEditorThemeOverrides - LuthorEditorThemeToken - LuthorTheme - MARKDOWN NATIVE KEY MAP - MARKDOWN SUPPORTED NODE TYPES - MARKDOWN TEXT NATIVE FORMAT MASK - MarkdownBridgeFlavor - MarkdownBridgeOptions - markdownToJSON - mergeThemes - MetadataEnvelope - PreparedBridgeDocument - prepareDocumentForBridge - rehydrateDocumentFromEnvelopes - resolveLinkNodeKeyFromAnchor - RichText - RichTextComponentProps - RichTextConfig - richTextExtension - SerializedImageNode - SlashCommandCommands - SlashCommandConfig - slashCommandExtension - SlashCommandExtension - SlashCommandItem - SlashCommandMenuState - SlashCommandStateQueries - SourceMetadataMode - strikethroughExtension - StrikethroughExtension - subscriptExtension - SubscriptExtension - superscriptExtension - SuperscriptExtension - tabIndentExtension - TabIndentExtension - TableConfig - tableExtension - TableExtension - TextColorConfig - textColorExtension - TextColorExtension - TextColorOption - TextFormatExtension - TextHighlightConfig - textHighlightExtension - TextHighlightExtension - TextHighlightOption - ToolbarItem - underlineExtension - UnderlineExtension - useBaseEditor - youTubeEmbedExtension - YouTubeEmbedExtension",
     "sections": [
       {
         "heading": "Overview",
@@ -7488,7 +6917,7 @@ export const docsIndex = [
         "heading": "@lyfie/luthor exports",
         "id": "lyfieluthor-exports",
         "level": 2,
-        "text": "- AlignCenterIcon - AlignJustifyIcon - AlignLeftIcon - AlignRightIcon - BLOCK HEADING LEVELS - BlockFormat - BlockHeadingLevel - BoldIcon - Button - ChevronDownIcon - ClassNameToken - CloseIcon - CodeBlockIcon - CodeIcon - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CommandConfig - CommandGenerationOptions - CommandIcon - CommandPalette - commandsToCommandPaletteItems - commandsToSlashCommandItems - ComposeEditor - ComposeEditorProps - composePreset - CoreEditorActiveStates - CoreEditorCommands - CoreEditorMode - CoreTheme - CoreToolbarClassNames - createDefaultSettingsStyleVarRecord - createExtensiveExtensions - createExtensivePreset - createFeatureGuardedCommands - createFloatingToolbarExtension - createModeCache - createPresetEditorConfig - DEFAULT TOOLBAR LAYOUT - DefaultSettings - Dialog - Dropdown - EditorPreset - EditorThemeOverrides - EmojiIcon - EmojiSuggestionMenu - ExtensiveEditor - ExtensiveEditorMode - ExtensiveEditorProps - ExtensiveEditorRef - extensiveExtensions - ExtensiveExtensionsConfig - extensivePreset - ExtensivePresetConfig - EyeIcon - FeatureFlag - FeatureFlagOverrides - FeatureFlags - FeatureFlagsLike - FeatureShortcutSpec - FileCodeIcon - filterToolbarLayout - FloatingToolbar - FloatingToolbarProps - formatHTMLSource - formatJSONSource - formatMarkdownSource - generateCommands - headless - headlessEditorPreset - HeadlessEditorPreset - HeadlessEditorPresetProps - HighlighterIcon - HTMLEditor - HTMLEditorMode - htmlEditorPreset - HTMLEditorProps - IconButton - ImageAlignment - ImageIcon - IndentIcon - InsertImageConfig - InsertTableConfig - invalidateModeCache - isEditableCommandTarget - isModeCached - isShortcutMatch - isToolbarItemSupported - isToolbarItemVisible - ItalicIcon - joinClassNames - KeyboardShortcut - LegacyRichEditor - LegacyRichEditorMode - LegacyRichEditorProps - legacyRichPreset - LegacyRichSourceFormat - LinkHoverBubble - LinkHoverBubbleProps - LinkIcon - ListCheckIcon - ListIcon - ListOrderedIcon - MarkDownEditor - MarkDownEditorMode - MarkDownEditorProps - markModeCached - mdEditorPreset - mergeToolbarVisibilityWithFeatures - MinusIcon - ModeTabs - MoonIcon - normalizeStyleVarsKey - OutdentIcon - PaletteIcon - PencilIcon - PresetFeatureOverrides - PresetFeaturePolicy - PresetModeCache - presetRegistry - QuoteIcon - QuoteStyleVars - RedoIcon - registerKeyboardShortcuts - SearchIcon - Select - setFloatingToolbarContext - ShortcutBindingOverride - ShortcutConfig - SimpleEditor - SimpleEditorOutputFormat - simpleEditorPreset - SimpleEditorProps - SimpleEditorSendPayload - SimpleFormattingOptions - SimpleToolbarButton - SlashCommandMenu - SlashCommandVisibility - SlashCommandVisibilityFilters - SlashCommandVisibilitySelection - SlashEditor - slashEditorPreset - SlashEditorProps - SourceView - StrikethroughIcon - StyleVarRecord - StyleVarValueRecord - SubscriptIcon - SunIcon - SuperscriptIcon - SyntaxHighlightColorMode - SyntaxHighlightColors - SyntaxHighlightColorTokens - TableIcon - TextAlignment - Toolbar - ToolbarAlignment - ToolbarFeatureMap - ToolbarItemType - ToolbarLayout - ToolbarPosition - ToolbarProps - ToolbarSection - ToolbarStyleVars - ToolbarVisibility - TRADITIONAL TOOLBAR LAYOUT - TypeIcon - UnderlineIcon - UndoIcon - UnlinkIcon - UploadIcon"
+        "text": "- AlignCenterIcon - AlignJustifyIcon - AlignLeftIcon - AlignRightIcon - BLOCK HEADING LEVELS - BlockFormat - BlockHeadingLevel - BoldIcon - Button - ChevronDownIcon - ClassNameToken - CloseIcon - CodeBlockIcon - CodeIcon - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CommandConfig - CommandGenerationOptions - CommandIcon - CommandPalette - commandsToCommandPaletteItems - commandsToSlashCommandItems - CoreEditorActiveStates - CoreEditorCommands - CoreEditorMode - CoreTheme - CoreToolbarClassNames - createDefaultSettingsStyleVarRecord - createExtensiveExtensions - createExtensivePreset - createFeatureGuardedCommands - createFloatingToolbarExtension - createModeCache - createPresetEditorConfig - DEFAULT TOOLBAR LAYOUT - DefaultSettings - Dialog - Dropdown - EditorPreset - EditorThemeOverrides - EmojiIcon - EmojiSuggestionMenu - ExtensiveEditor - ExtensiveEditorMode - ExtensiveEditorProps - ExtensiveEditorRef - extensiveExtensions - ExtensiveExtensionsConfig - extensivePreset - ExtensivePresetConfig - EyeIcon - FeatureFlag - FeatureFlagOverrides - FeatureFlags - FeatureFlagsLike - FeatureShortcutSpec - FileCodeIcon - filterToolbarLayout - FloatingToolbar - FloatingToolbarProps - formatHTMLSource - formatJSONSource - formatMarkdownSource - generateCommands - headless - headlessEditorPreset - HeadlessEditorPreset - HeadlessEditorPresetProps - HighlighterIcon - HTMLEditor - HTMLEditorMode - htmlEditorPreset - HTMLEditorProps - IconButton - ImageAlignment - ImageIcon - IndentIcon - InsertImageConfig - InsertTableConfig - invalidateModeCache - isEditableCommandTarget - isModeCached - isShortcutMatch - isToolbarItemSupported - isToolbarItemVisible - ItalicIcon - joinClassNames - KeyboardShortcut - LegacyRichEditor - LegacyRichEditorMode - LegacyRichEditorProps - legacyRichPreset - LegacyRichSourceFormat - LinkHoverBubble - LinkHoverBubbleProps - LinkIcon - ListCheckIcon - ListIcon - ListOrderedIcon - MarkDownEditor - MarkDownEditorMode - MarkDownEditorProps - markModeCached - mdEditorPreset - mergeToolbarVisibilityWithFeatures - MinusIcon - ModeTabs - MoonIcon - normalizeStyleVarsKey - OutdentIcon - PaletteIcon - PencilIcon - PresetFeatureOverrides - PresetFeaturePolicy - PresetModeCache - presetRegistry - QuoteIcon - QuoteStyleVars - RedoIcon - registerKeyboardShortcuts - SearchIcon - Select - setFloatingToolbarContext - ShortcutBindingOverride - ShortcutConfig - SlashCommandMenu - SlashCommandVisibility - SlashCommandVisibilityFilters - SlashCommandVisibilitySelection - SourceView - StrikethroughIcon - StyleVarRecord - StyleVarValueRecord - SubscriptIcon - SunIcon - SuperscriptIcon - SyntaxHighlightColorMode - SyntaxHighlightColors - SyntaxHighlightColorTokens - TableIcon - TextAlignment - Toolbar - ToolbarAlignment - ToolbarFeatureMap - ToolbarItemType - ToolbarLayout - ToolbarPosition - ToolbarProps - ToolbarSection - ToolbarStyleVars - ToolbarVisibility - TRADITIONAL TOOLBAR LAYOUT - TypeIcon - UnderlineIcon - UndoIcon - UnlinkIcon - UploadIcon"
       },
       {
         "heading": "@lyfie/luthor-headless exports",
@@ -7516,7 +6945,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/reference/exports-map/",
     "sourcePath": "apps/web/src/content/docs/reference/exports-map.md",
-    "updatedAt": "2026-03-20T17:40:45.267Z",
+    "updatedAt": "2026-05-29T02:31:33.903Z",
     "package": "shared",
     "docType": "reference",
     "surface": "tooling",
@@ -7604,9 +7033,6 @@ export const docsIndex = [
       "CommandPalette",
       "commandsToCommandPaletteItems",
       "commandsToSlashCommandItems",
-      "ComposeEditor",
-      "ComposeEditorProps",
-      "composePreset",
       "CoreEditorActiveStates",
       "CoreEditorCommands",
       "CoreEditorMode",
@@ -7710,20 +7136,10 @@ export const docsIndex = [
       "setFloatingToolbarContext",
       "ShortcutBindingOverride",
       "ShortcutConfig",
-      "SimpleEditor",
-      "SimpleEditorOutputFormat",
-      "simpleEditorPreset",
-      "SimpleEditorProps",
-      "SimpleEditorSendPayload",
-      "SimpleFormattingOptions",
-      "SimpleToolbarButton",
       "SlashCommandMenu",
       "SlashCommandVisibility",
       "SlashCommandVisibilityFilters",
       "SlashCommandVisibilitySelection",
-      "SlashEditor",
-      "slashEditorPreset",
-      "SlashEditorProps",
       "SourceView",
       "StrikethroughIcon",
       "StyleVarRecord",
@@ -8147,9 +7563,6 @@ export const docsIndex = [
       "commandstoslashcommanditems",
       "complete",
       "complete export map for @lyfie/luthor and @lyfie/luthor-headless.",
-      "composeeditor",
-      "composeeditorprops",
-      "composepreset",
       "contextmenucommands",
       "contextmenuconfig",
       "contextmenuextension",
@@ -8453,13 +7866,6 @@ export const docsIndex = [
       "show",
       "showdefaultcontent",
       "showlinenumbers",
-      "simpleeditor",
-      "simpleeditoroutputformat",
-      "simpleeditorpreset",
-      "simpleeditorprops",
-      "simpleeditorsendpayload",
-      "simpleformattingoptions",
-      "simpletoolbarbutton",
       "slashcommandcommands",
       "slashcommandconfig",
       "slashcommandextension",
@@ -8470,9 +7876,6 @@ export const docsIndex = [
       "slashcommandvisibility",
       "slashcommandvisibilityfilters",
       "slashcommandvisibilityselection",
-      "slasheditor",
-      "slasheditorpreset",
-      "slasheditorprops",
       "sourcemetadatamode",
       "sourceview",
       "strikethrough",
@@ -8704,9 +8107,6 @@ export const docsIndex = [
         "commandpalettestatequeries",
         "commandstocommandpaletteitems",
         "commandstoslashcommanditems",
-        "composeeditor",
-        "composeeditorprops",
-        "composepreset",
         "contextmenucommands",
         "contextmenuconfig",
         "contextmenuextension",
@@ -8920,13 +8320,6 @@ export const docsIndex = [
         "setfloatingtoolbarcontext",
         "shortcutbindingoverride",
         "shortcutconfig",
-        "simpleeditor",
-        "simpleeditoroutputformat",
-        "simpleeditorpreset",
-        "simpleeditorprops",
-        "simpleeditorsendpayload",
-        "simpleformattingoptions",
-        "simpletoolbarbutton",
         "slashcommandcommands",
         "slashcommandconfig",
         "slashcommandextension",
@@ -8937,9 +8330,6 @@ export const docsIndex = [
         "slashcommandvisibility",
         "slashcommandvisibilityfilters",
         "slashcommandvisibilityselection",
-        "slasheditor",
-        "slasheditorpreset",
-        "slasheditorprops",
         "sourcemetadatamode",
         "sourceview",
         "strikethroughextension",
@@ -9153,8 +8543,8 @@ export const docsIndex = [
     "title": "Preset Selector",
     "navTitle": "Preset Selector",
     "description": "Decision matrix for choosing the right preset by workflow, source mode profile, and feature policy.",
-    "content": "\r\n# Preset Selector\r\n\r\nUse this table to choose the right preset quickly.\r\n\r\n## What this page answers\r\n\r\n- Which preset fits my workflow and source mode needs?\r\n\r\n| Need | Preset |\r\n| --- | --- |\r\n| Full capability, broad modes | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |\r\n| Compact composer | [Compose Editor](/docs/luthor/presets/compose-editor/) |\r\n| Chat-style input with send flow | [Simple Editor](/docs/luthor/presets/simple-editor/) |\r\n| Legacy-compatible rich editing | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |\r\n| Markdown-focused source of truth | [Markdown Editor](/docs/luthor/presets/md-editor/) |\r\n| HTML-focused source workflows | [HTML Editor](/docs/luthor/presets/html-editor/) |\r\n| Slash-command-first authoring | [Slash Editor](/docs/luthor/presets/slash-editor/) |\r\n| Constrained source-mode preset | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |\r\n\r\n\r\n",
-    "plainContent": "Preset Selector Use this table to choose the right preset quickly. What this page answers - Which preset fits my workflow and source mode needs? Need Preset --- --- Full capability, broad modes Extensive Editor Compact composer Compose Editor Chat-style input with send flow Simple Editor Legacy-compatible rich editing Legacy Rich Editor Markdown-focused source of truth Markdown Editor HTML-focused source workflows HTML Editor Slash-command-first authoring Slash Editor Constrained source-mode preset Headless Editor Preset",
+    "content": "\r\n# Preset Selector\r\n\r\nUse this table to choose the right preset quickly.\r\n\r\n## What this page answers\r\n\r\n- Which preset fits my workflow and source mode needs?\r\n\r\n| Need | Preset |\n| --- | --- |\n| Full capability, broad modes | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |\n| Legacy-compatible rich editing | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |\n| Markdown-focused source of truth | [Markdown Editor](/docs/luthor/presets/md-editor/) |\n| HTML-focused source workflows | [HTML Editor](/docs/luthor/presets/html-editor/) |\n| Constrained source-mode preset | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |\n\r\n\r\n",
+    "plainContent": "Preset Selector Use this table to choose the right preset quickly. What this page answers - Which preset fits my workflow and source mode needs? Need Preset --- --- Full capability, broad modes Extensive Editor Legacy-compatible rich editing Legacy Rich Editor Markdown-focused source of truth Markdown Editor HTML-focused source workflows HTML Editor Constrained source-mode preset Headless Editor Preset",
     "sections": [
       {
         "heading": "Overview",
@@ -9166,7 +8556,7 @@ export const docsIndex = [
         "heading": "What this page answers",
         "id": "what-this-page-answers",
         "level": 2,
-        "text": "- Which preset fits my workflow and source mode needs? Need Preset --- --- Full capability, broad modes Extensive Editor Compact composer Compose Editor Chat-style input with send flow Simple Editor Legacy-compatible rich editing Legacy Rich Editor Markdown-focused source of truth Markdown Editor HTML-focused source workflows HTML Editor Slash-command-first authoring Slash Editor Constrained source-mode preset Headless Editor Preset"
+        "text": "- Which preset fits my workflow and source mode needs? Need Preset --- --- Full capability, broad modes Extensive Editor Legacy-compatible rich editing Legacy Rich Editor Markdown-focused source of truth Markdown Editor HTML-focused source workflows HTML Editor Constrained source-mode preset Headless Editor Preset"
       }
     ],
     "headings": [
@@ -9178,7 +8568,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/reference/preset-selector/",
     "sourcePath": "apps/web/src/content/docs/reference/preset-selector.md",
-    "updatedAt": "2026-03-20T17:40:45.272Z",
+    "updatedAt": "2026-05-29T02:31:18.144Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -9186,12 +8576,9 @@ export const docsIndex = [
       "preset selector",
       "decision matrix",
       "extensive",
-      "compose",
-      "simple-editor",
       "legacy-rich",
       "md-editor",
       "html-editor",
-      "slash-editor",
       "headless-editor"
     ],
     "props": [
@@ -9202,12 +8589,9 @@ export const docsIndex = [
     "exports": [
       "presetRegistry",
       "ExtensiveEditor",
-      "ComposeEditor",
-      "SimpleEditor",
       "LegacyRichEditor",
       "MarkDownEditor",
       "HTMLEditor",
-      "SlashEditor",
       "HeadlessEditorPreset"
     ],
     "commands": [],
@@ -9227,8 +8611,6 @@ export const docsIndex = [
       "availablemodes",
       "by",
       "choosing",
-      "compose",
-      "composeeditor",
       "decision",
       "decision matrix",
       "decision matrix for choosing the right preset by workflow, source mode profile, and feature policy.",
@@ -9262,12 +8644,6 @@ export const docsIndex = [
       "rich",
       "right",
       "selector",
-      "simple",
-      "simple-editor",
-      "simpleeditor",
-      "slash",
-      "slash-editor",
-      "slasheditor",
       "source",
       "the",
       "workflow,"
@@ -9275,7 +8651,6 @@ export const docsIndex = [
     "searchTokenBuckets": {
       "keywords": [
         "availablemodes",
-        "compose",
         "decision",
         "decision matrix",
         "editor",
@@ -9294,11 +8669,7 @@ export const docsIndex = [
         "preset",
         "preset selector",
         "rich",
-        "selector",
-        "simple",
-        "simple-editor",
-        "slash",
-        "slash-editor"
+        "selector"
       ],
       "props": [
         "availablemodes",
@@ -9306,15 +8677,12 @@ export const docsIndex = [
         "initialmode"
       ],
       "exports": [
-        "composeeditor",
         "extensiveeditor",
         "headlesseditorpreset",
         "htmleditor",
         "legacyricheditor",
         "markdowneditor",
-        "presetregistry",
-        "simpleeditor",
-        "slasheditor"
+        "presetregistry"
       ],
       "commands": [],
       "extensions": [],

@@ -14,7 +14,6 @@ props:
   - "availableModes"
 exports:
   - "ExtensiveEditor"
-  - "ComposeEditor"
   - "presetRegistry"
 commands:
   - "palette.show"
@@ -48,7 +47,7 @@ navOrder: 10
 
 ## Key exports
 
-- Preset components: `ExtensiveEditor`, `ComposeEditor`, `SimpleEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `SlashEditor`, `HeadlessEditorPreset`
+- Preset components: `ExtensiveEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `HeadlessEditorPreset`
 - Registry and factories: `presetRegistry`, `createExtensivePreset`, `createExtensiveExtensions`
 - Shared command layer: `generateCommands`, `registerKeyboardShortcuts`
 

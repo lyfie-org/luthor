@@ -8,7 +8,6 @@
 'use client';
 
 import {
-  ComposeEditor,
   type EditorPreset,
   ExtensiveEditor,
   HeadlessEditorPreset,
@@ -16,37 +15,24 @@ import {
   LegacyRichEditor,
   MarkDownEditor,
   presetRegistry,
-  SimpleEditor,
-  type SimpleEditorSendPayload,
-  SlashEditor,
 } from '@lyfie/luthor';
-import { PaperPlaneRight } from '@phosphor-icons/react';
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
-  WEB_DEMO_COMPOSE_CONTENT,
   WEB_DEMO_EXTENSIVE_CONTENT,
   WEB_DEMO_HEADLESS_PRESET_CONTENT,
   WEB_DEMO_HTML_EDITOR_CONTENT,
   WEB_DEMO_LEGACY_RICH_CONTENT,
   WEB_DEMO_MD_EDITOR_CONTENT,
-  WEB_DEMO_SIMPLE_EDITOR_CONTENT,
-  WEB_DEMO_SLASH_EDITOR_CONTENT,
 } from './demo-content';
-import { isExternalWebsiteHref } from '@/utils/link';
 
 type Theme = 'light' | 'dark';
 
 const VISIBLE_PRESET_IDS = [
   'extensive',
-  'compose',
-  'simple-editor',
   'legacy-rich',
   'md-editor',
   'html-editor',
-  'slash-editor',
   'headless-editor',
 ] as const;
 
@@ -72,18 +58,6 @@ const presetDetails: Record<VisiblePresetId, PresetDetails> = {
     customization: 'Theme tokens, toolbar controls, source tabs, slash visibility, and feature flags are all configurable.',
     docsPath: '/docs/luthor/presets/extensive-editor/',
   },
-  compose: {
-    summary: 'Focused rich-text drafting preset with essential formatting and source tabs.',
-    useCases: 'Best for support replies, outbound messaging, and professional drafting surfaces.',
-    customization: 'Compact toolbar and preset-scoped feature flags can be tuned for product needs.',
-    docsPath: '/docs/luthor/presets/compose-editor/',
-  },
-  'simple-editor': {
-    summary: 'Minimal chat/message input with safe formatting and send-oriented behavior.',
-    useCases: 'Best for chats, comments, inbox replies, and compact message composers.',
-    customization: 'Output format, send interaction, height constraints, and action controls are configurable.',
-    docsPath: '/docs/luthor/presets/simple-editor/',
-  },
   'legacy-rich': {
     summary: 'Metadata-free native profile that powers both MD and HTML focused editors.',
     useCases: 'Best for compatibility-first products that need clean markdown/html round trips.',
@@ -102,12 +76,6 @@ const presetDetails: Record<VisiblePresetId, PresetDetails> = {
     customization: 'Uses LegacyRichEditor under the hood with html source mode defaults.',
     docsPath: '/docs/luthor/presets/html-editor/',
   },
-  'slash-editor': {
-    summary: 'Slash-first authoring mode with draggable blocks and zero toolbar dependence.',
-    useCases: 'Best for block-based editors, keyboard-first authoring, and lightweight command-driven input.',
-    customization: 'Slash visibility can be tightly controlled while keeping a curated command set.',
-    docsPath: '/docs/luthor/presets/slash-editor/',
-  },
   'headless-editor': {
     summary: 'Basic rich-text preset with simple controls and full source tabs for lightweight authoring.',
     useCases: 'Best for starter editors, internal tools, and simple text workflows with clean output.',
@@ -118,23 +86,17 @@ const presetDetails: Record<VisiblePresetId, PresetDetails> = {
 
 const presetTag: Record<VisiblePresetId, string> = {
   extensive: '<ExtensiveEditor />',
-  compose: '<ComposeEditor />',
-  'simple-editor': '<SimpleEditor />',
   'legacy-rich': '<LegacyRichEditor />',
   'md-editor': '<MarkDownEditor />',
   'html-editor': '<HTMLEditor />',
-  'slash-editor': '<SlashEditor />',
   'headless-editor': '<HeadlessEditorPreset />',
 };
 
 const presetHeading: Record<VisiblePresetId, string> = {
   extensive: 'Extensive Editor Preset',
-  compose: 'Compose Editor Preset',
-  'simple-editor': 'Simple Editor Preset',
   'legacy-rich': 'Legacy Rich Editor Preset',
   'md-editor': 'MD Editor Preset',
   'html-editor': 'HTML Editor Preset',
-  'slash-editor': 'Slash Editor Preset',
   'headless-editor': 'Headless Editor Preset',
 };
 
@@ -154,31 +116,8 @@ type PresetSurfaceProps = {
   children: ReactNode;
 };
 
-type DemoMessage = {
-  id: string;
-  role: 'assistant' | 'user';
-  text: string;
-  createdAt: number;
-};
-
 function resolveTheme(): Theme {
   return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
-}
-
-function nextReply(input: string): string {
-  const trimmed = input.trim();
-  if (!trimmed) {
-    return 'Send a prompt and I will respond here.';
-  }
-
-  return `Got it. You said:\n\n${trimmed.slice(0, 120)}${trimmed.length > 120 ? '...' : ''}`;
-}
-
-function formatTime(timestamp: number): string {
-  return new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(timestamp);
 }
 
 function PresetSurface({ children }: PresetSurfaceProps) {
@@ -203,24 +142,6 @@ function ExtensiveExperience({
         toolbarAlignment="center"
         isToolbarPinned
         maxListIndentation={8}
-      />
-    </PresetSurface>
-  );
-}
-
-function ComposeExperience({
-  siteTheme,
-}: {
-  siteTheme: Theme;
-}) {
-  return (
-    <PresetSurface>
-      <ComposeEditor
-        defaultContent={WEB_DEMO_COMPOSE_CONTENT}
-        initialTheme={siteTheme}
-        showDefaultContent={false}
-        compactToolbar
-        placeholder="Write your customer follow-up..."
       />
     </PresetSurface>
   );
@@ -277,18 +198,6 @@ function HTMLEditorExperience({
   );
 }
 
-function SlashEditorExperience({ siteTheme }: { siteTheme: Theme }) {
-  return (
-    <PresetSurface>
-      <SlashEditor
-        defaultContent={WEB_DEMO_SLASH_EDITOR_CONTENT}
-        initialTheme={siteTheme}
-        showDefaultContent={false}
-      />
-    </PresetSurface>
-  );
-}
-
 function HeadlessExperience({ siteTheme }: { siteTheme: Theme }) {
   return (
     <PresetSurface>
@@ -302,147 +211,14 @@ function HeadlessExperience({ siteTheme }: { siteTheme: Theme }) {
   );
 }
 
-function SimpleEditorExperience({ siteTheme }: { siteTheme: Theme }) {
-  const [messages, setMessages] = useState<DemoMessage[]>([
-    {
-      id: 'seed-assistant',
-      role: 'assistant',
-      text: 'Hi, I am luthor. Press Enter to send a message.',
-      createdAt: Date.now(),
-    },
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
-  const pendingReplyTimeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (pendingReplyTimeoutRef.current !== null) {
-        window.clearTimeout(pendingReplyTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleSend = (payload: SimpleEditorSendPayload) => {
-    const userText = payload.markdown.trim();
-    if (!userText) {
-      return;
-    }
-
-    const createdAt = Date.now();
-    setMessages((prev) => [...prev, { id: `user-${createdAt}`, role: 'user', text: userText, createdAt }]);
-    setIsTyping(true);
-
-    if (pendingReplyTimeoutRef.current !== null) {
-      window.clearTimeout(pendingReplyTimeoutRef.current);
-    }
-
-    pendingReplyTimeoutRef.current = window.setTimeout(() => {
-      const replyAt = Date.now();
-      setMessages((prev) => [
-        ...prev,
-        { id: `assistant-${replyAt}`, role: 'assistant', text: nextReply(userText), createdAt: replyAt },
-      ]);
-      setIsTyping(false);
-      pendingReplyTimeoutRef.current = null;
-    }, 650);
-  };
-
-  return (
-    <PresetSurface>
-      <div className="demo-chat-shell">
-        <div className="demo-chat-history" aria-live="polite">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={[
-                'demo-chat-bubble-row',
-                message.role === 'user' ? 'demo-chat-bubble-row-user' : 'demo-chat-bubble-row-assistant',
-              ].join(' ')}
-            >
-              <div className="demo-chat-message">
-                <div className={['demo-chat-bubble', message.role === 'user' ? 'is-user' : 'is-assistant'].join(' ')}>
-                  <div className="demo-chat-bubble-content">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        a: ({ href, children }) => {
-                          const nextHref = href ?? '#';
-                          if (isExternalWebsiteHref(nextHref)) {
-                            return (
-                              <a href={nextHref} target="_blank" rel="noopener noreferrer">
-                                {children}
-                              </a>
-                            );
-                          }
-                          if (nextHref.startsWith('/')) return <Link href={nextHref}>{children}</Link>;
-                          return <a href={nextHref}>{children}</a>;
-                        },
-                      }}
-                    >
-                      {message.text}
-                    </ReactMarkdown>
-                  </div>
-                </div>
-                <div className="demo-chat-message-meta">
-                  <span>{message.role === 'user' ? 'You' : 'luthor'}</span>
-                  <span className="demo-chat-meta-separator" aria-hidden="true">
-                    |
-                  </span>
-                  <span>{formatTime(message.createdAt)}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-          {isTyping ? (
-            <div className="demo-chat-bubble-row demo-chat-bubble-row-assistant">
-              <div className="demo-chat-bubble is-assistant demo-chat-bubble-typing">
-                <span />
-                <span />
-                <span />
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="demo-chat-composer">
-          <SimpleEditor
-            defaultContent={WEB_DEMO_SIMPLE_EDITOR_CONTENT}
-            initialTheme={siteTheme}
-            showDefaultContent={false}
-            placeholder="Type a message and press Enter..."
-            onSend={handleSend}
-            submitOnEnter
-            allowShiftEnter
-            clearOnSend
-            outputFormat="md"
-            minHeight={56}
-            maxHeight={160}
-            minWidth="100%"
-            maxWidth="100%"
-            showBottomToolbar={false}
-            sendButtonPlacement="right"
-            sendButtonContent={<PaperPlaneRight size={18} weight="fill" />}
-          />
-        </div>
-      </div>
-    </PresetSurface>
-  );
-}
-
 function PresetRenderer({ presetId, siteTheme }: PresetRendererProps) {
   switch (presetId) {
-    case 'compose':
-      return <ComposeExperience siteTheme={siteTheme} />;
-    case 'simple-editor':
-      return <SimpleEditorExperience siteTheme={siteTheme} />;
     case 'legacy-rich':
       return <LegacyRichExperience siteTheme={siteTheme} />;
     case 'md-editor':
       return <MarkDownEditorExperience siteTheme={siteTheme} />;
     case 'html-editor':
       return <HTMLEditorExperience siteTheme={siteTheme} />;
-    case 'slash-editor':
-      return <SlashEditorExperience siteTheme={siteTheme} />;
     case 'headless-editor':
       return <HeadlessExperience siteTheme={siteTheme} />;
     case 'extensive':

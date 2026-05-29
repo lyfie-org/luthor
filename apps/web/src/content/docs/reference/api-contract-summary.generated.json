@@ -124,12 +124,9 @@
   ],
   "presetRegistryKeys": [
     "extensive",
-    "compose",
-    "simple-editor",
     "legacy-rich",
     "md-editor",
     "html-editor",
-    "slash-editor",
     "headless-editor"
   ],
   "supportedNodeTypes": [
