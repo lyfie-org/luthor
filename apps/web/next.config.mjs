@@ -5,6 +5,20 @@
  * Build freely. Credit kindly.
  */
 
+const edgeCachedHtmlHeaders = [
+  {
+    key: 'Cache-Control',
+    value: 'public, max-age=0, s-maxage=86400, stale-while-revalidate=3600',
+  },
+];
+
+const longLivedAssetHeaders = [
+  {
+    key: 'Cache-Control',
+    value: 'public, max-age=31536000, immutable',
+  },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -70,13 +84,36 @@ const nextConfig = {
         ],
       },
       {
+        source: '/',
+        headers: edgeCachedHtmlHeaders,
+      },
+      {
+        source: '/demo/',
+        headers: edgeCachedHtmlHeaders,
+      },
+      {
+        source: '/docs/:path*',
+        headers: edgeCachedHtmlHeaders,
+      },
+      {
+        source: '/sitemap.xml',
+        headers: edgeCachedHtmlHeaders,
+      },
+      {
+        source: '/llms.txt',
+        headers: edgeCachedHtmlHeaders,
+      },
+      {
+        source: '/llms-full.txt',
+        headers: edgeCachedHtmlHeaders,
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: longLivedAssetHeaders,
+      },
+      {
         source: '/:all*(svg|png|jpg|jpeg|gif|webp|avif|ico)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
+        headers: longLivedAssetHeaders,
       },
     ];
   },

@@ -16,7 +16,7 @@ import {
   Sparkle,
   StackSimple,
 } from '@phosphor-icons/react/dist/ssr';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 import {
   CREATOR_NAME,
   CREATOR_URL,
@@ -30,31 +30,14 @@ import {
   SEO_FAQS,
   SPONSORS_URL,
 } from '@/config/site';
+import { homepageMetrics } from '@/data/homepage-metrics.generated';
 import { HomeJsonLd } from '@/features/home/home-json-ld';
 import { LocalLastSync } from '@/features/home/local-last-sync';
 import { WhyLuthorReasons } from '@/features/home/why-luthor-reasons';
 import { formatBytes, formatCompact } from '@/utils/format';
 
-type DownloadPointResponse = {
-  downloads?: number;
-};
-
-type RegistryResponse = {
-  'dist-tags'?: {
-    latest?: string;
-  };
-  versions?: Record<
-    string,
-    {
-      dist?: {
-        unpackedSize?: number;
-      };
-    }
-  >;
-  time?: {
-    created?: string;
-  };
-};
+export const dynamic = 'force-static';
+export const revalidate = false;
 
 const packagePlans = [
   {
@@ -98,139 +81,36 @@ const heroUseCases = [
   { label: 'Teams', icon: ShieldCheck },
 ] as const;
 
-const ExtensiveEditorShell = dynamic(
+const ExtensiveEditorShell = nextDynamic(
   () => import('@/features/editor/extensive-editor-shell').then((mod) => mod.ExtensiveEditorShell),
   {
     loading: () => <p className="section-copy">Loading editor demo...</p>,
   },
 );
 
-const WhyLuthorFeatures = dynamic(
+const WhyLuthorFeatures = nextDynamic(
   () => import('@/features/home/why-luthor-features').then((mod) => mod.WhyLuthorFeatures),
   {
     loading: () => <p className="section-copy">Loading feature previews...</p>,
   },
 );
 
-async function safeFetchJson<T>(url: string): Promise<T | null> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 1800);
-
-  try {
-    const response = await fetch(url, {
-      next: { revalidate: 21600 },
-      headers: {
-        accept: 'application/json',
-      },
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return (await response.json()) as T;
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-function toIsoDate(value: string | undefined): string | null {
-  if (!value) return null;
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return parsed.toISOString().slice(0, 10);
-}
-
-async function getLiveStats() {
-  const [luthorRegistry, headlessRegistry] = await Promise.all([
-    safeFetchJson<RegistryResponse>(`https://registry.npmjs.org/${encodeURIComponent(PRIMARY_PACKAGE_NAME)}`),
-    safeFetchJson<RegistryResponse>(`https://registry.npmjs.org/${encodeURIComponent(HEADLESS_PACKAGE_NAME)}`),
-  ]);
-
-  const today = new Date().toISOString().slice(0, 10);
-  const luthorCreatedDate = toIsoDate(luthorRegistry?.time?.created);
-  const headlessCreatedDate = toIsoDate(headlessRegistry?.time?.created);
-
-  const [luthorTotalDownloads, headlessTotalDownloads, luthorLastMonthDownloads, headlessLastMonthDownloads] =
-    await Promise.all([
-      luthorCreatedDate
-        ? safeFetchJson<DownloadPointResponse>(
-            `https://api.npmjs.org/downloads/point/${luthorCreatedDate}:${today}/${encodeURIComponent(PRIMARY_PACKAGE_NAME)}`,
-          )
-        : Promise.resolve(null),
-      headlessCreatedDate
-        ? safeFetchJson<DownloadPointResponse>(
-            `https://api.npmjs.org/downloads/point/${headlessCreatedDate}:${today}/${encodeURIComponent(HEADLESS_PACKAGE_NAME)}`,
-          )
-        : Promise.resolve(null),
-      safeFetchJson<DownloadPointResponse>(
-        `https://api.npmjs.org/downloads/point/last-month/${encodeURIComponent(PRIMARY_PACKAGE_NAME)}`,
-      ),
-      safeFetchJson<DownloadPointResponse>(
-        `https://api.npmjs.org/downloads/point/last-month/${encodeURIComponent(HEADLESS_PACKAGE_NAME)}`,
-      ),
-    ]);
-
-  const luthorTotal = typeof luthorTotalDownloads?.downloads === 'number' ? luthorTotalDownloads.downloads : null;
-  const headlessTotal = typeof headlessTotalDownloads?.downloads === 'number' ? headlessTotalDownloads.downloads : null;
-  const totalDownloads =
-    typeof luthorTotal === 'number' || typeof headlessTotal === 'number'
-      ? (luthorTotal ?? 0) + (headlessTotal ?? 0)
-      : null;
-  const luthorLastMonth = typeof luthorLastMonthDownloads?.downloads === 'number' ? luthorLastMonthDownloads.downloads : null;
-  const headlessLastMonth =
-    typeof headlessLastMonthDownloads?.downloads === 'number' ? headlessLastMonthDownloads.downloads : null;
-  const lastMonthDownloads =
-    typeof luthorLastMonth === 'number' || typeof headlessLastMonth === 'number'
-      ? (luthorLastMonth ?? 0) + (headlessLastMonth ?? 0)
-      : null;
-
-  const luthorLatestVersion = luthorRegistry?.['dist-tags']?.latest ?? 'N/A';
-  const headlessLatestVersion = headlessRegistry?.['dist-tags']?.latest ?? 'N/A';
-  const luthorPackageSize =
-    luthorLatestVersion !== 'N/A'
-      ? luthorRegistry?.versions?.[luthorLatestVersion]?.dist?.unpackedSize ?? null
-      : null;
-  const headlessPackageSize =
-    headlessLatestVersion !== 'N/A'
-      ? headlessRegistry?.versions?.[headlessLatestVersion]?.dist?.unpackedSize ?? null
-      : null;
-  const combinedPackageSize =
-    typeof luthorPackageSize === 'number' || typeof headlessPackageSize === 'number'
-      ? (luthorPackageSize ?? 0) + (headlessPackageSize ?? 0)
-      : null;
-  const luthorReleaseCount = luthorRegistry?.versions ? Object.keys(luthorRegistry.versions).length : 0;
-  const headlessReleaseCount = headlessRegistry?.versions ? Object.keys(headlessRegistry.versions).length : 0;
-  const releaseCount =
-    luthorReleaseCount > 0 || headlessReleaseCount > 0 ? luthorReleaseCount + headlessReleaseCount : null;
-
-  const hasLiveData = Boolean(
-    luthorRegistry ||
-      headlessRegistry ||
-      luthorTotalDownloads ||
-      headlessTotalDownloads ||
-      luthorLastMonthDownloads ||
-      headlessLastMonthDownloads,
-  );
-
+function getBuildTimeStats() {
   return {
-    totalDownloads: formatCompact(totalDownloads),
-    lastMonthDownloads: formatCompact(lastMonthDownloads),
-    latestVersion: luthorLatestVersion,
-    headlessVersion: headlessLatestVersion,
-    luthorPackageSize: formatBytes(luthorPackageSize),
-    headlessPackageSize: formatBytes(headlessPackageSize),
-    combinedPackageSize: formatBytes(combinedPackageSize),
-    releaseCount: formatCompact(releaseCount),
-    fetchedAtIso: hasLiveData ? new Date().toISOString() : null,
+    totalDownloads: formatCompact(homepageMetrics.totalDownloads),
+    lastMonthDownloads: formatCompact(homepageMetrics.lastMonthDownloads),
+    latestVersion: String(homepageMetrics.latestVersion),
+    headlessVersion: String(homepageMetrics.headlessVersion),
+    luthorPackageSize: formatBytes(homepageMetrics.luthorPackageSize),
+    headlessPackageSize: formatBytes(homepageMetrics.headlessPackageSize),
+    combinedPackageSize: formatBytes(homepageMetrics.combinedPackageSize),
+    releaseCount: formatCompact(homepageMetrics.releaseCount),
+    fetchedAtIso: homepageMetrics.fetchedAtIso,
   };
 }
 
-export default async function HomePage() {
-  const stats = await getLiveStats();
+export default function HomePage() {
+  const stats = getBuildTimeStats();
   const luthorVersionLabel =
     stats.latestVersion === 'N/A' ? PRIMARY_PACKAGE_NAME : `${PRIMARY_PACKAGE_NAME}@${stats.latestVersion}`;
   const headlessVersionLabel =

@@ -9,6 +9,9 @@ import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/config/site';
 import { getAllDocs } from '@/features/docs/docs.service';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 type SitemapEntry = MetadataRoute.Sitemap[number];
 
 function toCanonicalUrl(path: string): string {
