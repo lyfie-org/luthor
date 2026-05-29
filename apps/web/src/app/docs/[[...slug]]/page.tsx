@@ -19,6 +19,10 @@ import { DocsSearch } from '@/features/docs/docs-search';
 import { type DocEntry, getAllDocs, getAllDocSlugs, getDocBySlug } from '@/features/docs/docs.service';
 import { isExternalWebsiteHref } from '@/utils/link';
 
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+export const revalidate = false;
+
 type Params = { slug?: string[] };
 type NavGroupId = 'start_here' | 'luthor_headless' | 'luthor' | 'integrations' | 'reference' | 'contributing' | 'other';
 
@@ -330,7 +334,7 @@ function slugifyHeading(text: string): string {
 
 export async function generateStaticParams() {
   const slugs = await getAllDocSlugs();
-  const params = slugs.map((slug) => (slug.length ? { slug } : {}));
+  const params = [{}, ...slugs.map((slug) => (slug.length ? { slug } : {}))];
   return params;
 }
 

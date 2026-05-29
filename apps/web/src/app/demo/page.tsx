@@ -8,6 +8,9 @@
 import type { Metadata } from 'next';
 import { PresetShowcaseShell } from '@/features/editor/preset-showcase-shell';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 export const metadata: Metadata = {
   title: 'Luthor Demo Playground',
   description: 'Explore every Luthor preset live, switch instantly, and evaluate the right React + Lexical editing experience before integrating.',
