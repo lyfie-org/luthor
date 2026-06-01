@@ -8,7 +8,7 @@
 import type { Metadata } from 'next';
 import { ArrowLeft, ArrowRight, BookOpenText, House, Package, RocketLaunch, SquaresFour, Stack } from '@phosphor-icons/react/dist/ssr';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { type HTMLAttributes, ReactNode, createElement, isValidElement } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -23,7 +23,7 @@ export const dynamic = 'force-static';
 export const dynamicParams = false;
 export const revalidate = false;
 
-type Params = { slug?: string[] };
+type Params = { slug: string[] };
 type NavGroupId = 'start_here' | 'luthor_headless' | 'luthor' | 'integrations' | 'reference' | 'contributing' | 'other';
 
 const NAV_GROUP_ORDER: { id: NavGroupId; label: string }[] = [
@@ -334,22 +334,13 @@ function slugifyHeading(text: string): string {
 
 export async function generateStaticParams() {
   const slugs = await getAllDocSlugs();
-  const params = [{}, ...slugs.map((slug) => (slug.length ? { slug } : {}))];
+  const params = slugs.map((slug) => ({ slug }));
   return params;
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const resolvedParams = await params;
-  const slug = resolvedParams.slug ?? [];
-  if (slug.length === 0) {
-    return {
-      title: 'Documentation',
-      description: 'Documentation for @lyfie/luthor and @lyfie/luthor-headless.',
-      alternates: {
-        canonical: '/docs/getting-started/',
-      },
-    };
-  }
+  const slug = resolvedParams.slug;
   const doc = await getDocBySlug(slug);
 
   if (!doc) {
@@ -383,8 +374,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function DocsPage({ params }: { params: Promise<Params> }) {
   const resolvedParams = await params;
-  const slug = resolvedParams.slug ?? [];
-  if (slug.length === 0) redirect('/docs/getting-started/');
+  const slug = resolvedParams.slug;
   const [doc, allDocs] = await Promise.all([getDocBySlug(slug), getAllDocs()]);
 
   if (!doc) notFound();
