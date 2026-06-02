@@ -9,6 +9,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
+  ArrowsOut,
   ArrowsOutCardinal,
   BracketsCurly,
   CheckCircle,
@@ -268,8 +269,8 @@ export function WhyLuthorFeatures() {
               </div>              
             </div>            
             <p>{feature.summary}</p>
-            <span className="why-feature-cta">
-              <span>View details</span>
+            <span className="why-feature-cta" aria-hidden="true">
+              <ArrowsOut size={13} weight="bold" />
             </span>
           </button>
         ))}

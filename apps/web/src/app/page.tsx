@@ -8,7 +8,6 @@
 import {
   BracketsCurly,
   CheckCircle,
-  DownloadSimple,
   GithubLogo,
   Package,
   RocketLaunch,
@@ -32,6 +31,7 @@ import {
 } from '@/config/site';
 import { homepageMetrics } from '@/data/homepage-metrics.generated';
 import { HomeJsonLd } from '@/features/home/home-json-ld';
+import { LiveStats } from '@/features/home/live-downloads';
 import { LocalLastSync } from '@/features/home/local-last-sync';
 import { WhyLuthorReasons } from '@/features/home/why-luthor-reasons';
 import { formatBytes, formatCompact } from '@/utils/format';
@@ -98,12 +98,9 @@ const WhyLuthorFeatures = nextDynamic(
 function getBuildTimeStats() {
   return {
     totalDownloads: formatCompact(homepageMetrics.totalDownloads),
-    lastMonthDownloads: formatCompact(homepageMetrics.lastMonthDownloads),
     latestVersion: String(homepageMetrics.latestVersion),
-    headlessVersion: String(homepageMetrics.headlessVersion),
     luthorPackageSize: formatBytes(homepageMetrics.luthorPackageSize),
     headlessPackageSize: formatBytes(homepageMetrics.headlessPackageSize),
-    combinedPackageSize: formatBytes(homepageMetrics.combinedPackageSize),
     releaseCount: formatCompact(homepageMetrics.releaseCount),
     fetchedAtIso: homepageMetrics.fetchedAtIso,
   };
@@ -111,30 +108,6 @@ function getBuildTimeStats() {
 
 export default function HomePage() {
   const stats = getBuildTimeStats();
-  const luthorVersionLabel =
-    stats.latestVersion === 'N/A' ? PRIMARY_PACKAGE_NAME : `${PRIMARY_PACKAGE_NAME}@${stats.latestVersion}`;
-  const headlessVersionLabel =
-    stats.headlessVersion === 'N/A'
-      ? HEADLESS_PACKAGE_NAME
-      : `${HEADLESS_PACKAGE_NAME}@${stats.headlessVersion}`;
-  const modernBuildHighlights = [
-    {
-      label: 'Luthor footprint',
-      detail: `${luthorVersionLabel}: ${stats.luthorPackageSize} unpacked (npm dist metadata).`,
-    },
-    {
-      label: 'Luthor-Headless footprint',
-      detail: `${headlessVersionLabel}: ${stats.headlessPackageSize} unpacked (npm dist metadata).`,
-    },
-    {
-      label: 'Combined footprint',
-      detail: `${stats.combinedPackageSize} unpacked across both published packages.`,
-    },
-    {
-      label: 'Framework compatibility',
-      detail: 'React, Next.js, Astro (via React), Vite, Remix, and similar setups.',
-    },
-  ] as const;
 
   return (
     <>
@@ -260,67 +233,27 @@ export default function HomePage() {
         <div className="container modern-shell">
           <h2 className="section-title">Built On Modern. Built For Modern.</h2>
           <p className="section-copy">
-            Current npm package telemetry plus compatibility targets for modern JavaScript applications.
+            Live npm stats. MIT licensed. Works with React, Next.js, Astro, Vite, and Remix.
           </p>
 
-          <div className="modern-highlight-grid">
-            {modernBuildHighlights.map((item) => (
-              <article key={item.label} className="modern-highlight-card">
-                <p className="metric-label">{item.label}</p>
-                <p className="metric-value modern-highlight-value">{item.detail}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      <section className="section">
-        <div className="container">
-          <div className="stats-badge-row">
-            <article className="metric metric-badge">
-              <p className="metric-label">
-                <DownloadSimple size={14} weight="duotone" aria-hidden="true" />
-                <span>Total downloads</span>
-              </p>
-              <p className="metric-value">{stats.totalDownloads}</p>
-            </article>
-            <article className="metric metric-badge">
-              <p className="metric-label">
-                <Package size={14} weight="duotone" aria-hidden="true" />
-                <span>Luthor version</span>
-              </p>
-              <p className="metric-value">{stats.latestVersion}</p>
-            </article>
-            <article className="metric metric-badge">
-              <p className="metric-label">
-                <Package size={14} weight="duotone" aria-hidden="true" />
-                <span>Luthor package size</span>
-              </p>
-              <p className="metric-value">{stats.luthorPackageSize}</p>
-            </article>
-            <article className="metric metric-badge">
-              <p className="metric-label">
-                <Package size={14} weight="duotone" aria-hidden="true" />
-                <span>Headless package size</span>
-              </p>
-              <p className="metric-value">{stats.headlessPackageSize}</p>
-            </article>
-            <article className="metric metric-badge">
-              <p className="metric-label">
-                <StackSimple size={14} weight="duotone" aria-hidden="true" />
-                <span>Published releases</span>
-              </p>
-              <p className="metric-value">{stats.releaseCount}</p>
-            </article>
-          </div>
+          <LiveStats
+            initial={{
+              totalDownloads: stats.totalDownloads,
+              latestVersion: stats.latestVersion,
+              releaseCount: stats.releaseCount,
+              luthorPackageSize: stats.luthorPackageSize,
+              headlessPackageSize: stats.headlessPackageSize,
+            }}
+          />
+
           <div className="link-row">
             <a className="btn btn-muted" href={LYFIE_NPM_URL} target="_blank" rel="noopener noreferrer">
               <Package className="btn-icon" size={16} weight="duotone" aria-hidden="true" />
-              <span>Luthor NPM package</span>
+              <span>Luthor on npm</span>
             </a>
             <a className="btn btn-muted" href={LYFIE_HEADLESS_NPM_URL} target="_blank" rel="noopener noreferrer">
               <Package className="btn-icon" size={16} weight="duotone" aria-hidden="true" />
-              <span>Luthor-Headless NPM package</span>
+              <span>Luthor Headless on npm</span>
             </a>
             <a className="btn btn-muted" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
               <GithubLogo className="btn-icon" size={16} weight="duotone" aria-hidden="true" />
@@ -341,7 +274,7 @@ export default function HomePage() {
               {CREATOR_NAME}
             </a>
             , BDFL of {MAINTAINER_ORG_NAME}.
-            | Data sources last sync: <LocalLastSync isoTimestamp={stats.fetchedAtIso} /> 
+            | Stats last synced: <LocalLastSync isoTimestamp={stats.fetchedAtIso} />
           </p>    
         </div>
       </section>
