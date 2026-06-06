@@ -9,16 +9,10 @@
 
 <div align="center">
 
-[![Project Status](https://img.shields.io/badge/status-stable%20release%20%7C%20internal%20QA-yellowgreen?style=flat-square)](https://github.com/lyfie-org/luthor)
-[![Stability](https://img.shields.io/badge/stable%20release-expected%20soon-blue?style=flat-square)](https://github.com/lyfie-org/luthor/releases)
 
 [![npm version](https://img.shields.io/npm/v/@lyfie/luthor-headless?style=flat-square)](https://www.npmjs.com/package/@lyfie/luthor-headless)
-[![npm downloads](https://img.shields.io/npm/dm/@lyfie/luthor-headless?style=flat-square)](https://www.npmjs.com/package/@lyfie/luthor-headless)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/@lyfie/luthor-headless?style=flat-square)](https://bundlephobia.com/package/@lyfie/luthor-headless)
-[![types](https://img.shields.io/npm/types/@lyfie/luthor-headless?style=flat-square)](https://www.npmjs.com/package/@lyfie/luthor-headless)
-[![license](https://img.shields.io/npm/l/@lyfie/luthor-headless?style=flat-square)](https://github.com/lyfie-org/luthor/blob/main/LICENSE)
-[![last commit](https://img.shields.io/github/last-commit/lyfie-org/luthor/main?style=flat-square)](https://github.com/lyfie-org/luthor/commits/main)
-
+[![license](https://img.shields.io/npm/l/@lyfie/luthor?style=flat-square)](https://github.com/lyfie-org/luthor/blob/main/LICENSE)
+[![Quality Gates](https://img.shields.io/github/actions/workflow/status/lyfie-org/luthor/quality-gates.yml?branch=main&label=QA&style=for-the-badge)](https://github.com/lyfie-org/luthor/actions/workflows/publish-packages.yml)
 </div>
 
 <p align="center">
