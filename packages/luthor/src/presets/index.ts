@@ -22,7 +22,9 @@ import {
   createPapyraPreset,
   PapyraEditor,
   PAPYRA_AVAILABLE_MODES,
-  PAPYRA_LOCKED_FEATURE_FLAGS,
+  papyraFeaturePolicy,
+  PAPYRA_FEATURE_DEFAULTS,
+  PAPYRA_FEATURE_ENFORCED,
 } from "./papyra";
 import type {
   ExtensiveEditorMode,
@@ -47,6 +49,8 @@ import type { HeadlessEditorPresetProps } from "./headless-editor";
 import type {
   PapyraEditorProps,
   PapyraEditorRef,
+  PapyraOutlineHeading,
+  PapyraBlockAnchor,
   PapyraPresetConfig,
 } from "./papyra";
 
@@ -83,7 +87,9 @@ export {
   createPapyraPreset,
   PapyraEditor,
   PAPYRA_AVAILABLE_MODES,
-  PAPYRA_LOCKED_FEATURE_FLAGS,
+  papyraFeaturePolicy,
+  PAPYRA_FEATURE_DEFAULTS,
+  PAPYRA_FEATURE_ENFORCED,
 };
 
 export type {
@@ -107,6 +113,8 @@ export type {
   HeadlessEditorPresetProps,
   PapyraEditorProps,
   PapyraEditorRef,
+  PapyraOutlineHeading,
+  PapyraBlockAnchor,
   PapyraPresetConfig,
 };
 

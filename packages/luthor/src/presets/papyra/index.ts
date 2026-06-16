@@ -8,10 +8,16 @@
 export {
   PapyraEditor,
   PAPYRA_AVAILABLE_MODES,
-  PAPYRA_LOCKED_FEATURE_FLAGS,
   type PapyraEditorProps,
   type PapyraEditorRef,
+  type PapyraOutlineHeading,
+  type PapyraBlockAnchor,
 } from "./PapyraEditor";
+export {
+  papyraFeaturePolicy,
+  PAPYRA_FEATURE_DEFAULTS,
+  PAPYRA_FEATURE_ENFORCED,
+} from "./features";
 export {
   papyraPreset,
   createPapyraPreset,
