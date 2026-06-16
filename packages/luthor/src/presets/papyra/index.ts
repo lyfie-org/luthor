@@ -19,6 +19,15 @@ export {
   PAPYRA_FEATURE_ENFORCED,
 } from "./features";
 export {
+  PAPYRA_THEME_TOKEN_NAMES,
+  PAPYRA_THEME_OVERRIDES,
+  PAPYRA_COLORED_VARIANT_CLASS,
+  resolvePapyraThemeOverrides,
+  createPapyraThemeOverrides,
+  type PapyraThemeTokenName,
+  type PapyraThemeOptions,
+} from "./theme";
+export {
   papyraPreset,
   createPapyraPreset,
   type PapyraPresetConfig,

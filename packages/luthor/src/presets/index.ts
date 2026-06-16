@@ -25,6 +25,11 @@ import {
   papyraFeaturePolicy,
   PAPYRA_FEATURE_DEFAULTS,
   PAPYRA_FEATURE_ENFORCED,
+  PAPYRA_THEME_TOKEN_NAMES,
+  PAPYRA_THEME_OVERRIDES,
+  PAPYRA_COLORED_VARIANT_CLASS,
+  resolvePapyraThemeOverrides,
+  createPapyraThemeOverrides,
 } from "./papyra";
 import type {
   ExtensiveEditorMode,
@@ -52,6 +57,8 @@ import type {
   PapyraOutlineHeading,
   PapyraBlockAnchor,
   PapyraPresetConfig,
+  PapyraThemeTokenName,
+  PapyraThemeOptions,
 } from "./papyra";
 
 export { createPresetEditorConfig } from "../core/preset-config";
@@ -90,6 +97,11 @@ export {
   papyraFeaturePolicy,
   PAPYRA_FEATURE_DEFAULTS,
   PAPYRA_FEATURE_ENFORCED,
+  PAPYRA_THEME_TOKEN_NAMES,
+  PAPYRA_THEME_OVERRIDES,
+  PAPYRA_COLORED_VARIANT_CLASS,
+  resolvePapyraThemeOverrides,
+  createPapyraThemeOverrides,
 };
 
 export type {
@@ -116,6 +128,8 @@ export type {
   PapyraOutlineHeading,
   PapyraBlockAnchor,
   PapyraPresetConfig,
+  PapyraThemeTokenName,
+  PapyraThemeOptions,
 };
 
 export const presetRegistry: Record<string, EditorPreset> = {

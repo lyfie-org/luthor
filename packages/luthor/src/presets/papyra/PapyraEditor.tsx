@@ -21,6 +21,10 @@ import type {
 import { ExtensiveEditor } from "../extensive";
 import { joinClassNames } from "../_shared";
 import { papyraFeaturePolicy } from "./features";
+import {
+  PAPYRA_COLORED_VARIANT_CLASS,
+  createPapyraThemeOverrides,
+} from "./theme";
 
 /**
  * Modes Papyra ever exposes: the visual canvas and a raw markdown source view.
@@ -90,6 +94,10 @@ export interface PapyraEditorRef extends ExtensiveEditorRef {
  * but routed through {@link papyraFeaturePolicy}, so the enforced restrictions
  * can never be switched back on. `onReady` is narrowed to the
  * {@link PapyraEditorRef}.
+ *
+ * Theming is token-driven: caller `editorThemeOverrides` are layered on top of
+ * the Papyra token bridge (see {@link createPapyraThemeOverrides}), and the
+ * `colored` flag light-locks tinted notes.
  */
 export type PapyraEditorProps = Omit<
   ExtensiveEditorProps,
@@ -103,6 +111,14 @@ export type PapyraEditorProps = Omit<
   | "onReady"
 > & {
   onReady?: (methods: PapyraEditorRef) => void;
+  /**
+   * Light-lock for tinted ("colored") notes. When the host paints the note
+   * paper with a per-note tint, set this so the editor stays on its light
+   * editorial palette regardless of the ambient app theme — otherwise ink can
+   * wash out on the tint. Forces `initialTheme="light"` and adds the colored
+   * variant class. Defaults to `false`.
+   */
+  colored?: boolean;
 };
 
 function focusEditableWithin(host: HTMLElement | null): void {
@@ -128,7 +144,17 @@ function focusEditableWithin(host: HTMLElement | null): void {
  */
 export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
   (
-    { className, variantClassName, placeholder, featureFlags, onReady, ...props },
+    {
+      className,
+      variantClassName,
+      placeholder,
+      featureFlags,
+      editorThemeOverrides,
+      initialTheme,
+      colored = false,
+      onReady,
+      ...props
+    },
     ref,
   ) => {
     const innerRef = useRef<ExtensiveEditorRef | null>(null);
@@ -164,12 +190,19 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     const resolvedFeatureFlags: FeatureFlagOverrides =
       papyraFeaturePolicy.resolve(featureFlags);
 
+    const { editorThemeOverrides: resolvedThemeOverrides, initialTheme: lockedTheme } =
+      createPapyraThemeOverrides({ colored, overrides: editorThemeOverrides });
+
     return (
       <div ref={hostRef} style={{ display: "contents" }}>
         <ExtensiveEditor
           {...props}
           onReady={handleInnerReady}
-          className={joinClassNames("luthor-preset-papyra", className)}
+          className={joinClassNames(
+            "luthor-preset-papyra",
+            colored ? PAPYRA_COLORED_VARIANT_CLASS : undefined,
+            className,
+          )}
           variantClassName={joinClassNames(
             "luthor-preset-papyra__variant",
             variantClassName,
@@ -182,6 +215,8 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
           markdownSourceOfTruth
           sourceMetadataMode="none"
           featureFlags={resolvedFeatureFlags}
+          editorThemeOverrides={resolvedThemeOverrides}
+          initialTheme={lockedTheme ?? initialTheme}
         />
       </div>
     );

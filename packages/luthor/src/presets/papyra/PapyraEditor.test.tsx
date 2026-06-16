@@ -120,6 +120,62 @@ describe("PapyraEditor", () => {
     expect(props.variantClassName).toContain("inner");
   });
 
+  describe("theming", () => {
+    it("bridges editorial surfaces to Papyra tokens with no hardcoded hex", () => {
+      render(<PapyraEditor showDefaultContent={false} />);
+
+      const overrides = lastProps().editorThemeOverrides ?? {};
+      // The bridge must cover the core editorial surfaces.
+      expect(overrides["--luthor-fg"]).toContain("var(--papyra-text");
+      expect(overrides["--luthor-link-color"]).toContain("var(--papyra-accent-text");
+      expect(overrides["--luthor-quote-border"]).toContain("var(--papyra-accent");
+      expect(overrides["--luthor-floating-bg"]).toContain("var(--papyra-surface");
+
+      // Invariant: zero hardcoded color in the preset's theme bridge.
+      for (const value of Object.values(overrides)) {
+        expect(value).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+      }
+    });
+
+    it("layers caller theme overrides on top of the bridge", () => {
+      render(
+        <PapyraEditor
+          showDefaultContent={false}
+          editorThemeOverrides={{ "--luthor-fg": "var(--brand-ink)" }}
+        />,
+      );
+
+      const overrides = lastProps().editorThemeOverrides ?? {};
+      // Caller override wins for the token it targets...
+      expect(overrides["--luthor-fg"]).toBe("var(--brand-ink)");
+      // ...while the rest of the bridge is preserved.
+      expect(overrides["--luthor-link-color"]).toContain("var(--papyra-accent-text");
+    });
+
+    it("passes a caller initialTheme through when not colored", () => {
+      render(<PapyraEditor showDefaultContent={false} initialTheme="dark" />);
+
+      const props = lastProps();
+      expect(props.initialTheme).toBe("dark");
+      expect(props.className).not.toContain("luthor-preset-papyra--colored");
+    });
+
+    it("light-locks colored notes", () => {
+      render(
+        <PapyraEditor
+          showDefaultContent={false}
+          colored
+          initialTheme="dark"
+        />,
+      );
+
+      const props = lastProps();
+      // colored forces the light editorial palette regardless of the request.
+      expect(props.initialTheme).toBe("light");
+      expect(props.className).toContain("luthor-preset-papyra--colored");
+    });
+  });
+
   describe("imperative ref", () => {
     const stubMethods: ExtensiveEditorRef = {
       injectJSON: vi.fn(),

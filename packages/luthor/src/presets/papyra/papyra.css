@@ -6,16 +6,72 @@
  */
 
 /*
- * Skeleton-stage structural shell for the `papyra` preset (Sprint E0.1). Colors,
- * typography, and the editorial token bridge land in Phase E1 — keep this file
- * free of hardcoded hex; reach for `var(--token, fallback)` only.
+ * Editorial typography + theming for the `papyra` preset (Sprint 1.2).
+ *
+ * Colors flow through the token bridge in `theme.ts` (passed as
+ * `editorThemeOverrides`); this file owns the surfaces Luthor has no theme
+ * token for — type families, heading ink, selection, and the colored
+ * light-lock. Every value is `var(--papyra-*, fallback)` and the preset bundles
+ * no fonts: the host loads Marcellus / Sora / Roboto Mono and the fallbacks are
+ * generic family keywords (never hex).
  */
 
 .luthor-preset-papyra {
   display: flex;
   flex-direction: column;
+  font-family: var(--papyra-font-body, "Sora", ui-sans-serif, system-ui, sans-serif);
 }
 
 .luthor-preset-papyra .luthor-editor {
   min-height: 320px;
+}
+
+.luthor-preset-papyra .luthor-content-editable {
+  font-family: var(--papyra-font-body, "Sora", ui-sans-serif, system-ui, sans-serif);
+}
+
+/* Headings — Marcellus, heading ink token (falls back to body ink). */
+.luthor-preset-papyra .luthor-heading-h1,
+.luthor-preset-papyra .luthor-heading-h2,
+.luthor-preset-papyra .luthor-heading-h3,
+.luthor-preset-papyra .luthor-heading-h4,
+.luthor-preset-papyra .luthor-heading-h5,
+.luthor-preset-papyra .luthor-heading-h6 {
+  font-family: var(--papyra-font-heading, "Marcellus", ui-serif, Georgia, serif);
+  color: var(--papyra-text-heading, var(--papyra-text, inherit));
+}
+
+/* Inline + block code — Roboto Mono. */
+.luthor-preset-papyra .luthor-text-code,
+.luthor-preset-papyra .luthor-code-block,
+.luthor-preset-papyra .luthor-content-editable code,
+.luthor-preset-papyra .luthor-content-editable pre {
+  font-family: var(--papyra-font-mono, "Roboto Mono", ui-monospace, SFMono-Regular, monospace);
+}
+
+/* Selection — accent-tinted paper. */
+.luthor-preset-papyra .luthor-content-editable ::selection {
+  background: var(--papyra-selection-bg, var(--papyra-accent-surface, var(--luthor-preset-muted)));
+}
+
+/*
+ * Colored notes (light-lock): the wrapper also hard-sets `initialTheme="light"`.
+ * Ink stays readable on the host-painted tint via a dedicated on-tint token,
+ * falling back to the standard body ink.
+ */
+.luthor-preset-papyra.luthor-preset-papyra--colored .luthor-content-editable {
+  color: var(--papyra-text-on-tint, var(--papyra-text, var(--luthor-preset-fg)));
+}
+
+/* Respect reduced-motion: drop the editor's theme/UI transitions. */
+@media (prefers-reduced-motion: reduce) {
+  .luthor-preset-papyra,
+  .luthor-preset-papyra *,
+  .luthor-preset-papyra *::before,
+  .luthor-preset-papyra *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
