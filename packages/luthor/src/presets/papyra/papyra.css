@@ -1,0 +1,21 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
+/*
+ * Skeleton-stage structural shell for the `papyra` preset (Sprint E0.1). Colors,
+ * typography, and the editorial token bridge land in Phase E1 — keep this file
+ * free of hardcoded hex; reach for `var(--token, fallback)` only.
+ */
+
+.luthor-preset-papyra {
+  display: flex;
+  flex-direction: column;
+}
+
+.luthor-preset-papyra .luthor-editor {
+  min-height: 320px;
+}

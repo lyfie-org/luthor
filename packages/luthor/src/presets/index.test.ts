@@ -16,6 +16,7 @@ describe("presetRegistry", () => {
       "html-editor",
       "legacy-rich",
       "md-editor",
+      "papyra",
     ]);
   });
 
@@ -25,5 +26,6 @@ describe("presetRegistry", () => {
     expect(presetRegistry["legacy-rich"]?.id).toBe("legacy-rich");
     expect(presetRegistry["md-editor"]?.id).toBe("md-editor");
     expect(presetRegistry["html-editor"]?.id).toBe("html-editor");
+    expect(presetRegistry.papyra?.id).toBe("papyra");
   });
 });
