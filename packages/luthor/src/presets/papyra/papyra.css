@@ -63,6 +63,54 @@
   color: var(--papyra-text-on-tint, var(--papyra-text, var(--luthor-preset-fg)));
 }
 
+/*
+ * Embeds (Sprint 1.3a) — `[[wikilink]]` and `![[file.ext]]`.
+ *
+ * The nodes live in `@lyfie/luthor-headless` and render only class hooks (no
+ * inline color); the preset skins them through the token bridge so they stay on
+ * the editorial palette. Wikilinks read as accent-tinted links; an unresolved
+ * file reference renders as a bordered chip. Every value is `var(--papyra-*,
+ * fallback)` — no hex.
+ */
+.luthor-preset-papyra .luthor-wikilink {
+  color: var(--papyra-accent-text, var(--papyra-text, inherit));
+  text-decoration: none;
+  border-bottom: 1px solid
+    var(--papyra-accent-border, var(--papyra-accent-surface, currentColor));
+  cursor: pointer;
+}
+
+.luthor-preset-papyra .luthor-wikilink[aria-disabled="true"] {
+  cursor: text;
+  opacity: 0.85;
+}
+
+.luthor-preset-papyra .luthor-file-embed--image,
+.luthor-preset-papyra .luthor-file-embed--video {
+  display: block;
+  max-width: 100%;
+  margin: 1rem 0;
+}
+
+.luthor-preset-papyra .luthor-file-embed--audio {
+  display: block;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.luthor-preset-papyra .luthor-file-embed--chip,
+.luthor-preset-papyra .luthor-file-embed--link {
+  display: inline-block;
+  padding: 0.15em 0.5em;
+  border: 1px solid
+    var(--papyra-accent-border, var(--papyra-accent-surface, currentColor));
+  border-radius: 0.4em;
+  font-family: var(--papyra-font-mono, "Roboto Mono", ui-monospace, SFMono-Regular, monospace);
+  font-size: 0.9em;
+  color: var(--papyra-accent-text, var(--papyra-text, inherit));
+  text-decoration: none;
+}
+
 /* Respect reduced-motion: drop the editor's theme/UI transitions. */
 @media (prefers-reduced-motion: reduce) {
   .luthor-preset-papyra,

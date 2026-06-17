@@ -12,7 +12,8 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { markdownToJSON } from "@lyfie/luthor-headless";
+import { EmbedResolverProvider, markdownToJSON } from "@lyfie/luthor-headless";
+import type { EmbedResolvers } from "@lyfie/luthor-headless";
 import type {
   ExtensiveEditorProps,
   ExtensiveEditorRef,
@@ -25,6 +26,12 @@ import {
   createFallbackPapyraAdapter,
   type PapyraEditorAdapter,
 } from "./adapter";
+import {
+  PAPYRA_EMBED_EXTENSIONS,
+  PAPYRA_EMBED_NODES,
+  PAPYRA_EMBED_TRANSFORMERS,
+  createPapyraEmbedResolvers,
+} from "./embeds";
 import { papyraFeaturePolicy } from "./features";
 import {
   PAPYRA_COLORED_VARIANT_CLASS,
@@ -113,6 +120,9 @@ export type PapyraEditorProps = Omit<
   | "isToolbarPinned"
   | "markdownSourceOfTruth"
   | "sourceMetadataMode"
+  | "extraExtensions"
+  | "markdownExtraNodes"
+  | "markdownExtraTransformers"
   | "onReady"
 > & {
   onReady?: (methods: PapyraEditorRef) => void;
@@ -184,7 +194,11 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
         getHTML: () => innerRef.current?.getHTML() ?? "",
         getMarkdown: () => innerRef.current?.getMarkdown() ?? "",
         setMarkdown: (markdown) => {
-          const document = markdownToJSON(markdown, { metadataMode: "none" });
+          const document = markdownToJSON(markdown, {
+            metadataMode: "none",
+            extraNodes: PAPYRA_EMBED_NODES,
+            extraTransformers: PAPYRA_EMBED_TRANSFORMERS,
+          });
           innerRef.current?.injectJSON(JSON.stringify(document));
         },
         focus: () => focusEditableWithin(hostRef.current),
@@ -223,32 +237,44 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       [adapter],
     );
 
+    // Adapt the host adapter onto the generic embed-resolver contract the
+    // headless wikilink/file-embed nodes read from context.
+    const embedResolvers = useMemo<EmbedResolvers>(
+      () => createPapyraEmbedResolvers(resolvedAdapter),
+      [resolvedAdapter],
+    );
+
     return (
       <div ref={hostRef} style={{ display: "contents" }}>
         <PapyraAdapterContext.Provider value={resolvedAdapter}>
-          <ExtensiveEditor
-            {...props}
-            onReady={handleInnerReady}
-            className={joinClassNames(
-              "luthor-preset-papyra",
-              colored ? PAPYRA_COLORED_VARIANT_CLASS : undefined,
-              className,
-            )}
-            variantClassName={joinClassNames(
-              "luthor-preset-papyra__variant",
-              variantClassName,
-            )}
-            placeholder={placeholder ?? PAPYRA_DEFAULT_PLACEHOLDER}
-            availableModes={PAPYRA_AVAILABLE_MODES}
-            isEditorViewTabsVisible={false}
-            isToolbarEnabled={false}
-            isToolbarPinned={false}
-            markdownSourceOfTruth
-            sourceMetadataMode="none"
-            featureFlags={resolvedFeatureFlags}
-            editorThemeOverrides={resolvedThemeOverrides}
-            initialTheme={lockedTheme ?? initialTheme}
-          />
+          <EmbedResolverProvider resolvers={embedResolvers}>
+            <ExtensiveEditor
+              {...props}
+              onReady={handleInnerReady}
+              extraExtensions={PAPYRA_EMBED_EXTENSIONS}
+              markdownExtraNodes={PAPYRA_EMBED_NODES}
+              markdownExtraTransformers={PAPYRA_EMBED_TRANSFORMERS}
+              className={joinClassNames(
+                "luthor-preset-papyra",
+                colored ? PAPYRA_COLORED_VARIANT_CLASS : undefined,
+                className,
+              )}
+              variantClassName={joinClassNames(
+                "luthor-preset-papyra__variant",
+                variantClassName,
+              )}
+              placeholder={placeholder ?? PAPYRA_DEFAULT_PLACEHOLDER}
+              availableModes={PAPYRA_AVAILABLE_MODES}
+              isEditorViewTabsVisible={false}
+              isToolbarEnabled={false}
+              isToolbarPinned={false}
+              markdownSourceOfTruth
+              sourceMetadataMode="none"
+              featureFlags={resolvedFeatureFlags}
+              editorThemeOverrides={resolvedThemeOverrides}
+              initialTheme={lockedTheme ?? initialTheme}
+            />
+          </EmbedResolverProvider>
         </PapyraAdapterContext.Provider>
       </div>
     );

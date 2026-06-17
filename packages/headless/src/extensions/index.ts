@@ -128,6 +128,28 @@ export {
 // Custom extensions
 export { createCustomNodeExtension } from "./custom/CustomNodeExtension";
 
+// Embed extensions (reusable wikilink / file-embed nodes + host resolver seam)
+export {
+  EmbedResolverContext,
+  EmbedResolverProvider,
+  useEmbedResolvers,
+  type EmbedResolvers,
+  WikilinkNode,
+  WikilinkExtension,
+  wikilinkExtension,
+  $createWikilinkNode,
+  $isWikilinkNode,
+  WIKILINK_MARKDOWN_TRANSFORMER,
+  type SerializedWikilinkNode,
+  FileEmbedNode,
+  FileEmbedExtension,
+  fileEmbedExtension,
+  $createFileEmbedNode,
+  $isFileEmbedNode,
+  FILE_EMBED_MARKDOWN_TRANSFORMER,
+  type SerializedFileEmbedNode,
+} from "./embeds";
+
 // Core extensions
 export {
   richTextExtension,

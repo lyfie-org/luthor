@@ -37,6 +37,12 @@ export {
   type PapyraBlockRef,
 } from "./adapter";
 export {
+  PAPYRA_EMBED_EXTENSIONS,
+  PAPYRA_EMBED_NODES,
+  PAPYRA_EMBED_TRANSFORMERS,
+  createPapyraEmbedResolvers,
+} from "./embeds";
+export {
   papyraPreset,
   createPapyraPreset,
   type PapyraPresetConfig,
