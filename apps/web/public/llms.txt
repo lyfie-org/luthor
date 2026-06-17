@@ -52,6 +52,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [luthor/presets/html-editor.md](https://www.luthor.fyi/docs/luthor/presets/html-editor/) - HTML Editor
 - [luthor/presets/legacy-rich-editor.md](https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/) - Legacy Rich Editor
 - [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/) - Markdown Editor
+- [luthor/presets/papyra-editor.md](https://www.luthor.fyi/docs/luthor/presets/papyra-editor/) - Papyra Editor
 - [luthor/props-reference.md](https://www.luthor.fyi/docs/luthor/props-reference/) - Props Reference
 - [reference/exports-map.md](https://www.luthor.fyi/docs/reference/exports-map/) - Exports Map
 - [reference/preset-selector.md](https://www.luthor.fyi/docs/reference/preset-selector/) - Preset Selector
@@ -245,6 +246,11 @@ This file helps AI agents discover and query Luthor docs quickly.
 - File: luthor/presets/md-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/md-editor/
 - Summary: title: "Markdown Editor" description: "Markdown focused preset profile built on LegacyRichEditor with markdown source of truth behavior." package: "luthor" docType: "reference" surface: "preset" keywords: "MarkDownEditor" "md editor" "markdownSourceOfTruth" props: "initialMode" "defaultEditorView" "featureFlags" export...
+
+### Papyra Editor
+- File: luthor/presets/papyra-editor.md
+- URL: https://www.luthor.fyi/docs/luthor/presets/papyra-editor/
+- Summary: Papyra Editor PapyraEditor is a markdown native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse ...
 
 ### Props Reference
 - File: luthor/props-reference.md

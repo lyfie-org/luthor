@@ -237,6 +237,13 @@ export interface CoreEditorCommands {
   setSlashCommands?: (commands: Record<string, unknown>[]) => void;
   closeSlashMenu?: () => void;
   executeSlashCommand?: (commandId: string) => boolean;
+  /**
+   * Insert plain text at the current selection, replacing any selected range.
+   * Backed by the headless slash-command extension. Used by host-injected slash
+   * commands (see `extraSlashCommands`) to write markdown-native syntax such as
+   * a `[[` wikilink trigger, a `![[media]]` embed, or a date at the caret.
+   */
+  insertText?: (text: string) => void;
 }
 
 export interface CoreEditorActiveStates {

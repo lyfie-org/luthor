@@ -195,3 +195,24 @@ Every custom embed ships a bidirectional markdown transformer, so the body that
 
 The embed nodes and transformers live in `@lyfie/luthor-headless` and are
 re-exported through `@lyfie/luthor` — the preset only composes and themes them.
+
+## Command surface
+
+The slash menu and command palette are curated down to note-taking primitives:
+headings (H1–H3), lists and checklist, quote, code block, table, horizontal
+rule, and image. The typography pickers, view tabs, and pinned toolbar are
+enforced off.
+
+On top of the curated built-ins, PapyraEditor contributes three note-specific
+slash commands through the editor's `extraSlashCommands` seam:
+
+| Command       | Inserts                                                        |
+| ------------- | ------------------------------------------------------------- |
+| `Link note`   | the `[[` trigger, which opens the wikilink typeahead          |
+| `Embed media` | a picked file → `adapter.uploadMedia` → `![[filename]]`       |
+| `Insert date` | today's date as `YYYY-MM-DD`                                  |
+
+Each writes markdown-native syntax at the caret, so the body stays the source of
+truth and round-trips unchanged. The commands are appended automatically — there
+is nothing to wire beyond supplying an `adapter` for `Embed media` to upload
+through.

@@ -6490,6 +6490,302 @@ export const docsIndex = [
   {
     "slug": [
       "luthor",
+      "presets",
+      "papyra-editor"
+    ],
+    "title": "Papyra Editor",
+    "navTitle": "Papyra Editor",
+    "description": "Markdown-native, frontmatter-agnostic, token-themed note canvas preset with Obsidian-style embeds and a host adapter seam.",
+    "content": "\n# Papyra Editor\n\n`PapyraEditor` is a markdown-native note canvas composed on top of the extensive\npreset. It is the editor the [Papyra](https://github.com/lyfie-org) note app\nships, but it is host-agnostic: every external capability (media, uploads, note\nsearch and navigation, block resolution) flows through an injected adapter, so\nany note app can reuse it by supplying different configuration.\n\n## When to use this\n\nReach for `PapyraEditor` when your body of truth is a frontmatter-free markdown\nfile and you want a polished, restricted writing surface with Obsidian-style\nembeds — `[[Note]]` wikilinks, `![[file.ext]]` media, `![[Note#^id]]`\ntransclusion, and trailing `^id` block anchors — that survives a lossless\nround-trip back to that file.\n\n## The four invariants\n\n1. **Markdown is the source of truth.** `getMarkdown()` returns exactly what\n   lands in the `.md` body (CommonMark plus the documented embed set). There is\n   no JSON or HTML \"real\" format. The preset runs `sourceMetadataMode=\"none\"`.\n2. **The body is frontmatter-free.** The host splits YAML from the body and\n   hands the editor only the body; the preset never renders, emits, or mangles\n   frontmatter.\n3. **The caret is sacred.** The editor is **uncontrolled** — it reads\n   `defaultContent` once on mount and never exposes a `value`/`onChange`\n   round-trip. Adopt a remote revision by remounting (change the React `key`) or\n   by calling `setMarkdown` imperatively, never with a live-DOM patch.\n4. **Theming is token-driven.** All color and typography flow from\n   `var(--papyra-*, fallback)` tokens. The preset bundles no fonts — the host\n   loads Marcellus / Sora / Roboto Mono.\n\n## Locked contract\n\n`PapyraEditor` hard-locks the props it owns; callers cannot reach them:\n\n- Modes are fixed to `['visual', 'markdown']` (no `json`/`html`).\n- View tabs hidden; the toolbar is floating-on-selection only (never pinned).\n- `markdownSourceOfTruth` is on and `sourceMetadataMode=\"none\"`.\n- `featureFlags` are routed through `papyraFeaturePolicy`, whose **enforced** set\n  keeps markdown-breaking features off — font/size/line-height pickers, arbitrary\n  text color and highlight, sub/superscript, the in-editor theme toggle, and\n  draggable blocks **cannot be switched back on** by a caller flag.\n\n## Preset props\n\n- `adapter`: the host seam (`PapyraEditorAdapter`). Supplies media resolution,\n  uploads, note search/navigation, and block resolution. Omit it and the preset\n  uses a graceful no-op adapter so the editor still renders and round-trips.\n- `colored`: light-locks a tinted (\"colored\") note so ink stays readable on the\n  host-painted paper, regardless of the ambient app theme.\n- `readOnly`: mounts a non-editable surface (`visual-only`, click-to-edit\n  disabled) that emits no change events — safe for revision previews and\n  time-machine scrubbing. Pair with repeated `setMarkdown` calls.\n- `variant`: `\"focus\"` widens the body to a centered, distraction-free measure;\n  `\"default\"` is the standard editorial measure.\n- `locked`: withholds the body entirely — renders a blurred placeholder and\n  **never mounts the editor**, so there is no plaintext in the DOM. The lock is\n  UX only; the server (`401`/`PathGuard`) is the security boundary.\n- `onOutlineChange`: fired (debounced) with the current document outline; drives\n  a host's live table-of-contents scrollbar. Read-only observation — the caret\n  is never touched.\n- `featureFlags`: per-feature overrides, resolved through the enforced policy.\n\n## Imperative ref\n\n`PapyraEditorRef` extends `ExtensiveEditorRef` with the markdown-first surface a\nhost drives: `setMarkdown(md)` (host-driven adopt), `focus()`, `getOutline()` /\n`scrollToHeading(key)` for the table of contents, `getBlocks()` for trailing\nblock anchors, and `getMentions()` for `@username` detection. The host calls\nthese during its own orchestration (autosave, remount, TOC) — they never fire on\nkeystrokes.\n\n## The host adapter\n\nThe adapter is the entire contract between the preset and the host. The editor\ndeclares it; the host implements it.\n\n~~~ts\ninterface PapyraEditorAdapter {\n  resolveMediaUrl(filename: string): string;                 // ![[file]] → URL\n  uploadMedia(file: File): Promise<{ filename: string }>;    // drop/paste → store\n  openNote(ref: { title?: string; id?: string }): void;      // [[Note]] → navigate\n  searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;\n  resolveBlock?(ref: { note: string; blockId: string }): Promise<string | null>;\n  onMentions?(usernames: string[]): void;\n}\n~~~\n\nThe adapter's resolvers are where the host's server-side authorization lives. The\neditor's blur/lock is UX, never the boundary.\n\n## Usage\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor';\nimport { useRef } from 'react';\n\nexport function NoteCanvas({ body }: { body: string }) {\n  const ref = useRef<PapyraEditorRef>(null);\n\n  return (\n    <PapyraEditor\n      ref={ref}\n      defaultContent={body}\n      adapter={{\n        resolveMediaUrl: (name) => `/api/media/${name}`,\n        uploadMedia: async (file) => {\n          const stored = await upload(file);\n          return { filename: stored.name };\n        },\n        openNote: ({ title }) => router.push(`/notes/${title}`),\n        searchNotes: (q) => api.searchNotes(q),\n      }}\n      onReady={(editor) => {\n        // Read the body imperatively — never a controlled value.\n        console.log(editor.getMarkdown());\n      }}\n    />\n  );\n}\n~~~\n\n`PapyraEditor` is also available as a subpath export:\n\n~~~ts\nimport { PapyraEditor } from '@lyfie/luthor/presets/papyra';\n~~~\n\n## Embeds and lossless round-trips\n\nEvery custom embed ships a bidirectional markdown transformer, so the body that\n`getMarkdown()` returns is byte-stable across repeated saves:\n\n| Markdown            | Renders as                          |\n| ------------------- | ----------------------------------- |\n| `![[diagram.png]]`  | inline image (via `resolveMediaUrl`)|\n| `[[Note]]`          | wikilink (click → `openNote`)       |\n| `[[Note\\|alias]]`   | aliased wikilink                    |\n| `![[Note#^id]]`     | read-only transclusion              |\n| `text ^id`          | trailing block anchor (non-rendering)|\n\nThe embed nodes and transformers live in `@lyfie/luthor-headless` and are\nre-exported through `@lyfie/luthor` — the preset only composes and themes them.\n",
+    "plainContent": "Papyra Editor PapyraEditor is a markdown-native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host-agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse it by supplying different configuration. When to use this Reach for PapyraEditor when your body of truth is a frontmatter-free markdown file and you want a polished, restricted writing surface with Obsidian-style embeds — [[Note]] wikilinks, ![[file.ext]] media, ![[Note ^id]] transclusion, and trailing ^id block anchors — that survives a lossless round-trip back to that file. The four invariants 1. Markdown is the source of truth. getMarkdown() returns exactly what lands in the .md body (CommonMark plus the documented embed set). There is no JSON or HTML \"real\" format. The preset runs sourceMetadataMode=\"none\" . 2. The body is frontmatter-free. The host splits YAML from the body and hands the editor only the body; the preset never renders, emits, or mangles frontmatter. 3. The caret is sacred. The editor is uncontrolled — it reads defaultContent once on mount and never exposes a value / onChange round-trip. Adopt a remote revision by remounting (change the React key ) or by calling setMarkdown imperatively, never with a live-DOM patch. 4. Theming is token-driven. All color and typography flow from var(--papyra- , fallback) tokens. The preset bundles no fonts — the host loads Marcellus / Sora / Roboto Mono. Locked contract PapyraEditor hard-locks the props it owns; callers cannot reach them: - Modes are fixed to ['visual', 'markdown'] (no json / html ). - View tabs hidden; the toolbar is floating-on-selection only (never pinned). - markdownSourceOfTruth is on and sourceMetadataMode=\"none\" . - featureFlags are routed through papyraFeaturePolicy , whose enforced set keeps markdown-breaking features off — font/size/line-height pickers, arbitrary text color and highlight, sub/superscript, the in-editor theme toggle, and draggable blocks cannot be switched back on by a caller flag. Preset props - adapter : the host seam ( PapyraEditorAdapter ). Supplies media resolution, uploads, note search/navigation, and block resolution. Omit it and the preset uses a graceful no-op adapter so the editor still renders and round-trips. - colored : light-locks a tinted (\"colored\") note so ink stays readable on the host-painted paper, regardless of the ambient app theme. - readOnly : mounts a non-editable surface ( visual-only , click-to-edit disabled) that emits no change events — safe for revision previews and time-machine scrubbing. Pair with repeated setMarkdown calls. - variant : \"focus\" widens the body to a centered, distraction-free measure; \"default\" is the standard editorial measure. - locked : withholds the body entirely — renders a blurred placeholder and never mounts the editor , so there is no plaintext in the DOM. The lock is UX only; the server ( 401 / PathGuard ) is the security boundary. - onOutlineChange : fired (debounced) with the current document outline; drives a host's live table-of-contents scrollbar. Read-only observation — the caret is never touched. - featureFlags : per-feature overrides, resolved through the enforced policy. Imperative ref PapyraEditorRef extends ExtensiveEditorRef with the markdown-first surface a host drives: setMarkdown(md) (host-driven adopt), focus() , getOutline() / scrollToHeading(key) for the table of contents, getBlocks() for trailing block anchors, and getMentions() for @username detection. The host calls these during its own orchestration (autosave, remount, TOC) — they never fire on keystrokes. The host adapter The adapter is the entire contract between the preset and the host. The editor declares it; the host implements it. ts interface PapyraEditorAdapter { resolveMediaUrl(filename: string): string; // ![[file]] → URL uploadMedia(file: File): Promise ; // drop/paste → store openNote(ref: { title?: string; id?: string }): void; // [[Note]] → navigate searchNotes(q: string): Promise ; resolveBlock?(ref: { note: string; blockId: string }): Promise ; onMentions?(usernames: string[]): void; } The adapter's resolvers are where the host's server-side authorization lives. The editor's blur/lock is UX, never the boundary. Usage tsx import '@lyfie/luthor/styles.css'; import { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor'; import { useRef } from 'react'; export function NoteCanvas({ body }: { body: string }) { const ref = useRef (null); return ( /api/media/${name} , uploadMedia: async (file) = { const stored = await upload(file); return { filename: stored.name }; }, openNote: ({ title }) = router.push( /notes/${title} ), searchNotes: (q) = api.searchNotes(q), }} onReady={(editor) = { // Read the body imperatively — never a controlled value. console.log(editor.getMarkdown()); }} / ); } PapyraEditor is also available as a subpath export: ts import { PapyraEditor } from '@lyfie/luthor/presets/papyra'; Embeds and lossless round-trips Every custom embed ships a bidirectional markdown transformer, so the body that getMarkdown() returns is byte-stable across repeated saves: Markdown Renders as ------------------- ----------------------------------- ![[diagram.png]] inline image (via resolveMediaUrl ) [[Note]] wikilink (click → openNote ) [[Note\\ alias]] aliased wikilink ![[Note ^id]] read-only transclusion text ^id trailing block anchor (non-rendering) The embed nodes and transformers live in @lyfie/luthor-headless and are re-exported through @lyfie/luthor — the preset only composes and themes them.",
+    "sections": [
+      {
+        "heading": "Overview",
+        "id": "overview",
+        "level": 1,
+        "text": "Papyra Editor PapyraEditor is a markdown-native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host-agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse it by supplying different configuration."
+      },
+      {
+        "heading": "When to use this",
+        "id": "when-to-use-this",
+        "level": 2,
+        "text": "Reach for PapyraEditor when your body of truth is a frontmatter-free markdown file and you want a polished, restricted writing surface with Obsidian-style embeds — [[Note]] wikilinks, ![[file.ext]] media, ![[Note ^id]] transclusion, and trailing ^id block anchors — that survives a lossless round-trip back to that file."
+      },
+      {
+        "heading": "The four invariants",
+        "id": "the-four-invariants",
+        "level": 2,
+        "text": "1. Markdown is the source of truth. getMarkdown() returns exactly what lands in the .md body (CommonMark plus the documented embed set). There is no JSON or HTML \"real\" format. The preset runs sourceMetadataMode=\"none\" . 2. The body is frontmatter-free. The host splits YAML from the body and hands the editor only the body; the preset never renders, emits, or mangles frontmatter. 3. The caret is sacred. The editor is uncontrolled — it reads defaultContent once on mount and never exposes a value / onChange round-trip. Adopt a remote revision by remounting (change the React key ) or by calling setMarkdown imperatively, never with a live-DOM patch. 4. Theming is token-driven. All color and typography flow from var(--papyra- , fallback) tokens. The preset bundles no fonts — the host loads Marcellus / Sora / Roboto Mono."
+      },
+      {
+        "heading": "Locked contract",
+        "id": "locked-contract",
+        "level": 2,
+        "text": "PapyraEditor hard-locks the props it owns; callers cannot reach them: - Modes are fixed to ['visual', 'markdown'] (no json / html ). - View tabs hidden; the toolbar is floating-on-selection only (never pinned). - markdownSourceOfTruth is on and sourceMetadataMode=\"none\" . - featureFlags are routed through papyraFeaturePolicy , whose enforced set keeps markdown-breaking features off — font/size/line-height pickers, arbitrary text color and highlight, sub/superscript, the in-editor theme toggle, and draggable blocks cannot be switched back on by a caller flag."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- adapter : the host seam ( PapyraEditorAdapter ). Supplies media resolution, uploads, note search/navigation, and block resolution. Omit it and the preset uses a graceful no-op adapter so the editor still renders and round-trips. - colored : light-locks a tinted (\"colored\") note so ink stays readable on the host-painted paper, regardless of the ambient app theme. - readOnly : mounts a non-editable surface ( visual-only , click-to-edit disabled) that emits no change events — safe for revision previews and time-machine scrubbing. Pair with repeated setMarkdown calls. - variant : \"focus\" widens the body to a centered, distraction-free measure; \"default\" is the standard editorial measure. - locked : withholds the body entirely — renders a blurred placeholder and never mounts the editor , so there is no plaintext in the DOM. The lock is UX only; the server ( 401 / PathGuard ) is the security boundary. - onOutlineChange : fired (debounced) with the current document outline; drives a host's live table-of-contents scrollbar. Read-only observation — the caret is never touched. - featureFlags : per-feature overrides, resolved through the enforced policy."
+      },
+      {
+        "heading": "Imperative ref",
+        "id": "imperative-ref",
+        "level": 2,
+        "text": "PapyraEditorRef extends ExtensiveEditorRef with the markdown-first surface a host drives: setMarkdown(md) (host-driven adopt), focus() , getOutline() / scrollToHeading(key) for the table of contents, getBlocks() for trailing block anchors, and getMentions() for @username detection. The host calls these during its own orchestration (autosave, remount, TOC) — they never fire on keystrokes."
+      },
+      {
+        "heading": "The host adapter",
+        "id": "the-host-adapter",
+        "level": 2,
+        "text": "The adapter is the entire contract between the preset and the host. The editor declares it; the host implements it. ts interface PapyraEditorAdapter { resolveMediaUrl(filename: string): string; // ![[file]] → URL uploadMedia(file: File): Promise ; // drop/paste → store openNote(ref: { title?: string; id?: string }): void; // [[Note]] → navigate searchNotes(q: string): Promise ; resolveBlock?(ref: { note: string; blockId: string }): Promise ; onMentions?(usernames: string[]): void; } The adapter's resolvers are where the host's server-side authorization lives. The editor's blur/lock is UX, never the boundary."
+      },
+      {
+        "heading": "Usage",
+        "id": "usage",
+        "level": 2,
+        "text": "tsx import '@lyfie/luthor/styles.css'; import { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor'; import { useRef } from 'react'; export function NoteCanvas({ body }: { body: string }) { const ref = useRef (null); return ( /api/media/${name} , uploadMedia: async (file) = { const stored = await upload(file); return { filename: stored.name }; }, openNote: ({ title }) = router.push( /notes/${title} ), searchNotes: (q) = api.searchNotes(q), }} onReady={(editor) = { // Read the body imperatively — never a controlled value. console.log(editor.getMarkdown()); }} / ); } PapyraEditor is also available as a subpath export: ts import { PapyraEditor } from '@lyfie/luthor/presets/papyra';"
+      },
+      {
+        "heading": "Embeds and lossless round-trips",
+        "id": "embeds-and-lossless-round-trips",
+        "level": 2,
+        "text": "Every custom embed ships a bidirectional markdown transformer, so the body that getMarkdown() returns is byte-stable across repeated saves: Markdown Renders as ------------------- ----------------------------------- ![[diagram.png]] inline image (via resolveMediaUrl ) [[Note]] wikilink (click → openNote ) [[Note\\ alias]] aliased wikilink ![[Note ^id]] read-only transclusion text ^id trailing block anchor (non-rendering) The embed nodes and transformers live in @lyfie/luthor-headless and are re-exported through @lyfie/luthor — the preset only composes and themes them."
+      }
+    ],
+    "headings": [
+      {
+        "level": 2,
+        "text": "When to use this",
+        "id": "when-to-use-this"
+      },
+      {
+        "level": 2,
+        "text": "The four invariants",
+        "id": "the-four-invariants"
+      },
+      {
+        "level": 2,
+        "text": "Locked contract",
+        "id": "locked-contract"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Imperative ref",
+        "id": "imperative-ref"
+      },
+      {
+        "level": 2,
+        "text": "The host adapter",
+        "id": "the-host-adapter"
+      },
+      {
+        "level": 2,
+        "text": "Usage",
+        "id": "usage"
+      },
+      {
+        "level": 2,
+        "text": "Embeds and lossless round-trips",
+        "id": "embeds-and-lossless-round-trips"
+      }
+    ],
+    "urlPath": "/docs/luthor/presets/papyra-editor/",
+    "sourcePath": "apps/web/src/content/docs/luthor/presets/papyra-editor.md",
+    "updatedAt": "2026-06-17T17:16:58.171Z",
+    "package": "luthor",
+    "docType": "reference",
+    "surface": "preset",
+    "keywords": [
+      "PapyraEditor",
+      "papyra preset",
+      "markdownSourceOfTruth",
+      "wikilink",
+      "file embed",
+      "transclusion",
+      "PapyraEditorAdapter"
+    ],
+    "props": [
+      "adapter",
+      "colored",
+      "readOnly",
+      "variant",
+      "locked",
+      "onOutlineChange",
+      "featureFlags"
+    ],
+    "exports": [
+      "PapyraEditor",
+      "papyraPreset",
+      "createPapyraPreset",
+      "PapyraEditorAdapter"
+    ],
+    "commands": [
+      "block.heading1",
+      "list.check",
+      "insert.table",
+      "insert.image"
+    ],
+    "extensions": [
+      "wikilink",
+      "file-embed",
+      "transclusion",
+      "block-anchor"
+    ],
+    "nodes": [
+      "wikilink",
+      "fileEmbed",
+      "transclusion",
+      "blockAnchor"
+    ],
+    "frameworks": [
+      "react"
+    ],
+    "lastVerifiedFrom": [
+      "packages/luthor/src/presets/papyra/PapyraEditor.tsx",
+      "packages/luthor/src/presets/papyra/adapter.ts",
+      "packages/luthor/src/presets/papyra/embeds.ts"
+    ],
+    "navGroup": "luthor",
+    "navOrder": 110,
+    "navHidden": false,
+    "searchTokens": [
+      "a",
+      "adapter",
+      "agnostic,",
+      "anchor",
+      "and",
+      "block",
+      "block-anchor",
+      "block.heading1",
+      "blockanchor",
+      "canvas",
+      "check",
+      "colored",
+      "createpapyrapreset",
+      "editor",
+      "embed",
+      "embeds",
+      "featureflags",
+      "file",
+      "file embed",
+      "file-embed",
+      "fileembed",
+      "frontmatter",
+      "heading1",
+      "host",
+      "image",
+      "insert",
+      "insert.image",
+      "insert.table",
+      "list",
+      "list.check",
+      "locked",
+      "markdown",
+      "markdown-native, frontmatter-agnostic, token-themed note canvas preset with obsidian-style embeds and a host adapter seam.",
+      "markdownsourceoftruth",
+      "native,",
+      "note",
+      "obsidian",
+      "onoutlinechange",
+      "papyra",
+      "papyra editor",
+      "papyra preset",
+      "papyraeditor",
+      "papyraeditoradapter",
+      "papyrapreset",
+      "preset",
+      "react",
+      "readonly",
+      "seam",
+      "style",
+      "table",
+      "themed",
+      "token",
+      "transclusion",
+      "variant",
+      "wikilink",
+      "with"
+    ],
+    "searchTokenBuckets": {
+      "keywords": [
+        "adapter",
+        "colored",
+        "embed",
+        "featureflags",
+        "file",
+        "file embed",
+        "locked",
+        "markdownsourceoftruth",
+        "onoutlinechange",
+        "papyra",
+        "papyra preset",
+        "papyraeditor",
+        "papyraeditoradapter",
+        "preset",
+        "readonly",
+        "transclusion",
+        "variant",
+        "wikilink"
+      ],
+      "props": [
+        "adapter",
+        "colored",
+        "featureflags",
+        "locked",
+        "onoutlinechange",
+        "readonly",
+        "variant"
+      ],
+      "exports": [
+        "createpapyrapreset",
+        "papyraeditor",
+        "papyraeditoradapter",
+        "papyrapreset"
+      ],
+      "commands": [
+        "block",
+        "block.heading1",
+        "check",
+        "heading1",
+        "image",
+        "insert",
+        "insert.image",
+        "insert.table",
+        "list",
+        "list.check",
+        "table"
+      ],
+      "extensions": [
+        "anchor",
+        "block",
+        "block-anchor",
+        "embed",
+        "file",
+        "file-embed",
+        "transclusion",
+        "wikilink"
+      ],
+      "nodes": [
+        "blockanchor",
+        "fileembed",
+        "transclusion",
+        "wikilink"
+      ],
+      "frameworks": [
+        "react"
+      ]
+    }
+  },
+  {
+    "slug": [
+      "luthor",
       "props-reference"
     ],
     "title": "Props Reference",

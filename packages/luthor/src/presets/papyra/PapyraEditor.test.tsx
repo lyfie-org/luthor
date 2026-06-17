@@ -541,4 +541,91 @@ describe("PapyraEditor", () => {
       ).resolves.toBeNull();
     });
   });
+
+  describe("custom slash commands", () => {
+    it("contributes the curated Papyra slash commands", () => {
+      render(<PapyraEditor showDefaultContent={false} />);
+
+      const extra = lastProps().extraSlashCommands ?? [];
+      expect(extra.map((command) => command.id)).toEqual([
+        "papyra.link-note",
+        "papyra.embed-media",
+        "papyra.insert-date",
+      ]);
+      for (const command of extra) {
+        expect(command.category).toBe("Insert");
+        expect(typeof command.action).toBe("function");
+      }
+    });
+
+    it("drops the [[ typeahead trigger for Link note", () => {
+      render(<PapyraEditor showDefaultContent={false} />);
+
+      const command = (lastProps().extraSlashCommands ?? []).find(
+        (entry) => entry.id === "papyra.link-note",
+      );
+      const insertText = vi.fn();
+      command?.action({ insertText });
+
+      // The wikilink typeahead opens on the inserted `[[`; the adapter drives it.
+      expect(insertText).toHaveBeenCalledWith("[[");
+    });
+
+    it("inserts today's date as YYYY-MM-DD for Insert date", () => {
+      render(<PapyraEditor showDefaultContent={false} />);
+
+      const command = (lastProps().extraSlashCommands ?? []).find(
+        (entry) => entry.id === "papyra.insert-date",
+      );
+      const insertText = vi.fn();
+      command?.action({ insertText });
+
+      expect(insertText).toHaveBeenCalledTimes(1);
+      expect(insertText.mock.calls[0]?.[0]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+
+    it("uploads through the adapter and embeds the result for Embed media", async () => {
+      const uploadMedia = vi.fn(() => Promise.resolve({ filename: "stored.png" }));
+      const adapter: PapyraEditorAdapter = {
+        resolveMediaUrl: (filename) => filename,
+        uploadMedia,
+        openNote: vi.fn(),
+        searchNotes: () => Promise.resolve([]),
+      };
+      render(<PapyraEditor showDefaultContent={false} adapter={adapter} />);
+
+      const command = (lastProps().extraSlashCommands ?? []).find(
+        (entry) => entry.id === "papyra.embed-media",
+      );
+
+      // Stub the transient file picker: as soon as it "opens", feed it a file.
+      const file = new File(["x"], "drop.png", { type: "image/png" });
+      const realCreateElement = document.createElement.bind(document);
+      const createSpy = vi
+        .spyOn(document, "createElement")
+        .mockImplementation((tagName: string) => {
+          const element = realCreateElement(tagName);
+          if (tagName === "input") {
+            (element as HTMLInputElement).click = () => {
+              Object.defineProperty(element, "files", {
+                value: [file],
+                configurable: true,
+              });
+              element.dispatchEvent(new Event("change"));
+            };
+          }
+          return element;
+        });
+
+      try {
+        const insertText = vi.fn();
+        await command?.action({ insertText });
+
+        expect(uploadMedia).toHaveBeenCalledWith(file);
+        expect(insertText).toHaveBeenCalledWith("![[stored.png]]");
+      } finally {
+        createSpy.mockRestore();
+      }
+    });
+  });
 });

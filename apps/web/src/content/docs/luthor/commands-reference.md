@@ -149,4 +149,39 @@ This is the canonical command ID reference for preset command workflows.
 - `list.numbered`
 - `palette.show`
 
+## Host-contributed slash commands
+
+The IDs above are the editor's built-in catalogue, filtered into the slash menu
+by `slashCommandVisibility`. To add commands the catalogue does not cover — for
+example "Link note" or "Insert date" — pass `extraSlashCommands` to
+`<ExtensiveEditor>`. These are appended after the built-ins (so they are **not**
+subject to `slashCommandVisibility`, which only filters the built-ins) and also
+appear in the command palette.
+
+Each command's `action` receives an `ExtensiveSlashCommandContext`. The slash
+trigger (`/query`) is removed and the caret restored before `action` runs, so
+`insertText` lands exactly where the slash was typed. The action may be async
+(e.g. to await an upload before inserting a reference).
+
+```tsx
+<ExtensiveEditor
+  extraSlashCommands={[
+    {
+      id: "app.insert-date",
+      label: "Insert date",
+      description: "Insert today's date",
+      category: "Insert",
+      keywords: ["date", "today"],
+      action: ({ insertText }) => insertText(new Date().toISOString().slice(0, 10)),
+    },
+  ]}
+/>
+```
+
+> Memoize the array so the slash menu is not re-registered on every render.
+
+The `papyra` preset uses this seam internally to contribute its note-taking
+commands — "Link note" (drops the `[[` wikilink trigger), "Embed media"
+(uploads through the adapter, inserts `![[name]]`), and "Insert date".
+
 

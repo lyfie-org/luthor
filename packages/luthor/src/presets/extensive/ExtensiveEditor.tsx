@@ -961,6 +961,7 @@ function ExtensiveEditorContent({
   paragraphLabel,
   syncHeadingOptionsWithCommands,
   slashCommandVisibility,
+  extraSlashCommands,
   shortcutConfig,
   commandPaletteShortcutOnly,
   isListStyleDropdownEnabled,
@@ -996,6 +997,7 @@ function ExtensiveEditorContent({
   paragraphLabel?: string;
   syncHeadingOptionsWithCommands: boolean;
   slashCommandVisibility?: SlashCommandVisibility;
+  extraSlashCommands?: readonly ExtensiveSlashCommand[];
   shortcutConfig?: CommandShortcutConfig;
   commandPaletteShortcutOnly: boolean;
   isListStyleDropdownEnabled: boolean;
@@ -1308,16 +1310,36 @@ function ExtensiveEditorContent({
       shortcutConfig: stableShortcutConfigRef.current,
       commandPaletteShortcutOnly,
     });
+    // Host-contributed slash commands, bound to a minimal insert API. Mapped
+    // once so the same item objects flow into both the palette and the slash
+    // menu, and back out on cleanup.
+    const slashCommandContext: ExtensiveSlashCommandContext = {
+      insertText: (text) => commandApi.insertText?.(text),
+    };
+    const extraSlashItems = (extraSlashCommands ?? []).map((command) => ({
+      id: command.id,
+      label: command.label,
+      description: command.description,
+      category: command.category ?? "Insert",
+      keywords: command.keywords,
+      action: () => {
+        void command.action(slashCommandContext);
+      },
+    }));
     if (typeof commandApi.registerCommand === "function") {
       paletteItems.forEach((cmd) => commandApi.registerCommand(cmd));
+      extraSlashItems.forEach((cmd) => commandApi.registerCommand(cmd));
     }
-    const slashItems = commandsToSlashCommandItems(commandApi, {
-      headingOptions: commandHeadingOptions,
-      paragraphLabel: commandParagraphLabel,
-      slashCommandVisibility: stableSlashCommandVisibilityRef.current,
-      isFeatureEnabled: isMenuFeatureEnabled,
-      shortcutConfig: stableShortcutConfigRef.current,
-    });
+    const slashItems = [
+      ...commandsToSlashCommandItems(commandApi, {
+        headingOptions: commandHeadingOptions,
+        paragraphLabel: commandParagraphLabel,
+        slashCommandVisibility: stableSlashCommandVisibilityRef.current,
+        isFeatureEnabled: isMenuFeatureEnabled,
+        shortcutConfig: stableShortcutConfigRef.current,
+      }),
+      ...extraSlashItems,
+    ];
     if (typeof commandApi.setSlashCommands === "function") {
       commandApi.setSlashCommands(slashItems);
     } else {
@@ -1341,6 +1363,7 @@ function ExtensiveEditorContent({
       unregisterShortcuts();
       if (typeof commandApi.unregisterCommand === "function") {
         paletteItems.forEach((cmd) => commandApi.unregisterCommand(cmd.id));
+        extraSlashItems.forEach((cmd) => commandApi.unregisterCommand(cmd.id));
       }
       if (typeof commandApi.setSlashCommands === "function") {
         commandApi.setSlashCommands([]);
@@ -1356,6 +1379,7 @@ function ExtensiveEditorContent({
     commandHeadingOptions,
     commandParagraphLabel,
     slashCommandVisibilityKey,
+    extraSlashCommands,
     shortcutConfigKey,
     isMenuFeatureEnabled,
     commandPaletteShortcutOnly,
@@ -2010,6 +2034,48 @@ function ExtensiveEditorContent({
   );
 }
 
+/**
+ * The editor surface handed to a host-injected slash command's `action`. Kept
+ * deliberately small: it exposes only the primitives a custom command needs to
+ * write into the document, so presets stay markdown-safe and never reach into
+ * Lexical directly.
+ */
+export interface ExtensiveSlashCommandContext {
+  /**
+   * Insert plain text at the caret. The slash trigger (`/query`) has already
+   * been removed and the caret restored to that position before `action` runs,
+   * so the text lands exactly where the user typed the slash.
+   */
+  insertText: (text: string) => void;
+}
+
+/**
+ * A custom slash-menu command contributed by a preset or host. These are
+ * appended after the built-in catalogue (and so are not subject to
+ * {@link ExtensiveEditorProps.slashCommandVisibility}, which only filters the
+ * built-ins) and also surface in the command palette. The host owns the curated
+ * list, which is how Papyra adds "Link note" / "Embed media" / "Insert date"
+ * without forking the editor.
+ */
+export interface ExtensiveSlashCommand {
+  /** Stable, unique id (e.g. `"papyra.link-note"`). */
+  id: string;
+  /** Menu label. */
+  label: string;
+  /** Optional one-line description shown beneath the label. */
+  description?: string;
+  /** Menu group heading. Defaults to `"Insert"`. */
+  category?: string;
+  /** Extra search terms for the menu's fuzzy filter. */
+  keywords?: string[];
+  /**
+   * Runs when the command is chosen. Receives an
+   * {@link ExtensiveSlashCommandContext} for writing into the document. May be
+   * async (e.g. to await an upload before inserting an embed reference).
+   */
+  action: (context: ExtensiveSlashCommandContext) => void | Promise<void>;
+}
+
 export interface ExtensiveEditorProps {
   className?: string;
   onReady?: (methods: ExtensiveEditorRef) => void;
@@ -2050,6 +2116,14 @@ export interface ExtensiveEditorProps {
   paragraphLabel?: string;
   syncHeadingOptionsWithCommands?: boolean;
   slashCommandVisibility?: SlashCommandVisibility;
+  /**
+   * Custom slash commands appended to the built-in catalogue. They bypass
+   * {@link slashCommandVisibility} (which only filters built-ins, never the
+   * host's own additions) and also appear in the command palette. Memoize the
+   * array so the menu is not re-registered on every render. See
+   * {@link ExtensiveSlashCommand}.
+   */
+  extraSlashCommands?: readonly ExtensiveSlashCommand[];
   shortcutConfig?: CommandShortcutConfig;
   commandPaletteShortcutOnly?: boolean;
   isListStyleDropdownEnabled?: boolean;
@@ -2154,6 +2228,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     paragraphLabel,
     syncHeadingOptionsWithCommands = true,
     slashCommandVisibility,
+    extraSlashCommands,
     shortcutConfig,
     commandPaletteShortcutOnly = false,
     isListStyleDropdownEnabled = true,
@@ -2495,6 +2570,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             paragraphLabel={paragraphLabel}
             syncHeadingOptionsWithCommands={syncHeadingOptionsWithCommands}
             slashCommandVisibility={slashCommandVisibility}
+            extraSlashCommands={extraSlashCommands}
             shortcutConfig={shortcutConfig}
             commandPaletteShortcutOnly={commandPaletteShortcutOnly}
             isListStyleDropdownEnabled={isListStyleDropdownEnabled}

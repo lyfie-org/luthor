@@ -39,6 +39,7 @@ import {
   PAPYRA_HEADING_OPTIONS,
   PAPYRA_SHORTCUT_CONFIG,
   PAPYRA_SLASH_COMMAND_VISIBILITY,
+  createPapyraSlashCommands,
 } from "./commands";
 import { papyraFeaturePolicy } from "./features";
 import {
@@ -178,6 +179,7 @@ export type PapyraEditorProps = Omit<
   | "markdownExtraTransformers"
   | "headingOptions"
   | "slashCommandVisibility"
+  | "extraSlashCommands"
   | "shortcutConfig"
   | "toolbarVisibility"
   | "onReady"
@@ -399,6 +401,14 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       [resolvedAdapter],
     );
 
+    // Papyra's curated note-taking slash commands (Link note / Embed media /
+    // Insert date), bound to the active adapter. Appended to the built-in
+    // catalogue through the extensive editor's extraSlashCommands seam.
+    const slashCommands = useMemo(
+      () => createPapyraSlashCommands(resolvedAdapter),
+      [resolvedAdapter],
+    );
+
     // Build extra extensions including the upload pipeline (adapter-dependent).
     const embedExtensions = useMemo(
       () => buildPapyraEmbedExtensions(adapter),
@@ -472,6 +482,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               toolbarVisibility={PAPYRA_TOOLBAR_VISIBILITY}
               headingOptions={PAPYRA_HEADING_OPTIONS}
               slashCommandVisibility={PAPYRA_SLASH_COMMAND_VISIBILITY}
+              extraSlashCommands={slashCommands}
               shortcutConfig={PAPYRA_SHORTCUT_CONFIG}
               markdownSourceOfTruth
               sourceMetadataMode="none"

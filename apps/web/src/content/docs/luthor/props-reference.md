@@ -198,6 +198,7 @@ Use this page for exact prop names and discovery tokens.
 - `paragraphLabel`
 - `syncHeadingOptionsWithCommands`
 - `slashCommandVisibility`
+- `extraSlashCommands`
 - `shortcutConfig`
 - `commandPaletteShortcutOnly`
 - `isListStyleDropdownEnabled`
