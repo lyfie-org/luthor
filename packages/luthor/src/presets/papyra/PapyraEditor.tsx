@@ -20,6 +20,11 @@ import type {
 } from "../extensive";
 import { ExtensiveEditor } from "../extensive";
 import { joinClassNames } from "../_shared";
+import {
+  PapyraAdapterContext,
+  createFallbackPapyraAdapter,
+  type PapyraEditorAdapter,
+} from "./adapter";
 import { papyraFeaturePolicy } from "./features";
 import {
   PAPYRA_COLORED_VARIANT_CLASS,
@@ -119,6 +124,17 @@ export type PapyraEditorProps = Omit<
    * variant class. Defaults to `false`.
    */
   colored?: boolean;
+  /**
+   * The host seam. Supplies the editor with media resolution, uploads, note
+   * search/navigation, and block resolution for the Papyra embeds
+   * (`![[media]]`, `[[Note]]`, `![[Note#^id]]`). When omitted, the preset uses a
+   * graceful no-op adapter (see {@link createFallbackPapyraAdapter}) so the
+   * editor still renders and round-trips its markdown without a host. The
+   * adapter is the only data path out of the editor, and its resolvers are where
+   * the host's server-side authorization lives — the editor's blur/lock UX is
+   * never the security boundary.
+   */
+  adapter?: PapyraEditorAdapter;
 };
 
 function focusEditableWithin(host: HTMLElement | null): void {
@@ -152,6 +168,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       editorThemeOverrides,
       initialTheme,
       colored = false,
+      adapter,
       onReady,
       ...props
     },
@@ -190,34 +207,49 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     const resolvedFeatureFlags: FeatureFlagOverrides =
       papyraFeaturePolicy.resolve(featureFlags);
 
-    const { editorThemeOverrides: resolvedThemeOverrides, initialTheme: lockedTheme } =
-      createPapyraThemeOverrides({ colored, overrides: editorThemeOverrides });
+    const {
+      editorThemeOverrides: resolvedThemeOverrides,
+      initialTheme: lockedTheme,
+    } = createPapyraThemeOverrides({
+      colored,
+      overrides: editorThemeOverrides,
+    });
+
+    // Resolve the host seam once per adapter identity. When the host injects no
+    // adapter, fall back to the graceful no-op so the embed nodes always read a
+    // usable adapter from context.
+    const resolvedAdapter = useMemo<PapyraEditorAdapter>(
+      () => adapter ?? createFallbackPapyraAdapter(),
+      [adapter],
+    );
 
     return (
       <div ref={hostRef} style={{ display: "contents" }}>
-        <ExtensiveEditor
-          {...props}
-          onReady={handleInnerReady}
-          className={joinClassNames(
-            "luthor-preset-papyra",
-            colored ? PAPYRA_COLORED_VARIANT_CLASS : undefined,
-            className,
-          )}
-          variantClassName={joinClassNames(
-            "luthor-preset-papyra__variant",
-            variantClassName,
-          )}
-          placeholder={placeholder ?? PAPYRA_DEFAULT_PLACEHOLDER}
-          availableModes={PAPYRA_AVAILABLE_MODES}
-          isEditorViewTabsVisible={false}
-          isToolbarEnabled={false}
-          isToolbarPinned={false}
-          markdownSourceOfTruth
-          sourceMetadataMode="none"
-          featureFlags={resolvedFeatureFlags}
-          editorThemeOverrides={resolvedThemeOverrides}
-          initialTheme={lockedTheme ?? initialTheme}
-        />
+        <PapyraAdapterContext.Provider value={resolvedAdapter}>
+          <ExtensiveEditor
+            {...props}
+            onReady={handleInnerReady}
+            className={joinClassNames(
+              "luthor-preset-papyra",
+              colored ? PAPYRA_COLORED_VARIANT_CLASS : undefined,
+              className,
+            )}
+            variantClassName={joinClassNames(
+              "luthor-preset-papyra__variant",
+              variantClassName,
+            )}
+            placeholder={placeholder ?? PAPYRA_DEFAULT_PLACEHOLDER}
+            availableModes={PAPYRA_AVAILABLE_MODES}
+            isEditorViewTabsVisible={false}
+            isToolbarEnabled={false}
+            isToolbarPinned={false}
+            markdownSourceOfTruth
+            sourceMetadataMode="none"
+            featureFlags={resolvedFeatureFlags}
+            editorThemeOverrides={resolvedThemeOverrides}
+            initialTheme={lockedTheme ?? initialTheme}
+          />
+        </PapyraAdapterContext.Provider>
       </div>
     );
   },

@@ -28,6 +28,15 @@ export {
   type PapyraThemeOptions,
 } from "./theme";
 export {
+  PapyraAdapterContext,
+  createFallbackPapyraAdapter,
+  usePapyraAdapter,
+  type PapyraEditorAdapter,
+  type PapyraNoteRef,
+  type PapyraNoteSearchResult,
+  type PapyraBlockRef,
+} from "./adapter";
+export {
   papyraPreset,
   createPapyraPreset,
   type PapyraPresetConfig,

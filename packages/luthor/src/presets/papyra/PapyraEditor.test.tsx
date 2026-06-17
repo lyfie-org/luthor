@@ -19,6 +19,11 @@ vi.mock("../extensive", () => ({
 }));
 
 import { PapyraEditor, type PapyraEditorRef } from "./PapyraEditor";
+import {
+  createFallbackPapyraAdapter,
+  usePapyraAdapter,
+  type PapyraEditorAdapter,
+} from "./adapter";
 
 function lastProps(): ExtensiveEditorProps {
   return extensiveEditorMock.mock.calls.at(-1)?.[0] as ExtensiveEditorProps;
@@ -127,9 +132,15 @@ describe("PapyraEditor", () => {
       const overrides = lastProps().editorThemeOverrides ?? {};
       // The bridge must cover the core editorial surfaces.
       expect(overrides["--luthor-fg"]).toContain("var(--papyra-text");
-      expect(overrides["--luthor-link-color"]).toContain("var(--papyra-accent-text");
-      expect(overrides["--luthor-quote-border"]).toContain("var(--papyra-accent");
-      expect(overrides["--luthor-floating-bg"]).toContain("var(--papyra-surface");
+      expect(overrides["--luthor-link-color"]).toContain(
+        "var(--papyra-accent-text",
+      );
+      expect(overrides["--luthor-quote-border"]).toContain(
+        "var(--papyra-accent",
+      );
+      expect(overrides["--luthor-floating-bg"]).toContain(
+        "var(--papyra-surface",
+      );
 
       // Invariant: zero hardcoded color in the preset's theme bridge.
       for (const value of Object.values(overrides)) {
@@ -149,7 +160,9 @@ describe("PapyraEditor", () => {
       // Caller override wins for the token it targets...
       expect(overrides["--luthor-fg"]).toBe("var(--brand-ink)");
       // ...while the rest of the bridge is preserved.
-      expect(overrides["--luthor-link-color"]).toContain("var(--papyra-accent-text");
+      expect(overrides["--luthor-link-color"]).toContain(
+        "var(--papyra-accent-text",
+      );
     });
 
     it("passes a caller initialTheme through when not colored", () => {
@@ -162,11 +175,7 @@ describe("PapyraEditor", () => {
 
     it("light-locks colored notes", () => {
       render(
-        <PapyraEditor
-          showDefaultContent={false}
-          colored
-          initialTheme="dark"
-        />,
+        <PapyraEditor showDefaultContent={false} colored initialTheme="dark" />,
       );
 
       const props = lastProps();
@@ -184,7 +193,9 @@ describe("PapyraEditor", () => {
       getHTML: vi.fn(() => "<h1>Title</h1>"),
     };
 
-    function renderWithReadyEditor(ref: React.RefObject<PapyraEditorRef | null>) {
+    function renderWithReadyEditor(
+      ref: React.RefObject<PapyraEditorRef | null>,
+    ) {
       extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => {
         props.onReady?.(stubMethods);
         return <div contentEditable suppressContentEditableWarning />;
@@ -244,6 +255,62 @@ describe("PapyraEditor", () => {
       expect(typeof handed.setMarkdown).toBe("function");
       expect(typeof handed.focus).toBe("function");
       expect(typeof handed.getOutline).toBe("function");
+    });
+  });
+
+  describe("host adapter", () => {
+    function AdapterProbe({
+      onResolve,
+    }: {
+      onResolve: (adapter: PapyraEditorAdapter) => void;
+    }) {
+      onResolve(usePapyraAdapter());
+      return null;
+    }
+
+    it("provides the injected adapter to embeds through context", () => {
+      const adapter: PapyraEditorAdapter = {
+        resolveMediaUrl: vi.fn((filename) => `/media/${filename}`),
+        uploadMedia: vi.fn(() => Promise.resolve({ filename: "stored.png" })),
+        openNote: vi.fn(),
+        searchNotes: vi.fn(() => Promise.resolve([])),
+      };
+      const resolved = vi.fn();
+      extensiveEditorMock.mockImplementation(() => (
+        <AdapterProbe onResolve={resolved} />
+      ));
+
+      render(<PapyraEditor showDefaultContent={false} adapter={adapter} />);
+
+      expect(resolved).toHaveBeenCalledWith(adapter);
+    });
+
+    it("falls back to a graceful no-op adapter when the host injects none", () => {
+      const resolved = vi.fn();
+      extensiveEditorMock.mockImplementation(() => (
+        <AdapterProbe onResolve={resolved} />
+      ));
+
+      render(<PapyraEditor showDefaultContent={false} />);
+
+      const adapter = resolved.mock.calls.at(-1)?.[0] as PapyraEditorAdapter;
+      // The fallback echoes the filename and never throws, so embeds degrade to
+      // plain references instead of breaking the markdown body.
+      expect(adapter.resolveMediaUrl("photo.png")).toBe("photo.png");
+      expect(adapter.openNote({ title: "Note" })).toBeUndefined();
+    });
+
+    it("exposes a fallback adapter that degrades every capability gracefully", async () => {
+      const fallback = createFallbackPapyraAdapter();
+
+      expect(fallback.resolveMediaUrl("clip.mp4")).toBe("clip.mp4");
+      await expect(
+        fallback.uploadMedia(new File(["x"], "drop.png")),
+      ).resolves.toEqual({ filename: "drop.png" });
+      await expect(fallback.searchNotes("anything")).resolves.toEqual([]);
+      await expect(
+        fallback.resolveBlock?.({ note: "Note", blockId: "abc" }),
+      ).resolves.toBeNull();
     });
   });
 });
