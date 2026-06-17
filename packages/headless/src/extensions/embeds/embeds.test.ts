@@ -165,3 +165,86 @@ describe("papyra embed transformers", () => {
     expect(roundTrip(once)).toBe(once);
   });
 });
+
+/*
+ * Property / fuzz hardening (Sprint 1.6).
+ *
+ * The single-case tests above pin specific shapes; these generate many random
+ * bodies that mix every embed with ordinary markdown and assert the two release
+ * invariants the preset stakes its `.md` safety on:
+ *
+ *   1. Idempotency — `roundTrip(roundTrip(x)) === roundTrip(x)`. The first pass
+ *      may normalise spacing; every pass after it must be byte-stable, so an
+ *      autosave loop can never rewrite the user's body.
+ *   2. No frontmatter envelope — with `metadataMode: "none"` the bridge must
+ *      never emit a leading `---\n…\n---` block, regardless of body content.
+ *
+ * The generator is seeded (deterministic), so a failure reproduces from the
+ * printed seed rather than flaking in CI.
+ */
+describe("papyra embed transformers — property/fuzz round-trip", () => {
+  /** Deterministic PRNG (mulberry32) so failures reproduce from the seed. */
+  function createRandom(seed: number): () => number {
+    let state = seed >>> 0;
+    return () => {
+      state = (state + 0x6d2b79f5) | 0;
+      let t = Math.imul(state ^ (state >>> 15), 1 | state);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  const NOTES = ["Project Plan", "Daily Log", "Meeting Notes", "Inbox", "README"];
+  const ALIASES = ["the plan", "today", "notes", "here"];
+  const FILES = ["diagram.png", "clip.mp4", "audio.mp3", "notes.pdf", "photo.jpeg"];
+  const IDS = ["abc123", "ref-42", "block_1", "summary", "id99"];
+  const WORDS = ["alpha", "beta", "gamma", "delta", "note", "draft", "idea"];
+
+  /** Block generators — each returns a body fragment that round-trips. */
+  const BLOCKS: Array<(pick: <T>(items: T[]) => T) => string> = [
+    (pick) => `![[${pick(FILES)}]]`,
+    (pick) => `[[${pick(NOTES)}]]`,
+    (pick) => `[[${pick(NOTES)}|${pick(ALIASES)}]]`,
+    (pick) => `![[${pick(NOTES)}#^${pick(IDS)}]]`,
+    (pick) => `${pick(WORDS)} ${pick(WORDS)} ^${pick(IDS)}`,
+    (pick) => `# ${pick(WORDS)} ${pick(WORDS)}`,
+    (pick) => `## ${pick(WORDS)}`,
+    (pick) => `${pick(WORDS)} ${pick(WORDS)} ${pick(WORDS)}.`,
+    (pick) => `See [[${pick(NOTES)}]] and [[${pick(NOTES)}|${pick(ALIASES)}]].`,
+    (pick) => `> ${pick(WORDS)} ${pick(WORDS)}`,
+  ];
+
+  it("is idempotent and frontmatter-free across 200 random bodies", () => {
+    for (let seed = 1; seed <= 200; seed += 1) {
+      const random = createRandom(seed);
+      const pick = <T>(items: T[]): T =>
+        items[Math.floor(random() * items.length)] as T;
+
+      const blockCount = 1 + Math.floor(random() * 6);
+      const body = Array.from({ length: blockCount }, () =>
+        pick(BLOCKS)(pick),
+      ).join("\n\n");
+
+      const once = roundTrip(body);
+
+      // Stable from the first normalised pass onward — autosave never churns.
+      expect(roundTrip(once), `idempotency failed for seed ${seed}: ${body}`).toBe(
+        once,
+      );
+
+      // Never an emitted frontmatter envelope (metadataMode "none").
+      expect(
+        once.startsWith("---"),
+        `frontmatter leaked for seed ${seed}: ${once}`,
+      ).toBe(false);
+    }
+  });
+
+  it("never emits a frontmatter envelope even when the body opens with a rule", () => {
+    // A leading thematic break is legitimate body content, not frontmatter; the
+    // bridge must keep it as-is and never wrap the body in a YAML envelope.
+    const once = roundTrip("Heading\n\n[[Note]] body ^anchor1");
+    expect(once.startsWith("---")).toBe(false);
+    expect(once).not.toMatch(/^---\n[\s\S]*\n---/);
+  });
+});
