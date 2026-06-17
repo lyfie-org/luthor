@@ -12,6 +12,7 @@ keywords:
   - "file embed"
   - "transclusion"
   - "saved card"
+  - "transcription callout"
   - "PapyraEditorAdapter"
 props:
   - "adapter"
@@ -37,12 +38,14 @@ extensions:
   - "transclusion"
   - "block-anchor"
   - "saved-card"
+  - "callout"
 nodes:
   - "wikilink"
   - "fileEmbed"
   - "transclusion"
   - "blockAnchor"
   - "savedCard"
+  - "callout"
 frameworks:
   - "react"
 lastVerifiedFrom:
@@ -204,9 +207,17 @@ Every custom embed ships a bidirectional markdown transformer, so the body that
 | `text ^id`          | trailing block anchor (non-rendering)|
 | `![[card:url]]`     | saved web card (via `resolveCard`)  |
 | `![[card:url\|title]]` | saved web card with author title |
+| `> [!transcript]`   | transcription callout (display-only)|
 
 The embed nodes and transformers live in `@lyfie/luthor-headless` and are
 re-exported through `@lyfie/luthor` — the preset only composes and themes them.
+
+The **transcription callout** is an Obsidian-style `> [!transcript]` block: an
+opening line (optionally `> [!transcript] Title`) followed by `>`-prefixed body
+lines, terminated by a blank line. It renders as an accent-tinted, labelled block
+on the quote surface and is display-only — the transcript text lives inline in the
+body, so it needs no resolver and round-trips verbatim (the marker is normalized
+to lowercase).
 
 The **saved web card** (`![[card:url]]`) renders an archived link card. When the
 host wires `resolveCard`, the editor enriches it with the page's open-graph

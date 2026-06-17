@@ -3143,6 +3143,7 @@ export const docsApiIndex = [
     "searchTokenBuckets": {
       "keywords": [
         "adapter",
+        "callout",
         "card",
         "colored",
         "embed",
@@ -3161,6 +3162,8 @@ export const docsApiIndex = [
         "saved",
         "saved card",
         "transclusion",
+        "transcription",
+        "transcription callout",
         "variant",
         "wikilink"
       ],
@@ -3196,6 +3199,7 @@ export const docsApiIndex = [
         "anchor",
         "block",
         "block-anchor",
+        "callout",
         "card",
         "embed",
         "file",
@@ -3207,6 +3211,7 @@ export const docsApiIndex = [
       ],
       "nodes": [
         "blockanchor",
+        "callout",
         "fileembed",
         "savedcard",
         "transclusion",
@@ -3226,6 +3231,7 @@ export const docsApiIndex = [
       "block-anchor",
       "block.heading1",
       "blockanchor",
+      "callout",
       "canvas",
       "card",
       "check",
@@ -3275,6 +3281,8 @@ export const docsApiIndex = [
       "themed",
       "token",
       "transclusion",
+      "transcription",
+      "transcription callout",
       "variant",
       "wikilink",
       "with"

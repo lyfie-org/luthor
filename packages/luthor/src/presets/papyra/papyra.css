@@ -186,6 +186,44 @@
 }
 
 /*
+ * Transcription callout (Sprint 1.5) — `> [!transcript]`.
+ *
+ * The node lives in `@lyfie/luthor-headless` and renders only class hooks (no
+ * inline color); the preset skins it on the same accent-tinted surface as the
+ * quote (`--papyra-accent-surface` paper, `--papyra-accent` rule), with a
+ * Marcellus label. The body is display-only transcript text. Every value is
+ * `var(--papyra-*, fallback)` — no hex.
+ */
+.luthor-preset-papyra .luthor-callout {
+  display: block;
+  margin: 1rem 0;
+  padding: 0.75rem 0.9rem;
+  border-inline-start: 3px solid
+    var(--papyra-accent, var(--luthor-preset-accent));
+  border-radius: 0.4em;
+  background: var(--papyra-accent-surface, var(--papyra-surface-muted, transparent));
+  color: var(--papyra-text, inherit);
+}
+
+.luthor-preset-papyra .luthor-callout__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--papyra-font-heading, "Marcellus", ui-serif, Georgia, serif);
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--papyra-accent-text, var(--papyra-text, inherit));
+}
+
+.luthor-preset-papyra .luthor-callout__line {
+  margin: 0;
+}
+
+.luthor-preset-papyra .luthor-callout__line--blank {
+  height: 0.6em;
+}
+
+/*
  * Render-state variants (Sprint 1.5).
  *
  * `focus` — a centered, distraction-free measure. The only chrome Papyra keeps

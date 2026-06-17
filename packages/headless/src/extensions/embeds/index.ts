@@ -58,6 +58,15 @@ export {
   type SerializedSavedCardNode,
 } from "./SavedCardNode";
 export {
+  CalloutNode,
+  CalloutExtension,
+  calloutExtension,
+  $createCalloutNode,
+  $isCalloutNode,
+  CALLOUT_MARKDOWN_TRANSFORMER,
+  type SerializedCalloutNode,
+} from "./CalloutNode";
+export {
   WikilinkTypeaheadExtension,
   wikilinkTypeaheadExtension,
   type WikilinkTypeaheadMenuState,

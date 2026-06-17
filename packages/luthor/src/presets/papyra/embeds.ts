@@ -21,17 +21,20 @@
 
 import {
   blockAnchorExtension,
+  calloutExtension,
   fileEmbedExtension,
   savedCardExtension,
   transclusionExtension,
   wikilinkExtension,
   wikilinkTypeaheadExtension,
   BlockAnchorNode,
+  CalloutNode,
   FileEmbedNode,
   SavedCardNode,
   TransclusionNode,
   WikilinkNode,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
+  CALLOUT_MARKDOWN_TRANSFORMER,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
   SAVED_CARD_MARKDOWN_TRANSFORMER,
   TRANSCLUSION_MARKDOWN_TRANSFORMER,
@@ -52,6 +55,7 @@ export const PAPYRA_EMBED_EXTENSIONS: NonNullable<
 > = [
   fileEmbedExtension,
   savedCardExtension,
+  calloutExtension,
   wikilinkExtension,
   transclusionExtension,
   blockAnchorExtension,
@@ -83,7 +87,14 @@ export function buildPapyraEmbedExtensions(
  */
 export const PAPYRA_EMBED_NODES: NonNullable<
   ExtensiveEditorProps["markdownExtraNodes"]
-> = [FileEmbedNode, SavedCardNode, WikilinkNode, TransclusionNode, BlockAnchorNode];
+> = [
+  FileEmbedNode,
+  SavedCardNode,
+  CalloutNode,
+  WikilinkNode,
+  TransclusionNode,
+  BlockAnchorNode,
+];
 
 /**
  * Lossless bidirectional transformers giving Papyra's embeds a byte-stable
@@ -97,6 +108,10 @@ export const PAPYRA_EMBED_NODES: NonNullable<
  * 4. **Block anchor** (`^uuid`) — trailing inline marker.
  * 5. **Wikilink** (`[[Note]]`) — inline link.
  *
+ * The **callout** (`> [!transcript]`) is a multiline-element transformer with a
+ * distinct opening pattern, so it is independent of the ordering above; it is
+ * tried ahead of the built-in quote on import and claims the whole block.
+ *
  * Passed to the extensive editor's `markdownExtraTransformers` seam (prepended
  * ahead of the built-in set).
  */
@@ -104,6 +119,7 @@ export const PAPYRA_EMBED_TRANSFORMERS: NonNullable<
   ExtensiveEditorProps["markdownExtraTransformers"]
 > = [
   SAVED_CARD_MARKDOWN_TRANSFORMER,
+  CALLOUT_MARKDOWN_TRANSFORMER,
   TRANSCLUSION_MARKDOWN_TRANSFORMER,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,

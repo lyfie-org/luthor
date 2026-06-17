@@ -10,6 +10,8 @@ import { jsonToMarkdown, markdownToJSON } from "../../core/markdown";
 import {
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
   BlockAnchorNode,
+  CALLOUT_MARKDOWN_TRANSFORMER,
+  CalloutNode,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
   FileEmbedNode,
   SAVED_CARD_MARKDOWN_TRANSFORMER,
@@ -25,12 +27,14 @@ const BRIDGE_OPTIONS = {
   extraNodes: [
     FileEmbedNode,
     SavedCardNode,
+    CalloutNode,
     WikilinkNode,
     TransclusionNode,
     BlockAnchorNode,
   ],
   extraTransformers: [
     SAVED_CARD_MARKDOWN_TRANSFORMER,
+    CALLOUT_MARKDOWN_TRANSFORMER,
     TRANSCLUSION_MARKDOWN_TRANSFORMER,
     FILE_EMBED_MARKDOWN_TRANSFORMER,
     BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
@@ -175,6 +179,68 @@ describe("papyra embed transformers", () => {
     expect(roundTrip(once)).toBe(once);
   });
 
+  // ── Transcription callouts ──────────────────────────────────────────
+
+  it("round-trips a transcription callout losslessly", () => {
+    const source = "> [!transcript]\n> First line.\n> Second line.";
+    expect(roundTrip(source)).toBe(source);
+  });
+
+  it("round-trips a callout with a title losslessly", () => {
+    const source = "> [!transcript] Interview\n> Question one.";
+    expect(roundTrip(source)).toBe(source);
+  });
+
+  it("round-trips a callout with a blank body line", () => {
+    const source = "> [!transcript]\n> Para one.\n>\n> Para two.";
+    expect(roundTrip(source)).toBe(source);
+  });
+
+  it("round-trips a header-only callout", () => {
+    expect(roundTrip("> [!transcript]")).toBe("> [!transcript]");
+  });
+
+  it("parses a callout into a callout node, not a quote", () => {
+    const document = markdownToJSON(
+      "> [!transcript]\n> hello",
+      BRIDGE_OPTIONS,
+    );
+    const serialized = JSON.stringify(document);
+    expect(serialized).toContain('"type":"callout"');
+    expect(serialized).not.toContain('"type":"quote"');
+  });
+
+  it("persists the header tail and body on the serialized callout node", () => {
+    const document = markdownToJSON(
+      "> [!transcript] Title\n> line one",
+      BRIDGE_OPTIONS,
+    );
+    const serialized = JSON.stringify(document);
+    expect(serialized).toContain('"headerTail":" Title"');
+    expect(serialized).toContain('"line one"');
+  });
+
+  it("normalizes the callout marker case but stays idempotent after", () => {
+    // The marker is normalised to lowercase on the first pass (matching the
+    // checklist/alert case convention); every pass after it is byte-stable.
+    const once = roundTrip("> [!TRANSCRIPT]\n> body");
+    expect(once).toBe("> [!transcript]\n> body");
+    expect(roundTrip(once)).toBe(once);
+  });
+
+  it("leaves an ordinary quote as a quote", () => {
+    const document = markdownToJSON("> just a quote", BRIDGE_OPTIONS);
+    const serialized = JSON.stringify(document);
+    expect(serialized).toContain('"type":"quote"');
+    expect(serialized).not.toContain('"type":"callout"');
+  });
+
+  it("is idempotent for callout-only bodies", () => {
+    const source = "> [!transcript] Notes\n> alpha\n>\n> beta";
+    const once = roundTrip(source);
+    expect(roundTrip(once)).toBe(once);
+  });
+
   // ── Disambiguation ──────────────────────────────────────────────────
 
   it("does not mistake a file embed for a wikilink", () => {
@@ -276,6 +342,9 @@ describe("papyra embed transformers — property/fuzz round-trip", () => {
     (pick) => `${pick(WORDS)} ${pick(WORDS)} ${pick(WORDS)}.`,
     (pick) => `See [[${pick(NOTES)}]] and [[${pick(NOTES)}|${pick(ALIASES)}]].`,
     (pick) => `> ${pick(WORDS)} ${pick(WORDS)}`,
+    (pick) =>
+      `> [!transcript] ${pick(WORDS)}\n> ${pick(WORDS)} ${pick(WORDS)}\n> ${pick(WORDS)}`,
+    (pick) => `> [!transcript]\n> ${pick(WORDS)} ${pick(WORDS)}`,
   ];
 
   it("is idempotent and frontmatter-free across 200 random bodies", () => {
