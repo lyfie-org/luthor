@@ -25,6 +25,24 @@
 import { createContext, useContext, type ReactNode } from "react";
 
 /**
+ * Open-graph-style metadata for a saved web card (`![[card:url]]`). Every field
+ * is optional: a host returns whatever it has archived, and the card degrades to
+ * its bare URL when a field (or the whole record) is missing.
+ */
+export interface SavedCardMetadata {
+  /** The page title; falls back to the author-supplied title, then the URL. */
+  title?: string;
+  /** A short page summary, rendered under the title when present. */
+  description?: string;
+  /** A preview/hero image URL, rendered as the card thumbnail when present. */
+  image?: string;
+  /** A site favicon URL, rendered beside the source line when present. */
+  favicon?: string;
+  /** The human site name (e.g. "Wikipedia"), shown on the source line. */
+  siteName?: string;
+}
+
+/**
  * Callbacks an embed node uses to reach host services. Every member is optional
  * so the nodes degrade gracefully when a host wires only part of the surface (or
  * none of it). A preset adapts its own richer adapter onto this small contract.
@@ -49,6 +67,12 @@ export interface EmbedResolvers {
    * When omitted, transclusion embeds render an unresolved chip.
    */
   resolveBlock?: (note: string, blockId: string) => Promise<string | null>;
+  /**
+   * Resolve a saved web card (`![[card:url]]`) to its archived metadata, or
+   * `null` when the host has none. When omitted, the card renders as a bare link
+   * to the URL — still useful, and the markdown round-trips either way.
+   */
+  resolveCard?: (url: string) => Promise<SavedCardMetadata | null>;
 }
 
 const EMPTY_RESOLVERS: EmbedResolvers = {};

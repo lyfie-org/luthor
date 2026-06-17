@@ -53,6 +53,24 @@ export interface PapyraBlockRef {
 }
 
 /**
+ * Archived metadata for a saved web card (`![[card:url]]`). The host returns
+ * whatever it captured when it archived the page; every field is optional and
+ * the card degrades to a bare link when a field (or the whole record) is absent.
+ */
+export interface PapyraSavedCard {
+  /** The page title. */
+  title?: string;
+  /** A short page summary. */
+  description?: string;
+  /** A preview/hero image URL. */
+  image?: string;
+  /** A site favicon URL. */
+  favicon?: string;
+  /** The human site name (e.g. "Wikipedia"). */
+  siteName?: string;
+}
+
+/**
  * The entire contract between the `papyra` preset and its host.
  *
  * Luthor declares this interface; the host implements it. Keeping the surface
@@ -92,6 +110,12 @@ export interface PapyraEditorAdapter {
    * unresolved chip.
    */
   resolveBlock?(ref: PapyraBlockRef): Promise<string | null>;
+  /**
+   * Resolve a saved web card (`![[card:url]]`) to its archived metadata, or
+   * `null` when the host has no record. Optional: hosts without a web archiver
+   * omit it and the card renders as a bare link to the URL.
+   */
+  resolveCard?(url: string): Promise<PapyraSavedCard | null>;
   /**
    * Report `@username` mentions detected in the body, so the host can route an
    * inbox ping. Optional. Called by the host's save orchestration, never on

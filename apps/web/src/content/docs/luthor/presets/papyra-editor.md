@@ -11,6 +11,7 @@ keywords:
   - "wikilink"
   - "file embed"
   - "transclusion"
+  - "saved card"
   - "PapyraEditorAdapter"
 props:
   - "adapter"
@@ -35,11 +36,13 @@ extensions:
   - "file-embed"
   - "transclusion"
   - "block-anchor"
+  - "saved-card"
 nodes:
   - "wikilink"
   - "fileEmbed"
   - "transclusion"
   - "blockAnchor"
+  - "savedCard"
 frameworks:
   - "react"
 lastVerifiedFrom:
@@ -135,6 +138,13 @@ interface PapyraEditorAdapter {
   openNote(ref: { title?: string; id?: string }): void;      // [[Note]] → navigate
   searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;
   resolveBlock?(ref: { note: string; blockId: string }): Promise<string | null>;
+  resolveCard?(url: string): Promise<{
+    title?: string;
+    description?: string;
+    image?: string;
+    favicon?: string;
+    siteName?: string;
+  } | null>;                                                 // ![[card:url]] → metadata
   onMentions?(usernames: string[]): void;
 }
 ~~~
@@ -192,9 +202,18 @@ Every custom embed ships a bidirectional markdown transformer, so the body that
 | `[[Note\|alias]]`   | aliased wikilink                    |
 | `![[Note#^id]]`     | read-only transclusion              |
 | `text ^id`          | trailing block anchor (non-rendering)|
+| `![[card:url]]`     | saved web card (via `resolveCard`)  |
+| `![[card:url\|title]]` | saved web card with author title |
 
 The embed nodes and transformers live in `@lyfie/luthor-headless` and are
 re-exported through `@lyfie/luthor` — the preset only composes and themes them.
+
+The **saved web card** (`![[card:url]]`) renders an archived link card. When the
+host wires `resolveCard`, the editor enriches it with the page's open-graph
+metadata (title, description, preview image, favicon, site name); without a
+resolver the card degrades to a titled link to the URL. As with every embed, only
+the verbatim `url` (and optional `|title`) is serialized, so the metadata is
+render-only and the markdown round-trips unchanged.
 
 ## Command surface
 

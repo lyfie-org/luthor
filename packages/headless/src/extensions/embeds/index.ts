@@ -10,6 +10,7 @@ export {
   EmbedResolverProvider,
   useEmbedResolvers,
   type EmbedResolvers,
+  type SavedCardMetadata,
 } from "./EmbedResolverContext";
 export {
   WikilinkNode,
@@ -47,6 +48,15 @@ export {
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
   type SerializedBlockAnchorNode,
 } from "./BlockAnchorNode";
+export {
+  SavedCardNode,
+  SavedCardExtension,
+  savedCardExtension,
+  $createSavedCardNode,
+  $isSavedCardNode,
+  SAVED_CARD_MARKDOWN_TRANSFORMER,
+  type SerializedSavedCardNode,
+} from "./SavedCardNode";
 export {
   WikilinkTypeaheadExtension,
   wikilinkTypeaheadExtension,

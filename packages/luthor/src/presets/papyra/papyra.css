@@ -112,6 +112,80 @@
 }
 
 /*
+ * Saved web card (Sprint 1.5) — `![[card:url]]`.
+ *
+ * The node lives in `@lyfie/luthor-headless` and renders only class hooks (no
+ * inline color); the preset skins it through the token bridge. The whole card is
+ * an anchor to the original URL; archived metadata (image / description /
+ * favicon) is optional, so the layout collapses gracefully to a titled link.
+ * Every value is `var(--papyra-*, fallback)` — no hex.
+ */
+.luthor-preset-papyra .luthor-saved-card {
+  display: flex;
+  gap: 0.85rem;
+  margin: 1rem 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid
+    var(--papyra-accent-border, var(--papyra-accent-surface, currentColor));
+  border-radius: 0.6em;
+  background: var(--papyra-surface-muted, transparent);
+  color: inherit;
+  text-decoration: none;
+  align-items: center;
+}
+
+.luthor-preset-papyra .luthor-saved-card--loading {
+  opacity: 0.7;
+}
+
+.luthor-preset-papyra .luthor-saved-card__image {
+  flex: 0 0 auto;
+  width: 5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: 0.4em;
+}
+
+.luthor-preset-papyra .luthor-saved-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.luthor-preset-papyra .luthor-saved-card__title {
+  font-family: var(--papyra-font-heading, "Marcellus", ui-serif, Georgia, serif);
+  color: var(--papyra-text-heading, var(--papyra-text, inherit));
+  font-weight: 600;
+}
+
+.luthor-preset-papyra .luthor-saved-card__description {
+  color: var(--papyra-text-muted, var(--papyra-text, inherit));
+  font-size: 0.9em;
+}
+
+.luthor-preset-papyra .luthor-saved-card__source {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  font-family: var(--papyra-font-mono, "Roboto Mono", ui-monospace, SFMono-Regular, monospace);
+  font-size: 0.8em;
+  color: var(--papyra-accent-text, var(--papyra-text, inherit));
+}
+
+.luthor-preset-papyra .luthor-saved-card__favicon {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+}
+
+.luthor-preset-papyra .luthor-saved-card__source-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
  * Render-state variants (Sprint 1.5).
  *
  * `focus` — a centered, distraction-free measure. The only chrome Papyra keeps

@@ -22,15 +22,18 @@
 import {
   blockAnchorExtension,
   fileEmbedExtension,
+  savedCardExtension,
   transclusionExtension,
   wikilinkExtension,
   wikilinkTypeaheadExtension,
   BlockAnchorNode,
   FileEmbedNode,
+  SavedCardNode,
   TransclusionNode,
   WikilinkNode,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
+  SAVED_CARD_MARKDOWN_TRANSFORMER,
   TRANSCLUSION_MARKDOWN_TRANSFORMER,
   WIKILINK_MARKDOWN_TRANSFORMER,
   FileDropUploadExtension,
@@ -48,6 +51,7 @@ export const PAPYRA_EMBED_EXTENSIONS: NonNullable<
   ExtensiveEditorProps["extraExtensions"]
 > = [
   fileEmbedExtension,
+  savedCardExtension,
   wikilinkExtension,
   transclusionExtension,
   blockAnchorExtension,
@@ -79,17 +83,19 @@ export function buildPapyraEmbedExtensions(
  */
 export const PAPYRA_EMBED_NODES: NonNullable<
   ExtensiveEditorProps["markdownExtraNodes"]
-> = [FileEmbedNode, WikilinkNode, TransclusionNode, BlockAnchorNode];
+> = [FileEmbedNode, SavedCardNode, WikilinkNode, TransclusionNode, BlockAnchorNode];
 
 /**
  * Lossless bidirectional transformers giving Papyra's embeds a byte-stable
- * markdown round-trip. Ordering matters:
+ * markdown round-trip. Ordering matters — the more specific `![[…]]` variants
+ * must match before the general file-embed pattern:
  *
- * 1. **Transclusion** (`![[Note#^id]]`) before file embed — the more specific
- *    `#^` pattern must match before the general `![[…]]`.
- * 2. **File embed** (`![[file.ext]]`) — block-level media.
- * 3. **Block anchor** (`^uuid`) — trailing inline marker.
- * 4. **Wikilink** (`[[Note]]`) — inline link.
+ * 1. **Saved card** (`![[card:url]]`) — the `card:` prefix must be claimed before
+ *    the general `![[…]]` file embed swallows it as a filename.
+ * 2. **Transclusion** (`![[Note#^id]]`) — the `#^` pattern, also before file embed.
+ * 3. **File embed** (`![[file.ext]]`) — block-level media.
+ * 4. **Block anchor** (`^uuid`) — trailing inline marker.
+ * 5. **Wikilink** (`[[Note]]`) — inline link.
  *
  * Passed to the extensive editor's `markdownExtraTransformers` seam (prepended
  * ahead of the built-in set).
@@ -97,6 +103,7 @@ export const PAPYRA_EMBED_NODES: NonNullable<
 export const PAPYRA_EMBED_TRANSFORMERS: NonNullable<
   ExtensiveEditorProps["markdownExtraTransformers"]
 > = [
+  SAVED_CARD_MARKDOWN_TRANSFORMER,
   TRANSCLUSION_MARKDOWN_TRANSFORMER,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
@@ -117,6 +124,9 @@ export function createPapyraEmbedResolvers(
     openLink: (target) => adapter.openNote({ title: target }),
     resolveBlock: adapter.resolveBlock
       ? (note, blockId) => adapter.resolveBlock!({ note, blockId })
+      : undefined,
+    resolveCard: adapter.resolveCard
+      ? (url) => adapter.resolveCard!(url)
       : undefined,
   };
 }

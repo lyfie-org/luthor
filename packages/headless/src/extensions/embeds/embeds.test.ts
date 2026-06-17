@@ -12,6 +12,8 @@ import {
   BlockAnchorNode,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
   FileEmbedNode,
+  SAVED_CARD_MARKDOWN_TRANSFORMER,
+  SavedCardNode,
   TRANSCLUSION_MARKDOWN_TRANSFORMER,
   TransclusionNode,
   WIKILINK_MARKDOWN_TRANSFORMER,
@@ -20,8 +22,15 @@ import {
 
 const BRIDGE_OPTIONS = {
   metadataMode: "none" as const,
-  extraNodes: [FileEmbedNode, WikilinkNode, TransclusionNode, BlockAnchorNode],
+  extraNodes: [
+    FileEmbedNode,
+    SavedCardNode,
+    WikilinkNode,
+    TransclusionNode,
+    BlockAnchorNode,
+  ],
   extraTransformers: [
+    SAVED_CARD_MARKDOWN_TRANSFORMER,
     TRANSCLUSION_MARKDOWN_TRANSFORMER,
     FILE_EMBED_MARKDOWN_TRANSFORMER,
     BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
@@ -118,6 +127,54 @@ describe("papyra embed transformers", () => {
     expect(serialized).toContain('"blockId":"anchor1"');
   });
 
+  // ── Saved web cards ─────────────────────────────────────────────────
+
+  it("round-trips a saved card losslessly", () => {
+    expect(roundTrip("![[card:https://example.com]]")).toBe(
+      "![[card:https://example.com]]",
+    );
+  });
+
+  it("round-trips a saved card with a title losslessly", () => {
+    expect(
+      roundTrip("![[card:https://example.com/page?q=1|Example Page]]"),
+    ).toBe("![[card:https://example.com/page?q=1|Example Page]]");
+  });
+
+  it("parses a saved card into a savedCard node, not a file embed", () => {
+    const document = markdownToJSON(
+      "![[card:https://example.com]]",
+      BRIDGE_OPTIONS,
+    );
+    const serialized = JSON.stringify(document);
+    expect(serialized).toContain('"type":"savedCard"');
+    expect(serialized).not.toContain('"type":"fileEmbed"');
+  });
+
+  it("persists the verbatim url and title on the serialized card node", () => {
+    const document = markdownToJSON(
+      "![[card:https://example.com|Docs]]",
+      BRIDGE_OPTIONS,
+    );
+    const serialized = JSON.stringify(document);
+    expect(serialized).toContain('"url":"https://example.com"');
+    expect(serialized).toContain('"title":"Docs"');
+  });
+
+  it("omits the title key when a saved card has none", () => {
+    const document = markdownToJSON(
+      "![[card:https://example.com]]",
+      BRIDGE_OPTIONS,
+    );
+    expect(JSON.stringify(document)).not.toContain('"title"');
+  });
+
+  it("is idempotent for saved-card-only bodies", () => {
+    const source = "![[card:https://example.com/path|A Title]]";
+    const once = roundTrip(source);
+    expect(roundTrip(once)).toBe(once);
+  });
+
   // ── Disambiguation ──────────────────────────────────────────────────
 
   it("does not mistake a file embed for a wikilink", () => {
@@ -199,6 +256,11 @@ describe("papyra embed transformers — property/fuzz round-trip", () => {
   const FILES = ["diagram.png", "clip.mp4", "audio.mp3", "notes.pdf", "photo.jpeg"];
   const IDS = ["abc123", "ref-42", "block_1", "summary", "id99"];
   const WORDS = ["alpha", "beta", "gamma", "delta", "note", "draft", "idea"];
+  const URLS = [
+    "https://example.com",
+    "https://example.org/path?q=1",
+    "https://docs.example.com/a/b",
+  ];
 
   /** Block generators — each returns a body fragment that round-trips. */
   const BLOCKS: Array<(pick: <T>(items: T[]) => T) => string> = [
@@ -206,6 +268,8 @@ describe("papyra embed transformers — property/fuzz round-trip", () => {
     (pick) => `[[${pick(NOTES)}]]`,
     (pick) => `[[${pick(NOTES)}|${pick(ALIASES)}]]`,
     (pick) => `![[${pick(NOTES)}#^${pick(IDS)}]]`,
+    (pick) => `![[card:${pick(URLS)}]]`,
+    (pick) => `![[card:${pick(URLS)}|${pick(WORDS)} ${pick(WORDS)}]]`,
     (pick) => `${pick(WORDS)} ${pick(WORDS)} ^${pick(IDS)}`,
     (pick) => `# ${pick(WORDS)} ${pick(WORDS)}`,
     (pick) => `## ${pick(WORDS)}`,

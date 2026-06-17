@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-06-17T17:46:48.306Z
+Generated at: 2026-06-17T18:30:27.996Z
 
 ## AI Agent Workflow
 
@@ -2276,6 +2276,41 @@ This is the canonical command ID reference for preset command workflows.
 - `list.numbered`
 - `palette.show`
 
+## Host-contributed slash commands
+
+The IDs above are the editor's built-in catalogue, filtered into the slash menu
+by `slashCommandVisibility`. To add commands the catalogue does not cover — for
+example "Link note" or "Insert date" — pass `extraSlashCommands` to
+`<ExtensiveEditor>`. These are appended after the built-ins (so they are **not**
+subject to `slashCommandVisibility`, which only filters the built-ins) and also
+appear in the command palette.
+
+Each command's `action` receives an `ExtensiveSlashCommandContext`. The slash
+trigger (`/query`) is removed and the caret restored before `action` runs, so
+`insertText` lands exactly where the slash was typed. The action may be async
+(e.g. to await an upload before inserting a reference).
+
+```tsx
+<ExtensiveEditor
+  extraSlashCommands={[
+    {
+      id: "app.insert-date",
+      label: "Insert date",
+      description: "Insert today's date",
+      category: "Insert",
+      keywords: ["date", "today"],
+      action: ({ insertText }) => insertText(new Date().toISOString().slice(0, 10)),
+    },
+  ]}
+/>
+```
+
+> Memoize the array so the slash menu is not re-registered on every render.
+
+The `papyra` preset uses this seam internally to contribute its note-taking
+commands — "Link note" (drops the `[[` wikilink trigger), "Embed media"
+(uploads through the adapter, inserts `![[name]]`), and "Insert date".
+
 ---
 ## FILE: luthor/feature-flags.md
 ## URL: https://www.luthor.fyi/docs/luthor/feature-flags/
@@ -2930,6 +2965,7 @@ keywords:
   - "wikilink"
   - "file embed"
   - "transclusion"
+  - "saved card"
   - "PapyraEditorAdapter"
 props:
   - "adapter"
@@ -2954,11 +2990,13 @@ extensions:
   - "file-embed"
   - "transclusion"
   - "block-anchor"
+  - "saved-card"
 nodes:
   - "wikilink"
   - "fileEmbed"
   - "transclusion"
   - "blockAnchor"
+  - "savedCard"
 frameworks:
   - "react"
 lastVerifiedFrom:
@@ -3054,6 +3092,13 @@ interface PapyraEditorAdapter {
   openNote(ref: { title?: string; id?: string }): void;      // [[Note]] → navigate
   searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;
   resolveBlock?(ref: { note: string; blockId: string }): Promise<string | null>;
+  resolveCard?(url: string): Promise<{
+    title?: string;
+    description?: string;
+    image?: string;
+    favicon?: string;
+    siteName?: string;
+  } | null>;                                                 // ![[card:url]] → metadata
   onMentions?(usernames: string[]): void;
 }
 ~~~
@@ -3111,9 +3156,39 @@ Every custom embed ships a bidirectional markdown transformer, so the body that
 | `[[Note\|alias]]`   | aliased wikilink                    |
 | `![[Note#^id]]`     | read-only transclusion              |
 | `text ^id`          | trailing block anchor (non-rendering)|
+| `![[card:url]]`     | saved web card (via `resolveCard`)  |
+| `![[card:url\|title]]` | saved web card with author title |
 
 The embed nodes and transformers live in `@lyfie/luthor-headless` and are
 re-exported through `@lyfie/luthor` — the preset only composes and themes them.
+
+The **saved web card** (`![[card:url]]`) renders an archived link card. When the
+host wires `resolveCard`, the editor enriches it with the page's open-graph
+metadata (title, description, preview image, favicon, site name); without a
+resolver the card degrades to a titled link to the URL. As with every embed, only
+the verbatim `url` (and optional `|title`) is serialized, so the metadata is
+render-only and the markdown round-trips unchanged.
+
+## Command surface
+
+The slash menu and command palette are curated down to note-taking primitives:
+headings (H1–H3), lists and checklist, quote, code block, table, horizontal
+rule, and image. The typography pickers, view tabs, and pinned toolbar are
+enforced off.
+
+On top of the curated built-ins, PapyraEditor contributes three note-specific
+slash commands through the editor's `extraSlashCommands` seam:
+
+| Command       | Inserts                                                        |
+| ------------- | ------------------------------------------------------------- |
+| `Link note`   | the `[[` trigger, which opens the wikilink typeahead          |
+| `Embed media` | a picked file → `adapter.uploadMedia` → `![[filename]]`       |
+| `Insert date` | today's date as `YYYY-MM-DD`                                  |
+
+Each writes markdown-native syntax at the caret, so the body stays the source of
+truth and round-trips unchanged. The commands are appended automatically — there
+is nothing to wire beyond supplying an `adapter` for `Embed media` to upload
+through.
 
 ---
 ## FILE: luthor/props-reference.md
@@ -3320,6 +3395,7 @@ Use this page for exact prop names and discovery tokens.
 - `paragraphLabel`
 - `syncHeadingOptionsWithCommands`
 - `slashCommandVisibility`
+- `extraSlashCommands`
 - `shortcutConfig`
 - `commandPaletteShortcutOnly`
 - `isListStyleDropdownEnabled`

@@ -3143,6 +3143,7 @@ export const docsApiIndex = [
     "searchTokenBuckets": {
       "keywords": [
         "adapter",
+        "card",
         "colored",
         "embed",
         "featureflags",
@@ -3157,6 +3158,8 @@ export const docsApiIndex = [
         "papyraeditoradapter",
         "preset",
         "readonly",
+        "saved",
+        "saved card",
         "transclusion",
         "variant",
         "wikilink"
@@ -3193,15 +3196,19 @@ export const docsApiIndex = [
         "anchor",
         "block",
         "block-anchor",
+        "card",
         "embed",
         "file",
         "file-embed",
+        "saved",
+        "saved-card",
         "transclusion",
         "wikilink"
       ],
       "nodes": [
         "blockanchor",
         "fileembed",
+        "savedcard",
         "transclusion",
         "wikilink"
       ],
@@ -3220,6 +3227,7 @@ export const docsApiIndex = [
       "block.heading1",
       "blockanchor",
       "canvas",
+      "card",
       "check",
       "colored",
       "createpapyrapreset",
@@ -3257,6 +3265,10 @@ export const docsApiIndex = [
       "preset",
       "react",
       "readonly",
+      "saved",
+      "saved card",
+      "saved-card",
+      "savedcard",
       "seam",
       "style",
       "table",
