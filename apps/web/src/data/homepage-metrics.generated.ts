@@ -7,5 +7,5 @@ export const homepageMetrics = {
   "headlessPackageSize": 340019,
   "combinedPackageSize": 623397,
   "releaseCount": 73,
-  "fetchedAtIso": "2026-06-17T12:56:36.142Z"
+  "fetchedAtIso": "2026-06-17T17:06:13.871Z"
 } as const;

@@ -8,8 +8,12 @@
 export {
   PapyraEditor,
   PAPYRA_AVAILABLE_MODES,
+  PAPYRA_READONLY_MODES,
+  PAPYRA_FOCUS_VARIANT_CLASS,
+  PAPYRA_LOCKED_VARIANT_CLASS,
   type PapyraEditorProps,
   type PapyraEditorRef,
+  type PapyraEditorVariant,
   type PapyraOutlineHeading,
   type PapyraBlockAnchor,
 } from "./PapyraEditor";

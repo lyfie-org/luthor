@@ -18,7 +18,11 @@ vi.mock("../extensive", () => ({
   ExtensiveEditor: extensiveEditorMock,
 }));
 
-import { PapyraEditor, type PapyraEditorRef } from "./PapyraEditor";
+import {
+  PapyraEditor,
+  PAPYRA_READONLY_MODES,
+  type PapyraEditorRef,
+} from "./PapyraEditor";
 import {
   createFallbackPapyraAdapter,
   usePapyraAdapter,
@@ -151,6 +155,71 @@ describe("PapyraEditor", () => {
     expect(props.className).toContain("outer");
     expect(props.variantClassName).toContain("luthor-preset-papyra__variant");
     expect(props.variantClassName).toContain("inner");
+  });
+
+  describe("render states", () => {
+    it("keeps the editable visual surface by default", () => {
+      render(<PapyraEditor showDefaultContent={false} />);
+
+      const props = lastProps();
+      expect(props.availableModes).toEqual(["visual", "markdown"]);
+      // No forced read-only promotion lock when editing.
+      expect(props.defaultEditorView).toBeUndefined();
+      expect(props.editOnClick).toBeUndefined();
+    });
+
+    it("mounts a non-editable surface when readOnly", () => {
+      render(<PapyraEditor showDefaultContent={false} readOnly />);
+
+      const props = lastProps();
+      // visual-only with promotion disabled = no editable caret, no edits.
+      expect(props.availableModes).toEqual(PAPYRA_READONLY_MODES);
+      expect(props.defaultEditorView).toBe("visual-only");
+      expect(props.editOnClick).toBe(false);
+    });
+
+    it("widens the measure in the focus variant", () => {
+      const { rerender } = render(<PapyraEditor showDefaultContent={false} />);
+      expect(lastProps().className).not.toContain(
+        "luthor-preset-papyra--focus",
+      );
+
+      rerender(<PapyraEditor showDefaultContent={false} variant="focus" />);
+      expect(lastProps().className).toContain("luthor-preset-papyra--focus");
+    });
+
+    it("withholds the body and never mounts the editor when locked", () => {
+      const { container } = render(
+        <PapyraEditor
+          showDefaultContent={false}
+          locked
+          defaultContent="classified body text"
+        />,
+      );
+
+      // The editor is never mounted, so there is no plaintext to scrape.
+      expect(extensiveEditorMock).not.toHaveBeenCalled();
+      expect(container.textContent).not.toContain("classified");
+
+      const root = container.querySelector("[data-papyra-locked='true']");
+      expect(root).not.toBeNull();
+      expect(root?.className).toContain("luthor-preset-papyra--locked");
+    });
+
+    it("renders a custom locked placeholder instead of the body", () => {
+      const { container } = render(
+        <PapyraEditor
+          showDefaultContent={false}
+          locked
+          lockedPlaceholder={<p>Unlock to read this note</p>}
+          defaultContent="classified body text"
+        />,
+      );
+
+      expect(extensiveEditorMock).not.toHaveBeenCalled();
+      expect(container.textContent).toContain("Unlock to read this note");
+      expect(container.textContent).not.toContain("classified");
+    });
   });
 
   describe("theming", () => {

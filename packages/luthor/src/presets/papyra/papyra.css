@@ -111,6 +111,57 @@
   text-decoration: none;
 }
 
+/*
+ * Render-state variants (Sprint 1.5).
+ *
+ * `focus` — a centered, distraction-free measure. The only chrome Papyra keeps
+ * is the floating toolbar, which already hides until there is a selection, so
+ * focus mode just widens and centers the writing column. `--papyra-focus-measure`
+ * lets the host tune the line length.
+ */
+.luthor-preset-papyra--focus .luthor-content-editable {
+  max-width: var(--papyra-focus-measure, 72ch);
+  margin-inline: auto;
+}
+
+/*
+ * `locked` — the secure-note placeholder. The wrapper renders this *instead of*
+ * the editor, so the body is never in the DOM. The bars are decorative
+ * (`aria-hidden`) and carry no text; a blur keeps them from reading as content.
+ */
+.luthor-preset-papyra--locked {
+  min-height: 320px;
+  padding: 1.5rem;
+}
+
+.luthor-preset-papyra__lock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+}
+
+.luthor-preset-papyra__lock-line {
+  display: block;
+  height: 0.8rem;
+  border-radius: 0.4rem;
+  background: var(--papyra-surface-muted, var(--luthor-preset-muted));
+}
+
+.luthor-preset-papyra__lock-line:nth-child(1) {
+  width: 60%;
+}
+
+.luthor-preset-papyra__lock-line:nth-child(2) {
+  width: 90%;
+}
+
+.luthor-preset-papyra__lock-line:nth-child(3) {
+  width: 75%;
+}
+
 /* Respect reduced-motion: drop the editor's theme/UI transitions. */
 @media (prefers-reduced-motion: reduce) {
   .luthor-preset-papyra,

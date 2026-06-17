@@ -13,6 +13,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 import { EmbedResolverProvider, markdownToJSON } from "@lyfie/luthor-headless";
 import type { EmbedResolvers } from "@lyfie/luthor-headless";
@@ -59,7 +60,31 @@ import { PAPYRA_TOOLBAR_VISIBILITY } from "./toolbar";
  */
 export const PAPYRA_AVAILABLE_MODES = ["visual", "markdown"] as const;
 
+/**
+ * Modes used while {@link PapyraEditorProps.readOnly | readOnly} is set. The
+ * visual surface is mounted in `visual-only` (non-editable) so it can never
+ * promote to an editable caret — there is no `visual-editor` mode to promote
+ * into, and `editOnClick` is forced off — so the surface emits no edits. This is
+ * what makes `readOnly` safe for time-machine scrubbing and revision previews.
+ */
+export const PAPYRA_READONLY_MODES = ["visual-only", "markdown"] as const;
+
+/** Marker class the wrapper carries for the wide-measure focus variant. */
+export const PAPYRA_FOCUS_VARIANT_CLASS = "luthor-preset-papyra--focus";
+
+/** Marker class the wrapper carries while {@link PapyraEditorProps.locked}. */
+export const PAPYRA_LOCKED_VARIANT_CLASS = "luthor-preset-papyra--locked";
+
+/**
+ * Reading-surface variant. `default` is the standard editorial measure;
+ * `focus` widens to a centered, distraction-free column and keeps the only
+ * chrome (the floating toolbar) hidden until there is a selection.
+ */
+export type PapyraEditorVariant = "default" | "focus";
+
 const PAPYRA_DEFAULT_PLACEHOLDER = "Start writing…";
+
+const PAPYRA_DEFAULT_LOCKED_LABEL = "This note is locked";
 
 /**
  * One heading in the document outline. The shape matches what Papyra's TOC
@@ -174,6 +199,39 @@ export type PapyraEditorProps = Omit<
    */
   colored?: boolean;
   /**
+   * Render the note as a non-editable surface. The host decides *when* (revision
+   * preview, time-machine scrubbing, a read-only share); the preset decides
+   * *how* — the visual surface mounts in `visual-only` mode with click-to-edit
+   * promotion disabled, so it never produces an editable caret and emits no
+   * change events. Pair with repeated `setMarkdown` calls for time-machine
+   * scrubbing without arming autosave. Defaults to `false`.
+   */
+  readOnly?: boolean;
+  /**
+   * Reading-surface variant. `"focus"` widens the body to a centered,
+   * distraction-free measure and keeps chrome out of the way until there is a
+   * selection; `"default"` is the standard editorial measure. The host decides
+   * when to enter focus mode. Defaults to `"default"`.
+   */
+  variant?: PapyraEditorVariant;
+  /**
+   * Withhold the body entirely. When `true`, the preset renders a blurred
+   * placeholder and **never mounts the editor or the note's text** — there is no
+   * plaintext in the DOM to scrape. This is the UX half of Papyra's secure
+   * notes: the host keeps `locked` set while its server withholds the body
+   * (`401`/`PathGuard`), then flips it off and remounts (new React `key`) with
+   * the decrypted body once the note is unlocked. The lock is never the security
+   * boundary — the server is — but it guarantees the editor leaks nothing.
+   * Defaults to `false`.
+   */
+  locked?: boolean;
+  /**
+   * Custom content for the {@link locked} placeholder. Omit it for the default
+   * blurred lock surface. Whatever is passed renders *instead of* the note body,
+   * so it must not contain the note's plaintext.
+   */
+  lockedPlaceholder?: ReactNode;
+  /**
    * The host seam. Supplies the editor with media resolution, uploads, note
    * search/navigation, and block resolution for the Papyra embeds
    * (`![[media]]`, `[[Note]]`, `![[Note#^id]]`). When omitted, the preset uses a
@@ -217,6 +275,10 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       editorThemeOverrides,
       initialTheme,
       colored = false,
+      readOnly = false,
+      variant = "default",
+      locked = false,
+      lockedPlaceholder,
       adapter,
       onReady,
       onOutlineChange,
@@ -343,6 +405,50 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       [adapter],
     );
 
+    // The preset class set is shared by the live editor and the locked
+    // placeholder so theming (and the colored light-lock) applies to both.
+    const presetClassName = joinClassNames(
+      "luthor-preset-papyra",
+      colored ? PAPYRA_COLORED_VARIANT_CLASS : undefined,
+      variant === "focus" ? PAPYRA_FOCUS_VARIANT_CLASS : undefined,
+      className,
+    );
+
+    // Locked: render a blurred placeholder and never mount the editor or the
+    // note's text. The host flips `locked` off and remounts (new React `key`)
+    // with the real body once its server releases it; until then there is no
+    // plaintext in the DOM to leak. Hooks above still run unconditionally.
+    if (locked) {
+      return (
+        <div
+          ref={hostRef}
+          className={joinClassNames(presetClassName, PAPYRA_LOCKED_VARIANT_CLASS)}
+          data-papyra-locked="true"
+          role="status"
+          aria-label={PAPYRA_DEFAULT_LOCKED_LABEL}
+        >
+          {lockedPlaceholder ?? (
+            <div className="luthor-preset-papyra__lock" aria-hidden="true">
+              <span className="luthor-preset-papyra__lock-line" />
+              <span className="luthor-preset-papyra__lock-line" />
+              <span className="luthor-preset-papyra__lock-line" />
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Read-only mounts the visual surface in `visual-only` (non-editable) with
+    // click-to-edit promotion disabled, so it never arms a caret or emits edits.
+    // These land after `{...props}` so they override any caller-supplied mode.
+    const readStateProps = readOnly
+      ? {
+          availableModes: PAPYRA_READONLY_MODES,
+          defaultEditorView: "visual-only" as const,
+          editOnClick: false,
+        }
+      : { availableModes: PAPYRA_AVAILABLE_MODES };
+
     return (
       <div ref={hostRef} style={{ display: "contents" }}>
         <PapyraAdapterContext.Provider value={resolvedAdapter}>
@@ -353,17 +459,13 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               extraExtensions={embedExtensions}
               markdownExtraNodes={PAPYRA_EMBED_NODES}
               markdownExtraTransformers={PAPYRA_EMBED_TRANSFORMERS}
-              className={joinClassNames(
-                "luthor-preset-papyra",
-                colored ? PAPYRA_COLORED_VARIANT_CLASS : undefined,
-                className,
-              )}
+              className={presetClassName}
               variantClassName={joinClassNames(
                 "luthor-preset-papyra__variant",
                 variantClassName,
               )}
               placeholder={placeholder ?? PAPYRA_DEFAULT_PLACEHOLDER}
-              availableModes={PAPYRA_AVAILABLE_MODES}
+              {...readStateProps}
               isEditorViewTabsVisible={false}
               isToolbarEnabled={false}
               isToolbarPinned={false}
