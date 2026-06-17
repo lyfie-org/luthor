@@ -27,9 +27,9 @@ import {
   type PapyraEditorAdapter,
 } from "./adapter";
 import {
-  PAPYRA_EMBED_EXTENSIONS,
   PAPYRA_EMBED_NODES,
   PAPYRA_EMBED_TRANSFORMERS,
+  buildPapyraEmbedExtensions,
   createPapyraEmbedResolvers,
 } from "./embeds";
 import { papyraFeaturePolicy } from "./features";
@@ -203,7 +203,18 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
         },
         focus: () => focusEditableWithin(hostRef.current),
         getOutline: () => [],
-        getBlocks: () => [],
+        getBlocks: () => {
+          const markdown = innerRef.current?.getMarkdown() ?? "";
+          const blocks: PapyraBlockAnchor[] = [];
+          const anchorPattern = / \^([a-zA-Z0-9][a-zA-Z0-9_-]*)$/;
+          for (const line of markdown.split("\n")) {
+            const match = anchorPattern.exec(line);
+            if (match?.[1]) {
+              blocks.push({ blockId: match[1], key: match[1] });
+            }
+          }
+          return blocks;
+        },
       }),
       [],
     );
@@ -244,6 +255,12 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       [resolvedAdapter],
     );
 
+    // Build extra extensions including the upload pipeline (adapter-dependent).
+    const embedExtensions = useMemo(
+      () => buildPapyraEmbedExtensions(adapter),
+      [adapter],
+    );
+
     return (
       <div ref={hostRef} style={{ display: "contents" }}>
         <PapyraAdapterContext.Provider value={resolvedAdapter}>
@@ -251,7 +268,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
             <ExtensiveEditor
               {...props}
               onReady={handleInnerReady}
-              extraExtensions={PAPYRA_EMBED_EXTENSIONS}
+              extraExtensions={embedExtensions}
               markdownExtraNodes={PAPYRA_EMBED_NODES}
               markdownExtraTransformers={PAPYRA_EMBED_TRANSFORMERS}
               className={joinClassNames(

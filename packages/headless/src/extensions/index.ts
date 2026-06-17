@@ -128,7 +128,8 @@ export {
 // Custom extensions
 export { createCustomNodeExtension } from "./custom/CustomNodeExtension";
 
-// Embed extensions (reusable wikilink / file-embed nodes + host resolver seam)
+// Embed extensions (reusable wikilink / file-embed / transclusion / block-anchor
+// nodes, host resolver seam, typeahead trigger, and drop/paste upload pipeline)
 export {
   EmbedResolverContext,
   EmbedResolverProvider,
@@ -148,6 +149,29 @@ export {
   $isFileEmbedNode,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
   type SerializedFileEmbedNode,
+  TransclusionNode,
+  TransclusionExtension,
+  transclusionExtension,
+  $createTransclusionNode,
+  $isTransclusionNode,
+  TRANSCLUSION_MARKDOWN_TRANSFORMER,
+  type SerializedTransclusionNode,
+  BlockAnchorNode,
+  BlockAnchorExtension,
+  blockAnchorExtension,
+  $createBlockAnchorNode,
+  $isBlockAnchorNode,
+  BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
+  type SerializedBlockAnchorNode,
+  WikilinkTypeaheadExtension,
+  wikilinkTypeaheadExtension,
+  type WikilinkTypeaheadMenuState,
+  type WikilinkTypeaheadConfig,
+  type WikilinkTypeaheadCommands,
+  type WikilinkTypeaheadStateQueries,
+  FileDropUploadExtension,
+  fileDropUploadExtension,
+  type FileDropUploadConfig,
 } from "./embeds";
 
 // Core extensions

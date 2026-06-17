@@ -43,6 +43,12 @@ export interface EmbedResolvers {
    * styled text.
    */
   openLink?: (target: string) => void;
+  /**
+   * Resolve a transcluded block (`![[Note#^blockId]]`) to its rendered content,
+   * or `null` when the host withholds it (missing, or denied by authorization).
+   * When omitted, transclusion embeds render an unresolved chip.
+   */
+  resolveBlock?: (note: string, blockId: string) => Promise<string | null>;
 }
 
 const EMPTY_RESOLVERS: EmbedResolvers = {};

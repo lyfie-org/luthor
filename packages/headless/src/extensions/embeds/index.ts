@@ -29,3 +29,34 @@ export {
   FILE_EMBED_MARKDOWN_TRANSFORMER,
   type SerializedFileEmbedNode,
 } from "./FileEmbedNode";
+export {
+  TransclusionNode,
+  TransclusionExtension,
+  transclusionExtension,
+  $createTransclusionNode,
+  $isTransclusionNode,
+  TRANSCLUSION_MARKDOWN_TRANSFORMER,
+  type SerializedTransclusionNode,
+} from "./TransclusionNode";
+export {
+  BlockAnchorNode,
+  BlockAnchorExtension,
+  blockAnchorExtension,
+  $createBlockAnchorNode,
+  $isBlockAnchorNode,
+  BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
+  type SerializedBlockAnchorNode,
+} from "./BlockAnchorNode";
+export {
+  WikilinkTypeaheadExtension,
+  wikilinkTypeaheadExtension,
+  type WikilinkTypeaheadMenuState,
+  type WikilinkTypeaheadConfig,
+  type WikilinkTypeaheadCommands,
+  type WikilinkTypeaheadStateQueries,
+} from "./WikilinkTypeaheadExtension";
+export {
+  FileDropUploadExtension,
+  fileDropUploadExtension,
+  type FileDropUploadConfig,
+} from "./FileDropUploadExtension";
