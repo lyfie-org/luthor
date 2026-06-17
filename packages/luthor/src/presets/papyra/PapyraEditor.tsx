@@ -8,9 +8,11 @@
 import {
   forwardRef,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { EmbedResolverProvider, markdownToJSON } from "@lyfie/luthor-headless";
 import type { EmbedResolvers } from "@lyfie/luthor-headless";
@@ -32,11 +34,24 @@ import {
   buildPapyraEmbedExtensions,
   createPapyraEmbedResolvers,
 } from "./embeds";
+import {
+  PAPYRA_HEADING_OPTIONS,
+  PAPYRA_SHORTCUT_CONFIG,
+  PAPYRA_SLASH_COMMAND_VISIBILITY,
+} from "./commands";
 import { papyraFeaturePolicy } from "./features";
+import {
+  PAPYRA_OUTLINE_DEBOUNCE_MS,
+  extractBlockAnchors,
+  extractMentions,
+  readOutline,
+  scrollToOutlineHeading,
+} from "./navigation";
 import {
   PAPYRA_COLORED_VARIANT_CLASS,
   createPapyraThemeOverrides,
 } from "./theme";
+import { PAPYRA_TOOLBAR_VISIBILITY } from "./toolbar";
 
 /**
  * Modes Papyra ever exposes: the visual canvas and a raw markdown source view.
@@ -66,8 +81,6 @@ export interface PapyraOutlineHeading {
 /**
  * A trailing `^uuid` block anchor discovered in the body. Block anchors are
  * non-rendering and let Papyra address a specific block for transclusion.
- *
- * @remarks Stubbed (returns `[]`) until Sprint 1.3 ships the block-anchor node.
  */
 export interface PapyraBlockAnchor {
   /** The anchor id (the part after `^`). */
@@ -79,8 +92,8 @@ export interface PapyraBlockAnchor {
 /**
  * Imperative handle a Papyra host captures through the React ref or `onReady`.
  * Extends {@link ExtensiveEditorRef} with the markdown-first surface Papyra
- * drives: `setMarkdown` (host-driven adopt), `focus`, and the outline/block
- * readers (stubbed here, filled in Sprints 1.3–1.4).
+ * drives: `setMarkdown` (host-driven adopt), `focus`, the outline/block readers,
+ * scroll-to-heading, and mention detection.
  */
 export interface PapyraEditorRef extends ExtensiveEditorRef {
   /**
@@ -92,10 +105,25 @@ export interface PapyraEditorRef extends ExtensiveEditorRef {
   setMarkdown: (markdown: string) => void;
   /** Move focus into the editable surface. */
   focus: () => void;
-  /** Current document outline in document order. */
+  /**
+   * Current document outline in document order, read from the rendered editable
+   * surface. Returns `[]` when no visual surface is mounted (e.g. the markdown
+   * source view). Pair with {@link onOutlineChange} for a live table of contents.
+   */
   getOutline: () => PapyraOutlineHeading[];
+  /**
+   * Scroll the heading addressed by `key` into view. Pass a `key` from a fresh
+   * {@link getOutline} call (keys track document position).
+   */
+  scrollToHeading: (key: string) => void;
   /** All trailing `^uuid` block anchors in the body. */
   getBlocks: () => PapyraBlockAnchor[];
+  /**
+   * Distinct `@username` mentions in the body, in first-seen order. The host
+   * routes these to its inbox via `adapter.onMentions` during its save
+   * orchestration — the preset only detects, it never fires on keystrokes.
+   */
+  getMentions: () => string[];
 }
 
 /**
@@ -123,9 +151,20 @@ export type PapyraEditorProps = Omit<
   | "extraExtensions"
   | "markdownExtraNodes"
   | "markdownExtraTransformers"
+  | "headingOptions"
+  | "slashCommandVisibility"
+  | "shortcutConfig"
+  | "toolbarVisibility"
   | "onReady"
 > & {
   onReady?: (methods: PapyraEditorRef) => void;
+  /**
+   * Fired (debounced) whenever the document outline changes, with the current
+   * outline in document order. Drives a host's live table-of-contents scrollbar.
+   * Read-only observation of the rendered surface — it never touches the caret.
+   * Omit it to skip outline tracking entirely.
+   */
+  onOutlineChange?: (outline: PapyraOutlineHeading[]) => void;
   /**
    * Light-lock for tinted ("colored") notes. When the host paints the note
    * paper with a per-note tint, set this so the editor stays on its light
@@ -180,12 +219,14 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       colored = false,
       adapter,
       onReady,
+      onOutlineChange,
       ...props
     },
     ref,
   ) => {
     const innerRef = useRef<ExtensiveEditorRef | null>(null);
     const hostRef = useRef<HTMLDivElement | null>(null);
+    const [isReady, setIsReady] = useState(false);
 
     const handle = useMemo<PapyraEditorRef>(
       () => ({
@@ -202,19 +243,12 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
           innerRef.current?.injectJSON(JSON.stringify(document));
         },
         focus: () => focusEditableWithin(hostRef.current),
-        getOutline: () => [],
-        getBlocks: () => {
-          const markdown = innerRef.current?.getMarkdown() ?? "";
-          const blocks: PapyraBlockAnchor[] = [];
-          const anchorPattern = / \^([a-zA-Z0-9][a-zA-Z0-9_-]*)$/;
-          for (const line of markdown.split("\n")) {
-            const match = anchorPattern.exec(line);
-            if (match?.[1]) {
-              blocks.push({ blockId: match[1], key: match[1] });
-            }
-          }
-          return blocks;
+        getOutline: () => readOutline(hostRef.current),
+        scrollToHeading: (key) => {
+          scrollToOutlineHeading(hostRef.current, key);
         },
+        getBlocks: () => extractBlockAnchors(innerRef.current?.getMarkdown() ?? ""),
+        getMentions: () => extractMentions(innerRef.current?.getMarkdown() ?? ""),
       }),
       [],
     );
@@ -224,10 +258,58 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     const handleInnerReady = useCallback(
       (methods: ExtensiveEditorRef) => {
         innerRef.current = methods;
+        setIsReady(true);
         onReady?.(handle);
       },
       [handle, onReady],
     );
+
+    // Keep the latest outline listener in a ref so the observer effect only
+    // re-attaches when the listener's presence toggles, not on every render.
+    const hasOutlineListener = typeof onOutlineChange === "function";
+    const outlineChangeRef = useRef(onOutlineChange);
+    outlineChangeRef.current = onOutlineChange;
+
+    // Debounced, read-only outline tracking. A MutationObserver over the host
+    // subtree recomputes the outline after edits settle and hands it to the
+    // listener — observation only, the caret is never touched. Guarded for SSR /
+    // no-DOM environments.
+    useEffect(() => {
+      if (!isReady || !hasOutlineListener) {
+        return;
+      }
+
+      const host = hostRef.current;
+      if (!host || typeof MutationObserver === "undefined") {
+        return;
+      }
+
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const emit = () => outlineChangeRef.current?.(readOutline(host));
+      const schedule = () => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+        timer = setTimeout(emit, PAPYRA_OUTLINE_DEBOUNCE_MS);
+      };
+
+      // Emit the initial outline once the editable surface is mounted.
+      emit();
+
+      const observer = new MutationObserver(schedule);
+      observer.observe(host, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+
+      return () => {
+        observer.disconnect();
+        if (timer) {
+          clearTimeout(timer);
+        }
+      };
+    }, [isReady, hasOutlineListener]);
 
     const resolvedFeatureFlags: FeatureFlagOverrides =
       papyraFeaturePolicy.resolve(featureFlags);
@@ -285,6 +367,10 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               isEditorViewTabsVisible={false}
               isToolbarEnabled={false}
               isToolbarPinned={false}
+              toolbarVisibility={PAPYRA_TOOLBAR_VISIBILITY}
+              headingOptions={PAPYRA_HEADING_OPTIONS}
+              slashCommandVisibility={PAPYRA_SLASH_COMMAND_VISIBILITY}
+              shortcutConfig={PAPYRA_SHORTCUT_CONFIG}
               markdownSourceOfTruth
               sourceMetadataMode="none"
               featureFlags={resolvedFeatureFlags}

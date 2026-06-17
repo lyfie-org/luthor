@@ -5,7 +5,7 @@
  * Build freely. Credit kindly.
  */
 
-import { createRef } from "react";
+import { createRef, useEffect, useRef } from "react";
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExtensiveEditorProps, ExtensiveEditorRef } from "../extensive";
@@ -44,6 +44,34 @@ describe("PapyraEditor", () => {
     expect(props.isToolbarPinned).toBe(false);
     expect(props.markdownSourceOfTruth).toBe(true);
     expect(props.sourceMetadataMode).toBe("none");
+  });
+
+  it("locks the curated command and toolbar surface", () => {
+    render(<PapyraEditor showDefaultContent={false} />);
+
+    const props = lastProps();
+    expect(props.headingOptions).toEqual(["h1", "h2", "h3"]);
+    expect(props.slashCommandVisibility).toEqual({
+      allowlist: expect.arrayContaining([
+        "block.heading1",
+        "list.check",
+        "block.quote",
+        "insert.table",
+        "insert.image",
+      ]),
+    });
+    expect(props.shortcutConfig).toMatchObject({
+      preventNativeConflicts: true,
+      preventCollisions: true,
+    });
+    // Restricted toolbar items are pinned off.
+    expect(props.toolbarVisibility).toMatchObject({
+      fontFamily: false,
+      underline: false,
+      subscript: false,
+      embed: false,
+      themeToggle: false,
+    });
   });
 
   it("applies the markdown-safe feature policy", () => {
@@ -193,13 +221,48 @@ describe("PapyraEditor", () => {
       getHTML: vi.fn(() => "<h1>Title</h1>"),
     };
 
+    // Mirror the real editor, which fires onReady from an effect (never during
+    // render), so the wrapper's readiness state settles after commit.
+    function ReadyEditorMock({
+      props,
+      methods,
+      innerHTML,
+    }: {
+      props: ExtensiveEditorProps;
+      methods: ExtensiveEditorRef;
+      innerHTML?: string;
+    }) {
+      // Fire onReady exactly once, mirroring the real editor's readyRef guard,
+      // so wrapper re-renders don't re-invoke it.
+      const fired = useRef(false);
+      useEffect(() => {
+        if (fired.current) {
+          return;
+        }
+        fired.current = true;
+        props.onReady?.(methods);
+      });
+      return (
+        <div
+          contentEditable
+          suppressContentEditableWarning
+          dangerouslySetInnerHTML={innerHTML ? { __html: innerHTML } : undefined}
+        />
+      );
+    }
+
     function renderWithReadyEditor(
       ref: React.RefObject<PapyraEditorRef | null>,
+      options?: { methods?: ExtensiveEditorRef; innerHTML?: string },
     ) {
-      extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => {
-        props.onReady?.(stubMethods);
-        return <div contentEditable suppressContentEditableWarning />;
-      });
+      const methods = options?.methods ?? stubMethods;
+      extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => (
+        <ReadyEditorMock
+          props={props}
+          methods={methods}
+          innerHTML={options?.innerHTML}
+        />
+      ));
       render(<PapyraEditor ref={ref} showDefaultContent={false} />);
     }
 
@@ -233,20 +296,87 @@ describe("PapyraEditor", () => {
       );
     });
 
-    it("exposes outline and block readers (stubbed until later sprints)", () => {
+    it("returns an empty outline and no block anchors for a bare body", () => {
       const ref = createRef<PapyraEditorRef>();
       renderWithReadyEditor(ref);
 
+      // No headings rendered, and the stub body carries no trailing `^anchor`.
       expect(ref.current?.getOutline()).toEqual([]);
       expect(ref.current?.getBlocks()).toEqual([]);
     });
 
+    it("reads the outline from the rendered headings in document order", () => {
+      const ref = createRef<PapyraEditorRef>();
+      renderWithReadyEditor(ref, {
+        innerHTML: "<h1>Intro</h1><p>x</p><h2>Details</h2><h3>Notes</h3>",
+      });
+
+      const outline = ref.current?.getOutline() ?? [];
+      expect(outline.map((heading) => heading.level)).toEqual([1, 2, 3]);
+      expect(outline.map((heading) => heading.text)).toEqual([
+        "Intro",
+        "Details",
+        "Notes",
+      ]);
+      expect(outline[0]?.key).toBe("papyra-heading-0");
+      expect(outline[2]?.key).toBe("papyra-heading-2");
+    });
+
+    it("scrolls the heading addressed by key into view", () => {
+      // jsdom has no scrollIntoView; provide one to observe the call.
+      const scrollIntoView = vi.fn();
+      const original = HTMLElement.prototype.scrollIntoView;
+      HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+      try {
+        const ref = createRef<PapyraEditorRef>();
+        renderWithReadyEditor(ref, {
+          innerHTML: "<h1>One</h1><h2>Two</h2>",
+        });
+
+        ref.current?.scrollToHeading("papyra-heading-1");
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+        // An unknown key is a no-op, never a throw.
+        ref.current?.scrollToHeading("papyra-heading-99");
+        expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      } finally {
+        HTMLElement.prototype.scrollIntoView = original;
+      }
+    });
+
+    it("detects distinct @mentions from the body, skipping email locals", () => {
+      const ref = createRef<PapyraEditorRef>();
+      const mentionMethods: ExtensiveEditorRef = {
+        ...stubMethods,
+        getMarkdown: vi.fn(
+          () => "Ping @alice and @bob, then @alice again. Mail me@example.com.",
+        ),
+      };
+      renderWithReadyEditor(ref, { methods: mentionMethods });
+
+      expect(ref.current?.getMentions()).toEqual(["alice", "bob"]);
+    });
+
+    it("extracts trailing block anchors from the body", () => {
+      const ref = createRef<PapyraEditorRef>();
+      const anchorMethods: ExtensiveEditorRef = {
+        ...stubMethods,
+        getMarkdown: vi.fn(() => "A paragraph. ^abc123\n\nAnother line. ^note-2"),
+      };
+      renderWithReadyEditor(ref, { methods: anchorMethods });
+
+      expect(ref.current?.getBlocks()).toEqual([
+        { blockId: "abc123", key: "abc123" },
+        { blockId: "note-2", key: "note-2" },
+      ]);
+    });
+
     it("hands the Papyra ref to onReady", () => {
       const onReady = vi.fn();
-      extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => {
-        props.onReady?.(stubMethods);
-        return null;
-      });
+      extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => (
+        <ReadyEditorMock props={props} methods={stubMethods} />
+      ));
 
       render(<PapyraEditor showDefaultContent={false} onReady={onReady} />);
 
@@ -255,6 +385,35 @@ describe("PapyraEditor", () => {
       expect(typeof handed.setMarkdown).toBe("function");
       expect(typeof handed.focus).toBe("function");
       expect(typeof handed.getOutline).toBe("function");
+      expect(typeof handed.scrollToHeading).toBe("function");
+      expect(typeof handed.getMentions).toBe("function");
+    });
+
+    it("emits the initial outline to onOutlineChange once ready", () => {
+      const onOutlineChange = vi.fn();
+      extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => (
+        <ReadyEditorMock
+          props={props}
+          methods={stubMethods}
+          innerHTML="<h1>Heading</h1>"
+        />
+      ));
+
+      render(
+        <PapyraEditor
+          showDefaultContent={false}
+          onOutlineChange={onOutlineChange}
+        />,
+      );
+
+      expect(onOutlineChange).toHaveBeenCalled();
+      const firstOutline = onOutlineChange.mock.calls[0][0] as Array<{
+        level: number;
+        text: string;
+      }>;
+      expect(firstOutline).toEqual([
+        expect.objectContaining({ level: 1, text: "Heading" }),
+      ]);
     });
   });
 
