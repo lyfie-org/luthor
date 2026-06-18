@@ -484,6 +484,78 @@ describe("PapyraEditor", () => {
         expect.objectContaining({ level: 1, text: "Heading" }),
       ]);
     });
+
+    // Caret safety (Sprint 1.6). The invariant: the editor is uncontrolled, so a
+    // changed body prop never patches the mounted surface, and adopting a remote
+    // revision is a host-driven remount — never a live-DOM write that could move
+    // the caret. These pin the contract at the layer the preset owns; verifying
+    // the rendered caret never physically moves needs a real editor instance and
+    // is covered by the Phase 2 host's browser tests (like 1.2/1.3/1.5).
+    describe("caret safety", () => {
+      it("never re-injects content when defaultContent changes without a remount", () => {
+        const injectJSON = vi.fn();
+        const methods: ExtensiveEditorRef = { ...stubMethods, injectJSON };
+        extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => (
+          <ReadyEditorMock props={props} methods={methods} />
+        ));
+
+        const { rerender } = render(
+          <PapyraEditor showDefaultContent={false} defaultContent="# One" />,
+        );
+        rerender(
+          <PapyraEditor showDefaultContent={false} defaultContent="# Two" />,
+        );
+
+        // Uncontrolled by contract: the wrapper reads defaultContent once and
+        // never patches the live surface when the prop changes on re-render.
+        expect(injectJSON).not.toHaveBeenCalled();
+      });
+
+      it("adopts a revision through remount, not a live patch", () => {
+        const onReady = vi.fn();
+        const injectJSON = vi.fn();
+        const methods: ExtensiveEditorRef = { ...stubMethods, injectJSON };
+        extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => (
+          <ReadyEditorMock props={props} methods={methods} />
+        ));
+
+        const { rerender } = render(
+          <PapyraEditor
+            key="rev-1"
+            showDefaultContent={false}
+            defaultContent="# One"
+            onReady={onReady}
+          />,
+        );
+        expect(onReady).toHaveBeenCalledTimes(1);
+
+        // A new React key fully remounts the editor with the adopted body; the
+        // wrapper re-runs onReady on the fresh instance and patches nothing.
+        rerender(
+          <PapyraEditor
+            key="rev-2"
+            showDefaultContent={false}
+            defaultContent="# Two"
+            onReady={onReady}
+          />,
+        );
+        expect(onReady).toHaveBeenCalledTimes(2);
+        expect(injectJSON).not.toHaveBeenCalled();
+      });
+
+      it("only mutates the body through the explicit setMarkdown ref call", () => {
+        const ref = createRef<PapyraEditorRef>();
+        const injectJSON = vi.fn();
+        const methods: ExtensiveEditorRef = { ...stubMethods, injectJSON };
+        renderWithReadyEditor(ref, { methods });
+
+        // No imperative call yet: nothing has touched the mounted document.
+        expect(injectJSON).not.toHaveBeenCalled();
+
+        ref.current?.setMarkdown("# Adopted");
+        expect(injectJSON).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe("host adapter", () => {

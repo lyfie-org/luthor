@@ -90,6 +90,7 @@ function SavedCardComponent({
       target="_blank"
       rel="noopener noreferrer"
       data-luthor-saved-card-url={url}
+      aria-label={heading}
     >
       {meta?.image ? (
         <img

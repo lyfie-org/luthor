@@ -73,18 +73,33 @@ function FileEmbedComponent({ target }: { target: string }): ReactNode {
 
   if (url && kind === "audio") {
     return (
-      <audio className="luthor-file-embed luthor-file-embed--audio" controls src={url} />
+      <audio
+        className="luthor-file-embed luthor-file-embed--audio"
+        controls
+        src={url}
+        aria-label={target}
+      />
     );
   }
 
   if (url && kind === "video") {
     return (
-      <video className="luthor-file-embed luthor-file-embed--video" controls src={url} />
+      <video
+        className="luthor-file-embed luthor-file-embed--video"
+        controls
+        src={url}
+        aria-label={target}
+      />
     );
   }
 
   const chip = (
-    <span className="luthor-file-embed luthor-file-embed--chip" data-luthor-file-embed-target={target}>
+    <span
+      className="luthor-file-embed luthor-file-embed--chip"
+      data-luthor-file-embed-target={target}
+      role="note"
+      aria-label={`Embedded file: ${target}`}
+    >
       {target}
     </span>
   );

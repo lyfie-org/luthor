@@ -78,6 +78,9 @@ function TransclusionComponent({
       <div
         className="luthor-transclusion luthor-transclusion--loading"
         data-luthor-transclusion-ref={ref}
+        role="note"
+        aria-busy="true"
+        aria-label={`Loading transclusion: ${ref}`}
       >
         <span className="luthor-transclusion__ref">{ref}</span>
       </div>
@@ -89,6 +92,7 @@ function TransclusionComponent({
       <blockquote
         className="luthor-transclusion luthor-transclusion--resolved"
         data-luthor-transclusion-ref={ref}
+        aria-label={`Transclusion of ${ref}`}
       >
         <cite className="luthor-transclusion__ref">{ref}</cite>
         <div className="luthor-transclusion__content">{content}</div>
@@ -100,6 +104,8 @@ function TransclusionComponent({
     <div
       className="luthor-transclusion luthor-transclusion--unresolved"
       data-luthor-transclusion-ref={ref}
+      role="note"
+      aria-label={`Unresolved transclusion: ${ref}`}
     >
       <span className="luthor-transclusion__chip">{ref}</span>
     </div>

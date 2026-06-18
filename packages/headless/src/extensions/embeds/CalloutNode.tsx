@@ -58,6 +58,7 @@ function CalloutComponent({
     <aside
       className="luthor-callout luthor-callout--transcript"
       data-luthor-callout={CALLOUT_KIND}
+      aria-label={title}
     >
       <span className="luthor-callout__label">{title}</span>
       <div className="luthor-callout__body">
