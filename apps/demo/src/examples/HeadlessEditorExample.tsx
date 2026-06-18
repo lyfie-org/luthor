@@ -5,7 +5,29 @@
  * Build freely. Credit kindly.
  */
 
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties } from "react";
+/**
+ * Custom headless editor example.
+ *
+ * This is **not** a shipped Luthor preset — it lives in the demo app to show how
+ * a consumer composes a fully custom editor surface from the public primitives:
+ * the headless editor system (`createEditorSystem` + `RichText`) for the visual
+ * canvas, the source converters (`markdownToJSON`/`jsonToMarkdown`/…) for the
+ * JSON/Markdown/HTML tabs, and a hand-rolled text-button toolbar. Everything here
+ * is reachable from `@lyfie/luthor` / `@lyfie/luthor-headless`, so this doubles as
+ * a recipe for building your own editor instead of using a batteries-included
+ * preset.
+ */
+
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import {
   createEditorThemeStyleVars,
   createEditorSystem,
@@ -21,24 +43,26 @@ import {
   formatHTMLSource,
   formatJSONSource,
   formatMarkdownSource,
+  createExtensiveExtensions,
+  extensiveExtensions,
+  PresetFeaturePolicy,
   type EditorThemeOverrides,
   type SyntaxHighlightColorMode,
   type SyntaxHighlightColors,
   type SyntaxHighlightColorTokens,
-} from "../../core";
-import {
-  createExtensiveExtensions,
-  extensiveExtensions,
   type ExtensiveEditorProps,
   type ExtensiveEditorRef,
   type FeatureFlag,
   type FeatureFlagOverrides,
-} from "../extensive";
-import { PresetFeaturePolicy, joinClassNames } from "../_shared";
+} from "@lyfie/luthor";
 
 const { Provider, useEditor } = createEditorSystem<typeof extensiveExtensions>();
 
-export const HEADLESS_EDITOR_DEFAULT_MODES = ["visual-only", "visual", "json", "markdown", "html"] as const;
+function joinClassNames(...names: Array<string | false | null | undefined>): string {
+  return names.filter(Boolean).join(" ");
+}
+
+const HEADLESS_EXAMPLE_DEFAULT_MODES = ["visual-only", "visual", "json", "markdown", "html"] as const;
 
 const HEADLESS_MODE_LABELS = {
   "visual-only": "Visual Only",
@@ -100,7 +124,7 @@ const EMPTY_DOCUMENT = {
   },
 };
 
-export const HEADLESS_EDITOR_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
+const HEADLESS_EXAMPLE_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   bold: true,
   italic: true,
   underline: false,
@@ -136,7 +160,7 @@ export const HEADLESS_EDITOR_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   themeToggle: false,
 };
 
-const HEADLESS_EDITOR_ENFORCED_FEATURE_FLAGS: FeatureFlagOverrides = {
+const HEADLESS_EXAMPLE_ENFORCED_FEATURE_FLAGS: FeatureFlagOverrides = {
   draggableBlock: false,
   themeToggle: false,
   table: false,
@@ -150,10 +174,34 @@ const HEADLESS_EDITOR_ENFORCED_FEATURE_FLAGS: FeatureFlagOverrides = {
   floatingToolbar: false,
 };
 
-const HEADLESS_EDITOR_FEATURE_POLICY = new PresetFeaturePolicy<FeatureFlag>(
-  HEADLESS_EDITOR_DEFAULT_FEATURE_FLAGS,
-  HEADLESS_EDITOR_ENFORCED_FEATURE_FLAGS,
+const HEADLESS_EXAMPLE_FEATURE_POLICY = new PresetFeaturePolicy<FeatureFlag>(
+  HEADLESS_EXAMPLE_DEFAULT_FEATURE_FLAGS,
+  HEADLESS_EXAMPLE_ENFORCED_FEATURE_FLAGS,
 );
+
+/**
+ * The slice of editor commands this example's toolbar drives. The headless
+ * command registry is broadly typed across the public package surface, so a
+ * consumer composing its own toolbar narrows it to the calls it actually uses —
+ * exactly what this example does.
+ */
+type HeadlessExampleCommands = Partial<{
+  toggleBold: () => void;
+  toggleItalic: () => void;
+  toggleStrikethrough: () => void;
+  formatText: (format: string) => void;
+  removeLink: () => void;
+  toggleParagraph: () => void;
+  toggleHeading: (tag: string) => void;
+  toggleUnorderedList: () => void;
+  toggleOrderedList: () => void;
+  toggleCodeBlock: () => void;
+  toggleQuote: () => void;
+  insertHorizontalRule: () => void;
+  insertHardBreak: () => void;
+  undo: () => void;
+  redo: () => void;
+}>;
 
 type HeadlessActiveStates = {
   bold?: boolean;
@@ -175,34 +223,34 @@ type HeadlessActiveStates = {
   canRedo?: boolean;
 };
 
-type HeadlessEditorSourceMode = Exclude<HeadlessEditorPresetMode, "visual" | "visual-only">;
+type HeadlessExampleSourceMode = Exclude<HeadlessExampleMode, "visual" | "visual-only">;
 
-type HeadlessEditorContentState = {
+type HeadlessExampleContentState = {
   json: string;
   markdown: string;
   html: string;
 };
 
-type HeadlessEditorSourceError = {
-  mode: HeadlessEditorSourceMode;
+type HeadlessExampleSourceError = {
+  mode: HeadlessExampleSourceMode;
   error: string;
 };
 
-type HeadlessEditorMethods = {
+type HeadlessExampleMethods = {
   injectJSON: (content: string) => void;
   getJSON: () => string;
   getMarkdown: () => string;
   getHTML: () => string;
 };
 
-export type HeadlessEditorPresetMode = (typeof HEADLESS_EDITOR_DEFAULT_MODES)[number];
+export type HeadlessExampleMode = (typeof HEADLESS_EXAMPLE_DEFAULT_MODES)[number];
 
-export type HeadlessEditorPresetProps = Omit<
+export type HeadlessEditorExampleProps = Omit<
   ExtensiveEditorProps,
   "featureFlags" | "availableModes" | "initialMode" | "defaultEditorView"
 > & {
-  initialMode?: HeadlessEditorPresetMode;
-  defaultEditorView?: HeadlessEditorPresetMode;
+  initialMode?: HeadlessExampleMode;
+  defaultEditorView?: HeadlessExampleMode;
   featureFlags?: FeatureFlagOverrides;
 };
 
@@ -261,7 +309,7 @@ function parseJSONSource(value: string): unknown {
   return JSON.parse(trimmed);
 }
 
-function parseSourceToJSON(mode: HeadlessEditorSourceMode, value: string): unknown {
+function parseSourceToJSON(mode: HeadlessExampleSourceMode, value: string): unknown {
   switch (mode) {
     case "json":
       return parseJSONSource(value);
@@ -272,11 +320,11 @@ function parseSourceToJSON(mode: HeadlessEditorSourceMode, value: string): unkno
   }
 }
 
-function isHeadlessVisualMode(mode: HeadlessEditorPresetMode): mode is "visual" | "visual-only" {
+function isHeadlessVisualMode(mode: HeadlessExampleMode): mode is "visual" | "visual-only" {
   return mode === "visual" || mode === "visual-only";
 }
 
-function convertJSONToSource(mode: HeadlessEditorSourceMode, value: unknown): string {
+function convertJSONToSource(mode: HeadlessExampleSourceMode, value: unknown): string {
   const parsed = parseVisualJSON(value);
   switch (mode) {
     case "json":
@@ -290,7 +338,7 @@ function convertJSONToSource(mode: HeadlessEditorSourceMode, value: unknown): st
 
 function resolvePlaceholders(
   placeholder: ExtensiveEditorProps["placeholder"],
-): HeadlessEditorContentState & { visual: string } {
+): HeadlessExampleContentState & { visual: string } {
   if (typeof placeholder === "string" || typeof placeholder === "undefined") {
     return {
       visual: placeholder ?? DEFAULT_VISUAL_PLACEHOLDER,
@@ -308,29 +356,30 @@ function resolvePlaceholders(
   };
 }
 
-function HeadlessEditorContent({
+function HeadlessExampleContent({
   initialMode,
   placeholders,
   showLineNumbers,
   onReady,
 }: {
-  initialMode: HeadlessEditorPresetMode;
-  placeholders: HeadlessEditorContentState & { visual: string };
+  initialMode: HeadlessExampleMode;
+  placeholders: HeadlessExampleContentState & { visual: string };
   showLineNumbers: boolean;
-  onReady?: (methods: HeadlessEditorMethods) => void;
+  onReady?: (methods: HeadlessExampleMethods) => void;
 }) {
-  const { activeStates, commands, export: exportApi, import: importApi } = useEditor();
-  const [mode, setMode] = useState<HeadlessEditorPresetMode>(initialMode);
-  const [sourceState, setSourceState] = useState<HeadlessEditorContentState>({
+  const { activeStates, commands: editorCommands, export: exportApi, import: importApi } = useEditor();
+  const commands = editorCommands as unknown as HeadlessExampleCommands;
+  const [mode, setMode] = useState<HeadlessExampleMode>(initialMode);
+  const [sourceState, setSourceState] = useState<HeadlessExampleContentState>({
     json: "",
     markdown: "",
     html: "",
   });
-  const [sourceError, setSourceError] = useState<HeadlessEditorSourceError | null>(null);
+  const [sourceError, setSourceError] = useState<HeadlessExampleSourceError | null>(null);
   const readyRef = useRef(false);
   const typedActiveStates = activeStates as HeadlessActiveStates;
 
-  const syncSourceStateFromVisual = useCallback((): HeadlessEditorContentState => {
+  const syncSourceStateFromVisual = useCallback((): HeadlessExampleContentState => {
     const visualJSON = parseVisualJSON(exportApi.toJSON());
     const next = {
       json: convertJSONToSource("json", visualJSON),
@@ -342,7 +391,7 @@ function HeadlessEditorContent({
   }, [exportApi]);
 
   const setVisualFromSource = useCallback(
-    (sourceMode: HeadlessEditorSourceMode, sourceValue: string): unknown => {
+    (sourceMode: HeadlessExampleSourceMode, sourceValue: string): unknown => {
       const parsedJSON = parseSourceToJSON(sourceMode, sourceValue);
       importApi.fromJSON(parsedJSON);
       return parsedJSON;
@@ -350,7 +399,7 @@ function HeadlessEditorContent({
     [importApi],
   );
 
-  const editorMethods = useMemo<HeadlessEditorMethods>(
+  const editorMethods = useMemo<HeadlessExampleMethods>(
     () => ({
       injectJSON: (content: string) => {
         try {
@@ -381,7 +430,7 @@ function HeadlessEditorContent({
   }, [editorMethods, onReady]);
 
   const handleModeChange = useCallback(
-    (nextMode: HeadlessEditorPresetMode) => {
+    (nextMode: HeadlessExampleMode) => {
       if (nextMode === mode) {
         return;
       }
@@ -489,8 +538,8 @@ function HeadlessEditorContent({
       <div className="luthor-editor-header">
         <ModeTabs
           mode={mode}
-          onModeChange={(nextMode) => handleModeChange(nextMode as HeadlessEditorPresetMode)}
-          availableModes={HEADLESS_EDITOR_DEFAULT_MODES}
+          onModeChange={(nextMode) => handleModeChange(nextMode as HeadlessExampleMode)}
+          availableModes={HEADLESS_EXAMPLE_DEFAULT_MODES}
           labels={HEADLESS_MODE_LABELS}
         />
       </div>
@@ -749,7 +798,7 @@ function HeadlessEditorContent({
   );
 }
 
-export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEditorPresetProps>(
+export const HeadlessEditorExample = forwardRef<ExtensiveEditorRef, HeadlessEditorExampleProps>(
   (
     {
       className,
@@ -780,14 +829,14 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
 
     const requestedInitialMode = defaultEditorView ?? initialMode;
-    const resolvedInitialMode = HEADLESS_EDITOR_DEFAULT_MODES.includes(requestedInitialMode)
+    const resolvedInitialMode = HEADLESS_EXAMPLE_DEFAULT_MODES.includes(requestedInitialMode)
       ? requestedInitialMode
       : "visual";
 
     const placeholders = useMemo(() => resolvePlaceholders(placeholder), [placeholder]);
 
     const resolvedFeatureFlags = useMemo<FeatureFlagOverrides>(
-      () => HEADLESS_EDITOR_FEATURE_POLICY.resolve(featureFlags),
+      () => HEADLESS_EXAMPLE_FEATURE_POLICY.resolve(featureFlags),
       [featureFlags],
     );
     const resolvedSyntaxHighlighting = useMemo<"auto" | "disabled">(
@@ -836,7 +885,7 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
       showLineNumbers,
     ]);
 
-    const [methods, setMethods] = useState<HeadlessEditorMethods | null>(null);
+    const [methods, setMethods] = useState<HeadlessExampleMethods | null>(null);
     const didHydrateDefaultContentRef = useRef(false);
 
     useEffect(() => {
@@ -860,14 +909,14 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
     );
 
     const handleReady = useCallback(
-      (nextMethods: HeadlessEditorMethods) => {
+      (nextMethods: HeadlessExampleMethods) => {
         setMethods(nextMethods);
 
         if (!didHydrateDefaultContentRef.current) {
           if (defaultContent) {
             nextMethods.injectJSON(defaultContent);
           } else if (showDefaultContent) {
-            // Demo starter content is app-owned; package presets remain content-neutral by default.
+            // Demo starter content is app-owned; the example stays content-neutral by default.
           }
           didHydrateDefaultContentRef.current = true;
         }
@@ -891,7 +940,7 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
         style={wrapperStyleVars}
       >
         <Provider extensions={presetExtensions}>
-          <HeadlessEditorContent
+          <HeadlessExampleContent
             initialMode={resolvedInitialMode}
             placeholders={placeholders}
             showLineNumbers={showLineNumbers}
@@ -903,4 +952,4 @@ export const HeadlessEditorPreset = forwardRef<ExtensiveEditorRef, HeadlessEdito
   },
 );
 
-HeadlessEditorPreset.displayName = "HeadlessEditorPreset";
+HeadlessEditorExample.displayName = "HeadlessEditorExample";

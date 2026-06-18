@@ -10,30 +10,30 @@
 import {
   type EditorPreset,
   ExtensiveEditor,
-  HeadlessEditorPreset,
   HTMLEditor,
   LegacyRichEditor,
   MarkDownEditor,
+  PapyraEditor,
   presetRegistry,
 } from '@lyfie/luthor';
 import Link from 'next/link';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   WEB_DEMO_EXTENSIVE_CONTENT,
-  WEB_DEMO_HEADLESS_PRESET_CONTENT,
   WEB_DEMO_HTML_EDITOR_CONTENT,
   WEB_DEMO_LEGACY_RICH_CONTENT,
   WEB_DEMO_MD_EDITOR_CONTENT,
+  WEB_DEMO_PAPYRA_CONTENT,
 } from './demo-content';
 
 type Theme = 'light' | 'dark';
 
 const VISIBLE_PRESET_IDS = [
   'extensive',
+  'papyra',
   'legacy-rich',
   'md-editor',
   'html-editor',
-  'headless-editor',
 ] as const;
 
 type VisiblePresetId = (typeof VISIBLE_PRESET_IDS)[number];
@@ -76,11 +76,11 @@ const presetDetails: Record<VisiblePresetId, PresetDetails> = {
     customization: 'Uses LegacyRichEditor under the hood with html source mode defaults.',
     docsPath: '/docs/luthor/presets/html-editor/',
   },
-  'headless-editor': {
-    summary: 'Basic rich-text preset with simple controls and full source tabs for lightweight authoring.',
-    useCases: 'Best for starter editors, internal tools, and simple text workflows with clean output.',
-    customization: 'Focused feature profile keeps only essential formatting and structure controls enabled.',
-    docsPath: '/docs/luthor/presets/headless-editor-preset/',
+  papyra: {
+    summary: 'Markdown-native note canvas with Obsidian-style embeds, token theming, and a host adapter seam.',
+    useCases: 'Best for note apps and knowledge tools that keep clean .md as the source of truth.',
+    customization: 'Token-driven theme, floating toolbar, enforced markdown-safe feature policy, and an injectable adapter for media, wikilinks, and transclusion.',
+    docsPath: '/docs/luthor/presets/papyra-editor/',
   },
 };
 
@@ -89,7 +89,7 @@ const presetTag: Record<VisiblePresetId, string> = {
   'legacy-rich': '<LegacyRichEditor />',
   'md-editor': '<MarkDownEditor />',
   'html-editor': '<HTMLEditor />',
-  'headless-editor': '<HeadlessEditorPreset />',
+  papyra: '<PapyraEditor />',
 };
 
 const presetHeading: Record<VisiblePresetId, string> = {
@@ -97,7 +97,7 @@ const presetHeading: Record<VisiblePresetId, string> = {
   'legacy-rich': 'Legacy Rich Editor Preset',
   'md-editor': 'MD Editor Preset',
   'html-editor': 'HTML Editor Preset',
-  'headless-editor': 'Headless Editor Preset',
+  papyra: 'Papyra Editor Preset',
 };
 
 const defaultPresetDetails: PresetDetails = {
@@ -198,14 +198,13 @@ function HTMLEditorExperience({
   );
 }
 
-function HeadlessExperience({ siteTheme }: { siteTheme: Theme }) {
+function PapyraExperience({ siteTheme }: { siteTheme: Theme }) {
   return (
     <PresetSurface>
-      <HeadlessEditorPreset
-        defaultContent={WEB_DEMO_HEADLESS_PRESET_CONTENT}
+      <PapyraEditor
+        defaultContent={WEB_DEMO_PAPYRA_CONTENT}
         initialTheme={siteTheme}
         showDefaultContent={false}
-        defaultEditorView="visual"
       />
     </PresetSurface>
   );
@@ -219,8 +218,8 @@ function PresetRenderer({ presetId, siteTheme }: PresetRendererProps) {
       return <MarkDownEditorExperience siteTheme={siteTheme} />;
     case 'html-editor':
       return <HTMLEditorExperience siteTheme={siteTheme} />;
-    case 'headless-editor':
-      return <HeadlessExperience siteTheme={siteTheme} />;
+    case 'papyra':
+      return <PapyraExperience siteTheme={siteTheme} />;
     case 'extensive':
     default:
       return <ExtensiveExperience siteTheme={siteTheme} />;

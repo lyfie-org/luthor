@@ -11,7 +11,7 @@ keywords:
   - "legacy-rich"
   - "md-editor"
   - "html-editor"
-  - "headless-editor"
+  - "papyra"
 props:
   - "featureFlags"
   - "availableModes"
@@ -21,7 +21,7 @@ exports:
   - "LegacyRichEditor"
   - "MarkDownEditor"
   - "HTMLEditor"
-  - "HeadlessEditorPreset"
+  - "PapyraEditor"
 commands:
   []
 extensions:
@@ -51,6 +51,6 @@ This page maps preset exports to registry keys and reference pages.
 | `LegacyRichEditor` | `legacy-rich` | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |
 | `MarkDownEditor` | `md-editor` | [Markdown Editor](/docs/luthor/presets/md-editor/) |
 | `HTMLEditor` | `html-editor` | [HTML Editor](/docs/luthor/presets/html-editor/) |
-| `HeadlessEditorPreset` | `headless-editor` | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |
+| `PapyraEditor` | `papyra` | [Papyra Editor](/docs/luthor/presets/papyra-editor/) |
 
 

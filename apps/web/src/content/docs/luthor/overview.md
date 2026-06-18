@@ -47,7 +47,7 @@ navOrder: 10
 
 ## Key exports
 
-- Preset components: `ExtensiveEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `HeadlessEditorPreset`
+- Preset components: `ExtensiveEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `PapyraEditor`
 - Registry and factories: `presetRegistry`, `createExtensivePreset`, `createExtensiveExtensions`
 - Shared command layer: `generateCommands`, `registerKeyboardShortcuts`
 

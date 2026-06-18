@@ -17,11 +17,14 @@ import {
   DecoratorNode,
   DOMConversionMap,
   DOMConversionOutput,
+  type ElementNode,
   LexicalEditor,
+  type LexicalNode,
   NodeKey,
   SerializedLexicalNode,
   Spread,
 } from "lexical";
+import type { ElementTransformer } from "@lexical/markdown";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { BaseExtension } from "../base/BaseExtension";
 import { BaseExtensionConfig, ExtensionCategory } from "../types";
@@ -979,3 +982,88 @@ export class YouTubeEmbedExtension extends BaseExtension<
 }
 
 export const youTubeEmbedExtension = new YouTubeEmbedExtension();
+
+/** Create a {@link YouTubeEmbedNode}. */
+export function $createYouTubeEmbedNode(
+  payload: YouTubeEmbedPayload,
+): YouTubeEmbedNode {
+  return new YouTubeEmbedNode(payload);
+}
+
+/** Type guard for {@link YouTubeEmbedNode}. */
+export function $isYouTubeEmbedNode(
+  node: LexicalNode | null | undefined,
+): node is YouTubeEmbedNode {
+  return node instanceof YouTubeEmbedNode;
+}
+
+/**
+ * Embed-URL conversion defaults used when a YouTube embed is parsed from
+ * markdown (rather than inserted through the toolbar). They mirror the
+ * {@link YouTubeEmbedExtension} constructor defaults so a markdown-authored
+ * embed resolves the same canonical player URL the toolbar would produce.
+ */
+const YOUTUBE_MARKDOWN_EMBED_OPTIONS = {
+  allowFullscreen: true,
+  autoplay: false,
+  controls: true,
+  nocookie: true,
+  rel: 1,
+  start: 0,
+} as const;
+
+/**
+ * Lossless bidirectional markdown transformer for {@link YouTubeEmbedNode}.
+ *
+ * Import: a line that is exactly `![[youtube:url]]` (optionally
+ * `![[youtube:url|caption]]`) becomes a YouTube embed. Export: a YouTube embed
+ * serializes back to the same syntax using its stored (canonical embed) URL.
+ *
+ * The stored `src` is always the canonical `…/embed/<id>` player URL, so a body
+ * written with a `watch`/`youtu.be`/`shorts` link normalises to that form on the
+ * first pass and is byte-stable on every pass after — the same first-pass
+ * normalisation convention the other embeds use (e.g. callout marker case).
+ *
+ * Width/height/alignment are session-only presentation state (like image
+ * dimensions, they have no markdown representation) and default on parse, so the
+ * markdown text itself round-trips verbatim.
+ *
+ * **Ordering:** this transformer **must** be tried ahead of the general
+ * `![[…]]` file-embed transformer, whose `[^\]]+` target would otherwise claim
+ * `youtube:url` as a filename.
+ */
+export const YOUTUBE_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
+  dependencies: [YouTubeEmbedNode],
+  export: (node) => {
+    if (!$isYouTubeEmbedNode(node)) {
+      return null;
+    }
+    const { src, caption } = node.getPayload();
+    return caption && caption.trim() !== ""
+      ? `![[youtube:${src}|${caption}]]`
+      : `![[youtube:${src}]]`;
+  },
+  regExp: /^!\[\[youtube:([^\]|]+)(?:\|([^\]]+))?\]\]\s*$/,
+  replace: (parentNode: ElementNode, _children, match) => {
+    const raw = (match[1] ?? "").trim();
+    if (!raw) {
+      return;
+    }
+    const embedUrl = toEmbedUrl(raw, YOUTUBE_MARKDOWN_EMBED_OPTIONS) ?? raw;
+    const rawCaption = match[2];
+    const caption =
+      rawCaption !== undefined && rawCaption.trim() !== ""
+        ? rawCaption.trim()
+        : "";
+    parentNode.replace(
+      $createYouTubeEmbedNode({
+        src: embedUrl,
+        width: 640,
+        height: 480,
+        alignment: "center",
+        caption,
+      }),
+    );
+  },
+  type: "element",
+};

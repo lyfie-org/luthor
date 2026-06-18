@@ -153,7 +153,7 @@ Use this page for exact prop names and discovery tokens.
 
 ## Preset-level code intelligence toggle
 
-- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.
+- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `PapyraEditor` use `featureFlags.codeIntelligence`.
 
 ~~~tsx
 <ExtensiveEditor featureFlags={{ codeIntelligence: false }} />
@@ -198,6 +198,7 @@ Use this page for exact prop names and discovery tokens.
 - `paragraphLabel`
 - `syncHeadingOptionsWithCommands`
 - `slashCommandVisibility`
+- `extraSlashCommands`
 - `shortcutConfig`
 - `commandPaletteShortcutOnly`
 - `isListStyleDropdownEnabled`

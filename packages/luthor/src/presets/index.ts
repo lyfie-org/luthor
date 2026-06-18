@@ -16,7 +16,20 @@ import {
 import { mdEditorPreset, MarkDownEditor } from "./md-editor";
 import { htmlEditorPreset, HTMLEditor } from "./html-editor";
 import { legacyRichPreset, LegacyRichEditor } from "./legacy-rich";
-import { headlessEditorPreset, HeadlessEditorPreset } from "./headless-editor";
+import {
+  papyraPreset,
+  createPapyraPreset,
+  PapyraEditor,
+  PAPYRA_AVAILABLE_MODES,
+  papyraFeaturePolicy,
+  PAPYRA_FEATURE_DEFAULTS,
+  PAPYRA_FEATURE_ENFORCED,
+  PAPYRA_THEME_TOKEN_NAMES,
+  PAPYRA_THEME_OVERRIDES,
+  PAPYRA_COLORED_VARIANT_CLASS,
+  resolvePapyraThemeOverrides,
+  createPapyraThemeOverrides,
+} from "./papyra";
 import type {
   ExtensiveEditorMode,
   ExtensiveEditorProps,
@@ -36,7 +49,15 @@ import type {
   LegacyRichEditorMode,
   LegacyRichSourceFormat,
 } from "./legacy-rich";
-import type { HeadlessEditorPresetProps } from "./headless-editor";
+import type {
+  PapyraEditorProps,
+  PapyraEditorRef,
+  PapyraOutlineHeading,
+  PapyraBlockAnchor,
+  PapyraPresetConfig,
+  PapyraThemeTokenName,
+  PapyraThemeOptions,
+} from "./papyra";
 
 export { createPresetEditorConfig } from "../core/preset-config";
 export * from "./_shared";
@@ -65,8 +86,18 @@ export {
   HTMLEditor,
   legacyRichPreset,
   LegacyRichEditor,
-  headlessEditorPreset,
-  HeadlessEditorPreset,
+  papyraPreset,
+  createPapyraPreset,
+  PapyraEditor,
+  PAPYRA_AVAILABLE_MODES,
+  papyraFeaturePolicy,
+  PAPYRA_FEATURE_DEFAULTS,
+  PAPYRA_FEATURE_ENFORCED,
+  PAPYRA_THEME_TOKEN_NAMES,
+  PAPYRA_THEME_OVERRIDES,
+  PAPYRA_COLORED_VARIANT_CLASS,
+  resolvePapyraThemeOverrides,
+  createPapyraThemeOverrides,
 };
 
 export type {
@@ -87,7 +118,13 @@ export type {
   LegacyRichEditorProps,
   LegacyRichEditorMode,
   LegacyRichSourceFormat,
-  HeadlessEditorPresetProps,
+  PapyraEditorProps,
+  PapyraEditorRef,
+  PapyraOutlineHeading,
+  PapyraBlockAnchor,
+  PapyraPresetConfig,
+  PapyraThemeTokenName,
+  PapyraThemeOptions,
 };
 
 export const presetRegistry: Record<string, EditorPreset> = {
@@ -95,5 +132,5 @@ export const presetRegistry: Record<string, EditorPreset> = {
   "legacy-rich": legacyRichPreset,
   "md-editor": mdEditorPreset,
   "html-editor": htmlEditorPreset,
-  "headless-editor": headlessEditorPreset,
+  papyra: papyraPreset,
 };

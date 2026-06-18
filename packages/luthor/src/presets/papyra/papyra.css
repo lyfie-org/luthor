@@ -1,0 +1,308 @@
+/**
+ * Copyright (c) Luthor Team and contributors.
+ * Open source under the MIT License (LICENSE).
+ * Fork it. Remix it. Ship it.
+ * Build freely. Credit kindly.
+ */
+
+/*
+ * Editorial typography + theming for the `papyra` preset (Sprint 1.2).
+ *
+ * Colors flow through the token bridge in `theme.ts` (passed as
+ * `editorThemeOverrides`); this file owns the surfaces Luthor has no theme
+ * token for — type families, heading ink, selection, and the colored
+ * light-lock. Every value is `var(--papyra-*, fallback)` and the preset bundles
+ * no fonts: the host loads Marcellus / Sora / Roboto Mono and the fallbacks are
+ * generic family keywords (never hex).
+ */
+
+.luthor-preset-papyra {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--papyra-font-body, "Sora", ui-sans-serif, system-ui, sans-serif);
+}
+
+.luthor-preset-papyra .luthor-editor {
+  min-height: 320px;
+}
+
+.luthor-preset-papyra .luthor-content-editable {
+  font-family: var(--papyra-font-body, "Sora", ui-sans-serif, system-ui, sans-serif);
+}
+
+/* Headings — Marcellus, heading ink token (falls back to body ink). */
+.luthor-preset-papyra .luthor-heading-h1,
+.luthor-preset-papyra .luthor-heading-h2,
+.luthor-preset-papyra .luthor-heading-h3,
+.luthor-preset-papyra .luthor-heading-h4,
+.luthor-preset-papyra .luthor-heading-h5,
+.luthor-preset-papyra .luthor-heading-h6 {
+  font-family: var(--papyra-font-heading, "Marcellus", ui-serif, Georgia, serif);
+  color: var(--papyra-text-heading, var(--papyra-text, inherit));
+}
+
+/* Inline + block code — Roboto Mono. */
+.luthor-preset-papyra .luthor-text-code,
+.luthor-preset-papyra .luthor-code-block,
+.luthor-preset-papyra .luthor-content-editable code,
+.luthor-preset-papyra .luthor-content-editable pre {
+  font-family: var(--papyra-font-mono, "Roboto Mono", ui-monospace, SFMono-Regular, monospace);
+}
+
+/* Selection — accent-tinted paper. */
+.luthor-preset-papyra .luthor-content-editable ::selection {
+  background: var(--papyra-selection-bg, var(--papyra-accent-surface, var(--luthor-preset-muted)));
+}
+
+/*
+ * Colored notes (light-lock): the wrapper also hard-sets `initialTheme="light"`.
+ * Ink stays readable on the host-painted tint via a dedicated on-tint token,
+ * falling back to the standard body ink.
+ */
+.luthor-preset-papyra.luthor-preset-papyra--colored .luthor-content-editable {
+  color: var(--papyra-text-on-tint, var(--papyra-text, var(--luthor-preset-fg)));
+}
+
+/*
+ * Embeds (Sprint 1.3a) — `[[wikilink]]` and `![[file.ext]]`.
+ *
+ * The nodes live in `@lyfie/luthor-headless` and render only class hooks (no
+ * inline color); the preset skins them through the token bridge so they stay on
+ * the editorial palette. Wikilinks read as accent-tinted links; an unresolved
+ * file reference renders as a bordered chip. Every value is `var(--papyra-*,
+ * fallback)` — no hex.
+ */
+.luthor-preset-papyra .luthor-wikilink {
+  color: var(--papyra-accent-text, var(--papyra-text, inherit));
+  text-decoration: none;
+  border-bottom: 1px solid
+    var(--papyra-accent-border, var(--papyra-accent-surface, currentColor));
+  cursor: pointer;
+}
+
+.luthor-preset-papyra .luthor-wikilink[aria-disabled="true"] {
+  cursor: text;
+  opacity: 0.85;
+}
+
+.luthor-preset-papyra .luthor-file-embed--image,
+.luthor-preset-papyra .luthor-file-embed--video {
+  display: block;
+  max-width: 100%;
+  margin: 1rem 0;
+}
+
+.luthor-preset-papyra .luthor-file-embed--audio {
+  display: block;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.luthor-preset-papyra .luthor-file-embed--chip,
+.luthor-preset-papyra .luthor-file-embed--link {
+  display: inline-block;
+  padding: 0.15em 0.5em;
+  border: 1px solid
+    var(--papyra-accent-border, var(--papyra-accent-surface, currentColor));
+  border-radius: 0.4em;
+  font-family: var(--papyra-font-mono, "Roboto Mono", ui-monospace, SFMono-Regular, monospace);
+  font-size: 0.9em;
+  color: var(--papyra-accent-text, var(--papyra-text, inherit));
+  text-decoration: none;
+}
+
+/*
+ * Saved web card (Sprint 1.5) — `![[card:url]]`.
+ *
+ * The node lives in `@lyfie/luthor-headless` and renders only class hooks (no
+ * inline color); the preset skins it through the token bridge. The whole card is
+ * an anchor to the original URL; archived metadata (image / description /
+ * favicon) is optional, so the layout collapses gracefully to a titled link.
+ * Every value is `var(--papyra-*, fallback)` — no hex.
+ */
+.luthor-preset-papyra .luthor-saved-card {
+  display: flex;
+  gap: 0.85rem;
+  margin: 1rem 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid
+    var(--papyra-accent-border, var(--papyra-accent-surface, currentColor));
+  border-radius: 0.6em;
+  background: var(--papyra-surface-muted, transparent);
+  color: inherit;
+  text-decoration: none;
+  align-items: center;
+}
+
+.luthor-preset-papyra .luthor-saved-card--loading {
+  opacity: 0.7;
+}
+
+.luthor-preset-papyra .luthor-saved-card__image {
+  flex: 0 0 auto;
+  width: 5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: 0.4em;
+}
+
+.luthor-preset-papyra .luthor-saved-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.luthor-preset-papyra .luthor-saved-card__title {
+  font-family: var(--papyra-font-heading, "Marcellus", ui-serif, Georgia, serif);
+  color: var(--papyra-text-heading, var(--papyra-text, inherit));
+  font-weight: 600;
+}
+
+.luthor-preset-papyra .luthor-saved-card__description {
+  color: var(--papyra-text-muted, var(--papyra-text, inherit));
+  font-size: 0.9em;
+}
+
+.luthor-preset-papyra .luthor-saved-card__source {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  font-family: var(--papyra-font-mono, "Roboto Mono", ui-monospace, SFMono-Regular, monospace);
+  font-size: 0.8em;
+  color: var(--papyra-accent-text, var(--papyra-text, inherit));
+}
+
+.luthor-preset-papyra .luthor-saved-card__favicon {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+}
+
+.luthor-preset-papyra .luthor-saved-card__source-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Transcription callout (Sprint 1.5) — `> [!transcript]`.
+ *
+ * The node lives in `@lyfie/luthor-headless` and renders only class hooks (no
+ * inline color); the preset skins it on the same accent-tinted surface as the
+ * quote (`--papyra-accent-surface` paper, `--papyra-accent` rule), with a
+ * Marcellus label. The body is display-only transcript text. Every value is
+ * `var(--papyra-*, fallback)` — no hex.
+ */
+.luthor-preset-papyra .luthor-callout {
+  display: block;
+  margin: 1rem 0;
+  padding: 0.75rem 0.9rem;
+  border-inline-start: 3px solid
+    var(--papyra-accent, var(--luthor-preset-accent));
+  border-radius: 0.4em;
+  background: var(--papyra-accent-surface, var(--papyra-surface-muted, transparent));
+  color: var(--papyra-text, inherit);
+}
+
+.luthor-preset-papyra .luthor-callout__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--papyra-font-heading, "Marcellus", ui-serif, Georgia, serif);
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--papyra-accent-text, var(--papyra-text, inherit));
+}
+
+.luthor-preset-papyra .luthor-callout__line {
+  margin: 0;
+}
+
+.luthor-preset-papyra .luthor-callout__line--blank {
+  height: 0.6em;
+}
+
+/*
+ * Rich media embeds (Sprint 1.5) — `![[youtube:url]]` and `![[iframe:url]]`.
+ *
+ * The nodes live in `@lyfie/luthor-headless` (shared with the extensive/legacy
+ * presets) and render a `.luthor-media-embed-shell` carrying the iframe; the
+ * preset only rounds the frame and skins the caption onto the editorial palette.
+ * Every value is `var(--papyra-*, fallback)` — no hex.
+ */
+.luthor-preset-papyra .luthor-media-embed-shell {
+  border-radius: 0.5em;
+  overflow: hidden;
+  border: 1px solid
+    var(--papyra-accent-border, var(--papyra-accent-surface, transparent));
+}
+
+.luthor-preset-papyra .luthor-media-embed-shell + figcaption {
+  font-family: var(--papyra-font-body, "Sora", ui-sans-serif, system-ui, sans-serif);
+  color: var(--papyra-text-muted, var(--papyra-text, inherit));
+}
+
+/*
+ * Render-state variants (Sprint 1.5).
+ *
+ * `focus` — a centered, distraction-free measure. The only chrome Papyra keeps
+ * is the floating toolbar, which already hides until there is a selection, so
+ * focus mode just widens and centers the writing column. `--papyra-focus-measure`
+ * lets the host tune the line length.
+ */
+.luthor-preset-papyra--focus .luthor-content-editable {
+  max-width: var(--papyra-focus-measure, 72ch);
+  margin-inline: auto;
+}
+
+/*
+ * `locked` — the secure-note placeholder. The wrapper renders this *instead of*
+ * the editor, so the body is never in the DOM. The bars are decorative
+ * (`aria-hidden`) and carry no text; a blur keeps them from reading as content.
+ */
+.luthor-preset-papyra--locked {
+  min-height: 320px;
+  padding: 1.5rem;
+}
+
+.luthor-preset-papyra__lock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+}
+
+.luthor-preset-papyra__lock-line {
+  display: block;
+  height: 0.8rem;
+  border-radius: 0.4rem;
+  background: var(--papyra-surface-muted, var(--luthor-preset-muted));
+}
+
+.luthor-preset-papyra__lock-line:nth-child(1) {
+  width: 60%;
+}
+
+.luthor-preset-papyra__lock-line:nth-child(2) {
+  width: 90%;
+}
+
+.luthor-preset-papyra__lock-line:nth-child(3) {
+  width: 75%;
+}
+
+/* Respect reduced-motion: drop the editor's theme/UI transitions. */
+@media (prefers-reduced-motion: reduce) {
+  .luthor-preset-papyra,
+  .luthor-preset-papyra *,
+  .luthor-preset-papyra *::before,
+  .luthor-preset-papyra *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

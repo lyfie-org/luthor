@@ -4592,8 +4592,8 @@ export const docsIndex = [
     "title": "Commands Reference",
     "navTitle": "Commands Reference",
     "description": "Dedicated command ID reference for @lyfie/luthor, including generated heading commands.",
-    "content": "\r\n# Commands Reference\r\n\r\nThis is the canonical command ID reference for preset command workflows.\r\n\r\n## What this page answers\r\n\r\n- Which command IDs are public?\r\n- Which IDs are generated from heading options?\r\n\r\n## Public command IDs\r\n\r\n- `block.align-center`\r\n- `block.align-justify`\r\n- `block.align-left`\r\n- `block.align-right`\r\n- `block.code-language`\r\n- `block.code-language.auto`\r\n- `block.codeblock`\r\n- `block.heading1`\r\n- `block.heading2`\r\n- `block.heading3`\r\n- `block.heading4`\r\n- `block.heading5`\r\n- `block.heading6`\r\n- `block.paragraph`\r\n- `block.quote`\r\n- `edit.redo`\r\n- `edit.undo`\r\n- `format.bold`\r\n- `format.code`\r\n- `format.italic`\r\n- `format.strikethrough`\r\n- `format.subscript`\r\n- `format.superscript`\r\n- `format.underline`\r\n- `insert.emoji`\r\n- `insert.gif`\r\n- `insert.horizontal-rule`\r\n- `insert.iframe`\r\n- `insert.image`\r\n- `insert.table`\r\n- `insert.youtube`\r\n- `link.insert`\r\n- `link.remove`\r\n- `list.bullet`\r\n- `list.check`\r\n- `list.numbered`\r\n- `palette.show`\r\n\r\n\r\n",
-    "plainContent": "Commands Reference This is the canonical command ID reference for preset command workflows. What this page answers - Which command IDs are public? - Which IDs are generated from heading options? Public command IDs - block.align-center - block.align-justify - block.align-left - block.align-right - block.code-language - block.code-language.auto - block.codeblock - block.heading1 - block.heading2 - block.heading3 - block.heading4 - block.heading5 - block.heading6 - block.paragraph - block.quote - edit.redo - edit.undo - format.bold - format.code - format.italic - format.strikethrough - format.subscript - format.superscript - format.underline - insert.emoji - insert.gif - insert.horizontal-rule - insert.iframe - insert.image - insert.table - insert.youtube - link.insert - link.remove - list.bullet - list.check - list.numbered - palette.show",
+    "content": "\r\n# Commands Reference\r\n\r\nThis is the canonical command ID reference for preset command workflows.\r\n\r\n## What this page answers\r\n\r\n- Which command IDs are public?\r\n- Which IDs are generated from heading options?\r\n\r\n## Public command IDs\r\n\r\n- `block.align-center`\r\n- `block.align-justify`\r\n- `block.align-left`\r\n- `block.align-right`\r\n- `block.code-language`\r\n- `block.code-language.auto`\r\n- `block.codeblock`\r\n- `block.heading1`\r\n- `block.heading2`\r\n- `block.heading3`\r\n- `block.heading4`\r\n- `block.heading5`\r\n- `block.heading6`\r\n- `block.paragraph`\r\n- `block.quote`\r\n- `edit.redo`\r\n- `edit.undo`\r\n- `format.bold`\r\n- `format.code`\r\n- `format.italic`\r\n- `format.strikethrough`\r\n- `format.subscript`\r\n- `format.superscript`\r\n- `format.underline`\r\n- `insert.emoji`\r\n- `insert.gif`\r\n- `insert.horizontal-rule`\r\n- `insert.iframe`\r\n- `insert.image`\r\n- `insert.table`\r\n- `insert.youtube`\r\n- `link.insert`\r\n- `link.remove`\r\n- `list.bullet`\r\n- `list.check`\r\n- `list.numbered`\r\n- `palette.show`\r\n\r\n## Host-contributed slash commands\r\n\r\nThe IDs above are the editor's built-in catalogue, filtered into the slash menu\r\nby `slashCommandVisibility`. To add commands the catalogue does not cover — for\r\nexample \"Link note\" or \"Insert date\" — pass `extraSlashCommands` to\r\n`<ExtensiveEditor>`. These are appended after the built-ins (so they are **not**\r\nsubject to `slashCommandVisibility`, which only filters the built-ins) and also\r\nappear in the command palette.\r\n\r\nEach command's `action` receives an `ExtensiveSlashCommandContext`. The slash\r\ntrigger (`/query`) is removed and the caret restored before `action` runs, so\r\n`insertText` lands exactly where the slash was typed. The action may be async\r\n(e.g. to await an upload before inserting a reference).\r\n\r\n```tsx\r\n<ExtensiveEditor\r\n  extraSlashCommands={[\r\n    {\r\n      id: \"app.insert-date\",\r\n      label: \"Insert date\",\r\n      description: \"Insert today's date\",\r\n      category: \"Insert\",\r\n      keywords: [\"date\", \"today\"],\r\n      action: ({ insertText }) => insertText(new Date().toISOString().slice(0, 10)),\r\n    },\r\n  ]}\r\n/>\r\n```\r\n\r\n> Memoize the array so the slash menu is not re-registered on every render.\r\n\r\nThe `papyra` preset uses this seam internally to contribute its note-taking\r\ncommands — \"Link note\" (drops the `[[` wikilink trigger), \"Embed media\"\r\n(uploads through the adapter, inserts `![[name]]`), and \"Insert date\".\r\n\r\n\r\n",
+    "plainContent": "Commands Reference This is the canonical command ID reference for preset command workflows. What this page answers - Which command IDs are public? - Which IDs are generated from heading options? Public command IDs - block.align-center - block.align-justify - block.align-left - block.align-right - block.code-language - block.code-language.auto - block.codeblock - block.heading1 - block.heading2 - block.heading3 - block.heading4 - block.heading5 - block.heading6 - block.paragraph - block.quote - edit.redo - edit.undo - format.bold - format.code - format.italic - format.strikethrough - format.subscript - format.superscript - format.underline - insert.emoji - insert.gif - insert.horizontal-rule - insert.iframe - insert.image - insert.table - insert.youtube - link.insert - link.remove - list.bullet - list.check - list.numbered - palette.show Host-contributed slash commands The IDs above are the editor's built-in catalogue, filtered into the slash menu by slashCommandVisibility . To add commands the catalogue does not cover — for example \"Link note\" or \"Insert date\" — pass extraSlashCommands to . These are appended after the built-ins (so they are not subject to slashCommandVisibility , which only filters the built-ins) and also appear in the command palette. Each command's action receives an ExtensiveSlashCommandContext . The slash trigger ( /query ) is removed and the caret restored before action runs, so insertText lands exactly where the slash was typed. The action may be async (e.g. to await an upload before inserting a reference). insertText(new Date().toISOString().slice(0, 10)), }, ]} / Memoize the array so the slash menu is not re-registered on every render. The papyra preset uses this seam internally to contribute its note-taking commands — \"Link note\" (drops the [[ wikilink trigger), \"Embed media\" (uploads through the adapter, inserts ![[name]] ), and \"Insert date\".",
     "sections": [
       {
         "heading": "Overview",
@@ -4612,6 +4612,12 @@ export const docsIndex = [
         "id": "public-command-ids",
         "level": 2,
         "text": "- block.align-center - block.align-justify - block.align-left - block.align-right - block.code-language - block.code-language.auto - block.codeblock - block.heading1 - block.heading2 - block.heading3 - block.heading4 - block.heading5 - block.heading6 - block.paragraph - block.quote - edit.redo - edit.undo - format.bold - format.code - format.italic - format.strikethrough - format.subscript - format.superscript - format.underline - insert.emoji - insert.gif - insert.horizontal-rule - insert.iframe - insert.image - insert.table - insert.youtube - link.insert - link.remove - list.bullet - list.check - list.numbered - palette.show"
+      },
+      {
+        "heading": "Host-contributed slash commands",
+        "id": "host-contributed-slash-commands",
+        "level": 2,
+        "text": "The IDs above are the editor's built-in catalogue, filtered into the slash menu by slashCommandVisibility . To add commands the catalogue does not cover — for example \"Link note\" or \"Insert date\" — pass extraSlashCommands to . These are appended after the built-ins (so they are not subject to slashCommandVisibility , which only filters the built-ins) and also appear in the command palette. Each command's action receives an ExtensiveSlashCommandContext . The slash trigger ( /query ) is removed and the caret restored before action runs, so insertText lands exactly where the slash was typed. The action may be async (e.g. to await an upload before inserting a reference). insertText(new Date().toISOString().slice(0, 10)), }, ]} / Memoize the array so the slash menu is not re-registered on every render. The papyra preset uses this seam internally to contribute its note-taking commands — \"Link note\" (drops the [[ wikilink trigger), \"Embed media\" (uploads through the adapter, inserts ![[name]] ), and \"Insert date\"."
       }
     ],
     "headings": [
@@ -4624,11 +4630,16 @@ export const docsIndex = [
         "level": 2,
         "text": "Public command IDs",
         "id": "public-command-ids"
+      },
+      {
+        "level": 2,
+        "text": "Host-contributed slash commands",
+        "id": "host-contributed-slash-commands"
       }
     ],
     "urlPath": "/docs/luthor/commands-reference/",
     "sourcePath": "apps/web/src/content/docs/luthor/commands-reference.md",
-    "updatedAt": "2026-03-20T17:40:45.071Z",
+    "updatedAt": "2026-06-17T17:49:16.218Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "command",
@@ -5076,7 +5087,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/feature-flags/",
     "sourcePath": "apps/web/src/content/docs/luthor/feature-flags.md",
-    "updatedAt": "2026-05-29T02:31:18.145Z",
+    "updatedAt": "2026-06-18T05:35:40.877Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -5130,7 +5141,7 @@ export const docsIndex = [
     "frameworks": [],
     "lastVerifiedFrom": [
       "packages/luthor/src/presets/extensive/extensions.tsx",
-      "packages/luthor/src/presets/headless-editor/HeadlessEditorPreset.tsx"
+      "packages/luthor/src/presets/legacy-rich/LegacyRichEditor.tsx"
     ],
     "navGroup": "luthor",
     "navOrder": 30,
@@ -5251,8 +5262,8 @@ export const docsIndex = [
     "title": "@lyfie/luthor Overview",
     "navTitle": "@lyfie/luthor Overview",
     "description": "Preset package overview, export surfaces, and when to choose @lyfie/luthor over headless runtime.",
-    "content": "\r\n# @lyfie/luthor Overview\r\n\r\n`@lyfie/luthor` ships preset editors on top of the headless runtime.\r\n\r\n## What this page answers\r\n\r\n- What does the preset package export?\r\n- When should I choose presets?\r\n\r\n## Use this package when\r\n\r\n- You need a production UI fast.\r\n- You want source modes, toolbar, and feature gates prewired.\r\n- You still need override hooks through props.\r\n\r\n## Key exports\r\n\r\n- Preset components: `ExtensiveEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `HeadlessEditorPreset`\n- Registry and factories: `presetRegistry`, `createExtensivePreset`, `createExtensiveExtensions`\n- Shared command layer: `generateCommands`, `registerKeyboardShortcuts`\n\r\n\r\n",
-    "plainContent": "@lyfie/luthor Overview @lyfie/luthor ships preset editors on top of the headless runtime. What this page answers - What does the preset package export? - When should I choose presets? Use this package when - You need a production UI fast. - You want source modes, toolbar, and feature gates prewired. - You still need override hooks through props. Key exports - Preset components: ExtensiveEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , HeadlessEditorPreset - Registry and factories: presetRegistry , createExtensivePreset , createExtensiveExtensions - Shared command layer: generateCommands , registerKeyboardShortcuts",
+    "content": "\r\n# @lyfie/luthor Overview\r\n\r\n`@lyfie/luthor` ships preset editors on top of the headless runtime.\r\n\r\n## What this page answers\r\n\r\n- What does the preset package export?\r\n- When should I choose presets?\r\n\r\n## Use this package when\r\n\r\n- You need a production UI fast.\r\n- You want source modes, toolbar, and feature gates prewired.\r\n- You still need override hooks through props.\r\n\r\n## Key exports\r\n\r\n- Preset components: `ExtensiveEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `PapyraEditor`\r\n- Registry and factories: `presetRegistry`, `createExtensivePreset`, `createExtensiveExtensions`\r\n- Shared command layer: `generateCommands`, `registerKeyboardShortcuts`\r\n\r\n\r\n",
+    "plainContent": "@lyfie/luthor Overview @lyfie/luthor ships preset editors on top of the headless runtime. What this page answers - What does the preset package export? - When should I choose presets? Use this package when - You need a production UI fast. - You want source modes, toolbar, and feature gates prewired. - You still need override hooks through props. Key exports - Preset components: ExtensiveEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , PapyraEditor - Registry and factories: presetRegistry , createExtensivePreset , createExtensiveExtensions - Shared command layer: generateCommands , registerKeyboardShortcuts",
     "sections": [
       {
         "heading": "Overview",
@@ -5276,7 +5287,7 @@ export const docsIndex = [
         "heading": "Key exports",
         "id": "key-exports",
         "level": 2,
-        "text": "- Preset components: ExtensiveEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , HeadlessEditorPreset - Registry and factories: presetRegistry , createExtensivePreset , createExtensiveExtensions - Shared command layer: generateCommands , registerKeyboardShortcuts"
+        "text": "- Preset components: ExtensiveEditor , LegacyRichEditor , MarkDownEditor , HTMLEditor , PapyraEditor - Registry and factories: presetRegistry , createExtensivePreset , createExtensiveExtensions - Shared command layer: generateCommands , registerKeyboardShortcuts"
       }
     ],
     "headings": [
@@ -5298,7 +5309,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/overview/",
     "sourcePath": "apps/web/src/content/docs/luthor/overview.md",
-    "updatedAt": "2026-05-29T02:31:18.143Z",
+    "updatedAt": "2026-06-18T05:35:25.528Z",
     "package": "luthor",
     "docType": "guide",
     "surface": "preset",
@@ -5399,8 +5410,8 @@ export const docsIndex = [
     "title": "Presets Catalog",
     "navTitle": "Presets Catalog",
     "description": "Catalog of all @lyfie/luthor preset exports and presetRegistry keys with quick navigation links.",
-    "content": "\r\n# Presets Catalog\r\n\r\nThis page maps preset exports to registry keys and reference pages.\r\n\r\n## What this page answers\r\n\r\n- Which presets exist?\r\n- Which registry key maps to each preset?\r\n\r\n| Preset export | Registry key | Page |\n| --- | --- | --- |\n| `ExtensiveEditor` | `extensive` | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |\n| `LegacyRichEditor` | `legacy-rich` | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |\n| `MarkDownEditor` | `md-editor` | [Markdown Editor](/docs/luthor/presets/md-editor/) |\n| `HTMLEditor` | `html-editor` | [HTML Editor](/docs/luthor/presets/html-editor/) |\n| `HeadlessEditorPreset` | `headless-editor` | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |\n\r\n\r\n",
-    "plainContent": "Presets Catalog This page maps preset exports to registry keys and reference pages. What this page answers - Which presets exist? - Which registry key maps to each preset? Preset export Registry key Page --- --- --- ExtensiveEditor extensive Extensive Editor LegacyRichEditor legacy-rich Legacy Rich Editor MarkDownEditor md-editor Markdown Editor HTMLEditor html-editor HTML Editor HeadlessEditorPreset headless-editor Headless Editor Preset",
+    "content": "\r\n# Presets Catalog\r\n\r\nThis page maps preset exports to registry keys and reference pages.\r\n\r\n## What this page answers\r\n\r\n- Which presets exist?\r\n- Which registry key maps to each preset?\r\n\r\n| Preset export | Registry key | Page |\r\n| --- | --- | --- |\r\n| `ExtensiveEditor` | `extensive` | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |\r\n| `LegacyRichEditor` | `legacy-rich` | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |\r\n| `MarkDownEditor` | `md-editor` | [Markdown Editor](/docs/luthor/presets/md-editor/) |\r\n| `HTMLEditor` | `html-editor` | [HTML Editor](/docs/luthor/presets/html-editor/) |\r\n| `PapyraEditor` | `papyra` | [Papyra Editor](/docs/luthor/presets/papyra-editor/) |\r\n\r\n\r\n",
+    "plainContent": "Presets Catalog This page maps preset exports to registry keys and reference pages. What this page answers - Which presets exist? - Which registry key maps to each preset? Preset export Registry key Page --- --- --- ExtensiveEditor extensive Extensive Editor LegacyRichEditor legacy-rich Legacy Rich Editor MarkDownEditor md-editor Markdown Editor HTMLEditor html-editor HTML Editor PapyraEditor papyra Papyra Editor",
     "sections": [
       {
         "heading": "Overview",
@@ -5412,7 +5423,7 @@ export const docsIndex = [
         "heading": "What this page answers",
         "id": "what-this-page-answers",
         "level": 2,
-        "text": "- Which presets exist? - Which registry key maps to each preset? Preset export Registry key Page --- --- --- ExtensiveEditor extensive Extensive Editor LegacyRichEditor legacy-rich Legacy Rich Editor MarkDownEditor md-editor Markdown Editor HTMLEditor html-editor HTML Editor HeadlessEditorPreset headless-editor Headless Editor Preset"
+        "text": "- Which presets exist? - Which registry key maps to each preset? Preset export Registry key Page --- --- --- ExtensiveEditor extensive Extensive Editor LegacyRichEditor legacy-rich Legacy Rich Editor MarkDownEditor md-editor Markdown Editor HTMLEditor html-editor HTML Editor PapyraEditor papyra Papyra Editor"
       }
     ],
     "headings": [
@@ -5424,7 +5435,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/presets/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets.md",
-    "updatedAt": "2026-05-29T02:31:18.142Z",
+    "updatedAt": "2026-06-18T05:35:05.576Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -5435,7 +5446,7 @@ export const docsIndex = [
       "legacy-rich",
       "md-editor",
       "html-editor",
-      "headless-editor"
+      "papyra"
     ],
     "props": [
       "featureFlags",
@@ -5447,7 +5458,7 @@ export const docsIndex = [
       "LegacyRichEditor",
       "MarkDownEditor",
       "HTMLEditor",
-      "HeadlessEditorPreset"
+      "PapyraEditor"
     ],
     "commands": [],
     "extensions": [],
@@ -5473,9 +5484,6 @@ export const docsIndex = [
       "extensive",
       "extensiveeditor",
       "featureflags",
-      "headless",
-      "headless-editor",
-      "headlesseditorpreset",
       "html",
       "html-editor",
       "htmleditor",
@@ -5490,6 +5498,8 @@ export const docsIndex = [
       "md-editor",
       "navigation",
       "of",
+      "papyra",
+      "papyraeditor",
       "preset",
       "presetregistry",
       "presets",
@@ -5505,14 +5515,13 @@ export const docsIndex = [
         "editor",
         "extensive",
         "featureflags",
-        "headless",
-        "headless-editor",
         "html",
         "html-editor",
         "legacy",
         "legacy-rich",
         "md",
         "md-editor",
+        "papyra",
         "presetregistry",
         "presets",
         "rich"
@@ -5523,10 +5532,10 @@ export const docsIndex = [
       ],
       "exports": [
         "extensiveeditor",
-        "headlesseditorpreset",
         "htmleditor",
         "legacyricheditor",
         "markdowneditor",
+        "papyraeditor",
         "presetregistry"
       ],
       "commands": [],
@@ -5751,194 +5760,6 @@ export const docsIndex = [
         "table",
         "youtube",
         "youtube-embed"
-      ],
-      "frameworks": [
-        "react"
-      ]
-    }
-  },
-  {
-    "slug": [
-      "luthor",
-      "presets",
-      "headless-editor-preset"
-    ],
-    "title": "Headless Editor Preset",
-    "navTitle": "Headless Editor Preset",
-    "description": "Preset wrapper that demonstrates source mode handling and controlled bridge behavior on top of extensive extensions.",
-    "content": "\r\n# Headless Editor Preset\r\n\r\nThis preset offers a constrained profile for source-mode-centric use cases.\r\n\r\n## When to use this\r\n\r\nUse `HeadlessEditorPreset` when you want a compact preset that still exposes JSON/Markdown/HTML mode transitions.\r\n\r\n## Mode profile\n\n- Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.\n\n## Preset props\n\n- `initialMode`: Sets the first active mode when no `defaultEditorView` is provided.\n- `defaultEditorView`: Alias for initial mode selection; useful when binding mode via config objects.\n- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.\n\n## Code intelligence toggle\n\n~~~tsx\n<HeadlessEditorPreset\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { HeadlessEditorPreset } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <HeadlessEditorPreset initialMode=\"visual\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Headless Editor Preset This preset offers a constrained profile for source-mode-centric use cases. When to use this Use HeadlessEditorPreset when you want a compact preset that still exposes JSON/Markdown/HTML mode transitions. Mode profile - Modes: visual-only , visual , json , markdown , html . Preset props - initialMode : Sets the first active mode when no defaultEditorView is provided. - defaultEditorView : Alias for initial mode selection; useful when binding mode via config objects. - featureFlags : Optional per-feature overrides. Includes codeIntelligence . Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { HeadlessEditorPreset } from '@lyfie/luthor'; export function App() { return ; }",
-    "sections": [
-      {
-        "heading": "Overview",
-        "id": "overview",
-        "level": 1,
-        "text": "Headless Editor Preset This preset offers a constrained profile for source-mode-centric use cases."
-      },
-      {
-        "heading": "When to use this",
-        "id": "when-to-use-this",
-        "level": 2,
-        "text": "Use HeadlessEditorPreset when you want a compact preset that still exposes JSON/Markdown/HTML mode transitions."
-      },
-      {
-        "heading": "Mode profile",
-        "id": "mode-profile",
-        "level": 2,
-        "text": "- Modes: visual-only , visual , json , markdown , html ."
-      },
-      {
-        "heading": "Preset props",
-        "id": "preset-props",
-        "level": 2,
-        "text": "- initialMode : Sets the first active mode when no defaultEditorView is provided. - defaultEditorView : Alias for initial mode selection; useful when binding mode via config objects. - featureFlags : Optional per-feature overrides. Includes codeIntelligence ."
-      },
-      {
-        "heading": "Code intelligence toggle",
-        "id": "code-intelligence-toggle",
-        "level": 2,
-        "text": "tsx tsx import '@lyfie/luthor/styles.css'; import { HeadlessEditorPreset } from '@lyfie/luthor'; export function App() { return ; }"
-      }
-    ],
-    "headings": [
-      {
-        "level": 2,
-        "text": "When to use this",
-        "id": "when-to-use-this"
-      },
-      {
-        "level": 2,
-        "text": "Mode profile",
-        "id": "mode-profile"
-      },
-      {
-        "level": 2,
-        "text": "Preset props",
-        "id": "preset-props"
-      },
-      {
-        "level": 2,
-        "text": "Code intelligence toggle",
-        "id": "code-intelligence-toggle"
-      }
-    ],
-    "urlPath": "/docs/luthor/presets/headless-editor-preset/",
-    "sourcePath": "apps/web/src/content/docs/luthor/presets/headless-editor-preset.md",
-    "updatedAt": "2026-03-23T06:32:41.690Z",
-    "package": "luthor",
-    "docType": "reference",
-    "surface": "preset",
-    "keywords": [
-      "HeadlessEditorPreset",
-      "headless-editor preset",
-      "source mode"
-    ],
-    "props": [
-      "initialMode",
-      "defaultEditorView",
-      "featureFlags"
-    ],
-    "exports": [
-      "HeadlessEditorPreset",
-      "headlessEditorPreset"
-    ],
-    "commands": [
-      "block.codeblock",
-      "edit.undo",
-      "edit.redo"
-    ],
-    "extensions": [],
-    "nodes": [
-      "code",
-      "paragraph",
-      "list"
-    ],
-    "frameworks": [
-      "react"
-    ],
-    "lastVerifiedFrom": [
-      "packages/luthor/src/presets/headless-editor/HeadlessEditorPreset.tsx"
-    ],
-    "navGroup": "luthor",
-    "navOrder": 130,
-    "navHidden": false,
-    "searchTokens": [
-      "and",
-      "behavior",
-      "block",
-      "block.codeblock",
-      "bridge",
-      "code",
-      "codeblock",
-      "controlled",
-      "defaulteditorview",
-      "demonstrates",
-      "edit",
-      "edit.redo",
-      "edit.undo",
-      "editor",
-      "extensions",
-      "extensive",
-      "featureflags",
-      "handling",
-      "headless",
-      "headless editor preset",
-      "headless-editor preset",
-      "headlesseditorpreset",
-      "initialmode",
-      "list",
-      "mode",
-      "of",
-      "on",
-      "paragraph",
-      "preset",
-      "preset wrapper that demonstrates source mode handling and controlled bridge behavior on top of extensive extensions.",
-      "react",
-      "redo",
-      "source",
-      "source mode",
-      "that",
-      "top",
-      "undo",
-      "wrapper"
-    ],
-    "searchTokenBuckets": {
-      "keywords": [
-        "defaulteditorview",
-        "editor",
-        "featureflags",
-        "headless",
-        "headless-editor preset",
-        "headlesseditorpreset",
-        "initialmode",
-        "mode",
-        "preset",
-        "source",
-        "source mode"
-      ],
-      "props": [
-        "defaulteditorview",
-        "featureflags",
-        "initialmode"
-      ],
-      "exports": [
-        "headlesseditorpreset"
-      ],
-      "commands": [
-        "block",
-        "block.codeblock",
-        "codeblock",
-        "edit",
-        "edit.redo",
-        "edit.undo",
-        "redo",
-        "undo"
-      ],
-      "extensions": [],
-      "nodes": [
-        "code",
-        "list",
-        "paragraph"
       ],
       "frameworks": [
         "react"
@@ -6490,13 +6311,350 @@ export const docsIndex = [
   {
     "slug": [
       "luthor",
+      "presets",
+      "papyra-editor"
+    ],
+    "title": "Papyra Editor",
+    "navTitle": "Papyra Editor",
+    "description": "Markdown-native, frontmatter-agnostic, token-themed note canvas preset with Obsidian-style embeds and a host adapter seam.",
+    "content": "\n# Papyra Editor\n\n`PapyraEditor` is a markdown-native note canvas composed on top of the extensive\npreset. It is the editor the [Papyra](https://github.com/lyfie-org) note app\nships, but it is host-agnostic: every external capability (media, uploads, note\nsearch and navigation, block resolution) flows through an injected adapter, so\nany note app can reuse it by supplying different configuration.\n\n## When to use this\n\nReach for `PapyraEditor` when your body of truth is a frontmatter-free markdown\nfile and you want a polished, restricted writing surface with Obsidian-style\nembeds — `[[Note]]` wikilinks, `![[file.ext]]` media, `![[Note#^id]]`\ntransclusion, and trailing `^id` block anchors — that survives a lossless\nround-trip back to that file.\n\n## The four invariants\n\n1. **Markdown is the source of truth.** `getMarkdown()` returns exactly what\n   lands in the `.md` body (CommonMark plus the documented embed set). There is\n   no JSON or HTML \"real\" format. The preset runs `sourceMetadataMode=\"none\"`.\n2. **The body is frontmatter-free.** The host splits YAML from the body and\n   hands the editor only the body; the preset never renders, emits, or mangles\n   frontmatter.\n3. **The caret is sacred.** The editor is **uncontrolled** — it reads\n   `defaultContent` once on mount and never exposes a `value`/`onChange`\n   round-trip. Adopt a remote revision by remounting (change the React `key`) or\n   by calling `setMarkdown` imperatively, never with a live-DOM patch.\n4. **Theming is token-driven.** All color and typography flow from\n   `var(--papyra-*, fallback)` tokens. The preset bundles no fonts — the host\n   loads Marcellus / Sora / Roboto Mono.\n\n## Locked contract\n\n`PapyraEditor` hard-locks the props it owns; callers cannot reach them:\n\n- Modes are fixed to `['visual', 'markdown']` (no `json`/`html`).\n- View tabs hidden. By default the only toolbar is floating-on-selection; the\n  opt-in `toolbar` prop adds an always-visible toolbar, but it is never pinned.\n- `markdownSourceOfTruth` is on and `sourceMetadataMode=\"none\"`.\n- `featureFlags` are routed through `papyraFeaturePolicy`, whose **enforced** set\n  keeps markdown-breaking features off — font/size/line-height pickers, arbitrary\n  text color and highlight, sub/superscript, the in-editor theme toggle, and\n  draggable blocks **cannot be switched back on** by a caller flag.\n\n## Preset props\n\n- `adapter`: the host seam (`PapyraEditorAdapter`). Supplies media resolution,\n  uploads, note search/navigation, and block resolution. Omit it and the preset\n  uses a graceful no-op adapter so the editor still renders and round-trips.\n- `colored`: light-locks a tinted (\"colored\") note so ink stays readable on the\n  host-painted paper, regardless of the ambient app theme.\n- `readOnly`: mounts a non-editable surface (`visual-only`, click-to-edit\n  disabled) that emits no change events — safe for revision previews and\n  time-machine scrubbing. Pair with repeated `setMarkdown` calls.\n- `variant`: `\"focus\"` widens the body to a centered, distraction-free measure;\n  `\"default\"` is the standard editorial measure.\n- `toolbar`: opt into a persistent toolbar above the editor (default `false` —\n  floating-on-selection only). It lists just Papyra's markdown-safe actions\n  (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,\n  lists + checklist, code block, horizontal rule, table, image); the restricted\n  controls (typography pickers, color/highlight, sub/superscript, alignment, theme\n  toggle) can never appear, and the toolbar is never pinned. Only renders in the\n  editable visual surface, so `readOnly`/`locked` never show it.\n- `locked`: withholds the body entirely — renders a blurred placeholder and\n  **never mounts the editor**, so there is no plaintext in the DOM. The lock is\n  UX only; the server (`401`/`PathGuard`) is the security boundary.\n- `onOutlineChange`: fired (debounced) with the current document outline; drives\n  a host's live table-of-contents scrollbar. Read-only observation — the caret\n  is never touched.\n- `featureFlags`: per-feature overrides, resolved through the enforced policy.\n\n## Imperative ref\n\n`PapyraEditorRef` extends `ExtensiveEditorRef` with the markdown-first surface a\nhost drives: `setMarkdown(md)` (host-driven adopt), `focus()`, `getOutline()` /\n`scrollToHeading(key)` for the table of contents, `getBlocks()` for trailing\nblock anchors, and `getMentions()` for `@username` detection. The host calls\nthese during its own orchestration (autosave, remount, TOC) — they never fire on\nkeystrokes.\n\n## The host adapter\n\nThe adapter is the entire contract between the preset and the host. The editor\ndeclares it; the host implements it.\n\n~~~ts\ninterface PapyraEditorAdapter {\n  resolveMediaUrl(filename: string): string;                 // ![[file]] → URL\n  uploadMedia(file: File): Promise<{ filename: string }>;    // drop/paste → store\n  openNote(ref: { title?: string; id?: string }): void;      // [[Note]] → navigate\n  searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;\n  resolveBlock?(ref: { note: string; blockId: string }): Promise<string | null>;\n  resolveCard?(url: string): Promise<{\n    title?: string;\n    description?: string;\n    image?: string;\n    favicon?: string;\n    siteName?: string;\n  } | null>;                                                 // ![[card:url]] → metadata\n  onMentions?(usernames: string[]): void;\n}\n~~~\n\nThe adapter's resolvers are where the host's server-side authorization lives. The\neditor's blur/lock is UX, never the boundary.\n\n## Usage\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor';\nimport { useRef } from 'react';\n\nexport function NoteCanvas({ body }: { body: string }) {\n  const ref = useRef<PapyraEditorRef>(null);\n\n  return (\n    <PapyraEditor\n      ref={ref}\n      defaultContent={body}\n      adapter={{\n        resolveMediaUrl: (name) => `/api/media/${name}`,\n        uploadMedia: async (file) => {\n          const stored = await upload(file);\n          return { filename: stored.name };\n        },\n        openNote: ({ title }) => router.push(`/notes/${title}`),\n        searchNotes: (q) => api.searchNotes(q),\n      }}\n      onReady={(editor) => {\n        // Read the body imperatively — never a controlled value.\n        console.log(editor.getMarkdown());\n      }}\n    />\n  );\n}\n~~~\n\n`PapyraEditor` is also available as a subpath export:\n\n~~~ts\nimport { PapyraEditor } from '@lyfie/luthor/presets/papyra';\n~~~\n\n## Embeds and lossless round-trips\n\nEvery custom embed ships a bidirectional markdown transformer, so the body that\n`getMarkdown()` returns is byte-stable across repeated saves:\n\n| Markdown            | Renders as                          |\n| ------------------- | ----------------------------------- |\n| `![[diagram.png]]`  | inline image (via `resolveMediaUrl`)|\n| `[[Note]]`          | wikilink (click → `openNote`)       |\n| `[[Note\\|alias]]`   | aliased wikilink                    |\n| `![[Note#^id]]`     | read-only transclusion              |\n| `text ^id`          | trailing block anchor (non-rendering)|\n| `![[card:url]]`     | saved web card (via `resolveCard`)  |\n| `![[card:url\\|title]]` | saved web card with author title |\n| `![[youtube:url]]`  | YouTube player (optional `\\|caption`)|\n| `![[iframe:url]]`   | iframe embed (optional `\\|caption`) |\n| `> [!transcript]`   | transcription callout (display-only)|\n\nThe embed nodes and transformers live in `@lyfie/luthor-headless` and are\nre-exported through `@lyfie/luthor` — the preset only composes and themes them.\n\nThe **transcription callout** is an Obsidian-style `> [!transcript]` block: an\nopening line (optionally `> [!transcript] Title`) followed by `>`-prefixed body\nlines, terminated by a blank line. It renders as an accent-tinted, labelled block\non the quote surface and is display-only — the transcript text lives inline in the\nbody, so it needs no resolver and round-trips verbatim (the marker is normalized\nto lowercase).\n\nThe **saved web card** (`![[card:url]]`) renders an archived link card. When the\nhost wires `resolveCard`, the editor enriches it with the page's open-graph\nmetadata (title, description, preview image, favicon, site name); without a\nresolver the card degrades to a titled link to the URL. As with every embed, only\nthe verbatim `url` (and optional `|title`) is serialized, so the metadata is\nrender-only and the markdown round-trips unchanged.\n\nThe **YouTube** (`![[youtube:url]]`) and **iframe** (`![[iframe:url]]`) embeds\nreuse the shared media nodes from `@lyfie/luthor-headless` and carry an optional\n`|caption`. A YouTube `watch`/`youtu.be`/`shorts` link is normalized to the\ncanonical `…/embed/<id>` player URL on the first pass and is byte-stable\nafterward; an iframe URL gains `https://` if it has none. Frame size and\nalignment are session-only presentation state with no markdown representation\n(like image dimensions), so the markdown text itself round-trips unchanged.\n\n## Command surface\n\nThe slash menu and command palette are curated down to note-taking primitives:\nheadings (H1–H3), lists and checklist, quote, code block, table, horizontal\nrule, and image. The typography pickers, view tabs, and pinned toolbar are\nenforced off.\n\nOn top of the curated built-ins, PapyraEditor contributes three note-specific\nslash commands through the editor's `extraSlashCommands` seam:\n\n| Command       | Inserts                                                        |\n| ------------- | ------------------------------------------------------------- |\n| `Link note`   | the `[[` trigger, which opens the wikilink typeahead          |\n| `Embed media` | a picked file → `adapter.uploadMedia` → `![[filename]]`       |\n| `Insert date` | today's date as `YYYY-MM-DD`                                  |\n\nEach writes markdown-native syntax at the caret, so the body stays the source of\ntruth and round-trips unchanged. The commands are appended automatically — there\nis nothing to wire beyond supplying an `adapter` for `Embed media` to upload\nthrough.\n",
+    "plainContent": "Papyra Editor PapyraEditor is a markdown-native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host-agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse it by supplying different configuration. When to use this Reach for PapyraEditor when your body of truth is a frontmatter-free markdown file and you want a polished, restricted writing surface with Obsidian-style embeds — [[Note]] wikilinks, ![[file.ext]] media, ![[Note ^id]] transclusion, and trailing ^id block anchors — that survives a lossless round-trip back to that file. The four invariants 1. Markdown is the source of truth. getMarkdown() returns exactly what lands in the .md body (CommonMark plus the documented embed set). There is no JSON or HTML \"real\" format. The preset runs sourceMetadataMode=\"none\" . 2. The body is frontmatter-free. The host splits YAML from the body and hands the editor only the body; the preset never renders, emits, or mangles frontmatter. 3. The caret is sacred. The editor is uncontrolled — it reads defaultContent once on mount and never exposes a value / onChange round-trip. Adopt a remote revision by remounting (change the React key ) or by calling setMarkdown imperatively, never with a live-DOM patch. 4. Theming is token-driven. All color and typography flow from var(--papyra- , fallback) tokens. The preset bundles no fonts — the host loads Marcellus / Sora / Roboto Mono. Locked contract PapyraEditor hard-locks the props it owns; callers cannot reach them: - Modes are fixed to ['visual', 'markdown'] (no json / html ). - View tabs hidden. By default the only toolbar is floating-on-selection; the opt-in toolbar prop adds an always-visible toolbar, but it is never pinned. - markdownSourceOfTruth is on and sourceMetadataMode=\"none\" . - featureFlags are routed through papyraFeaturePolicy , whose enforced set keeps markdown-breaking features off — font/size/line-height pickers, arbitrary text color and highlight, sub/superscript, the in-editor theme toggle, and draggable blocks cannot be switched back on by a caller flag. Preset props - adapter : the host seam ( PapyraEditorAdapter ). Supplies media resolution, uploads, note search/navigation, and block resolution. Omit it and the preset uses a graceful no-op adapter so the editor still renders and round-trips. - colored : light-locks a tinted (\"colored\") note so ink stays readable on the host-painted paper, regardless of the ambient app theme. - readOnly : mounts a non-editable surface ( visual-only , click-to-edit disabled) that emits no change events — safe for revision previews and time-machine scrubbing. Pair with repeated setMarkdown calls. - variant : \"focus\" widens the body to a centered, distraction-free measure; \"default\" is the standard editorial measure. - toolbar : opt into a persistent toolbar above the editor (default false — floating-on-selection only). It lists just Papyra's markdown-safe actions (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link, lists + checklist, code block, horizontal rule, table, image); the restricted controls (typography pickers, color/highlight, sub/superscript, alignment, theme toggle) can never appear, and the toolbar is never pinned. Only renders in the editable visual surface, so readOnly / locked never show it. - locked : withholds the body entirely — renders a blurred placeholder and never mounts the editor , so there is no plaintext in the DOM. The lock is UX only; the server ( 401 / PathGuard ) is the security boundary. - onOutlineChange : fired (debounced) with the current document outline; drives a host's live table-of-contents scrollbar. Read-only observation — the caret is never touched. - featureFlags : per-feature overrides, resolved through the enforced policy. Imperative ref PapyraEditorRef extends ExtensiveEditorRef with the markdown-first surface a host drives: setMarkdown(md) (host-driven adopt), focus() , getOutline() / scrollToHeading(key) for the table of contents, getBlocks() for trailing block anchors, and getMentions() for @username detection. The host calls these during its own orchestration (autosave, remount, TOC) — they never fire on keystrokes. The host adapter The adapter is the entire contract between the preset and the host. The editor declares it; the host implements it. ts interface PapyraEditorAdapter { resolveMediaUrl(filename: string): string; // ![[file]] → URL uploadMedia(file: File): Promise ; // drop/paste → store openNote(ref: { title?: string; id?: string }): void; // [[Note]] → navigate searchNotes(q: string): Promise ; resolveBlock?(ref: { note: string; blockId: string }): Promise ; resolveCard?(url: string): Promise ; // ![[card:url]] → metadata onMentions?(usernames: string[]): void; } The adapter's resolvers are where the host's server-side authorization lives. The editor's blur/lock is UX, never the boundary. Usage tsx import '@lyfie/luthor/styles.css'; import { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor'; import { useRef } from 'react'; export function NoteCanvas({ body }: { body: string }) { const ref = useRef (null); return ( /api/media/${name} , uploadMedia: async (file) = { const stored = await upload(file); return { filename: stored.name }; }, openNote: ({ title }) = router.push( /notes/${title} ), searchNotes: (q) = api.searchNotes(q), }} onReady={(editor) = { // Read the body imperatively — never a controlled value. console.log(editor.getMarkdown()); }} / ); } PapyraEditor is also available as a subpath export: ts import { PapyraEditor } from '@lyfie/luthor/presets/papyra'; Embeds and lossless round-trips Every custom embed ships a bidirectional markdown transformer, so the body that getMarkdown() returns is byte-stable across repeated saves: Markdown Renders as ------------------- ----------------------------------- ![[diagram.png]] inline image (via resolveMediaUrl ) [[Note]] wikilink (click → openNote ) [[Note\\ alias]] aliased wikilink ![[Note ^id]] read-only transclusion text ^id trailing block anchor (non-rendering) ![[card:url]] saved web card (via resolveCard ) ![[card:url\\ title]] saved web card with author title ![[youtube:url]] YouTube player (optional \\ caption ) ![[iframe:url]] iframe embed (optional \\ caption ) [!transcript] transcription callout (display-only) The embed nodes and transformers live in @lyfie/luthor-headless and are re-exported through @lyfie/luthor — the preset only composes and themes them. The transcription callout is an Obsidian-style [!transcript] block: an opening line (optionally [!transcript] Title ) followed by -prefixed body lines, terminated by a blank line. It renders as an accent-tinted, labelled block on the quote surface and is display-only — the transcript text lives inline in the body, so it needs no resolver and round-trips verbatim (the marker is normalized to lowercase). The saved web card ( ![[card:url]] ) renders an archived link card. When the host wires resolveCard , the editor enriches it with the page's open-graph metadata (title, description, preview image, favicon, site name); without a resolver the card degrades to a titled link to the URL. As with every embed, only the verbatim url (and optional title ) is serialized, so the metadata is render-only and the markdown round-trips unchanged. The YouTube ( ![[youtube:url]] ) and iframe ( ![[iframe:url]] ) embeds reuse the shared media nodes from @lyfie/luthor-headless and carry an optional caption . A YouTube watch / youtu.be / shorts link is normalized to the canonical …/embed/ player URL on the first pass and is byte-stable afterward; an iframe URL gains https:// if it has none. Frame size and alignment are session-only presentation state with no markdown representation (like image dimensions), so the markdown text itself round-trips unchanged. Command surface The slash menu and command palette are curated down to note-taking primitives: headings (H1–H3), lists and checklist, quote, code block, table, horizontal rule, and image. The typography pickers, view tabs, and pinned toolbar are enforced off. On top of the curated built-ins, PapyraEditor contributes three note-specific slash commands through the editor's extraSlashCommands seam: Command Inserts ------------- ------------------------------------------------------------- Link note the [[ trigger, which opens the wikilink typeahead Embed media a picked file → adapter.uploadMedia → ![[filename]] Insert date today's date as YYYY-MM-DD Each writes markdown-native syntax at the caret, so the body stays the source of truth and round-trips unchanged. The commands are appended automatically — there is nothing to wire beyond supplying an adapter for Embed media to upload through.",
+    "sections": [
+      {
+        "heading": "Overview",
+        "id": "overview",
+        "level": 1,
+        "text": "Papyra Editor PapyraEditor is a markdown-native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host-agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse it by supplying different configuration."
+      },
+      {
+        "heading": "When to use this",
+        "id": "when-to-use-this",
+        "level": 2,
+        "text": "Reach for PapyraEditor when your body of truth is a frontmatter-free markdown file and you want a polished, restricted writing surface with Obsidian-style embeds — [[Note]] wikilinks, ![[file.ext]] media, ![[Note ^id]] transclusion, and trailing ^id block anchors — that survives a lossless round-trip back to that file."
+      },
+      {
+        "heading": "The four invariants",
+        "id": "the-four-invariants",
+        "level": 2,
+        "text": "1. Markdown is the source of truth. getMarkdown() returns exactly what lands in the .md body (CommonMark plus the documented embed set). There is no JSON or HTML \"real\" format. The preset runs sourceMetadataMode=\"none\" . 2. The body is frontmatter-free. The host splits YAML from the body and hands the editor only the body; the preset never renders, emits, or mangles frontmatter. 3. The caret is sacred. The editor is uncontrolled — it reads defaultContent once on mount and never exposes a value / onChange round-trip. Adopt a remote revision by remounting (change the React key ) or by calling setMarkdown imperatively, never with a live-DOM patch. 4. Theming is token-driven. All color and typography flow from var(--papyra- , fallback) tokens. The preset bundles no fonts — the host loads Marcellus / Sora / Roboto Mono."
+      },
+      {
+        "heading": "Locked contract",
+        "id": "locked-contract",
+        "level": 2,
+        "text": "PapyraEditor hard-locks the props it owns; callers cannot reach them: - Modes are fixed to ['visual', 'markdown'] (no json / html ). - View tabs hidden. By default the only toolbar is floating-on-selection; the opt-in toolbar prop adds an always-visible toolbar, but it is never pinned. - markdownSourceOfTruth is on and sourceMetadataMode=\"none\" . - featureFlags are routed through papyraFeaturePolicy , whose enforced set keeps markdown-breaking features off — font/size/line-height pickers, arbitrary text color and highlight, sub/superscript, the in-editor theme toggle, and draggable blocks cannot be switched back on by a caller flag."
+      },
+      {
+        "heading": "Preset props",
+        "id": "preset-props",
+        "level": 2,
+        "text": "- adapter : the host seam ( PapyraEditorAdapter ). Supplies media resolution, uploads, note search/navigation, and block resolution. Omit it and the preset uses a graceful no-op adapter so the editor still renders and round-trips. - colored : light-locks a tinted (\"colored\") note so ink stays readable on the host-painted paper, regardless of the ambient app theme. - readOnly : mounts a non-editable surface ( visual-only , click-to-edit disabled) that emits no change events — safe for revision previews and time-machine scrubbing. Pair with repeated setMarkdown calls. - variant : \"focus\" widens the body to a centered, distraction-free measure; \"default\" is the standard editorial measure. - toolbar : opt into a persistent toolbar above the editor (default false — floating-on-selection only). It lists just Papyra's markdown-safe actions (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link, lists + checklist, code block, horizontal rule, table, image); the restricted controls (typography pickers, color/highlight, sub/superscript, alignment, theme toggle) can never appear, and the toolbar is never pinned. Only renders in the editable visual surface, so readOnly / locked never show it. - locked : withholds the body entirely — renders a blurred placeholder and never mounts the editor , so there is no plaintext in the DOM. The lock is UX only; the server ( 401 / PathGuard ) is the security boundary. - onOutlineChange : fired (debounced) with the current document outline; drives a host's live table-of-contents scrollbar. Read-only observation — the caret is never touched. - featureFlags : per-feature overrides, resolved through the enforced policy."
+      },
+      {
+        "heading": "Imperative ref",
+        "id": "imperative-ref",
+        "level": 2,
+        "text": "PapyraEditorRef extends ExtensiveEditorRef with the markdown-first surface a host drives: setMarkdown(md) (host-driven adopt), focus() , getOutline() / scrollToHeading(key) for the table of contents, getBlocks() for trailing block anchors, and getMentions() for @username detection. The host calls these during its own orchestration (autosave, remount, TOC) — they never fire on keystrokes."
+      },
+      {
+        "heading": "The host adapter",
+        "id": "the-host-adapter",
+        "level": 2,
+        "text": "The adapter is the entire contract between the preset and the host. The editor declares it; the host implements it. ts interface PapyraEditorAdapter { resolveMediaUrl(filename: string): string; // ![[file]] → URL uploadMedia(file: File): Promise ; // drop/paste → store openNote(ref: { title?: string; id?: string }): void; // [[Note]] → navigate searchNotes(q: string): Promise ; resolveBlock?(ref: { note: string; blockId: string }): Promise ; resolveCard?(url: string): Promise ; // ![[card:url]] → metadata onMentions?(usernames: string[]): void; } The adapter's resolvers are where the host's server-side authorization lives. The editor's blur/lock is UX, never the boundary."
+      },
+      {
+        "heading": "Usage",
+        "id": "usage",
+        "level": 2,
+        "text": "tsx import '@lyfie/luthor/styles.css'; import { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor'; import { useRef } from 'react'; export function NoteCanvas({ body }: { body: string }) { const ref = useRef (null); return ( /api/media/${name} , uploadMedia: async (file) = { const stored = await upload(file); return { filename: stored.name }; }, openNote: ({ title }) = router.push( /notes/${title} ), searchNotes: (q) = api.searchNotes(q), }} onReady={(editor) = { // Read the body imperatively — never a controlled value. console.log(editor.getMarkdown()); }} / ); } PapyraEditor is also available as a subpath export: ts import { PapyraEditor } from '@lyfie/luthor/presets/papyra';"
+      },
+      {
+        "heading": "Embeds and lossless round-trips",
+        "id": "embeds-and-lossless-round-trips",
+        "level": 2,
+        "text": "Every custom embed ships a bidirectional markdown transformer, so the body that getMarkdown() returns is byte-stable across repeated saves: Markdown Renders as ------------------- ----------------------------------- ![[diagram.png]] inline image (via resolveMediaUrl ) [[Note]] wikilink (click → openNote ) [[Note\\ alias]] aliased wikilink ![[Note ^id]] read-only transclusion text ^id trailing block anchor (non-rendering) ![[card:url]] saved web card (via resolveCard ) ![[card:url\\ title]] saved web card with author title ![[youtube:url]] YouTube player (optional \\ caption ) ![[iframe:url]] iframe embed (optional \\ caption ) [!transcript] transcription callout (display-only) The embed nodes and transformers live in @lyfie/luthor-headless and are re-exported through @lyfie/luthor — the preset only composes and themes them. The transcription callout is an Obsidian-style [!transcript] block: an opening line (optionally [!transcript] Title ) followed by -prefixed body lines, terminated by a blank line. It renders as an accent-tinted, labelled block on the quote surface and is display-only — the transcript text lives inline in the body, so it needs no resolver and round-trips verbatim (the marker is normalized to lowercase). The saved web card ( ![[card:url]] ) renders an archived link card. When the host wires resolveCard , the editor enriches it with the page's open-graph metadata (title, description, preview image, favicon, site name); without a resolver the card degrades to a titled link to the URL. As with every embed, only the verbatim url (and optional title ) is serialized, so the metadata is render-only and the markdown round-trips unchanged. The YouTube ( ![[youtube:url]] ) and iframe ( ![[iframe:url]] ) embeds reuse the shared media nodes from @lyfie/luthor-headless and carry an optional caption . A YouTube watch / youtu.be / shorts link is normalized to the canonical …/embed/ player URL on the first pass and is byte-stable afterward; an iframe URL gains https:// if it has none. Frame size and alignment are session-only presentation state with no markdown representation (like image dimensions), so the markdown text itself round-trips unchanged."
+      },
+      {
+        "heading": "Command surface",
+        "id": "command-surface",
+        "level": 2,
+        "text": "The slash menu and command palette are curated down to note-taking primitives: headings (H1–H3), lists and checklist, quote, code block, table, horizontal rule, and image. The typography pickers, view tabs, and pinned toolbar are enforced off. On top of the curated built-ins, PapyraEditor contributes three note-specific slash commands through the editor's extraSlashCommands seam: Command Inserts ------------- ------------------------------------------------------------- Link note the [[ trigger, which opens the wikilink typeahead Embed media a picked file → adapter.uploadMedia → ![[filename]] Insert date today's date as YYYY-MM-DD Each writes markdown-native syntax at the caret, so the body stays the source of truth and round-trips unchanged. The commands are appended automatically — there is nothing to wire beyond supplying an adapter for Embed media to upload through."
+      }
+    ],
+    "headings": [
+      {
+        "level": 2,
+        "text": "When to use this",
+        "id": "when-to-use-this"
+      },
+      {
+        "level": 2,
+        "text": "The four invariants",
+        "id": "the-four-invariants"
+      },
+      {
+        "level": 2,
+        "text": "Locked contract",
+        "id": "locked-contract"
+      },
+      {
+        "level": 2,
+        "text": "Preset props",
+        "id": "preset-props"
+      },
+      {
+        "level": 2,
+        "text": "Imperative ref",
+        "id": "imperative-ref"
+      },
+      {
+        "level": 2,
+        "text": "The host adapter",
+        "id": "the-host-adapter"
+      },
+      {
+        "level": 2,
+        "text": "Usage",
+        "id": "usage"
+      },
+      {
+        "level": 2,
+        "text": "Embeds and lossless round-trips",
+        "id": "embeds-and-lossless-round-trips"
+      },
+      {
+        "level": 2,
+        "text": "Command surface",
+        "id": "command-surface"
+      }
+    ],
+    "urlPath": "/docs/luthor/presets/papyra-editor/",
+    "sourcePath": "apps/web/src/content/docs/luthor/presets/papyra-editor.md",
+    "updatedAt": "2026-06-18T13:34:47.563Z",
+    "package": "luthor",
+    "docType": "reference",
+    "surface": "preset",
+    "keywords": [
+      "PapyraEditor",
+      "papyra preset",
+      "markdownSourceOfTruth",
+      "wikilink",
+      "file embed",
+      "transclusion",
+      "saved card",
+      "transcription callout",
+      "PapyraEditorAdapter"
+    ],
+    "props": [
+      "adapter",
+      "colored",
+      "readOnly",
+      "variant",
+      "locked",
+      "toolbar",
+      "onOutlineChange",
+      "featureFlags"
+    ],
+    "exports": [
+      "PapyraEditor",
+      "papyraPreset",
+      "createPapyraPreset",
+      "PapyraEditorAdapter"
+    ],
+    "commands": [
+      "block.heading1",
+      "list.check",
+      "insert.table",
+      "insert.image"
+    ],
+    "extensions": [
+      "wikilink",
+      "file-embed",
+      "transclusion",
+      "block-anchor",
+      "saved-card",
+      "callout"
+    ],
+    "nodes": [
+      "wikilink",
+      "fileEmbed",
+      "transclusion",
+      "blockAnchor",
+      "savedCard",
+      "callout"
+    ],
+    "frameworks": [
+      "react"
+    ],
+    "lastVerifiedFrom": [
+      "packages/luthor/src/presets/papyra/PapyraEditor.tsx",
+      "packages/luthor/src/presets/papyra/adapter.ts",
+      "packages/luthor/src/presets/papyra/embeds.ts"
+    ],
+    "navGroup": "luthor",
+    "navOrder": 110,
+    "navHidden": false,
+    "searchTokens": [
+      "a",
+      "adapter",
+      "agnostic,",
+      "anchor",
+      "and",
+      "block",
+      "block-anchor",
+      "block.heading1",
+      "blockanchor",
+      "callout",
+      "canvas",
+      "card",
+      "check",
+      "colored",
+      "createpapyrapreset",
+      "editor",
+      "embed",
+      "embeds",
+      "featureflags",
+      "file",
+      "file embed",
+      "file-embed",
+      "fileembed",
+      "frontmatter",
+      "heading1",
+      "host",
+      "image",
+      "insert",
+      "insert.image",
+      "insert.table",
+      "list",
+      "list.check",
+      "locked",
+      "markdown",
+      "markdown-native, frontmatter-agnostic, token-themed note canvas preset with obsidian-style embeds and a host adapter seam.",
+      "markdownsourceoftruth",
+      "native,",
+      "note",
+      "obsidian",
+      "onoutlinechange",
+      "papyra",
+      "papyra editor",
+      "papyra preset",
+      "papyraeditor",
+      "papyraeditoradapter",
+      "papyrapreset",
+      "preset",
+      "react",
+      "readonly",
+      "saved",
+      "saved card",
+      "saved-card",
+      "savedcard",
+      "seam",
+      "style",
+      "table",
+      "themed",
+      "token",
+      "toolbar",
+      "transclusion",
+      "transcription",
+      "transcription callout",
+      "variant",
+      "wikilink",
+      "with"
+    ],
+    "searchTokenBuckets": {
+      "keywords": [
+        "adapter",
+        "callout",
+        "card",
+        "colored",
+        "embed",
+        "featureflags",
+        "file",
+        "file embed",
+        "locked",
+        "markdownsourceoftruth",
+        "onoutlinechange",
+        "papyra",
+        "papyra preset",
+        "papyraeditor",
+        "papyraeditoradapter",
+        "preset",
+        "readonly",
+        "saved",
+        "saved card",
+        "toolbar",
+        "transclusion",
+        "transcription",
+        "transcription callout",
+        "variant",
+        "wikilink"
+      ],
+      "props": [
+        "adapter",
+        "colored",
+        "featureflags",
+        "locked",
+        "onoutlinechange",
+        "readonly",
+        "toolbar",
+        "variant"
+      ],
+      "exports": [
+        "createpapyrapreset",
+        "papyraeditor",
+        "papyraeditoradapter",
+        "papyrapreset"
+      ],
+      "commands": [
+        "block",
+        "block.heading1",
+        "check",
+        "heading1",
+        "image",
+        "insert",
+        "insert.image",
+        "insert.table",
+        "list",
+        "list.check",
+        "table"
+      ],
+      "extensions": [
+        "anchor",
+        "block",
+        "block-anchor",
+        "callout",
+        "card",
+        "embed",
+        "file",
+        "file-embed",
+        "saved",
+        "saved-card",
+        "transclusion",
+        "wikilink"
+      ],
+      "nodes": [
+        "blockanchor",
+        "callout",
+        "fileembed",
+        "savedcard",
+        "transclusion",
+        "wikilink"
+      ],
+      "frameworks": [
+        "react"
+      ]
+    }
+  },
+  {
+    "slug": [
+      "luthor",
       "props-reference"
     ],
     "title": "Props Reference",
     "navTitle": "Props Reference",
     "description": "Reference index for ExtensiveEditorProps and common preset prop surfaces, including mode and bridge controls.",
-    "content": "\r\n# Props Reference\r\n\r\nUse this page for exact prop names and discovery tokens.\r\n\r\n## What this page answers\r\n\r\n- Which props control modes, source bridges, and feature gates?\r\n\r\n## High-signal props\r\n\r\n| Area | Props |\r\n| --- | --- |\r\n| Mode control | `initialMode`, `defaultEditorView`, `availableModes` |\r\n| Feature gating | `featureFlags`, `headingOptions`, `slashCommandVisibility` |\r\n| Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |\r\n| Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |\n| List depth | `maxListIndentation` |\n\n## Preset-level code intelligence toggle\n\n- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.\n\n~~~tsx\n<ExtensiveEditor featureFlags={{ codeIntelligence: false }} />\n~~~\n\n## Full `ExtensiveEditorProps` index\n\r\n- `className`\r\n- `onReady`\r\n- `initialTheme`\r\n- `onThemeChange`\r\n- `theme`\r\n- `defaultContent`\r\n- `showDefaultContent`\r\n- `placeholder`\r\n- `defaultEditorView`\r\n- `initialMode`\r\n- `isEditorViewTabsVisible`\r\n- `isEditorViewsTabVisible`\r\n- `availableModes`\r\n- `variantClassName`\r\n- `toolbarLayout`\r\n- `toolbarVisibility`\r\n- `toolbarPosition`\r\n- `toolbarAlignment`\r\n- `toolbarClassName`\r\n- `toolbarStyleVars`\r\n- `quoteClassName`\r\n- `quoteStyleVars`\r\n- `defaultSettings`\r\n- `editorThemeOverrides`\r\n- `isToolbarEnabled`\n- `isToolbarPinned`\n- `imageUploadHandler`\n- `gifUploadHandler`\n- `fontFamilyOptions`\n- `fontSizeOptions`\r\n- `lineHeightOptions`\r\n- `minimumDefaultLineHeight`\r\n- `scaleByRatio`\r\n- `headingOptions`\r\n- `paragraphLabel`\r\n- `syncHeadingOptionsWithCommands`\r\n- `slashCommandVisibility`\r\n- `shortcutConfig`\r\n- `commandPaletteShortcutOnly`\r\n- `isListStyleDropdownEnabled`\r\n- `editOnClick`\r\n- `isDraggableBoxEnabled`\r\n- `featureFlags`\r\n- `sourceMetadataMode`\r\n- `markdownBridgeFlavor`\r\n- `markdownSourceOfTruth`\r\n- `isSyntaxHighlightingEnabled`\r\n- `syntaxHighlightColorMode`\r\n- `syntaxHighlightColors`\r\n- `maxAutoDetectCodeLength`\r\n- `isCopyAllowed`\r\n- `languageOptions`\r\n- `showLineNumbers`\r\n- `maxListIndentation`\r\n\r\n\r\n",
-    "plainContent": "Props Reference Use this page for exact prop names and discovery tokens. What this page answers - Which props control modes, source bridges, and feature gates? High-signal props Area Props --- --- Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation Preset-level code intelligence toggle - ExtensiveEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and HeadlessEditorPreset use featureFlags.codeIntelligence . tsx Full ExtensiveEditorProps index - className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation",
+    "content": "\r\n# Props Reference\r\n\r\nUse this page for exact prop names and discovery tokens.\r\n\r\n## What this page answers\r\n\r\n- Which props control modes, source bridges, and feature gates?\r\n\r\n## High-signal props\r\n\r\n| Area | Props |\r\n| --- | --- |\r\n| Mode control | `initialMode`, `defaultEditorView`, `availableModes` |\r\n| Feature gating | `featureFlags`, `headingOptions`, `slashCommandVisibility` |\r\n| Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |\r\n| Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |\r\n| List depth | `maxListIndentation` |\r\n\r\n## Preset-level code intelligence toggle\r\n\r\n- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `PapyraEditor` use `featureFlags.codeIntelligence`.\r\n\r\n~~~tsx\r\n<ExtensiveEditor featureFlags={{ codeIntelligence: false }} />\r\n~~~\r\n\r\n## Full `ExtensiveEditorProps` index\r\n\r\n- `className`\r\n- `onReady`\r\n- `initialTheme`\r\n- `onThemeChange`\r\n- `theme`\r\n- `defaultContent`\r\n- `showDefaultContent`\r\n- `placeholder`\r\n- `defaultEditorView`\r\n- `initialMode`\r\n- `isEditorViewTabsVisible`\r\n- `isEditorViewsTabVisible`\r\n- `availableModes`\r\n- `variantClassName`\r\n- `toolbarLayout`\r\n- `toolbarVisibility`\r\n- `toolbarPosition`\r\n- `toolbarAlignment`\r\n- `toolbarClassName`\r\n- `toolbarStyleVars`\r\n- `quoteClassName`\r\n- `quoteStyleVars`\r\n- `defaultSettings`\r\n- `editorThemeOverrides`\r\n- `isToolbarEnabled`\r\n- `isToolbarPinned`\r\n- `imageUploadHandler`\r\n- `gifUploadHandler`\r\n- `fontFamilyOptions`\r\n- `fontSizeOptions`\r\n- `lineHeightOptions`\r\n- `minimumDefaultLineHeight`\r\n- `scaleByRatio`\r\n- `headingOptions`\r\n- `paragraphLabel`\r\n- `syncHeadingOptionsWithCommands`\r\n- `slashCommandVisibility`\r\n- `extraSlashCommands`\r\n- `shortcutConfig`\r\n- `commandPaletteShortcutOnly`\r\n- `isListStyleDropdownEnabled`\r\n- `editOnClick`\r\n- `isDraggableBoxEnabled`\r\n- `featureFlags`\r\n- `sourceMetadataMode`\r\n- `markdownBridgeFlavor`\r\n- `markdownSourceOfTruth`\r\n- `isSyntaxHighlightingEnabled`\r\n- `syntaxHighlightColorMode`\r\n- `syntaxHighlightColors`\r\n- `maxAutoDetectCodeLength`\r\n- `isCopyAllowed`\r\n- `languageOptions`\r\n- `showLineNumbers`\r\n- `maxListIndentation`\r\n\r\n\r\n",
+    "plainContent": "Props Reference Use this page for exact prop names and discovery tokens. What this page answers - Which props control modes, source bridges, and feature gates? High-signal props Area Props --- --- Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation Preset-level code intelligence toggle - ExtensiveEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and PapyraEditor use featureFlags.codeIntelligence . tsx Full ExtensiveEditorProps index - className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - extraSlashCommands - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation",
     "sections": [
       {
         "heading": "Overview",
@@ -6520,13 +6678,13 @@ export const docsIndex = [
         "heading": "Preset-level code intelligence toggle",
         "id": "preset-level-code-intelligence-toggle",
         "level": 2,
-        "text": "- ExtensiveEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and HeadlessEditorPreset use featureFlags.codeIntelligence . tsx"
+        "text": "- ExtensiveEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and PapyraEditor use featureFlags.codeIntelligence . tsx"
       },
       {
         "heading": "Full `ExtensiveEditorProps` index",
         "id": "full-extensiveeditorprops-index",
         "level": 2,
-        "text": "- className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation"
+        "text": "- className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - extraSlashCommands - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation"
       }
     ],
     "headings": [
@@ -6553,7 +6711,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/props-reference/",
     "sourcePath": "apps/web/src/content/docs/luthor/props-reference.md",
-    "updatedAt": "2026-05-29T02:31:18.144Z",
+    "updatedAt": "2026-06-18T05:35:33.133Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "prop",
@@ -6898,8 +7056,8 @@ export const docsIndex = [
     "title": "Exports Map",
     "navTitle": "Exports Map",
     "description": "Complete export map for @lyfie/luthor and @lyfie/luthor-headless.",
-    "content": "\r\n# Exports Map\r\n\r\nThis page is the canonical export inventory.\r\n\r\n## What this page answers\r\n\r\n- Which public exports are available from each package?\r\n\r\n## @lyfie/luthor exports\r\n\r\n- `AlignCenterIcon`\r\n- `AlignJustifyIcon`\r\n- `AlignLeftIcon`\r\n- `AlignRightIcon`\r\n- `BLOCK_HEADING_LEVELS`\r\n- `BlockFormat`\r\n- `BlockHeadingLevel`\r\n- `BoldIcon`\r\n- `Button`\r\n- `ChevronDownIcon`\r\n- `ClassNameToken`\r\n- `CloseIcon`\r\n- `CodeBlockIcon`\r\n- `CodeIcon`\r\n- `CodeIntelligenceCommands`\r\n- `CodeIntelligenceConfig`\r\n- `codeIntelligenceExtension`\r\n- `CodeIntelligenceExtension`\r\n- `CommandConfig`\r\n- `CommandGenerationOptions`\r\n- `CommandIcon`\r\n- `CommandPalette`\r\n- `commandsToCommandPaletteItems`\r\n- `commandsToSlashCommandItems`\r\n- `CoreEditorActiveStates`\n- `CoreEditorCommands`\r\n- `CoreEditorMode`\r\n- `CoreTheme`\r\n- `CoreToolbarClassNames`\r\n- `createDefaultSettingsStyleVarRecord`\r\n- `createExtensiveExtensions`\r\n- `createExtensivePreset`\r\n- `createFeatureGuardedCommands`\r\n- `createFloatingToolbarExtension`\r\n- `createModeCache`\r\n- `createPresetEditorConfig`\r\n- `DEFAULT_TOOLBAR_LAYOUT`\r\n- `DefaultSettings`\r\n- `Dialog`\r\n- `Dropdown`\r\n- `EditorPreset`\r\n- `EditorThemeOverrides`\r\n- `EmojiIcon`\r\n- `EmojiSuggestionMenu`\r\n- `ExtensiveEditor`\r\n- `ExtensiveEditorMode`\r\n- `ExtensiveEditorProps`\r\n- `ExtensiveEditorRef`\r\n- `extensiveExtensions`\r\n- `ExtensiveExtensionsConfig`\r\n- `extensivePreset`\r\n- `ExtensivePresetConfig`\r\n- `EyeIcon`\r\n- `FeatureFlag`\r\n- `FeatureFlagOverrides`\r\n- `FeatureFlags`\r\n- `FeatureFlagsLike`\r\n- `FeatureShortcutSpec`\r\n- `FileCodeIcon`\r\n- `filterToolbarLayout`\r\n- `FloatingToolbar`\r\n- `FloatingToolbarProps`\r\n- `formatHTMLSource`\r\n- `formatJSONSource`\r\n- `formatMarkdownSource`\r\n- `generateCommands`\r\n- `headless`\r\n- `headlessEditorPreset`\r\n- `HeadlessEditorPreset`\r\n- `HeadlessEditorPresetProps`\r\n- `HighlighterIcon`\r\n- `HTMLEditor`\r\n- `HTMLEditorMode`\r\n- `htmlEditorPreset`\r\n- `HTMLEditorProps`\r\n- `IconButton`\r\n- `ImageAlignment`\r\n- `ImageIcon`\r\n- `IndentIcon`\r\n- `InsertImageConfig`\r\n- `InsertTableConfig`\r\n- `invalidateModeCache`\r\n- `isEditableCommandTarget`\r\n- `isModeCached`\r\n- `isShortcutMatch`\r\n- `isToolbarItemSupported`\r\n- `isToolbarItemVisible`\r\n- `ItalicIcon`\r\n- `joinClassNames`\r\n- `KeyboardShortcut`\r\n- `LegacyRichEditor`\r\n- `LegacyRichEditorMode`\r\n- `LegacyRichEditorProps`\r\n- `legacyRichPreset`\r\n- `LegacyRichSourceFormat`\r\n- `LinkHoverBubble`\r\n- `LinkHoverBubbleProps`\r\n- `LinkIcon`\r\n- `ListCheckIcon`\r\n- `ListIcon`\r\n- `ListOrderedIcon`\r\n- `MarkDownEditor`\r\n- `MarkDownEditorMode`\r\n- `MarkDownEditorProps`\r\n- `markModeCached`\r\n- `mdEditorPreset`\r\n- `mergeToolbarVisibilityWithFeatures`\r\n- `MinusIcon`\r\n- `ModeTabs`\r\n- `MoonIcon`\r\n- `normalizeStyleVarsKey`\r\n- `OutdentIcon`\r\n- `PaletteIcon`\r\n- `PencilIcon`\r\n- `PresetFeatureOverrides`\r\n- `PresetFeaturePolicy`\r\n- `PresetModeCache`\r\n- `presetRegistry`\r\n- `QuoteIcon`\r\n- `QuoteStyleVars`\r\n- `RedoIcon`\r\n- `registerKeyboardShortcuts`\r\n- `SearchIcon`\r\n- `Select`\r\n- `setFloatingToolbarContext`\r\n- `ShortcutBindingOverride`\r\n- `ShortcutConfig`\r\n- `SlashCommandMenu`\n- `SlashCommandVisibility`\n- `SlashCommandVisibilityFilters`\n- `SlashCommandVisibilitySelection`\n- `SourceView`\n- `StrikethroughIcon`\r\n- `StyleVarRecord`\r\n- `StyleVarValueRecord`\r\n- `SubscriptIcon`\r\n- `SunIcon`\r\n- `SuperscriptIcon`\r\n- `SyntaxHighlightColorMode`\r\n- `SyntaxHighlightColors`\r\n- `SyntaxHighlightColorTokens`\r\n- `TableIcon`\r\n- `TextAlignment`\r\n- `Toolbar`\r\n- `ToolbarAlignment`\r\n- `ToolbarFeatureMap`\r\n- `ToolbarItemType`\r\n- `ToolbarLayout`\r\n- `ToolbarPosition`\r\n- `ToolbarProps`\r\n- `ToolbarSection`\r\n- `ToolbarStyleVars`\r\n- `ToolbarVisibility`\r\n- `TRADITIONAL_TOOLBAR_LAYOUT`\r\n- `TypeIcon`\r\n- `UnderlineIcon`\r\n- `UndoIcon`\r\n- `UnlinkIcon`\r\n- `UploadIcon`\r\n\r\n## @lyfie/luthor-headless exports\r\n\r\n- `Alignment`\r\n- `appendMetadataEnvelopes`\r\n- `BaseCommands`\r\n- `BaseExtension`\r\n- `BaseExtensionConfig`\r\n- `BaseProvider`\r\n- `blockFormatExtension`\r\n- `BlockFormatExtension`\r\n- `boldExtension`\r\n- `BoldExtension`\r\n- `BridgeMode`\r\n- `clearLexicalSelection`\r\n- `codeExtension`\r\n- `CodeExtension`\r\n- `CodeExtensionConfig`\r\n- `codeFormatExtension`\r\n- `CodeFormatExtension`\r\n- `CodeHighlightProvider`\r\n- `CodeHighlightProviderConfig`\r\n- `CodeIntelligenceCommands`\r\n- `CodeIntelligenceConfig`\r\n- `codeIntelligenceExtension`\r\n- `CodeIntelligenceExtension`\r\n- `CodeLanguageOptionsConfig`\r\n- `CodeLanguageOptionsMode`\r\n- `CommandPaletteCommands`\r\n- `commandPaletteExtension`\r\n- `CommandPaletteExtension`\r\n- `CommandPaletteItem`\r\n- `CommandPaletteStateQueries`\r\n- `ContextMenuCommands`\r\n- `ContextMenuConfig`\r\n- `contextMenuExtension`\r\n- `ContextMenuExtension`\r\n- `ContextMenuItem`\r\n- `ContextMenuStateQueries`\r\n- `createCustomNodeExtension`\r\n- `createEditorSystem`\r\n- `createEditorThemeStyleVars`\r\n- `createExtension`\r\n- `defaultLuthorTheme`\r\n- `draggableBlockExtension`\r\n- `DraggableBlockExtension`\r\n- `DraggableCommands`\r\n- `DraggableConfig`\r\n- `DraggableStateQueries`\r\n- `EditorConfig`\r\n- `EditorContextType`\r\n- `EmojiCatalogAdapter`\r\n- `EmojiCatalogItem`\r\n- `EmojiCommands`\r\n- `EmojiConfig`\r\n- `emojiExtension`\r\n- `EmojiExtension`\r\n- `EmojiStateQueries`\r\n- `EmojiSuggestionState`\r\n- `enterKeyBehaviorExtension`\r\n- `EnterKeyBehaviorExtension`\r\n- `Extension`\r\n- `ExtensionCategory`\r\n- `ExtractCommands`\r\n- `ExtractedMetadataEnvelopes`\r\n- `extractHTMLMetadataPatch`\r\n- `extractMarkdownMetadataPatch`\r\n- `extractMetadataEnvelopes`\r\n- `ExtractNames`\r\n- `ExtractPlugins`\r\n- `ExtractStateQueries`\r\n- `FloatingCommands`\r\n- `FloatingConfig`\r\n- `FloatingStateQueries`\r\n- `floatingToolbarExtension`\r\n- `FloatingToolbarExtension`\r\n- `FontCssLoadStrategy`\r\n- `FontFamilyConfig`\r\n- `fontFamilyExtension`\r\n- `FontFamilyExtension`\r\n- `FontFamilyOption`\r\n- `FontSizeConfig`\r\n- `fontSizeExtension`\r\n- `FontSizeExtension`\r\n- `FontSizeOption`\r\n- `historyExtension`\r\n- `HistoryExtension`\r\n- `horizontalRuleExtension`\r\n- `HorizontalRuleExtension`\r\n- `HTML_NATIVE_KEY_MAP`\r\n- `HTML_SUPPORTED_NODE_TYPES`\r\n- `HtmlBridgeOptions`\r\n- `htmlToJSON`\r\n- `iframeEmbedExtension`\r\n- `IframeEmbedExtension`\r\n- `ImageCommands`\r\n- `ImageComponentProps`\r\n- `imageExtension`\r\n- `ImageExtension`\r\n- `ImageExtensionConfig`\r\n- `ImagePayload`\r\n- `ImageStateQueries`\r\n- `isDefaultBridgeValue`\r\n- `isHTMLRepresentable`\r\n- `isLuthorTheme`\r\n- `isMarkdownRepresentable`\r\n- `italicExtension`\r\n- `ItalicExtension`\r\n- `JsonDocument`\r\n- `jsonToHTML`\r\n- `jsonToMarkdown`\r\n- `LexicalEditor`\r\n- `LexicalNodeRegistration`\r\n- `LIGHTWEIGHT_EMOJI_CATALOG`\r\n- `LineHeightConfig`\r\n- `lineHeightExtension`\r\n- `LineHeightExtension`\r\n- `LineHeightOption`\r\n- `linkExtension`\r\n- `LinkExtension`\r\n- `listExtension`\r\n- `ListExtension`\r\n- `LUTHOR_EDITOR_THEME_TOKENS`\r\n- `LuthorEditorThemeOverrides`\r\n- `LuthorEditorThemeToken`\r\n- `LuthorTheme`\r\n- `MARKDOWN_NATIVE_KEY_MAP`\r\n- `MARKDOWN_SUPPORTED_NODE_TYPES`\r\n- `MARKDOWN_TEXT_NATIVE_FORMAT_MASK`\r\n- `MarkdownBridgeFlavor`\r\n- `MarkdownBridgeOptions`\r\n- `markdownToJSON`\r\n- `mergeThemes`\r\n- `MetadataEnvelope`\r\n- `PreparedBridgeDocument`\r\n- `prepareDocumentForBridge`\r\n- `rehydrateDocumentFromEnvelopes`\r\n- `resolveLinkNodeKeyFromAnchor`\r\n- `RichText`\r\n- `RichTextComponentProps`\r\n- `RichTextConfig`\r\n- `richTextExtension`\r\n- `SerializedImageNode`\r\n- `SlashCommandCommands`\r\n- `SlashCommandConfig`\r\n- `slashCommandExtension`\r\n- `SlashCommandExtension`\r\n- `SlashCommandItem`\r\n- `SlashCommandMenuState`\r\n- `SlashCommandStateQueries`\r\n- `SourceMetadataMode`\r\n- `strikethroughExtension`\r\n- `StrikethroughExtension`\r\n- `subscriptExtension`\r\n- `SubscriptExtension`\r\n- `superscriptExtension`\r\n- `SuperscriptExtension`\r\n- `tabIndentExtension`\r\n- `TabIndentExtension`\r\n- `TableConfig`\r\n- `tableExtension`\r\n- `TableExtension`\r\n- `TextColorConfig`\r\n- `textColorExtension`\r\n- `TextColorExtension`\r\n- `TextColorOption`\r\n- `TextFormatExtension`\r\n- `TextHighlightConfig`\r\n- `textHighlightExtension`\r\n- `TextHighlightExtension`\r\n- `TextHighlightOption`\r\n- `ToolbarItem`\r\n- `underlineExtension`\r\n- `UnderlineExtension`\r\n- `useBaseEditor`\r\n- `youTubeEmbedExtension`\r\n- `YouTubeEmbedExtension`\r\n\r\n\r\n",
-    "plainContent": "Exports Map This page is the canonical export inventory. What this page answers - Which public exports are available from each package? @lyfie/luthor exports - AlignCenterIcon - AlignJustifyIcon - AlignLeftIcon - AlignRightIcon - BLOCK HEADING LEVELS - BlockFormat - BlockHeadingLevel - BoldIcon - Button - ChevronDownIcon - ClassNameToken - CloseIcon - CodeBlockIcon - CodeIcon - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CommandConfig - CommandGenerationOptions - CommandIcon - CommandPalette - commandsToCommandPaletteItems - commandsToSlashCommandItems - CoreEditorActiveStates - CoreEditorCommands - CoreEditorMode - CoreTheme - CoreToolbarClassNames - createDefaultSettingsStyleVarRecord - createExtensiveExtensions - createExtensivePreset - createFeatureGuardedCommands - createFloatingToolbarExtension - createModeCache - createPresetEditorConfig - DEFAULT TOOLBAR LAYOUT - DefaultSettings - Dialog - Dropdown - EditorPreset - EditorThemeOverrides - EmojiIcon - EmojiSuggestionMenu - ExtensiveEditor - ExtensiveEditorMode - ExtensiveEditorProps - ExtensiveEditorRef - extensiveExtensions - ExtensiveExtensionsConfig - extensivePreset - ExtensivePresetConfig - EyeIcon - FeatureFlag - FeatureFlagOverrides - FeatureFlags - FeatureFlagsLike - FeatureShortcutSpec - FileCodeIcon - filterToolbarLayout - FloatingToolbar - FloatingToolbarProps - formatHTMLSource - formatJSONSource - formatMarkdownSource - generateCommands - headless - headlessEditorPreset - HeadlessEditorPreset - HeadlessEditorPresetProps - HighlighterIcon - HTMLEditor - HTMLEditorMode - htmlEditorPreset - HTMLEditorProps - IconButton - ImageAlignment - ImageIcon - IndentIcon - InsertImageConfig - InsertTableConfig - invalidateModeCache - isEditableCommandTarget - isModeCached - isShortcutMatch - isToolbarItemSupported - isToolbarItemVisible - ItalicIcon - joinClassNames - KeyboardShortcut - LegacyRichEditor - LegacyRichEditorMode - LegacyRichEditorProps - legacyRichPreset - LegacyRichSourceFormat - LinkHoverBubble - LinkHoverBubbleProps - LinkIcon - ListCheckIcon - ListIcon - ListOrderedIcon - MarkDownEditor - MarkDownEditorMode - MarkDownEditorProps - markModeCached - mdEditorPreset - mergeToolbarVisibilityWithFeatures - MinusIcon - ModeTabs - MoonIcon - normalizeStyleVarsKey - OutdentIcon - PaletteIcon - PencilIcon - PresetFeatureOverrides - PresetFeaturePolicy - PresetModeCache - presetRegistry - QuoteIcon - QuoteStyleVars - RedoIcon - registerKeyboardShortcuts - SearchIcon - Select - setFloatingToolbarContext - ShortcutBindingOverride - ShortcutConfig - SlashCommandMenu - SlashCommandVisibility - SlashCommandVisibilityFilters - SlashCommandVisibilitySelection - SourceView - StrikethroughIcon - StyleVarRecord - StyleVarValueRecord - SubscriptIcon - SunIcon - SuperscriptIcon - SyntaxHighlightColorMode - SyntaxHighlightColors - SyntaxHighlightColorTokens - TableIcon - TextAlignment - Toolbar - ToolbarAlignment - ToolbarFeatureMap - ToolbarItemType - ToolbarLayout - ToolbarPosition - ToolbarProps - ToolbarSection - ToolbarStyleVars - ToolbarVisibility - TRADITIONAL TOOLBAR LAYOUT - TypeIcon - UnderlineIcon - UndoIcon - UnlinkIcon - UploadIcon @lyfie/luthor-headless exports - Alignment - appendMetadataEnvelopes - BaseCommands - BaseExtension - BaseExtensionConfig - BaseProvider - blockFormatExtension - BlockFormatExtension - boldExtension - BoldExtension - BridgeMode - clearLexicalSelection - codeExtension - CodeExtension - CodeExtensionConfig - codeFormatExtension - CodeFormatExtension - CodeHighlightProvider - CodeHighlightProviderConfig - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CodeLanguageOptionsConfig - CodeLanguageOptionsMode - CommandPaletteCommands - commandPaletteExtension - CommandPaletteExtension - CommandPaletteItem - CommandPaletteStateQueries - ContextMenuCommands - ContextMenuConfig - contextMenuExtension - ContextMenuExtension - ContextMenuItem - ContextMenuStateQueries - createCustomNodeExtension - createEditorSystem - createEditorThemeStyleVars - createExtension - defaultLuthorTheme - draggableBlockExtension - DraggableBlockExtension - DraggableCommands - DraggableConfig - DraggableStateQueries - EditorConfig - EditorContextType - EmojiCatalogAdapter - EmojiCatalogItem - EmojiCommands - EmojiConfig - emojiExtension - EmojiExtension - EmojiStateQueries - EmojiSuggestionState - enterKeyBehaviorExtension - EnterKeyBehaviorExtension - Extension - ExtensionCategory - ExtractCommands - ExtractedMetadataEnvelopes - extractHTMLMetadataPatch - extractMarkdownMetadataPatch - extractMetadataEnvelopes - ExtractNames - ExtractPlugins - ExtractStateQueries - FloatingCommands - FloatingConfig - FloatingStateQueries - floatingToolbarExtension - FloatingToolbarExtension - FontCssLoadStrategy - FontFamilyConfig - fontFamilyExtension - FontFamilyExtension - FontFamilyOption - FontSizeConfig - fontSizeExtension - FontSizeExtension - FontSizeOption - historyExtension - HistoryExtension - horizontalRuleExtension - HorizontalRuleExtension - HTML NATIVE KEY MAP - HTML SUPPORTED NODE TYPES - HtmlBridgeOptions - htmlToJSON - iframeEmbedExtension - IframeEmbedExtension - ImageCommands - ImageComponentProps - imageExtension - ImageExtension - ImageExtensionConfig - ImagePayload - ImageStateQueries - isDefaultBridgeValue - isHTMLRepresentable - isLuthorTheme - isMarkdownRepresentable - italicExtension - ItalicExtension - JsonDocument - jsonToHTML - jsonToMarkdown - LexicalEditor - LexicalNodeRegistration - LIGHTWEIGHT EMOJI CATALOG - LineHeightConfig - lineHeightExtension - LineHeightExtension - LineHeightOption - linkExtension - LinkExtension - listExtension - ListExtension - LUTHOR EDITOR THEME TOKENS - LuthorEditorThemeOverrides - LuthorEditorThemeToken - LuthorTheme - MARKDOWN NATIVE KEY MAP - MARKDOWN SUPPORTED NODE TYPES - MARKDOWN TEXT NATIVE FORMAT MASK - MarkdownBridgeFlavor - MarkdownBridgeOptions - markdownToJSON - mergeThemes - MetadataEnvelope - PreparedBridgeDocument - prepareDocumentForBridge - rehydrateDocumentFromEnvelopes - resolveLinkNodeKeyFromAnchor - RichText - RichTextComponentProps - RichTextConfig - richTextExtension - SerializedImageNode - SlashCommandCommands - SlashCommandConfig - slashCommandExtension - SlashCommandExtension - SlashCommandItem - SlashCommandMenuState - SlashCommandStateQueries - SourceMetadataMode - strikethroughExtension - StrikethroughExtension - subscriptExtension - SubscriptExtension - superscriptExtension - SuperscriptExtension - tabIndentExtension - TabIndentExtension - TableConfig - tableExtension - TableExtension - TextColorConfig - textColorExtension - TextColorExtension - TextColorOption - TextFormatExtension - TextHighlightConfig - textHighlightExtension - TextHighlightExtension - TextHighlightOption - ToolbarItem - underlineExtension - UnderlineExtension - useBaseEditor - youTubeEmbedExtension - YouTubeEmbedExtension",
+    "content": "\r\n# Exports Map\r\n\r\nThis page is the canonical export inventory.\r\n\r\n## What this page answers\r\n\r\n- Which public exports are available from each package?\r\n\r\n## @lyfie/luthor exports\r\n\r\n- `AlignCenterIcon`\r\n- `AlignJustifyIcon`\r\n- `AlignLeftIcon`\r\n- `AlignRightIcon`\r\n- `BLOCK_HEADING_LEVELS`\r\n- `BlockFormat`\r\n- `BlockHeadingLevel`\r\n- `BoldIcon`\r\n- `Button`\r\n- `ChevronDownIcon`\r\n- `ClassNameToken`\r\n- `CloseIcon`\r\n- `CodeBlockIcon`\r\n- `CodeIcon`\r\n- `CodeIntelligenceCommands`\r\n- `CodeIntelligenceConfig`\r\n- `codeIntelligenceExtension`\r\n- `CodeIntelligenceExtension`\r\n- `CommandConfig`\r\n- `CommandGenerationOptions`\r\n- `CommandIcon`\r\n- `CommandPalette`\r\n- `commandsToCommandPaletteItems`\r\n- `commandsToSlashCommandItems`\r\n- `CoreEditorActiveStates`\r\n- `CoreEditorCommands`\r\n- `CoreEditorMode`\r\n- `CoreTheme`\r\n- `CoreToolbarClassNames`\r\n- `createDefaultSettingsStyleVarRecord`\r\n- `createExtensiveExtensions`\r\n- `createExtensivePreset`\r\n- `createFeatureGuardedCommands`\r\n- `createFloatingToolbarExtension`\r\n- `createModeCache`\r\n- `createPresetEditorConfig`\r\n- `DEFAULT_TOOLBAR_LAYOUT`\r\n- `DefaultSettings`\r\n- `Dialog`\r\n- `Dropdown`\r\n- `EditorPreset`\r\n- `EditorThemeOverrides`\r\n- `EmojiIcon`\r\n- `EmojiSuggestionMenu`\r\n- `ExtensiveEditor`\r\n- `ExtensiveEditorMode`\r\n- `ExtensiveEditorProps`\r\n- `ExtensiveEditorRef`\r\n- `extensiveExtensions`\r\n- `ExtensiveExtensionsConfig`\r\n- `extensivePreset`\r\n- `ExtensivePresetConfig`\r\n- `EyeIcon`\r\n- `FeatureFlag`\r\n- `FeatureFlagOverrides`\r\n- `FeatureFlags`\r\n- `FeatureFlagsLike`\r\n- `FeatureShortcutSpec`\r\n- `FileCodeIcon`\r\n- `filterToolbarLayout`\r\n- `FloatingToolbar`\r\n- `FloatingToolbarProps`\r\n- `formatHTMLSource`\r\n- `formatJSONSource`\r\n- `formatMarkdownSource`\r\n- `generateCommands`\r\n- `headless`\r\n- `HighlighterIcon`\r\n- `HTMLEditor`\r\n- `HTMLEditorMode`\r\n- `htmlEditorPreset`\r\n- `HTMLEditorProps`\r\n- `IconButton`\r\n- `ImageAlignment`\r\n- `ImageIcon`\r\n- `IndentIcon`\r\n- `InsertImageConfig`\r\n- `InsertTableConfig`\r\n- `invalidateModeCache`\r\n- `isEditableCommandTarget`\r\n- `isModeCached`\r\n- `isShortcutMatch`\r\n- `isToolbarItemSupported`\r\n- `isToolbarItemVisible`\r\n- `ItalicIcon`\r\n- `joinClassNames`\r\n- `KeyboardShortcut`\r\n- `LegacyRichEditor`\r\n- `LegacyRichEditorMode`\r\n- `LegacyRichEditorProps`\r\n- `legacyRichPreset`\r\n- `LegacyRichSourceFormat`\r\n- `LinkHoverBubble`\r\n- `LinkHoverBubbleProps`\r\n- `LinkIcon`\r\n- `ListCheckIcon`\r\n- `ListIcon`\r\n- `ListOrderedIcon`\r\n- `MarkDownEditor`\r\n- `MarkDownEditorMode`\r\n- `MarkDownEditorProps`\r\n- `markModeCached`\r\n- `mdEditorPreset`\r\n- `mergeToolbarVisibilityWithFeatures`\r\n- `MinusIcon`\r\n- `ModeTabs`\r\n- `MoonIcon`\r\n- `normalizeStyleVarsKey`\r\n- `OutdentIcon`\r\n- `PaletteIcon`\r\n- `PencilIcon`\r\n- `PresetFeatureOverrides`\r\n- `PresetFeaturePolicy`\r\n- `PresetModeCache`\r\n- `presetRegistry`\r\n- `QuoteIcon`\r\n- `QuoteStyleVars`\r\n- `RedoIcon`\r\n- `registerKeyboardShortcuts`\r\n- `SearchIcon`\r\n- `Select`\r\n- `setFloatingToolbarContext`\r\n- `ShortcutBindingOverride`\r\n- `ShortcutConfig`\r\n- `SlashCommandMenu`\r\n- `SlashCommandVisibility`\r\n- `SlashCommandVisibilityFilters`\r\n- `SlashCommandVisibilitySelection`\r\n- `SourceView`\r\n- `StrikethroughIcon`\r\n- `StyleVarRecord`\r\n- `StyleVarValueRecord`\r\n- `SubscriptIcon`\r\n- `SunIcon`\r\n- `SuperscriptIcon`\r\n- `SyntaxHighlightColorMode`\r\n- `SyntaxHighlightColors`\r\n- `SyntaxHighlightColorTokens`\r\n- `TableIcon`\r\n- `TextAlignment`\r\n- `Toolbar`\r\n- `ToolbarAlignment`\r\n- `ToolbarFeatureMap`\r\n- `ToolbarItemType`\r\n- `ToolbarLayout`\r\n- `ToolbarPosition`\r\n- `ToolbarProps`\r\n- `ToolbarSection`\r\n- `ToolbarStyleVars`\r\n- `ToolbarVisibility`\r\n- `TRADITIONAL_TOOLBAR_LAYOUT`\r\n- `TypeIcon`\r\n- `UnderlineIcon`\r\n- `UndoIcon`\r\n- `UnlinkIcon`\r\n- `UploadIcon`\r\n\r\n## @lyfie/luthor-headless exports\r\n\r\n- `Alignment`\r\n- `appendMetadataEnvelopes`\r\n- `BaseCommands`\r\n- `BaseExtension`\r\n- `BaseExtensionConfig`\r\n- `BaseProvider`\r\n- `blockFormatExtension`\r\n- `BlockFormatExtension`\r\n- `boldExtension`\r\n- `BoldExtension`\r\n- `BridgeMode`\r\n- `clearLexicalSelection`\r\n- `codeExtension`\r\n- `CodeExtension`\r\n- `CodeExtensionConfig`\r\n- `codeFormatExtension`\r\n- `CodeFormatExtension`\r\n- `CodeHighlightProvider`\r\n- `CodeHighlightProviderConfig`\r\n- `CodeIntelligenceCommands`\r\n- `CodeIntelligenceConfig`\r\n- `codeIntelligenceExtension`\r\n- `CodeIntelligenceExtension`\r\n- `CodeLanguageOptionsConfig`\r\n- `CodeLanguageOptionsMode`\r\n- `CommandPaletteCommands`\r\n- `commandPaletteExtension`\r\n- `CommandPaletteExtension`\r\n- `CommandPaletteItem`\r\n- `CommandPaletteStateQueries`\r\n- `ContextMenuCommands`\r\n- `ContextMenuConfig`\r\n- `contextMenuExtension`\r\n- `ContextMenuExtension`\r\n- `ContextMenuItem`\r\n- `ContextMenuStateQueries`\r\n- `createCustomNodeExtension`\r\n- `createEditorSystem`\r\n- `createEditorThemeStyleVars`\r\n- `createExtension`\r\n- `defaultLuthorTheme`\r\n- `draggableBlockExtension`\r\n- `DraggableBlockExtension`\r\n- `DraggableCommands`\r\n- `DraggableConfig`\r\n- `DraggableStateQueries`\r\n- `EditorConfig`\r\n- `EditorContextType`\r\n- `EmojiCatalogAdapter`\r\n- `EmojiCatalogItem`\r\n- `EmojiCommands`\r\n- `EmojiConfig`\r\n- `emojiExtension`\r\n- `EmojiExtension`\r\n- `EmojiStateQueries`\r\n- `EmojiSuggestionState`\r\n- `enterKeyBehaviorExtension`\r\n- `EnterKeyBehaviorExtension`\r\n- `Extension`\r\n- `ExtensionCategory`\r\n- `ExtractCommands`\r\n- `ExtractedMetadataEnvelopes`\r\n- `extractHTMLMetadataPatch`\r\n- `extractMarkdownMetadataPatch`\r\n- `extractMetadataEnvelopes`\r\n- `ExtractNames`\r\n- `ExtractPlugins`\r\n- `ExtractStateQueries`\r\n- `FloatingCommands`\r\n- `FloatingConfig`\r\n- `FloatingStateQueries`\r\n- `floatingToolbarExtension`\r\n- `FloatingToolbarExtension`\r\n- `FontCssLoadStrategy`\r\n- `FontFamilyConfig`\r\n- `fontFamilyExtension`\r\n- `FontFamilyExtension`\r\n- `FontFamilyOption`\r\n- `FontSizeConfig`\r\n- `fontSizeExtension`\r\n- `FontSizeExtension`\r\n- `FontSizeOption`\r\n- `historyExtension`\r\n- `HistoryExtension`\r\n- `horizontalRuleExtension`\r\n- `HorizontalRuleExtension`\r\n- `HTML_NATIVE_KEY_MAP`\r\n- `HTML_SUPPORTED_NODE_TYPES`\r\n- `HtmlBridgeOptions`\r\n- `htmlToJSON`\r\n- `iframeEmbedExtension`\r\n- `IframeEmbedExtension`\r\n- `ImageCommands`\r\n- `ImageComponentProps`\r\n- `imageExtension`\r\n- `ImageExtension`\r\n- `ImageExtensionConfig`\r\n- `ImagePayload`\r\n- `ImageStateQueries`\r\n- `isDefaultBridgeValue`\r\n- `isHTMLRepresentable`\r\n- `isLuthorTheme`\r\n- `isMarkdownRepresentable`\r\n- `italicExtension`\r\n- `ItalicExtension`\r\n- `JsonDocument`\r\n- `jsonToHTML`\r\n- `jsonToMarkdown`\r\n- `LexicalEditor`\r\n- `LexicalNodeRegistration`\r\n- `LIGHTWEIGHT_EMOJI_CATALOG`\r\n- `LineHeightConfig`\r\n- `lineHeightExtension`\r\n- `LineHeightExtension`\r\n- `LineHeightOption`\r\n- `linkExtension`\r\n- `LinkExtension`\r\n- `listExtension`\r\n- `ListExtension`\r\n- `LUTHOR_EDITOR_THEME_TOKENS`\r\n- `LuthorEditorThemeOverrides`\r\n- `LuthorEditorThemeToken`\r\n- `LuthorTheme`\r\n- `MARKDOWN_NATIVE_KEY_MAP`\r\n- `MARKDOWN_SUPPORTED_NODE_TYPES`\r\n- `MARKDOWN_TEXT_NATIVE_FORMAT_MASK`\r\n- `MarkdownBridgeFlavor`\r\n- `MarkdownBridgeOptions`\r\n- `markdownToJSON`\r\n- `mergeThemes`\r\n- `MetadataEnvelope`\r\n- `PreparedBridgeDocument`\r\n- `prepareDocumentForBridge`\r\n- `rehydrateDocumentFromEnvelopes`\r\n- `resolveLinkNodeKeyFromAnchor`\r\n- `RichText`\r\n- `RichTextComponentProps`\r\n- `RichTextConfig`\r\n- `richTextExtension`\r\n- `SerializedImageNode`\r\n- `SlashCommandCommands`\r\n- `SlashCommandConfig`\r\n- `slashCommandExtension`\r\n- `SlashCommandExtension`\r\n- `SlashCommandItem`\r\n- `SlashCommandMenuState`\r\n- `SlashCommandStateQueries`\r\n- `SourceMetadataMode`\r\n- `strikethroughExtension`\r\n- `StrikethroughExtension`\r\n- `subscriptExtension`\r\n- `SubscriptExtension`\r\n- `superscriptExtension`\r\n- `SuperscriptExtension`\r\n- `tabIndentExtension`\r\n- `TabIndentExtension`\r\n- `TableConfig`\r\n- `tableExtension`\r\n- `TableExtension`\r\n- `TextColorConfig`\r\n- `textColorExtension`\r\n- `TextColorExtension`\r\n- `TextColorOption`\r\n- `TextFormatExtension`\r\n- `TextHighlightConfig`\r\n- `textHighlightExtension`\r\n- `TextHighlightExtension`\r\n- `TextHighlightOption`\r\n- `ToolbarItem`\r\n- `underlineExtension`\r\n- `UnderlineExtension`\r\n- `useBaseEditor`\r\n- `youTubeEmbedExtension`\r\n- `YouTubeEmbedExtension`\r\n\r\n\r\n",
+    "plainContent": "Exports Map This page is the canonical export inventory. What this page answers - Which public exports are available from each package? @lyfie/luthor exports - AlignCenterIcon - AlignJustifyIcon - AlignLeftIcon - AlignRightIcon - BLOCK HEADING LEVELS - BlockFormat - BlockHeadingLevel - BoldIcon - Button - ChevronDownIcon - ClassNameToken - CloseIcon - CodeBlockIcon - CodeIcon - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CommandConfig - CommandGenerationOptions - CommandIcon - CommandPalette - commandsToCommandPaletteItems - commandsToSlashCommandItems - CoreEditorActiveStates - CoreEditorCommands - CoreEditorMode - CoreTheme - CoreToolbarClassNames - createDefaultSettingsStyleVarRecord - createExtensiveExtensions - createExtensivePreset - createFeatureGuardedCommands - createFloatingToolbarExtension - createModeCache - createPresetEditorConfig - DEFAULT TOOLBAR LAYOUT - DefaultSettings - Dialog - Dropdown - EditorPreset - EditorThemeOverrides - EmojiIcon - EmojiSuggestionMenu - ExtensiveEditor - ExtensiveEditorMode - ExtensiveEditorProps - ExtensiveEditorRef - extensiveExtensions - ExtensiveExtensionsConfig - extensivePreset - ExtensivePresetConfig - EyeIcon - FeatureFlag - FeatureFlagOverrides - FeatureFlags - FeatureFlagsLike - FeatureShortcutSpec - FileCodeIcon - filterToolbarLayout - FloatingToolbar - FloatingToolbarProps - formatHTMLSource - formatJSONSource - formatMarkdownSource - generateCommands - headless - HighlighterIcon - HTMLEditor - HTMLEditorMode - htmlEditorPreset - HTMLEditorProps - IconButton - ImageAlignment - ImageIcon - IndentIcon - InsertImageConfig - InsertTableConfig - invalidateModeCache - isEditableCommandTarget - isModeCached - isShortcutMatch - isToolbarItemSupported - isToolbarItemVisible - ItalicIcon - joinClassNames - KeyboardShortcut - LegacyRichEditor - LegacyRichEditorMode - LegacyRichEditorProps - legacyRichPreset - LegacyRichSourceFormat - LinkHoverBubble - LinkHoverBubbleProps - LinkIcon - ListCheckIcon - ListIcon - ListOrderedIcon - MarkDownEditor - MarkDownEditorMode - MarkDownEditorProps - markModeCached - mdEditorPreset - mergeToolbarVisibilityWithFeatures - MinusIcon - ModeTabs - MoonIcon - normalizeStyleVarsKey - OutdentIcon - PaletteIcon - PencilIcon - PresetFeatureOverrides - PresetFeaturePolicy - PresetModeCache - presetRegistry - QuoteIcon - QuoteStyleVars - RedoIcon - registerKeyboardShortcuts - SearchIcon - Select - setFloatingToolbarContext - ShortcutBindingOverride - ShortcutConfig - SlashCommandMenu - SlashCommandVisibility - SlashCommandVisibilityFilters - SlashCommandVisibilitySelection - SourceView - StrikethroughIcon - StyleVarRecord - StyleVarValueRecord - SubscriptIcon - SunIcon - SuperscriptIcon - SyntaxHighlightColorMode - SyntaxHighlightColors - SyntaxHighlightColorTokens - TableIcon - TextAlignment - Toolbar - ToolbarAlignment - ToolbarFeatureMap - ToolbarItemType - ToolbarLayout - ToolbarPosition - ToolbarProps - ToolbarSection - ToolbarStyleVars - ToolbarVisibility - TRADITIONAL TOOLBAR LAYOUT - TypeIcon - UnderlineIcon - UndoIcon - UnlinkIcon - UploadIcon @lyfie/luthor-headless exports - Alignment - appendMetadataEnvelopes - BaseCommands - BaseExtension - BaseExtensionConfig - BaseProvider - blockFormatExtension - BlockFormatExtension - boldExtension - BoldExtension - BridgeMode - clearLexicalSelection - codeExtension - CodeExtension - CodeExtensionConfig - codeFormatExtension - CodeFormatExtension - CodeHighlightProvider - CodeHighlightProviderConfig - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CodeLanguageOptionsConfig - CodeLanguageOptionsMode - CommandPaletteCommands - commandPaletteExtension - CommandPaletteExtension - CommandPaletteItem - CommandPaletteStateQueries - ContextMenuCommands - ContextMenuConfig - contextMenuExtension - ContextMenuExtension - ContextMenuItem - ContextMenuStateQueries - createCustomNodeExtension - createEditorSystem - createEditorThemeStyleVars - createExtension - defaultLuthorTheme - draggableBlockExtension - DraggableBlockExtension - DraggableCommands - DraggableConfig - DraggableStateQueries - EditorConfig - EditorContextType - EmojiCatalogAdapter - EmojiCatalogItem - EmojiCommands - EmojiConfig - emojiExtension - EmojiExtension - EmojiStateQueries - EmojiSuggestionState - enterKeyBehaviorExtension - EnterKeyBehaviorExtension - Extension - ExtensionCategory - ExtractCommands - ExtractedMetadataEnvelopes - extractHTMLMetadataPatch - extractMarkdownMetadataPatch - extractMetadataEnvelopes - ExtractNames - ExtractPlugins - ExtractStateQueries - FloatingCommands - FloatingConfig - FloatingStateQueries - floatingToolbarExtension - FloatingToolbarExtension - FontCssLoadStrategy - FontFamilyConfig - fontFamilyExtension - FontFamilyExtension - FontFamilyOption - FontSizeConfig - fontSizeExtension - FontSizeExtension - FontSizeOption - historyExtension - HistoryExtension - horizontalRuleExtension - HorizontalRuleExtension - HTML NATIVE KEY MAP - HTML SUPPORTED NODE TYPES - HtmlBridgeOptions - htmlToJSON - iframeEmbedExtension - IframeEmbedExtension - ImageCommands - ImageComponentProps - imageExtension - ImageExtension - ImageExtensionConfig - ImagePayload - ImageStateQueries - isDefaultBridgeValue - isHTMLRepresentable - isLuthorTheme - isMarkdownRepresentable - italicExtension - ItalicExtension - JsonDocument - jsonToHTML - jsonToMarkdown - LexicalEditor - LexicalNodeRegistration - LIGHTWEIGHT EMOJI CATALOG - LineHeightConfig - lineHeightExtension - LineHeightExtension - LineHeightOption - linkExtension - LinkExtension - listExtension - ListExtension - LUTHOR EDITOR THEME TOKENS - LuthorEditorThemeOverrides - LuthorEditorThemeToken - LuthorTheme - MARKDOWN NATIVE KEY MAP - MARKDOWN SUPPORTED NODE TYPES - MARKDOWN TEXT NATIVE FORMAT MASK - MarkdownBridgeFlavor - MarkdownBridgeOptions - markdownToJSON - mergeThemes - MetadataEnvelope - PreparedBridgeDocument - prepareDocumentForBridge - rehydrateDocumentFromEnvelopes - resolveLinkNodeKeyFromAnchor - RichText - RichTextComponentProps - RichTextConfig - richTextExtension - SerializedImageNode - SlashCommandCommands - SlashCommandConfig - slashCommandExtension - SlashCommandExtension - SlashCommandItem - SlashCommandMenuState - SlashCommandStateQueries - SourceMetadataMode - strikethroughExtension - StrikethroughExtension - subscriptExtension - SubscriptExtension - superscriptExtension - SuperscriptExtension - tabIndentExtension - TabIndentExtension - TableConfig - tableExtension - TableExtension - TextColorConfig - textColorExtension - TextColorExtension - TextColorOption - TextFormatExtension - TextHighlightConfig - textHighlightExtension - TextHighlightExtension - TextHighlightOption - ToolbarItem - underlineExtension - UnderlineExtension - useBaseEditor - youTubeEmbedExtension - YouTubeEmbedExtension",
     "sections": [
       {
         "heading": "Overview",
@@ -6917,7 +7075,7 @@ export const docsIndex = [
         "heading": "@lyfie/luthor exports",
         "id": "lyfieluthor-exports",
         "level": 2,
-        "text": "- AlignCenterIcon - AlignJustifyIcon - AlignLeftIcon - AlignRightIcon - BLOCK HEADING LEVELS - BlockFormat - BlockHeadingLevel - BoldIcon - Button - ChevronDownIcon - ClassNameToken - CloseIcon - CodeBlockIcon - CodeIcon - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CommandConfig - CommandGenerationOptions - CommandIcon - CommandPalette - commandsToCommandPaletteItems - commandsToSlashCommandItems - CoreEditorActiveStates - CoreEditorCommands - CoreEditorMode - CoreTheme - CoreToolbarClassNames - createDefaultSettingsStyleVarRecord - createExtensiveExtensions - createExtensivePreset - createFeatureGuardedCommands - createFloatingToolbarExtension - createModeCache - createPresetEditorConfig - DEFAULT TOOLBAR LAYOUT - DefaultSettings - Dialog - Dropdown - EditorPreset - EditorThemeOverrides - EmojiIcon - EmojiSuggestionMenu - ExtensiveEditor - ExtensiveEditorMode - ExtensiveEditorProps - ExtensiveEditorRef - extensiveExtensions - ExtensiveExtensionsConfig - extensivePreset - ExtensivePresetConfig - EyeIcon - FeatureFlag - FeatureFlagOverrides - FeatureFlags - FeatureFlagsLike - FeatureShortcutSpec - FileCodeIcon - filterToolbarLayout - FloatingToolbar - FloatingToolbarProps - formatHTMLSource - formatJSONSource - formatMarkdownSource - generateCommands - headless - headlessEditorPreset - HeadlessEditorPreset - HeadlessEditorPresetProps - HighlighterIcon - HTMLEditor - HTMLEditorMode - htmlEditorPreset - HTMLEditorProps - IconButton - ImageAlignment - ImageIcon - IndentIcon - InsertImageConfig - InsertTableConfig - invalidateModeCache - isEditableCommandTarget - isModeCached - isShortcutMatch - isToolbarItemSupported - isToolbarItemVisible - ItalicIcon - joinClassNames - KeyboardShortcut - LegacyRichEditor - LegacyRichEditorMode - LegacyRichEditorProps - legacyRichPreset - LegacyRichSourceFormat - LinkHoverBubble - LinkHoverBubbleProps - LinkIcon - ListCheckIcon - ListIcon - ListOrderedIcon - MarkDownEditor - MarkDownEditorMode - MarkDownEditorProps - markModeCached - mdEditorPreset - mergeToolbarVisibilityWithFeatures - MinusIcon - ModeTabs - MoonIcon - normalizeStyleVarsKey - OutdentIcon - PaletteIcon - PencilIcon - PresetFeatureOverrides - PresetFeaturePolicy - PresetModeCache - presetRegistry - QuoteIcon - QuoteStyleVars - RedoIcon - registerKeyboardShortcuts - SearchIcon - Select - setFloatingToolbarContext - ShortcutBindingOverride - ShortcutConfig - SlashCommandMenu - SlashCommandVisibility - SlashCommandVisibilityFilters - SlashCommandVisibilitySelection - SourceView - StrikethroughIcon - StyleVarRecord - StyleVarValueRecord - SubscriptIcon - SunIcon - SuperscriptIcon - SyntaxHighlightColorMode - SyntaxHighlightColors - SyntaxHighlightColorTokens - TableIcon - TextAlignment - Toolbar - ToolbarAlignment - ToolbarFeatureMap - ToolbarItemType - ToolbarLayout - ToolbarPosition - ToolbarProps - ToolbarSection - ToolbarStyleVars - ToolbarVisibility - TRADITIONAL TOOLBAR LAYOUT - TypeIcon - UnderlineIcon - UndoIcon - UnlinkIcon - UploadIcon"
+        "text": "- AlignCenterIcon - AlignJustifyIcon - AlignLeftIcon - AlignRightIcon - BLOCK HEADING LEVELS - BlockFormat - BlockHeadingLevel - BoldIcon - Button - ChevronDownIcon - ClassNameToken - CloseIcon - CodeBlockIcon - CodeIcon - CodeIntelligenceCommands - CodeIntelligenceConfig - codeIntelligenceExtension - CodeIntelligenceExtension - CommandConfig - CommandGenerationOptions - CommandIcon - CommandPalette - commandsToCommandPaletteItems - commandsToSlashCommandItems - CoreEditorActiveStates - CoreEditorCommands - CoreEditorMode - CoreTheme - CoreToolbarClassNames - createDefaultSettingsStyleVarRecord - createExtensiveExtensions - createExtensivePreset - createFeatureGuardedCommands - createFloatingToolbarExtension - createModeCache - createPresetEditorConfig - DEFAULT TOOLBAR LAYOUT - DefaultSettings - Dialog - Dropdown - EditorPreset - EditorThemeOverrides - EmojiIcon - EmojiSuggestionMenu - ExtensiveEditor - ExtensiveEditorMode - ExtensiveEditorProps - ExtensiveEditorRef - extensiveExtensions - ExtensiveExtensionsConfig - extensivePreset - ExtensivePresetConfig - EyeIcon - FeatureFlag - FeatureFlagOverrides - FeatureFlags - FeatureFlagsLike - FeatureShortcutSpec - FileCodeIcon - filterToolbarLayout - FloatingToolbar - FloatingToolbarProps - formatHTMLSource - formatJSONSource - formatMarkdownSource - generateCommands - headless - HighlighterIcon - HTMLEditor - HTMLEditorMode - htmlEditorPreset - HTMLEditorProps - IconButton - ImageAlignment - ImageIcon - IndentIcon - InsertImageConfig - InsertTableConfig - invalidateModeCache - isEditableCommandTarget - isModeCached - isShortcutMatch - isToolbarItemSupported - isToolbarItemVisible - ItalicIcon - joinClassNames - KeyboardShortcut - LegacyRichEditor - LegacyRichEditorMode - LegacyRichEditorProps - legacyRichPreset - LegacyRichSourceFormat - LinkHoverBubble - LinkHoverBubbleProps - LinkIcon - ListCheckIcon - ListIcon - ListOrderedIcon - MarkDownEditor - MarkDownEditorMode - MarkDownEditorProps - markModeCached - mdEditorPreset - mergeToolbarVisibilityWithFeatures - MinusIcon - ModeTabs - MoonIcon - normalizeStyleVarsKey - OutdentIcon - PaletteIcon - PencilIcon - PresetFeatureOverrides - PresetFeaturePolicy - PresetModeCache - presetRegistry - QuoteIcon - QuoteStyleVars - RedoIcon - registerKeyboardShortcuts - SearchIcon - Select - setFloatingToolbarContext - ShortcutBindingOverride - ShortcutConfig - SlashCommandMenu - SlashCommandVisibility - SlashCommandVisibilityFilters - SlashCommandVisibilitySelection - SourceView - StrikethroughIcon - StyleVarRecord - StyleVarValueRecord - SubscriptIcon - SunIcon - SuperscriptIcon - SyntaxHighlightColorMode - SyntaxHighlightColors - SyntaxHighlightColorTokens - TableIcon - TextAlignment - Toolbar - ToolbarAlignment - ToolbarFeatureMap - ToolbarItemType - ToolbarLayout - ToolbarPosition - ToolbarProps - ToolbarSection - ToolbarStyleVars - ToolbarVisibility - TRADITIONAL TOOLBAR LAYOUT - TypeIcon - UnderlineIcon - UndoIcon - UnlinkIcon - UploadIcon"
       },
       {
         "heading": "@lyfie/luthor-headless exports",
@@ -6945,7 +7103,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/reference/exports-map/",
     "sourcePath": "apps/web/src/content/docs/reference/exports-map.md",
-    "updatedAt": "2026-05-29T02:31:33.903Z",
+    "updatedAt": "2026-06-18T05:35:58.630Z",
     "package": "shared",
     "docType": "reference",
     "surface": "tooling",
@@ -7076,9 +7234,6 @@ export const docsIndex = [
       "formatMarkdownSource",
       "generateCommands",
       "headless",
-      "headlessEditorPreset",
-      "HeadlessEditorPreset",
-      "HeadlessEditorPresetProps",
       "HighlighterIcon",
       "HTMLEditor",
       "HTMLEditorMode",
@@ -7684,8 +7839,6 @@ export const docsIndex = [
       "heading6",
       "headingoptions",
       "headless",
-      "headlesseditorpreset",
-      "headlesseditorpresetprops",
       "highlight",
       "highlightericon",
       "historyextension",
@@ -8200,8 +8353,6 @@ export const docsIndex = [
         "generatecommands",
         "heading",
         "headless",
-        "headlesseditorpreset",
-        "headlesseditorpresetprops",
         "highlightericon",
         "historyextension",
         "horizontalruleextension",
@@ -8543,8 +8694,8 @@ export const docsIndex = [
     "title": "Preset Selector",
     "navTitle": "Preset Selector",
     "description": "Decision matrix for choosing the right preset by workflow, source mode profile, and feature policy.",
-    "content": "\r\n# Preset Selector\r\n\r\nUse this table to choose the right preset quickly.\r\n\r\n## What this page answers\r\n\r\n- Which preset fits my workflow and source mode needs?\r\n\r\n| Need | Preset |\n| --- | --- |\n| Full capability, broad modes | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |\n| Legacy-compatible rich editing | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |\n| Markdown-focused source of truth | [Markdown Editor](/docs/luthor/presets/md-editor/) |\n| HTML-focused source workflows | [HTML Editor](/docs/luthor/presets/html-editor/) |\n| Constrained source-mode preset | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |\n\r\n\r\n",
-    "plainContent": "Preset Selector Use this table to choose the right preset quickly. What this page answers - Which preset fits my workflow and source mode needs? Need Preset --- --- Full capability, broad modes Extensive Editor Legacy-compatible rich editing Legacy Rich Editor Markdown-focused source of truth Markdown Editor HTML-focused source workflows HTML Editor Constrained source-mode preset Headless Editor Preset",
+    "content": "\r\n# Preset Selector\r\n\r\nUse this table to choose the right preset quickly.\r\n\r\n## What this page answers\r\n\r\n- Which preset fits my workflow and source mode needs?\r\n\r\n| Need | Preset |\r\n| --- | --- |\r\n| Full capability, broad modes | [Extensive Editor](/docs/luthor/presets/extensive-editor/) |\r\n| Legacy-compatible rich editing | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |\r\n| Markdown-focused source of truth | [Markdown Editor](/docs/luthor/presets/md-editor/) |\r\n| HTML-focused source workflows | [HTML Editor](/docs/luthor/presets/html-editor/) |\r\n| Markdown-native note canvas (embeds, tokens, adapter) | [Papyra Editor](/docs/luthor/presets/papyra-editor/) |\r\n\r\n\r\n",
+    "plainContent": "Preset Selector Use this table to choose the right preset quickly. What this page answers - Which preset fits my workflow and source mode needs? Need Preset --- --- Full capability, broad modes Extensive Editor Legacy-compatible rich editing Legacy Rich Editor Markdown-focused source of truth Markdown Editor HTML-focused source workflows HTML Editor Markdown-native note canvas (embeds, tokens, adapter) Papyra Editor",
     "sections": [
       {
         "heading": "Overview",
@@ -8556,7 +8707,7 @@ export const docsIndex = [
         "heading": "What this page answers",
         "id": "what-this-page-answers",
         "level": 2,
-        "text": "- Which preset fits my workflow and source mode needs? Need Preset --- --- Full capability, broad modes Extensive Editor Legacy-compatible rich editing Legacy Rich Editor Markdown-focused source of truth Markdown Editor HTML-focused source workflows HTML Editor Constrained source-mode preset Headless Editor Preset"
+        "text": "- Which preset fits my workflow and source mode needs? Need Preset --- --- Full capability, broad modes Extensive Editor Legacy-compatible rich editing Legacy Rich Editor Markdown-focused source of truth Markdown Editor HTML-focused source workflows HTML Editor Markdown-native note canvas (embeds, tokens, adapter) Papyra Editor"
       }
     ],
     "headings": [
@@ -8568,7 +8719,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/reference/preset-selector/",
     "sourcePath": "apps/web/src/content/docs/reference/preset-selector.md",
-    "updatedAt": "2026-05-29T02:31:18.144Z",
+    "updatedAt": "2026-06-18T05:35:17.539Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -8579,7 +8730,7 @@ export const docsIndex = [
       "legacy-rich",
       "md-editor",
       "html-editor",
-      "headless-editor"
+      "papyra"
     ],
     "props": [
       "featureFlags",
@@ -8592,7 +8743,7 @@ export const docsIndex = [
       "LegacyRichEditor",
       "MarkDownEditor",
       "HTMLEditor",
-      "HeadlessEditorPreset"
+      "PapyraEditor"
     ],
     "commands": [],
     "extensions": [],
@@ -8620,9 +8771,6 @@ export const docsIndex = [
       "feature",
       "featureflags",
       "for",
-      "headless",
-      "headless-editor",
-      "headlesseditorpreset",
       "html",
       "html-editor",
       "htmleditor",
@@ -8635,6 +8783,8 @@ export const docsIndex = [
       "md",
       "md-editor",
       "mode",
+      "papyra",
+      "papyraeditor",
       "policy",
       "preset",
       "preset selector",
@@ -8656,8 +8806,6 @@ export const docsIndex = [
         "editor",
         "extensive",
         "featureflags",
-        "headless",
-        "headless-editor",
         "html",
         "html-editor",
         "initialmode",
@@ -8666,6 +8814,7 @@ export const docsIndex = [
         "matrix",
         "md",
         "md-editor",
+        "papyra",
         "preset",
         "preset selector",
         "rich",
@@ -8678,10 +8827,10 @@ export const docsIndex = [
       ],
       "exports": [
         "extensiveeditor",
-        "headlesseditorpreset",
         "htmleditor",
         "legacyricheditor",
         "markdowneditor",
+        "papyraeditor",
         "presetregistry"
       ],
       "commands": [],

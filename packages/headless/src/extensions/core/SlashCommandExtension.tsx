@@ -40,6 +40,17 @@ export type SlashCommandCommands = {
   setSlashCommands: (items: readonly SlashCommandItem[]) => void;
   closeSlashMenu: () => void;
   executeSlashCommand: (id: string) => boolean;
+  /**
+   * Insert plain text at the current selection, replacing any selected range.
+   * This is the write primitive backing host-contributed slash commands: by the
+   * time a command's action runs, {@link executeSlashCommand} has already
+   * removed the `/query` trigger and restored the caret to that spot, so the
+   * text lands exactly where the slash was typed. The editor is focused first so
+   * the insertion still applies when DOM focus was lost (e.g. after a file
+   * dialog), and the caret is read from the editor state, not the DOM, so it
+   * survives the focus hop. No-op for an empty string or a non-range selection.
+   */
+  insertText: (text: string) => void;
 };
 
 export type SlashCommandStateQueries = {
@@ -158,6 +169,7 @@ export class SlashCommandExtension extends BaseExtension<
       setSlashCommands: (items: readonly SlashCommandItem[]) => this.setSlashCommands(items),
       closeSlashMenu: () => this.closeSlashMenu(),
       executeSlashCommand: (id: string) => this.executeSlashCommand(editor, id),
+      insertText: (text: string) => this.insertText(editor, text),
     };
   }
 
@@ -237,6 +249,20 @@ export class SlashCommandExtension extends BaseExtension<
     this.closeSlashMenu();
     command.action();
     return true;
+  }
+
+  private insertText(editor: LexicalEditor, text: string) {
+    if (!text) {
+      return;
+    }
+
+    editor.focus();
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        selection.insertText(text);
+      }
+    });
   }
 
   private updateMatchFromSelection(editor: LexicalEditor) {

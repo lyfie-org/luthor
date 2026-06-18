@@ -18,6 +18,8 @@ export type {
   ExtensiveEditorRef,
   ExtensiveEditorProps,
   ExtensiveEditorMode,
+  ExtensiveSlashCommand,
+  ExtensiveSlashCommandContext,
   ImageUploadHandler,
   GifUploadHandler,
 } from "./ExtensiveEditor";

@@ -51,7 +51,7 @@ export function App() {
 - `MarkDownEditor`
 - `HTMLEditor`
 - `LegacyRichEditor`
-- `HeadlessEditorPreset`
+- `PapyraEditor`
 
 ## Compatibility
 

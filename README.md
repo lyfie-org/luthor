@@ -43,8 +43,10 @@ Luthor now applies a strict source-metadata policy:
 
 - **Metadata-free presets**: `MarkDownEditor`, `HTMLEditor`, `LegacyRichEditor`
   - These presets run with `sourceMetadataMode="none"` and avoid metadata envelopes by default.
-- **Metadata-friendly presets**: `ExtensiveEditor`, `SlashEditor`, `HeadlessEditorPreset`, `ComposeEditor`, `SimpleEditor`
-  - These presets preserve metadata only when an attribute is not natively representable in Markdown/HTML.
+- **Markdown-native preset**: `PapyraEditor`
+  - Runs with `sourceMetadataMode="none"`; markdown is the source of truth, with Obsidian-style embeds and a host adapter seam.
+- **Metadata-friendly preset**: `ExtensiveEditor`
+  - Preserves metadata only when an attribute is not natively representable in Markdown/HTML.
 
 Examples of metadata that can still be emitted in metadata-friendly presets:
 

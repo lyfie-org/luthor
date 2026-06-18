@@ -44,6 +44,7 @@ import {
   TabNode,
   type EditorState,
   type ElementNode,
+  type Klass,
   type LexicalNode,
 } from "lexical";
 import {
@@ -74,6 +75,20 @@ export type MarkdownBridgeFlavor = "github" | "luthor" | "lexical-native";
 export interface MarkdownBridgeOptions {
   metadataMode?: SourceMetadataMode;
   bridgeFlavor?: MarkdownBridgeFlavor;
+  /**
+   * Extra Lexical node classes a preset needs the bridge to understand on top of
+   * the built-in markdown node set. Register a preset's custom nodes (e.g.
+   * Papyra's `[[wikilink]]`/`![[media]]` embeds) here so the bridge editor can
+   * parse and serialize them. Ignored by the `lexical-native` flavor.
+   */
+  extraNodes?: ReadonlyArray<Klass<LexicalNode>>;
+  /**
+   * Extra markdown transformers appended ahead of the built-in set, giving a
+   * preset's custom syntax a lossless round-trip in both directions. Their
+   * `dependencies` node types are automatically treated as markdown-supported so
+   * they survive export sanitization. Ignored by the `lexical-native` flavor.
+   */
+  extraTransformers?: ReadonlyArray<Transformer>;
 }
 
 const HORIZONTAL_RULE_MARKDOWN_TRANSFORMER: ElementTransformer = {
@@ -617,34 +632,85 @@ function collectMarkdownPartialEnvelopes(input: unknown): MetadataEnvelope[] {
   });
 }
 
-function createMarkdownEditor() {
+const BASE_MARKDOWN_NODES: ReadonlyArray<Klass<LexicalNode>> = [
+  ParagraphNode,
+  TextNode,
+  LineBreakNode,
+  TabNode,
+  HeadingNode,
+  QuoteNode,
+  ListNode,
+  ListItemNode,
+  LinkNode,
+  AutoLinkNode,
+  CodeNode,
+  CodeHighlightNode,
+  HorizontalRuleNode,
+  ImageNode,
+  IframeEmbedNode,
+  YouTubeEmbedNode,
+  TableNode,
+  TableRowNode,
+  TableCellNode,
+];
+
+function createMarkdownEditor(extraNodes?: ReadonlyArray<Klass<LexicalNode>>) {
   return createEditor({
     namespace: "luthor-markdown-converter",
     onError: (error) => {
       throw error;
     },
-    nodes: [
-      ParagraphNode,
-      TextNode,
-      LineBreakNode,
-      TabNode,
-      HeadingNode,
-      QuoteNode,
-      ListNode,
-      ListItemNode,
-      LinkNode,
-      AutoLinkNode,
-      CodeNode,
-      CodeHighlightNode,
-      HorizontalRuleNode,
-      ImageNode,
-      IframeEmbedNode,
-      YouTubeEmbedNode,
-      TableNode,
-      TableRowNode,
-      TableCellNode,
-    ],
+    nodes:
+      extraNodes && extraNodes.length > 0
+        ? [...BASE_MARKDOWN_NODES, ...extraNodes]
+        : [...BASE_MARKDOWN_NODES],
   });
+}
+
+/**
+ * Merge a preset's extra transformers ahead of the built-in markdown set, so a
+ * preset's custom syntax is matched before the generic rules on import.
+ */
+function resolveMarkdownTransformers(
+  extraTransformers?: ReadonlyArray<Transformer>,
+): Transformer[] {
+  return extraTransformers && extraTransformers.length > 0
+    ? [...extraTransformers, ...MARKDOWN_TRANSFORMERS]
+    : MARKDOWN_TRANSFORMERS;
+}
+
+/**
+ * Derive the node types a preset's extra nodes/transformers introduce, so the
+ * export-side sanitizer treats them as markdown-supported instead of replacing
+ * them with a fallback label before their transformer can serialize them.
+ */
+function collectExtraSupportedNodeTypes(
+  extraNodes?: ReadonlyArray<Klass<LexicalNode>>,
+  extraTransformers?: ReadonlyArray<Transformer>,
+): string[] {
+  const types = new Set<string>();
+
+  const addType = (node: Klass<LexicalNode>): void => {
+    const getType = (node as { getType?: () => string }).getType;
+    if (typeof getType === "function") {
+      types.add(getType.call(node));
+    }
+  };
+
+  for (const node of extraNodes ?? []) {
+    addType(node);
+  }
+
+  for (const transformer of extraTransformers ?? []) {
+    const dependencies = (
+      transformer as { dependencies?: ReadonlyArray<Klass<LexicalNode>> }
+    ).dependencies;
+    for (const dependency of dependencies ?? []) {
+      addType(dependency);
+    }
+  }
+
+  return [...types];
 }
 
 function createLexicalNativeMarkdownEditor() {
@@ -2431,10 +2497,11 @@ export function markdownToJSON(
     ? preprocessed.content
     : preprocessMarkdownForMetadataFreeImport(preprocessed.content);
 
-  const editor = createMarkdownEditor();
+  const editor = createMarkdownEditor(options?.extraNodes);
+  const transformers = resolveMarkdownTransformers(options?.extraTransformers);
   editor.update(
     () => {
-      $convertFromMarkdownString(sourceContent, MARKDOWN_TRANSFORMERS);
+      $convertFromMarkdownString(sourceContent, transformers);
     },
     { discrete: true },
   );
@@ -2463,19 +2530,31 @@ export function jsonToMarkdown(
 
   const { document: inputWithoutFrontmatter, frontmatter } = stripFrontmatterFromDocument(input);
   const preserveMetadata = shouldPreserveMetadata(options?.metadataMode);
+  const extraSupportedNodeTypes = collectExtraSupportedNodeTypes(
+    options?.extraNodes,
+    options?.extraTransformers,
+  );
+  const supportedNodeTypes =
+    extraSupportedNodeTypes.length > 0
+      ? new Set<string>([
+          ...MARKDOWN_SUPPORTED_NODE_TYPES,
+          ...extraSupportedNodeTypes,
+        ])
+      : MARKDOWN_SUPPORTED_NODE_TYPES;
   const prepared = prepareDocumentForBridge(inputWithoutFrontmatter, {
     mode: "markdown",
-    supportedNodeTypes: MARKDOWN_SUPPORTED_NODE_TYPES,
+    supportedNodeTypes,
   });
   const partialEnvelopes = preserveMetadata
     ? collectMarkdownPartialEnvelopes(inputWithoutFrontmatter)
     : [];
-  const editor = createMarkdownEditor();
+  const editor = createMarkdownEditor(options?.extraNodes);
+  const transformers = resolveMarkdownTransformers(options?.extraTransformers);
   const editorState = toEditorState(editor, prepared.document);
   editor.setEditorState(editorState, { tag: "history-merge" });
 
   const markdown = editorState.read(() => {
-    return $convertToMarkdownString(MARKDOWN_TRANSFORMERS);
+    return $convertToMarkdownString(transformers);
   });
   const postprocessedMarkdown = postprocessMarkdownForBridgeExport(
     markdown,

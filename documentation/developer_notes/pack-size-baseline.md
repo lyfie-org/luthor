@@ -1,8 +1,8 @@
 # Package Size Baseline
 
-Generated on 2026-03-19T09:02:55.005Z.
+Generated on 2026-06-18T13:44:24.323Z.
 
 | Package | Version | Packed (bytes) | Unpacked (bytes) | Files | Budget (packed/unpacked) |
 | --- | --- | ---: | ---: | ---: | --- |
-| @lyfie/luthor | 2.6.6 | 65,781 | 290,196 | 33 | 350,000 / 1,700,000 |
-| @lyfie/luthor-headless | 2.6.6 | 79,114 | 325,375 | 4 | 130,000 / 550,000 |
+| @lyfie/luthor | 2.8.0 | 76,927 | 327,487 | 26 | 350,000 / 1,700,000 |
+| @lyfie/luthor-headless | 2.8.0 | 92,943 | 390,766 | 4 | 130,000 / 550,000 |

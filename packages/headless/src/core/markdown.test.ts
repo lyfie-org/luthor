@@ -8,8 +8,87 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { IS_BOLD, IS_SUBSCRIPT } from "lexical";
+import {
+  DecoratorNode,
+  IS_BOLD,
+  IS_SUBSCRIPT,
+  type LexicalNode,
+  type SerializedLexicalNode,
+} from "lexical";
+import type { TextMatchTransformer } from "@lexical/markdown";
 import { jsonToMarkdown, markdownToJSON } from "./markdown";
+
+/*
+ * A minimal preset-style custom node used to exercise the bridge's
+ * `extraNodes`/`extraTransformers` seam: an inline `[[Target]]` wikilink that
+ * has no standard-markdown representation, so it round-trips losslessly only
+ * when its node and transformer are registered with the bridge.
+ */
+type SerializedWikiLinkNode = SerializedLexicalNode & { target: string };
+
+class WikiLinkNode extends DecoratorNode<null> {
+  __target: string;
+
+  static getType(): string {
+    return "test-wikilink";
+  }
+
+  static clone(node: WikiLinkNode): WikiLinkNode {
+    return new WikiLinkNode(node.__target, node.__key);
+  }
+
+  constructor(target: string, key?: string) {
+    super(key);
+    this.__target = target;
+  }
+
+  static importJSON(serialized: SerializedWikiLinkNode): WikiLinkNode {
+    return new WikiLinkNode(serialized.target);
+  }
+
+  exportJSON(): SerializedWikiLinkNode {
+    return { type: "test-wikilink", version: 1, target: this.__target };
+  }
+
+  getTarget(): string {
+    return this.__target;
+  }
+
+  getTextContent(): string {
+    return `[[${this.__target}]]`;
+  }
+
+  createDOM(): HTMLElement {
+    return document.createElement("span");
+  }
+
+  updateDOM(): boolean {
+    return false;
+  }
+
+  decorate(): null {
+    return null;
+  }
+}
+
+const WIKILINK_TRANSFORMER: TextMatchTransformer = {
+  dependencies: [WikiLinkNode],
+  export: (node: LexicalNode) =>
+    node instanceof WikiLinkNode ? `[[${node.getTarget()}]]` : null,
+  importRegExp: /\[\[([^\]]+)\]\]/,
+  regExp: /\[\[([^\]]+)\]\]$/,
+  replace: (textNode, match) => {
+    textNode.replace(new WikiLinkNode(match[1] ?? ""));
+  },
+  trigger: "]",
+  type: "text-match",
+};
+
+const WIKILINK_BRIDGE_OPTIONS = {
+  metadataMode: "none" as const,
+  extraNodes: [WikiLinkNode],
+  extraTransformers: [WIKILINK_TRANSFORMER],
+};
 
 type JsonDocument = {
   root: {
@@ -1558,5 +1637,63 @@ describe("markdown bridge", () => {
     expect((Number(textNode.format) & IS_BOLD) === IS_BOLD).toBe(true);
     expect((Number(textNode.format) & IS_SUBSCRIPT) === IS_SUBSCRIPT).toBe(true);
     expect(textNode.style).toBe("color: red;");
+  });
+});
+
+describe("preset node/transformer bridge seam", () => {
+  const MARKDOWN_WITH_WIKILINK = "Link to [[Project Plan]] here.";
+
+  function findWikiLink(document: JsonDocument): { target?: string } | undefined {
+    const paragraph = document.root.children[0] as {
+      children?: Array<{ type?: string; target?: string }>;
+    };
+    return paragraph.children?.find((child) => child.type === "test-wikilink");
+  }
+
+  it("parses preset syntax into its custom node via extraNodes/extraTransformers", () => {
+    const document = markdownToJSON(
+      MARKDOWN_WITH_WIKILINK,
+      WIKILINK_BRIDGE_OPTIONS,
+    ) as JsonDocument;
+
+    expect(findWikiLink(document)?.target).toBe("Project Plan");
+  });
+
+  it("round-trips a preset node back to its markdown losslessly", () => {
+    const document = markdownToJSON(
+      MARKDOWN_WITH_WIKILINK,
+      WIKILINK_BRIDGE_OPTIONS,
+    );
+    const markdown = jsonToMarkdown(document, WIKILINK_BRIDGE_OPTIONS);
+
+    expect(markdown.trim()).toBe(MARKDOWN_WITH_WIKILINK);
+  });
+
+  it("stays idempotent across repeated round-trips", () => {
+    const first = jsonToMarkdown(
+      markdownToJSON(MARKDOWN_WITH_WIKILINK, WIKILINK_BRIDGE_OPTIONS),
+      WIKILINK_BRIDGE_OPTIONS,
+    ).trim();
+    const second = jsonToMarkdown(
+      markdownToJSON(first, WIKILINK_BRIDGE_OPTIONS),
+      WIKILINK_BRIDGE_OPTIONS,
+    ).trim();
+
+    expect(second).toBe(first);
+  });
+
+  it("drops the node without the seam, proving the seam is what enables round-trip", () => {
+    // Imported with the seam, the document contains a custom node...
+    const document = markdownToJSON(
+      MARKDOWN_WITH_WIKILINK,
+      WIKILINK_BRIDGE_OPTIONS,
+    );
+
+    // ...but exporting it without the matching options sanitizes the unknown
+    // node to a fallback before any transformer can serialize it, so the
+    // wikilink syntax is lost. This is the corruption the seam exists to avoid.
+    const markdownWithoutSeam = jsonToMarkdown(document, { metadataMode: "none" });
+
+    expect(markdownWithoutSeam).not.toContain("[[Project Plan]]");
   });
 });

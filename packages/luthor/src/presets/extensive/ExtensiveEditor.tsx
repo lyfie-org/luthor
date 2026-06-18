@@ -18,6 +18,8 @@ import {
   mergeThemes,
   RichText,
   type MarkdownBridgeFlavor,
+  type MarkdownBridgeOptions,
+  type Extension,
   type LuthorTheme,
   type SourceMetadataMode,
 } from "@lyfie/luthor-headless";
@@ -486,6 +488,7 @@ function serializeJSONToSource(
   document: unknown,
   sourceMetadataMode: SourceMetadataMode = "preserve",
   markdownBridgeFlavor: MarkdownBridgeFlavor = "luthor",
+  bridgeExtras?: MarkdownBridgeExtras,
 ): string {
   const resolvedDocument = document ?? EMPTY_JSON_DOCUMENT;
 
@@ -497,8 +500,10 @@ function serializeJSONToSource(
     const markdown = markdownBridgeFlavor === "lexical-native"
       ? jsonToMarkdown(resolvedDocument, { bridgeFlavor: "lexical-native" })
       : sourceMetadataMode === "none"
-        ? jsonToMarkdown(resolvedDocument, { metadataMode: "none" })
-        : jsonToMarkdown(resolvedDocument);
+        ? jsonToMarkdown(resolvedDocument, { metadataMode: "none", ...bridgeExtras })
+        : hasBridgeExtras(bridgeExtras)
+          ? jsonToMarkdown(resolvedDocument, { ...bridgeExtras })
+          : jsonToMarkdown(resolvedDocument);
     return formatMarkdownSource(markdown);
   }
 
@@ -956,6 +961,7 @@ function ExtensiveEditorContent({
   paragraphLabel,
   syncHeadingOptionsWithCommands,
   slashCommandVisibility,
+  extraSlashCommands,
   shortcutConfig,
   commandPaletteShortcutOnly,
   isListStyleDropdownEnabled,
@@ -965,6 +971,7 @@ function ExtensiveEditorContent({
   markdownBridgeFlavor,
   markdownSourceOfTruth,
   showLineNumbers,
+  markdownBridgeExtras,
 }: {
   isDark: boolean;
   toggleTheme: () => void;
@@ -990,6 +997,7 @@ function ExtensiveEditorContent({
   paragraphLabel?: string;
   syncHeadingOptionsWithCommands: boolean;
   slashCommandVisibility?: SlashCommandVisibility;
+  extraSlashCommands?: readonly ExtensiveSlashCommand[];
   shortcutConfig?: CommandShortcutConfig;
   commandPaletteShortcutOnly: boolean;
   isListStyleDropdownEnabled: boolean;
@@ -999,6 +1007,7 @@ function ExtensiveEditorContent({
   markdownBridgeFlavor: MarkdownBridgeFlavor;
   markdownSourceOfTruth: boolean;
   showLineNumbers: boolean;
+  markdownBridgeExtras?: MarkdownBridgeExtras;
 }) {
   const {
     commands,
@@ -1223,6 +1232,7 @@ function ExtensiveEditorContent({
             exportApi.toJSON(),
             sourceMetadataMode,
             markdownBridgeFlavor,
+            markdownBridgeExtras,
           );
           canonicalMarkdownRef.current = nextMarkdown;
           canonicalMarkdownStaleRef.current = false;
@@ -1237,8 +1247,10 @@ function ExtensiveEditorContent({
         }
 
         return sourceMetadataMode === "none"
-          ? markdownToJSON(markdown, { metadataMode: "none" })
-          : markdownToJSON(markdown);
+          ? markdownToJSON(markdown, { metadataMode: "none", ...markdownBridgeExtras })
+          : hasBridgeExtras(markdownBridgeExtras)
+            ? markdownToJSON(markdown, { ...markdownBridgeExtras })
+            : markdownToJSON(markdown);
       };
       const getJSON = () => {
         if (!markdownSourceOfTruth) {
@@ -1281,6 +1293,7 @@ function ExtensiveEditorContent({
       exportApi,
       importApi,
       markdownBridgeFlavor,
+      markdownBridgeExtras,
       markdownSourceOfTruth,
       sourceMetadataMode,
     ],
@@ -1297,16 +1310,36 @@ function ExtensiveEditorContent({
       shortcutConfig: stableShortcutConfigRef.current,
       commandPaletteShortcutOnly,
     });
+    // Host-contributed slash commands, bound to a minimal insert API. Mapped
+    // once so the same item objects flow into both the palette and the slash
+    // menu, and back out on cleanup.
+    const slashCommandContext: ExtensiveSlashCommandContext = {
+      insertText: (text) => commandApi.insertText?.(text),
+    };
+    const extraSlashItems = (extraSlashCommands ?? []).map((command) => ({
+      id: command.id,
+      label: command.label,
+      description: command.description,
+      category: command.category ?? "Insert",
+      keywords: command.keywords,
+      action: () => {
+        void command.action(slashCommandContext);
+      },
+    }));
     if (typeof commandApi.registerCommand === "function") {
       paletteItems.forEach((cmd) => commandApi.registerCommand(cmd));
+      extraSlashItems.forEach((cmd) => commandApi.registerCommand(cmd));
     }
-    const slashItems = commandsToSlashCommandItems(commandApi, {
-      headingOptions: commandHeadingOptions,
-      paragraphLabel: commandParagraphLabel,
-      slashCommandVisibility: stableSlashCommandVisibilityRef.current,
-      isFeatureEnabled: isMenuFeatureEnabled,
-      shortcutConfig: stableShortcutConfigRef.current,
-    });
+    const slashItems = [
+      ...commandsToSlashCommandItems(commandApi, {
+        headingOptions: commandHeadingOptions,
+        paragraphLabel: commandParagraphLabel,
+        slashCommandVisibility: stableSlashCommandVisibilityRef.current,
+        isFeatureEnabled: isMenuFeatureEnabled,
+        shortcutConfig: stableShortcutConfigRef.current,
+      }),
+      ...extraSlashItems,
+    ];
     if (typeof commandApi.setSlashCommands === "function") {
       commandApi.setSlashCommands(slashItems);
     } else {
@@ -1330,6 +1363,7 @@ function ExtensiveEditorContent({
       unregisterShortcuts();
       if (typeof commandApi.unregisterCommand === "function") {
         paletteItems.forEach((cmd) => commandApi.unregisterCommand(cmd.id));
+        extraSlashItems.forEach((cmd) => commandApi.unregisterCommand(cmd.id));
       }
       if (typeof commandApi.setSlashCommands === "function") {
         commandApi.setSlashCommands([]);
@@ -1345,6 +1379,7 @@ function ExtensiveEditorContent({
     commandHeadingOptions,
     commandParagraphLabel,
     slashCommandVisibilityKey,
+    extraSlashCommands,
     shortcutConfigKey,
     isMenuFeatureEnabled,
     commandPaletteShortcutOnly,
@@ -1572,8 +1607,10 @@ function ExtensiveEditorContent({
     }
 
     return sourceMetadataMode === "none"
-      ? markdownToJSON(sourceValue, { metadataMode: "none" })
-      : markdownToJSON(sourceValue);
+      ? markdownToJSON(sourceValue, { metadataMode: "none", ...markdownBridgeExtras })
+      : hasBridgeExtras(markdownBridgeExtras)
+        ? markdownToJSON(sourceValue, { ...markdownBridgeExtras })
+        : markdownToJSON(sourceValue);
   };
 
   const parseSourceModeDocument = (
@@ -1997,6 +2034,48 @@ function ExtensiveEditorContent({
   );
 }
 
+/**
+ * The editor surface handed to a host-injected slash command's `action`. Kept
+ * deliberately small: it exposes only the primitives a custom command needs to
+ * write into the document, so presets stay markdown-safe and never reach into
+ * Lexical directly.
+ */
+export interface ExtensiveSlashCommandContext {
+  /**
+   * Insert plain text at the caret. The slash trigger (`/query`) has already
+   * been removed and the caret restored to that position before `action` runs,
+   * so the text lands exactly where the user typed the slash.
+   */
+  insertText: (text: string) => void;
+}
+
+/**
+ * A custom slash-menu command contributed by a preset or host. These are
+ * appended after the built-in catalogue (and so are not subject to
+ * {@link ExtensiveEditorProps.slashCommandVisibility}, which only filters the
+ * built-ins) and also surface in the command palette. The host owns the curated
+ * list, which is how Papyra adds "Link note" / "Embed media" / "Insert date"
+ * without forking the editor.
+ */
+export interface ExtensiveSlashCommand {
+  /** Stable, unique id (e.g. `"papyra.link-note"`). */
+  id: string;
+  /** Menu label. */
+  label: string;
+  /** Optional one-line description shown beneath the label. */
+  description?: string;
+  /** Menu group heading. Defaults to `"Insert"`. */
+  category?: string;
+  /** Extra search terms for the menu's fuzzy filter. */
+  keywords?: string[];
+  /**
+   * Runs when the command is chosen. Receives an
+   * {@link ExtensiveSlashCommandContext} for writing into the document. May be
+   * async (e.g. to await an upload before inserting an embed reference).
+   */
+  action: (context: ExtensiveSlashCommandContext) => void | Promise<void>;
+}
+
 export interface ExtensiveEditorProps {
   className?: string;
   onReady?: (methods: ExtensiveEditorRef) => void;
@@ -2037,6 +2116,14 @@ export interface ExtensiveEditorProps {
   paragraphLabel?: string;
   syncHeadingOptionsWithCommands?: boolean;
   slashCommandVisibility?: SlashCommandVisibility;
+  /**
+   * Custom slash commands appended to the built-in catalogue. They bypass
+   * {@link slashCommandVisibility} (which only filters built-ins, never the
+   * host's own additions) and also appear in the command palette. Memoize the
+   * array so the menu is not re-registered on every render. See
+   * {@link ExtensiveSlashCommand}.
+   */
+  extraSlashCommands?: readonly ExtensiveSlashCommand[];
   shortcutConfig?: CommandShortcutConfig;
   commandPaletteShortcutOnly?: boolean;
   isListStyleDropdownEnabled?: boolean;
@@ -2063,6 +2150,43 @@ export interface ExtensiveEditorProps {
   showLineNumbers?: boolean;
   /** Maximum list sub-indent levels (excluding top-level list). Default: 8 */
   maxListIndentation?: number;
+  /**
+   * Additional headless extensions to register alongside the feature-gated set.
+   * Lets a preset contribute its own custom Lexical nodes (e.g. Papyra's
+   * `[[wikilink]]`/`![[media]]` embeds) without forking the editor. The
+   * extensions are appended after the built-in ones and own their nodes,
+   * commands, and rendering.
+   */
+  extraExtensions?: readonly Extension[];
+  /**
+   * Custom Lexical node classes the markdown bridge must understand to parse and
+   * serialize a preset's extra nodes. Pair with {@link extraExtensions} (which
+   * registers the same nodes with the live editor) and
+   * {@link markdownExtraTransformers}. Forwarded to the markdown converter so
+   * custom nodes survive the round-trip instead of being dropped.
+   */
+  markdownExtraNodes?: MarkdownBridgeOptions["extraNodes"];
+  /**
+   * Custom markdown transformers giving a preset's extra nodes a lossless
+   * round-trip in both directions. Prepended ahead of the built-in transformer
+   * set so preset syntax is matched first on import.
+   */
+  markdownExtraTransformers?: MarkdownBridgeOptions["extraTransformers"];
+}
+
+/** Extra node/transformer set forwarded to the markdown bridge. */
+type MarkdownBridgeExtras = Pick<
+  MarkdownBridgeOptions,
+  "extraNodes" | "extraTransformers"
+>;
+
+/** Whether a bridge-extras object actually carries nodes or transformers. */
+function hasBridgeExtras(extras?: MarkdownBridgeExtras): boolean {
+  return (
+    !!extras &&
+    ((extras.extraNodes?.length ?? 0) > 0 ||
+      (extras.extraTransformers?.length ?? 0) > 0)
+  );
 }
 
 export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorProps>(
@@ -2104,6 +2228,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     paragraphLabel,
     syncHeadingOptionsWithCommands = true,
     slashCommandVisibility,
+    extraSlashCommands,
     shortcutConfig,
     commandPaletteShortcutOnly = false,
     isListStyleDropdownEnabled = true,
@@ -2121,8 +2246,21 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     languageOptions,
     showLineNumbers = true,
     maxListIndentation = 8,
+    extraExtensions,
+    markdownExtraNodes,
+    markdownExtraTransformers,
   }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
+    const markdownBridgeExtras = useMemo<MarkdownBridgeExtras>(() => {
+      const extras: MarkdownBridgeExtras = {};
+      if (markdownExtraNodes && markdownExtraNodes.length > 0) {
+        extras.extraNodes = markdownExtraNodes;
+      }
+      if (markdownExtraTransformers && markdownExtraTransformers.length > 0) {
+        extras.extraTransformers = markdownExtraTransformers;
+      }
+      return extras;
+    }, [markdownExtraNodes, markdownExtraTransformers]);
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     const isDark = editorTheme === "dark";
     const requestedInitialMode = toCanonicalExtensiveMode(defaultEditorView ?? initialMode);
@@ -2224,7 +2362,10 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       () => resolveFeatureFlags(effectiveFeatureFlags),
       [effectiveFeatureFlags],
     );
-    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${lineNumbersKey}::${languageOptionsKey}::${featureFlagsKey}`;
+    const extraExtensionsKey = (extraExtensions ?? [])
+      .map((extension) => extension.name)
+      .join(",");
+    const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${lineNumbersKey}::${languageOptionsKey}::${featureFlagsKey}::${extraExtensionsKey}`;
     const stableFontFamilyOptionsRef = useRef<readonly FontFamilyOption[] | undefined>(fontFamilyOptions);
     const stableFontSizeOptionsRef = useRef<readonly FontSizeOption[] | undefined>(fontSizeOptions);
     const stableLineHeightOptionsRef = useRef<readonly LineHeightOption[] | undefined>(lineHeightOptions);
@@ -2273,9 +2414,13 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
         ...(stableFeatureFlagsRef.current ? { featureFlags: stableFeatureFlagsRef.current } : {}),
       };
 
+      const builtExtensions = createExtensiveExtensions(nextConfig);
       memoizedExtensionsRef.current = {
         key: extensionsKey,
-        value: createExtensiveExtensions(nextConfig),
+        value:
+          extraExtensions && extraExtensions.length > 0
+            ? [...builtExtensions, ...extraExtensions]
+            : builtExtensions,
       };
     }
     const memoizedExtensions = memoizedExtensionsRef.current.value;
@@ -2369,6 +2514,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
               EMPTY_JSON_DOCUMENT,
               sourceMetadataMode,
               markdownBridgeFlavor,
+              markdownBridgeExtras,
             ),
           getHTML: () =>
             serializeJSONToSource(
@@ -2378,7 +2524,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
               markdownBridgeFlavor,
             ),
         },
-      [markdownBridgeFlavor, methods, sourceMetadataMode],
+      [markdownBridgeFlavor, markdownBridgeExtras, methods, sourceMetadataMode],
     );
 
     const handleReady = (m: ExtensiveEditorRef) => {
@@ -2424,6 +2570,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             paragraphLabel={paragraphLabel}
             syncHeadingOptionsWithCommands={syncHeadingOptionsWithCommands}
             slashCommandVisibility={slashCommandVisibility}
+            extraSlashCommands={extraSlashCommands}
             shortcutConfig={shortcutConfig}
             commandPaletteShortcutOnly={commandPaletteShortcutOnly}
             isListStyleDropdownEnabled={isListStyleDropdownEnabled}
@@ -2433,6 +2580,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             markdownBridgeFlavor={markdownBridgeFlavor}
             markdownSourceOfTruth={markdownSourceOfTruth}
             showLineNumbers={showLineNumbers}
+            markdownBridgeExtras={markdownBridgeExtras}
           />
         </Provider>
       </div>

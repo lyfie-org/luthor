@@ -5,6 +5,20 @@
  * Build freely. Credit kindly.
  */
 
+/*
+ * Base preset token palette.
+ *
+ * Defines the `--luthor-preset-*` base palette (and a neutral default for the
+ * consumed `--luthor-*` theme contract) on every `.luthor-preset` wrapper. This
+ * is the fallback layer presets resolve against when neither a host token nor a
+ * higher-specificity preset/theme rule supplies a value — e.g. PapyraEditor's
+ * token bridge falls back to `--luthor-preset-*` here so it renders a sensible
+ * light editorial default without a host (see presets/papyra/theme.ts).
+ *
+ * Token declarations only — no structural/chrome rules — so this can never
+ * outrank a preset's own surface styles (the extensive base owns the wrapper
+ * chrome and content padding at higher specificity).
+ */
 .luthor-preset {
   --luthor-preset-bg: #ffffff;
   --luthor-preset-fg: #0f172a;
@@ -72,41 +86,25 @@
   --luthor-floating-border-active: var(--luthor-border-active);
   --luthor-floating-accent: var(--luthor-accent);
   --luthor-floating-accent-fg: var(--luthor-bg);
-
-  position: relative;
-  border: 1px solid var(--luthor-preset-border);
-  border-radius: var(--luthor-preset-radius);
-  background: var(--luthor-preset-bg);
-  color: var(--luthor-preset-fg);
-  box-shadow: var(--luthor-preset-shadow);
-  overflow: hidden;
 }
 
-.luthor-preset .luthor-content-editable {
-  min-height: var(--luthor-preset-content-min-height);
-  padding: var(--luthor-preset-content-padding);
-  color: var(--luthor-preset-fg);
-  background: var(--luthor-preset-bg);
-  line-height: 1.65;
-}
-
-.luthor-preset .luthor-content-editable:focus {
-  outline: 2px solid color-mix(in srgb, var(--luthor-preset-accent) 25%, transparent);
-  outline-offset: -2px;
-}
-
-.luthor-preset .luthor-placeholder {
-  color: var(--luthor-preset-muted-fg);
-}
-
-.luthor-preset .luthor-content-editable a {
-  color: var(--luthor-preset-accent);
-}
-
-.luthor-preset .luthor-content-editable blockquote {
-  margin: 0;
-  padding: 8px 12px;
-  border-left: 3px solid var(--luthor-preset-accent);
-  background: var(--luthor-preset-muted);
+/*
+ * Dark variant of the base palette.
+ *
+ * Only the raw `--luthor-preset-*` values are re-pointed; the `--luthor-*` theme
+ * contract above is declared in terms of them (`var(--luthor-preset-*)`), so it
+ * recolors automatically. This lets a preset that resolves against the base
+ * palette — e.g. PapyraEditor's token bridge — follow the host's light/dark
+ * choice (`data-editor-theme`, driven by the `initialTheme` prop) without any
+ * in-editor theme toggle. A host that supplies its own `--papyra-*` (or other)
+ * tokens still wins, since those are consumed ahead of this fallback.
+ */
+.luthor-preset[data-editor-theme="dark"] {
+  --luthor-preset-bg: #0f172a;
+  --luthor-preset-fg: #e2e8f0;
+  --luthor-preset-border: #334155;
+  --luthor-preset-muted: #1e293b;
+  --luthor-preset-muted-fg: #94a3b8;
+  --luthor-preset-accent: #60a5fa;
 }
 
