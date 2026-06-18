@@ -17,11 +17,14 @@ import {
   DecoratorNode,
   DOMConversionMap,
   DOMConversionOutput,
+  type ElementNode,
   LexicalEditor,
+  type LexicalNode,
   NodeKey,
   SerializedLexicalNode,
   Spread,
 } from "lexical";
+import type { ElementTransformer } from "@lexical/markdown";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { BaseExtension } from "../base/BaseExtension";
 import { BaseExtensionConfig, ExtensionCategory } from "../types";
@@ -728,3 +731,73 @@ export class IframeEmbedExtension extends BaseExtension<
 }
 
 export const iframeEmbedExtension = new IframeEmbedExtension();
+
+/** Create an {@link IframeEmbedNode}. */
+export function $createIframeEmbedNode(
+  payload: IframeEmbedPayload,
+): IframeEmbedNode {
+  return new IframeEmbedNode(payload);
+}
+
+/** Type guard for {@link IframeEmbedNode}. */
+export function $isIframeEmbedNode(
+  node: LexicalNode | null | undefined,
+): node is IframeEmbedNode {
+  return node instanceof IframeEmbedNode;
+}
+
+/**
+ * Lossless bidirectional markdown transformer for {@link IframeEmbedNode}.
+ *
+ * Import: a line that is exactly `![[iframe:url]]` (optionally
+ * `![[iframe:url|caption]]`) becomes an iframe embed. Export: an iframe embed
+ * serializes back to the same syntax using its stored URL.
+ *
+ * The URL is normalised through {@link parseUrl} on import (a missing protocol
+ * gains `https://`), so a fully-qualified URL round-trips verbatim and a
+ * shorthand one normalises on the first pass then stays byte-stable.
+ * Width/height/alignment are session-only presentation state with no markdown
+ * representation and default on parse, so the markdown text round-trips cleanly.
+ *
+ * **Ordering:** this transformer **must** be tried ahead of the general
+ * `![[…]]` file-embed transformer, whose `[^\]]+` target would otherwise claim
+ * `iframe:url` as a filename.
+ */
+export const IFRAME_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
+  dependencies: [IframeEmbedNode],
+  export: (node) => {
+    if (!$isIframeEmbedNode(node)) {
+      return null;
+    }
+    const { src, caption } = node.getPayload();
+    return caption && caption.trim() !== ""
+      ? `![[iframe:${src}|${caption}]]`
+      : `![[iframe:${src}]]`;
+  },
+  regExp: /^!\[\[iframe:([^\]|]+)(?:\|([^\]]+))?\]\]\s*$/,
+  replace: (parentNode: ElementNode, _children, match) => {
+    const raw = (match[1] ?? "").trim();
+    if (!raw) {
+      return;
+    }
+    const parsed = parseUrl(raw);
+    if (!parsed) {
+      return;
+    }
+    const rawCaption = match[2];
+    const caption =
+      rawCaption !== undefined && rawCaption.trim() !== ""
+        ? rawCaption.trim()
+        : "";
+    parentNode.replace(
+      $createIframeEmbedNode({
+        src: parsed.toString(),
+        width: 640,
+        height: 360,
+        alignment: "center",
+        caption,
+      }),
+    );
+  },
+  type: "element",
+};

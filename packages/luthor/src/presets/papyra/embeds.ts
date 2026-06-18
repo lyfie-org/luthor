@@ -23,22 +23,28 @@ import {
   blockAnchorExtension,
   calloutExtension,
   fileEmbedExtension,
+  iframeEmbedExtension,
   savedCardExtension,
   transclusionExtension,
   wikilinkExtension,
   wikilinkTypeaheadExtension,
+  youTubeEmbedExtension,
   BlockAnchorNode,
   CalloutNode,
   FileEmbedNode,
+  IframeEmbedNode,
   SavedCardNode,
   TransclusionNode,
   WikilinkNode,
+  YouTubeEmbedNode,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
   CALLOUT_MARKDOWN_TRANSFORMER,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
+  IFRAME_EMBED_MARKDOWN_TRANSFORMER,
   SAVED_CARD_MARKDOWN_TRANSFORMER,
   TRANSCLUSION_MARKDOWN_TRANSFORMER,
   WIKILINK_MARKDOWN_TRANSFORMER,
+  YOUTUBE_EMBED_MARKDOWN_TRANSFORMER,
   FileDropUploadExtension,
   type EmbedResolvers,
 } from "@lyfie/luthor-headless";
@@ -56,6 +62,8 @@ export const PAPYRA_EMBED_EXTENSIONS: NonNullable<
   fileEmbedExtension,
   savedCardExtension,
   calloutExtension,
+  iframeEmbedExtension,
+  youTubeEmbedExtension,
   wikilinkExtension,
   transclusionExtension,
   blockAnchorExtension,
@@ -91,6 +99,8 @@ export const PAPYRA_EMBED_NODES: NonNullable<
   FileEmbedNode,
   SavedCardNode,
   CalloutNode,
+  IframeEmbedNode,
+  YouTubeEmbedNode,
   WikilinkNode,
   TransclusionNode,
   BlockAnchorNode,
@@ -103,10 +113,12 @@ export const PAPYRA_EMBED_NODES: NonNullable<
  *
  * 1. **Saved card** (`![[card:url]]`) — the `card:` prefix must be claimed before
  *    the general `![[…]]` file embed swallows it as a filename.
- * 2. **Transclusion** (`![[Note#^id]]`) — the `#^` pattern, also before file embed.
- * 3. **File embed** (`![[file.ext]]`) — block-level media.
- * 4. **Block anchor** (`^uuid`) — trailing inline marker.
- * 5. **Wikilink** (`[[Note]]`) — inline link.
+ * 2. **YouTube** (`![[youtube:url]]`) — the `youtube:` prefix, before file embed.
+ * 3. **Iframe** (`![[iframe:url]]`) — the `iframe:` prefix, before file embed.
+ * 4. **Transclusion** (`![[Note#^id]]`) — the `#^` pattern, also before file embed.
+ * 5. **File embed** (`![[file.ext]]`) — block-level media.
+ * 6. **Block anchor** (`^uuid`) — trailing inline marker.
+ * 7. **Wikilink** (`[[Note]]`) — inline link.
  *
  * The **callout** (`> [!transcript]`) is a multiline-element transformer with a
  * distinct opening pattern, so it is independent of the ordering above; it is
@@ -119,6 +131,8 @@ export const PAPYRA_EMBED_TRANSFORMERS: NonNullable<
   ExtensiveEditorProps["markdownExtraTransformers"]
 > = [
   SAVED_CARD_MARKDOWN_TRANSFORMER,
+  YOUTUBE_EMBED_MARKDOWN_TRANSFORMER,
+  IFRAME_EMBED_MARKDOWN_TRANSFORMER,
   CALLOUT_MARKDOWN_TRANSFORMER,
   TRANSCLUSION_MARKDOWN_TRANSFORMER,
   FILE_EMBED_MARKDOWN_TRANSFORMER,

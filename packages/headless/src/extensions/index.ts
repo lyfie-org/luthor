@@ -119,10 +119,20 @@ export { ImageExtension, imageExtension } from "./media/ImageExtension";
 export {
   IframeEmbedExtension,
   iframeEmbedExtension,
+  IframeEmbedNode,
+  $createIframeEmbedNode,
+  $isIframeEmbedNode,
+  IFRAME_EMBED_MARKDOWN_TRANSFORMER,
+  type IframeEmbedPayload,
 } from "./media/IframeEmbedExtension";
 export {
   YouTubeEmbedExtension,
   youTubeEmbedExtension,
+  YouTubeEmbedNode,
+  $createYouTubeEmbedNode,
+  $isYouTubeEmbedNode,
+  YOUTUBE_EMBED_MARKDOWN_TRANSFORMER,
+  type YouTubeEmbedPayload,
 } from "./media/YouTubeEmbedExtension";
 
 // Custom extensions

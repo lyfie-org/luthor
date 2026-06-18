@@ -224,6 +224,26 @@
 }
 
 /*
+ * Rich media embeds (Sprint 1.5) — `![[youtube:url]]` and `![[iframe:url]]`.
+ *
+ * The nodes live in `@lyfie/luthor-headless` (shared with the extensive/legacy
+ * presets) and render a `.luthor-media-embed-shell` carrying the iframe; the
+ * preset only rounds the frame and skins the caption onto the editorial palette.
+ * Every value is `var(--papyra-*, fallback)` — no hex.
+ */
+.luthor-preset-papyra .luthor-media-embed-shell {
+  border-radius: 0.5em;
+  overflow: hidden;
+  border: 1px solid
+    var(--papyra-accent-border, var(--papyra-accent-surface, transparent));
+}
+
+.luthor-preset-papyra .luthor-media-embed-shell + figcaption {
+  font-family: var(--papyra-font-body, "Sora", ui-sans-serif, system-ui, sans-serif);
+  color: var(--papyra-text-muted, var(--papyra-text, inherit));
+}
+
+/*
  * Render-state variants (Sprint 1.5).
  *
  * `focus` — a centered, distraction-free measure. The only chrome Papyra keeps

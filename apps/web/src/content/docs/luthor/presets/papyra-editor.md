@@ -207,6 +207,8 @@ Every custom embed ships a bidirectional markdown transformer, so the body that
 | `text ^id`          | trailing block anchor (non-rendering)|
 | `![[card:url]]`     | saved web card (via `resolveCard`)  |
 | `![[card:url\|title]]` | saved web card with author title |
+| `![[youtube:url]]`  | YouTube player (optional `\|caption`)|
+| `![[iframe:url]]`   | iframe embed (optional `\|caption`) |
 | `> [!transcript]`   | transcription callout (display-only)|
 
 The embed nodes and transformers live in `@lyfie/luthor-headless` and are
@@ -225,6 +227,14 @@ metadata (title, description, preview image, favicon, site name); without a
 resolver the card degrades to a titled link to the URL. As with every embed, only
 the verbatim `url` (and optional `|title`) is serialized, so the metadata is
 render-only and the markdown round-trips unchanged.
+
+The **YouTube** (`![[youtube:url]]`) and **iframe** (`![[iframe:url]]`) embeds
+reuse the shared media nodes from `@lyfie/luthor-headless` and carry an optional
+`|caption`. A YouTube `watch`/`youtu.be`/`shorts` link is normalized to the
+canonical `…/embed/<id>` player URL on the first pass and is byte-stable
+afterward; an iframe URL gains `https://` if it has none. Frame size and
+alignment are session-only presentation state with no markdown representation
+(like image dimensions), so the markdown text itself round-trips unchanged.
 
 ## Command surface
 
