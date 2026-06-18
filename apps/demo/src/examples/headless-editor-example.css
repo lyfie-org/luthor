@@ -5,6 +5,12 @@
  * Build freely. Credit kindly.
  */
 
+/*
+ * Styles for the demo-only custom headless editor example
+ * (see ./HeadlessEditorExample.tsx). These ship with the demo app, not the
+ * published Luthor package.
+ */
+
 .luthor-preset-headless-editor.luthor-editor-wrapper[data-editor-theme="light"] {
   --luthor-bg: #ffffff;
   --luthor-fg: #111827;

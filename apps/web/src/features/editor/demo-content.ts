@@ -393,21 +393,36 @@ export const WEB_DEMO_LEGACY_RICH_CONTENT = markdownToJSONString(LEGACY_RICH_MAR
 export const WEB_DEMO_MD_EDITOR_CONTENT = markdownToJSONString(MD_EDITOR_SOURCE);
 export const WEB_DEMO_HTML_EDITOR_CONTENT = htmlToJSONString(HTML_EDITOR_SOURCE);
 
-export const WEB_DEMO_HEADLESS_PRESET_CONTENT = documentToJSONString([
-  headingNode('h1', 'Headless Preset: Lightweight Controls'),
-  paragraphNode([
-    textNode('This preset demonstrates the compact toolbar profile backed by the same JSON core.'),
-  ]),
-  headingNode('h2', 'Formatting'),
-  paragraphNode([
-    textNode('Use Bold, Italic, Strike, Code, and clear actions for fast text cleanup.'),
-  ]),
-  headingNode('h3', 'Structure'),
-  listNode('bullet', 'ul', [
-    listItemNode([paragraphNode([textNode('Heading toggles (H1-H6)')])], 1),
-    listItemNode([paragraphNode([textNode('Bullet and ordered lists')])], 2),
-    listItemNode([paragraphNode([textNode('Quote, code block, and horizontal rule')])], 3),
-  ]),
-  quoteNode('Headless preset keeps the surface minimal while preserving robust source tabs.'),
-  codeNode('javascript', ['const snapshot = editor.getJSON();', 'save(snapshot);']),
-]);
+const PAPYRA_MARKDOWN_SOURCE = `# Papyra: The Markdown-Native Note Canvas
+
+Papyra keeps **markdown as the source of truth** — what you write is exactly what
+lands in the \`.md\` file. The body is frontmatter-free and the caret stays sacred.
+
+## Writing essentials
+
+- Bold, _italic_, ~~strikethrough~~, and \`inline code\`
+- [Links](https://luthor.fyi) to anywhere
+- Task lists you can tick off
+
+- [x] Draft the note
+- [x] Embed some media
+- [ ] Ship it
+
+> Quotes read like quiet asides in the editorial measure.
+
+## Obsidian-style embeds
+
+These round-trip losslessly even without a host adapter wired in:
+
+- Wikilink: [[Project Roadmap]] and an alias [[Project Roadmap|the roadmap]]
+- Media embed: ![[diagram.png]]
+- Block transclusion: ![[Meeting Notes#^summary]]
+
+\`\`\`ts
+// Read the body imperatively — never a controlled value path.
+const markdown = editor.getMarkdown();
+\`\`\`
+
+Switch to the **markdown** tab to see the exact source the editor emits.`;
+
+export const WEB_DEMO_PAPYRA_CONTENT = markdownToJSONString(PAPYRA_MARKDOWN_SOURCE);

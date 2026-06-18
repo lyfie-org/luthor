@@ -9,36 +9,41 @@ import {
   ExtensiveEditor,
   type ExtensiveEditorProps,
   type ExtensiveEditorRef,
-  HeadlessEditorPreset,
   HTMLEditor,
   LegacyRichEditor,
   MarkDownEditor,
+  PapyraEditor,
 } from "@lyfie/luthor";
 import "@lyfie/luthor/styles.css";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { HeadlessEditorExample } from "./examples/HeadlessEditorExample";
+import "./examples/headless-editor-example.css";
 import {
   DEMO_EXTENSIVE_CONTENT,
-  DEMO_HEADLESS_PRESET_CONTENT,
+  DEMO_HEADLESS_EXAMPLE_CONTENT,
   DEMO_HTML_EDITOR_CONTENT,
   DEMO_LEGACY_RICH_CONTENT,
   DEMO_MD_EDITOR_CONTENT,
+  DEMO_PAPYRA_CONTENT,
 } from "./demo-content";
 import { useDemoTheme } from "./hooks/useDemoTheme";
 
 type PresetId =
   | "extensive"
+  | "papyra"
   | "legacy-rich"
   | "md-editor"
   | "html-editor"
-  | "headless-editor";
+  | "headless-example";
 type SyntaxFlavor = "default" | "custom" | "disabled";
 
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "extensive", label: "Extensive Editor" },
+  { value: "papyra", label: "Papyra Editor" },
   { value: "legacy-rich", label: "Legacy Rich Editor" },
   { value: "md-editor", label: "MD Editor" },
   { value: "html-editor", label: "HTML Editor" },
-  { value: "headless-editor", label: "Headless Editor" },
+  { value: "headless-example", label: "Headless Editor (custom example)" },
 ];
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -152,6 +157,15 @@ function App() {
 
   const presetNode = useMemo(() => {
     switch (preset) {
+      case "papyra":
+        return (
+          <PapyraEditor
+            {...syntaxPresetProps}
+            defaultContent={DEMO_PAPYRA_CONTENT}
+            showDefaultContent={false}
+            initialTheme={theme}
+          />
+        );
       case "legacy-rich":
         return (
           <LegacyRichEditor
@@ -182,11 +196,11 @@ function App() {
             initialTheme={theme}
           />
         );
-      case "headless-editor":
+      case "headless-example":
         return (
-          <HeadlessEditorPreset
+          <HeadlessEditorExample
             {...syntaxPresetProps}
-            defaultContent={DEMO_HEADLESS_PRESET_CONTENT}
+            defaultContent={DEMO_HEADLESS_EXAMPLE_CONTENT}
             showDefaultContent={false}
             initialTheme={theme}
           />

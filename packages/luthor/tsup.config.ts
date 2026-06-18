@@ -14,7 +14,6 @@ export default defineConfig({
     "src/presets/legacy-rich/index.ts",
     "src/presets/md-editor/index.ts",
     "src/presets/html-editor/index.ts",
-    "src/presets/headless-editor/index.ts",
     "src/presets/papyra/index.ts",
   ],
   format: ["esm"],

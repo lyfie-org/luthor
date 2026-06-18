@@ -127,7 +127,7 @@
     "legacy-rich",
     "md-editor",
     "html-editor",
-    "headless-editor"
+    "papyra"
   ],
   "supportedNodeTypes": [
     "root",

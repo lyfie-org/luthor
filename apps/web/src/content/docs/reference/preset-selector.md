@@ -11,7 +11,7 @@ keywords:
   - "legacy-rich"
   - "md-editor"
   - "html-editor"
-  - "headless-editor"
+  - "papyra"
 props:
   - "featureFlags"
   - "initialMode"
@@ -22,7 +22,7 @@ exports:
   - "LegacyRichEditor"
   - "MarkDownEditor"
   - "HTMLEditor"
-  - "HeadlessEditorPreset"
+  - "PapyraEditor"
 commands:
   []
 extensions:
@@ -51,6 +51,6 @@ Use this table to choose the right preset quickly.
 | Legacy-compatible rich editing | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |
 | Markdown-focused source of truth | [Markdown Editor](/docs/luthor/presets/md-editor/) |
 | HTML-focused source workflows | [HTML Editor](/docs/luthor/presets/html-editor/) |
-| Constrained source-mode preset | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |
+| Markdown-native note canvas (embeds, tokens, adapter) | [Papyra Editor](/docs/luthor/presets/papyra-editor/) |
 
 

@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-06-18T05:06:55.502Z
+Generated at: 2026-06-18T06:49:05.853Z
 
 ## AI Agent Workflow
 
@@ -2373,7 +2373,7 @@ frameworks:
   []
 lastVerifiedFrom:
   - "packages/luthor/src/presets/extensive/extensions.tsx"
-  - "packages/luthor/src/presets/headless-editor/HeadlessEditorPreset.tsx"
+  - "packages/luthor/src/presets/legacy-rich/LegacyRichEditor.tsx"
 navGroup: "luthor"
 navOrder: 30
 ---
@@ -2482,7 +2482,7 @@ navOrder: 10
 
 ## Key exports
 
-- Preset components: `ExtensiveEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `HeadlessEditorPreset`
+- Preset components: `ExtensiveEditor`, `LegacyRichEditor`, `MarkDownEditor`, `HTMLEditor`, `PapyraEditor`
 - Registry and factories: `presetRegistry`, `createExtensivePreset`, `createExtensiveExtensions`
 - Shared command layer: `generateCommands`, `registerKeyboardShortcuts`
 
@@ -2504,7 +2504,7 @@ keywords:
   - "legacy-rich"
   - "md-editor"
   - "html-editor"
-  - "headless-editor"
+  - "papyra"
 props:
   - "featureFlags"
   - "availableModes"
@@ -2514,7 +2514,7 @@ exports:
   - "LegacyRichEditor"
   - "MarkDownEditor"
   - "HTMLEditor"
-  - "HeadlessEditorPreset"
+  - "PapyraEditor"
 commands:
   []
 extensions:
@@ -2544,7 +2544,7 @@ This page maps preset exports to registry keys and reference pages.
 | `LegacyRichEditor` | `legacy-rich` | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |
 | `MarkDownEditor` | `md-editor` | [Markdown Editor](/docs/luthor/presets/md-editor/) |
 | `HTMLEditor` | `html-editor` | [HTML Editor](/docs/luthor/presets/html-editor/) |
-| `HeadlessEditorPreset` | `headless-editor` | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |
+| `PapyraEditor` | `papyra` | [Papyra Editor](/docs/luthor/presets/papyra-editor/) |
 
 ---
 ## FILE: luthor/presets/extensive-editor.md
@@ -2641,81 +2641,6 @@ import { ExtensiveEditor } from '@lyfie/luthor';
 
 export function App() {
   return <ExtensiveEditor placeholder="Write anything..." />;
-}
-~~~
-
----
-## FILE: luthor/presets/headless-editor-preset.md
-## URL: https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/
----
-
----
-title: "Headless Editor Preset"
-description: "Preset wrapper that demonstrates source mode handling and controlled bridge behavior on top of extensive extensions."
-package: "luthor"
-docType: "reference"
-surface: "preset"
-keywords:
-  - "HeadlessEditorPreset"
-  - "headless-editor preset"
-  - "source mode"
-props:
-  - "initialMode"
-  - "defaultEditorView"
-  - "featureFlags"
-exports:
-  - "HeadlessEditorPreset"
-  - "headlessEditorPreset"
-commands:
-  - "block.codeblock"
-  - "edit.undo"
-  - "edit.redo"
-extensions:
-  []
-nodes:
-  - "code"
-  - "paragraph"
-  - "list"
-frameworks:
-  - "react"
-lastVerifiedFrom:
-  - "packages/luthor/src/presets/headless-editor/HeadlessEditorPreset.tsx"
-navGroup: "luthor"
-navOrder: 130
----
-
-# Headless Editor Preset
-
-This preset offers a constrained profile for source-mode-centric use cases.
-
-## When to use this
-
-Use `HeadlessEditorPreset` when you want a compact preset that still exposes JSON/Markdown/HTML mode transitions.
-
-## Mode profile
-
-- Modes: `visual-only`, `visual`, `json`, `markdown`, `html`.
-
-## Preset props
-
-- `initialMode`: Sets the first active mode when no `defaultEditorView` is provided.
-- `defaultEditorView`: Alias for initial mode selection; useful when binding mode via config objects.
-- `featureFlags`: Optional per-feature overrides. Includes `codeIntelligence`.
-
-## Code intelligence toggle
-
-~~~tsx
-<HeadlessEditorPreset
-  featureFlags={{ codeIntelligence: false }}
-/>
-~~~
-
-~~~tsx
-import '@lyfie/luthor/styles.css';
-import { HeadlessEditorPreset } from '@lyfie/luthor';
-
-export function App() {
-  return <HeadlessEditorPreset initialMode="visual" />;
 }
 ~~~
 
@@ -3371,7 +3296,7 @@ Use this page for exact prop names and discovery tokens.
 
 ## Preset-level code intelligence toggle
 
-- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `HeadlessEditorPreset` use `featureFlags.codeIntelligence`.
+- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `PapyraEditor` use `featureFlags.codeIntelligence`.
 
 ~~~tsx
 <ExtensiveEditor featureFlags={{ codeIntelligence: false }} />
@@ -3571,9 +3496,6 @@ exports:
   - "formatMarkdownSource"
   - "generateCommands"
   - "headless"
-  - "headlessEditorPreset"
-  - "HeadlessEditorPreset"
-  - "HeadlessEditorPresetProps"
   - "HighlighterIcon"
   - "HTMLEditor"
   - "HTMLEditorMode"
@@ -4051,9 +3973,6 @@ This page is the canonical export inventory.
 - `formatMarkdownSource`
 - `generateCommands`
 - `headless`
-- `headlessEditorPreset`
-- `HeadlessEditorPreset`
-- `HeadlessEditorPresetProps`
 - `HighlighterIcon`
 - `HTMLEditor`
 - `HTMLEditorMode`
@@ -4339,7 +4258,7 @@ keywords:
   - "legacy-rich"
   - "md-editor"
   - "html-editor"
-  - "headless-editor"
+  - "papyra"
 props:
   - "featureFlags"
   - "initialMode"
@@ -4350,7 +4269,7 @@ exports:
   - "LegacyRichEditor"
   - "MarkDownEditor"
   - "HTMLEditor"
-  - "HeadlessEditorPreset"
+  - "PapyraEditor"
 commands:
   []
 extensions:
@@ -4379,7 +4298,7 @@ Use this table to choose the right preset quickly.
 | Legacy-compatible rich editing | [Legacy Rich Editor](/docs/luthor/presets/legacy-rich-editor/) |
 | Markdown-focused source of truth | [Markdown Editor](/docs/luthor/presets/md-editor/) |
 | HTML-focused source workflows | [HTML Editor](/docs/luthor/presets/html-editor/) |
-| Constrained source-mode preset | [Headless Editor Preset](/docs/luthor/presets/headless-editor-preset/) |
+| Markdown-native note canvas (embeds, tokens, adapter) | [Papyra Editor](/docs/luthor/presets/papyra-editor/) |
 
 ---
 ## FILE: reference/search-guide.md

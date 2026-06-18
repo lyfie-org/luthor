@@ -16,7 +16,6 @@ import {
 import { mdEditorPreset, MarkDownEditor } from "./md-editor";
 import { htmlEditorPreset, HTMLEditor } from "./html-editor";
 import { legacyRichPreset, LegacyRichEditor } from "./legacy-rich";
-import { headlessEditorPreset, HeadlessEditorPreset } from "./headless-editor";
 import {
   papyraPreset,
   createPapyraPreset,
@@ -50,7 +49,6 @@ import type {
   LegacyRichEditorMode,
   LegacyRichSourceFormat,
 } from "./legacy-rich";
-import type { HeadlessEditorPresetProps } from "./headless-editor";
 import type {
   PapyraEditorProps,
   PapyraEditorRef,
@@ -88,8 +86,6 @@ export {
   HTMLEditor,
   legacyRichPreset,
   LegacyRichEditor,
-  headlessEditorPreset,
-  HeadlessEditorPreset,
   papyraPreset,
   createPapyraPreset,
   PapyraEditor,
@@ -122,7 +118,6 @@ export type {
   LegacyRichEditorProps,
   LegacyRichEditorMode,
   LegacyRichSourceFormat,
-  HeadlessEditorPresetProps,
   PapyraEditorProps,
   PapyraEditorRef,
   PapyraOutlineHeading,
@@ -137,6 +132,5 @@ export const presetRegistry: Record<string, EditorPreset> = {
   "legacy-rich": legacyRichPreset,
   "md-editor": mdEditorPreset,
   "html-editor": htmlEditorPreset,
-  "headless-editor": headlessEditorPreset,
   papyra: papyraPreset,
 };

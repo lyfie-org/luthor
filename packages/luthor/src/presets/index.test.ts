@@ -12,7 +12,6 @@ describe("presetRegistry", () => {
   it("includes active preset ids only", () => {
     expect(Object.keys(presetRegistry).sort()).toEqual([
       "extensive",
-      "headless-editor",
       "html-editor",
       "legacy-rich",
       "md-editor",
@@ -22,7 +21,6 @@ describe("presetRegistry", () => {
 
   it("keeps stable identifiers for active preset ids", () => {
     expect(presetRegistry.extensive?.id).toBe("extensive");
-    expect(presetRegistry["headless-editor"]?.id).toBe("headless-editor");
     expect(presetRegistry["legacy-rich"]?.id).toBe("legacy-rich");
     expect(presetRegistry["md-editor"]?.id).toBe("md-editor");
     expect(presetRegistry["html-editor"]?.id).toBe("html-editor");

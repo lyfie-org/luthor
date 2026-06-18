@@ -129,9 +129,6 @@ exports:
   - "formatMarkdownSource"
   - "generateCommands"
   - "headless"
-  - "headlessEditorPreset"
-  - "HeadlessEditorPreset"
-  - "HeadlessEditorPresetProps"
   - "HighlighterIcon"
   - "HTMLEditor"
   - "HTMLEditorMode"
@@ -609,9 +606,6 @@ This page is the canonical export inventory.
 - `formatMarkdownSource`
 - `generateCommands`
 - `headless`
-- `headlessEditorPreset`
-- `HeadlessEditorPreset`
-- `HeadlessEditorPresetProps`
 - `HighlighterIcon`
 - `HTMLEditor`
 - `HTMLEditorMode`

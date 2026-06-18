@@ -48,7 +48,6 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [luthor/overview.md](https://www.luthor.fyi/docs/luthor/overview/) - @lyfie/luthor Overview
 - [luthor/presets.md](https://www.luthor.fyi/docs/luthor/presets/) - Presets Catalog
 - [luthor/presets/extensive-editor.md](https://www.luthor.fyi/docs/luthor/presets/extensive-editor/) - Extensive Editor
-- [luthor/presets/headless-editor-preset.md](https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/) - Headless Editor Preset
 - [luthor/presets/html-editor.md](https://www.luthor.fyi/docs/luthor/presets/html-editor/) - HTML Editor
 - [luthor/presets/legacy-rich-editor.md](https://www.luthor.fyi/docs/luthor/presets/legacy-rich-editor/) - Legacy Rich Editor
 - [luthor/presets/md-editor.md](https://www.luthor.fyi/docs/luthor/presets/md-editor/) - Markdown Editor
@@ -220,17 +219,12 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Presets Catalog
 - File: luthor/presets.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/
-- Summary: title: "Presets Catalog" description: "Catalog of all @lyfie/luthor preset exports and presetRegistry keys with quick navigation links." package: "luthor" docType: "reference" surface: "preset" keywords: "presets" "presetRegistry" "extensive" "legacy rich" "md editor" "html editor" "headless editor" props: "featureFlag...
+- Summary: title: "Presets Catalog" description: "Catalog of all @lyfie/luthor preset exports and presetRegistry keys with quick navigation links." package: "luthor" docType: "reference" surface: "preset" keywords: "presets" "presetRegistry" "extensive" "legacy rich" "md editor" "html editor" "papyra" props: "featureFlags" "avail...
 
 ### Extensive Editor
 - File: luthor/presets/extensive-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/extensive-editor/
 - Summary: title: "Extensive Editor" description: "Full preset profile with all core features enabled and broad mode support." package: "luthor" docType: "reference" surface: "preset" keywords: "ExtensiveEditor" "extensive preset" "full editor" "imageUploadHandler" "gifUploadHandler" props: "featureFlags" "availableModes" "maxLis...
-
-### Headless Editor Preset
-- File: luthor/presets/headless-editor-preset.md
-- URL: https://www.luthor.fyi/docs/luthor/presets/headless-editor-preset/
-- Summary: title: "Headless Editor Preset" description: "Preset wrapper that demonstrates source mode handling and controlled bridge behavior on top of extensive extensions." package: "luthor" docType: "reference" surface: "preset" keywords: "HeadlessEditorPreset" "headless editor preset" "source mode" props: "initialMode" "defau...
 
 ### HTML Editor
 - File: luthor/presets/html-editor.md
@@ -265,7 +259,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Preset Selector
 - File: reference/preset-selector.md
 - URL: https://www.luthor.fyi/docs/reference/preset-selector/
-- Summary: title: "Preset Selector" description: "Decision matrix for choosing the right preset by workflow, source mode profile, and feature policy." package: "luthor" docType: "reference" surface: "preset" keywords: "preset selector" "decision matrix" "extensive" "legacy rich" "md editor" "html editor" "headless editor" props: ...
+- Summary: title: "Preset Selector" description: "Decision matrix for choosing the right preset by workflow, source mode profile, and feature policy." package: "luthor" docType: "reference" surface: "preset" keywords: "preset selector" "decision matrix" "extensive" "legacy rich" "md editor" "html editor" "papyra" props: "featureF...
 
 ### Search Guide
 - File: reference/search-guide.md
