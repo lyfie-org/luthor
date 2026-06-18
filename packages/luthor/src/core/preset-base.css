@@ -88,3 +88,23 @@
   --luthor-floating-accent-fg: var(--luthor-bg);
 }
 
+/*
+ * Dark variant of the base palette.
+ *
+ * Only the raw `--luthor-preset-*` values are re-pointed; the `--luthor-*` theme
+ * contract above is declared in terms of them (`var(--luthor-preset-*)`), so it
+ * recolors automatically. This lets a preset that resolves against the base
+ * palette — e.g. PapyraEditor's token bridge — follow the host's light/dark
+ * choice (`data-editor-theme`, driven by the `initialTheme` prop) without any
+ * in-editor theme toggle. A host that supplies its own `--papyra-*` (or other)
+ * tokens still wins, since those are consumed ahead of this fallback.
+ */
+.luthor-preset[data-editor-theme="dark"] {
+  --luthor-preset-bg: #0f172a;
+  --luthor-preset-fg: #e2e8f0;
+  --luthor-preset-border: #334155;
+  --luthor-preset-muted: #1e293b;
+  --luthor-preset-muted-fg: #94a3b8;
+  --luthor-preset-accent: #60a5fa;
+}
+

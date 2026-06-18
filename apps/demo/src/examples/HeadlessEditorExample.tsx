@@ -62,7 +62,7 @@ function joinClassNames(...names: Array<string | false | null | undefined>): str
   return names.filter(Boolean).join(" ");
 }
 
-export const HEADLESS_EXAMPLE_DEFAULT_MODES = ["visual-only", "visual", "json", "markdown", "html"] as const;
+const HEADLESS_EXAMPLE_DEFAULT_MODES = ["visual-only", "visual", "json", "markdown", "html"] as const;
 
 const HEADLESS_MODE_LABELS = {
   "visual-only": "Visual Only",
@@ -124,7 +124,7 @@ const EMPTY_DOCUMENT = {
   },
 };
 
-export const HEADLESS_EXAMPLE_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
+const HEADLESS_EXAMPLE_DEFAULT_FEATURE_FLAGS: FeatureFlagOverrides = {
   bold: true,
   italic: true,
   underline: false,

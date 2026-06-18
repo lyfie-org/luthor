@@ -164,6 +164,7 @@ function App() {
             defaultContent={DEMO_PAPYRA_CONTENT}
             showDefaultContent={false}
             initialTheme={theme}
+            toolbar
           />
         );
       case "legacy-rich":

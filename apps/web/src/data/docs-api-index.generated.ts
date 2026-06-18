@@ -3069,6 +3069,7 @@ export const docsApiIndex = [
         "readonly",
         "saved",
         "saved card",
+        "toolbar",
         "transclusion",
         "transcription",
         "transcription callout",
@@ -3082,6 +3083,7 @@ export const docsApiIndex = [
         "locked",
         "onoutlinechange",
         "readonly",
+        "toolbar",
         "variant"
       ],
       "exports": [
@@ -3188,6 +3190,7 @@ export const docsApiIndex = [
       "table",
       "themed",
       "token",
+      "toolbar",
       "transclusion",
       "transcription",
       "transcription callout",

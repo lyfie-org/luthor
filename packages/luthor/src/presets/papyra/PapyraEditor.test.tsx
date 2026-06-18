@@ -78,6 +78,41 @@ describe("PapyraEditor", () => {
     });
   });
 
+  it("opts into a markdown-safe persistent toolbar via the toolbar prop", () => {
+    render(<PapyraEditor showDefaultContent={false} toolbar />);
+
+    const props = lastProps();
+    // The persistent toolbar turns on but never pins (pinned stays enforced off).
+    expect(props.isToolbarEnabled).toBe(true);
+    expect(props.isToolbarPinned).toBe(false);
+
+    // The layout only lists Papyra's markdown-safe actions.
+    const items = (props.toolbarLayout?.sections ?? []).flatMap(
+      (section) => section.items,
+    );
+    expect(items).toEqual(
+      expect.arrayContaining([
+        "bold",
+        "italic",
+        "strikethrough",
+        "code",
+        "link",
+        "blockFormat",
+        "quote",
+        "checkList",
+        "codeBlock",
+        "horizontalRule",
+        "table",
+        "image",
+      ]),
+    );
+    // The restricted controls never appear in the layout.
+    expect(items).not.toContain("fontFamily");
+    expect(items).not.toContain("textHighlight");
+    expect(items).not.toContain("alignLeft");
+    expect(items).not.toContain("themeToggle");
+  });
+
   it("applies the markdown-safe feature policy", () => {
     render(<PapyraEditor showDefaultContent={false} />);
 

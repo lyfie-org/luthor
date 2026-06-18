@@ -22,7 +22,7 @@
  * toolbar item even if this map omits it.
  */
 
-import type { ToolbarItemType, ToolbarVisibility } from "../../core";
+import type { ToolbarItemType, ToolbarLayout, ToolbarVisibility } from "../../core";
 
 /**
  * Toolbar items Papyra hard-hides. These are the typography pickers, underline,
@@ -54,3 +54,27 @@ export const PAPYRA_TOOLBAR_VISIBILITY: ToolbarVisibility = Object.freeze(
     return visibility;
   }, {}),
 );
+
+/**
+ * The persistent-toolbar layout PapyraEditor uses when the opt-in
+ * {@link PapyraEditorProps.toolbar | `toolbar`} prop is set.
+ *
+ * It lists only Papyra's markdown-safe actions: history, block format
+ * (paragraph/headings) + quote, the inline marks Papyra keeps (bold, italic,
+ * strikethrough, inline code, link), lists + checklist with indent controls,
+ * and the block inserts (code block, horizontal rule, table, image). The
+ * typography pickers, text color/highlight, sub/superscript, alignment (no
+ * lossless markdown form), the rich-embed inserter, and the theme toggle are
+ * intentionally absent — they are also pinned off by
+ * {@link PAPYRA_TOOLBAR_VISIBILITY} and the enforced feature policy, so the
+ * restricted controls can never surface even if a host retunes the layout.
+ */
+export const PAPYRA_TOOLBAR_LAYOUT: ToolbarLayout = {
+  sections: [
+    { items: ["undo", "redo"] },
+    { items: ["blockFormat", "quote"] },
+    { items: ["bold", "italic", "strikethrough", "code", "link"] },
+    { items: ["unorderedList", "orderedList", "checkList", "indentList", "outdentList"] },
+    { items: ["codeBlock", "horizontalRule", "table", "image"] },
+  ],
+};

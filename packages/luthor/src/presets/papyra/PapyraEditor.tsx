@@ -53,7 +53,7 @@ import {
   PAPYRA_COLORED_VARIANT_CLASS,
   createPapyraThemeOverrides,
 } from "./theme";
-import { PAPYRA_TOOLBAR_VISIBILITY } from "./toolbar";
+import { PAPYRA_TOOLBAR_LAYOUT, PAPYRA_TOOLBAR_VISIBILITY } from "./toolbar";
 
 /**
  * Modes Papyra ever exposes: the visual canvas and a raw markdown source view.
@@ -172,6 +172,8 @@ export type PapyraEditorProps = Omit<
   | "isEditorViewsTabVisible"
   | "isToolbarEnabled"
   | "isToolbarPinned"
+  | "toolbarLayout"
+  | "isListStyleDropdownEnabled"
   | "markdownSourceOfTruth"
   | "sourceMetadataMode"
   | "extraExtensions"
@@ -216,6 +218,22 @@ export type PapyraEditorProps = Omit<
    * when to enter focus mode. Defaults to `"default"`.
    */
   variant?: PapyraEditorVariant;
+  /**
+   * Show a persistent toolbar above the editor. By default Papyra ships
+   * **chrome-light** — its only toolbar is the floating-on-selection one (plus
+   * slash `/` and the command palette), per the preset's minimal-chrome
+   * contract. Set this to opt into an always-visible toolbar restricted to
+   * Papyra's markdown-safe actions (see {@link PAPYRA_TOOLBAR_LAYOUT}): history,
+   * headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,
+   * lists + checklist, code block, horizontal rule, table, and image. The
+   * restricted controls (typography pickers, color/highlight, sub/superscript,
+   * alignment, theme toggle) can never appear — they stay pinned off by the
+   * toolbar visibility contract and the enforced feature policy. The toolbar is
+   * not pinned/sticky (the pinned toolbar stays enforced off) and only renders
+   * in the editable visual surface, so `readOnly`/`locked` never show it.
+   * Defaults to `false`.
+   */
+  toolbar?: boolean;
   /**
    * Withhold the body entirely. When `true`, the preset renders a blurred
    * placeholder and **never mounts the editor or the note's text** — there is no
@@ -279,6 +297,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       colored = false,
       readOnly = false,
       variant = "default",
+      toolbar = false,
       locked = false,
       lockedPlaceholder,
       adapter,
@@ -477,8 +496,10 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               placeholder={placeholder ?? PAPYRA_DEFAULT_PLACEHOLDER}
               {...readStateProps}
               isEditorViewTabsVisible={false}
-              isToolbarEnabled={false}
+              isToolbarEnabled={toolbar}
               isToolbarPinned={false}
+              toolbarLayout={PAPYRA_TOOLBAR_LAYOUT}
+              isListStyleDropdownEnabled={false}
               toolbarVisibility={PAPYRA_TOOLBAR_VISIBILITY}
               headingOptions={PAPYRA_HEADING_OPTIONS}
               slashCommandVisibility={PAPYRA_SLASH_COMMAND_VISIBILITY}

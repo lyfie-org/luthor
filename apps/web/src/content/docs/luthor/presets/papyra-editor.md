@@ -20,6 +20,7 @@ props:
   - "readOnly"
   - "variant"
   - "locked"
+  - "toolbar"
   - "onOutlineChange"
   - "featureFlags"
 exports:
@@ -93,7 +94,8 @@ round-trip back to that file.
 `PapyraEditor` hard-locks the props it owns; callers cannot reach them:
 
 - Modes are fixed to `['visual', 'markdown']` (no `json`/`html`).
-- View tabs hidden; the toolbar is floating-on-selection only (never pinned).
+- View tabs hidden. By default the only toolbar is floating-on-selection; the
+  opt-in `toolbar` prop adds an always-visible toolbar, but it is never pinned.
 - `markdownSourceOfTruth` is on and `sourceMetadataMode="none"`.
 - `featureFlags` are routed through `papyraFeaturePolicy`, whose **enforced** set
   keeps markdown-breaking features off — font/size/line-height pickers, arbitrary
@@ -112,6 +114,13 @@ round-trip back to that file.
   time-machine scrubbing. Pair with repeated `setMarkdown` calls.
 - `variant`: `"focus"` widens the body to a centered, distraction-free measure;
   `"default"` is the standard editorial measure.
+- `toolbar`: opt into a persistent toolbar above the editor (default `false` —
+  floating-on-selection only). It lists just Papyra's markdown-safe actions
+  (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,
+  lists + checklist, code block, horizontal rule, table, image); the restricted
+  controls (typography pickers, color/highlight, sub/superscript, alignment, theme
+  toggle) can never appear, and the toolbar is never pinned. Only renders in the
+  editable visual surface, so `readOnly`/`locked` never show it.
 - `locked`: withholds the body entirely — renders a blurred placeholder and
   **never mounts the editor**, so there is no plaintext in the DOM. The lock is
   UX only; the server (`401`/`PathGuard`) is the security boundary.
