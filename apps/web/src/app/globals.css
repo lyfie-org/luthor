@@ -152,6 +152,13 @@ a {
   background: color-mix(in srgb, var(--bg) 84%, transparent);
 }
 
+/* Header spans the full browser width: brand flush left, nav flush right. */
+.site-header .container {
+  width: 100%;
+  max-width: none;
+  padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+}
+
 .nav-progress {
   position: fixed;
   top: 0;
@@ -1807,6 +1814,14 @@ a {
 
 .docs-section {
   padding-top: var(--space-6);
+}
+
+/* Docs uses the full browser width with healthy gutters: sidebar hugs the
+   left, the article column stretches across the viewport. */
+.docs-section .container {
+  width: 100%;
+  max-width: none;
+  padding-inline: clamp(1.25rem, 4vw, 3.5rem);
 }
 
 .docs-layout {
