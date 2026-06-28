@@ -1667,10 +1667,18 @@ a {
   );
 }
 
+/* Footer spans the full browser width to match the header, with the same
+   gutters so the brand sits flush left and the columns spread across. */
+.site-footer .container {
+  width: 100%;
+  max-width: none;
+  padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+}
+
 .footer-grid {
   display: grid;
   grid-template-columns: minmax(220px, 1.2fr) repeat(3, minmax(180px, 1fr));
-  gap: clamp(1rem, 2.6vw, 2.4rem);
+  gap: clamp(1.5rem, 4vw, 4rem);
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--line);
 }
