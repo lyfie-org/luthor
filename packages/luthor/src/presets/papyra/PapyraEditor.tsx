@@ -15,7 +15,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { EmbedResolverProvider, markdownToJSON } from "@lyfie/luthor-headless";
+import {
+  EmbedResolverProvider,
+  ensureBlockAnchors,
+  markdownToJSON,
+} from "@lyfie/luthor-headless";
 import type { EmbedResolvers } from "@lyfie/luthor-headless";
 import type {
   ExtensiveEditorProps,
@@ -107,13 +111,36 @@ export interface PapyraOutlineHeading {
 /**
  * A trailing `^uuid` block anchor discovered in the body. Block anchors are
  * non-rendering and let Papyra address a specific block for transclusion.
+ * The block's own text and markdown offsets ride along so a host can resolve
+ * a `#^id` reference without re-parsing the document.
  */
 export interface PapyraBlockAnchor {
   /** The anchor id (the part after `^`). */
   blockId: string;
   /** Stable node key of the anchored block. */
   key: string;
+  /** The anchored line's markdown, without the trailing ` ^id` suffix. */
+  text: string;
+  /** Zero-based line index of the anchored line in the markdown body. */
+  line: number;
+  /** Character offset of the anchored line's start in the markdown body. */
+  start: number;
+  /** Character offset of the anchored line's end (incl. the anchor suffix). */
+  end: number;
 }
+
+/**
+ * Block-anchor assignment policy.
+ *
+ * - `"off"` (default): the preset parses, renders, and round-trips anchors
+ *   that already exist in the text, but never creates one.
+ * - `"on-demand"`: nothing stamps automatically; the host calls
+ *   {@link PapyraEditorRef.ensureBlockAnchors} (typically at save time).
+ * - `"auto"`: every eligible top-level block (paragraph, heading, quote) gets
+ *   a stable `^id` appended on commit. Anchors are invisible in the visual
+ *   surface and survive markdown round-trips losslessly.
+ */
+export type PapyraBlockAnchorMode = "off" | "on-demand" | "auto";
 
 /**
  * Imperative handle a Papyra host captures through the React ref or `onReady`.
@@ -144,6 +171,15 @@ export interface PapyraEditorRef extends ExtensiveEditorRef {
   scrollToHeading: (key: string) => void;
   /** All trailing `^uuid` block anchors in the body. */
   getBlocks: () => PapyraBlockAnchor[];
+  /**
+   * Stamp a stable `^id` anchor onto every eligible top-level block that does
+   * not already carry one, and return the resulting markdown. Existing ids are
+   * kept; the pass is synchronous, so the returned string is the stamped body.
+   * For hosts that assign anchors only at save time (the `"on-demand"`
+   * {@link PapyraEditorProps.blockAnchors | blockAnchors} mode) — though it
+   * works in any mode when called explicitly.
+   */
+  ensureBlockAnchors: () => string;
   /**
    * Distinct `@username` mentions in the body, in first-seen order. The host
    * routes these to its inbox via `adapter.onMentions` during its save
@@ -185,6 +221,7 @@ export type PapyraEditorProps = Omit<
   | "shortcutConfig"
   | "toolbarVisibility"
   | "onReady"
+  | "presetId"
 > & {
   onReady?: (methods: PapyraEditorRef) => void;
   /**
@@ -252,6 +289,14 @@ export type PapyraEditorProps = Omit<
    */
   lockedPlaceholder?: ReactNode;
   /**
+   * Block-anchor assignment policy. Defaults to `"off"` so existing consumers
+   * are untouched: anchors already present in the text keep parsing,
+   * rendering, and round-tripping, but nothing creates one. `"on-demand"`
+   * leaves stamping to {@link PapyraEditorRef.ensureBlockAnchors}; `"auto"`
+   * stamps every eligible block on commit. See {@link PapyraBlockAnchorMode}.
+   */
+  blockAnchors?: PapyraBlockAnchorMode;
+  /**
    * The host seam. Supplies the editor with media resolution, uploads, note
    * search/navigation, and block resolution for the Papyra embeds
    * (`![[media]]`, `[[Note]]`, `![[Note#^id]]`). When omitted, the preset uses a
@@ -300,6 +345,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       toolbar = false,
       locked = false,
       lockedPlaceholder,
+      blockAnchors = "off",
       adapter,
       onReady,
       onOutlineChange,
@@ -314,6 +360,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     const handle = useMemo<PapyraEditorRef>(
       () => ({
         injectJSON: (content) => innerRef.current?.injectJSON(content),
+        getLexicalEditor: () => innerRef.current?.getLexicalEditor() ?? null,
         getJSON: () => innerRef.current?.getJSON() ?? "",
         getHTML: () => innerRef.current?.getHTML() ?? "",
         getMarkdown: () => innerRef.current?.getMarkdown() ?? "",
@@ -331,6 +378,13 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
           scrollToOutlineHeading(hostRef.current, key);
         },
         getBlocks: () => extractBlockAnchors(innerRef.current?.getMarkdown() ?? ""),
+        ensureBlockAnchors: () => {
+          const editor = innerRef.current?.getLexicalEditor();
+          if (editor) {
+            ensureBlockAnchors(editor);
+          }
+          return innerRef.current?.getMarkdown() ?? "";
+        },
         getMentions: () => extractMentions(innerRef.current?.getMarkdown() ?? ""),
       }),
       [],
@@ -428,10 +482,12 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       [resolvedAdapter],
     );
 
-    // Build extra extensions including the upload pipeline (adapter-dependent).
+    // Build extra extensions including the upload pipeline (adapter-dependent)
+    // and, in `blockAnchors: "auto"`, the auto-stamping anchor extension.
+    const autoStampBlockAnchors = blockAnchors === "auto";
     const embedExtensions = useMemo(
-      () => buildPapyraEmbedExtensions(adapter),
-      [adapter],
+      () => buildPapyraEmbedExtensions(adapter, { autoStampBlockAnchors }),
+      [adapter, autoStampBlockAnchors],
     );
 
     // The preset class set is shared by the live editor and the locked
@@ -484,6 +540,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
           <EmbedResolverProvider resolvers={embedResolvers}>
             <ExtensiveEditor
               {...props}
+              presetId="papyra"
               onReady={handleInnerReady}
               extraExtensions={embedExtensions}
               markdownExtraNodes={PAPYRA_EMBED_NODES}

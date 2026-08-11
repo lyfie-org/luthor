@@ -16,6 +16,10 @@ props:
   - "maxListIndentation"
   - "imageUploadHandler"
   - "gifUploadHandler"
+  - "onChange"
+  - "onReady"
+  - "onDesync"
+  - "presetId"
 exports:
   - "ExtensiveEditor"
   - "extensivePreset"
@@ -60,6 +64,14 @@ Use `ExtensiveEditor` when you want full formatting, media, code, and command wo
 - `maxListIndentation`: Caps nested list depth in visual editing.
 - `imageUploadHandler`: Intercepts local image file uploads from the toolbar.
 - `gifUploadHandler`: Intercepts local GIF uploads. Falls back to `imageUploadHandler` when omitted.
+- `onChange`: Change notification, coalesced to one call per committed change, with `{ markdown, source, isDirty }`. Fires for every mutation path (typing, toolbar, slash commands, undo/redo, paste, drag-drop, markdown source view) as `source: "user"`; host adopts (`injectJSON`) fire as `source: "programmatic"`; the initial `defaultContent` load never fires. Wire autosave here — a DOM `onInput` handler on a wrapper element does **not** work, because Lexical stops propagation of the contenteditable's `input` event.
+- `onReady`: Fires after the editor is interactive **and** initial content has reconciled, so `getMarkdown()` inside the callback is immediately stable. The editor normalises imported markdown, so baseline dirty checks against its own output, never against your input string.
+- `onDesync`: Opt-in watchdog reporting model/DOM divergence — text painted into the contenteditable behind the reconciler's back (`document.execCommand`, extensions, password managers) that would silently miss from `getMarkdown()`.
+- `presetId`: Preset identity for the editable-surface class names (`luthor-preset-<id>__container` / `__content` / `__placeholder`). Wrapper presets set their own id so host CSS matches the rendered element.
+
+## Keyboard access
+
+Tab indents and Shift+Tab outdents inside the editor. Keyboard-only users escape the capture with **Escape, then Tab** — the armed Tab performs the browser's native focus move out of the editor (WCAG 2.1.2); any other key restores Tab-as-indent.
 
 ## Custom upload hooks
 

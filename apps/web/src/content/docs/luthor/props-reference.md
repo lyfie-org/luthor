@@ -145,6 +145,7 @@ Use this page for exact prop names and discovery tokens.
 
 | Area | Props |
 | --- | --- |
+| Lifecycle and change | `onReady`, `onChange`, `onDesync` |
 | Mode control | `initialMode`, `defaultEditorView`, `availableModes` |
 | Feature gating | `featureFlags`, `headingOptions`, `slashCommandVisibility` |
 | Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |
@@ -163,6 +164,9 @@ Use this page for exact prop names and discovery tokens.
 
 - `className`
 - `onReady`
+- `onChange`
+- `onDesync`
+- `presetId`
 - `initialTheme`
 - `onThemeChange`
 - `theme`

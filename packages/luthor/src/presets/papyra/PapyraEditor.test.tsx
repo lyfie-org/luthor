@@ -19,6 +19,10 @@ vi.mock("../extensive", () => ({
 }));
 
 import {
+  BlockAnchorExtension,
+  blockAnchorExtension,
+} from "@lyfie/luthor-headless";
+import {
   PapyraEditor,
   PAPYRA_READONLY_MODES,
   type PapyraEditorRef,
@@ -31,6 +35,27 @@ import {
 
 function lastProps(): ExtensiveEditorProps {
   return extensiveEditorMock.mock.calls.at(-1)?.[0] as ExtensiveEditorProps;
+}
+
+// Module-level ready-firing editor mock: fires onReady exactly once from an
+// effect (mirroring the real editor's readyRef guard), for tests outside the
+// "imperative ref" describe that need a live-looking editor.
+function ReadyEditorMockStandalone({
+  props,
+  methods,
+}: {
+  props: ExtensiveEditorProps;
+  methods: ExtensiveEditorRef;
+}) {
+  const fired = useRef(false);
+  useEffect(() => {
+    if (fired.current) {
+      return;
+    }
+    fired.current = true;
+    props.onReady?.(methods);
+  });
+  return <div contentEditable suppressContentEditableWarning />;
 }
 
 describe("PapyraEditor", () => {
@@ -174,6 +199,15 @@ describe("PapyraEditor", () => {
     expect(flags?.draggableBlock).toBe(false);
     expect(flags?.subscript).toBe(false);
     expect(flags?.table).toBe(false);
+  });
+
+  it("passes the papyra preset identity so the editable surface gets papyra classes", () => {
+    render(<PapyraEditor showDefaultContent={false} />);
+
+    // The extensive editor derives `luthor-preset-papyra__content` (and the
+    // container/placeholder variants) from this id — a host styling
+    // `.luthor-preset-papyra__content` must match the rendered element.
+    expect(lastProps().presetId).toBe("papyra");
   });
 
   it("composes the preset class names", () => {
@@ -323,6 +357,7 @@ describe("PapyraEditor", () => {
       getJSON: vi.fn(() => "{}"),
       getMarkdown: vi.fn(() => "# Title\n\nBody"),
       getHTML: vi.fn(() => "<h1>Title</h1>"),
+      getLexicalEditor: vi.fn(() => null),
     };
 
     // Mirror the real editor, which fires onReady from an effect (never during
@@ -471,8 +506,22 @@ describe("PapyraEditor", () => {
       renderWithReadyEditor(ref, { methods: anchorMethods });
 
       expect(ref.current?.getBlocks()).toEqual([
-        { blockId: "abc123", key: "abc123" },
-        { blockId: "note-2", key: "note-2" },
+        {
+          blockId: "abc123",
+          key: "abc123",
+          text: "A paragraph.",
+          line: 0,
+          start: 0,
+          end: 20,
+        },
+        {
+          blockId: "note-2",
+          key: "note-2",
+          text: "Another line.",
+          line: 2,
+          start: 22,
+          end: 43,
+        },
       ]);
     });
 
@@ -590,6 +639,88 @@ describe("PapyraEditor", () => {
         ref.current?.setMarkdown("# Adopted");
         expect(injectJSON).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe("block anchors", () => {
+    it("registers the passive block-anchor extension by default (off mode)", () => {
+      render(<PapyraEditor showDefaultContent={false} />);
+
+      const extensions = lastProps().extraExtensions ?? [];
+      // The shared singleton parses/renders/round-trips existing anchors but
+      // never stamps one: existing consumers stay untouched.
+      expect(extensions).toContain(blockAnchorExtension);
+      expect(
+        extensions.filter(
+          (extension) => extension instanceof BlockAnchorExtension,
+        ),
+      ).toHaveLength(1);
+    });
+
+    it("swaps in an auto-stamping anchor extension in auto mode", () => {
+      render(<PapyraEditor showDefaultContent={false} blockAnchors="auto" />);
+
+      const extensions = lastProps().extraExtensions ?? [];
+      const anchorExtensions = extensions.filter(
+        (extension) => extension instanceof BlockAnchorExtension,
+      );
+      expect(anchorExtensions).toHaveLength(1);
+      // A dedicated instance, not the passive singleton.
+      expect(anchorExtensions[0]).not.toBe(blockAnchorExtension);
+    });
+
+    it("keeps the passive extension in on-demand mode", () => {
+      render(
+        <PapyraEditor showDefaultContent={false} blockAnchors="on-demand" />,
+      );
+
+      expect(lastProps().extraExtensions ?? []).toContain(blockAnchorExtension);
+    });
+
+    it("stamps through the live editor and returns markdown from ensureBlockAnchors", () => {
+      const ref = createRef<PapyraEditorRef>();
+      const update = vi.fn();
+      const methods: ExtensiveEditorRef = {
+        injectJSON: vi.fn(),
+        getJSON: vi.fn(() => "{}"),
+        getMarkdown: vi.fn(() => "Stamped body ^abc12345"),
+        getHTML: vi.fn(() => ""),
+        getLexicalEditor: vi.fn(
+          () => ({ update }) as unknown as ReturnType<
+            ExtensiveEditorRef["getLexicalEditor"]
+          >,
+        ),
+      };
+      extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => (
+        <ReadyEditorMockStandalone props={props} methods={methods} />
+      ));
+
+      render(<PapyraEditor ref={ref} showDefaultContent={false} />);
+
+      const markdown = ref.current?.ensureBlockAnchors();
+
+      // The stamping pass runs inside a Lexical update on the live editor…
+      expect(update).toHaveBeenCalledTimes(1);
+      // …and the method hands back the (now stamped) markdown body.
+      expect(markdown).toBe("Stamped body ^abc12345");
+    });
+
+    it("returns the current markdown without stamping when no editor is live", () => {
+      const ref = createRef<PapyraEditorRef>();
+      const methods: ExtensiveEditorRef = {
+        injectJSON: vi.fn(),
+        getJSON: vi.fn(() => "{}"),
+        getMarkdown: vi.fn(() => "Body"),
+        getHTML: vi.fn(() => ""),
+        getLexicalEditor: vi.fn(() => null),
+      };
+      extensiveEditorMock.mockImplementation((props: ExtensiveEditorProps) => (
+        <ReadyEditorMockStandalone props={props} methods={methods} />
+      ));
+
+      render(<PapyraEditor ref={ref} showDefaultContent={false} />);
+
+      expect(ref.current?.ensureBlockAnchors()).toBe("Body");
     });
   });
 

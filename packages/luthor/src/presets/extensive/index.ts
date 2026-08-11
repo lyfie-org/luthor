@@ -17,6 +17,7 @@ export { ExtensiveEditor } from "./ExtensiveEditor";
 export type {
   ExtensiveEditorRef,
   ExtensiveEditorProps,
+  ExtensiveEditorChangePayload,
   ExtensiveEditorMode,
   ExtensiveSlashCommand,
   ExtensiveSlashCommandContext,

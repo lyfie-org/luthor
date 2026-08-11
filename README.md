@@ -139,7 +139,7 @@ Issue tracker: [github.com/lyfie-org/luthor/issues](https://github.com/lyfie-org
 
 ### Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=lyfie-org/luthor&type=Date)](https://star-history.com/#lyfie-org/luthor&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=lyfie-org/luthor&type=Date&v=1)](https://star-history.com/#lyfie-org/luthor&Date)
 
 ### Contributors
 

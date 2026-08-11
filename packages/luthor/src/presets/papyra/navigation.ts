@@ -135,16 +135,29 @@ export function extractMentions(markdown: string): string[] {
 /**
  * Extract trailing `^uuid` block anchors from the markdown body, one per line
  * that ends with an anchor. Lets the host address a specific block for
- * transclusion.
+ * transclusion, and — through `text` / `line` / `start` / `end` — resolve a
+ * `#^id` reference to its content without re-parsing the document itself.
  */
 export function extractBlockAnchors(markdown: string): PapyraBlockAnchor[] {
   const blocks: PapyraBlockAnchor[] = [];
+  const lines = markdown.split("\n");
+  let offset = 0;
 
-  for (const line of markdown.split("\n")) {
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+    const line = lines[lineIndex] ?? "";
     const match = BLOCK_ANCHOR_PATTERN.exec(line);
     if (match?.[1]) {
-      blocks.push({ blockId: match[1], key: match[1] });
+      blocks.push({
+        blockId: match[1],
+        key: match[1],
+        text: line.slice(0, line.length - match[0].length),
+        line: lineIndex,
+        start: offset,
+        end: offset + line.length,
+      });
     }
+
+    offset += line.length + 1;
   }
 
   return blocks;
