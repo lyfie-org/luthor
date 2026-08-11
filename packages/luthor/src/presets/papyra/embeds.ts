@@ -20,6 +20,7 @@
  */
 
 import {
+  BlockAnchorExtension,
   blockAnchorExtension,
   calloutExtension,
   fileEmbedExtension,
@@ -70,23 +71,45 @@ export const PAPYRA_EMBED_EXTENSIONS: NonNullable<
   wikilinkTypeaheadExtension,
 ];
 
+/** Options for {@link buildPapyraEmbedExtensions}. */
+export interface PapyraEmbedExtensionOptions {
+  /**
+   * When `true`, the block-anchor extension is instantiated with automatic
+   * stamping: every eligible top-level block gets a stable `^id` anchor on
+   * commit (the preset's `blockAnchors: "auto"` mode).
+   */
+  autoStampBlockAnchors?: boolean;
+}
+
 /**
  * Build the full extra-extensions array, including the upload pipeline when an
  * adapter is provided. The upload extension is instantiated per-adapter since
- * the upload callback comes from the host.
+ * the upload callback comes from the host; the block-anchor extension is
+ * instantiated per-options when auto-stamping is requested.
  */
 export function buildPapyraEmbedExtensions(
   adapter?: PapyraEditorAdapter,
+  options?: PapyraEmbedExtensionOptions,
 ): NonNullable<ExtensiveEditorProps["extraExtensions"]> {
+  let extensions = PAPYRA_EMBED_EXTENSIONS;
+
+  if (options?.autoStampBlockAnchors) {
+    extensions = extensions.map((extension) =>
+      extension === blockAnchorExtension
+        ? new BlockAnchorExtension({ autoStamp: true })
+        : extension,
+    );
+  }
+
   if (!adapter) {
-    return PAPYRA_EMBED_EXTENSIONS;
+    return extensions;
   }
 
   const uploadExtension = new FileDropUploadExtension({
     uploadFile: (file) => adapter.uploadMedia(file),
   });
 
-  return [...PAPYRA_EMBED_EXTENSIONS, uploadExtension];
+  return [...extensions, uploadExtension];
 }
 
 /**

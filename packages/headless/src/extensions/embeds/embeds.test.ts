@@ -5,11 +5,16 @@
  * Build freely. Credit kindly.
  */
 
+// @vitest-environment jsdom
+
 import { describe, expect, it } from "vitest";
+import { createEditor, type LexicalEditor } from "lexical";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { jsonToMarkdown, markdownToJSON } from "../../core/markdown";
 import {
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
   BlockAnchorNode,
+  ensureBlockAnchors,
   CALLOUT_MARKDOWN_TRANSFORMER,
   CalloutNode,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
@@ -45,6 +50,33 @@ const BRIDGE_OPTIONS = {
 function roundTrip(markdown: string): string {
   const document = markdownToJSON(markdown, BRIDGE_OPTIONS);
   return jsonToMarkdown(document, BRIDGE_OPTIONS).trim();
+}
+
+/**
+ * Editor loaded with the given markdown, for stamping passes. A root element
+ * is attached because a plain `createEditor` without one never commits its
+ * pending updates (the live presets always have a mounted root).
+ */
+function createStampEditor(markdown: string): LexicalEditor {
+  const editor = createEditor({
+    namespace: "embeds-test",
+    nodes: [BlockAnchorNode, HeadingNode, QuoteNode],
+    onError: (error) => {
+      throw error;
+    },
+  });
+  const root = window.document.createElement("div");
+  root.contentEditable = "true";
+  window.document.body.appendChild(root);
+  editor.setRootElement(root);
+
+  const document = markdownToJSON(markdown, BRIDGE_OPTIONS);
+  editor.setEditorState(editor.parseEditorState(JSON.stringify(document)));
+  return editor;
+}
+
+function editorMarkdown(editor: LexicalEditor): string {
+  return jsonToMarkdown(editor.getEditorState().toJSON(), BRIDGE_OPTIONS).trim();
 }
 
 describe("papyra embed transformers", () => {
@@ -129,6 +161,76 @@ describe("papyra embed transformers", () => {
     const serialized = JSON.stringify(document);
     expect(serialized).toContain('"type":"blockAnchor"');
     expect(serialized).toContain('"blockId":"anchor1"');
+  });
+
+  it("round-trips a mid-document block anchor losslessly", () => {
+    const markdown = "First block. ^a1\n\nMiddle without anchor.\n\nLast block. ^z9";
+    expect(roundTrip(markdown)).toBe(markdown);
+  });
+
+  // ── Block anchor stamping ──────────────────────────────────────────
+
+  const ANCHORED_LINE = / \^[a-z0-9]{8}$/;
+
+  it("stamps a distinct anchor on every top-level paragraph", () => {
+    const editor = createStampEditor("One\n\nTwo\n\nThree");
+    ensureBlockAnchors(editor);
+
+    const lines = editorMarkdown(editor)
+      .split("\n")
+      .filter((line) => line.trim().length > 0);
+    expect(lines).toHaveLength(3);
+    for (const line of lines) {
+      expect(line).toMatch(ANCHORED_LINE);
+    }
+
+    const ids = lines.map((line) => line.slice(line.lastIndexOf("^") + 1));
+    expect(new Set(ids).size).toBe(3);
+  });
+
+  it("keeps existing anchor ids stable across repeated stamping", () => {
+    const editor = createStampEditor("One\n\nTwo ^kept0042\n\nThree");
+    ensureBlockAnchors(editor);
+    const first = editorMarkdown(editor);
+    expect(first).toContain("Two ^kept0042");
+
+    // Stamping again is a no-op: ids never churn.
+    ensureBlockAnchors(editor);
+    expect(editorMarkdown(editor)).toBe(first);
+  });
+
+  it("survives a remount round-trip with ids unchanged", () => {
+    const editor = createStampEditor("Alpha\n\nBeta\n\nGamma");
+    ensureBlockAnchors(editor);
+    const stamped = editorMarkdown(editor);
+
+    // Re-mounting from the stamped markdown (parse → serialize) is lossless,
+    // and re-running the stamp adds nothing.
+    expect(roundTrip(stamped)).toBe(stamped);
+    const remounted = createStampEditor(stamped);
+    ensureBlockAnchors(remounted);
+    expect(editorMarkdown(remounted)).toBe(stamped);
+  });
+
+  it("re-stamps duplicated ids so anchors stay unique per document", () => {
+    const editor = createStampEditor("Original ^dupe1234\n\nPasted copy ^dupe1234");
+    ensureBlockAnchors(editor);
+
+    const markdown = editorMarkdown(editor);
+    // The first occurrence keeps its id; the duplicate gets a fresh one.
+    expect(markdown).toContain("Original ^dupe1234");
+    expect(markdown).not.toContain("Pasted copy ^dupe1234");
+    expect(markdown.split("^dupe1234")).toHaveLength(2);
+  });
+
+  it("stamps headings and quotes but leaves empty blocks alone", () => {
+    const editor = createStampEditor("# Heading\n\n> Quoted line\n\nBody");
+    ensureBlockAnchors(editor);
+
+    const markdown = editorMarkdown(editor);
+    expect(markdown).toMatch(/^# Heading \^[a-z0-9]{8}$/m);
+    expect(markdown).toMatch(/^> Quoted line \^[a-z0-9]{8}$/m);
+    expect(markdown).toMatch(/^Body \^[a-z0-9]{8}$/m);
   });
 
   // ── Saved web cards ─────────────────────────────────────────────────

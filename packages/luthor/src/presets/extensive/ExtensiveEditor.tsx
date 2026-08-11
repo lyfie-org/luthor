@@ -5,7 +5,7 @@
  * Build freely. Credit kindly.
  */
 
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   clearLexicalSelection,
   createEditorSystem,
@@ -16,7 +16,10 @@ import {
   jsonToMarkdown,
   markdownToJSON,
   mergeThemes,
+  registerEditorDomWatchdog,
   RichText,
+  type EditorDomDivergence,
+  type LexicalEditor,
   type MarkdownBridgeFlavor,
   type MarkdownBridgeOptions,
   type Extension,
@@ -326,6 +329,38 @@ export interface ExtensiveEditorRef {
   getJSON: () => string;
   getMarkdown: () => string;
   getHTML: () => string;
+  /**
+   * Escape hatch to the live Lexical editor instance, for advanced hosts and
+   * presets that need to run a read/update the imperative surface does not
+   * cover (e.g. the papyra preset's block-anchor stamping). Returns `null`
+   * before the editor has mounted. Prefer the typed methods above — reaching
+   * into Lexical directly bypasses the preset's feature policy.
+   */
+  getLexicalEditor: () => LexicalEditor | null;
+}
+
+/**
+ * Payload handed to {@link ExtensiveEditorProps.onChange} after the document
+ * changes. One call is coalesced per committed change, not per DOM event.
+ */
+export interface ExtensiveEditorChangePayload {
+  /** The current markdown serialization of the document. */
+  markdown: string;
+  /**
+   * `"user"` for edits that originate inside the editor (typing, toolbar
+   * formatting, slash commands, undo/redo, paste, drag-drop, the markdown
+   * source view). `"programmatic"` for host-initiated mutations (`injectJSON`
+   * / the papyra preset's `setMarkdown`), so a host can avoid treating its own
+   * adopt as a user edit.
+   */
+  source: "user" | "programmatic";
+  /**
+   * Whether the markdown differs from the content baseline — the editor's own
+   * serialization of the initially mounted content (or of the last
+   * programmatic adopt). Compare against this, never against the raw string
+   * you fed in: the editor re-normalises markdown it round-trips.
+   */
+  isDirty: boolean;
 }
 
 export type ImageUploadHandler = (file: File) => Promise<string>;
@@ -946,6 +981,9 @@ function ExtensiveEditorContent({
   initialMode,
   availableModes,
   onReady,
+  onChange,
+  onDesync,
+  presetClassName,
   toolbarLayout,
   toolbarVisibility,
   toolbarPosition,
@@ -982,6 +1020,9 @@ function ExtensiveEditorContent({
   initialMode: ExtensiveEditorCanonicalMode;
   availableModes: readonly ExtensiveEditorMode[];
   onReady?: (methods: ExtensiveEditorRef) => void;
+  onChange?: (payload: ExtensiveEditorChangePayload) => void;
+  onDesync?: (info: EditorDomDivergence) => void;
+  presetClassName: string;
   toolbarLayout?: ToolbarLayout;
   toolbarVisibility?: ToolbarVisibility;
   toolbarPosition: ToolbarPosition;
@@ -1148,6 +1189,80 @@ function ExtensiveEditorContent({
   const editorChangeCountRef = useRef(0);
   const pendingEditIntentRef = useRef<{ clientX: number; clientY: number } | null>(null);
 
+  // Change-notification state. The baseline is the editor's own serialization
+  // of the mounted (or last programmatically adopted) content — hosts compare
+  // against it for dirty checks instead of the raw markdown they fed in, since
+  // the editor re-normalises markdown it round-trips. `lastNotified` dedupes
+  // consecutive identical snapshots so a no-op commit never reaches the host.
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const changeBaselineRef = useRef<string | null>(null);
+  const lastNotifiedMarkdownRef = useRef<string | null>(null);
+  const pendingChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const methodsRef = useRef<ExtensiveEditorRef | null>(null);
+
+  const cancelPendingChange = useCallback(() => {
+    if (pendingChangeTimerRef.current !== null) {
+      clearTimeout(pendingChangeTimerRef.current);
+      pendingChangeTimerRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Coalesce user-originated commits into one `onChange` per macrotask. The
+   * emit reads the markdown snapshot lazily so a burst of commits in the same
+   * tick serializes once, and a programmatic adopt that lands in between (see
+   * `notifyProgrammaticAdopt`) cancels the stale emission entirely.
+   */
+  const scheduleUserChange = useCallback(() => {
+    if (!onChangeRef.current) {
+      return;
+    }
+
+    cancelPendingChange();
+    pendingChangeTimerRef.current = setTimeout(() => {
+      pendingChangeTimerRef.current = null;
+      const markdown = methodsRef.current?.getMarkdown();
+      const previous =
+        lastNotifiedMarkdownRef.current ?? changeBaselineRef.current;
+      if (markdown === undefined || markdown === previous) {
+        return;
+      }
+
+      lastNotifiedMarkdownRef.current = markdown;
+      onChangeRef.current?.({
+        markdown,
+        source: "user",
+        isDirty: markdown !== changeBaselineRef.current,
+      });
+    }, 0);
+  }, [cancelPendingChange]);
+
+  /**
+   * A host-initiated adopt (injectJSON / setMarkdown) resets the baseline to
+   * the editor's serialization of the new content and fires a single
+   * `source: "programmatic"` notification — except for the very first adopt
+   * (the initial `defaultContent` load), which stays silent.
+   */
+  const notifyProgrammaticAdopt = useCallback(
+    (markdown: string) => {
+      cancelPendingChange();
+      const previous = lastNotifiedMarkdownRef.current;
+      changeBaselineRef.current = markdown;
+      lastNotifiedMarkdownRef.current = markdown;
+      if (previous !== null && previous !== markdown) {
+        onChangeRef.current?.({
+          markdown,
+          source: "programmatic",
+          isDirty: false,
+        });
+      }
+    },
+    [cancelPendingChange],
+  );
+
+  useEffect(() => cancelPendingChange, [cancelPendingChange]);
+
   useEffect(() => {
     setFloatingToolbarContext(
       safeCommands,
@@ -1202,19 +1317,22 @@ function ExtensiveEditorContent({
           canonicalMarkdownRef.current = nextMarkdown;
           canonicalMarkdownStaleRef.current = false;
         }
+
+        notifyProgrammaticAdopt(nextMarkdown);
       };
 
+      // Synchronous by design: the caller (host `onReady` flows, the papyra
+      // preset's `setMarkdown`) must be able to read a settled `getMarkdown()`
+      // immediately after injecting, with no timers.
       const injectJSON = (value: string) => {
-        setTimeout(() => {
-          try {
-            const parsed = JSON.parse(value);
-            importApi.fromJSON(parsed);
-            hydrateSourceSnapshots(parsed);
-          } catch (error) {
-            console.error("Failed to inject JSON:", error);
-            return;
-          }
-        }, 100);
+        try {
+          const parsed = JSON.parse(value);
+          importApi.fromJSON(parsed);
+          hydrateSourceSnapshots(parsed);
+        } catch (error) {
+          console.error("Failed to inject JSON:", error);
+          return;
+        }
       };
       const resolveMarkdownSnapshot = (): string => {
         if (!markdownSourceOfTruth) {
@@ -1287,17 +1405,22 @@ function ExtensiveEditorContent({
         getJSON,
         getMarkdown,
         getHTML,
+        getLexicalEditor: () => editor ?? null,
       };
     },
     [
+      editor,
       exportApi,
       importApi,
       markdownBridgeFlavor,
       markdownBridgeExtras,
       markdownSourceOfTruth,
       sourceMetadataMode,
+      notifyProgrammaticAdopt,
     ],
   );
+
+  methodsRef.current = methods;
 
   useEffect(() => {
     if (!editor || !safeCommands) return;
@@ -1356,6 +1479,16 @@ function ExtensiveEditorContent({
 
     if (!readyRef.current) {
       readyRef.current = true;
+      // When a change listener is wired, seed the baseline with the editor's
+      // own serialization of the empty document so a first keystroke on a
+      // blank mount reports dirty. A defaultContent injection (which the
+      // wrapper runs before the host's onReady) re-seeds it through
+      // notifyProgrammaticAdopt. lastNotified stays null: the initial adopt
+      // must never surface as a change event. Without a listener we skip the
+      // serialization entirely — it is not free in source-of-truth mode.
+      if (onChangeRef.current) {
+        changeBaselineRef.current = methods.getMarkdown();
+      }
       onReady?.(methods);
     }
 
@@ -1575,6 +1708,11 @@ function ExtensiveEditorContent({
         return;
       }
 
+      // Every content commit — typing, toolbar formatting, slash commands,
+      // undo/redo, paste, drag-drop — schedules a change notification. A
+      // programmatic adopt cancels it and notifies through its own path.
+      scheduleUserChange();
+
       // When visual editor changes, mark all cached formats as stale
       // This prevents stale cache but doesn't do any actual export work
       editorChangeCountRef.current += 1;
@@ -1597,7 +1735,25 @@ function ExtensiveEditorContent({
     });
 
     return unsubscribe;
-  }, [editor, exportApi, markdownSourceOfTruth, mode]);
+  }, [editor, exportApi, markdownSourceOfTruth, mode, scheduleUserChange]);
+
+  // Model/DOM divergence watchdog. External DOM writes the reconciler never
+  // registered (execCommand, extensions, password managers) leave the visible
+  // text and `getMarkdown()` disagreeing; when a host opts in via onDesync we
+  // surface that instead of staying silent. Observation only — nothing here
+  // mutates the document.
+  const hasDesyncListener = typeof onDesync === "function";
+  const onDesyncRef = useRef(onDesync);
+  onDesyncRef.current = onDesync;
+  useEffect(() => {
+    if (!editor || !hasDesyncListener || typeof registerEditorDomWatchdog !== "function") {
+      return;
+    }
+
+    return registerEditorDomWatchdog(editor, (divergence) => {
+      onDesyncRef.current?.(divergence);
+    });
+  }, [editor, hasDesyncListener]);
 
   const parseMarkdownSourceDocument = (sourceValue: string): unknown => {
     if (markdownBridgeFlavor === "lexical-native") {
@@ -1729,6 +1885,18 @@ function ExtensiveEditorContent({
     if (markdownSourceOfTruth && sourceMode === "markdown") {
       canonicalMarkdownRef.current = value;
       canonicalMarkdownStaleRef.current = false;
+    }
+
+    // Markdown-source typing is a user edit of the canonical body when
+    // markdown is the source of truth, so it notifies immediately. Other
+    // source modes (and markdown without source-of-truth) notify when their
+    // edits are committed back into the model on mode switch.
+    if (
+      options?.dirty === true &&
+      markdownSourceOfTruth &&
+      sourceMode === "markdown"
+    ) {
+      scheduleUserChange();
     }
   };
 
@@ -1939,9 +2107,9 @@ function ExtensiveEditorContent({
             nonEditableVisualMode={isVisualOnlyMode}
             onEditIntent={isVisualOnlyMode ? handleVisualOnlyEditIntent : undefined}
             classNames={{
-              container: "luthor-richtext-container luthor-preset-extensive__container",
-              contentEditable: "luthor-content-editable luthor-preset-extensive__content",
-              placeholder: "luthor-placeholder luthor-preset-extensive__placeholder",
+              container: `luthor-richtext-container ${presetClassName}__container`,
+              contentEditable: `luthor-content-editable ${presetClassName}__content`,
+              placeholder: `luthor-placeholder ${presetClassName}__placeholder`,
             }}
           />
         </div>
@@ -2078,7 +2246,47 @@ export interface ExtensiveSlashCommand {
 
 export interface ExtensiveEditorProps {
   className?: string;
+  /**
+   * Fires once the editor is interactive **and** the initial content
+   * (`defaultContent`, when provided) has been injected and reconciled, so
+   * `getMarkdown()` called synchronously inside the callback returns a stable
+   * snapshot suitable as a dirty-check baseline — no settle timers needed.
+   *
+   * Note the normalisation contract: the editor re-serialises everything it
+   * imports, so `getMarkdown()` is **not** byte-identical to the markdown you
+   * fed in (list markers, spacing, and fence style are normalised). Always
+   * baseline against the editor's own output, never against your input.
+   */
   onReady?: (methods: ExtensiveEditorRef) => void;
+  /**
+   * First-class change notification, coalesced to one call per committed
+   * change. Fires for every mutation path — typing, toolbar formatting, slash
+   * commands, undo/redo, paste, drag-drop, and markdown source-view edits —
+   * with `source: "user"`. Host-initiated mutations (`injectJSON`, the papyra
+   * preset's `setMarkdown`) fire once with `source: "programmatic"`; the
+   * initial `defaultContent` load never fires. Wire autosave here: a DOM
+   * `onInput` handler on a wrapper element does NOT work, because Lexical
+   * stops propagation of the contenteditable's `input` event.
+   */
+  onChange?: (payload: ExtensiveEditorChangePayload) => void;
+  /**
+   * Opt-in watchdog for model/DOM divergence. The DOM is not the source of
+   * truth: text written into the contenteditable behind the reconciler's back
+   * (`document.execCommand`, browser extensions, password managers,
+   * translation tools) renders on screen but is absent from `getMarkdown()`.
+   * When provided, an internal observer compares the visible text against the
+   * model after each external mutation settles and reports any divergence
+   * instead of losing it silently.
+   */
+  onDesync?: (info: EditorDomDivergence) => void;
+  /**
+   * Preset identity used to build the BEM-style class names on the editable
+   * surface (`luthor-preset-<id>__container` / `__content` / `__placeholder`).
+   * Wrapper presets (papyra, md-editor, …) set their own id so host CSS that
+   * targets e.g. `.luthor-preset-papyra__content` matches the element actually
+   * rendered. Defaults to `"extensive"`.
+   */
+  presetId?: string;
   initialTheme?: "light" | "dark";
   onThemeChange?: (theme: "light" | "dark") => void;
   theme?: Partial<LuthorTheme>;
@@ -2193,6 +2401,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
   ({
     className,
     onReady,
+    onChange,
+    onDesync,
+    presetId = "extensive",
     initialTheme = "light",
     onThemeChange,
     theme,
@@ -2507,6 +2718,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       () =>
         methods ?? {
           injectJSON: () => {},
+          getLexicalEditor: () => null,
           getJSON: () => serializeJSONToSource("json", EMPTY_JSON_DOCUMENT),
           getMarkdown: () =>
             serializeJSONToSource(
@@ -2555,6 +2767,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             initialMode={resolvedInitialMode}
             availableModes={availableModes}
             onReady={handleReady}
+            onChange={onChange}
+            onDesync={onDesync}
+            presetClassName={`luthor-preset-${presetId}`}
             toolbarLayout={toolbarLayout}
             toolbarVisibility={toolbarVisibility}
             toolbarPosition={toolbarPosition}

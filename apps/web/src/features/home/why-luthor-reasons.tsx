@@ -12,6 +12,7 @@ import {
   Cpu,
   Database,
   GearSix,
+  Leaf,
   Lightning,
   RocketLaunch,
 } from '@phosphor-icons/react/dist/ssr';
@@ -28,6 +29,11 @@ const WHY_REASONS: WhyReason[] = [
     title: 'Lightning Performance',
     description: 'Fast typing, stable selection handling, and responsive editor interactions.',
     icon: Lightning,
+  },
+  {
+    title: 'Tree-Shakeable By Design',
+    description: 'ESM-first and side-effect-free, so your bundler ships only the editor features you import. Unused code never reaches production.',
+    icon: Leaf,
   },
   {
     title: 'Type-Safe Commands',

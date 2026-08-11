@@ -130,6 +130,11 @@ export const SEO_FAQS = [
       'Yes. It is MIT licensed and free for commercial use.',
   },
   {
+    question: `Will ${PRIMARY_PACKAGE_NAME} bloat my bundle?`,
+    answer:
+      `No. Both packages are ESM-first and fully tree-shakeable with side-effect-free modules, so your bundler ships only the editor features you actually import. Unused presets, extensions, and nodes are dropped from your production build — you pay for exactly what you use, not the whole library.`,
+  },
+  {
     question: 'How fast can I get an editor on screen?',
     answer:
       `Usually in minutes. Install ${PRIMARY_PACKAGE_NAME}, import styles, and render ExtensiveEditor.`,

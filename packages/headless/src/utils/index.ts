@@ -5,4 +5,11 @@
  * Build freely. Credit kindly.
  */
 
-export {};
+export {
+  detectEditorDomDivergence,
+  readEditorDomText,
+  readEditorModelText,
+  registerEditorDomWatchdog,
+  type EditorDomDivergence,
+  type EditorDomWatchdogOptions,
+} from "./editorDomWatchdog";

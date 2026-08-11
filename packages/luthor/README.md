@@ -37,6 +37,30 @@ export function App() {
 }
 ```
 
+## Autosave: use `onChange`, not DOM `onInput`
+
+Lexical stops propagation of the contenteditable's `input` event, so a React
+`onInput` handler on a wrapper element **never fires** — an autosave wired that
+way silently saves nothing. Every preset exposes a first-class `onChange`
+instead, coalesced to one call per committed change:
+
+```tsx
+<ExtensiveEditor
+  defaultContent={body}
+  onChange={({ markdown, source, isDirty }) => {
+    if (source !== "user" || !isDirty) return; // ignore your own adopts
+    scheduleAutosave(markdown);                // your debounce
+  }}
+/>
+```
+
+It fires for every mutation path (typing, toolbar, slash commands, undo/redo,
+paste, drag-drop, the markdown source view). The initial `defaultContent` load
+never fires; host-initiated adopts fire as `source: "programmatic"`. `onReady`
+fires only after the initial content has reconciled, so `getMarkdown()` inside
+it is a stable dirty-check baseline — note the editor re-normalises markdown it
+imports, so always baseline against its own output, never your input string.
+
 ## What You Get
 
 - :sparkles: `ExtensiveEditor` with rich defaults and polished UX

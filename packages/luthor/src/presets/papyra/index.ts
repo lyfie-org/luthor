@@ -16,6 +16,7 @@ export {
   type PapyraEditorVariant,
   type PapyraOutlineHeading,
   type PapyraBlockAnchor,
+  type PapyraBlockAnchorMode,
 } from "./PapyraEditor";
 export {
   papyraFeaturePolicy,
@@ -49,6 +50,7 @@ export {
   PAPYRA_EMBED_TRANSFORMERS,
   buildPapyraEmbedExtensions,
   createPapyraEmbedResolvers,
+  type PapyraEmbedExtensionOptions,
 } from "./embeds";
 export {
   papyraPreset,

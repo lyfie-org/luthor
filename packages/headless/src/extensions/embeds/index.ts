@@ -45,7 +45,13 @@ export {
   blockAnchorExtension,
   $createBlockAnchorNode,
   $isBlockAnchorNode,
+  $ensureBlockAnchors,
+  ensureBlockAnchors,
+  registerBlockAnchorAutoStamp,
+  createBlockAnchorId,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
+  BLOCK_ANCHOR_STAMP_TAG,
+  type BlockAnchorExtensionConfig,
   type SerializedBlockAnchorNode,
 } from "./BlockAnchorNode";
 export {

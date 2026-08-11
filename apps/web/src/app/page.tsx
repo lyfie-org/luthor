@@ -67,7 +67,7 @@ const packagePlans = [
       'Single package for all your editor needs',
       'Polished toolbar and extensions',
       'Type-safe framework integration',
-      'Built for production speed',
+      'Tree-shakeable — ships only the features you use',
       'Includes Luthor Headless for maximum flexibility',
     ],
   },

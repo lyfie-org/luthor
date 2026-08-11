@@ -1871,6 +1871,148 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     expect(screen.getByTestId("source-view")).toBeInTheDocument();
   });
 
+  it("derives the editable-surface class names from presetId", () => {
+    render(<ExtensiveEditor showDefaultContent={false} presetId="papyra" />);
+
+    const richTextCall = richTextMock.mock.calls.at(-1)?.[0] as {
+      classNames?: {
+        container?: string;
+        contentEditable?: string;
+        placeholder?: string;
+      };
+    };
+    expect(richTextCall.classNames?.container).toBe(
+      "luthor-richtext-container luthor-preset-papyra__container",
+    );
+    expect(richTextCall.classNames?.contentEditable).toBe(
+      "luthor-content-editable luthor-preset-papyra__content",
+    );
+    expect(richTextCall.classNames?.placeholder).toBe(
+      "luthor-placeholder luthor-preset-papyra__placeholder",
+    );
+  });
+
+  it("keeps the extensive classes on the editable surface by default", () => {
+    render(<ExtensiveEditor showDefaultContent={false} />);
+
+    const richTextCall = richTextMock.mock.calls.at(-1)?.[0] as {
+      classNames?: { contentEditable?: string };
+    };
+    expect(richTextCall.classNames?.contentEditable).toBe(
+      "luthor-content-editable luthor-preset-extensive__content",
+    );
+  });
+
+  it("notifies onChange for markdown source-view edits when markdown is the source of truth", async () => {
+    const onChange = vi.fn();
+    jsonToMarkdownMock.mockReturnValueOnce("");
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        onChange={onChange}
+        initialMode="markdown"
+        availableModes={["visual-editor", "markdown"]}
+        markdownSourceOfTruth
+      />,
+    );
+
+    fireEvent.change(screen.getByTestId("source-view"), {
+      target: { value: "## Edited" },
+    });
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    expect(onChange).toHaveBeenCalledWith({
+      markdown: "## Edited",
+      source: "user",
+      isDirty: true,
+    });
+  });
+
+  it("coalesces model commits into one user onChange call", async () => {
+    const onChange = vi.fn();
+    const lexicalUpdateListeners: Array<
+      (payload: { dirtyElements: Map<string, unknown>; dirtyLeaves: Set<string> }) => void
+    > = [];
+    mockEditorApi.lexical.registerUpdateListener.mockImplementation(
+      (listener: any) => {
+        lexicalUpdateListeners.push(listener);
+        return () => {};
+      },
+    );
+    jsonToMarkdownMock.mockReturnValueOnce("").mockReturnValue("typed body");
+
+    render(<ExtensiveEditor showDefaultContent={false} onChange={onChange} />);
+
+    // Two commits in the same tick — the notification must coalesce to one.
+    lexicalUpdateListeners.forEach((listener) => {
+      listener({ dirtyElements: new Map([["p", {}]]), dirtyLeaves: new Set() });
+      listener({ dirtyElements: new Map([["p", {}]]), dirtyLeaves: new Set() });
+    });
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    expect(onChange.mock.calls[0]?.[0]).toMatchObject({
+      markdown: "typed body",
+      source: "user",
+      isDirty: true,
+    });
+  });
+
+  it("fires a single programmatic onChange for a host adopt after user edits, and none for a silent mount", async () => {
+    const onChange = vi.fn();
+    const onReady = vi.fn();
+    const lexicalUpdateListeners: Array<
+      (payload: { dirtyElements: Map<string, unknown>; dirtyLeaves: Set<string> }) => void
+    > = [];
+    mockEditorApi.lexical.registerUpdateListener.mockImplementation(
+      (listener: any) => {
+        lexicalUpdateListeners.push(listener);
+        return () => {};
+      },
+    );
+    jsonToMarkdownMock.mockReturnValueOnce("").mockReturnValue("user body");
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        onChange={onChange}
+        onReady={onReady}
+      />,
+    );
+
+    // Mounting alone never notifies.
+    expect(onChange).not.toHaveBeenCalled();
+
+    // A user commit notifies as "user".
+    lexicalUpdateListeners.forEach((listener) => {
+      listener({ dirtyElements: new Map([["p", {}]]), dirtyLeaves: new Set() });
+    });
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(1);
+    });
+    expect(onChange.mock.calls[0]?.[0]).toMatchObject({ source: "user" });
+
+    // A host adopt that changes the content notifies once as "programmatic".
+    const methods = onReady.mock.calls[0]?.[0] as {
+      injectJSON: (content: string) => void;
+    };
+    jsonToMarkdownMock.mockReturnValue("adopted body");
+    methods.injectJSON(JSON.stringify({ root: { children: [] } }));
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledTimes(2);
+    });
+    expect(onChange.mock.calls[1]?.[0]).toEqual({
+      markdown: "adopted body",
+      source: "programmatic",
+      isDirty: false,
+    });
+  });
+
   it("emits onThemeChange on mount and when initialTheme prop changes", () => {
     const onThemeChange = vi.fn();
     const { rerender } = render(

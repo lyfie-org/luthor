@@ -21,6 +21,9 @@ props:
   - "variant"
   - "locked"
   - "toolbar"
+  - "blockAnchors"
+  - "onChange"
+  - "onDesync"
   - "onOutlineChange"
   - "featureFlags"
 exports:
@@ -82,9 +85,11 @@ round-trip back to that file.
    hands the editor only the body; the preset never renders, emits, or mangles
    frontmatter.
 3. **The caret is sacred.** The editor is **uncontrolled** — it reads
-   `defaultContent` once on mount and never exposes a `value`/`onChange`
-   round-trip. Adopt a remote revision by remounting (change the React `key`) or
-   by calling `setMarkdown` imperatively, never with a live-DOM patch.
+   `defaultContent` once on mount and there is no `value` prop or controlled
+   round-trip. The `onChange` callback is a **notification**, not a value
+   binding: nothing you do in it re-renders the document. Adopt a remote
+   revision by remounting (change the React `key`) or by calling `setMarkdown`
+   imperatively, never with a live-DOM patch.
 4. **Theming is token-driven.** All color and typography flow from
    `var(--papyra-*, fallback)` tokens. The preset bundles no fonts — the host
    loads Marcellus / Sora / Roboto Mono.
@@ -124,19 +129,107 @@ round-trip back to that file.
 - `locked`: withholds the body entirely — renders a blurred placeholder and
   **never mounts the editor**, so there is no plaintext in the DOM. The lock is
   UX only; the server (`401`/`PathGuard`) is the security boundary.
+- `blockAnchors`: block-anchor assignment policy — `"off"` (default; anchors
+  already in the text parse and round-trip, nothing creates one), `"on-demand"`
+  (the host stamps at save time via `ensureBlockAnchors()`), or `"auto"` (every
+  eligible top-level block — paragraph, heading, quote — gets a stable `^id`
+  appended on commit). Anchors are invisible in the visual surface: no `^id`
+  artefact, no caret stop, nothing selectable — while the trailing ` ^id`
+  round-trips losslessly in the markdown.
+- `onChange`: first-class change notification (see
+  [Change notification and autosave](#change-notification-and-autosave)).
+- `onDesync`: opt-in model/DOM divergence watchdog (see
+  [The DOM is not the source of truth](#the-dom-is-not-the-source-of-truth)).
 - `onOutlineChange`: fired (debounced) with the current document outline; drives
   a host's live table-of-contents scrollbar. Read-only observation — the caret
   is never touched.
 - `featureFlags`: per-feature overrides, resolved through the enforced policy.
 
+## Change notification and autosave
+
+**Do not attach a DOM `onInput` handler to a wrapper element — it will never
+fire.** Lexical stops propagation of the contenteditable's `input` event, so
+React's delegated synthetic `onInput` on an ancestor receives nothing, and an
+autosave driven that way silently saves nothing. Wire autosave to the editor's
+own `onChange` instead:
+
+~~~tsx
+<PapyraEditor
+  defaultContent={body}
+  onChange={({ markdown, source, isDirty }) => {
+    if (source !== 'user') return; // ignore your own setMarkdown adopts
+    if (!isDirty) return;
+    scheduleAutosave(markdown);    // your debounce; one call per commit arrives here
+  }}
+/>
+~~~
+
+The payload is `{ markdown, source, isDirty }`:
+
+- Fires for **every mutation path** — typing, toolbar formatting, slash
+  commands, undo/redo, paste, drag-drop, and markdown source-view edits — with
+  `source: "user"`, coalesced to **one call per committed change** (typing a
+  character produces exactly one call).
+- The initial `defaultContent` load never fires. A host-initiated `setMarkdown`
+  fires at most once with `source: "programmatic"` (only when it actually
+  changes the content), so your autosave can ignore it.
+- `isDirty` compares against the editor's own serialization of the mounted (or
+  last adopted) content — see the normalisation contract below.
+
+### Ready timing and the normalisation contract
+
+`onReady` fires only after the editor is interactive **and** the initial
+content has been injected and reconciled, so `getMarkdown()` called
+synchronously inside the callback is already stable — no settle timers:
+
+~~~tsx
+onReady={(editor) => {
+  baselineRef.current = editor.getMarkdown(); // safe: no setTimeout needed
+}}
+~~~
+
+Note that `getMarkdown()` is **not** byte-identical to the markdown you loaded:
+the editor re-normalises everything it imports (list markers, spacing, fence
+style), so `getMarkdown(setMarkdown(x)) !== x` in general. Always baseline your
+dirty checks against the editor's own output — the `onReady` snapshot or the
+`markdown` field of an `onChange` payload — never against your input string.
+
+## The DOM is not the source of truth
+
+Serialization reads the Lexical model, never the DOM. Text written into the
+contenteditable behind the reconciler's back — `document.execCommand`, browser
+extensions, password managers, translation tools — can render on screen while
+being absent from `getMarkdown()`. Two consequences:
+
+- **Never assert against `innerText` in tests**; use `getMarkdown()`.
+- **Never mutate the contenteditable directly**; go through `setMarkdown` or
+  the command surface.
+
+To be told instead of silently losing such writes, pass `onDesync`: an internal
+observer compares the visible text with the model after external mutations
+settle and reports `{ domText, modelText }` when they disagree.
+
+## Keyboard access: escaping Tab capture
+
+Tab indents (and Shift+Tab outdents) inside the editor, which would otherwise
+trap keyboard-only users (WCAG 2.1.2). The standard escape is built in: press
+**Escape, then Tab** — the armed Tab performs the browser's native focus move
+out of the editor instead of indenting; any other key restores Tab-as-indent.
+Advertise "Press Esc then Tab to move focus out of the editor" in your help UI.
+
 ## Imperative ref
 
 `PapyraEditorRef` extends `ExtensiveEditorRef` with the markdown-first surface a
 host drives: `setMarkdown(md)` (host-driven adopt), `focus()`, `getOutline()` /
-`scrollToHeading(key)` for the table of contents, `getBlocks()` for trailing
-block anchors, and `getMentions()` for `@username` detection. The host calls
-these during its own orchestration (autosave, remount, TOC) — they never fire on
-keystrokes.
+`scrollToHeading(key)` for the table of contents, `getBlocks()` for block
+anchors, `ensureBlockAnchors()` to stamp missing anchors and return the stamped
+body (the `"on-demand"` save-time flow), and `getMentions()` for `@username`
+detection. The host calls these during its own orchestration (autosave, remount,
+TOC) — they never fire on keystrokes.
+
+Each `getBlocks()` entry carries the anchor id plus the block's own `text`,
+`line`, and `start`/`end` character offsets in the markdown body, so a host can
+resolve a `#^id` reference without re-parsing the document.
 
 ## The host adapter
 

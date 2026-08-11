@@ -6,6 +6,7 @@
  */
 
 import {
+  COMMAND_PRIORITY_CRITICAL,
   COMMAND_PRIORITY_LOW,
   KEY_TAB_COMMAND,
   LexicalEditor,
@@ -37,6 +38,13 @@ type TabIndentConfig = {
  * the editor, not just in code blocks. This provides a consistent
  * indentation experience across all content types.
  *
+ * Because Tab is captured for indentation, the extension also provides the
+ * standard rich-text-editor escape hatch for keyboard-only users (WCAG 2.1.2):
+ * pressing **Escape** arms the next **Tab** (or Shift+Tab) to perform the
+ * browser's native focus move out of the editor instead of indenting. Any
+ * other key press re-arms Tab capture. Hosts should advertise "Press Esc then
+ * Tab to move focus out of the editor" in their help UI.
+ *
  * @example
  * ```tsx
  * import { tabIndentExtension } from '@lyfie/luthor-headless';
@@ -62,6 +70,51 @@ export class TabIndentExtension extends BaseExtension<
    * @returns Cleanup function
    */
   register(editor: LexicalEditor): () => void {
+    // Escape-then-Tab focus escape (WCAG 2.1.2). Escape arms the hatch; the
+    // next Tab is claimed at critical priority WITHOUT preventDefault so the
+    // browser's native focus navigation runs. Any other key (or leaving the
+    // editor) disarms it and restores Tab-as-indent.
+    let escapeArmed = false;
+
+    const handleRootKeydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        escapeArmed = true;
+      } else if (event.key !== "Tab") {
+        escapeArmed = false;
+      }
+    };
+    const handleRootFocusOut = () => {
+      escapeArmed = false;
+    };
+
+    const unregisterRootListener = editor.registerRootListener(
+      (nextRoot: HTMLElement | null, previousRoot: HTMLElement | null) => {
+        if (previousRoot) {
+          previousRoot.removeEventListener("keydown", handleRootKeydown, true);
+          previousRoot.removeEventListener("focusout", handleRootFocusOut);
+        }
+        if (nextRoot) {
+          nextRoot.addEventListener("keydown", handleRootKeydown, true);
+          nextRoot.addEventListener("focusout", handleRootFocusOut);
+        }
+      },
+    );
+
+    const unregisterEscapeHatch = editor.registerCommand<KeyboardEvent>(
+      KEY_TAB_COMMAND,
+      () => {
+        if (!escapeArmed) {
+          return false;
+        }
+
+        // Claim the command so no indent handler runs, but leave the event's
+        // default alone: the browser moves focus out of the contenteditable.
+        escapeArmed = false;
+        return true;
+      },
+      COMMAND_PRIORITY_CRITICAL,
+    );
+
     const unregisterTabCommand = editor.registerCommand<KeyboardEvent>(
       KEY_TAB_COMMAND,
       (event) => {
@@ -126,6 +179,8 @@ export class TabIndentExtension extends BaseExtension<
 
     return () => {
       unregisterTabCommand();
+      unregisterEscapeHatch();
+      unregisterRootListener();
     };
   }
 
