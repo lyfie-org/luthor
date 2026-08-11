@@ -13,3 +13,11 @@ export {
   type EditorDomDivergence,
   type EditorDomWatchdogOptions,
 } from "./editorDomWatchdog";
+
+export {
+  DEFAULT_ALLOWED_URL_SCHEMES,
+  EMBED_ALLOWED_URL_SCHEMES,
+  isSafeUrl,
+  sanitizeUrlForAttribute,
+  type SafeUrlOptions,
+} from "./urlSafety";

@@ -32,6 +32,7 @@ import {
   EmbedAlignment,
   resolveEmbedPointerEvents,
   shouldShowEmbedResizeHandles,
+  toRenderableEmbedSrc,
 } from "./IframeEmbedExtension";
 
 export type YouTubeEmbedPayload = {
@@ -450,7 +451,7 @@ export class YouTubeEmbedNode extends DecoratorNode<ReactNode> {
     element.setAttribute("data-caption", this.__payload.caption ?? "");
 
     const iframe = document.createElement("iframe");
-    iframe.setAttribute("src", this.__payload.src);
+    iframe.setAttribute("src", toRenderableEmbedSrc(this.__payload.src));
     iframe.setAttribute("width", String(this.__payload.width));
     iframe.setAttribute("height", String(this.__payload.height));
     iframe.setAttribute("title", "YouTube video player");
@@ -668,7 +669,7 @@ function YouTubeEmbedComponent({
       >
         <iframe
           ref={iframeRef}
-          src={payload.src}
+          src={toRenderableEmbedSrc(payload.src)}
           title="YouTube video player"
           loading="lazy"
           referrerPolicy="strict-origin-when-cross-origin"

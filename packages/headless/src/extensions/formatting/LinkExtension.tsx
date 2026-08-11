@@ -26,10 +26,42 @@ import {
   BaseExtensionConfig,
   ExtensionCategory,
 } from "@lyfie/luthor-headless/extensions/types";
+import { isSafeUrl } from "@lyfie/luthor-headless/utils";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
 import { ClickableLinkPlugin } from "@lexical/react/LexicalClickableLinkPlugin";
 import React from "react";
+
+type AutoLinkUrlMatch = {
+  text: string;
+  url: string;
+  index: number;
+  length: number;
+};
+
+/**
+ * Builds the matcher handed to Lexical's AutoLinkPlugin. Every regex match
+ * is re-checked against the configured validator so auto-linking can never
+ * out-run the scheme allowlist, even if the regex is loosened later.
+ */
+function createAutoLinkUrlMatcher(
+  validateUrl: (url: string) => boolean,
+): (text: string) => AutoLinkUrlMatch | null {
+  return (text: string) => {
+    const urlRegex =
+      /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_.+~#?&//=]*)/g;
+    const match = urlRegex.exec(text);
+    if (match && validateUrl(match[0])) {
+      return {
+        text: match[0],
+        url: match[0],
+        index: match.index,
+        length: match[0].length,
+      };
+    }
+    return null;
+  };
+}
 
 /**
  * Link extension configuration.
@@ -42,7 +74,8 @@ export interface LinkConfig extends BaseExtensionConfig {
   autoLinkText?: boolean;
   /**
    * Automatically link URLs when pasted into the editor.
-   * When false, pasted URLs remain plain text. Default: true
+   * When false, pasted URLs remain plain text. Default: false
+   * (the `extensive` preset enables it explicitly).
    */
   autoLinkUrls?: boolean;
   /**
@@ -51,7 +84,17 @@ export interface LinkConfig extends BaseExtensionConfig {
    * When false: selected text is replaced with the pasted URL and then linked. Default: true
    */
   linkSelectedTextOnPaste?: boolean;
-  /** URL validation function (default: basic URL regex) */
+  /**
+   * URL validation function applied to every pasted, typed, and
+   * programmatically inserted link.
+   *
+   * The default accepts `http`, `https`, `mailto`, and `tel` URLs plus
+   * same-document (`#`) and protocol-relative (`//`) references, and
+   * rejects everything else — including `javascript:`, `data:`, and
+   * `vbscript:` URLs that would otherwise become script-bearing hrefs.
+   * Hosts that need a custom scheme (e.g. `obsidian://`) can supply their
+   * own validator; see `isSafeUrl` for a composable building block.
+   */
   validateUrl?: (url: string) => boolean;
   /** Enable click navigation on links rendered inside the editor. Default: true */
   clickableLinks?: boolean;
@@ -149,14 +192,7 @@ export class LinkExtension extends BaseExtension<
       clickableLinks: true,
       openLinksInNewTab: true,
       linkSelectedTextOnPaste: true, // Link selected text when pasting URLs
-      validateUrl: (url: string) => {
-        try {
-          new URL(url);
-          return true;
-        } catch {
-          return false;
-        }
-      },
+      validateUrl: (url: string) => isSafeUrl(url),
     };
   }
 
@@ -279,21 +315,7 @@ export class LinkExtension extends BaseExtension<
 
     // Optional: Auto-link as you type
     if (this.config.autoLinkText) {
-      const urlMatcher = (text: string) => {
-        const urlRegex =
-          /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_.+~#?&//=]*)/g;
-        const match = urlRegex.exec(text);
-        if (match && this.config.validateUrl!(match[0])) {
-          return {
-            text: match[0],
-            url: match[0],
-            index: match.index,
-            length: match[0].length,
-          };
-        }
-        return null;
-      };
-
+      const urlMatcher = createAutoLinkUrlMatcher(this.config.validateUrl!);
       plugins.push(<AutoLinkPlugin key="auto-link" matchers={[urlMatcher]} />);
     }
 
@@ -596,6 +618,13 @@ export class LinkExtension extends BaseExtension<
     };
   }
 }
+
+/**
+ * Test-only internals. Not part of the public API surface.
+ */
+export const __TEST_ONLY_LINK_INTERNALS = {
+  createAutoLinkUrlMatcher,
+};
 
 /**
  * Preconfigured link extension instance.
