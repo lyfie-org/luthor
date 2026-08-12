@@ -175,6 +175,7 @@ export {
   $ensureBlockAnchors,
   ensureBlockAnchors,
   registerBlockAnchorAutoStamp,
+  registerBlockAnchorTrailingGuard,
   createBlockAnchorId,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
   BLOCK_ANCHOR_STAMP_TAG,
