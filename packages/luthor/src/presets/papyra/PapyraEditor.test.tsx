@@ -497,6 +497,25 @@ describe("PapyraEditor", () => {
       expect(ref.current?.getMentions()).toEqual(["alice", "bob"]);
     });
 
+    it("matches the host's mention rule on boundaries and username characters", () => {
+      const ref = createRef<PapyraEditorRef>();
+      const mentionMethods: ExtensiveEditorRef = {
+        ...stubMethods,
+        getMarkdown: vi.fn(
+          () =>
+            "@bea.smith opens the body.\n(@cara) and [@dev] count.\nmail me@example.com, dash-@nope, and code@1 skip.\nTrailing @bea.",
+        ),
+      };
+      renderWithReadyEditor(ref, { methods: mentionMethods });
+
+      expect(ref.current?.getMentions()).toEqual([
+        "bea.smith",
+        "cara",
+        "dev",
+        "bea",
+      ]);
+    });
+
     it("extracts trailing block anchors from the body", () => {
       const ref = createRef<PapyraEditorRef>();
       const anchorMethods: ExtensiveEditorRef = {

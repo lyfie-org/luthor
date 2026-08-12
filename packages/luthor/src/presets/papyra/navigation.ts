@@ -29,13 +29,22 @@ export const PAPYRA_OUTLINE_DEBOUNCE_MS = 200;
 const HEADING_SELECTOR = "h1, h2, h3, h4, h5, h6";
 
 /**
- * `@username` detection. A mention is an `@` that starts a token (line start or
- * after a non-word, non-`@`, non-`/` character — so email locals like
- * `name@host` and paths are skipped), followed by a username that starts and
- * ends with an alphanumeric and may contain `_`/`-` between.
+ * `@username` detection, matching the host's own rule
+ * (`(?<=^|[\s(\[])@[A-Za-z0-9][A-Za-z0-9._-]{0,63}\b`) so `getMentions()` never
+ * reports a mention the host would drop, nor misses one it would route: the `@`
+ * must open the body or follow whitespace, `(`, or `[` — which is what skips
+ * email locals like `name@host` — and the username starts alphanumeric, runs up
+ * to 64 characters of `[A-Za-z0-9._-]`, and ends on a word boundary (so a
+ * sentence-ending `.` is not swallowed).
+ *
+ * Written with a leading capture group rather than a lookbehind, which Safari
+ * only gained in 16.4. Consuming the boundary character is safe: it is never
+ * part of the following mention.
+ *
+ * Kept in step with the `@` typeahead trigger in
+ * `MentionTypeaheadExtension` — the menu must not offer what this would drop.
  */
-const MENTION_PATTERN =
-  /(?:^|[^A-Za-z0-9_@/])@([A-Za-z0-9](?:[A-Za-z0-9_-]*[A-Za-z0-9])?)/g;
+const MENTION_PATTERN = /(^|[\s([])@([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b/g;
 
 /**
  * Trailing block anchor: a space, a `^`, then the id, at end of line. Matches
@@ -122,7 +131,7 @@ export function extractMentions(markdown: string): string[] {
   const mentions: string[] = [];
 
   for (const match of markdown.matchAll(MENTION_PATTERN)) {
-    const username = match[1];
+    const username = match[2];
     if (username && !seen.has(username)) {
       seen.add(username);
       mentions.push(username);
