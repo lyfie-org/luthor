@@ -8,13 +8,27 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from "vitest";
-import { createEditor, type LexicalEditor } from "lexical";
+import {
+  $createTextNode,
+  $getRoot,
+  $getSelection,
+  $isElementNode,
+  $isRangeSelection,
+  $isTextNode,
+  createEditor,
+  SELECTION_CHANGE_COMMAND,
+  type LexicalEditor,
+} from "lexical";
+import { CodeHighlightNode, CodeNode } from "@lexical/code";
+import { ListItemNode, ListNode } from "@lexical/list";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { jsonToMarkdown, markdownToJSON } from "../../core/markdown";
 import {
+  $isBlockAnchorNode,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
   BlockAnchorNode,
   ensureBlockAnchors,
+  registerBlockAnchorTrailingGuard,
   CALLOUT_MARKDOWN_TRANSFORMER,
   CalloutNode,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
@@ -60,7 +74,15 @@ function roundTrip(markdown: string): string {
 function createStampEditor(markdown: string): LexicalEditor {
   const editor = createEditor({
     namespace: "embeds-test",
-    nodes: [BlockAnchorNode, HeadingNode, QuoteNode],
+    nodes: [
+      BlockAnchorNode,
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      CodeNode,
+      CodeHighlightNode,
+    ],
     onError: (error) => {
       throw error;
     },
@@ -231,6 +253,189 @@ describe("papyra embed transformers", () => {
     expect(markdown).toMatch(/^# Heading \^[a-z0-9]{8}$/m);
     expect(markdown).toMatch(/^> Quoted line \^[a-z0-9]{8}$/m);
     expect(markdown).toMatch(/^Body \^[a-z0-9]{8}$/m);
+  });
+
+  it("leaves lists, tables, and code blocks unanchored", () => {
+    const editor = createStampEditor(
+      "- One\n- Two\n\n```js\nconst a = 1;\n```",
+    );
+    ensureBlockAnchors(editor);
+
+    expect(editorMarkdown(editor)).not.toMatch(/\^[a-z0-9]{8}/);
+  });
+
+  // ── Stranded anchors (id corruption regression) ─────────────────────
+  //
+  // The anchor renders nothing, so a caret at the visual end of an anchored
+  // line can sit on its far side. Text typed there becomes a sibling *after*
+  // the anchor and used to serialize glued onto the id (`^sc36ih7scc`), which
+  // renames the block and dangles every `![[Note#^sc36ih7s]]` pointing at it.
+
+  /** Append text after the block's trailing anchor, as stranded typing does. */
+  function typeAfterAnchor(
+    editor: LexicalEditor,
+    blockIndex: number,
+    text: string,
+  ): void {
+    editor.update(
+      () => {
+        const block = $getRoot().getChildren()[blockIndex];
+        if (!$isElementNode(block)) {
+          throw new Error(`Block ${blockIndex} is not an element`);
+        }
+        const anchor = block
+          .getChildren()
+          .find((child) => $isBlockAnchorNode(child));
+        if (!anchor) {
+          throw new Error(`Block ${blockIndex} has no anchor`);
+        }
+        anchor.insertAfter($createTextNode(text));
+      },
+      { discrete: true },
+    );
+  }
+
+  it("keeps the block id when typing stranded text after the anchor", () => {
+    const editor = createStampEditor("Ship ^sc36ih7s");
+    typeAfterAnchor(editor, 0, "cc");
+
+    ensureBlockAnchors(editor);
+    const markdown = editorMarkdown(editor);
+
+    // The id is byte-identical, and still the 8 characters
+    // `createBlockAnchorId` emits — never the glued `^sc36ih7scc`.
+    expect(markdown).toBe("Shipcc ^sc36ih7s");
+    expect(markdown).toMatch(ANCHORED_LINE);
+    expect(markdown).not.toContain("^sc36ih7scc");
+  });
+
+  it("never glues typed text onto the id even without a stamping pass", () => {
+    const editor = createStampEditor("Ship ^sc36ih7s");
+    typeAfterAnchor(editor, 0, "cc");
+
+    // Serializing a stranded anchor degrades to a stray token, never a
+    // renamed block: the id stays readable and intact.
+    expect(editorMarkdown(editor)).not.toContain("^sc36ih7scc");
+    expect(editorMarkdown(editor)).toContain("^sc36ih7s");
+  });
+
+  it("repairs a stranded anchor to exactly one anchor across a round-trip", () => {
+    const editor = createStampEditor("Ship ^sc36ih7s");
+    typeAfterAnchor(editor, 0, "cc");
+    ensureBlockAnchors(editor);
+
+    const repaired = editorMarkdown(editor);
+    expect(roundTrip(repaired)).toBe(repaired);
+
+    // Re-importing and re-stamping must not append a second anchor — the
+    // double-stamp that used to leave `Shipcc ^sc36ih7scc ^42ad9l0l` on disk.
+    const remounted = createStampEditor(repaired);
+    ensureBlockAnchors(remounted);
+    const restamped = editorMarkdown(remounted);
+
+    expect(restamped).toBe(repaired);
+    expect(restamped.match(/\^/g)).toHaveLength(1);
+  });
+
+  it("repairs only the edited block and leaves other ids byte-identical", () => {
+    const editor = createStampEditor(
+      "First ^aaa11111\n\nSecond ^bbb22222\n\nThird ^ccc33333",
+    );
+    typeAfterAnchor(editor, 1, " tail");
+    ensureBlockAnchors(editor);
+
+    const lines = editorMarkdown(editor)
+      .split("\n")
+      .filter((line) => line.trim().length > 0);
+
+    expect(lines[0]).toBe("First ^aaa11111");
+    expect(lines[1]).toBe("Second tail ^bbb22222");
+    expect(lines[2]).toBe("Third ^ccc33333");
+  });
+
+  it("re-stamps a duplicated id and still leaves the anchor trailing", () => {
+    const editor = createStampEditor("Original ^dupe1234\n\nCopy ^dupe1234");
+    typeAfterAnchor(editor, 1, " more");
+    ensureBlockAnchors(editor);
+
+    const lines = editorMarkdown(editor)
+      .split("\n")
+      .filter((line) => line.trim().length > 0);
+
+    expect(lines[0]).toBe("Original ^dupe1234");
+    expect(lines[1]).toMatch(/^Copy more \^[a-z0-9]{8}$/);
+    expect(lines[1]).not.toContain("dupe1234");
+  });
+
+  // ── Trailing guard (caret + live repair) ────────────────────────────
+
+  /** A stamping editor with the live trailing guard registered. */
+  function createGuardedEditor(markdown: string): LexicalEditor {
+    const editor = createStampEditor(markdown);
+    registerBlockAnchorTrailingGuard(editor);
+    return editor;
+  }
+
+  /** Put the collapsed caret at the very end of a block, past its anchor. */
+  function selectPastAnchor(editor: LexicalEditor, blockIndex: number): void {
+    editor.update(
+      () => {
+        const block = $getRoot().getChildren()[blockIndex];
+        if (!$isElementNode(block)) {
+          throw new Error(`Block ${blockIndex} is not an element`);
+        }
+        const end = block.getChildrenSize();
+        block.select(end, end);
+      },
+      { discrete: true },
+    );
+  }
+
+  it("snaps a caret resting after the anchor back in front of it", () => {
+    const editor = createGuardedEditor("Ship ^sc36ih7s");
+    selectPastAnchor(editor, 0);
+
+    editor.dispatchCommand(SELECTION_CHANGE_COMMAND, undefined);
+    editor.update(() => {}, { discrete: true });
+
+    editor.getEditorState().read(() => {
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) {
+        throw new Error("Expected a range selection");
+      }
+      const node = selection.anchor.getNode();
+      expect($isTextNode(node)).toBe(true);
+      expect(node.getTextContent()).toBe("Ship");
+      expect(selection.anchor.offset).toBe(4);
+      expect($isBlockAnchorNode(node.getNextSibling())).toBe(true);
+    });
+  });
+
+  it("types into the line, not past the anchor, once the caret is normalized", () => {
+    const editor = createGuardedEditor("Ship ^sc36ih7s");
+    selectPastAnchor(editor, 0);
+    editor.dispatchCommand(SELECTION_CHANGE_COMMAND, undefined);
+
+    editor.update(
+      () => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          selection.insertText("cc");
+        }
+      },
+      { discrete: true },
+    );
+
+    expect(editorMarkdown(editor)).toBe("Shipcc ^sc36ih7s");
+  });
+
+  it("moves an anchor back to the end when text lands after it", () => {
+    const editor = createGuardedEditor("Ship ^sc36ih7s");
+    typeAfterAnchor(editor, 0, "cc");
+
+    // No stamping pass: the guard's transform repairs the block as the text
+    // is committed, so even an unsaved document never holds a stranded anchor.
+    expect(editorMarkdown(editor)).toBe("Shipcc ^sc36ih7s");
   });
 
   // ── Saved web cards ─────────────────────────────────────────────────

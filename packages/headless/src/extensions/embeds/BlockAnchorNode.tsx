@@ -8,8 +8,14 @@
 import {
   $addUpdateTag,
   $getRoot,
+  $getSelection,
   $isElementNode,
+  $isRangeSelection,
+  $isTextNode,
+  COMMAND_PRIORITY_LOW,
   DecoratorNode,
+  SELECTION_CHANGE_COMMAND,
+  TextNode,
   type DOMConversionMap,
   type DOMExportOutput,
   type ElementNode,
@@ -115,7 +121,7 @@ export class BlockAnchorNode extends DecoratorNode<ReactNode> {
   }
 
   getTextContent(): string {
-    return ` ^${this.__blockId}`;
+    return blockAnchorMarkdown(this);
   }
 
   getBlockId(): string {
@@ -130,6 +136,26 @@ export class BlockAnchorNode extends DecoratorNode<ReactNode> {
   decorate(): ReactNode {
     return null;
   }
+}
+
+/**
+ * Serialize an anchor to its ` ^id` markdown form, with a trailing space when
+ * content follows it and starts on a non-space character.
+ *
+ * An anchor is only ever meant to be a block's last child, and both
+ * {@link $ensureBlockAnchors} and {@link registerBlockAnchorTrailingGuard} keep
+ * it there. This is the last line of defence for the case where it somehow is
+ * not: without the boundary, ` ^abc12345` immediately followed by typed text
+ * serializes as `^abc12345text`, which silently *renames* the block — every
+ * `![[Note#^abc12345]]` reference to it dangles, and the malformed id survives
+ * the next import because the trailing-anchor pattern no longer matches. With
+ * the boundary the same slip degrades to a stray, visible `^abc12345` token
+ * that the block's real id has already outlived.
+ */
+function blockAnchorMarkdown(node: BlockAnchorNode): string {
+  const next = node.getNextSibling();
+  const needsBoundary = next !== null && /^\S/.test(next.getTextContent());
+  return ` ^${node.getBlockId()}${needsBoundary ? " " : ""}`;
 }
 
 /** Create a {@link BlockAnchorNode}. */
@@ -182,11 +208,32 @@ function $findBlockAnchor(block: ElementNode): BlockAnchorNode | null {
 }
 
 /**
+ * Move an anchor back to the end of its block when editing has stranded it
+ * mid-block (typing lands after the invisible anchor whenever the caret sat at
+ * the visual end of the line). Re-appending an existing node re-parents it, so
+ * the id survives — which is the whole point: a stranded anchor serializes as
+ * `^id` glued to whatever follows, renaming the block and dangling every
+ * `![[Note#^id]]` reference to it. Returns whether the block changed.
+ */
+function $restoreTrailingAnchor(
+  block: ElementNode,
+  anchor: BlockAnchorNode,
+): boolean {
+  if (anchor.getParent() === block && anchor.getNextSibling() === null) {
+    return false;
+  }
+
+  block.append(anchor);
+  return true;
+}
+
+/**
  * Ensure every eligible top-level block carries a `^id` block anchor. Must be
  * called inside `editor.update()`. Blocks that already have an anchor keep
- * their id (stability across edits); duplicated ids — e.g. a pasted copy of an
- * anchored block — are re-stamped fresh so ids stay unique per document; empty
- * blocks are left alone. Returns whether anything changed.
+ * their id (stability across edits) and have it moved back to the end of the
+ * block if an edit stranded it mid-block; duplicated ids — e.g. a pasted copy
+ * of an anchored block — are re-stamped fresh so ids stay unique per document;
+ * empty blocks are left alone. Returns whether anything changed.
  *
  * Anchors are appended as the block's last inline child, which serializes to
  * the trailing ` ^id` the {@link BLOCK_ANCHOR_MARKDOWN_TRANSFORMER} owns.
@@ -207,11 +254,14 @@ export function $ensureBlockAnchors(
       const id = existing.getBlockId();
       if (seen.has(id)) {
         const fresh = createId();
-        existing.replace($createBlockAnchorNode(fresh));
+        const replacement = $createBlockAnchorNode(fresh);
+        existing.replace(replacement);
+        $restoreTrailingAnchor(block, replacement);
         seen.add(fresh);
         changed = true;
       } else {
         seen.add(id);
+        changed = $restoreTrailingAnchor(block, existing) || changed;
       }
       continue;
     }
@@ -286,6 +336,109 @@ export function registerBlockAnchorAutoStamp(
   );
 }
 
+/**
+ * Move a collapsed caret that sits immediately after a block anchor to just
+ * before it. Must be called inside `editor.update()`. Returns whether the
+ * selection moved.
+ *
+ * The anchor renders nothing, so a caret on its far side looks exactly like a
+ * caret at the end of the line — clicking there, `Ctrl`/`Cmd`+`End`, or
+ * collapsing a select-all to its end all land there. Typing from that position
+ * inserts *after* the anchor, which is how a block's id ends up with the user's
+ * text glued onto it. Snapping the caret back makes the position match what the
+ * reader sees.
+ */
+function $normalizeCaretAroundAnchor(): boolean {
+  const selection = $getSelection();
+  if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+    return false;
+  }
+
+  const point = selection.anchor;
+  const node = point.getNode();
+
+  let anchorNode: BlockAnchorNode | null = null;
+  if (point.type === "element" && $isElementNode(node)) {
+    const previous = node.getChildAtIndex(point.offset - 1);
+    if ($isBlockAnchorNode(previous)) {
+      anchorNode = previous;
+    }
+  } else if (point.offset === 0) {
+    const previous = node.getPreviousSibling();
+    if ($isBlockAnchorNode(previous)) {
+      anchorNode = previous;
+    }
+  }
+
+  if (!anchorNode) {
+    return false;
+  }
+
+  const previous = anchorNode.getPreviousSibling();
+  if ($isTextNode(previous)) {
+    const end = previous.getTextContentSize();
+    previous.select(end, end);
+    return true;
+  }
+
+  const parent = anchorNode.getParent();
+  if (!parent) {
+    return false;
+  }
+
+  const index = anchorNode.getIndexWithinParent();
+  parent.select(index, index);
+  return true;
+}
+
+/**
+ * Keep block anchors where they belong: last in their block, with the caret
+ * always on their content side. Two guards, both registered for every editor
+ * that has the extension (they cost nothing when a document has no anchors):
+ *
+ * 1. A selection normalizer, so a caret placed after the invisible anchor snaps
+ *    in front of it and typing continues the line instead of running past it.
+ * 2. A text transform that re-appends an anchor a text insertion has stranded
+ *    mid-block. Re-parenting preserves the node — and therefore the id — so the
+ *    block keeps its identity and its `![[Note#^id]]` references stay live.
+ *
+ * Returns an unregister function.
+ */
+export function registerBlockAnchorTrailingGuard(
+  editor: LexicalEditor,
+): () => void {
+  const unregisterSelection = editor.registerCommand(
+    SELECTION_CHANGE_COMMAND,
+    () => {
+      $normalizeCaretAroundAnchor();
+      // Never claim the event: this only nudges the caret, other listeners
+      // still need to see the selection change.
+      return false;
+    },
+    COMMAND_PRIORITY_LOW,
+  );
+
+  const unregisterTransform = editor.registerNodeTransform(
+    TextNode,
+    (textNode) => {
+      const previous = textNode.getPreviousSibling();
+      if (!$isBlockAnchorNode(previous)) {
+        return;
+      }
+
+      const block = previous.getParent();
+      if (block) {
+        $restoreTrailingAnchor(block, previous);
+      }
+    },
+  );
+
+  return () => {
+    unregisterSelection();
+    unregisterTransform();
+  };
+}
+
 /** Configuration for {@link BlockAnchorExtension}. */
 export interface BlockAnchorExtensionConfig {
   /**
@@ -312,14 +465,25 @@ export class BlockAnchorExtension extends BaseExtension<"blockAnchor"> {
   }
 
   register(editor: LexicalEditor): () => void {
+    // The trailing guard runs in every mode, including the passive `off` one:
+    // a document that merely *parsed* existing anchors can still strand one by
+    // typing at the end of an anchored line, and that corrupts its id on the
+    // next save.
+    const unregisterGuard = registerBlockAnchorTrailingGuard(editor);
+
     if (!this.stampConfig.autoStamp) {
-      return () => {};
+      return unregisterGuard;
     }
 
-    return registerBlockAnchorAutoStamp(
+    const unregisterAutoStamp = registerBlockAnchorAutoStamp(
       editor,
       this.stampConfig.createId ?? createBlockAnchorId,
     );
+
+    return () => {
+      unregisterGuard();
+      unregisterAutoStamp();
+    };
   }
 
   getNodes(): Array<typeof BlockAnchorNode> {
@@ -345,7 +509,7 @@ export const BLOCK_ANCHOR_MARKDOWN_TRANSFORMER: TextMatchTransformer = {
     if (!$isBlockAnchorNode(node)) {
       return null;
     }
-    return ` ^${node.getBlockId()}`;
+    return blockAnchorMarkdown(node);
   },
   importRegExp: / \^([a-zA-Z0-9][a-zA-Z0-9_-]*)$/,
   // Live trigger disabled: non-printable sentinel + impossible regex.

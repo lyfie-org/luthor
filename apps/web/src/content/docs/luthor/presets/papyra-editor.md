@@ -135,7 +135,11 @@ round-trip back to that file.
   eligible top-level block — paragraph, heading, quote — gets a stable `^id`
   appended on commit). Anchors are invisible in the visual surface: no `^id`
   artefact, no caret stop, nothing selectable — while the trailing ` ^id`
-  round-trips losslessly in the markdown.
+  round-trips losslessly in the markdown. An anchor is always kept **last** in
+  its block, in every mode: the caret snaps in front of it, and text that lands
+  behind it moves it back to the end. That is what keeps a block's id stable
+  when you type at the end of an anchored line — an id is an address, and
+  `![[Note#^id]]` references to it must not change under the writer.
 - `onChange`: first-class change notification (see
   [Change notification and autosave](#change-notification-and-autosave)).
 - `onDesync`: opt-in model/DOM divergence watchdog (see
