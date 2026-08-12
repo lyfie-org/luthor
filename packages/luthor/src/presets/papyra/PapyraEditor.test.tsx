@@ -896,9 +896,7 @@ describe("PapyraEditor typeahead seams", () => {
   };
 
   function extensionNames(): string[] {
-    return ((lastProps().extraExtensions ?? []) as Array<{ name: string }>).map(
-      (extension) => extension.name,
-    );
+    return (lastProps().extraExtensions ?? []).map((extension) => extension.name);
   }
 
   beforeEach(() => {
