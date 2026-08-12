@@ -153,11 +153,24 @@ export function SlashCommandMenu({
     return null;
   }
 
+  const activeCommand = filteredCommands[selectedIndex];
+
   const menu = (
+    /*
+     * Focus stays in the editor while this menu is open, so it is exposed
+     * as a listbox the caret "owns": the active option is announced
+     * through aria-activedescendant rather than by moving focus, which
+     * would break typing. Same pattern as the emoji and command menus.
+     */
     <div
       className="luthor-slash-menu"
       ref={menuRef}
       style={menuStyle}
+      role="listbox"
+      aria-label="Insert block"
+      aria-activedescendant={
+        activeCommand ? `luthor-slash-option-${activeCommand.id}` : undefined
+      }
       onPointerDown={(event) => {
         event.stopPropagation();
       }}
@@ -165,25 +178,41 @@ export function SlashCommandMenu({
         event.stopPropagation();
       }}
     >
-      <div className="luthor-slash-menu-header">
+      <div className="luthor-slash-menu-header" aria-hidden="true">
         <span className="luthor-slash-menu-title">Insert block</span>
         <span className="luthor-slash-menu-query">/{query}</span>
       </div>
 
       <div className="luthor-slash-menu-list">
         {filteredCommands.length === 0 ? (
-          <div className="luthor-slash-menu-empty">No matching commands</div>
+          <div className="luthor-slash-menu-empty" role="status">
+            No matching commands
+          </div>
         ) : (
           Object.entries(groupedCommands).map(([groupName, items]) => (
-            <div key={groupName} className="luthor-slash-menu-group">
-              <div className="luthor-slash-menu-group-title">{groupName}</div>
+            <div
+              key={groupName}
+              className="luthor-slash-menu-group"
+              role="group"
+              aria-label={groupName}
+            >
+              <div className="luthor-slash-menu-group-title" aria-hidden="true">
+                {groupName}
+              </div>
               {items.map((command) => {
                 const globalIndex = filteredCommands.indexOf(command);
                 const selected = globalIndex === selectedIndex;
                 return (
                   <button
                     key={command.id}
+                    id={`luthor-slash-option-${command.id}`}
                     type="button"
+                    role="option"
+                    aria-selected={selected}
+                    // Focus never leaves the editor, so options must not be
+                    // reachable by Tab — they are driven by arrow keys and
+                    // announced via aria-activedescendant.
+                    tabIndex={-1}
                     className={`luthor-slash-menu-item ${selected ? "selected" : ""}`}
                     onMouseEnter={() => setSelectedIndex(globalIndex)}
                     onMouseDown={(event) => {

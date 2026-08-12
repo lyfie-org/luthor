@@ -2819,3 +2819,27 @@
 		font-size: 13px;
 	}
 }
+
+/*
+ * Honor the OS "reduce motion" setting.
+ *
+ * Nearly all Luthor motion flows through --luthor-theme-transition, so
+ * zeroing the token covers the themed transitions in one place; the
+ * explicit rules below catch the few animations and one-off transitions
+ * that do not read it (the upload spinner, menu reveals).
+ */
+@media (prefers-reduced-motion: reduce) {
+	:root,
+	[class*="luthor-"] {
+		--luthor-theme-transition: 0s;
+	}
+
+	[class*="luthor-"],
+	[class*="luthor-"]::before,
+	[class*="luthor-"]::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

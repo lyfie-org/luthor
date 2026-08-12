@@ -62,6 +62,10 @@ jobs:
       - name: Demo app build
         run: pnpm --filter luthor-demo run build
 
+      # Runs after the package builds: it reads the built .d.ts surface.
+      - name: Documentation contracts
+        run: pnpm check:docs-contracts
+
       - name: Web SEO validation
         run: pnpm --dir apps/web run seo:check
 

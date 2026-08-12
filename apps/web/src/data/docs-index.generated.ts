@@ -4904,6 +4904,219 @@ export const docsIndex = [
   {
     "slug": [
       "luthor",
+      "accessibility"
+    ],
+    "title": "Accessibility",
+    "navTitle": "Accessibility",
+    "description": "Luthor's WCAG 2.1 AA posture: keyboard operation, screen-reader semantics, focus handling, reduced motion, and the gaps that remain.",
+    "content": "\n# Accessibility\n\n[Luthor](/demo/) targets **WCAG 2.1 Level AA**. This page records what is\nimplemented and verified, so hosts can cite it in their own\naccessibility statements — and what is not, so nobody cites something\nthat isn't true.\n\n## What this page answers\n\n- Can every feature be operated from the keyboard?\n- What do screen readers announce for the overlay surfaces?\n- How is motion handled, and what remains unverified?\n\n## Keyboard operation\n\n| Surface | Keys |\n|---|---|\n| Editor | Standard text editing. `Tab` inserts indentation inside lists and code; press `Escape` first to move focus out of the editor instead. |\n| Toolbar | `Tab` to reach it, arrow keys within grouped controls, `Enter`/`Space` to activate. |\n| Slash menu (`/`) | `↑`/`↓` to move, `Enter` to insert, `Escape` to dismiss. Focus stays in the editor. |\n| Emoji menu (`:`) | Same as the slash menu. |\n| Command palette | `Escape` to dismiss, `↑`/`↓` to move, `Enter` to run. Focus is in the search input. |\n| Link bubble | Reachable by `Tab`; `Escape` returns to the editor. |\n\n### The Tab trap, and how to escape it\n\nA rich-text editor that swallows `Tab` traps keyboard users. [Luthor](/demo/)'s\n`TabIndentExtension` takes `Tab` for indentation, but pressing `Escape`\nfirst releases it: the next `Tab` then moves focus out of the editor\nnormally. Every other focus-capturing surface follows the same rule —\n`Escape` always returns control to the caret.\n\n## Screen-reader semantics\n\nThe three typeahead surfaces deliberately **keep DOM focus in the\neditor** while open, because moving focus would interrupt typing. They\ntherefore expose the ARIA combobox/listbox relationship instead:\n\n- the container is a `role=\"listbox\"` with an `aria-label`,\n- each item is a `role=\"option\"` carrying `aria-selected`,\n- `aria-activedescendant` on the container (or, for the palette, on its\n  search input) names the active option, so arrowing through the list is\n  announced without focus moving,\n- items are `tabIndex={-1}`, keeping them out of the Tab order,\n- an empty result set is announced through `role=\"status\"`.\n\nThe command palette is additionally a `role=\"dialog\"` with\n`aria-modal=\"true\"`, and its input is a `role=\"combobox\"` wired to the\nlist via `aria-controls`. The link bubble is a labelled `role=\"group\"`\nso its controls are announced in context, and its URL field sets\n`aria-invalid` when the value is rejected.\n\nPurely decorative chrome — menu headers, group titles that duplicate an\n`aria-label`, emoji glyphs beside their own text label — is marked\n`aria-hidden` so it is not read twice.\n\n## Motion\n\n[Luthor](/demo/) honors `prefers-reduced-motion: reduce`. Most of its motion flows\nthrough the `--luthor-theme-transition` token, which the query sets to\n`0s`; animations and transitions that do not read the token are reduced\nto a negligible duration by the same block. Hosts overriding [Luthor](/demo/)'s\nCSS should keep that media query in place.\n\n## Verified by tests\n\n`packages/luthor/src/core/accessibility.test.tsx` guards the semantics\nabove: listbox/option roles, `aria-selected`, `aria-activedescendant`\nwiring per surface, dialog and combobox attributes on the palette,\nlabelled link-bubble controls, and the reduced-motion block including\nits token reset.\n\n## Known gaps\n\nThese are honest limits, not oversights to be discovered later.\n\n### Not verified automatically\n\n- **Colour contrast.** The default light and dark palettes were chosen\n  for AA contrast but there is no automated contrast check in CI. A host\n  overriding the theme tokens owns contrast for its own palette.\n- **Focus-visible styling** across every control in both themes.\n- **Focus restoration** after a menu or dialog closes is driven by\n  keeping focus in the editor rather than by explicitly restoring it.\n  That is correct for the typeahead surfaces; it has not been audited\n  for every dialog.\n\n### Not testable in the current suite\n\nThe a11y tests assert on component source, not on rendered output,\nbecause the overlay surfaces only mount behind editor state that jsdom\ncannot produce (a live caret with a real selection rectangle). A\nrender-level audit — and any real screen-reader verification with\nNVDA, JAWS, or VoiceOver — needs a browser-driven suite. Until that\nexists, treat this page as describing implemented semantics rather than\nobserved assistive-technology behaviour.\n",
+    "plainContent": "Accessibility Luthor targets WCAG 2.1 Level AA . This page records what is implemented and verified, so hosts can cite it in their own accessibility statements — and what is not, so nobody cites something that isn't true. What this page answers - Can every feature be operated from the keyboard? - What do screen readers announce for the overlay surfaces? - How is motion handled, and what remains unverified? Keyboard operation Surface Keys --- --- Editor Standard text editing. Tab inserts indentation inside lists and code; press Escape first to move focus out of the editor instead. Toolbar Tab to reach it, arrow keys within grouped controls, Enter / Space to activate. Slash menu ( / ) ↑ / ↓ to move, Enter to insert, Escape to dismiss. Focus stays in the editor. Emoji menu ( : ) Same as the slash menu. Command palette Escape to dismiss, ↑ / ↓ to move, Enter to run. Focus is in the search input. Link bubble Reachable by Tab ; Escape returns to the editor. The Tab trap, and how to escape it A rich-text editor that swallows Tab traps keyboard users. Luthor 's TabIndentExtension takes Tab for indentation, but pressing Escape first releases it: the next Tab then moves focus out of the editor normally. Every other focus-capturing surface follows the same rule — Escape always returns control to the caret. Screen-reader semantics The three typeahead surfaces deliberately keep DOM focus in the editor while open, because moving focus would interrupt typing. They therefore expose the ARIA combobox/listbox relationship instead: - the container is a role=\"listbox\" with an aria-label , - each item is a role=\"option\" carrying aria-selected , - aria-activedescendant on the container (or, for the palette, on its search input) names the active option, so arrowing through the list is announced without focus moving, - items are tabIndex={-1} , keeping them out of the Tab order, - an empty result set is announced through role=\"status\" . The command palette is additionally a role=\"dialog\" with aria-modal=\"true\" , and its input is a role=\"combobox\" wired to the list via aria-controls . The link bubble is a labelled role=\"group\" so its controls are announced in context, and its URL field sets aria-invalid when the value is rejected. Purely decorative chrome — menu headers, group titles that duplicate an aria-label , emoji glyphs beside their own text label — is marked aria-hidden so it is not read twice. Motion Luthor honors prefers-reduced-motion: reduce . Most of its motion flows through the --luthor-theme-transition token, which the query sets to 0s ; animations and transitions that do not read the token are reduced to a negligible duration by the same block. Hosts overriding Luthor 's CSS should keep that media query in place. Verified by tests packages/luthor/src/core/accessibility.test.tsx guards the semantics above: listbox/option roles, aria-selected , aria-activedescendant wiring per surface, dialog and combobox attributes on the palette, labelled link-bubble controls, and the reduced-motion block including its token reset. Known gaps These are honest limits, not oversights to be discovered later. Not verified automatically - Colour contrast. The default light and dark palettes were chosen for AA contrast but there is no automated contrast check in CI. A host overriding the theme tokens owns contrast for its own palette. - Focus-visible styling across every control in both themes. - Focus restoration after a menu or dialog closes is driven by keeping focus in the editor rather than by explicitly restoring it. That is correct for the typeahead surfaces; it has not been audited for every dialog. Not testable in the current suite The a11y tests assert on component source, not on rendered output, because the overlay surfaces only mount behind editor state that jsdom cannot produce (a live caret with a real selection rectangle). A render-level audit — and any real screen-reader verification with NVDA, JAWS, or VoiceOver — needs a browser-driven suite. Until that exists, treat this page as describing implemented semantics rather than observed assistive-technology behaviour.",
+    "sections": [
+      {
+        "heading": "Overview",
+        "id": "overview",
+        "level": 1,
+        "text": "Accessibility Luthor targets WCAG 2.1 Level AA . This page records what is implemented and verified, so hosts can cite it in their own accessibility statements — and what is not, so nobody cites something that isn't true."
+      },
+      {
+        "heading": "What this page answers",
+        "id": "what-this-page-answers",
+        "level": 2,
+        "text": "- Can every feature be operated from the keyboard? - What do screen readers announce for the overlay surfaces? - How is motion handled, and what remains unverified?"
+      },
+      {
+        "heading": "Keyboard operation",
+        "id": "keyboard-operation",
+        "level": 2,
+        "text": "Surface Keys --- --- Editor Standard text editing. Tab inserts indentation inside lists and code; press Escape first to move focus out of the editor instead. Toolbar Tab to reach it, arrow keys within grouped controls, Enter / Space to activate. Slash menu ( / ) ↑ / ↓ to move, Enter to insert, Escape to dismiss. Focus stays in the editor. Emoji menu ( : ) Same as the slash menu. Command palette Escape to dismiss, ↑ / ↓ to move, Enter to run. Focus is in the search input. Link bubble Reachable by Tab ; Escape returns to the editor."
+      },
+      {
+        "heading": "The Tab trap, and how to escape it",
+        "id": "the-tab-trap-and-how-to-escape-it",
+        "level": 3,
+        "text": "A rich-text editor that swallows Tab traps keyboard users. Luthor 's TabIndentExtension takes Tab for indentation, but pressing Escape first releases it: the next Tab then moves focus out of the editor normally. Every other focus-capturing surface follows the same rule — Escape always returns control to the caret."
+      },
+      {
+        "heading": "Screen-reader semantics",
+        "id": "screen-reader-semantics",
+        "level": 2,
+        "text": "The three typeahead surfaces deliberately keep DOM focus in the editor while open, because moving focus would interrupt typing. They therefore expose the ARIA combobox/listbox relationship instead: - the container is a role=\"listbox\" with an aria-label , - each item is a role=\"option\" carrying aria-selected , - aria-activedescendant on the container (or, for the palette, on its search input) names the active option, so arrowing through the list is announced without focus moving, - items are tabIndex={-1} , keeping them out of the Tab order, - an empty result set is announced through role=\"status\" . The command palette is additionally a role=\"dialog\" with aria-modal=\"true\" , and its input is a role=\"combobox\" wired to the list via aria-controls . The link bubble is a labelled role=\"group\" so its controls are announced in context, and its URL field sets aria-invalid when the value is rejected. Purely decorative chrome — menu headers, group titles that duplicate an aria-label , emoji glyphs beside their own text label — is marked aria-hidden so it is not read twice."
+      },
+      {
+        "heading": "Motion",
+        "id": "motion",
+        "level": 2,
+        "text": "Luthor honors prefers-reduced-motion: reduce . Most of its motion flows through the --luthor-theme-transition token, which the query sets to 0s ; animations and transitions that do not read the token are reduced to a negligible duration by the same block. Hosts overriding Luthor 's CSS should keep that media query in place."
+      },
+      {
+        "heading": "Verified by tests",
+        "id": "verified-by-tests",
+        "level": 2,
+        "text": "packages/luthor/src/core/accessibility.test.tsx guards the semantics above: listbox/option roles, aria-selected , aria-activedescendant wiring per surface, dialog and combobox attributes on the palette, labelled link-bubble controls, and the reduced-motion block including its token reset."
+      },
+      {
+        "heading": "Known gaps",
+        "id": "known-gaps",
+        "level": 2,
+        "text": "These are honest limits, not oversights to be discovered later."
+      },
+      {
+        "heading": "Not verified automatically",
+        "id": "not-verified-automatically",
+        "level": 3,
+        "text": "- Colour contrast. The default light and dark palettes were chosen for AA contrast but there is no automated contrast check in CI. A host overriding the theme tokens owns contrast for its own palette. - Focus-visible styling across every control in both themes. - Focus restoration after a menu or dialog closes is driven by keeping focus in the editor rather than by explicitly restoring it. That is correct for the typeahead surfaces; it has not been audited for every dialog."
+      },
+      {
+        "heading": "Not testable in the current suite",
+        "id": "not-testable-in-the-current-suite",
+        "level": 3,
+        "text": "The a11y tests assert on component source, not on rendered output, because the overlay surfaces only mount behind editor state that jsdom cannot produce (a live caret with a real selection rectangle). A render-level audit — and any real screen-reader verification with NVDA, JAWS, or VoiceOver — needs a browser-driven suite. Until that exists, treat this page as describing implemented semantics rather than observed assistive-technology behaviour."
+      }
+    ],
+    "headings": [
+      {
+        "level": 2,
+        "text": "What this page answers",
+        "id": "what-this-page-answers"
+      },
+      {
+        "level": 2,
+        "text": "Keyboard operation",
+        "id": "keyboard-operation"
+      },
+      {
+        "level": 3,
+        "text": "The Tab trap, and how to escape it",
+        "id": "the-tab-trap-and-how-to-escape-it"
+      },
+      {
+        "level": 2,
+        "text": "Screen-reader semantics",
+        "id": "screen-reader-semantics"
+      },
+      {
+        "level": 2,
+        "text": "Motion",
+        "id": "motion"
+      },
+      {
+        "level": 2,
+        "text": "Verified by tests",
+        "id": "verified-by-tests"
+      },
+      {
+        "level": 2,
+        "text": "Known gaps",
+        "id": "known-gaps"
+      },
+      {
+        "level": 3,
+        "text": "Not verified automatically",
+        "id": "not-verified-automatically"
+      },
+      {
+        "level": 3,
+        "text": "Not testable in the current suite",
+        "id": "not-testable-in-the-current-suite"
+      }
+    ],
+    "urlPath": "/docs/luthor/accessibility/",
+    "sourcePath": "apps/web/src/content/docs/luthor/accessibility.md",
+    "updatedAt": "2026-08-12T11:33:02.151Z",
+    "package": "luthor",
+    "docType": "reference",
+    "surface": "preset",
+    "keywords": [
+      "accessibility",
+      "a11y",
+      "WCAG",
+      "keyboard navigation",
+      "screen reader",
+      "aria-activedescendant",
+      "prefers-reduced-motion"
+    ],
+    "props": [],
+    "exports": [],
+    "commands": [],
+    "extensions": [],
+    "nodes": [],
+    "frameworks": [],
+    "lastVerifiedFrom": [
+      "packages/luthor/src/core/toolbar.tsx",
+      "packages/luthor/src/core/slash-command-menu.tsx",
+      "packages/luthor/src/core/emoji-suggestion-menu.tsx",
+      "packages/luthor/src/core/command-palette.tsx",
+      "packages/luthor/src/core/link-hover-bubble.tsx",
+      "packages/luthor/src/core/styles.css"
+    ],
+    "navGroup": "luthor",
+    "navOrder": 95,
+    "navHidden": false,
+    "searchTokens": [
+      "1",
+      "2",
+      "a11y",
+      "aa",
+      "accessibility",
+      "activedescendant",
+      "and",
+      "aria",
+      "aria-activedescendant",
+      "focus",
+      "gaps",
+      "handling,",
+      "keyboard",
+      "keyboard navigation",
+      "luthor",
+      "luthor s wcag 2.1 aa posture: keyboard operation, screen-reader semantics, focus handling, reduced motion, and the gaps that remain.",
+      "motion",
+      "motion,",
+      "navigation",
+      "operation,",
+      "posture",
+      "prefers",
+      "prefers-reduced-motion",
+      "reader",
+      "reduced",
+      "remain",
+      "s",
+      "screen",
+      "screen reader",
+      "semantics,",
+      "that",
+      "the",
+      "wcag"
+    ],
+    "searchTokenBuckets": {
+      "keywords": [
+        "a11y",
+        "accessibility",
+        "activedescendant",
+        "aria",
+        "aria-activedescendant",
+        "keyboard",
+        "keyboard navigation",
+        "motion",
+        "navigation",
+        "prefers",
+        "prefers-reduced-motion",
+        "reader",
+        "reduced",
+        "screen",
+        "screen reader",
+        "wcag"
+      ],
+      "props": [],
+      "exports": [],
+      "commands": [],
+      "extensions": [],
+      "nodes": [],
+      "frameworks": []
+    }
+  },
+  {
+    "slug": [
+      "luthor",
       "architecture"
     ],
     "title": "@lyfie/luthor Architecture",

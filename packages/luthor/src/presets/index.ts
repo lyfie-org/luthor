@@ -33,6 +33,7 @@ import {
 import type {
   ExtensiveEditorMode,
   ExtensiveEditorProps,
+  ExtensiveEditorChangePayload,
   ExtensiveEditorRef,
   ImageUploadHandler,
   GifUploadHandler,
@@ -103,6 +104,7 @@ export {
 export type {
   ExtensiveEditorMode,
   ExtensiveEditorProps,
+  ExtensiveEditorChangePayload,
   ExtensiveEditorRef,
   ImageUploadHandler,
   GifUploadHandler,

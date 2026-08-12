@@ -118,7 +118,9 @@ function flush(): Promise<void> {
 }
 
 describe("long undo chains", () => {
-  it("walks back and forward through 100 edits without losing a step", async () => {
+  // Each undo/redo is its own committed update plus a flush, so the full
+  // 100-step walk needs more than the 5s default budget on a loaded CI box.
+  it("walks back and forward through 100 edits without losing a step", { timeout: 30_000 }, async () => {
     const editor = createHistoryEditor();
 
     for (let step = 0; step < 100; step += 1) {

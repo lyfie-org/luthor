@@ -15,11 +15,15 @@ import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import {
   createEditor,
   $getRoot,
+  $createParagraphNode,
+  $isDecoratorNode,
+  $isElementNode,
   ParagraphNode,
   TextNode,
   LineBreakNode,
   TabNode,
   type EditorState,
+  type LexicalNode,
 } from "lexical";
 import { ImageNode, IframeEmbedNode, YouTubeEmbedNode } from "@lyfie/luthor-headless/extensions/media";
 import {
@@ -359,6 +363,42 @@ function shouldPreserveMetadata(metadataMode: SourceMetadataMode | undefined): b
   return metadataMode !== "none";
 }
 
+/**
+ * Malformed markup ("<<<>>>", stray text outside any block) makes
+ * `$generateNodesFromDOM` return bare inline nodes, which the root refuses
+ * to hold — it throws "Only element or decorator nodes can be inserted to
+ * the root node". Group runs of inline nodes into paragraphs so broken
+ * input degrades to plain text instead of crashing the caller.
+ */
+function wrapTopLevelInlineNodes(nodes: LexicalNode[]): LexicalNode[] {
+  const wrapped: LexicalNode[] = [];
+  let pendingInline: LexicalNode[] = [];
+
+  const flushInline = () => {
+    if (pendingInline.length === 0) {
+      return;
+    }
+    const paragraph = $createParagraphNode();
+    paragraph.append(...pendingInline);
+    wrapped.push(paragraph);
+    pendingInline = [];
+  };
+
+  for (const node of nodes) {
+    const isBlockLevel =
+      ($isElementNode(node) && !node.isInline()) || $isDecoratorNode(node);
+    if (isBlockLevel) {
+      flushInline();
+      wrapped.push(node);
+      continue;
+    }
+    pendingInline.push(node);
+  }
+
+  flushInline();
+  return wrapped;
+}
+
 export function htmlToJSON(
   html: string,
   options?: HtmlBridgeOptions,
@@ -388,7 +428,7 @@ export function htmlToJSON(
       const nodes = $generateNodesFromDOM(editor, parsedDocument);
       const root = $getRoot();
       root.clear();
-      root.append(...nodes);
+      root.append(...wrapTopLevelInlineNodes(nodes));
     },
     { discrete: true },
   );

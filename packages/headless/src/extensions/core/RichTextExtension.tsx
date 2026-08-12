@@ -404,21 +404,59 @@ export const RichText: React.FC<RichTextComponentProps> = (props) => {
   return <SharedRichText {...props} />;
 };
 
-// Default error boundary for RichTextPlugin
-const DefaultErrorBoundary: React.FC<{
+/**
+ * Default error boundary for RichTextPlugin.
+ *
+ * Must be a class component: React only routes render-phase errors to
+ * `getDerivedStateFromError`/`componentDidCatch`. A function component
+ * wrapping its children in try/catch catches nothing, because the
+ * children render after it returns.
+ *
+ * On failure the editor is replaced by an inert, labelled fallback
+ * instead of propagating and unmounting the host's tree. `onError` is
+ * still called so the host can log or recover.
+ */
+type DefaultErrorBoundaryProps = {
   children: React.JSX.Element;
   onError: (error: Error) => void;
-}> = ({ children, onError }) => {
-  try {
-    return <>{children}</>;
-  } catch (error) {
-    console.error("RichTextPlugin Error:", error);
-    onError(error as Error);
-    return (
-      <div className="editor-error-boundary">
-        <h3>Editor Error</h3>
-        <p>Something went wrong with the editor. Please refresh the page.</p>
-      </div>
-    );
-  }
 };
+
+type DefaultErrorBoundaryState = {
+  error: Error | null;
+};
+
+class DefaultErrorBoundary extends React.Component<
+  DefaultErrorBoundaryProps,
+  DefaultErrorBoundaryState
+> {
+  state: DefaultErrorBoundaryState = { error: null };
+
+  static getDerivedStateFromError(error: Error): DefaultErrorBoundaryState {
+    return { error };
+  }
+
+  componentDidCatch(error: Error): void {
+    // The host owns reporting; the library does not also log, so a
+    // handled failure cannot spam a production console.
+    this.props.onError(error);
+  }
+
+  render(): React.ReactNode {
+    if (this.state.error) {
+      return (
+        <div className="editor-error-boundary" role="alert">
+          <h3>Editor Error</h3>
+          <p>Something went wrong with the editor. Please refresh the page.</p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+/**
+ * The default boundary, exported for tests. Not part of the public API —
+ * hosts override the boundary through the `errorBoundary` prop.
+ */
+export const DefaultErrorBoundaryForTests = DefaultErrorBoundary;

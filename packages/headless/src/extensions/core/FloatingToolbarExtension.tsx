@@ -250,16 +250,34 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
     return (anchorElement ?? element).getBoundingClientRect();
   };
 
-  /* Debounce utility for delaying function execution */
+  /*
+   * Debounce utility for delaying function execution. The returned
+   * function carries a `cancel` so the owning effect can drop a pending
+   * call on unmount — without it the trailing timer fires against a torn
+   * down editor (and, under SSR-ish test teardown, against a missing
+   * `window`).
+   */
   const debounce = <T extends (...args: any[]) => any>(
     func: T,
     wait: number,
-  ) => {
-    let timeout: NodeJS.Timeout;
-    return (...args: Parameters<T>) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(() => args), wait);
+  ): ((...args: Parameters<T>) => void) & { cancel: () => void } => {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const debounced = (...args: Parameters<T>) => {
+      if (timeout !== undefined) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(() => {
+        timeout = undefined;
+        func(...args);
+      }, wait);
     };
+    debounced.cancel = () => {
+      if (timeout !== undefined) {
+        clearTimeout(timeout);
+        timeout = undefined;
+      }
+    };
+    return debounced;
   };
 
   const toAnchorRelativeRect = useCallback(
@@ -476,6 +494,7 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
 
     return () => {
       unregister();
+      debouncedUpdate.cancel();
       document.removeEventListener("selectionchange", handleSelectionChange);
       window.removeEventListener("scroll", handleViewportChange, true);
       window.removeEventListener("resize", handleViewportChange);

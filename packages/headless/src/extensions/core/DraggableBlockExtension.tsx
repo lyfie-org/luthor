@@ -28,6 +28,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { BaseExtension } from "../base/BaseExtension";
 import { ExtensionCategory, BaseExtensionConfig } from "../types";
 import { useBaseEditor as useEditor } from "../../core/createEditorSystem";
+import { warnOnce } from "../../utils/logger";
 
 /**
  * DraggableBlockExtension configuration
@@ -889,7 +890,7 @@ function DraggableBlockPlugin({
                 setHoveredBlock(newElement);
               }
             } catch (error) {
-              console.warn("Error finding moved element:", error);
+              warnOnce("Could not resolve the moved block element", error);
             }
           }
         }, 50);
@@ -1118,7 +1119,7 @@ function DraggableBlockPlugin({
                 setHoveredBlock(newElement);
               }
             } catch (error) {
-              console.warn("Error finding moved element:", error);
+              warnOnce("Could not resolve the moved block element", error);
             }
           }
           // Restore editor focus without forcing viewport scroll

@@ -202,6 +202,7 @@ export {
   type WikilinkTypeaheadStateQueries,
   FileDropUploadExtension,
   fileDropUploadExtension,
+  sanitizeEmbedTarget,
   type FileDropUploadConfig,
 } from "./embeds";
 

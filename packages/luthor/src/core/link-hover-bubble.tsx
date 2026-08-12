@@ -355,6 +355,10 @@ export function LinkHoverBubble({
     <div
       ref={bubbleRef}
       className="luthor-floating-toolbar luthor-link-hover-bubble"
+      // Grouped and named so a screen reader announces what the controls
+      // belong to when focus enters the bubble from the editor.
+      role="group"
+      aria-label="Link actions"
       data-theme={editorTheme}
       style={bubbleStyle}
       onMouseEnter={clearHideTimeout}
