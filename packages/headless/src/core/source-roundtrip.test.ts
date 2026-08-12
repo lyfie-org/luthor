@@ -17,7 +17,7 @@ import { jsonToMarkdown, markdownToJSON } from "./markdown";
 type JsonNode = Record<string, unknown>;
 
 type JsonDocument = {
-  root: {
+  root: JsonNode & {
     children: JsonNode[];
   };
 };

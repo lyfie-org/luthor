@@ -1997,6 +1997,213 @@ export const docsIndex = [
   {
     "slug": [
       "luthor-headless",
+      "edge-case-coverage"
+    ],
+    "title": "Edge Case Coverage",
+    "navTitle": "Edge Case Coverage",
+    "description": "What Luthor is tested against for IME, bidi, Unicode, paste, scale, history, SSR, and StrictMode — and the gaps that cannot be covered in jsdom.",
+    "content": "\n# Edge Case Coverage\n\n[Luthor](/demo/) is used in documents its authors never see: Japanese notes, Arabic\narticles, pastes out of Word, files with 10,000 blocks. This page records\nwhat is tested, what the tests found, and — as honestly — what cannot be\ntested in the jsdom environment the suites run in.\n\n## What this page answers\n\n- Which hostile or unusual inputs are covered by tests?\n- What did those tests establish about real behavior?\n- Which risks are known but unverified, and why?\n\n## Covered\n\n| Area | What is asserted |\n|---|---|\n| **IME composition** | Block-anchor auto-stamping stands down while `isComposing()` and resumes after. Driven through Lexical's `$setCompositionKey`, so removing the guard fails the test. |\n| **Bidi / RTL** | Arabic and Hebrew round-trip verbatim through markdown and HTML, including mixed LTR/RTL paragraphs, RTL headings and lists, and idempotency on a second pass. |\n| **Unicode** | ZWJ family emoji, skin-tone modifiers, regional-indicator flags, stacked combining marks, Devanagari clusters, and astral-plane codepoints survive both bridges byte-exactly, including across formatting boundaries. |\n| **Real-world paste** | Word, Google Docs, Sheets, VS Code, Apple Notes, and a plain article selection keep their structure and formatting through the sanitizer. |\n| **Scale** | 10k-block markdown, a 100k-character paragraph, 100-deep nested lists, a 50-column table, and 5k-block HTML all convert well inside budget; a growth-ratio test guards against an accidental quadratic. |\n| **History** | 100-edit undo/redo chains round-trip exactly; undoing past the start keeps the earliest state instead of emptying the document; a wholesale replacement is one undo; auto-stamped anchors fold into the triggering edit rather than becoming separately undoable. |\n| **SSR** | All five presets import and `renderToString` in a DOM-free Node environment. |\n| **StrictMode** | Double-mount and ten mount/unmount cycles leak no `MutationObserver`, interval, or `document`/`window` listener. |\n| **Concurrent input** | 200 edits queued in one tick keep every character and their order; a bulk insertion between keystrokes does not drop them; a programmatic replacement wins cleanly without splicing pending edits into the adopted document. |\n\n## Measured numbers\n\nRecorded so a future regression reads as a multiple rather than noise\n(local run, jsdom):\n\n| Operation | Time |\n|---|---|\n| 10,000-block markdown parse + serialize | ~390 ms |\n| 5,000-block HTML sanitize + convert | ~600 ms |\n| 100-edit undo + redo chain | ~2.5 s (dominated by per-commit flushes) |\n\n## Known gaps\n\nThese are documented rather than silently skipped.\n\n### The DOM watchdog's observer path\n\n`registerEditorDomWatchdog` reports only after a settle window\n(`MutationObserver` → `setTimeout`). Lexical's own mutation handling\nrestores an externally written DOM back to the model within roughly 2 ms,\nso by the time the window closes there is no divergence left to observe —\nverified directly: divergence is present synchronously after an external\nwrite and `null` 2 ms later.\n\nThe detection function (`detectEditorDomDivergence`) is covered. The\n`isComposing()` early-return inside the watchdog's settle callback is\nreviewed but not asserted; exercising it needs a real browser.\n\n### Direction is not stored in the model\n\nLexical 0.40 does not persist a per-block `direction`. It emits\n`dir=\"auto\"` and lets the browser's bidi algorithm resolve each block,\nwhich handles mixed runs better than a stored guess would.\n\nThe consequence for hosts: bridge JSON carries `direction: null`. A host\nrendering that JSON through its own renderer must emit `dir=\"auto\"`\nitself, or RTL content will lay out left-to-right. This is asserted in\nthe suite so the behavior is visible if a future Lexical changes it.\n\n### `blob:` URL lifecycle under StrictMode\n\n`ImageComponent` revokes a `blob:` src in its unmount cleanup, with\nnothing distinguishing a StrictMode teardown from a real one — so the\nthrowaway first mount can revoke a URL the surviving mount still needs.\nThe extensive preset's default `uploadHandler` returns\n`URL.createObjectURL(file)`, so the shipped default is what hits this.\n\nAttempts to reproduce it in jsdom were **unsuccessful**: decorator nodes\ninserted programmatically did not mount an `<img>` in the test\nenvironment, so any assertion would have passed vacuously. The risk is\nrecorded from code inspection, not from a reproduction. Production hosts\nshould return a persistent URL from their upload handler.\n\n### Not covered here\n\nCaret movement, selection geometry, and composition *keystroke* handling\ndepend on real layout and native IME events. jsdom has neither. These\nneed a browser-driven suite (Playwright or similar) to cover properly.\n",
+    "plainContent": "Edge Case Coverage Luthor is used in documents its authors never see: Japanese notes, Arabic articles, pastes out of Word, files with 10,000 blocks. This page records what is tested, what the tests found, and — as honestly — what cannot be tested in the jsdom environment the suites run in. What this page answers - Which hostile or unusual inputs are covered by tests? - What did those tests establish about real behavior? - Which risks are known but unverified, and why? Covered Area What is asserted --- --- IME composition Block-anchor auto-stamping stands down while isComposing() and resumes after. Driven through Lexical's $setCompositionKey , so removing the guard fails the test. Bidi / RTL Arabic and Hebrew round-trip verbatim through markdown and HTML, including mixed LTR/RTL paragraphs, RTL headings and lists, and idempotency on a second pass. Unicode ZWJ family emoji, skin-tone modifiers, regional-indicator flags, stacked combining marks, Devanagari clusters, and astral-plane codepoints survive both bridges byte-exactly, including across formatting boundaries. Real-world paste Word, Google Docs, Sheets, VS Code, Apple Notes, and a plain article selection keep their structure and formatting through the sanitizer. Scale 10k-block markdown, a 100k-character paragraph, 100-deep nested lists, a 50-column table, and 5k-block HTML all convert well inside budget; a growth-ratio test guards against an accidental quadratic. History 100-edit undo/redo chains round-trip exactly; undoing past the start keeps the earliest state instead of emptying the document; a wholesale replacement is one undo; auto-stamped anchors fold into the triggering edit rather than becoming separately undoable. SSR All five presets import and renderToString in a DOM-free Node environment. StrictMode Double-mount and ten mount/unmount cycles leak no MutationObserver , interval, or document / window listener. Concurrent input 200 edits queued in one tick keep every character and their order; a bulk insertion between keystrokes does not drop them; a programmatic replacement wins cleanly without splicing pending edits into the adopted document. Measured numbers Recorded so a future regression reads as a multiple rather than noise (local run, jsdom): Operation Time --- --- 10,000-block markdown parse + serialize 390 ms 5,000-block HTML sanitize + convert 600 ms 100-edit undo + redo chain 2.5 s (dominated by per-commit flushes) Known gaps These are documented rather than silently skipped. The DOM watchdog's observer path registerEditorDomWatchdog reports only after a settle window ( MutationObserver → setTimeout ). Lexical's own mutation handling restores an externally written DOM back to the model within roughly 2 ms, so by the time the window closes there is no divergence left to observe — verified directly: divergence is present synchronously after an external write and null 2 ms later. The detection function ( detectEditorDomDivergence ) is covered. The isComposing() early-return inside the watchdog's settle callback is reviewed but not asserted; exercising it needs a real browser. Direction is not stored in the model Lexical 0.40 does not persist a per-block direction . It emits dir=\"auto\" and lets the browser's bidi algorithm resolve each block, which handles mixed runs better than a stored guess would. The consequence for hosts: bridge JSON carries direction: null . A host rendering that JSON through its own renderer must emit dir=\"auto\" itself, or RTL content will lay out left-to-right. This is asserted in the suite so the behavior is visible if a future Lexical changes it. blob: URL lifecycle under StrictMode ImageComponent revokes a blob: src in its unmount cleanup, with nothing distinguishing a StrictMode teardown from a real one — so the throwaway first mount can revoke a URL the surviving mount still needs. The extensive preset's default uploadHandler returns URL.createObjectURL(file) , so the shipped default is what hits this. Attempts to reproduce it in jsdom were unsuccessful : decorator nodes inserted programmatically did not mount an in the test environment, so any assertion would have passed vacuously. The risk is recorded from code inspection, not from a reproduction. Production hosts should return a persistent URL from their upload handler. Not covered here Caret movement, selection geometry, and composition keystroke handling depend on real layout and native IME events. jsdom has neither. These need a browser-driven suite (Playwright or similar) to cover properly.",
+    "sections": [
+      {
+        "heading": "Overview",
+        "id": "overview",
+        "level": 1,
+        "text": "Edge Case Coverage Luthor is used in documents its authors never see: Japanese notes, Arabic articles, pastes out of Word, files with 10,000 blocks. This page records what is tested, what the tests found, and — as honestly — what cannot be tested in the jsdom environment the suites run in."
+      },
+      {
+        "heading": "What this page answers",
+        "id": "what-this-page-answers",
+        "level": 2,
+        "text": "- Which hostile or unusual inputs are covered by tests? - What did those tests establish about real behavior? - Which risks are known but unverified, and why?"
+      },
+      {
+        "heading": "Covered",
+        "id": "covered",
+        "level": 2,
+        "text": "Area What is asserted --- --- IME composition Block-anchor auto-stamping stands down while isComposing() and resumes after. Driven through Lexical's $setCompositionKey , so removing the guard fails the test. Bidi / RTL Arabic and Hebrew round-trip verbatim through markdown and HTML, including mixed LTR/RTL paragraphs, RTL headings and lists, and idempotency on a second pass. Unicode ZWJ family emoji, skin-tone modifiers, regional-indicator flags, stacked combining marks, Devanagari clusters, and astral-plane codepoints survive both bridges byte-exactly, including across formatting boundaries. Real-world paste Word, Google Docs, Sheets, VS Code, Apple Notes, and a plain article selection keep their structure and formatting through the sanitizer. Scale 10k-block markdown, a 100k-character paragraph, 100-deep nested lists, a 50-column table, and 5k-block HTML all convert well inside budget; a growth-ratio test guards against an accidental quadratic. History 100-edit undo/redo chains round-trip exactly; undoing past the start keeps the earliest state instead of emptying the document; a wholesale replacement is one undo; auto-stamped anchors fold into the triggering edit rather than becoming separately undoable. SSR All five presets import and renderToString in a DOM-free Node environment. StrictMode Double-mount and ten mount/unmount cycles leak no MutationObserver , interval, or document / window listener. Concurrent input 200 edits queued in one tick keep every character and their order; a bulk insertion between keystrokes does not drop them; a programmatic replacement wins cleanly without splicing pending edits into the adopted document."
+      },
+      {
+        "heading": "Measured numbers",
+        "id": "measured-numbers",
+        "level": 2,
+        "text": "Recorded so a future regression reads as a multiple rather than noise (local run, jsdom): Operation Time --- --- 10,000-block markdown parse + serialize 390 ms 5,000-block HTML sanitize + convert 600 ms 100-edit undo + redo chain 2.5 s (dominated by per-commit flushes)"
+      },
+      {
+        "heading": "Known gaps",
+        "id": "known-gaps",
+        "level": 2,
+        "text": "These are documented rather than silently skipped."
+      },
+      {
+        "heading": "The DOM watchdog's observer path",
+        "id": "the-dom-watchdogs-observer-path",
+        "level": 3,
+        "text": "registerEditorDomWatchdog reports only after a settle window ( MutationObserver → setTimeout ). Lexical's own mutation handling restores an externally written DOM back to the model within roughly 2 ms, so by the time the window closes there is no divergence left to observe — verified directly: divergence is present synchronously after an external write and null 2 ms later. The detection function ( detectEditorDomDivergence ) is covered. The isComposing() early-return inside the watchdog's settle callback is reviewed but not asserted; exercising it needs a real browser."
+      },
+      {
+        "heading": "Direction is not stored in the model",
+        "id": "direction-is-not-stored-in-the-model",
+        "level": 3,
+        "text": "Lexical 0.40 does not persist a per-block direction . It emits dir=\"auto\" and lets the browser's bidi algorithm resolve each block, which handles mixed runs better than a stored guess would. The consequence for hosts: bridge JSON carries direction: null . A host rendering that JSON through its own renderer must emit dir=\"auto\" itself, or RTL content will lay out left-to-right. This is asserted in the suite so the behavior is visible if a future Lexical changes it."
+      },
+      {
+        "heading": "`blob:` URL lifecycle under StrictMode",
+        "id": "blob-url-lifecycle-under-strictmode",
+        "level": 3,
+        "text": "ImageComponent revokes a blob: src in its unmount cleanup, with nothing distinguishing a StrictMode teardown from a real one — so the throwaway first mount can revoke a URL the surviving mount still needs. The extensive preset's default uploadHandler returns URL.createObjectURL(file) , so the shipped default is what hits this. Attempts to reproduce it in jsdom were unsuccessful : decorator nodes inserted programmatically did not mount an in the test environment, so any assertion would have passed vacuously. The risk is recorded from code inspection, not from a reproduction. Production hosts should return a persistent URL from their upload handler."
+      },
+      {
+        "heading": "Not covered here",
+        "id": "not-covered-here",
+        "level": 3,
+        "text": "Caret movement, selection geometry, and composition keystroke handling depend on real layout and native IME events. jsdom has neither. These need a browser-driven suite (Playwright or similar) to cover properly."
+      }
+    ],
+    "headings": [
+      {
+        "level": 2,
+        "text": "What this page answers",
+        "id": "what-this-page-answers"
+      },
+      {
+        "level": 2,
+        "text": "Covered",
+        "id": "covered"
+      },
+      {
+        "level": 2,
+        "text": "Measured numbers",
+        "id": "measured-numbers"
+      },
+      {
+        "level": 2,
+        "text": "Known gaps",
+        "id": "known-gaps"
+      },
+      {
+        "level": 3,
+        "text": "The DOM watchdog's observer path",
+        "id": "the-dom-watchdogs-observer-path"
+      },
+      {
+        "level": 3,
+        "text": "Direction is not stored in the model",
+        "id": "direction-is-not-stored-in-the-model"
+      },
+      {
+        "level": 3,
+        "text": "`blob:` URL lifecycle under StrictMode",
+        "id": "blob-url-lifecycle-under-strictmode"
+      },
+      {
+        "level": 3,
+        "text": "Not covered here",
+        "id": "not-covered-here"
+      }
+    ],
+    "urlPath": "/docs/luthor-headless/edge-case-coverage/",
+    "sourcePath": "apps/web/src/content/docs/luthor-headless/edge-case-coverage.md",
+    "updatedAt": "2026-08-12T08:52:45.673Z",
+    "package": "headless",
+    "docType": "reference",
+    "surface": "tooling",
+    "keywords": [
+      "IME composition",
+      "RTL",
+      "bidi",
+      "unicode",
+      "grapheme",
+      "SSR",
+      "StrictMode",
+      "edge cases"
+    ],
+    "props": [],
+    "exports": [],
+    "commands": [],
+    "extensions": [],
+    "nodes": [],
+    "frameworks": [
+      "next"
+    ],
+    "lastVerifiedFrom": [
+      "packages/headless/src/edge-cases",
+      "packages/luthor/src/presets/ssr.edge.test.tsx",
+      "packages/luthor/src/presets/strict-mode.edge.test.tsx"
+    ],
+    "navGroup": "luthor_headless",
+    "navOrder": 46,
+    "navHidden": false,
+    "searchTokens": [
+      "—",
+      "against",
+      "and",
+      "be",
+      "bidi",
+      "bidi,",
+      "cannot",
+      "case",
+      "cases",
+      "composition",
+      "coverage",
+      "covered",
+      "edge",
+      "edge case coverage",
+      "edge cases",
+      "for",
+      "gaps",
+      "grapheme",
+      "history,",
+      "ime",
+      "ime composition",
+      "ime,",
+      "in",
+      "is",
+      "jsdom",
+      "luthor",
+      "next",
+      "paste,",
+      "rtl",
+      "scale,",
+      "ssr",
+      "ssr,",
+      "strictmode",
+      "tested",
+      "that",
+      "the",
+      "unicode",
+      "unicode,",
+      "what",
+      "what luthor is tested against for ime, bidi, unicode, paste, scale, history, ssr, and strictmode — and the gaps that cannot be covered in jsdom."
+    ],
+    "searchTokenBuckets": {
+      "keywords": [
+        "bidi",
+        "cases",
+        "composition",
+        "edge",
+        "edge cases",
+        "grapheme",
+        "ime",
+        "ime composition",
+        "rtl",
+        "ssr",
+        "strictmode",
+        "unicode"
+      ],
+      "props": [],
+      "exports": [],
+      "commands": [],
+      "extensions": [],
+      "nodes": [],
+      "frameworks": [
+        "next"
+      ]
+    }
+  },
+  {
+    "slug": [
+      "luthor-headless",
       "extensions-and-api"
     ],
     "title": "Extensions and API",

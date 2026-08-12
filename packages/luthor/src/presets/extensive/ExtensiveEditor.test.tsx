@@ -30,20 +30,20 @@ const {
   emojiSuggestionMenuMock,
   linkHoverBubbleMock,
 } = vi.hoisted(() => ({
-  registerKeyboardShortcutsMock: vi.fn(() => vi.fn()),
+  registerKeyboardShortcutsMock: vi.fn<(props: Record<string, unknown>) => ReturnType<typeof vi.fn>>(() => vi.fn()),
   commandsToCommandPaletteItemsMock: vi.fn(() => [{ id: "mock-command" }]),
   commandsToSlashCommandItemsMock: vi.fn(() => [{ id: "mock-slash-command" }]),
-  commandPaletteMock: vi.fn(() => null),
+  commandPaletteMock: vi.fn<(props: Record<string, unknown>) => null>(() => null),
   toolbarMock: vi.fn(({ classNames, toolbarStyleVars }: { classNames?: { toolbar?: string }; toolbarStyleVars?: Record<string, string> }) => (
     <div data-testid="toolbar" className={classNames?.toolbar} style={toolbarStyleVars} />
   )),
-  createExtensiveExtensionsMock: vi.fn(() => []),
+  createExtensiveExtensionsMock: vi.fn<(props: Record<string, unknown>) => unknown[]>(() => []),
   createEditorThemeStyleVarsMock: vi.fn((overrides?: Record<string, string>) => overrides),
-  providerMock: vi.fn(),
-  htmlToJSONMock: vi.fn(() => ({ root: { children: [] } })),
+  providerMock: vi.fn<(props: Record<string, unknown>) => void>(),
+  htmlToJSONMock: vi.fn((): { root: { children: unknown[] } } => ({ root: { children: [] } })),
   jsonToHTMLMock: vi.fn(() => "<p></p>"),
   jsonToMarkdownMock: vi.fn(() => ""),
-  markdownToJSONMock: vi.fn(() => ({ root: { children: [] } })),
+  markdownToJSONMock: vi.fn((): { root: { children: unknown[] } } => ({ root: { children: [] } })),
   richTextMock: vi.fn(
     ({
       placeholder,
@@ -94,7 +94,7 @@ const {
       />
     ),
   ),
-  setFloatingToolbarContextMock: vi.fn(),
+  setFloatingToolbarContextMock: vi.fn<(props: Record<string, unknown>) => void>(),
   slashCommandMenuMock: vi.fn(() => null),
   emojiSuggestionMenuMock: vi.fn(() => null),
   linkHoverBubbleMock: vi.fn(() => null),
@@ -230,13 +230,13 @@ const mockEditorApi = {
   activeStates: {},
   lexical: {
     update: vi.fn(),
-    getRootElement: vi.fn(() => null),
+    getRootElement: vi.fn((): HTMLElement | null => null),
     focus: vi.fn(),
-    registerUpdateListener: vi.fn(() => () => {}),
+    registerUpdateListener: vi.fn<(listener: unknown) => () => void>(() => () => {}),
   },
-  extensions: [],
+  extensions: [] as Array<Record<string, unknown>>,
   export: {
-    toJSON: vi.fn(() => ({ root: { children: [] } })),
+    toJSON: vi.fn((): { root: { children: unknown[] } } => ({ root: { children: [] } })),
   },
   import: {
     fromJSON: vi.fn(),
@@ -246,7 +246,7 @@ const mockEditorApi = {
 vi.mock("@lyfie/luthor-headless", () => ({
   createEditorSystem: () => ({
     Provider: ({ children, config }: { children: ReactNode; config?: unknown }) => {
-      providerMock(config);
+      providerMock(config as Record<string, unknown>);
       return <>{children}</>;
     },
     useEditor: () => mockEditorApi,
@@ -278,7 +278,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
 
     const toolbar = screen.getByTestId("toolbar");
     const header = container.querySelector(".luthor-editor-header");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
 
     expect(toolbar).toHaveClass("luthor-toolbar");
     expect(toolbar).toHaveClass("luthor-toolbar--align-left");
@@ -324,8 +324,8 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
   it("pins tabs + toolbar together when tabs are visible and isToolbarPinned is true", () => {
     const { container } = render(<ExtensiveEditor showDefaultContent={false} isToolbarPinned />);
 
-    const topRegion = container.querySelector(".luthor-editor-top-region");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topRegion = container.querySelector<HTMLElement>(".luthor-editor-top-region");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
     const wrapper = container.querySelector(".luthor-editor-wrapper");
 
     expect(topRegion).toHaveClass("luthor-editor-top-region--pinned");
@@ -343,7 +343,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     const topRegion = container.querySelector(".luthor-editor-top-region");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
     const wrapper = container.querySelector(".luthor-editor-wrapper");
 
     expect(topRegion).toHaveClass("luthor-editor-top-region--pinned");
@@ -361,7 +361,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     const topRegion = container.querySelector(".luthor-editor-top-region");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
     const wrapper = container.querySelector(".luthor-editor-wrapper");
 
     expect(topRegion).toHaveClass("luthor-editor-top-region--pinned");
@@ -379,7 +379,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     const topRegion = container.querySelector(".luthor-editor-top-region");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
 
     expect(screen.queryByTestId("mode-tabs")).toBeNull();
     expect(topRegion).not.toHaveClass("luthor-editor-top-region--pinned");
@@ -390,7 +390,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     const { container } = render(<ExtensiveEditor showDefaultContent={false} isToolbarPinned />);
 
     const editor = container.querySelector(".luthor-editor");
-    const topRegion = container.querySelector(".luthor-editor-top-region");
+    const topRegion = container.querySelector<HTMLElement>(".luthor-editor-top-region");
 
     expect(editor).toContainElement(topRegion);
     expect(editor?.firstElementChild).toBe(topRegion);
@@ -406,7 +406,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     const editor = container.querySelector(".luthor-editor");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
 
     expect(editor).toContainElement(topSlot);
   });

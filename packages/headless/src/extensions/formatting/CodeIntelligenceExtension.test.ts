@@ -156,24 +156,20 @@ describe("CodeIntelligenceExtension language options", () => {
   });
 
   it("uses plain fallback theme for plaintext-like languages", () => {
-    const extension = new CodeIntelligenceExtension() as CodeIntelligenceExtension & {
-      getThemeForLanguage?: (language: string | null | undefined) => string | null;
-    };
+    const { resolveThemeForLanguage } = __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS;
 
-    expect(extension.getThemeForLanguage?.("plaintext")).toBe("plain");
-    expect(extension.getThemeForLanguage?.("plain")).toBe("plain");
-    expect(extension.getThemeForLanguage?.(null)).toBe("plain");
+    expect(resolveThemeForLanguage("plaintext")).toBe("plain");
+    expect(resolveThemeForLanguage("plain")).toBe("plain");
+    expect(resolveThemeForLanguage(null)).toBe("plain");
   });
 
   it("uses prism theme for non-plaintext selected languages", () => {
-    const extension = new CodeIntelligenceExtension() as CodeIntelligenceExtension & {
-      getThemeForLanguage?: (language: string | null | undefined) => string | null;
-    };
+    const { resolveThemeForLanguage } = __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS;
 
-    expect(extension.getThemeForLanguage?.("typescript")).toBe("prism");
-    expect(extension.getThemeForLanguage?.("javascript")).toBe("prism");
-    expect(extension.getThemeForLanguage?.("tsx")).toBe("plain");
-    expect(extension.getThemeForLanguage?.("bash")).toBe("plain");
+    expect(resolveThemeForLanguage("typescript")).toBe("prism");
+    expect(resolveThemeForLanguage("javascript")).toBe("prism");
+    expect(resolveThemeForLanguage("tsx")).toBe("plain");
+    expect(resolveThemeForLanguage("bash")).toBe("plain");
   });
 
   it("does not update code block language when the editor is non-editable", () => {

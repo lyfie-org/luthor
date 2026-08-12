@@ -235,6 +235,37 @@ describe("legitimate paste sources keep their formatting", () => {
     expect(fullText(html)).toBe("const x = 1");
   });
 
+  it("converts an Apple Notes paste", () => {
+    // Apple Notes emits inline styles on every block plus its own class
+    // names; the wrapper div is unknown markup that must unwrap, not eat
+    // its children.
+    const html = `<div style="font-family:'Helvetica Neue';font-size:14px"><p class="p1" style="margin:0px"><b>Shopping</b></p><ul class="ul1"><li class="li1" style="margin:0px">Milk</li><li class="li1">Eggs</li></ul></div>`;
+    const types = nodeTypes(html);
+
+    expect(types).toContain("list");
+    expect(types.filter((type) => type === "listitem")).toHaveLength(2);
+    expect(fullText(html)).toContain("Milk");
+    expect(fullText(html)).toContain("Eggs");
+  });
+
+  it("converts a plain browser-page selection", () => {
+    // A copy from an ordinary article: semantic tags, a link, and a
+    // figure the sanitizer must not strip.
+    const html = `<article><h2>Title</h2><p>Body with <a href="https://example.com/ref">a link</a> and <em>emphasis</em>.</p><figure><img src="https://example.com/p.png" alt="pic"><figcaption>Caption</figcaption></figure></article>`;
+    const document = convert(html) as { root: JsonNode };
+    const nodes = collectNodes(document);
+
+    expect(nodes.some((node) => node.type === "heading")).toBe(true);
+    expect(nodes.find((node) => node.type === "link")?.url).toBe(
+      "https://example.com/ref",
+    );
+    expect(JSON.stringify(document)).toContain("https://example.com/p.png");
+    // The figure is absorbed into the image node, so its caption lives on
+    // that node rather than in the document text stream.
+    const image = nodes.find((node) => node.type === "image");
+    expect(image?.caption).toBe("Caption");
+  });
+
   it("keeps blockquotes, code blocks, lists, and rules intact", () => {
     const html = `<blockquote>quote</blockquote><pre><code>let x;</code></pre><ol start="3"><li>third</li></ol><hr>`;
     const types = nodeTypes(html);

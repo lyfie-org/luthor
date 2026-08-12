@@ -34,6 +34,9 @@ jobs:
       - name: Rule contracts
         run: pnpm check:rule-contracts
 
+      - name: Typecheck
+        run: pnpm typecheck
+
       - name: Headless quality gates
         run: |
           pnpm --filter @lyfie/luthor-headless run lint
@@ -49,8 +52,49 @@ jobs:
       - name: Release hardening smoke (ESM-only)
         run: pnpm check:release-hardening
 
+      # Guards the minimal-footprint promise against tools/pack-size-budgets.json.
+      # Uses --gate without --write-report so CI never leaves a dirty tree.
+      - name: Packed size budgets
+        run: pnpm size:gate
+
+      # The demo consumes both packages the way a real host does, so it catches
+      # public-surface breaks that the packages' own suites cannot see.
+      - name: Demo app build
+        run: pnpm --filter luthor-demo run build
+
       - name: Web SEO validation
         run: pnpm --dir apps/web run seo:check
 
       - name: Web build
         run: pnpm --dir apps/web run build
+
+  # Node 20 is the stated floor; 22 is current LTS. Only the package suites run
+  # across both — the app builds and one-off gates are Node-version-agnostic and
+  # would just double CI time.
+  test-matrix:
+    if: ${{ github.event.created == false && github.event.deleted == false && !startsWith(github.event.head_commit.message, 'Merge pull request') && !startsWith(github.event.head_commit.message, 'Merge branch') }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Package test suites
+        run: |
+          pnpm --filter @lyfie/luthor-headless run test
+          pnpm --filter @lyfie/luthor run test

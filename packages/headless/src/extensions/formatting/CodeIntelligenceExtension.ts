@@ -281,11 +281,7 @@ export class CodeIntelligenceExtension extends BaseExtension<
   }
 
   private getThemeForLanguage(language: string | null | undefined): string | null {
-    const normalized = normalizeLanguage(language);
-    if (!normalized || normalized === "plain") {
-      return getFallbackCodeTheme();
-    }
-    return "prism";
+    return resolveThemeForLanguage(language);
   }
 
   private ensureCodeBlockThemes(editor: LexicalEditor): void {
@@ -1043,11 +1039,24 @@ function humanizeLanguageIdentifier(languageId: string): string {
     .join(" ");
 }
 
+/**
+ * Picks the highlight theme for a language: plaintext-like languages get
+ * the fallback theme, everything else gets prism.
+ */
+function resolveThemeForLanguage(language: string | null | undefined): string | null {
+  const normalized = normalizeLanguage(language);
+  if (!normalized || normalized === "plain") {
+    return getFallbackCodeTheme();
+  }
+  return "prism";
+}
+
 export const __TEST_ONLY_CODE_INTELLIGENCE_INTERNALS = {
   getLanguageDisplayLabel,
   getSafeCodeLanguageOptions,
   getSafeRuntimeCodeLanguages,
   resolveMarkdownShortcutTransformers,
+  resolveThemeForLanguage,
 } as const;
 
 function resolveMarkdownShortcutTransformers(

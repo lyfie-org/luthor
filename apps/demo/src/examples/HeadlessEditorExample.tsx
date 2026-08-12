@@ -36,6 +36,7 @@ import {
   jsonToMarkdown,
   markdownToJSON,
   RichText,
+  type LexicalEditor,
 } from "@lyfie/luthor-headless";
 import {
   ModeTabs,
@@ -241,6 +242,7 @@ type HeadlessExampleMethods = {
   getJSON: () => string;
   getMarkdown: () => string;
   getHTML: () => string;
+  getLexicalEditor: () => LexicalEditor | null;
 };
 
 export type HeadlessExampleMode = (typeof HEADLESS_EXAMPLE_DEFAULT_MODES)[number];
@@ -367,7 +369,13 @@ function HeadlessExampleContent({
   showLineNumbers: boolean;
   onReady?: (methods: HeadlessExampleMethods) => void;
 }) {
-  const { activeStates, commands: editorCommands, export: exportApi, import: importApi } = useEditor();
+  const {
+    activeStates,
+    commands: editorCommands,
+    export: exportApi,
+    import: importApi,
+    lexical,
+  } = useEditor();
   const commands = editorCommands as unknown as HeadlessExampleCommands;
   const [mode, setMode] = useState<HeadlessExampleMode>(initialMode);
   const [sourceState, setSourceState] = useState<HeadlessExampleContentState>({
@@ -417,8 +425,9 @@ function HeadlessExampleContent({
       getJSON: () => convertJSONToSource("json", exportApi.toJSON()),
       getMarkdown: () => convertJSONToSource("markdown", exportApi.toJSON()),
       getHTML: () => convertJSONToSource("html", exportApi.toJSON()),
+      getLexicalEditor: () => lexical ?? null,
     }),
-    [exportApi, importApi, syncSourceStateFromVisual],
+    [exportApi, importApi, lexical, syncSourceStateFromVisual],
   );
 
   useEffect(() => {
@@ -904,6 +913,7 @@ export const HeadlessEditorExample = forwardRef<ExtensiveEditorRef, HeadlessEdit
           getJSON: () => convertJSONToSource("json", EMPTY_DOCUMENT),
           getMarkdown: () => convertJSONToSource("markdown", EMPTY_DOCUMENT),
           getHTML: () => convertJSONToSource("html", EMPTY_DOCUMENT),
+          getLexicalEditor: () => null,
         },
       [methods],
     );

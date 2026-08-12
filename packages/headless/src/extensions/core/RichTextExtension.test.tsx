@@ -326,7 +326,9 @@ describe("RichText placeholder behavior", () => {
     fireEvent.mouseUp(listItem, { button: 0, clientX: 32, clientY: 24 });
 
     expect(onEditIntent).not.toHaveBeenCalled();
-    expect(container.querySelector(".luthor-editor-container")?.style.cursor).toBe(
+    expect(
+      container.querySelector<HTMLElement>(".luthor-editor-container")?.style.cursor,
+    ).toBe(
       "default",
     );
   });

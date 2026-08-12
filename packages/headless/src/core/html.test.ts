@@ -305,8 +305,8 @@ describe("html bridge", () => {
     expect(list?.listType).toBe("bullet");
     const listItems = getChildren(list as JsonNode);
     expect(listItems).toHaveLength(2);
-    expect(collectNodeText(listItems[0])).toBe("First item");
-    expect(collectNodeText(listItems[1])).toBe("Second item");
+    expect(collectNodeText(listItems[0] as JsonNode)).toBe("First item");
+    expect(collectNodeText(listItems[1] as JsonNode)).toBe("Second item");
   });
 
   it("round-trips nested lists without metadata comments in metadata-free mode", () => {

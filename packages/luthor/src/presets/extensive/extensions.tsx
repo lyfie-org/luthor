@@ -41,7 +41,7 @@ import {
   TabIndentExtension,
   enterKeyBehaviorExtension,
   type CodeLanguageOptionsConfig,
-  type Extension,
+  type AnyExtension,
 } from "@lyfie/luthor-headless";
 import type { ReactNode } from "react";
 import { createFloatingToolbarExtension, setFloatingToolbarContext } from "../../core";
@@ -774,7 +774,7 @@ function buildExtensiveExtensions({
     maxListDepth: resolvedMaxListIndentation + 1,
   });
 
-  const extensions: Extension[] = [];
+  const extensions: AnyExtension[] = [];
 
   if (enabled("bold")) extensions.push(boldExtension);
   if (enabled("italic")) extensions.push(italicExtension);

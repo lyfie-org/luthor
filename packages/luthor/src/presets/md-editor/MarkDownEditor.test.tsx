@@ -9,7 +9,7 @@ import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { extensiveEditorMock } = vi.hoisted(() => ({
-  extensiveEditorMock: vi.fn(() => null),
+  extensiveEditorMock: vi.fn<(props: Record<string, unknown>) => null>(() => null),
 }));
 
 vi.mock("../extensive", () => ({
@@ -142,6 +142,9 @@ describe("MarkDownEditor", () => {
     render(
       <MarkDownEditor
         showDefaultContent={false}
+        // The prop type already rules "html" out; this asserts the runtime
+        // guard behind it, for JS callers and stale-typed hosts.
+        // @ts-expect-error deliberately invalid mode for this preset
         defaultEditorView="html"
       />,
     );

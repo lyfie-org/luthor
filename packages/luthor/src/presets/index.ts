@@ -5,7 +5,7 @@
  * Build freely. Credit kindly.
  */
 
-import type { EditorConfig, Extension, LuthorTheme } from "@lyfie/luthor-headless";
+import type { AnyExtension, EditorConfig, LuthorTheme } from "@lyfie/luthor-headless";
 import {
   extensivePreset,
   createExtensivePreset,
@@ -66,7 +66,7 @@ export interface EditorPreset {
   id: string;
   label: string;
   description?: string;
-  extensions?: Extension[];
+  extensions?: AnyExtension[];
   config?: EditorConfig;
   theme?: LuthorTheme;
   toolbar?: string[];

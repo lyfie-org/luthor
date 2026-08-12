@@ -22,7 +22,7 @@ import {
   type LexicalEditor,
   type MarkdownBridgeFlavor,
   type MarkdownBridgeOptions,
-  type Extension,
+  type AnyExtension,
   type LuthorTheme,
   type SourceMetadataMode,
 } from "@lyfie/luthor-headless";
@@ -2365,7 +2365,7 @@ export interface ExtensiveEditorProps {
    * extensions are appended after the built-in ones and own their nodes,
    * commands, and rendering.
    */
-  extraExtensions?: readonly Extension[];
+  extraExtensions?: readonly AnyExtension[];
   /**
    * Custom Lexical node classes the markdown bridge must understand to parse and
    * serialize a preset's extra nodes. Pair with {@link extraExtensions} (which

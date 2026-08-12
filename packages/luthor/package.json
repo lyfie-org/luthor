@@ -31,6 +31,7 @@
     "build": "tsup",
     "prepack": "npm run build",
     "lint": "node ../../node_modules/eslint/bin/eslint.js . --max-warnings 0",
+    "typecheck": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.typecheck.json",
     "dev": "tsup --watch",
     "test": "node ../../node_modules/vitest/vitest.mjs run",
     "check:rule-contracts": "node ../../tools/check-rule-contracts.mjs --scope=luthor"

@@ -9,7 +9,8 @@
     "emitDeclarationOnly": true,
     "paths": {
       "@lyfie/luthor/*": ["./src/*"],
-      "@lyfie/luthor-headless": ["../headless/src/index.ts"]
+      "@lyfie/luthor-headless": ["../headless/src/index.ts"],
+      "@lyfie/luthor-headless/*": ["../headless/src/*"]
     }
   },
   "include": ["src"],

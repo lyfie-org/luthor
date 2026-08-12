@@ -29,6 +29,7 @@ import {
   TextFormatType,
 } from "lexical";
 import {
+  AnyExtension,
   EditorConfig,
   EditorContextType,
   Extension,
@@ -43,7 +44,7 @@ export const EditorContext = createContext<
   EditorContextType<readonly Extension[]> | null
 >(null);
 
-interface ProviderProps<Exts extends readonly Extension[]> {
+interface ProviderProps<Exts extends readonly AnyExtension[]> {
   children: ReactNode;
   config?: EditorConfig;
   extensions: Exts;
@@ -128,7 +129,7 @@ function isSelectionInsideCodeBlock(editor: LexicalEditor | null): boolean {
  * const { Provider, useEditor } = createEditorSystem<typeof extensions>();
  * ```
  */
-export function createEditorSystem<Exts extends readonly Extension[]>() {
+export function createEditorSystem<Exts extends readonly AnyExtension[]>() {
   /**
    * Hook to access the editor context. Must be used within a Provider.
    *
@@ -440,7 +441,7 @@ export function createEditorSystem<Exts extends readonly Extension[]>() {
   function Provider(props: ProviderProps<Exts>) {
     const nodes = useMemo(() => {
       const allNodes = props.extensions.flatMap(
-        (ext: Extension) => ext.getNodes?.() || [],
+        (ext: AnyExtension) => ext.getNodes?.() || [],
       );
       return allNodes;
     }, [props.extensions]);

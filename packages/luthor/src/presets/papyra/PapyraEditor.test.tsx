@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExtensiveEditorProps, ExtensiveEditorRef } from "../extensive";
 
 const { extensiveEditorMock } = vi.hoisted(() => ({
-  extensiveEditorMock: vi.fn((): React.ReactNode => null),
+  extensiveEditorMock: vi.fn<(props: Record<string, unknown>) => React.ReactNode>(() => null),
 }));
 
 vi.mock("../extensive", () => ({
@@ -419,7 +419,7 @@ describe("PapyraEditor", () => {
 
       expect(stubMethods.injectJSON).toHaveBeenCalledTimes(1);
       const payload = (stubMethods.injectJSON as ReturnType<typeof vi.fn>).mock
-        .calls[0][0] as string;
+        .calls[0]?.[0] as string;
       // injectJSON always receives a serialized JSON document, never raw markdown.
       expect(() => JSON.parse(payload)).not.toThrow();
     });
@@ -534,7 +534,7 @@ describe("PapyraEditor", () => {
       render(<PapyraEditor showDefaultContent={false} onReady={onReady} />);
 
       expect(onReady).toHaveBeenCalledTimes(1);
-      const handed = onReady.mock.calls[0][0] as PapyraEditorRef;
+      const handed = onReady.mock.calls[0]?.[0] as PapyraEditorRef;
       expect(typeof handed.setMarkdown).toBe("function");
       expect(typeof handed.focus).toBe("function");
       expect(typeof handed.getOutline).toBe("function");
@@ -560,7 +560,7 @@ describe("PapyraEditor", () => {
       );
 
       expect(onOutlineChange).toHaveBeenCalled();
-      const firstOutline = onOutlineChange.mock.calls[0][0] as Array<{
+      const firstOutline = onOutlineChange.mock.calls[0]?.[0] as Array<{
         level: number;
         text: string;
       }>;

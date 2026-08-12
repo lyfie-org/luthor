@@ -9,7 +9,7 @@ import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { extensiveEditorMock } = vi.hoisted(() => ({
-  extensiveEditorMock: vi.fn(() => null),
+  extensiveEditorMock: vi.fn<(props: Record<string, unknown>) => null>(() => null),
 }));
 
 vi.mock("../extensive", () => ({
