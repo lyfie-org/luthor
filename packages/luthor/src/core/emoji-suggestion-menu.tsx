@@ -130,6 +130,13 @@ export function EmojiSuggestionMenu({
       className="luthor-emoji-menu"
       ref={menuRef}
       style={menuStyle}
+      role="listbox"
+      aria-label="Emoji suggestions"
+      aria-activedescendant={
+        suggestions[selectedIndex]
+          ? `luthor-emoji-option-${selectedIndex}`
+          : undefined
+      }
       onPointerDown={(event) => {
         event.stopPropagation();
       }}
@@ -137,14 +144,16 @@ export function EmojiSuggestionMenu({
         event.stopPropagation();
       }}
     >
-      <div className="luthor-emoji-menu-header">
+      <div className="luthor-emoji-menu-header" aria-hidden="true">
         <span className="luthor-emoji-menu-title">Emoji</span>
         <span className="luthor-emoji-menu-query">:{query}</span>
       </div>
 
       <div className="luthor-emoji-menu-list">
         {suggestions.length === 0 ? (
-          <div className="luthor-emoji-menu-empty">No matching emoji</div>
+          <div className="luthor-emoji-menu-empty" role="status">
+            No matching emoji
+          </div>
         ) : (
           suggestions.map((item, index) => {
             const selected = index === selectedIndex;
@@ -152,7 +161,14 @@ export function EmojiSuggestionMenu({
             return (
               <button
                 key={`${item.emoji}-${item.label}`}
+                id={`luthor-emoji-option-${index}`}
                 type="button"
+                role="option"
+                aria-selected={selected}
+                aria-label={item.label}
+                // Driven by arrow keys with focus left in the editor, so
+                // options stay out of the Tab order.
+                tabIndex={-1}
                 className={`luthor-emoji-menu-item ${selected ? "selected" : ""}`}
                 onMouseEnter={() => setSelectedIndex(index)}
                 onMouseDown={(event) => {

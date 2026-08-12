@@ -30,6 +30,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [integrations/remix.md](https://www.luthor.fyi/docs/integrations/remix/) - Remix Integration
 - [integrations/vite.md](https://www.luthor.fyi/docs/integrations/vite/) - Vite Integration
 - [luthor-headless/architecture.md](https://www.luthor.fyi/docs/luthor-headless/architecture/) - @lyfie/luthor-headless Architecture
+- [luthor-headless/edge-case-coverage.md](https://www.luthor.fyi/docs/luthor-headless/edge-case-coverage/) - Edge Case Coverage
 - [luthor-headless/extensions-and-api.md](https://www.luthor.fyi/docs/luthor-headless/extensions-and-api/) - Extensions and API
 - [luthor-headless/extensions-reference.md](https://www.luthor.fyi/docs/luthor-headless/extensions-reference/) - Extensions Reference
 - [luthor-headless/features.md](https://www.luthor.fyi/docs/luthor-headless/features/) - Features
@@ -42,6 +43,8 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [luthor-headless/metadata-comment-system.md](https://www.luthor.fyi/docs/luthor-headless/metadata-comment-system/) - Metadata Comment System
 - [luthor-headless/nodes-and-bridges-reference.md](https://www.luthor.fyi/docs/luthor-headless/nodes-and-bridges-reference/) - Nodes and Bridges Reference
 - [luthor-headless/overview.md](https://www.luthor.fyi/docs/luthor-headless/overview/) - @lyfie/luthor-headless Overview
+- [luthor-headless/url-and-content-safety.md](https://www.luthor.fyi/docs/luthor-headless/url-and-content-safety/) - URL and Content Safety
+- [luthor/accessibility.md](https://www.luthor.fyi/docs/luthor/accessibility/) - Accessibility
 - [luthor/architecture.md](https://www.luthor.fyi/docs/luthor/architecture/) - @lyfie/luthor Architecture
 - [luthor/commands-reference.md](https://www.luthor.fyi/docs/luthor/commands-reference/) - Commands Reference
 - [luthor/feature-flags.md](https://www.luthor.fyi/docs/luthor/feature-flags/) - Feature Flags
@@ -136,6 +139,11 @@ This file helps AI agents discover and query Luthor docs quickly.
 - URL: https://www.luthor.fyi/docs/luthor-headless/architecture/
 - Summary: title: "@lyfie/luthor headless Architecture" description: "Runtime architecture for provider lifecycle, extension registration, commands, and state queries." package: "headless" docType: "concept" surface: "extension" keywords: "architecture" "Provider" "commands" "activeStates" "stateQueries" props: [] exports: "creat...
 
+### Edge Case Coverage
+- File: luthor-headless/edge-case-coverage.md
+- URL: https://www.luthor.fyi/docs/luthor-headless/edge-case-coverage/
+- Summary: Edge Case Coverage Luthor is used in documents its authors never see: Japanese notes, Arabic articles, pastes out of Word, files with 10,000 blocks. This page records what is tested, what the tests found, and — as honestly — what cannot be tested in the jsdom environment the suites run in. What this page answers Which ...
+
 ### Extensions and API
 - File: luthor-headless/extensions-and-api.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/extensions-and-api/
@@ -196,6 +204,16 @@ This file helps AI agents discover and query Luthor docs quickly.
 - URL: https://www.luthor.fyi/docs/luthor-headless/overview/
 - Summary: title: "@lyfie/luthor headless Overview" description: "Headless runtime overview, core exports, and extension first architecture choices." package: "headless" docType: "guide" surface: "extension" keywords: "luthor headless" "createEditorSystem" "extension first" props: [] exports: "createEditorSystem" "createExtension...
 
+### URL and Content Safety
+- File: luthor-headless/url-and-content-safety.md
+- URL: https://www.luthor.fyi/docs/luthor-headless/url-and-content-safety/
+- Summary: URL and Content Safety Luthor treats every URL in a document as untrusted input. A document may have been pasted from a hostile page, synced from another machine, or loaded from a store the host does not control — so "the user typed it" is never assumed. What this page answers Which URL schemes do links and embeds acce...
+
+### Accessibility
+- File: luthor/accessibility.md
+- URL: https://www.luthor.fyi/docs/luthor/accessibility/
+- Summary: Accessibility Luthor targets WCAG 2.1 Level AA . This page records what is implemented and verified, so hosts can cite it in their own accessibility statements — and what is not, so nobody cites something that isn't true. What this page answers Can every feature be operated from the keyboard? What do screen readers ann...
+
 ### @lyfie/luthor Architecture
 - File: luthor/architecture.md
 - URL: https://www.luthor.fyi/docs/luthor/architecture/
@@ -224,7 +242,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Extensive Editor
 - File: luthor/presets/extensive-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/extensive-editor/
-- Summary: title: "Extensive Editor" description: "Full preset profile with all core features enabled and broad mode support." package: "luthor" docType: "reference" surface: "preset" keywords: "ExtensiveEditor" "extensive preset" "full editor" "imageUploadHandler" "gifUploadHandler" props: "featureFlags" "availableModes" "maxLis...
+- Summary: Extensive Editor This preset is the broadest out of box profile. When to use this Use ExtensiveEditor when you want full formatting, media, code, and command workflows in one preset. Mode profile Default modes: visual editor , visual only , json , markdown , html . Default initial mode: visual editor . Preset props fea...
 
 ### HTML Editor
 - File: luthor/presets/html-editor.md
@@ -244,7 +262,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Papyra Editor
 - File: luthor/presets/papyra-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/papyra-editor/
-- Summary: Papyra Editor PapyraEditor is a markdown native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse ...
+- Summary: title: "Papyra Editor" description: "Markdown native, frontmatter agnostic, token themed note canvas preset with Obsidian style embeds and a host adapter seam." package: "luthor" docType: "reference" surface: "preset" keywords: "PapyraEditor" "papyra preset" "markdownSourceOfTruth" "wikilink" "file embed" "transclusion...
 
 ### Props Reference
 - File: luthor/props-reference.md

@@ -17,6 +17,7 @@ import {
 import "@lyfie/luthor/styles.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HeadlessEditorExample } from "./examples/HeadlessEditorExample";
+import { AutosaveExample } from "./examples/AutosaveExample";
 import "./examples/headless-editor-example.css";
 import {
   DEMO_EXTENSIVE_CONTENT,
@@ -34,7 +35,8 @@ type PresetId =
   | "legacy-rich"
   | "md-editor"
   | "html-editor"
-  | "headless-example";
+  | "headless-example"
+  | "autosave";
 type SyntaxFlavor = "default" | "custom" | "disabled";
 
 const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
@@ -44,6 +46,7 @@ const PRESET_OPTIONS: Array<{ value: PresetId; label: string }> = [
   { value: "md-editor", label: "MD Editor" },
   { value: "html-editor", label: "HTML Editor" },
   { value: "headless-example", label: "Headless Editor (custom example)" },
+  { value: "autosave", label: "Autosave (onChange integration)" },
 ];
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -206,6 +209,10 @@ function App() {
             initialTheme={theme}
           />
         );
+      case "autosave":
+        // Owns its own content and change handling, so the shared preset
+        // props deliberately do not apply here.
+        return <AutosaveExample />;
       default:
         return (
           <ExtensiveEditor

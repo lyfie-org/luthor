@@ -5,7 +5,7 @@
  * Build freely. Credit kindly.
  */
 
-import type { EditorConfig, Extension, LuthorTheme } from "@lyfie/luthor-headless";
+import type { AnyExtension, EditorConfig, LuthorTheme } from "@lyfie/luthor-headless";
 import {
   extensivePreset,
   createExtensivePreset,
@@ -33,6 +33,7 @@ import {
 import type {
   ExtensiveEditorMode,
   ExtensiveEditorProps,
+  ExtensiveEditorChangePayload,
   ExtensiveEditorRef,
   ImageUploadHandler,
   GifUploadHandler,
@@ -66,7 +67,7 @@ export interface EditorPreset {
   id: string;
   label: string;
   description?: string;
-  extensions?: Extension[];
+  extensions?: AnyExtension[];
   config?: EditorConfig;
   theme?: LuthorTheme;
   toolbar?: string[];
@@ -103,6 +104,7 @@ export {
 export type {
   ExtensiveEditorMode,
   ExtensiveEditorProps,
+  ExtensiveEditorChangePayload,
   ExtensiveEditorRef,
   ImageUploadHandler,
   GifUploadHandler,

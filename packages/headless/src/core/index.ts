@@ -41,6 +41,10 @@ export {
   type HtmlBridgeOptions,
 } from "./html";
 export {
+  sanitizeHtmlImportDocument,
+  type HtmlImportSanitizeOptions,
+} from "./htmlImportSanitizer";
+export {
   MARKDOWN_SUPPORTED_NODE_TYPES,
   HTML_SUPPORTED_NODE_TYPES,
   MARKDOWN_NATIVE_KEY_MAP,

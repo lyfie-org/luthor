@@ -43,7 +43,9 @@ export {
   type PapyraEditorAdapter,
   type PapyraNoteRef,
   type PapyraNoteSearchResult,
+  type PapyraUserSuggestion,
   type PapyraBlockRef,
+  type PapyraSavedCard,
 } from "./adapter";
 export {
   PAPYRA_EMBED_NODES,

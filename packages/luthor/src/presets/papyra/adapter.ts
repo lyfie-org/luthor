@@ -44,6 +44,14 @@ export interface PapyraNoteSearchResult {
   color?: string;
 }
 
+/** A single person returned by {@link PapyraEditorAdapter.searchUsers}. */
+export interface PapyraUserSuggestion {
+  /** The handle written into the body as `@username`. */
+  username: string;
+  /** The person's display name, shown next to the handle in the typeahead. */
+  name: string;
+}
+
 /** A reference to a specific block inside a note, for transclusion. */
 export interface PapyraBlockRef {
   /** The target note (title or id), as written before `#^`. */
@@ -104,6 +112,14 @@ export interface PapyraEditorAdapter {
    */
   searchNotes(query: string): Promise<PapyraNoteSearchResult[]>;
   /**
+   * Search people for the `@` mention typeahead. Resolves to the candidate users
+   * for the given query. Optional: a host without a people directory omits it
+   * and the `@` menu never opens, so the editor offers nothing it cannot honour.
+   * The host owns the matching rules (Papyra's endpoint is prefix-only, from two
+   * characters, capped at eight rows) — the editor renders whatever comes back.
+   */
+  searchUsers?(query: string): Promise<PapyraUserSuggestion[]>;
+  /**
    * Resolve a transcluded block (`![[Note#^id]]`) to its rendered markdown, or
    * `null` when the host withholds it (missing, or denied by `PathGuard`/`401`).
    * Optional: hosts without transclusion omit it and the embed renders an
@@ -139,6 +155,7 @@ export function createFallbackPapyraAdapter(): PapyraEditorAdapter {
     uploadMedia: (file) => Promise.resolve({ filename: file.name }),
     openNote: () => {},
     searchNotes: () => Promise.resolve([]),
+    searchUsers: () => Promise.resolve([]),
     resolveBlock: () => Promise.resolve(null),
   };
 }

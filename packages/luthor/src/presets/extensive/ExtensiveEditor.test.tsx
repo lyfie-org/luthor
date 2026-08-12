@@ -28,22 +28,24 @@ const {
   setFloatingToolbarContextMock,
   slashCommandMenuMock,
   emojiSuggestionMenuMock,
+  mentionSuggestionMenuMock,
+  wikilinkSuggestionMenuMock,
   linkHoverBubbleMock,
 } = vi.hoisted(() => ({
-  registerKeyboardShortcutsMock: vi.fn(() => vi.fn()),
+  registerKeyboardShortcutsMock: vi.fn<(props: Record<string, unknown>) => ReturnType<typeof vi.fn>>(() => vi.fn()),
   commandsToCommandPaletteItemsMock: vi.fn(() => [{ id: "mock-command" }]),
   commandsToSlashCommandItemsMock: vi.fn(() => [{ id: "mock-slash-command" }]),
-  commandPaletteMock: vi.fn(() => null),
+  commandPaletteMock: vi.fn<(props: Record<string, unknown>) => null>(() => null),
   toolbarMock: vi.fn(({ classNames, toolbarStyleVars }: { classNames?: { toolbar?: string }; toolbarStyleVars?: Record<string, string> }) => (
     <div data-testid="toolbar" className={classNames?.toolbar} style={toolbarStyleVars} />
   )),
-  createExtensiveExtensionsMock: vi.fn(() => []),
+  createExtensiveExtensionsMock: vi.fn<(props: Record<string, unknown>) => unknown[]>(() => []),
   createEditorThemeStyleVarsMock: vi.fn((overrides?: Record<string, string>) => overrides),
-  providerMock: vi.fn(),
-  htmlToJSONMock: vi.fn(() => ({ root: { children: [] } })),
+  providerMock: vi.fn<(props: Record<string, unknown>) => void>(),
+  htmlToJSONMock: vi.fn((): { root: { children: unknown[] } } => ({ root: { children: [] } })),
   jsonToHTMLMock: vi.fn(() => "<p></p>"),
   jsonToMarkdownMock: vi.fn(() => ""),
-  markdownToJSONMock: vi.fn(() => ({ root: { children: [] } })),
+  markdownToJSONMock: vi.fn((): { root: { children: unknown[] } } => ({ root: { children: [] } })),
   richTextMock: vi.fn(
     ({
       placeholder,
@@ -94,9 +96,11 @@ const {
       />
     ),
   ),
-  setFloatingToolbarContextMock: vi.fn(),
+  setFloatingToolbarContextMock: vi.fn<(props: Record<string, unknown>) => void>(),
   slashCommandMenuMock: vi.fn(() => null),
   emojiSuggestionMenuMock: vi.fn(() => null),
+  mentionSuggestionMenuMock: vi.fn<(props: Record<string, unknown>) => null>(() => null),
+  wikilinkSuggestionMenuMock: vi.fn<(props: Record<string, unknown>) => null>(() => null),
   linkHoverBubbleMock: vi.fn(() => null),
 }));
 
@@ -185,6 +189,8 @@ vi.mock("../../core", () => ({
   CommandPalette: commandPaletteMock,
   SlashCommandMenu: slashCommandMenuMock,
   EmojiSuggestionMenu: emojiSuggestionMenuMock,
+  MentionSuggestionMenu: mentionSuggestionMenuMock,
+  WikilinkSuggestionMenu: wikilinkSuggestionMenuMock,
   commandsToCommandPaletteItems: commandsToCommandPaletteItemsMock,
   commandsToSlashCommandItems: commandsToSlashCommandItemsMock,
   formatHTMLSource: (value: string) => value,
@@ -225,18 +231,22 @@ const mockEditorApi = {
     executeSlashCommand: vi.fn(),
     closeEmojiSuggestions: vi.fn(),
     executeEmojiSuggestion: vi.fn(),
+    closeWikilinkMenu: vi.fn(),
+    selectWikilink: vi.fn(),
+    closeMentionMenu: vi.fn(),
+    selectMention: vi.fn(),
   },
   hasExtension: () => false,
   activeStates: {},
   lexical: {
     update: vi.fn(),
-    getRootElement: vi.fn(() => null),
+    getRootElement: vi.fn((): HTMLElement | null => null),
     focus: vi.fn(),
-    registerUpdateListener: vi.fn(() => () => {}),
+    registerUpdateListener: vi.fn<(listener: unknown) => () => void>(() => () => {}),
   },
-  extensions: [],
+  extensions: [] as Array<Record<string, unknown>>,
   export: {
-    toJSON: vi.fn(() => ({ root: { children: [] } })),
+    toJSON: vi.fn((): { root: { children: unknown[] } } => ({ root: { children: [] } })),
   },
   import: {
     fromJSON: vi.fn(),
@@ -246,7 +256,7 @@ const mockEditorApi = {
 vi.mock("@lyfie/luthor-headless", () => ({
   createEditorSystem: () => ({
     Provider: ({ children, config }: { children: ReactNode; config?: unknown }) => {
-      providerMock(config);
+      providerMock(config as Record<string, unknown>);
       return <>{children}</>;
     },
     useEditor: () => mockEditorApi,
@@ -278,7 +288,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
 
     const toolbar = screen.getByTestId("toolbar");
     const header = container.querySelector(".luthor-editor-header");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
 
     expect(toolbar).toHaveClass("luthor-toolbar");
     expect(toolbar).toHaveClass("luthor-toolbar--align-left");
@@ -324,8 +334,8 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
   it("pins tabs + toolbar together when tabs are visible and isToolbarPinned is true", () => {
     const { container } = render(<ExtensiveEditor showDefaultContent={false} isToolbarPinned />);
 
-    const topRegion = container.querySelector(".luthor-editor-top-region");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topRegion = container.querySelector<HTMLElement>(".luthor-editor-top-region");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
     const wrapper = container.querySelector(".luthor-editor-wrapper");
 
     expect(topRegion).toHaveClass("luthor-editor-top-region--pinned");
@@ -343,7 +353,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     const topRegion = container.querySelector(".luthor-editor-top-region");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
     const wrapper = container.querySelector(".luthor-editor-wrapper");
 
     expect(topRegion).toHaveClass("luthor-editor-top-region--pinned");
@@ -361,7 +371,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     const topRegion = container.querySelector(".luthor-editor-top-region");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
     const wrapper = container.querySelector(".luthor-editor-wrapper");
 
     expect(topRegion).toHaveClass("luthor-editor-top-region--pinned");
@@ -379,7 +389,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     const topRegion = container.querySelector(".luthor-editor-top-region");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
 
     expect(screen.queryByTestId("mode-tabs")).toBeNull();
     expect(topRegion).not.toHaveClass("luthor-editor-top-region--pinned");
@@ -390,7 +400,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     const { container } = render(<ExtensiveEditor showDefaultContent={false} isToolbarPinned />);
 
     const editor = container.querySelector(".luthor-editor");
-    const topRegion = container.querySelector(".luthor-editor-top-region");
+    const topRegion = container.querySelector<HTMLElement>(".luthor-editor-top-region");
 
     expect(editor).toContainElement(topRegion);
     expect(editor?.firstElementChild).toBe(topRegion);
@@ -406,7 +416,7 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     );
 
     const editor = container.querySelector(".luthor-editor");
-    const topSlot = container.querySelector(".luthor-editor-toolbar-slot--top");
+    const topSlot = container.querySelector<HTMLElement>(".luthor-editor-toolbar-slot--top");
 
     expect(editor).toContainElement(topSlot);
   });
@@ -2037,3 +2047,207 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
   });
 });
 
+
+describe("ExtensiveEditor typeahead menu wiring", () => {
+  type TriggerState = {
+    isOpen: boolean;
+    query: string;
+    position: { x: number; y: number } | null;
+  };
+
+  const OPEN_MENTION: TriggerState = {
+    isOpen: true,
+    query: "be",
+    position: { x: 10, y: 20 },
+  };
+  const OPEN_WIKILINK: TriggerState = {
+    isOpen: true,
+    query: "ro",
+    position: { x: 30, y: 40 },
+  };
+
+  /** A registered trigger extension that pushes one state to its subscriber. */
+  function triggerExtension(name: string, state: TriggerState) {
+    return {
+      name,
+      subscribe: vi.fn((listener: (next: TriggerState) => void) => {
+        listener(state);
+        return () => {};
+      }),
+    };
+  }
+
+  function lastMenuProps(menu: typeof mentionSuggestionMenuMock) {
+    return menu.mock.calls.at(-1)?.[0] as {
+      isOpen?: boolean;
+      query?: string;
+      position?: { x: number; y: number } | null;
+      suggestions?: unknown[];
+      onExecute?: (value: string) => void;
+      onClose?: () => void;
+    };
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useRealTimers();
+    mockEditorApi.extensions = [];
+  });
+
+  it("mirrors the mention trigger state into the menu and runs the host search", async () => {
+    mockEditorApi.extensions = [triggerExtension("mentionTypeahead", OPEN_MENTION)] as any;
+    const searchUsers = vi.fn(async () => [{ username: "bea", name: "Bea Ito" }]);
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        mentionSuggestionProvider={searchUsers}
+      />,
+    );
+
+    expect(lastMenuProps(mentionSuggestionMenuMock)).toMatchObject({
+      isOpen: true,
+      query: "be",
+      position: { x: 10, y: 20 },
+    });
+
+    await waitFor(() => expect(searchUsers).toHaveBeenCalledWith("be"));
+    await waitFor(() => {
+      expect(lastMenuProps(mentionSuggestionMenuMock).suggestions).toEqual([
+        { username: "bea", name: "Bea Ito" },
+      ]);
+    });
+  });
+
+  it("mirrors the wikilink trigger state into the menu and runs the host search", async () => {
+    mockEditorApi.extensions = [triggerExtension("wikilinkTypeahead", OPEN_WIKILINK)] as any;
+    const searchNotes = vi.fn(async () => [{ id: "n1", title: "Roadmap" }]);
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        wikilinkSuggestionProvider={searchNotes}
+      />,
+    );
+
+    expect(lastMenuProps(wikilinkSuggestionMenuMock)).toMatchObject({
+      isOpen: true,
+      query: "ro",
+      position: { x: 30, y: 40 },
+    });
+
+    await waitFor(() => expect(searchNotes).toHaveBeenCalledWith("ro"));
+    await waitFor(() => {
+      expect(lastMenuProps(wikilinkSuggestionMenuMock).suggestions).toEqual([
+        { id: "n1", title: "Roadmap" },
+      ]);
+    });
+  });
+
+  it("commits a picked suggestion through the extension commands", () => {
+    mockEditorApi.extensions = [
+      triggerExtension("mentionTypeahead", OPEN_MENTION),
+      triggerExtension("wikilinkTypeahead", OPEN_WIKILINK),
+    ] as any;
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        mentionSuggestionProvider={async () => []}
+        wikilinkSuggestionProvider={async () => []}
+      />,
+    );
+
+    lastMenuProps(mentionSuggestionMenuMock).onExecute?.("bea");
+    lastMenuProps(wikilinkSuggestionMenuMock).onExecute?.("Roadmap");
+    lastMenuProps(mentionSuggestionMenuMock).onClose?.();
+    lastMenuProps(wikilinkSuggestionMenuMock).onClose?.();
+
+    expect(mockEditorApi.commands.selectMention).toHaveBeenCalledWith("bea");
+    expect(mockEditorApi.commands.selectWikilink).toHaveBeenCalledWith("Roadmap");
+    expect(mockEditorApi.commands.closeMentionMenu).toHaveBeenCalled();
+    expect(mockEditorApi.commands.closeWikilinkMenu).toHaveBeenCalled();
+  });
+
+  it("renders no typeahead menu without a host suggestion provider", () => {
+    mockEditorApi.extensions = [
+      triggerExtension("mentionTypeahead", OPEN_MENTION),
+      triggerExtension("wikilinkTypeahead", OPEN_WIKILINK),
+    ] as any;
+
+    render(<ExtensiveEditor showDefaultContent={false} />);
+
+    expect(mentionSuggestionMenuMock).not.toHaveBeenCalled();
+    expect(wikilinkSuggestionMenuMock).not.toHaveBeenCalled();
+  });
+
+  it("closes both typeahead menus when leaving the visual editor", () => {
+    mockEditorApi.extensions = [
+      triggerExtension("mentionTypeahead", OPEN_MENTION),
+      triggerExtension("wikilinkTypeahead", OPEN_WIKILINK),
+    ] as any;
+
+    render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        initialMode="markdown"
+        mentionSuggestionProvider={async () => []}
+        wikilinkSuggestionProvider={async () => []}
+      />,
+    );
+
+    expect(mockEditorApi.commands.closeMentionMenu).toHaveBeenCalled();
+    expect(mockEditorApi.commands.closeWikilinkMenu).toHaveBeenCalled();
+    expect(lastMenuProps(mentionSuggestionMenuMock)).toBeUndefined();
+    expect(lastMenuProps(wikilinkSuggestionMenuMock)).toBeUndefined();
+  });
+
+  it("drops a stale search result when the query moves on", async () => {
+    const extension = {
+      name: "mentionTypeahead",
+      subscribe: vi.fn((listener: (next: TriggerState) => void) => {
+        listener({ isOpen: true, query: "b", position: { x: 0, y: 0 } });
+        return () => {};
+      }),
+    };
+    mockEditorApi.extensions = [extension] as any;
+
+    const searchUsers = vi.fn(
+      (query: string) =>
+        new Promise<Array<{ username: string; name: string }>>((resolve) => {
+          setTimeout(
+            () => resolve([{ username: query, name: query }]),
+            query === "b" ? 60 : 0,
+          );
+        }),
+    );
+
+    const { rerender } = render(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        mentionSuggestionProvider={searchUsers}
+      />,
+    );
+
+    mockEditorApi.extensions = [
+      triggerExtension("mentionTypeahead", OPEN_MENTION),
+    ] as any;
+    rerender(
+      <ExtensiveEditor
+        showDefaultContent={false}
+        mentionSuggestionProvider={searchUsers}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(lastMenuProps(mentionSuggestionMenuMock).suggestions).toEqual([
+        { username: "be", name: "be" },
+      ]);
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(lastMenuProps(mentionSuggestionMenuMock).suggestions).toEqual([
+      { username: "be", name: "be" },
+    ]);
+  });
+});

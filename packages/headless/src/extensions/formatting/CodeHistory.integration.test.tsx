@@ -20,7 +20,7 @@ import {
   blockFormatExtension,
   listExtension,
   linkExtension,
-  type Extension,
+  type AnyExtension,
 } from "@lyfie/luthor-headless";
 import { $createParagraphNode, $createTextNode, $getRoot } from "lexical";
 
@@ -43,7 +43,7 @@ function TestEditor({
   extensions,
   onReady,
 }: {
-  extensions: readonly Extension[];
+  extensions: readonly AnyExtension[];
   onReady: (api: HarnessApi) => void;
 }) {
   const { Provider, useEditor } = createEditorSystem<typeof extensions>();
@@ -93,25 +93,27 @@ async function assertCodeBlockUndoRedo({
   extensions,
   initialText,
 }: {
-  extensions: readonly Extension[];
+  extensions: readonly AnyExtension[];
   initialText: string;
 }) {
-  let api: HarnessApi | null = null;
+  // Held in an object so TS keeps the union: a plain `let` assigned only
+  // inside the callback narrows to `null` at every later read.
+  const captured: { api: HarnessApi | null } = { api: null };
 
   render(
     <TestEditor
       extensions={extensions}
       onReady={(nextApi) => {
-        api = nextApi;
+        captured.api = nextApi;
       }}
     />,
   );
 
   await waitFor(() => {
-    expect(api).not.toBeNull();
+    expect(captured.api).not.toBeNull();
   });
 
-  const editorApi = api as HarnessApi;
+  const editorApi = captured.api as HarnessApi;
 
   await act(async () => {
     editorApi.lexical.update(() => {
@@ -226,7 +228,7 @@ describe("Code block history integration", () => {
   });
 
   it("keeps undo/redo working for non-code block commands when code intelligence is enabled", async () => {
-    let api: HarnessApi | null = null;
+    const captured: { api: HarnessApi | null } = { api: null };
 
     const extensions = [
       richTextExtension,
@@ -242,16 +244,16 @@ describe("Code block history integration", () => {
       <TestEditor
         extensions={extensions}
         onReady={(nextApi) => {
-          api = nextApi;
+          captured.api = nextApi;
         }}
       />,
     );
 
     await waitFor(() => {
-      expect(api).not.toBeNull();
+      expect(captured.api).not.toBeNull();
     });
 
-    const editorApi = api as HarnessApi;
+    const editorApi = captured.api as HarnessApi;
 
     await act(async () => {
       editorApi.lexical.update(() => {

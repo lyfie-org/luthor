@@ -118,6 +118,28 @@ export interface Extension<
   // getToolbarItems?(): ToolbarItem<Commands>[];
 }
 
+/**
+ * Any extension, regardless of the commands and state queries it exposes.
+ *
+ * A bare `Extension` falls back to its type-parameter defaults
+ * (`Record<string, never>`), which means "declares no commands" — the
+ * right default for an extension that genuinely has none, but wrong for a
+ * heterogeneous list, where no real extension is assignable to it. Use
+ * `AnyExtension` for arrays, constraints, and props that accept whatever
+ * a caller passes; keep the precise `typeof extensions` tuple wherever
+ * command inference has to survive.
+ */
+export type AnyExtension = Extension<
+  string,
+  // `configure` takes its config as a parameter, so a concrete config type
+  // is only assignable here if the parameter is bivariant — `any` is what
+  // makes an extension with its own config land in a mixed list.
+  any,
+  Record<string, any>,
+  Record<string, () => Promise<boolean>>,
+  ReactNode[]
+>;
+
 // Merge commands (uses unknown for distribution)
 type MergeCommands<T> = {
   [K in UnionKeys<T>]: T extends { [P in K]: infer V } ? V : never;
@@ -129,12 +151,12 @@ type MergeStateQueries<T> = {
 };
 
 // Infer unions from the extensions array
-export type ExtractNames<Exts extends readonly Extension[]> =
+export type ExtractNames<Exts extends readonly AnyExtension[]> =
   Exts[number]["name"];
-export type ExtractCommands<Exts extends readonly Extension[]> = MergeCommands<
+export type ExtractCommands<Exts extends readonly AnyExtension[]> = MergeCommands<
   ReturnType<Exts[number]["getCommands"]>
 >;
-export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<
+export type ExtractPlugins<Exts extends readonly AnyExtension[]> = ReturnType<
   Exts[number]["getPlugins"]
 >[number];
 
@@ -142,7 +164,7 @@ export type ExtractPlugins<Exts extends readonly Extension[]> = ReturnType<
 type UnionKeys<T> = T extends unknown ? keyof T : never;
 
 // Extract state queries the same way
-export type ExtractStateQueries<Exts extends readonly Extension[]> =
+export type ExtractStateQueries<Exts extends readonly AnyExtension[]> =
   MergeStateQueries<ReturnType<NonNullable<Exts[number]["getStateQueries"]>>>;
 
 // Base commands that are always available
@@ -156,7 +178,7 @@ export interface BaseCommands {
  *
  * @template Exts - Extensions array that defines available functionality
  */
-export interface EditorContextType<Exts extends readonly Extension[]> {
+export interface EditorContextType<Exts extends readonly AnyExtension[]> {
   /** Underlying Lexical editor instance */
   editor: LexicalEditor | null;
 

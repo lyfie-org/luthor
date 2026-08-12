@@ -81,7 +81,17 @@ export {
   type WikilinkTypeaheadStateQueries,
 } from "./WikilinkTypeaheadExtension";
 export {
+  MentionTypeaheadExtension,
+  mentionTypeaheadExtension,
+  sanitizeMentionUsername,
+  type MentionTypeaheadMenuState,
+  type MentionTypeaheadConfig,
+  type MentionTypeaheadCommands,
+  type MentionTypeaheadStateQueries,
+} from "./MentionTypeaheadExtension";
+export {
   FileDropUploadExtension,
   fileDropUploadExtension,
+  sanitizeEmbedTarget,
   type FileDropUploadConfig,
 } from "./FileDropUploadExtension";

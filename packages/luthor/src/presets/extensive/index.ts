@@ -23,6 +23,8 @@ export type {
   ExtensiveSlashCommandContext,
   ImageUploadHandler,
   GifUploadHandler,
+  MentionSuggestionProvider,
+  WikilinkSuggestionProvider,
 } from "./ExtensiveEditor";
 export type {
   ExtensiveExtensionsConfig,

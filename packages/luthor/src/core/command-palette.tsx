@@ -121,22 +121,52 @@ export function CommandPalette({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             className="luthor-command-palette-input"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="luthor-command-palette-list"
+            aria-autocomplete="list"
+            aria-activedescendant={
+              flatCommands[selectedIndex]
+                ? `luthor-command-option-${flatCommands[selectedIndex].id}`
+                : undefined
+            }
           />
           <kbd className="luthor-command-palette-kbd">ESC</kbd>
         </div>
 
-        <div ref={listRef} className="luthor-command-palette-list">
+        <div
+          ref={listRef}
+          id="luthor-command-palette-list"
+          role="listbox"
+          aria-label="Commands"
+          className="luthor-command-palette-list"
+        >
           {Object.keys(groupedCommands).length === 0 ? (
-            <div className="luthor-command-palette-empty">No commands found</div>
+            <div className="luthor-command-palette-empty" role="status">
+              No commands found
+            </div>
           ) : (
             Object.entries(groupedCommands).map(([category, items]) => (
-              <div key={category} className="luthor-command-palette-group">
-                <div className="luthor-command-palette-group-title">{category}</div>
+              <div
+                key={category}
+                className="luthor-command-palette-group"
+                role="group"
+                aria-label={category}
+              >
+                <div
+                  className="luthor-command-palette-group-title"
+                  aria-hidden="true"
+                >
+                  {category}
+                </div>
                 {items.map((cmd) => {
                   const globalIndex = flatCommands.indexOf(cmd);
                   return (
                     <div
                       key={cmd.id}
+                      id={`luthor-command-option-${cmd.id}`}
+                      role="option"
+                      aria-selected={globalIndex === selectedIndex}
                       className={`luthor-command-palette-item ${globalIndex === selectedIndex ? "selected" : ""}`}
                       onClick={() => {
                         cmd.action();

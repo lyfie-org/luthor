@@ -1997,6 +1997,213 @@ export const docsIndex = [
   {
     "slug": [
       "luthor-headless",
+      "edge-case-coverage"
+    ],
+    "title": "Edge Case Coverage",
+    "navTitle": "Edge Case Coverage",
+    "description": "What Luthor is tested against for IME, bidi, Unicode, paste, scale, history, SSR, and StrictMode — and the gaps that cannot be covered in jsdom.",
+    "content": "\n# Edge Case Coverage\n\n[Luthor](/demo/) is used in documents its authors never see: Japanese notes, Arabic\narticles, pastes out of Word, files with 10,000 blocks. This page records\nwhat is tested, what the tests found, and — as honestly — what cannot be\ntested in the jsdom environment the suites run in.\n\n## What this page answers\n\n- Which hostile or unusual inputs are covered by tests?\n- What did those tests establish about real behavior?\n- Which risks are known but unverified, and why?\n\n## Covered\n\n| Area | What is asserted |\n|---|---|\n| **IME composition** | Block-anchor auto-stamping stands down while `isComposing()` and resumes after. Driven through Lexical's `$setCompositionKey`, so removing the guard fails the test. |\n| **Bidi / RTL** | Arabic and Hebrew round-trip verbatim through markdown and HTML, including mixed LTR/RTL paragraphs, RTL headings and lists, and idempotency on a second pass. |\n| **Unicode** | ZWJ family emoji, skin-tone modifiers, regional-indicator flags, stacked combining marks, Devanagari clusters, and astral-plane codepoints survive both bridges byte-exactly, including across formatting boundaries. |\n| **Real-world paste** | Word, Google Docs, Sheets, VS Code, Apple Notes, and a plain article selection keep their structure and formatting through the sanitizer. |\n| **Scale** | 10k-block markdown, a 100k-character paragraph, 100-deep nested lists, a 50-column table, and 5k-block HTML all convert well inside budget; a growth-ratio test guards against an accidental quadratic. |\n| **History** | 100-edit undo/redo chains round-trip exactly; undoing past the start keeps the earliest state instead of emptying the document; a wholesale replacement is one undo; auto-stamped anchors fold into the triggering edit rather than becoming separately undoable. |\n| **SSR** | All five presets import and `renderToString` in a DOM-free Node environment. |\n| **StrictMode** | Double-mount and ten mount/unmount cycles leak no `MutationObserver`, interval, or `document`/`window` listener. |\n| **Concurrent input** | 200 edits queued in one tick keep every character and their order; a bulk insertion between keystrokes does not drop them; a programmatic replacement wins cleanly without splicing pending edits into the adopted document. |\n\n## Measured numbers\n\nRecorded so a future regression reads as a multiple rather than noise\n(local run, jsdom):\n\n| Operation | Time |\n|---|---|\n| 10,000-block markdown parse + serialize | ~390 ms |\n| 5,000-block HTML sanitize + convert | ~600 ms |\n| 100-edit undo + redo chain | ~2.5 s (dominated by per-commit flushes) |\n\n## Known gaps\n\nThese are documented rather than silently skipped.\n\n### The DOM watchdog's observer path\n\n`registerEditorDomWatchdog` reports only after a settle window\n(`MutationObserver` → `setTimeout`). Lexical's own mutation handling\nrestores an externally written DOM back to the model within roughly 2 ms,\nso by the time the window closes there is no divergence left to observe —\nverified directly: divergence is present synchronously after an external\nwrite and `null` 2 ms later.\n\nThe detection function (`detectEditorDomDivergence`) is covered. The\n`isComposing()` early-return inside the watchdog's settle callback is\nreviewed but not asserted; exercising it needs a real browser.\n\n### Direction is not stored in the model\n\nLexical 0.40 does not persist a per-block `direction`. It emits\n`dir=\"auto\"` and lets the browser's bidi algorithm resolve each block,\nwhich handles mixed runs better than a stored guess would.\n\nThe consequence for hosts: bridge JSON carries `direction: null`. A host\nrendering that JSON through its own renderer must emit `dir=\"auto\"`\nitself, or RTL content will lay out left-to-right. This is asserted in\nthe suite so the behavior is visible if a future Lexical changes it.\n\n### `blob:` URL lifecycle under StrictMode\n\n`ImageComponent` revokes a `blob:` src in its unmount cleanup, with\nnothing distinguishing a StrictMode teardown from a real one — so the\nthrowaway first mount can revoke a URL the surviving mount still needs.\nThe extensive preset's default `uploadHandler` returns\n`URL.createObjectURL(file)`, so the shipped default is what hits this.\n\nAttempts to reproduce it in jsdom were **unsuccessful**: decorator nodes\ninserted programmatically did not mount an `<img>` in the test\nenvironment, so any assertion would have passed vacuously. The risk is\nrecorded from code inspection, not from a reproduction. Production hosts\nshould return a persistent URL from their upload handler.\n\n### Not covered here\n\nCaret movement, selection geometry, and composition *keystroke* handling\ndepend on real layout and native IME events. jsdom has neither. These\nneed a browser-driven suite (Playwright or similar) to cover properly.\n",
+    "plainContent": "Edge Case Coverage Luthor is used in documents its authors never see: Japanese notes, Arabic articles, pastes out of Word, files with 10,000 blocks. This page records what is tested, what the tests found, and — as honestly — what cannot be tested in the jsdom environment the suites run in. What this page answers - Which hostile or unusual inputs are covered by tests? - What did those tests establish about real behavior? - Which risks are known but unverified, and why? Covered Area What is asserted --- --- IME composition Block-anchor auto-stamping stands down while isComposing() and resumes after. Driven through Lexical's $setCompositionKey , so removing the guard fails the test. Bidi / RTL Arabic and Hebrew round-trip verbatim through markdown and HTML, including mixed LTR/RTL paragraphs, RTL headings and lists, and idempotency on a second pass. Unicode ZWJ family emoji, skin-tone modifiers, regional-indicator flags, stacked combining marks, Devanagari clusters, and astral-plane codepoints survive both bridges byte-exactly, including across formatting boundaries. Real-world paste Word, Google Docs, Sheets, VS Code, Apple Notes, and a plain article selection keep their structure and formatting through the sanitizer. Scale 10k-block markdown, a 100k-character paragraph, 100-deep nested lists, a 50-column table, and 5k-block HTML all convert well inside budget; a growth-ratio test guards against an accidental quadratic. History 100-edit undo/redo chains round-trip exactly; undoing past the start keeps the earliest state instead of emptying the document; a wholesale replacement is one undo; auto-stamped anchors fold into the triggering edit rather than becoming separately undoable. SSR All five presets import and renderToString in a DOM-free Node environment. StrictMode Double-mount and ten mount/unmount cycles leak no MutationObserver , interval, or document / window listener. Concurrent input 200 edits queued in one tick keep every character and their order; a bulk insertion between keystrokes does not drop them; a programmatic replacement wins cleanly without splicing pending edits into the adopted document. Measured numbers Recorded so a future regression reads as a multiple rather than noise (local run, jsdom): Operation Time --- --- 10,000-block markdown parse + serialize 390 ms 5,000-block HTML sanitize + convert 600 ms 100-edit undo + redo chain 2.5 s (dominated by per-commit flushes) Known gaps These are documented rather than silently skipped. The DOM watchdog's observer path registerEditorDomWatchdog reports only after a settle window ( MutationObserver → setTimeout ). Lexical's own mutation handling restores an externally written DOM back to the model within roughly 2 ms, so by the time the window closes there is no divergence left to observe — verified directly: divergence is present synchronously after an external write and null 2 ms later. The detection function ( detectEditorDomDivergence ) is covered. The isComposing() early-return inside the watchdog's settle callback is reviewed but not asserted; exercising it needs a real browser. Direction is not stored in the model Lexical 0.40 does not persist a per-block direction . It emits dir=\"auto\" and lets the browser's bidi algorithm resolve each block, which handles mixed runs better than a stored guess would. The consequence for hosts: bridge JSON carries direction: null . A host rendering that JSON through its own renderer must emit dir=\"auto\" itself, or RTL content will lay out left-to-right. This is asserted in the suite so the behavior is visible if a future Lexical changes it. blob: URL lifecycle under StrictMode ImageComponent revokes a blob: src in its unmount cleanup, with nothing distinguishing a StrictMode teardown from a real one — so the throwaway first mount can revoke a URL the surviving mount still needs. The extensive preset's default uploadHandler returns URL.createObjectURL(file) , so the shipped default is what hits this. Attempts to reproduce it in jsdom were unsuccessful : decorator nodes inserted programmatically did not mount an in the test environment, so any assertion would have passed vacuously. The risk is recorded from code inspection, not from a reproduction. Production hosts should return a persistent URL from their upload handler. Not covered here Caret movement, selection geometry, and composition keystroke handling depend on real layout and native IME events. jsdom has neither. These need a browser-driven suite (Playwright or similar) to cover properly.",
+    "sections": [
+      {
+        "heading": "Overview",
+        "id": "overview",
+        "level": 1,
+        "text": "Edge Case Coverage Luthor is used in documents its authors never see: Japanese notes, Arabic articles, pastes out of Word, files with 10,000 blocks. This page records what is tested, what the tests found, and — as honestly — what cannot be tested in the jsdom environment the suites run in."
+      },
+      {
+        "heading": "What this page answers",
+        "id": "what-this-page-answers",
+        "level": 2,
+        "text": "- Which hostile or unusual inputs are covered by tests? - What did those tests establish about real behavior? - Which risks are known but unverified, and why?"
+      },
+      {
+        "heading": "Covered",
+        "id": "covered",
+        "level": 2,
+        "text": "Area What is asserted --- --- IME composition Block-anchor auto-stamping stands down while isComposing() and resumes after. Driven through Lexical's $setCompositionKey , so removing the guard fails the test. Bidi / RTL Arabic and Hebrew round-trip verbatim through markdown and HTML, including mixed LTR/RTL paragraphs, RTL headings and lists, and idempotency on a second pass. Unicode ZWJ family emoji, skin-tone modifiers, regional-indicator flags, stacked combining marks, Devanagari clusters, and astral-plane codepoints survive both bridges byte-exactly, including across formatting boundaries. Real-world paste Word, Google Docs, Sheets, VS Code, Apple Notes, and a plain article selection keep their structure and formatting through the sanitizer. Scale 10k-block markdown, a 100k-character paragraph, 100-deep nested lists, a 50-column table, and 5k-block HTML all convert well inside budget; a growth-ratio test guards against an accidental quadratic. History 100-edit undo/redo chains round-trip exactly; undoing past the start keeps the earliest state instead of emptying the document; a wholesale replacement is one undo; auto-stamped anchors fold into the triggering edit rather than becoming separately undoable. SSR All five presets import and renderToString in a DOM-free Node environment. StrictMode Double-mount and ten mount/unmount cycles leak no MutationObserver , interval, or document / window listener. Concurrent input 200 edits queued in one tick keep every character and their order; a bulk insertion between keystrokes does not drop them; a programmatic replacement wins cleanly without splicing pending edits into the adopted document."
+      },
+      {
+        "heading": "Measured numbers",
+        "id": "measured-numbers",
+        "level": 2,
+        "text": "Recorded so a future regression reads as a multiple rather than noise (local run, jsdom): Operation Time --- --- 10,000-block markdown parse + serialize 390 ms 5,000-block HTML sanitize + convert 600 ms 100-edit undo + redo chain 2.5 s (dominated by per-commit flushes)"
+      },
+      {
+        "heading": "Known gaps",
+        "id": "known-gaps",
+        "level": 2,
+        "text": "These are documented rather than silently skipped."
+      },
+      {
+        "heading": "The DOM watchdog's observer path",
+        "id": "the-dom-watchdogs-observer-path",
+        "level": 3,
+        "text": "registerEditorDomWatchdog reports only after a settle window ( MutationObserver → setTimeout ). Lexical's own mutation handling restores an externally written DOM back to the model within roughly 2 ms, so by the time the window closes there is no divergence left to observe — verified directly: divergence is present synchronously after an external write and null 2 ms later. The detection function ( detectEditorDomDivergence ) is covered. The isComposing() early-return inside the watchdog's settle callback is reviewed but not asserted; exercising it needs a real browser."
+      },
+      {
+        "heading": "Direction is not stored in the model",
+        "id": "direction-is-not-stored-in-the-model",
+        "level": 3,
+        "text": "Lexical 0.40 does not persist a per-block direction . It emits dir=\"auto\" and lets the browser's bidi algorithm resolve each block, which handles mixed runs better than a stored guess would. The consequence for hosts: bridge JSON carries direction: null . A host rendering that JSON through its own renderer must emit dir=\"auto\" itself, or RTL content will lay out left-to-right. This is asserted in the suite so the behavior is visible if a future Lexical changes it."
+      },
+      {
+        "heading": "`blob:` URL lifecycle under StrictMode",
+        "id": "blob-url-lifecycle-under-strictmode",
+        "level": 3,
+        "text": "ImageComponent revokes a blob: src in its unmount cleanup, with nothing distinguishing a StrictMode teardown from a real one — so the throwaway first mount can revoke a URL the surviving mount still needs. The extensive preset's default uploadHandler returns URL.createObjectURL(file) , so the shipped default is what hits this. Attempts to reproduce it in jsdom were unsuccessful : decorator nodes inserted programmatically did not mount an in the test environment, so any assertion would have passed vacuously. The risk is recorded from code inspection, not from a reproduction. Production hosts should return a persistent URL from their upload handler."
+      },
+      {
+        "heading": "Not covered here",
+        "id": "not-covered-here",
+        "level": 3,
+        "text": "Caret movement, selection geometry, and composition keystroke handling depend on real layout and native IME events. jsdom has neither. These need a browser-driven suite (Playwright or similar) to cover properly."
+      }
+    ],
+    "headings": [
+      {
+        "level": 2,
+        "text": "What this page answers",
+        "id": "what-this-page-answers"
+      },
+      {
+        "level": 2,
+        "text": "Covered",
+        "id": "covered"
+      },
+      {
+        "level": 2,
+        "text": "Measured numbers",
+        "id": "measured-numbers"
+      },
+      {
+        "level": 2,
+        "text": "Known gaps",
+        "id": "known-gaps"
+      },
+      {
+        "level": 3,
+        "text": "The DOM watchdog's observer path",
+        "id": "the-dom-watchdogs-observer-path"
+      },
+      {
+        "level": 3,
+        "text": "Direction is not stored in the model",
+        "id": "direction-is-not-stored-in-the-model"
+      },
+      {
+        "level": 3,
+        "text": "`blob:` URL lifecycle under StrictMode",
+        "id": "blob-url-lifecycle-under-strictmode"
+      },
+      {
+        "level": 3,
+        "text": "Not covered here",
+        "id": "not-covered-here"
+      }
+    ],
+    "urlPath": "/docs/luthor-headless/edge-case-coverage/",
+    "sourcePath": "apps/web/src/content/docs/luthor-headless/edge-case-coverage.md",
+    "updatedAt": "2026-08-12T08:52:45.673Z",
+    "package": "headless",
+    "docType": "reference",
+    "surface": "tooling",
+    "keywords": [
+      "IME composition",
+      "RTL",
+      "bidi",
+      "unicode",
+      "grapheme",
+      "SSR",
+      "StrictMode",
+      "edge cases"
+    ],
+    "props": [],
+    "exports": [],
+    "commands": [],
+    "extensions": [],
+    "nodes": [],
+    "frameworks": [
+      "next"
+    ],
+    "lastVerifiedFrom": [
+      "packages/headless/src/edge-cases",
+      "packages/luthor/src/presets/ssr.edge.test.tsx",
+      "packages/luthor/src/presets/strict-mode.edge.test.tsx"
+    ],
+    "navGroup": "luthor_headless",
+    "navOrder": 46,
+    "navHidden": false,
+    "searchTokens": [
+      "—",
+      "against",
+      "and",
+      "be",
+      "bidi",
+      "bidi,",
+      "cannot",
+      "case",
+      "cases",
+      "composition",
+      "coverage",
+      "covered",
+      "edge",
+      "edge case coverage",
+      "edge cases",
+      "for",
+      "gaps",
+      "grapheme",
+      "history,",
+      "ime",
+      "ime composition",
+      "ime,",
+      "in",
+      "is",
+      "jsdom",
+      "luthor",
+      "next",
+      "paste,",
+      "rtl",
+      "scale,",
+      "ssr",
+      "ssr,",
+      "strictmode",
+      "tested",
+      "that",
+      "the",
+      "unicode",
+      "unicode,",
+      "what",
+      "what luthor is tested against for ime, bidi, unicode, paste, scale, history, ssr, and strictmode — and the gaps that cannot be covered in jsdom."
+    ],
+    "searchTokenBuckets": {
+      "keywords": [
+        "bidi",
+        "cases",
+        "composition",
+        "edge",
+        "edge cases",
+        "grapheme",
+        "ime",
+        "ime composition",
+        "rtl",
+        "ssr",
+        "strictmode",
+        "unicode"
+      ],
+      "props": [],
+      "exports": [],
+      "commands": [],
+      "extensions": [],
+      "nodes": [],
+      "frameworks": [
+        "next"
+      ]
+    }
+  },
+  {
+    "slug": [
+      "luthor-headless",
       "extensions-and-api"
     ],
     "title": "Extensions and API",
@@ -4418,6 +4625,497 @@ export const docsIndex = [
   },
   {
     "slug": [
+      "luthor-headless",
+      "url-and-content-safety"
+    ],
+    "title": "URL and Content Safety",
+    "navTitle": "URL and Content Safety",
+    "description": "The default URL scheme allowlist for links and embeds, how to override it, and what the guarantee does and does not cover.",
+    "content": "\n# URL and Content Safety\n\n[Luthor](/demo/) treats every URL in a document as untrusted input. A document may\nhave been pasted from a hostile page, synced from another machine, or\nloaded from a store the host does not control — so \"the user typed it\"\nis never assumed.\n\n## What this page answers\n\n- Which URL schemes do links and embeds accept by default?\n- How do I allow a custom scheme like `obsidian://` deliberately?\n- What does the guarantee cover, and what stays the host's job?\n\n## Link URLs\n\nThe link extension validates every URL at each entry point — paste,\nauto-linking while typing, and the programmatic `insertLink` /\n`updateLink` / `updateLinkByKey` commands — with one default validator\nthat accepts:\n\n- `http:`, `https:`, `mailto:`, `tel:` absolute URLs\n- same-document references (`#section`)\n- protocol-relative references (`//example.com/path`)\n\nEverything else is rejected, including `javascript:`, `data:`, and\n`vbscript:` URLs in any casing or whitespace disguise (`JaVaScRiPt:`,\n`java\\tscript:`). Rejected URLs never enter the document model, so they\nalso never appear in markdown, JSON, or HTML output.\n\nAs a second layer, Lexical's own `LinkNode` renders any non-allowlisted\nscheme that reaches the model (for example from a pre-existing document)\nas an inert `about:blank` anchor. The raw URL still round-trips through\nJSON and markdown untouched — a host rendering exported markdown with\nits own pipeline must apply its own URL policy there.\n\n### Allowing a custom scheme\n\n`validateUrl` is a plain function, so hosts that need a custom protocol\nopt in explicitly. `isSafeUrl` is exported as a building block:\n\n```tsx\nimport { isSafeUrl, linkExtension } from \"@lyfie/luthor-headless\";\n\nlinkExtension.configure({\n  validateUrl: (url) =>\n    isSafeUrl(url, {\n      allowedSchemes: [\"http\", \"https\", \"mailto\", \"tel\", \"obsidian\"],\n    }),\n});\n```\n\n## Embed sources\n\nThe iframe and YouTube embed commands only ever accept `http(s)` URLs.\nDocuments, however, can carry an arbitrary `src` into the model through\n`importJSON` or pasted HTML (`importDOM`) — those paths deliberately do\nnot rewrite the value, so loading and saving a document never mutates\nit. Instead, the `src` is sanitized at the DOM boundary: anything that\nis not `http(s)` renders (and exports to HTML) as `about:blank`.\n\n`sanitizeUrlForAttribute(url, { allowedSchemes })` implements that gate\nand is exported for hosts building their own embed nodes.\n\n## HTML import\n\n`htmlToJSON` sanitizes markup before converting it, using a hand-written\nallowlist pass (`sanitizeHtmlImportDocument`) applied to the parsed —\ninert — document:\n\n- **Dropped with their content:** `script`, `style`, `svg`, `math`,\n  `object`, `embed`, `template`, form controls, and other elements whose\n  payload is executable or meaningless as document text.\n- **Unwrapped:** unknown elements lose their tag but keep their children,\n  so a Word or Google Docs wrapper never costs the user their text.\n- **Attributes:** event handlers (`on*`) and `srcdoc` are always removed;\n  everything else outside a small allowlist (plus inert `data-*` /\n  `aria-*`) is removed; `style` values carrying `url(...)`,\n  `expression(...)`, or `@import` are dropped whole.\n- **URLs:** `a[href]` goes through the link scheme allowlist (a hostile\n  anchor is unwrapped to plain text); `iframe[src]` through the embed\n  allowlist; `img[src]` rejects script-capable absolute schemes while\n  keeping `data:image/*` and relative references, so pasted screenshots\n  survive.\n\nThe policy only widens, never narrows, through options:\n\n```tsx\nimport { htmlToJSON } from \"@lyfie/luthor-headless\";\n\n// Widen deliberately for a trusted source…\nhtmlToJSON(html, {\n  sanitize: { allowedLinkSchemes: [\"http\", \"https\", \"obsidian\"] },\n});\n\n// …or disable entirely for markup the host itself generated.\nhtmlToJSON(trustedCmsMarkup, { sanitize: false });\n```\n\n[Luthor](/demo/) sanitizes what it converts. It is **not** a general-purpose HTML\nsanitizer: markup that survives this pass still has to be understood by\nthe Lexical conversion to reach the document, and the pass makes no\npromises about HTML used outside `htmlToJSON`.\n\n## Other document-derived URLs\n\nThe same DOM-boundary rule covers every remaining place a document can\nsupply a URL:\n\n- **Linked images** (`[![alt](img)](url)` in markdown) — `linkHref` has\n  no Lexical-side sanitization, so the rendered and exported anchors are\n  scheme-gated while the model keeps the raw value.\n- **Saved cards** (`![[card:url]]`) — same treatment for the card anchor.\n- **Wikilinks** render as `href=\"#\"` and navigate through the host\n  adapter, so they never carry a document-supplied URL.\n\n## Upload filenames\n\n`FileDropUploadExtension` writes the host's returned filename into the\nbody as `![[filename]]`. The wikilink syntax has no escape mechanism, so\nthe reserved characters `[ ] # ^ |` and control characters are replaced\nwith `-` before insertion (`sanitizeEmbedTarget`) — a file named\n`x]]y.png` would otherwise close the embed early and corrupt the body on\nthe next save. Hosts should apply the same normalization server-side, or\nthe stored name and the body reference will disagree.\n\n## Metadata envelopes\n\nEnvelopes preserve unsupported nodes inside `<!-- luthor:meta -->`\ncomments. Payload `>` characters are written as their JSON `\\u003e`\nescape so document text containing `-->` cannot terminate the comment\nearly and spill markup into the host's page. `JSON.parse` restores the\nvalue exactly, so round-trips stay lossless.\n\n## Scope of the guarantee\n\n- [Luthor](/demo/) validates URLs it turns into anchors and iframe sources, and\n  sanitizes what it renders into the live DOM.\n- [Luthor](/demo/) does not sanitize markdown or JSON *output* — exports are\n  lossless by design, and a host rendering them outside [Luthor](/demo/) needs its\n  own final-render policy.\n- The blur/lock behavior of embeds is UX, not a security boundary;\n  server-side authorization for media URLs stays with the host.\n",
+    "plainContent": "URL and Content Safety Luthor treats every URL in a document as untrusted input. A document may have been pasted from a hostile page, synced from another machine, or loaded from a store the host does not control — so \"the user typed it\" is never assumed. What this page answers - Which URL schemes do links and embeds accept by default? - How do I allow a custom scheme like obsidian:// deliberately? - What does the guarantee cover, and what stays the host's job? Link URLs The link extension validates every URL at each entry point — paste, auto-linking while typing, and the programmatic insertLink / updateLink / updateLinkByKey commands — with one default validator that accepts: - http: , https: , mailto: , tel: absolute URLs - same-document references ( section ) - protocol-relative references ( //example.com/path ) Everything else is rejected, including javascript: , data: , and vbscript: URLs in any casing or whitespace disguise ( JaVaScRiPt: , java\\tscript: ). Rejected URLs never enter the document model, so they also never appear in markdown, JSON, or HTML output. As a second layer, Lexical's own LinkNode renders any non-allowlisted scheme that reaches the model (for example from a pre-existing document) as an inert about:blank anchor. The raw URL still round-trips through JSON and markdown untouched — a host rendering exported markdown with its own pipeline must apply its own URL policy there. Allowing a custom scheme validateUrl is a plain function, so hosts that need a custom protocol opt in explicitly. isSafeUrl is exported as a building block: import { isSafeUrl, linkExtension } from \"@lyfie/luthor-headless\"; linkExtension.configure({ validateUrl: (url) = isSafeUrl(url, { allowedSchemes: [\"http\", \"https\", \"mailto\", \"tel\", \"obsidian\"], }), }); Embed sources The iframe and YouTube embed commands only ever accept http(s) URLs. Documents, however, can carry an arbitrary src into the model through importJSON or pasted HTML ( importDOM ) — those paths deliberately do not rewrite the value, so loading and saving a document never mutates it. Instead, the src is sanitized at the DOM boundary: anything that is not http(s) renders (and exports to HTML) as about:blank . sanitizeUrlForAttribute(url, { allowedSchemes }) implements that gate and is exported for hosts building their own embed nodes. HTML import htmlToJSON sanitizes markup before converting it, using a hand-written allowlist pass ( sanitizeHtmlImportDocument ) applied to the parsed — inert — document: - Dropped with their content: script , style , svg , math , object , embed , template , form controls, and other elements whose payload is executable or meaningless as document text. - Unwrapped: unknown elements lose their tag but keep their children, so a Word or Google Docs wrapper never costs the user their text. - Attributes: event handlers ( on ) and srcdoc are always removed; everything else outside a small allowlist (plus inert data- / aria- ) is removed; style values carrying url(...) , expression(...) , or @import are dropped whole. - URLs: a[href] goes through the link scheme allowlist (a hostile anchor is unwrapped to plain text); iframe[src] through the embed allowlist; img[src] rejects script-capable absolute schemes while keeping data:image/ and relative references, so pasted screenshots survive. The policy only widens, never narrows, through options: import { htmlToJSON } from \"@lyfie/luthor-headless\"; // Widen deliberately for a trusted source… htmlToJSON(html, { sanitize: { allowedLinkSchemes: [\"http\", \"https\", \"obsidian\"] }, }); // …or disable entirely for markup the host itself generated. htmlToJSON(trustedCmsMarkup, { sanitize: false }); Luthor sanitizes what it converts. It is not a general-purpose HTML sanitizer: markup that survives this pass still has to be understood by the Lexical conversion to reach the document, and the pass makes no promises about HTML used outside htmlToJSON . Other document-derived URLs The same DOM-boundary rule covers every remaining place a document can supply a URL: - Linked images ( alt in markdown) — linkHref has no Lexical-side sanitization, so the rendered and exported anchors are scheme-gated while the model keeps the raw value. - Saved cards ( ![[card:url]] ) — same treatment for the card anchor. - Wikilinks render as href=\" \" and navigate through the host adapter, so they never carry a document-supplied URL. Upload filenames FileDropUploadExtension writes the host's returned filename into the body as ![[filename]] . The wikilink syntax has no escape mechanism, so the reserved characters [ ] ^ and control characters are replaced with - before insertion ( sanitizeEmbedTarget ) — a file named x]]y.png would otherwise close the embed early and corrupt the body on the next save. Hosts should apply the same normalization server-side, or the stored name and the body reference will disagree. Metadata envelopes Envelopes preserve unsupported nodes inside comments. Payload characters are written as their JSON \\u003e escape so document text containing -- cannot terminate the comment early and spill markup into the host's page. JSON.parse restores the value exactly, so round-trips stay lossless. Scope of the guarantee - Luthor validates URLs it turns into anchors and iframe sources, and sanitizes what it renders into the live DOM. - Luthor does not sanitize markdown or JSON output — exports are lossless by design, and a host rendering them outside Luthor needs its own final-render policy. - The blur/lock behavior of embeds is UX, not a security boundary; server-side authorization for media URLs stays with the host.",
+    "sections": [
+      {
+        "heading": "Overview",
+        "id": "overview",
+        "level": 1,
+        "text": "URL and Content Safety Luthor treats every URL in a document as untrusted input. A document may have been pasted from a hostile page, synced from another machine, or loaded from a store the host does not control — so \"the user typed it\" is never assumed."
+      },
+      {
+        "heading": "What this page answers",
+        "id": "what-this-page-answers",
+        "level": 2,
+        "text": "- Which URL schemes do links and embeds accept by default? - How do I allow a custom scheme like obsidian:// deliberately? - What does the guarantee cover, and what stays the host's job?"
+      },
+      {
+        "heading": "Link URLs",
+        "id": "link-urls",
+        "level": 2,
+        "text": "The link extension validates every URL at each entry point — paste, auto-linking while typing, and the programmatic insertLink / updateLink / updateLinkByKey commands — with one default validator that accepts: - http: , https: , mailto: , tel: absolute URLs - same-document references ( section ) - protocol-relative references ( //example.com/path ) Everything else is rejected, including javascript: , data: , and vbscript: URLs in any casing or whitespace disguise ( JaVaScRiPt: , java\\tscript: ). Rejected URLs never enter the document model, so they also never appear in markdown, JSON, or HTML output. As a second layer, Lexical's own LinkNode renders any non-allowlisted scheme that reaches the model (for example from a pre-existing document) as an inert about:blank anchor. The raw URL still round-trips through JSON and markdown untouched — a host rendering exported markdown with its own pipeline must apply its own URL policy there."
+      },
+      {
+        "heading": "Allowing a custom scheme",
+        "id": "allowing-a-custom-scheme",
+        "level": 3,
+        "text": "validateUrl is a plain function, so hosts that need a custom protocol opt in explicitly. isSafeUrl is exported as a building block: import { isSafeUrl, linkExtension } from \"@lyfie/luthor-headless\"; linkExtension.configure({ validateUrl: (url) = isSafeUrl(url, { allowedSchemes: [\"http\", \"https\", \"mailto\", \"tel\", \"obsidian\"], }), });"
+      },
+      {
+        "heading": "Embed sources",
+        "id": "embed-sources",
+        "level": 2,
+        "text": "The iframe and YouTube embed commands only ever accept http(s) URLs. Documents, however, can carry an arbitrary src into the model through importJSON or pasted HTML ( importDOM ) — those paths deliberately do not rewrite the value, so loading and saving a document never mutates it. Instead, the src is sanitized at the DOM boundary: anything that is not http(s) renders (and exports to HTML) as about:blank . sanitizeUrlForAttribute(url, { allowedSchemes }) implements that gate and is exported for hosts building their own embed nodes."
+      },
+      {
+        "heading": "HTML import",
+        "id": "html-import",
+        "level": 2,
+        "text": "htmlToJSON sanitizes markup before converting it, using a hand-written allowlist pass ( sanitizeHtmlImportDocument ) applied to the parsed — inert — document: - Dropped with their content: script , style , svg , math , object , embed , template , form controls, and other elements whose payload is executable or meaningless as document text. - Unwrapped: unknown elements lose their tag but keep their children, so a Word or Google Docs wrapper never costs the user their text. - Attributes: event handlers ( on ) and srcdoc are always removed; everything else outside a small allowlist (plus inert data- / aria- ) is removed; style values carrying url(...) , expression(...) , or @import are dropped whole. - URLs: a[href] goes through the link scheme allowlist (a hostile anchor is unwrapped to plain text); iframe[src] through the embed allowlist; img[src] rejects script-capable absolute schemes while keeping data:image/ and relative references, so pasted screenshots survive. The policy only widens, never narrows, through options: import { htmlToJSON } from \"@lyfie/luthor-headless\"; // Widen deliberately for a trusted source… htmlToJSON(html, { sanitize: { allowedLinkSchemes: [\"http\", \"https\", \"obsidian\"] }, }); // …or disable entirely for markup the host itself generated. htmlToJSON(trustedCmsMarkup, { sanitize: false }); Luthor sanitizes what it converts. It is not a general-purpose HTML sanitizer: markup that survives this pass still has to be understood by the Lexical conversion to reach the document, and the pass makes no promises about HTML used outside htmlToJSON ."
+      },
+      {
+        "heading": "Other document-derived URLs",
+        "id": "other-document-derived-urls",
+        "level": 2,
+        "text": "The same DOM-boundary rule covers every remaining place a document can supply a URL: - Linked images ( alt in markdown) — linkHref has no Lexical-side sanitization, so the rendered and exported anchors are scheme-gated while the model keeps the raw value. - Saved cards ( ![[card:url]] ) — same treatment for the card anchor. - Wikilinks render as href=\" \" and navigate through the host adapter, so they never carry a document-supplied URL."
+      },
+      {
+        "heading": "Upload filenames",
+        "id": "upload-filenames",
+        "level": 2,
+        "text": "FileDropUploadExtension writes the host's returned filename into the body as ![[filename]] . The wikilink syntax has no escape mechanism, so the reserved characters [ ] ^ and control characters are replaced with - before insertion ( sanitizeEmbedTarget ) — a file named x]]y.png would otherwise close the embed early and corrupt the body on the next save. Hosts should apply the same normalization server-side, or the stored name and the body reference will disagree."
+      },
+      {
+        "heading": "Metadata envelopes",
+        "id": "metadata-envelopes",
+        "level": 2,
+        "text": "Envelopes preserve unsupported nodes inside comments. Payload characters are written as their JSON \\u003e escape so document text containing -- cannot terminate the comment early and spill markup into the host's page. JSON.parse restores the value exactly, so round-trips stay lossless."
+      },
+      {
+        "heading": "Scope of the guarantee",
+        "id": "scope-of-the-guarantee",
+        "level": 2,
+        "text": "- Luthor validates URLs it turns into anchors and iframe sources, and sanitizes what it renders into the live DOM. - Luthor does not sanitize markdown or JSON output — exports are lossless by design, and a host rendering them outside Luthor needs its own final-render policy. - The blur/lock behavior of embeds is UX, not a security boundary; server-side authorization for media URLs stays with the host."
+      }
+    ],
+    "headings": [
+      {
+        "level": 2,
+        "text": "What this page answers",
+        "id": "what-this-page-answers"
+      },
+      {
+        "level": 2,
+        "text": "Link URLs",
+        "id": "link-urls"
+      },
+      {
+        "level": 3,
+        "text": "Allowing a custom scheme",
+        "id": "allowing-a-custom-scheme"
+      },
+      {
+        "level": 2,
+        "text": "Embed sources",
+        "id": "embed-sources"
+      },
+      {
+        "level": 2,
+        "text": "HTML import",
+        "id": "html-import"
+      },
+      {
+        "level": 2,
+        "text": "Other document-derived URLs",
+        "id": "other-document-derived-urls"
+      },
+      {
+        "level": 2,
+        "text": "Upload filenames",
+        "id": "upload-filenames"
+      },
+      {
+        "level": 2,
+        "text": "Metadata envelopes",
+        "id": "metadata-envelopes"
+      },
+      {
+        "level": 2,
+        "text": "Scope of the guarantee",
+        "id": "scope-of-the-guarantee"
+      }
+    ],
+    "urlPath": "/docs/luthor-headless/url-and-content-safety/",
+    "sourcePath": "apps/web/src/content/docs/luthor-headless/url-and-content-safety.md",
+    "updatedAt": "2026-08-12T06:16:35.611Z",
+    "package": "headless",
+    "docType": "guide",
+    "surface": "extension",
+    "keywords": [
+      "security",
+      "url validation",
+      "scheme allowlist",
+      "javascript: url",
+      "isSafeUrl",
+      "sanitizeUrlForAttribute",
+      "validateUrl",
+      "html sanitization",
+      "sanitizeHtmlImportDocument",
+      "xss"
+    ],
+    "props": [
+      "validateUrl",
+      "sanitize"
+    ],
+    "exports": [
+      "isSafeUrl",
+      "sanitizeUrlForAttribute",
+      "DEFAULT_ALLOWED_URL_SCHEMES",
+      "EMBED_ALLOWED_URL_SCHEMES",
+      "sanitizeHtmlImportDocument",
+      "sanitizeEmbedTarget"
+    ],
+    "commands": [],
+    "extensions": [
+      "linkExtension",
+      "iframeEmbedExtension",
+      "youTubeEmbedExtension"
+    ],
+    "nodes": [
+      "iframe-embed",
+      "youtube-embed"
+    ],
+    "frameworks": [],
+    "lastVerifiedFrom": [
+      "packages/headless/src/utils/urlSafety.ts",
+      "packages/headless/src/extensions/formatting/LinkExtension.tsx",
+      "packages/headless/src/extensions/media/IframeEmbedExtension.tsx",
+      "packages/headless/src/core/htmlImportSanitizer.ts",
+      "packages/headless/src/core/html.ts",
+      "packages/headless/src/core/metadata-envelope.ts",
+      "packages/headless/src/extensions/embeds/FileDropUploadExtension.tsx"
+    ],
+    "navGroup": "luthor_headless",
+    "navOrder": 45,
+    "navHidden": false,
+    "searchTokens": [
+      "allowed",
+      "allowlist",
+      "and",
+      "content",
+      "cover",
+      "default",
+      "default_allowed_url_schemes",
+      "does",
+      "embed",
+      "embed_allowed_url_schemes",
+      "embeds,",
+      "for",
+      "guarantee",
+      "how",
+      "html",
+      "html sanitization",
+      "iframe",
+      "iframe-embed",
+      "iframeembedextension",
+      "issafeurl",
+      "it,",
+      "javascript",
+      "javascript: url",
+      "linkextension",
+      "links",
+      "not",
+      "override",
+      "safety",
+      "sanitization",
+      "sanitize",
+      "sanitizeembedtarget",
+      "sanitizehtmlimportdocument",
+      "sanitizeurlforattribute",
+      "scheme",
+      "scheme allowlist",
+      "schemes",
+      "security",
+      "the",
+      "the default url scheme allowlist for links and embeds, how to override it, and what the guarantee does and does not cover.",
+      "to",
+      "url",
+      "url and content safety",
+      "url validation",
+      "validateurl",
+      "validation",
+      "what",
+      "xss",
+      "youtube",
+      "youtube-embed",
+      "youtubeembedextension"
+    ],
+    "searchTokenBuckets": {
+      "keywords": [
+        "allowlist",
+        "html",
+        "html sanitization",
+        "issafeurl",
+        "javascript",
+        "javascript: url",
+        "sanitization",
+        "sanitize",
+        "sanitizehtmlimportdocument",
+        "sanitizeurlforattribute",
+        "scheme",
+        "scheme allowlist",
+        "security",
+        "url",
+        "url validation",
+        "validateurl",
+        "validation",
+        "xss"
+      ],
+      "props": [
+        "sanitize",
+        "validateurl"
+      ],
+      "exports": [
+        "allowed",
+        "default",
+        "default_allowed_url_schemes",
+        "embed",
+        "embed_allowed_url_schemes",
+        "issafeurl",
+        "sanitizeembedtarget",
+        "sanitizehtmlimportdocument",
+        "sanitizeurlforattribute",
+        "schemes",
+        "url"
+      ],
+      "commands": [],
+      "extensions": [
+        "iframeembedextension",
+        "linkextension",
+        "youtubeembedextension"
+      ],
+      "nodes": [
+        "embed",
+        "iframe",
+        "iframe-embed",
+        "youtube",
+        "youtube-embed"
+      ],
+      "frameworks": []
+    }
+  },
+  {
+    "slug": [
+      "luthor",
+      "accessibility"
+    ],
+    "title": "Accessibility",
+    "navTitle": "Accessibility",
+    "description": "Luthor's WCAG 2.1 AA posture: keyboard operation, screen-reader semantics, focus handling, reduced motion, and the gaps that remain.",
+    "content": "\n# Accessibility\n\n[Luthor](/demo/) targets **WCAG 2.1 Level AA**. This page records what is\nimplemented and verified, so hosts can cite it in their own\naccessibility statements — and what is not, so nobody cites something\nthat isn't true.\n\n## What this page answers\n\n- Can every feature be operated from the keyboard?\n- What do screen readers announce for the overlay surfaces?\n- How is motion handled, and what remains unverified?\n\n## Keyboard operation\n\n| Surface | Keys |\n|---|---|\n| Editor | Standard text editing. `Tab` inserts indentation inside lists and code; press `Escape` first to move focus out of the editor instead. |\n| Toolbar | `Tab` to reach it, arrow keys within grouped controls, `Enter`/`Space` to activate. |\n| Slash menu (`/`) | `↑`/`↓` to move, `Enter` to insert, `Escape` to dismiss. Focus stays in the editor. |\n| Emoji menu (`:`) | Same as the slash menu. |\n| Command palette | `Escape` to dismiss, `↑`/`↓` to move, `Enter` to run. Focus is in the search input. |\n| Link bubble | Reachable by `Tab`; `Escape` returns to the editor. |\n\n### The Tab trap, and how to escape it\n\nA rich-text editor that swallows `Tab` traps keyboard users. [Luthor](/demo/)'s\n`TabIndentExtension` takes `Tab` for indentation, but pressing `Escape`\nfirst releases it: the next `Tab` then moves focus out of the editor\nnormally. Every other focus-capturing surface follows the same rule —\n`Escape` always returns control to the caret.\n\n## Screen-reader semantics\n\nThe three typeahead surfaces deliberately **keep DOM focus in the\neditor** while open, because moving focus would interrupt typing. They\ntherefore expose the ARIA combobox/listbox relationship instead:\n\n- the container is a `role=\"listbox\"` with an `aria-label`,\n- each item is a `role=\"option\"` carrying `aria-selected`,\n- `aria-activedescendant` on the container (or, for the palette, on its\n  search input) names the active option, so arrowing through the list is\n  announced without focus moving,\n- items are `tabIndex={-1}`, keeping them out of the Tab order,\n- an empty result set is announced through `role=\"status\"`.\n\nThe command palette is additionally a `role=\"dialog\"` with\n`aria-modal=\"true\"`, and its input is a `role=\"combobox\"` wired to the\nlist via `aria-controls`. The link bubble is a labelled `role=\"group\"`\nso its controls are announced in context, and its URL field sets\n`aria-invalid` when the value is rejected.\n\nPurely decorative chrome — menu headers, group titles that duplicate an\n`aria-label`, emoji glyphs beside their own text label — is marked\n`aria-hidden` so it is not read twice.\n\n## Motion\n\n[Luthor](/demo/) honors `prefers-reduced-motion: reduce`. Most of its motion flows\nthrough the `--luthor-theme-transition` token, which the query sets to\n`0s`; animations and transitions that do not read the token are reduced\nto a negligible duration by the same block. Hosts overriding [Luthor](/demo/)'s\nCSS should keep that media query in place.\n\n## Verified by tests\n\n`packages/luthor/src/core/accessibility.test.tsx` guards the semantics\nabove: listbox/option roles, `aria-selected`, `aria-activedescendant`\nwiring per surface, dialog and combobox attributes on the palette,\nlabelled link-bubble controls, and the reduced-motion block including\nits token reset.\n\n## Known gaps\n\nThese are honest limits, not oversights to be discovered later.\n\n### Not verified automatically\n\n- **Colour contrast.** The default light and dark palettes were chosen\n  for AA contrast but there is no automated contrast check in CI. A host\n  overriding the theme tokens owns contrast for its own palette.\n- **Focus-visible styling** across every control in both themes.\n- **Focus restoration** after a menu or dialog closes is driven by\n  keeping focus in the editor rather than by explicitly restoring it.\n  That is correct for the typeahead surfaces; it has not been audited\n  for every dialog.\n\n### Not testable in the current suite\n\nThe a11y tests assert on component source, not on rendered output,\nbecause the overlay surfaces only mount behind editor state that jsdom\ncannot produce (a live caret with a real selection rectangle). A\nrender-level audit — and any real screen-reader verification with\nNVDA, JAWS, or VoiceOver — needs a browser-driven suite. Until that\nexists, treat this page as describing implemented semantics rather than\nobserved assistive-technology behaviour.\n",
+    "plainContent": "Accessibility Luthor targets WCAG 2.1 Level AA . This page records what is implemented and verified, so hosts can cite it in their own accessibility statements — and what is not, so nobody cites something that isn't true. What this page answers - Can every feature be operated from the keyboard? - What do screen readers announce for the overlay surfaces? - How is motion handled, and what remains unverified? Keyboard operation Surface Keys --- --- Editor Standard text editing. Tab inserts indentation inside lists and code; press Escape first to move focus out of the editor instead. Toolbar Tab to reach it, arrow keys within grouped controls, Enter / Space to activate. Slash menu ( / ) ↑ / ↓ to move, Enter to insert, Escape to dismiss. Focus stays in the editor. Emoji menu ( : ) Same as the slash menu. Command palette Escape to dismiss, ↑ / ↓ to move, Enter to run. Focus is in the search input. Link bubble Reachable by Tab ; Escape returns to the editor. The Tab trap, and how to escape it A rich-text editor that swallows Tab traps keyboard users. Luthor 's TabIndentExtension takes Tab for indentation, but pressing Escape first releases it: the next Tab then moves focus out of the editor normally. Every other focus-capturing surface follows the same rule — Escape always returns control to the caret. Screen-reader semantics The three typeahead surfaces deliberately keep DOM focus in the editor while open, because moving focus would interrupt typing. They therefore expose the ARIA combobox/listbox relationship instead: - the container is a role=\"listbox\" with an aria-label , - each item is a role=\"option\" carrying aria-selected , - aria-activedescendant on the container (or, for the palette, on its search input) names the active option, so arrowing through the list is announced without focus moving, - items are tabIndex={-1} , keeping them out of the Tab order, - an empty result set is announced through role=\"status\" . The command palette is additionally a role=\"dialog\" with aria-modal=\"true\" , and its input is a role=\"combobox\" wired to the list via aria-controls . The link bubble is a labelled role=\"group\" so its controls are announced in context, and its URL field sets aria-invalid when the value is rejected. Purely decorative chrome — menu headers, group titles that duplicate an aria-label , emoji glyphs beside their own text label — is marked aria-hidden so it is not read twice. Motion Luthor honors prefers-reduced-motion: reduce . Most of its motion flows through the --luthor-theme-transition token, which the query sets to 0s ; animations and transitions that do not read the token are reduced to a negligible duration by the same block. Hosts overriding Luthor 's CSS should keep that media query in place. Verified by tests packages/luthor/src/core/accessibility.test.tsx guards the semantics above: listbox/option roles, aria-selected , aria-activedescendant wiring per surface, dialog and combobox attributes on the palette, labelled link-bubble controls, and the reduced-motion block including its token reset. Known gaps These are honest limits, not oversights to be discovered later. Not verified automatically - Colour contrast. The default light and dark palettes were chosen for AA contrast but there is no automated contrast check in CI. A host overriding the theme tokens owns contrast for its own palette. - Focus-visible styling across every control in both themes. - Focus restoration after a menu or dialog closes is driven by keeping focus in the editor rather than by explicitly restoring it. That is correct for the typeahead surfaces; it has not been audited for every dialog. Not testable in the current suite The a11y tests assert on component source, not on rendered output, because the overlay surfaces only mount behind editor state that jsdom cannot produce (a live caret with a real selection rectangle). A render-level audit — and any real screen-reader verification with NVDA, JAWS, or VoiceOver — needs a browser-driven suite. Until that exists, treat this page as describing implemented semantics rather than observed assistive-technology behaviour.",
+    "sections": [
+      {
+        "heading": "Overview",
+        "id": "overview",
+        "level": 1,
+        "text": "Accessibility Luthor targets WCAG 2.1 Level AA . This page records what is implemented and verified, so hosts can cite it in their own accessibility statements — and what is not, so nobody cites something that isn't true."
+      },
+      {
+        "heading": "What this page answers",
+        "id": "what-this-page-answers",
+        "level": 2,
+        "text": "- Can every feature be operated from the keyboard? - What do screen readers announce for the overlay surfaces? - How is motion handled, and what remains unverified?"
+      },
+      {
+        "heading": "Keyboard operation",
+        "id": "keyboard-operation",
+        "level": 2,
+        "text": "Surface Keys --- --- Editor Standard text editing. Tab inserts indentation inside lists and code; press Escape first to move focus out of the editor instead. Toolbar Tab to reach it, arrow keys within grouped controls, Enter / Space to activate. Slash menu ( / ) ↑ / ↓ to move, Enter to insert, Escape to dismiss. Focus stays in the editor. Emoji menu ( : ) Same as the slash menu. Command palette Escape to dismiss, ↑ / ↓ to move, Enter to run. Focus is in the search input. Link bubble Reachable by Tab ; Escape returns to the editor."
+      },
+      {
+        "heading": "The Tab trap, and how to escape it",
+        "id": "the-tab-trap-and-how-to-escape-it",
+        "level": 3,
+        "text": "A rich-text editor that swallows Tab traps keyboard users. Luthor 's TabIndentExtension takes Tab for indentation, but pressing Escape first releases it: the next Tab then moves focus out of the editor normally. Every other focus-capturing surface follows the same rule — Escape always returns control to the caret."
+      },
+      {
+        "heading": "Screen-reader semantics",
+        "id": "screen-reader-semantics",
+        "level": 2,
+        "text": "The three typeahead surfaces deliberately keep DOM focus in the editor while open, because moving focus would interrupt typing. They therefore expose the ARIA combobox/listbox relationship instead: - the container is a role=\"listbox\" with an aria-label , - each item is a role=\"option\" carrying aria-selected , - aria-activedescendant on the container (or, for the palette, on its search input) names the active option, so arrowing through the list is announced without focus moving, - items are tabIndex={-1} , keeping them out of the Tab order, - an empty result set is announced through role=\"status\" . The command palette is additionally a role=\"dialog\" with aria-modal=\"true\" , and its input is a role=\"combobox\" wired to the list via aria-controls . The link bubble is a labelled role=\"group\" so its controls are announced in context, and its URL field sets aria-invalid when the value is rejected. Purely decorative chrome — menu headers, group titles that duplicate an aria-label , emoji glyphs beside their own text label — is marked aria-hidden so it is not read twice."
+      },
+      {
+        "heading": "Motion",
+        "id": "motion",
+        "level": 2,
+        "text": "Luthor honors prefers-reduced-motion: reduce . Most of its motion flows through the --luthor-theme-transition token, which the query sets to 0s ; animations and transitions that do not read the token are reduced to a negligible duration by the same block. Hosts overriding Luthor 's CSS should keep that media query in place."
+      },
+      {
+        "heading": "Verified by tests",
+        "id": "verified-by-tests",
+        "level": 2,
+        "text": "packages/luthor/src/core/accessibility.test.tsx guards the semantics above: listbox/option roles, aria-selected , aria-activedescendant wiring per surface, dialog and combobox attributes on the palette, labelled link-bubble controls, and the reduced-motion block including its token reset."
+      },
+      {
+        "heading": "Known gaps",
+        "id": "known-gaps",
+        "level": 2,
+        "text": "These are honest limits, not oversights to be discovered later."
+      },
+      {
+        "heading": "Not verified automatically",
+        "id": "not-verified-automatically",
+        "level": 3,
+        "text": "- Colour contrast. The default light and dark palettes were chosen for AA contrast but there is no automated contrast check in CI. A host overriding the theme tokens owns contrast for its own palette. - Focus-visible styling across every control in both themes. - Focus restoration after a menu or dialog closes is driven by keeping focus in the editor rather than by explicitly restoring it. That is correct for the typeahead surfaces; it has not been audited for every dialog."
+      },
+      {
+        "heading": "Not testable in the current suite",
+        "id": "not-testable-in-the-current-suite",
+        "level": 3,
+        "text": "The a11y tests assert on component source, not on rendered output, because the overlay surfaces only mount behind editor state that jsdom cannot produce (a live caret with a real selection rectangle). A render-level audit — and any real screen-reader verification with NVDA, JAWS, or VoiceOver — needs a browser-driven suite. Until that exists, treat this page as describing implemented semantics rather than observed assistive-technology behaviour."
+      }
+    ],
+    "headings": [
+      {
+        "level": 2,
+        "text": "What this page answers",
+        "id": "what-this-page-answers"
+      },
+      {
+        "level": 2,
+        "text": "Keyboard operation",
+        "id": "keyboard-operation"
+      },
+      {
+        "level": 3,
+        "text": "The Tab trap, and how to escape it",
+        "id": "the-tab-trap-and-how-to-escape-it"
+      },
+      {
+        "level": 2,
+        "text": "Screen-reader semantics",
+        "id": "screen-reader-semantics"
+      },
+      {
+        "level": 2,
+        "text": "Motion",
+        "id": "motion"
+      },
+      {
+        "level": 2,
+        "text": "Verified by tests",
+        "id": "verified-by-tests"
+      },
+      {
+        "level": 2,
+        "text": "Known gaps",
+        "id": "known-gaps"
+      },
+      {
+        "level": 3,
+        "text": "Not verified automatically",
+        "id": "not-verified-automatically"
+      },
+      {
+        "level": 3,
+        "text": "Not testable in the current suite",
+        "id": "not-testable-in-the-current-suite"
+      }
+    ],
+    "urlPath": "/docs/luthor/accessibility/",
+    "sourcePath": "apps/web/src/content/docs/luthor/accessibility.md",
+    "updatedAt": "2026-08-12T11:33:02.151Z",
+    "package": "luthor",
+    "docType": "reference",
+    "surface": "preset",
+    "keywords": [
+      "accessibility",
+      "a11y",
+      "WCAG",
+      "keyboard navigation",
+      "screen reader",
+      "aria-activedescendant",
+      "prefers-reduced-motion"
+    ],
+    "props": [],
+    "exports": [],
+    "commands": [],
+    "extensions": [],
+    "nodes": [],
+    "frameworks": [],
+    "lastVerifiedFrom": [
+      "packages/luthor/src/core/toolbar.tsx",
+      "packages/luthor/src/core/slash-command-menu.tsx",
+      "packages/luthor/src/core/emoji-suggestion-menu.tsx",
+      "packages/luthor/src/core/command-palette.tsx",
+      "packages/luthor/src/core/link-hover-bubble.tsx",
+      "packages/luthor/src/core/styles.css"
+    ],
+    "navGroup": "luthor",
+    "navOrder": 95,
+    "navHidden": false,
+    "searchTokens": [
+      "1",
+      "2",
+      "a11y",
+      "aa",
+      "accessibility",
+      "activedescendant",
+      "and",
+      "aria",
+      "aria-activedescendant",
+      "focus",
+      "gaps",
+      "handling,",
+      "keyboard",
+      "keyboard navigation",
+      "luthor",
+      "luthor s wcag 2.1 aa posture: keyboard operation, screen-reader semantics, focus handling, reduced motion, and the gaps that remain.",
+      "motion",
+      "motion,",
+      "navigation",
+      "operation,",
+      "posture",
+      "prefers",
+      "prefers-reduced-motion",
+      "reader",
+      "reduced",
+      "remain",
+      "s",
+      "screen",
+      "screen reader",
+      "semantics,",
+      "that",
+      "the",
+      "wcag"
+    ],
+    "searchTokenBuckets": {
+      "keywords": [
+        "a11y",
+        "accessibility",
+        "activedescendant",
+        "aria",
+        "aria-activedescendant",
+        "keyboard",
+        "keyboard navigation",
+        "motion",
+        "navigation",
+        "prefers",
+        "prefers-reduced-motion",
+        "reader",
+        "reduced",
+        "screen",
+        "screen reader",
+        "wcag"
+      ],
+      "props": [],
+      "exports": [],
+      "commands": [],
+      "extensions": [],
+      "nodes": [],
+      "frameworks": []
+    }
+  },
+  {
+    "slug": [
       "luthor",
       "architecture"
     ],
@@ -5555,8 +6253,8 @@ export const docsIndex = [
     "title": "Extensive Editor",
     "navTitle": "Extensive Editor",
     "description": "Full preset profile with all core features enabled and broad mode support.",
-    "content": "\r\n# Extensive Editor\r\n\r\nThis preset is the broadest out-of-box profile.\r\n\r\n## When to use this\r\n\r\nUse `ExtensiveEditor` when you want full formatting, media, code, and command workflows in one preset.\r\n\r\n## Mode profile\n\n- Default modes: `visual-editor`, `visual-only`, `json`, `markdown`, `html`.\n- Default initial mode: `visual-editor`.\n\n## Preset props\n\n- `featureFlags`: Toggle individual preset capabilities. Use `featureFlags.codeIntelligence` to turn code intelligence on/off.\n- `availableModes`: Restrict visible mode tabs and allowed mode switching targets.\n- `maxListIndentation`: Caps nested list depth in visual editing.\n- `imageUploadHandler`: Intercepts local image file uploads from the toolbar.\n- `gifUploadHandler`: Intercepts local GIF uploads. Falls back to `imageUploadHandler` when omitted.\n\n## Custom upload hooks\n\n~~~tsx\n<ExtensiveEditor\n  imageUploadHandler={async (file) => uploadToCdn(file)}\n  gifUploadHandler={async (file) => uploadGifToMediaStore(file)}\n/>\n~~~\n\nIf `gifUploadHandler` is not provided, GIF file uploads use `imageUploadHandler`.\n\nFor production handlers, return a persistent URL from your storage service. Returning `blob:` URLs from handlers is fine for quick prototypes, but dev StrictMode remount cycles can revoke blob URLs and cause temporary `ERR_FILE_NOT_FOUND` preview errors.\n\n## Code intelligence toggle\n\n~~~tsx\n<ExtensiveEditor\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { ExtensiveEditor } from '@lyfie/luthor';\n\r\nexport function App() {\r\n  return <ExtensiveEditor placeholder=\"Write anything...\" />;\r\n}\r\n~~~\r\n\r\n\r\n",
-    "plainContent": "Extensive Editor This preset is the broadest out-of-box profile. When to use this Use ExtensiveEditor when you want full formatting, media, code, and command workflows in one preset. Mode profile - Default modes: visual-editor , visual-only , json , markdown , html . - Default initial mode: visual-editor . Preset props - featureFlags : Toggle individual preset capabilities. Use featureFlags.codeIntelligence to turn code intelligence on/off. - availableModes : Restrict visible mode tabs and allowed mode switching targets. - maxListIndentation : Caps nested list depth in visual editing. - imageUploadHandler : Intercepts local image file uploads from the toolbar. - gifUploadHandler : Intercepts local GIF uploads. Falls back to imageUploadHandler when omitted. Custom upload hooks tsx uploadToCdn(file)} gifUploadHandler={async (file) = uploadGifToMediaStore(file)} / If gifUploadHandler is not provided, GIF file uploads use imageUploadHandler . For production handlers, return a persistent URL from your storage service. Returning blob: URLs from handlers is fine for quick prototypes, but dev StrictMode remount cycles can revoke blob URLs and cause temporary ERR FILE NOT FOUND preview errors. Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { ExtensiveEditor } from '@lyfie/luthor'; export function App() { return ; }",
+    "content": "\n# Extensive Editor\n\nThis preset is the broadest out-of-box profile.\n\n## When to use this\n\nUse `ExtensiveEditor` when you want full formatting, media, code, and command workflows in one preset.\n\n## Mode profile\n\n- Default modes: `visual-editor`, `visual-only`, `json`, `markdown`, `html`.\n- Default initial mode: `visual-editor`.\n\n## Preset props\n\n- `featureFlags`: Toggle individual preset capabilities. Use `featureFlags.codeIntelligence` to turn code intelligence on/off.\n- `availableModes`: Restrict visible mode tabs and allowed mode switching targets.\n- `maxListIndentation`: Caps nested list depth in visual editing.\n- `imageUploadHandler`: Intercepts local image file uploads from the toolbar.\n- `gifUploadHandler`: Intercepts local GIF uploads. Falls back to `imageUploadHandler` when omitted.\n- `onChange`: Change notification, coalesced to one call per committed change, with `{ markdown, source, isDirty }`. Fires for every mutation path (typing, toolbar, slash commands, undo/redo, paste, drag-drop, markdown source view) as `source: \"user\"`; host adopts (`injectJSON`) fire as `source: \"programmatic\"`; the initial `defaultContent` load never fires. Wire autosave here — a DOM `onInput` handler on a wrapper element does **not** work, because Lexical stops propagation of the contenteditable's `input` event.\n- `onReady`: Fires after the editor is interactive **and** initial content has reconciled, so `getMarkdown()` inside the callback is immediately stable. The editor normalises imported markdown, so baseline dirty checks against its own output, never against your input string.\n- `onDesync`: Opt-in watchdog reporting model/DOM divergence — text painted into the contenteditable behind the reconciler's back (`document.execCommand`, extensions, password managers) that would silently miss from `getMarkdown()`.\n- `presetId`: Preset identity for the editable-surface class names (`luthor-preset-<id>__container` / `__content` / `__placeholder`). Wrapper presets set their own id so host CSS matches the rendered element.\n\n## Keyboard access\n\nTab indents and Shift+Tab outdents inside the editor. Keyboard-only users escape the capture with **Escape, then Tab** — the armed Tab performs the browser's native focus move out of the editor (WCAG 2.1.2); any other key restores Tab-as-indent.\n\n## Custom upload hooks\n\n~~~tsx\n<ExtensiveEditor\n  imageUploadHandler={async (file) => uploadToCdn(file)}\n  gifUploadHandler={async (file) => uploadGifToMediaStore(file)}\n/>\n~~~\n\nIf `gifUploadHandler` is not provided, GIF file uploads use `imageUploadHandler`.\n\nFor production handlers, return a persistent URL from your storage service. Returning `blob:` URLs from handlers is fine for quick prototypes, but dev StrictMode remount cycles can revoke blob URLs and cause temporary `ERR_FILE_NOT_FOUND` preview errors.\n\n## Code intelligence toggle\n\n~~~tsx\n<ExtensiveEditor\n  featureFlags={{ codeIntelligence: false }}\n/>\n~~~\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { ExtensiveEditor } from '@lyfie/luthor';\n\nexport function App() {\n  return <ExtensiveEditor placeholder=\"Write anything...\" />;\n}\n~~~\n\n\n",
+    "plainContent": "Extensive Editor This preset is the broadest out-of-box profile. When to use this Use ExtensiveEditor when you want full formatting, media, code, and command workflows in one preset. Mode profile - Default modes: visual-editor , visual-only , json , markdown , html . - Default initial mode: visual-editor . Preset props - featureFlags : Toggle individual preset capabilities. Use featureFlags.codeIntelligence to turn code intelligence on/off. - availableModes : Restrict visible mode tabs and allowed mode switching targets. - maxListIndentation : Caps nested list depth in visual editing. - imageUploadHandler : Intercepts local image file uploads from the toolbar. - gifUploadHandler : Intercepts local GIF uploads. Falls back to imageUploadHandler when omitted. - onChange : Change notification, coalesced to one call per committed change, with { markdown, source, isDirty } . Fires for every mutation path (typing, toolbar, slash commands, undo/redo, paste, drag-drop, markdown source view) as source: \"user\" ; host adopts ( injectJSON ) fire as source: \"programmatic\" ; the initial defaultContent load never fires. Wire autosave here — a DOM onInput handler on a wrapper element does not work, because Lexical stops propagation of the contenteditable's input event. - onReady : Fires after the editor is interactive and initial content has reconciled, so getMarkdown() inside the callback is immediately stable. The editor normalises imported markdown, so baseline dirty checks against its own output, never against your input string. - onDesync : Opt-in watchdog reporting model/DOM divergence — text painted into the contenteditable behind the reconciler's back ( document.execCommand , extensions, password managers) that would silently miss from getMarkdown() . - presetId : Preset identity for the editable-surface class names ( luthor-preset- container / content / placeholder ). Wrapper presets set their own id so host CSS matches the rendered element. Keyboard access Tab indents and Shift+Tab outdents inside the editor. Keyboard-only users escape the capture with Escape, then Tab — the armed Tab performs the browser's native focus move out of the editor (WCAG 2.1.2); any other key restores Tab-as-indent. Custom upload hooks tsx uploadToCdn(file)} gifUploadHandler={async (file) = uploadGifToMediaStore(file)} / If gifUploadHandler is not provided, GIF file uploads use imageUploadHandler . For production handlers, return a persistent URL from your storage service. Returning blob: URLs from handlers is fine for quick prototypes, but dev StrictMode remount cycles can revoke blob URLs and cause temporary ERR FILE NOT FOUND preview errors. Code intelligence toggle tsx tsx import '@lyfie/luthor/styles.css'; import { ExtensiveEditor } from '@lyfie/luthor'; export function App() { return ; }",
     "sections": [
       {
         "heading": "Overview",
@@ -5580,7 +6278,13 @@ export const docsIndex = [
         "heading": "Preset props",
         "id": "preset-props",
         "level": 2,
-        "text": "- featureFlags : Toggle individual preset capabilities. Use featureFlags.codeIntelligence to turn code intelligence on/off. - availableModes : Restrict visible mode tabs and allowed mode switching targets. - maxListIndentation : Caps nested list depth in visual editing. - imageUploadHandler : Intercepts local image file uploads from the toolbar. - gifUploadHandler : Intercepts local GIF uploads. Falls back to imageUploadHandler when omitted."
+        "text": "- featureFlags : Toggle individual preset capabilities. Use featureFlags.codeIntelligence to turn code intelligence on/off. - availableModes : Restrict visible mode tabs and allowed mode switching targets. - maxListIndentation : Caps nested list depth in visual editing. - imageUploadHandler : Intercepts local image file uploads from the toolbar. - gifUploadHandler : Intercepts local GIF uploads. Falls back to imageUploadHandler when omitted. - onChange : Change notification, coalesced to one call per committed change, with { markdown, source, isDirty } . Fires for every mutation path (typing, toolbar, slash commands, undo/redo, paste, drag-drop, markdown source view) as source: \"user\" ; host adopts ( injectJSON ) fire as source: \"programmatic\" ; the initial defaultContent load never fires. Wire autosave here — a DOM onInput handler on a wrapper element does not work, because Lexical stops propagation of the contenteditable's input event. - onReady : Fires after the editor is interactive and initial content has reconciled, so getMarkdown() inside the callback is immediately stable. The editor normalises imported markdown, so baseline dirty checks against its own output, never against your input string. - onDesync : Opt-in watchdog reporting model/DOM divergence — text painted into the contenteditable behind the reconciler's back ( document.execCommand , extensions, password managers) that would silently miss from getMarkdown() . - presetId : Preset identity for the editable-surface class names ( luthor-preset- container / content / placeholder ). Wrapper presets set their own id so host CSS matches the rendered element."
+      },
+      {
+        "heading": "Keyboard access",
+        "id": "keyboard-access",
+        "level": 2,
+        "text": "Tab indents and Shift+Tab outdents inside the editor. Keyboard-only users escape the capture with Escape, then Tab — the armed Tab performs the browser's native focus move out of the editor (WCAG 2.1.2); any other key restores Tab-as-indent."
       },
       {
         "heading": "Custom upload hooks",
@@ -5613,6 +6317,11 @@ export const docsIndex = [
       },
       {
         "level": 2,
+        "text": "Keyboard access",
+        "id": "keyboard-access"
+      },
+      {
+        "level": 2,
         "text": "Custom upload hooks",
         "id": "custom-upload-hooks"
       },
@@ -5624,7 +6333,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/presets/extensive-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/extensive-editor.md",
-    "updatedAt": "2026-04-17T04:40:30.316Z",
+    "updatedAt": "2026-08-11T11:14:46.911Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -5640,7 +6349,11 @@ export const docsIndex = [
       "availableModes",
       "maxListIndentation",
       "imageUploadHandler",
-      "gifUploadHandler"
+      "gifUploadHandler",
+      "onChange",
+      "onReady",
+      "onDesync",
+      "presetId"
     ],
     "exports": [
       "ExtensiveEditor",
@@ -5701,9 +6414,13 @@ export const docsIndex = [
       "insert.table",
       "maxlistindentation",
       "mode",
+      "onchange",
+      "ondesync",
+      "onready",
       "palette",
       "palette.show",
       "preset",
+      "presetid",
       "profile",
       "react",
       "show",
@@ -5726,14 +6443,22 @@ export const docsIndex = [
         "gifuploadhandler",
         "imageuploadhandler",
         "maxlistindentation",
-        "preset"
+        "onchange",
+        "ondesync",
+        "onready",
+        "preset",
+        "presetid"
       ],
       "props": [
         "availablemodes",
         "featureflags",
         "gifuploadhandler",
         "imageuploadhandler",
-        "maxlistindentation"
+        "maxlistindentation",
+        "onchange",
+        "ondesync",
+        "onready",
+        "presetid"
       ],
       "exports": [
         "createextensivepreset",
@@ -6317,8 +7042,8 @@ export const docsIndex = [
     "title": "Papyra Editor",
     "navTitle": "Papyra Editor",
     "description": "Markdown-native, frontmatter-agnostic, token-themed note canvas preset with Obsidian-style embeds and a host adapter seam.",
-    "content": "\n# Papyra Editor\n\n`PapyraEditor` is a markdown-native note canvas composed on top of the extensive\npreset. It is the editor the [Papyra](https://github.com/lyfie-org) note app\nships, but it is host-agnostic: every external capability (media, uploads, note\nsearch and navigation, block resolution) flows through an injected adapter, so\nany note app can reuse it by supplying different configuration.\n\n## When to use this\n\nReach for `PapyraEditor` when your body of truth is a frontmatter-free markdown\nfile and you want a polished, restricted writing surface with Obsidian-style\nembeds — `[[Note]]` wikilinks, `![[file.ext]]` media, `![[Note#^id]]`\ntransclusion, and trailing `^id` block anchors — that survives a lossless\nround-trip back to that file.\n\n## The four invariants\n\n1. **Markdown is the source of truth.** `getMarkdown()` returns exactly what\n   lands in the `.md` body (CommonMark plus the documented embed set). There is\n   no JSON or HTML \"real\" format. The preset runs `sourceMetadataMode=\"none\"`.\n2. **The body is frontmatter-free.** The host splits YAML from the body and\n   hands the editor only the body; the preset never renders, emits, or mangles\n   frontmatter.\n3. **The caret is sacred.** The editor is **uncontrolled** — it reads\n   `defaultContent` once on mount and never exposes a `value`/`onChange`\n   round-trip. Adopt a remote revision by remounting (change the React `key`) or\n   by calling `setMarkdown` imperatively, never with a live-DOM patch.\n4. **Theming is token-driven.** All color and typography flow from\n   `var(--papyra-*, fallback)` tokens. The preset bundles no fonts — the host\n   loads Marcellus / Sora / Roboto Mono.\n\n## Locked contract\n\n`PapyraEditor` hard-locks the props it owns; callers cannot reach them:\n\n- Modes are fixed to `['visual', 'markdown']` (no `json`/`html`).\n- View tabs hidden. By default the only toolbar is floating-on-selection; the\n  opt-in `toolbar` prop adds an always-visible toolbar, but it is never pinned.\n- `markdownSourceOfTruth` is on and `sourceMetadataMode=\"none\"`.\n- `featureFlags` are routed through `papyraFeaturePolicy`, whose **enforced** set\n  keeps markdown-breaking features off — font/size/line-height pickers, arbitrary\n  text color and highlight, sub/superscript, the in-editor theme toggle, and\n  draggable blocks **cannot be switched back on** by a caller flag.\n\n## Preset props\n\n- `adapter`: the host seam (`PapyraEditorAdapter`). Supplies media resolution,\n  uploads, note search/navigation, and block resolution. Omit it and the preset\n  uses a graceful no-op adapter so the editor still renders and round-trips.\n- `colored`: light-locks a tinted (\"colored\") note so ink stays readable on the\n  host-painted paper, regardless of the ambient app theme.\n- `readOnly`: mounts a non-editable surface (`visual-only`, click-to-edit\n  disabled) that emits no change events — safe for revision previews and\n  time-machine scrubbing. Pair with repeated `setMarkdown` calls.\n- `variant`: `\"focus\"` widens the body to a centered, distraction-free measure;\n  `\"default\"` is the standard editorial measure.\n- `toolbar`: opt into a persistent toolbar above the editor (default `false` —\n  floating-on-selection only). It lists just Papyra's markdown-safe actions\n  (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,\n  lists + checklist, code block, horizontal rule, table, image); the restricted\n  controls (typography pickers, color/highlight, sub/superscript, alignment, theme\n  toggle) can never appear, and the toolbar is never pinned. Only renders in the\n  editable visual surface, so `readOnly`/`locked` never show it.\n- `locked`: withholds the body entirely — renders a blurred placeholder and\n  **never mounts the editor**, so there is no plaintext in the DOM. The lock is\n  UX only; the server (`401`/`PathGuard`) is the security boundary.\n- `onOutlineChange`: fired (debounced) with the current document outline; drives\n  a host's live table-of-contents scrollbar. Read-only observation — the caret\n  is never touched.\n- `featureFlags`: per-feature overrides, resolved through the enforced policy.\n\n## Imperative ref\n\n`PapyraEditorRef` extends `ExtensiveEditorRef` with the markdown-first surface a\nhost drives: `setMarkdown(md)` (host-driven adopt), `focus()`, `getOutline()` /\n`scrollToHeading(key)` for the table of contents, `getBlocks()` for trailing\nblock anchors, and `getMentions()` for `@username` detection. The host calls\nthese during its own orchestration (autosave, remount, TOC) — they never fire on\nkeystrokes.\n\n## The host adapter\n\nThe adapter is the entire contract between the preset and the host. The editor\ndeclares it; the host implements it.\n\n~~~ts\ninterface PapyraEditorAdapter {\n  resolveMediaUrl(filename: string): string;                 // ![[file]] → URL\n  uploadMedia(file: File): Promise<{ filename: string }>;    // drop/paste → store\n  openNote(ref: { title?: string; id?: string }): void;      // [[Note]] → navigate\n  searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;\n  resolveBlock?(ref: { note: string; blockId: string }): Promise<string | null>;\n  resolveCard?(url: string): Promise<{\n    title?: string;\n    description?: string;\n    image?: string;\n    favicon?: string;\n    siteName?: string;\n  } | null>;                                                 // ![[card:url]] → metadata\n  onMentions?(usernames: string[]): void;\n}\n~~~\n\nThe adapter's resolvers are where the host's server-side authorization lives. The\neditor's blur/lock is UX, never the boundary.\n\n## Usage\n\n~~~tsx\nimport '@lyfie/luthor/styles.css';\nimport { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor';\nimport { useRef } from 'react';\n\nexport function NoteCanvas({ body }: { body: string }) {\n  const ref = useRef<PapyraEditorRef>(null);\n\n  return (\n    <PapyraEditor\n      ref={ref}\n      defaultContent={body}\n      adapter={{\n        resolveMediaUrl: (name) => `/api/media/${name}`,\n        uploadMedia: async (file) => {\n          const stored = await upload(file);\n          return { filename: stored.name };\n        },\n        openNote: ({ title }) => router.push(`/notes/${title}`),\n        searchNotes: (q) => api.searchNotes(q),\n      }}\n      onReady={(editor) => {\n        // Read the body imperatively — never a controlled value.\n        console.log(editor.getMarkdown());\n      }}\n    />\n  );\n}\n~~~\n\n`PapyraEditor` is also available as a subpath export:\n\n~~~ts\nimport { PapyraEditor } from '@lyfie/luthor/presets/papyra';\n~~~\n\n## Embeds and lossless round-trips\n\nEvery custom embed ships a bidirectional markdown transformer, so the body that\n`getMarkdown()` returns is byte-stable across repeated saves:\n\n| Markdown            | Renders as                          |\n| ------------------- | ----------------------------------- |\n| `![[diagram.png]]`  | inline image (via `resolveMediaUrl`)|\n| `[[Note]]`          | wikilink (click → `openNote`)       |\n| `[[Note\\|alias]]`   | aliased wikilink                    |\n| `![[Note#^id]]`     | read-only transclusion              |\n| `text ^id`          | trailing block anchor (non-rendering)|\n| `![[card:url]]`     | saved web card (via `resolveCard`)  |\n| `![[card:url\\|title]]` | saved web card with author title |\n| `![[youtube:url]]`  | YouTube player (optional `\\|caption`)|\n| `![[iframe:url]]`   | iframe embed (optional `\\|caption`) |\n| `> [!transcript]`   | transcription callout (display-only)|\n\nThe embed nodes and transformers live in `@lyfie/luthor-headless` and are\nre-exported through `@lyfie/luthor` — the preset only composes and themes them.\n\nThe **transcription callout** is an Obsidian-style `> [!transcript]` block: an\nopening line (optionally `> [!transcript] Title`) followed by `>`-prefixed body\nlines, terminated by a blank line. It renders as an accent-tinted, labelled block\non the quote surface and is display-only — the transcript text lives inline in the\nbody, so it needs no resolver and round-trips verbatim (the marker is normalized\nto lowercase).\n\nThe **saved web card** (`![[card:url]]`) renders an archived link card. When the\nhost wires `resolveCard`, the editor enriches it with the page's open-graph\nmetadata (title, description, preview image, favicon, site name); without a\nresolver the card degrades to a titled link to the URL. As with every embed, only\nthe verbatim `url` (and optional `|title`) is serialized, so the metadata is\nrender-only and the markdown round-trips unchanged.\n\nThe **YouTube** (`![[youtube:url]]`) and **iframe** (`![[iframe:url]]`) embeds\nreuse the shared media nodes from `@lyfie/luthor-headless` and carry an optional\n`|caption`. A YouTube `watch`/`youtu.be`/`shorts` link is normalized to the\ncanonical `…/embed/<id>` player URL on the first pass and is byte-stable\nafterward; an iframe URL gains `https://` if it has none. Frame size and\nalignment are session-only presentation state with no markdown representation\n(like image dimensions), so the markdown text itself round-trips unchanged.\n\n## Command surface\n\nThe slash menu and command palette are curated down to note-taking primitives:\nheadings (H1–H3), lists and checklist, quote, code block, table, horizontal\nrule, and image. The typography pickers, view tabs, and pinned toolbar are\nenforced off.\n\nOn top of the curated built-ins, PapyraEditor contributes three note-specific\nslash commands through the editor's `extraSlashCommands` seam:\n\n| Command       | Inserts                                                        |\n| ------------- | ------------------------------------------------------------- |\n| `Link note`   | the `[[` trigger, which opens the wikilink typeahead          |\n| `Embed media` | a picked file → `adapter.uploadMedia` → `![[filename]]`       |\n| `Insert date` | today's date as `YYYY-MM-DD`                                  |\n\nEach writes markdown-native syntax at the caret, so the body stays the source of\ntruth and round-trips unchanged. The commands are appended automatically — there\nis nothing to wire beyond supplying an `adapter` for `Embed media` to upload\nthrough.\n",
-    "plainContent": "Papyra Editor PapyraEditor is a markdown-native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host-agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse it by supplying different configuration. When to use this Reach for PapyraEditor when your body of truth is a frontmatter-free markdown file and you want a polished, restricted writing surface with Obsidian-style embeds — [[Note]] wikilinks, ![[file.ext]] media, ![[Note ^id]] transclusion, and trailing ^id block anchors — that survives a lossless round-trip back to that file. The four invariants 1. Markdown is the source of truth. getMarkdown() returns exactly what lands in the .md body (CommonMark plus the documented embed set). There is no JSON or HTML \"real\" format. The preset runs sourceMetadataMode=\"none\" . 2. The body is frontmatter-free. The host splits YAML from the body and hands the editor only the body; the preset never renders, emits, or mangles frontmatter. 3. The caret is sacred. The editor is uncontrolled — it reads defaultContent once on mount and never exposes a value / onChange round-trip. Adopt a remote revision by remounting (change the React key ) or by calling setMarkdown imperatively, never with a live-DOM patch. 4. Theming is token-driven. All color and typography flow from var(--papyra- , fallback) tokens. The preset bundles no fonts — the host loads Marcellus / Sora / Roboto Mono. Locked contract PapyraEditor hard-locks the props it owns; callers cannot reach them: - Modes are fixed to ['visual', 'markdown'] (no json / html ). - View tabs hidden. By default the only toolbar is floating-on-selection; the opt-in toolbar prop adds an always-visible toolbar, but it is never pinned. - markdownSourceOfTruth is on and sourceMetadataMode=\"none\" . - featureFlags are routed through papyraFeaturePolicy , whose enforced set keeps markdown-breaking features off — font/size/line-height pickers, arbitrary text color and highlight, sub/superscript, the in-editor theme toggle, and draggable blocks cannot be switched back on by a caller flag. Preset props - adapter : the host seam ( PapyraEditorAdapter ). Supplies media resolution, uploads, note search/navigation, and block resolution. Omit it and the preset uses a graceful no-op adapter so the editor still renders and round-trips. - colored : light-locks a tinted (\"colored\") note so ink stays readable on the host-painted paper, regardless of the ambient app theme. - readOnly : mounts a non-editable surface ( visual-only , click-to-edit disabled) that emits no change events — safe for revision previews and time-machine scrubbing. Pair with repeated setMarkdown calls. - variant : \"focus\" widens the body to a centered, distraction-free measure; \"default\" is the standard editorial measure. - toolbar : opt into a persistent toolbar above the editor (default false — floating-on-selection only). It lists just Papyra's markdown-safe actions (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link, lists + checklist, code block, horizontal rule, table, image); the restricted controls (typography pickers, color/highlight, sub/superscript, alignment, theme toggle) can never appear, and the toolbar is never pinned. Only renders in the editable visual surface, so readOnly / locked never show it. - locked : withholds the body entirely — renders a blurred placeholder and never mounts the editor , so there is no plaintext in the DOM. The lock is UX only; the server ( 401 / PathGuard ) is the security boundary. - onOutlineChange : fired (debounced) with the current document outline; drives a host's live table-of-contents scrollbar. Read-only observation — the caret is never touched. - featureFlags : per-feature overrides, resolved through the enforced policy. Imperative ref PapyraEditorRef extends ExtensiveEditorRef with the markdown-first surface a host drives: setMarkdown(md) (host-driven adopt), focus() , getOutline() / scrollToHeading(key) for the table of contents, getBlocks() for trailing block anchors, and getMentions() for @username detection. The host calls these during its own orchestration (autosave, remount, TOC) — they never fire on keystrokes. The host adapter The adapter is the entire contract between the preset and the host. The editor declares it; the host implements it. ts interface PapyraEditorAdapter { resolveMediaUrl(filename: string): string; // ![[file]] → URL uploadMedia(file: File): Promise ; // drop/paste → store openNote(ref: { title?: string; id?: string }): void; // [[Note]] → navigate searchNotes(q: string): Promise ; resolveBlock?(ref: { note: string; blockId: string }): Promise ; resolveCard?(url: string): Promise ; // ![[card:url]] → metadata onMentions?(usernames: string[]): void; } The adapter's resolvers are where the host's server-side authorization lives. The editor's blur/lock is UX, never the boundary. Usage tsx import '@lyfie/luthor/styles.css'; import { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor'; import { useRef } from 'react'; export function NoteCanvas({ body }: { body: string }) { const ref = useRef (null); return ( /api/media/${name} , uploadMedia: async (file) = { const stored = await upload(file); return { filename: stored.name }; }, openNote: ({ title }) = router.push( /notes/${title} ), searchNotes: (q) = api.searchNotes(q), }} onReady={(editor) = { // Read the body imperatively — never a controlled value. console.log(editor.getMarkdown()); }} / ); } PapyraEditor is also available as a subpath export: ts import { PapyraEditor } from '@lyfie/luthor/presets/papyra'; Embeds and lossless round-trips Every custom embed ships a bidirectional markdown transformer, so the body that getMarkdown() returns is byte-stable across repeated saves: Markdown Renders as ------------------- ----------------------------------- ![[diagram.png]] inline image (via resolveMediaUrl ) [[Note]] wikilink (click → openNote ) [[Note\\ alias]] aliased wikilink ![[Note ^id]] read-only transclusion text ^id trailing block anchor (non-rendering) ![[card:url]] saved web card (via resolveCard ) ![[card:url\\ title]] saved web card with author title ![[youtube:url]] YouTube player (optional \\ caption ) ![[iframe:url]] iframe embed (optional \\ caption ) [!transcript] transcription callout (display-only) The embed nodes and transformers live in @lyfie/luthor-headless and are re-exported through @lyfie/luthor — the preset only composes and themes them. The transcription callout is an Obsidian-style [!transcript] block: an opening line (optionally [!transcript] Title ) followed by -prefixed body lines, terminated by a blank line. It renders as an accent-tinted, labelled block on the quote surface and is display-only — the transcript text lives inline in the body, so it needs no resolver and round-trips verbatim (the marker is normalized to lowercase). The saved web card ( ![[card:url]] ) renders an archived link card. When the host wires resolveCard , the editor enriches it with the page's open-graph metadata (title, description, preview image, favicon, site name); without a resolver the card degrades to a titled link to the URL. As with every embed, only the verbatim url (and optional title ) is serialized, so the metadata is render-only and the markdown round-trips unchanged. The YouTube ( ![[youtube:url]] ) and iframe ( ![[iframe:url]] ) embeds reuse the shared media nodes from @lyfie/luthor-headless and carry an optional caption . A YouTube watch / youtu.be / shorts link is normalized to the canonical …/embed/ player URL on the first pass and is byte-stable afterward; an iframe URL gains https:// if it has none. Frame size and alignment are session-only presentation state with no markdown representation (like image dimensions), so the markdown text itself round-trips unchanged. Command surface The slash menu and command palette are curated down to note-taking primitives: headings (H1–H3), lists and checklist, quote, code block, table, horizontal rule, and image. The typography pickers, view tabs, and pinned toolbar are enforced off. On top of the curated built-ins, PapyraEditor contributes three note-specific slash commands through the editor's extraSlashCommands seam: Command Inserts ------------- ------------------------------------------------------------- Link note the [[ trigger, which opens the wikilink typeahead Embed media a picked file → adapter.uploadMedia → ![[filename]] Insert date today's date as YYYY-MM-DD Each writes markdown-native syntax at the caret, so the body stays the source of truth and round-trips unchanged. The commands are appended automatically — there is nothing to wire beyond supplying an adapter for Embed media to upload through.",
+    "content": "\r\n# Papyra Editor\r\n\r\n`PapyraEditor` is a markdown-native note canvas composed on top of the extensive\r\npreset. It is the editor the [Papyra](https://github.com/lyfie-org) note app\r\nships, but it is host-agnostic: every external capability (media, uploads, note\r\nsearch and navigation, block resolution) flows through an injected adapter, so\r\nany note app can reuse it by supplying different configuration.\r\n\r\n## When to use this\r\n\r\nReach for `PapyraEditor` when your body of truth is a frontmatter-free markdown\r\nfile and you want a polished, restricted writing surface with Obsidian-style\r\nembeds — `[[Note]]` wikilinks, `![[file.ext]]` media, `![[Note#^id]]`\r\ntransclusion, and trailing `^id` block anchors — that survives a lossless\r\nround-trip back to that file.\r\n\r\n## The four invariants\r\n\r\n1. **Markdown is the source of truth.** `getMarkdown()` returns exactly what\r\n   lands in the `.md` body (CommonMark plus the documented embed set). There is\r\n   no JSON or HTML \"real\" format. The preset runs `sourceMetadataMode=\"none\"`.\r\n2. **The body is frontmatter-free.** The host splits YAML from the body and\r\n   hands the editor only the body; the preset never renders, emits, or mangles\r\n   frontmatter.\r\n3. **The caret is sacred.** The editor is **uncontrolled** — it reads\r\n   `defaultContent` once on mount and there is no `value` prop or controlled\r\n   round-trip. The `onChange` callback is a **notification**, not a value\r\n   binding: nothing you do in it re-renders the document. Adopt a remote\r\n   revision by remounting (change the React `key`) or by calling `setMarkdown`\r\n   imperatively, never with a live-DOM patch.\r\n4. **Theming is token-driven.** All color and typography flow from\r\n   `var(--papyra-*, fallback)` tokens. The preset bundles no fonts — the host\r\n   loads Marcellus / Sora / Roboto Mono.\r\n\r\n## Locked contract\r\n\r\n`PapyraEditor` hard-locks the props it owns; callers cannot reach them:\r\n\r\n- Modes are fixed to `['visual', 'markdown']` (no `json`/`html`).\r\n- View tabs hidden. By default the only toolbar is floating-on-selection; the\r\n  opt-in `toolbar` prop adds an always-visible toolbar, but it is never pinned.\r\n- `markdownSourceOfTruth` is on and `sourceMetadataMode=\"none\"`.\r\n- `featureFlags` are routed through `papyraFeaturePolicy`, whose **enforced** set\r\n  keeps markdown-breaking features off — font/size/line-height pickers, arbitrary\r\n  text color and highlight, sub/superscript, the in-editor theme toggle, and\r\n  draggable blocks **cannot be switched back on** by a caller flag.\r\n\r\n## Preset props\r\n\r\n- `adapter`: the host seam (`PapyraEditorAdapter`). Supplies media resolution,\r\n  uploads, note search/navigation, and block resolution. Omit it and the preset\r\n  uses a graceful no-op adapter so the editor still renders and round-trips.\r\n- `colored`: light-locks a tinted (\"colored\") note so ink stays readable on the\r\n  host-painted paper, regardless of the ambient app theme.\r\n- `readOnly`: mounts a non-editable surface (`visual-only`, click-to-edit\r\n  disabled) that emits no change events — safe for revision previews and\r\n  time-machine scrubbing. Pair with repeated `setMarkdown` calls.\r\n- `variant`: `\"focus\"` widens the body to a centered, distraction-free measure;\r\n  `\"default\"` is the standard editorial measure.\r\n- `toolbar`: opt into a persistent toolbar above the editor (default `false` —\r\n  floating-on-selection only). It lists just Papyra's markdown-safe actions\r\n  (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,\r\n  lists + checklist, code block, horizontal rule, table, image); the restricted\r\n  controls (typography pickers, color/highlight, sub/superscript, alignment, theme\r\n  toggle) can never appear, and the toolbar is never pinned. Only renders in the\r\n  editable visual surface, so `readOnly`/`locked` never show it.\r\n- `locked`: withholds the body entirely — renders a blurred placeholder and\r\n  **never mounts the editor**, so there is no plaintext in the DOM. The lock is\r\n  UX only; the server (`401`/`PathGuard`) is the security boundary.\r\n- `blockAnchors`: block-anchor assignment policy — `\"off\"` (default; anchors\r\n  already in the text parse and round-trip, nothing creates one), `\"on-demand\"`\r\n  (the host stamps at save time via `ensureBlockAnchors()`), or `\"auto\"` (every\r\n  eligible top-level block — paragraph, heading, quote — gets a stable `^id`\r\n  appended on commit). Anchors are invisible in the visual surface: no `^id`\r\n  artefact, no caret stop, nothing selectable — while the trailing ` ^id`\r\n  round-trips losslessly in the markdown.\r\n- `onChange`: first-class change notification (see\r\n  [Change notification and autosave](#change-notification-and-autosave)).\r\n- `onDesync`: opt-in model/DOM divergence watchdog (see\r\n  [The DOM is not the source of truth](#the-dom-is-not-the-source-of-truth)).\r\n- `onOutlineChange`: fired (debounced) with the current document outline; drives\r\n  a host's live table-of-contents scrollbar. Read-only observation — the caret\r\n  is never touched.\r\n- `featureFlags`: per-feature overrides, resolved through the enforced policy.\r\n\r\n## Change notification and autosave\r\n\r\n**Do not attach a DOM `onInput` handler to a wrapper element — it will never\r\nfire.** Lexical stops propagation of the contenteditable's `input` event, so\r\nReact's delegated synthetic `onInput` on an ancestor receives nothing, and an\r\nautosave driven that way silently saves nothing. Wire autosave to the editor's\r\nown `onChange` instead:\r\n\r\n~~~tsx\r\n<PapyraEditor\r\n  defaultContent={body}\r\n  onChange={({ markdown, source, isDirty }) => {\r\n    if (source !== 'user') return; // ignore your own setMarkdown adopts\r\n    if (!isDirty) return;\r\n    scheduleAutosave(markdown);    // your debounce; one call per commit arrives here\r\n  }}\r\n/>\r\n~~~\r\n\r\nThe payload is `{ markdown, source, isDirty }`:\r\n\r\n- Fires for **every mutation path** — typing, toolbar formatting, slash\r\n  commands, undo/redo, paste, drag-drop, and markdown source-view edits — with\r\n  `source: \"user\"`, coalesced to **one call per committed change** (typing a\r\n  character produces exactly one call).\r\n- The initial `defaultContent` load never fires. A host-initiated `setMarkdown`\r\n  fires at most once with `source: \"programmatic\"` (only when it actually\r\n  changes the content), so your autosave can ignore it.\r\n- `isDirty` compares against the editor's own serialization of the mounted (or\r\n  last adopted) content — see the normalisation contract below.\r\n\r\n### Ready timing and the normalisation contract\r\n\r\n`onReady` fires only after the editor is interactive **and** the initial\r\ncontent has been injected and reconciled, so `getMarkdown()` called\r\nsynchronously inside the callback is already stable — no settle timers:\r\n\r\n~~~tsx\r\nonReady={(editor) => {\r\n  baselineRef.current = editor.getMarkdown(); // safe: no setTimeout needed\r\n}}\r\n~~~\r\n\r\nNote that `getMarkdown()` is **not** byte-identical to the markdown you loaded:\r\nthe editor re-normalises everything it imports (list markers, spacing, fence\r\nstyle), so `getMarkdown(setMarkdown(x)) !== x` in general. Always baseline your\r\ndirty checks against the editor's own output — the `onReady` snapshot or the\r\n`markdown` field of an `onChange` payload — never against your input string.\r\n\r\n## The DOM is not the source of truth\r\n\r\nSerialization reads the Lexical model, never the DOM. Text written into the\r\ncontenteditable behind the reconciler's back — `document.execCommand`, browser\r\nextensions, password managers, translation tools — can render on screen while\r\nbeing absent from `getMarkdown()`. Two consequences:\r\n\r\n- **Never assert against `innerText` in tests**; use `getMarkdown()`.\r\n- **Never mutate the contenteditable directly**; go through `setMarkdown` or\r\n  the command surface.\r\n\r\nTo be told instead of silently losing such writes, pass `onDesync`: an internal\r\nobserver compares the visible text with the model after external mutations\r\nsettle and reports `{ domText, modelText }` when they disagree.\r\n\r\n## Keyboard access: escaping Tab capture\r\n\r\nTab indents (and Shift+Tab outdents) inside the editor, which would otherwise\r\ntrap keyboard-only users (WCAG 2.1.2). The standard escape is built in: press\r\n**Escape, then Tab** — the armed Tab performs the browser's native focus move\r\nout of the editor instead of indenting; any other key restores Tab-as-indent.\r\nAdvertise \"Press Esc then Tab to move focus out of the editor\" in your help UI.\r\n\r\n## Imperative ref\r\n\r\n`PapyraEditorRef` extends `ExtensiveEditorRef` with the markdown-first surface a\r\nhost drives: `setMarkdown(md)` (host-driven adopt), `focus()`, `getOutline()` /\r\n`scrollToHeading(key)` for the table of contents, `getBlocks()` for block\r\nanchors, `ensureBlockAnchors()` to stamp missing anchors and return the stamped\r\nbody (the `\"on-demand\"` save-time flow), and `getMentions()` for `@username`\r\ndetection. The host calls these during its own orchestration (autosave, remount,\r\nTOC) — they never fire on keystrokes.\r\n\r\nEach `getBlocks()` entry carries the anchor id plus the block's own `text`,\r\n`line`, and `start`/`end` character offsets in the markdown body, so a host can\r\nresolve a `#^id` reference without re-parsing the document.\r\n\r\n## The host adapter\r\n\r\nThe adapter is the entire contract between the preset and the host. The editor\r\ndeclares it; the host implements it.\r\n\r\n~~~ts\r\ninterface PapyraEditorAdapter {\r\n  resolveMediaUrl(filename: string): string;                 // ![[file]] → URL\r\n  uploadMedia(file: File): Promise<{ filename: string }>;    // drop/paste → store\r\n  openNote(ref: { title?: string; id?: string }): void;      // [[Note]] → navigate\r\n  searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;\r\n  searchUsers?(q: string): Promise<Array<{ username: string; name: string }>>;\r\n  resolveBlock?(ref: { note: string; blockId: string }): Promise<string | null>;\r\n  resolveCard?(url: string): Promise<{\r\n    title?: string;\r\n    description?: string;\r\n    image?: string;\r\n    favicon?: string;\r\n    siteName?: string;\r\n  } | null>;                                                 // ![[card:url]] → metadata\r\n  onMentions?(usernames: string[]): void;\r\n}\r\n~~~\r\n\r\nThe adapter's resolvers are where the host's server-side authorization lives. The\r\neditor's blur/lock is UX, never the boundary.\r\n\r\n### Typeahead dropdowns\r\n\r\nTwo triggers open a caret-anchored dropdown, and both are fed by the adapter:\r\n\r\n| Trigger | Menu       | Fed by                  | Inserts                    |\r\n| ------- | ---------- | ----------------------- | -------------------------- |\r\n| `[[`    | note links | `searchNotes(q)`        | a `[[Note]]` wikilink      |\r\n| `@`     | mentions   | `searchUsers(q)`        | plain `@username ` text    |\r\n\r\nBoth are host-gated: with no adapter (or, for `@`, no `searchUsers`) the trigger\r\nis silent and no menu renders, so the editor never offers a suggestion it cannot\r\nhonour. Keyboard-driven throughout — Escape closes, arrows move, Enter/Tab\r\nselect, and a click outside dismisses.\r\n\r\nThe `@` trigger matches the mention rule byte-for-byte: an `@` only opens the\r\nmenu at the start of a block or after whitespace, `(`, or `[`, and the query is\r\n`[A-Za-z0-9][A-Za-z0-9._-]{0,63}`. `bea@example.com` never opens it. Mentions are\r\nwritten as **plain text**, not a node — nothing to serialize, nothing that can\r\nrewrite the body on save — and hosts detect them by scanning the markdown (see\r\n`getMentions()`).\r\n\r\n## Usage\r\n\r\n~~~tsx\r\nimport '@lyfie/luthor/styles.css';\r\nimport { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor';\r\nimport { useRef } from 'react';\r\n\r\nexport function NoteCanvas({ body }: { body: string }) {\r\n  const ref = useRef<PapyraEditorRef>(null);\r\n\r\n  return (\r\n    <PapyraEditor\r\n      ref={ref}\r\n      defaultContent={body}\r\n      adapter={{\r\n        resolveMediaUrl: (name) => `/api/media/${name}`,\r\n        uploadMedia: async (file) => {\r\n          const stored = await upload(file);\r\n          return { filename: stored.name };\r\n        },\r\n        openNote: ({ title }) => router.push(`/notes/${title}`),\r\n        searchNotes: (q) => api.searchNotes(q),\r\n        searchUsers: (q) => api.searchUsers(q),\r\n      }}\r\n      onReady={(editor) => {\r\n        // Read the body imperatively — never a controlled value.\r\n        console.log(editor.getMarkdown());\r\n      }}\r\n    />\r\n  );\r\n}\r\n~~~\r\n\r\n`PapyraEditor` is also available as a subpath export:\r\n\r\n~~~ts\r\nimport { PapyraEditor } from '@lyfie/luthor/presets/papyra';\r\n~~~\r\n\r\n## Embeds and lossless round-trips\r\n\r\nEvery custom embed ships a bidirectional markdown transformer, so the body that\r\n`getMarkdown()` returns is byte-stable across repeated saves:\r\n\r\n| Markdown            | Renders as                          |\r\n| ------------------- | ----------------------------------- |\r\n| `![[diagram.png]]`  | inline image (via `resolveMediaUrl`)|\r\n| `[[Note]]`          | wikilink (click → `openNote`)       |\r\n| `[[Note\\|alias]]`   | aliased wikilink                    |\r\n| `![[Note#^id]]`     | read-only transclusion              |\r\n| `text ^id`          | trailing block anchor (non-rendering)|\r\n| `![[card:url]]`     | saved web card (via `resolveCard`)  |\r\n| `![[card:url\\|title]]` | saved web card with author title |\r\n| `![[youtube:url]]`  | YouTube player (optional `\\|caption`)|\r\n| `![[iframe:url]]`   | iframe embed (optional `\\|caption`) |\r\n| `> [!transcript]`   | transcription callout (display-only)|\r\n\r\nThe embed nodes and transformers live in `@lyfie/luthor-headless` and are\r\nre-exported through `@lyfie/luthor` — the preset only composes and themes them.\r\n\r\nThe **transcription callout** is an Obsidian-style `> [!transcript]` block: an\r\nopening line (optionally `> [!transcript] Title`) followed by `>`-prefixed body\r\nlines, terminated by a blank line. It renders as an accent-tinted, labelled block\r\non the quote surface and is display-only — the transcript text lives inline in the\r\nbody, so it needs no resolver and round-trips verbatim (the marker is normalized\r\nto lowercase).\r\n\r\nThe **saved web card** (`![[card:url]]`) renders an archived link card. When the\r\nhost wires `resolveCard`, the editor enriches it with the page's open-graph\r\nmetadata (title, description, preview image, favicon, site name); without a\r\nresolver the card degrades to a titled link to the URL. As with every embed, only\r\nthe verbatim `url` (and optional `|title`) is serialized, so the metadata is\r\nrender-only and the markdown round-trips unchanged.\r\n\r\nThe **YouTube** (`![[youtube:url]]`) and **iframe** (`![[iframe:url]]`) embeds\r\nreuse the shared media nodes from `@lyfie/luthor-headless` and carry an optional\r\n`|caption`. A YouTube `watch`/`youtu.be`/`shorts` link is normalized to the\r\ncanonical `…/embed/<id>` player URL on the first pass and is byte-stable\r\nafterward; an iframe URL gains `https://` if it has none. Frame size and\r\nalignment are session-only presentation state with no markdown representation\r\n(like image dimensions), so the markdown text itself round-trips unchanged.\r\n\r\n## Command surface\r\n\r\nThe slash menu and command palette are curated down to note-taking primitives:\r\nheadings (H1–H3), lists and checklist, quote, code block, table, horizontal\r\nrule, and image. The typography pickers, view tabs, and pinned toolbar are\r\nenforced off.\r\n\r\nOn top of the curated built-ins, PapyraEditor contributes three note-specific\r\nslash commands through the editor's `extraSlashCommands` seam:\r\n\r\n| Command       | Inserts                                                        |\r\n| ------------- | ------------------------------------------------------------- |\r\n| `Link note`   | the `[[` trigger, which opens the wikilink typeahead          |\r\n| `Embed media` | a picked file → `adapter.uploadMedia` → `![[filename]]`       |\r\n| `Insert date` | today's date as `YYYY-MM-DD`                                  |\r\n\r\nEach writes markdown-native syntax at the caret, so the body stays the source of\r\ntruth and round-trips unchanged. The commands are appended automatically — there\r\nis nothing to wire beyond supplying an `adapter` for `Embed media` to upload\r\nthrough.\r\n",
+    "plainContent": "Papyra Editor PapyraEditor is a markdown-native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host-agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse it by supplying different configuration. When to use this Reach for PapyraEditor when your body of truth is a frontmatter-free markdown file and you want a polished, restricted writing surface with Obsidian-style embeds — [[Note]] wikilinks, ![[file.ext]] media, ![[Note ^id]] transclusion, and trailing ^id block anchors — that survives a lossless round-trip back to that file. The four invariants 1. Markdown is the source of truth. getMarkdown() returns exactly what lands in the .md body (CommonMark plus the documented embed set). There is no JSON or HTML \"real\" format. The preset runs sourceMetadataMode=\"none\" . 2. The body is frontmatter-free. The host splits YAML from the body and hands the editor only the body; the preset never renders, emits, or mangles frontmatter. 3. The caret is sacred. The editor is uncontrolled — it reads defaultContent once on mount and there is no value prop or controlled round-trip. The onChange callback is a notification , not a value binding: nothing you do in it re-renders the document. Adopt a remote revision by remounting (change the React key ) or by calling setMarkdown imperatively, never with a live-DOM patch. 4. Theming is token-driven. All color and typography flow from var(--papyra- , fallback) tokens. The preset bundles no fonts — the host loads Marcellus / Sora / Roboto Mono. Locked contract PapyraEditor hard-locks the props it owns; callers cannot reach them: - Modes are fixed to ['visual', 'markdown'] (no json / html ). - View tabs hidden. By default the only toolbar is floating-on-selection; the opt-in toolbar prop adds an always-visible toolbar, but it is never pinned. - markdownSourceOfTruth is on and sourceMetadataMode=\"none\" . - featureFlags are routed through papyraFeaturePolicy , whose enforced set keeps markdown-breaking features off — font/size/line-height pickers, arbitrary text color and highlight, sub/superscript, the in-editor theme toggle, and draggable blocks cannot be switched back on by a caller flag. Preset props - adapter : the host seam ( PapyraEditorAdapter ). Supplies media resolution, uploads, note search/navigation, and block resolution. Omit it and the preset uses a graceful no-op adapter so the editor still renders and round-trips. - colored : light-locks a tinted (\"colored\") note so ink stays readable on the host-painted paper, regardless of the ambient app theme. - readOnly : mounts a non-editable surface ( visual-only , click-to-edit disabled) that emits no change events — safe for revision previews and time-machine scrubbing. Pair with repeated setMarkdown calls. - variant : \"focus\" widens the body to a centered, distraction-free measure; \"default\" is the standard editorial measure. - toolbar : opt into a persistent toolbar above the editor (default false — floating-on-selection only). It lists just Papyra's markdown-safe actions (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link, lists + checklist, code block, horizontal rule, table, image); the restricted controls (typography pickers, color/highlight, sub/superscript, alignment, theme toggle) can never appear, and the toolbar is never pinned. Only renders in the editable visual surface, so readOnly / locked never show it. - locked : withholds the body entirely — renders a blurred placeholder and never mounts the editor , so there is no plaintext in the DOM. The lock is UX only; the server ( 401 / PathGuard ) is the security boundary. - blockAnchors : block-anchor assignment policy — \"off\" (default; anchors already in the text parse and round-trip, nothing creates one), \"on-demand\" (the host stamps at save time via ensureBlockAnchors() ), or \"auto\" (every eligible top-level block — paragraph, heading, quote — gets a stable ^id appended on commit). Anchors are invisible in the visual surface: no ^id artefact, no caret stop, nothing selectable — while the trailing ^id round-trips losslessly in the markdown. - onChange : first-class change notification (see Change notification and autosave ). - onDesync : opt-in model/DOM divergence watchdog (see The DOM is not the source of truth ). - onOutlineChange : fired (debounced) with the current document outline; drives a host's live table-of-contents scrollbar. Read-only observation — the caret is never touched. - featureFlags : per-feature overrides, resolved through the enforced policy. Change notification and autosave Do not attach a DOM onInput handler to a wrapper element — it will never fire. Lexical stops propagation of the contenteditable's input event, so React's delegated synthetic onInput on an ancestor receives nothing, and an autosave driven that way silently saves nothing. Wire autosave to the editor's own onChange instead: tsx { if (source !== 'user') return; // ignore your own setMarkdown adopts if (!isDirty) return; scheduleAutosave(markdown); // your debounce; one call per commit arrives here }} / The payload is { markdown, source, isDirty } : - Fires for every mutation path — typing, toolbar formatting, slash commands, undo/redo, paste, drag-drop, and markdown source-view edits — with source: \"user\" , coalesced to one call per committed change (typing a character produces exactly one call). - The initial defaultContent load never fires. A host-initiated setMarkdown fires at most once with source: \"programmatic\" (only when it actually changes the content), so your autosave can ignore it. - isDirty compares against the editor's own serialization of the mounted (or last adopted) content — see the normalisation contract below. Ready timing and the normalisation contract onReady fires only after the editor is interactive and the initial content has been injected and reconciled, so getMarkdown() called synchronously inside the callback is already stable — no settle timers: tsx onReady={(editor) = { baselineRef.current = editor.getMarkdown(); // safe: no setTimeout needed }} Note that getMarkdown() is not byte-identical to the markdown you loaded: the editor re-normalises everything it imports (list markers, spacing, fence style), so getMarkdown(setMarkdown(x)) !== x in general. Always baseline your dirty checks against the editor's own output — the onReady snapshot or the markdown field of an onChange payload — never against your input string. The DOM is not the source of truth Serialization reads the Lexical model, never the DOM. Text written into the contenteditable behind the reconciler's back — document.execCommand , browser extensions, password managers, translation tools — can render on screen while being absent from getMarkdown() . Two consequences: - Never assert against innerText in tests ; use getMarkdown() . - Never mutate the contenteditable directly ; go through setMarkdown or the command surface. To be told instead of silently losing such writes, pass onDesync : an internal observer compares the visible text with the model after external mutations settle and reports { domText, modelText } when they disagree. Keyboard access: escaping Tab capture Tab indents (and Shift+Tab outdents) inside the editor, which would otherwise trap keyboard-only users (WCAG 2.1.2). The standard escape is built in: press Escape, then Tab — the armed Tab performs the browser's native focus move out of the editor instead of indenting; any other key restores Tab-as-indent. Advertise \"Press Esc then Tab to move focus out of the editor\" in your help UI. Imperative ref PapyraEditorRef extends ExtensiveEditorRef with the markdown-first surface a host drives: setMarkdown(md) (host-driven adopt), focus() , getOutline() / scrollToHeading(key) for the table of contents, getBlocks() for block anchors, ensureBlockAnchors() to stamp missing anchors and return the stamped body (the \"on-demand\" save-time flow), and getMentions() for @username detection. The host calls these during its own orchestration (autosave, remount, TOC) — they never fire on keystrokes. Each getBlocks() entry carries the anchor id plus the block's own text , line , and start / end character offsets in the markdown body, so a host can resolve a ^id reference without re-parsing the document. The host adapter The adapter is the entire contract between the preset and the host. The editor declares it; the host implements it. ts interface PapyraEditorAdapter { resolveMediaUrl(filename: string): string; // ![[file]] → URL uploadMedia(file: File): Promise ; // drop/paste → store openNote(ref: { title?: string; id?: string }): void; // [[Note]] → navigate searchNotes(q: string): Promise ; searchUsers?(q: string): Promise ; resolveBlock?(ref: { note: string; blockId: string }): Promise ; resolveCard?(url: string): Promise ; // ![[card:url]] → metadata onMentions?(usernames: string[]): void; } The adapter's resolvers are where the host's server-side authorization lives. The editor's blur/lock is UX, never the boundary. Typeahead dropdowns Two triggers open a caret-anchored dropdown, and both are fed by the adapter: Trigger Menu Fed by Inserts ------- ---------- ----------------------- -------------------------- [[ note links searchNotes(q) a [[Note]] wikilink @ mentions searchUsers(q) plain @username text Both are host-gated: with no adapter (or, for @ , no searchUsers ) the trigger is silent and no menu renders, so the editor never offers a suggestion it cannot honour. Keyboard-driven throughout — Escape closes, arrows move, Enter/Tab select, and a click outside dismisses. The @ trigger matches the mention rule byte-for-byte: an @ only opens the menu at the start of a block or after whitespace, ( , or [ , and the query is [A-Za-z0-9][A-Za-z0-9. -]{0,63} . bea@example.com never opens it. Mentions are written as plain text , not a node — nothing to serialize, nothing that can rewrite the body on save — and hosts detect them by scanning the markdown (see getMentions() ). Usage tsx import '@lyfie/luthor/styles.css'; import { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor'; import { useRef } from 'react'; export function NoteCanvas({ body }: { body: string }) { const ref = useRef (null); return ( /api/media/${name} , uploadMedia: async (file) = { const stored = await upload(file); return { filename: stored.name }; }, openNote: ({ title }) = router.push( /notes/${title} ), searchNotes: (q) = api.searchNotes(q), searchUsers: (q) = api.searchUsers(q), }} onReady={(editor) = { // Read the body imperatively — never a controlled value. console.log(editor.getMarkdown()); }} / ); } PapyraEditor is also available as a subpath export: ts import { PapyraEditor } from '@lyfie/luthor/presets/papyra'; Embeds and lossless round-trips Every custom embed ships a bidirectional markdown transformer, so the body that getMarkdown() returns is byte-stable across repeated saves: Markdown Renders as ------------------- ----------------------------------- ![[diagram.png]] inline image (via resolveMediaUrl ) [[Note]] wikilink (click → openNote ) [[Note\\ alias]] aliased wikilink ![[Note ^id]] read-only transclusion text ^id trailing block anchor (non-rendering) ![[card:url]] saved web card (via resolveCard ) ![[card:url\\ title]] saved web card with author title ![[youtube:url]] YouTube player (optional \\ caption ) ![[iframe:url]] iframe embed (optional \\ caption ) [!transcript] transcription callout (display-only) The embed nodes and transformers live in @lyfie/luthor-headless and are re-exported through @lyfie/luthor — the preset only composes and themes them. The transcription callout is an Obsidian-style [!transcript] block: an opening line (optionally [!transcript] Title ) followed by -prefixed body lines, terminated by a blank line. It renders as an accent-tinted, labelled block on the quote surface and is display-only — the transcript text lives inline in the body, so it needs no resolver and round-trips verbatim (the marker is normalized to lowercase). The saved web card ( ![[card:url]] ) renders an archived link card. When the host wires resolveCard , the editor enriches it with the page's open-graph metadata (title, description, preview image, favicon, site name); without a resolver the card degrades to a titled link to the URL. As with every embed, only the verbatim url (and optional title ) is serialized, so the metadata is render-only and the markdown round-trips unchanged. The YouTube ( ![[youtube:url]] ) and iframe ( ![[iframe:url]] ) embeds reuse the shared media nodes from @lyfie/luthor-headless and carry an optional caption . A YouTube watch / youtu.be / shorts link is normalized to the canonical …/embed/ player URL on the first pass and is byte-stable afterward; an iframe URL gains https:// if it has none. Frame size and alignment are session-only presentation state with no markdown representation (like image dimensions), so the markdown text itself round-trips unchanged. Command surface The slash menu and command palette are curated down to note-taking primitives: headings (H1–H3), lists and checklist, quote, code block, table, horizontal rule, and image. The typography pickers, view tabs, and pinned toolbar are enforced off. On top of the curated built-ins, PapyraEditor contributes three note-specific slash commands through the editor's extraSlashCommands seam: Command Inserts ------------- ------------------------------------------------------------- Link note the [[ trigger, which opens the wikilink typeahead Embed media a picked file → adapter.uploadMedia → ![[filename]] Insert date today's date as YYYY-MM-DD Each writes markdown-native syntax at the caret, so the body stays the source of truth and round-trips unchanged. The commands are appended automatically — there is nothing to wire beyond supplying an adapter for Embed media to upload through.",
     "sections": [
       {
         "heading": "Overview",
@@ -6336,7 +7061,7 @@ export const docsIndex = [
         "heading": "The four invariants",
         "id": "the-four-invariants",
         "level": 2,
-        "text": "1. Markdown is the source of truth. getMarkdown() returns exactly what lands in the .md body (CommonMark plus the documented embed set). There is no JSON or HTML \"real\" format. The preset runs sourceMetadataMode=\"none\" . 2. The body is frontmatter-free. The host splits YAML from the body and hands the editor only the body; the preset never renders, emits, or mangles frontmatter. 3. The caret is sacred. The editor is uncontrolled — it reads defaultContent once on mount and never exposes a value / onChange round-trip. Adopt a remote revision by remounting (change the React key ) or by calling setMarkdown imperatively, never with a live-DOM patch. 4. Theming is token-driven. All color and typography flow from var(--papyra- , fallback) tokens. The preset bundles no fonts — the host loads Marcellus / Sora / Roboto Mono."
+        "text": "1. Markdown is the source of truth. getMarkdown() returns exactly what lands in the .md body (CommonMark plus the documented embed set). There is no JSON or HTML \"real\" format. The preset runs sourceMetadataMode=\"none\" . 2. The body is frontmatter-free. The host splits YAML from the body and hands the editor only the body; the preset never renders, emits, or mangles frontmatter. 3. The caret is sacred. The editor is uncontrolled — it reads defaultContent once on mount and there is no value prop or controlled round-trip. The onChange callback is a notification , not a value binding: nothing you do in it re-renders the document. Adopt a remote revision by remounting (change the React key ) or by calling setMarkdown imperatively, never with a live-DOM patch. 4. Theming is token-driven. All color and typography flow from var(--papyra- , fallback) tokens. The preset bundles no fonts — the host loads Marcellus / Sora / Roboto Mono."
       },
       {
         "heading": "Locked contract",
@@ -6348,25 +7073,55 @@ export const docsIndex = [
         "heading": "Preset props",
         "id": "preset-props",
         "level": 2,
-        "text": "- adapter : the host seam ( PapyraEditorAdapter ). Supplies media resolution, uploads, note search/navigation, and block resolution. Omit it and the preset uses a graceful no-op adapter so the editor still renders and round-trips. - colored : light-locks a tinted (\"colored\") note so ink stays readable on the host-painted paper, regardless of the ambient app theme. - readOnly : mounts a non-editable surface ( visual-only , click-to-edit disabled) that emits no change events — safe for revision previews and time-machine scrubbing. Pair with repeated setMarkdown calls. - variant : \"focus\" widens the body to a centered, distraction-free measure; \"default\" is the standard editorial measure. - toolbar : opt into a persistent toolbar above the editor (default false — floating-on-selection only). It lists just Papyra's markdown-safe actions (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link, lists + checklist, code block, horizontal rule, table, image); the restricted controls (typography pickers, color/highlight, sub/superscript, alignment, theme toggle) can never appear, and the toolbar is never pinned. Only renders in the editable visual surface, so readOnly / locked never show it. - locked : withholds the body entirely — renders a blurred placeholder and never mounts the editor , so there is no plaintext in the DOM. The lock is UX only; the server ( 401 / PathGuard ) is the security boundary. - onOutlineChange : fired (debounced) with the current document outline; drives a host's live table-of-contents scrollbar. Read-only observation — the caret is never touched. - featureFlags : per-feature overrides, resolved through the enforced policy."
+        "text": "- adapter : the host seam ( PapyraEditorAdapter ). Supplies media resolution, uploads, note search/navigation, and block resolution. Omit it and the preset uses a graceful no-op adapter so the editor still renders and round-trips. - colored : light-locks a tinted (\"colored\") note so ink stays readable on the host-painted paper, regardless of the ambient app theme. - readOnly : mounts a non-editable surface ( visual-only , click-to-edit disabled) that emits no change events — safe for revision previews and time-machine scrubbing. Pair with repeated setMarkdown calls. - variant : \"focus\" widens the body to a centered, distraction-free measure; \"default\" is the standard editorial measure. - toolbar : opt into a persistent toolbar above the editor (default false — floating-on-selection only). It lists just Papyra's markdown-safe actions (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link, lists + checklist, code block, horizontal rule, table, image); the restricted controls (typography pickers, color/highlight, sub/superscript, alignment, theme toggle) can never appear, and the toolbar is never pinned. Only renders in the editable visual surface, so readOnly / locked never show it. - locked : withholds the body entirely — renders a blurred placeholder and never mounts the editor , so there is no plaintext in the DOM. The lock is UX only; the server ( 401 / PathGuard ) is the security boundary. - blockAnchors : block-anchor assignment policy — \"off\" (default; anchors already in the text parse and round-trip, nothing creates one), \"on-demand\" (the host stamps at save time via ensureBlockAnchors() ), or \"auto\" (every eligible top-level block — paragraph, heading, quote — gets a stable ^id appended on commit). Anchors are invisible in the visual surface: no ^id artefact, no caret stop, nothing selectable — while the trailing ^id round-trips losslessly in the markdown. - onChange : first-class change notification (see Change notification and autosave ). - onDesync : opt-in model/DOM divergence watchdog (see The DOM is not the source of truth ). - onOutlineChange : fired (debounced) with the current document outline; drives a host's live table-of-contents scrollbar. Read-only observation — the caret is never touched. - featureFlags : per-feature overrides, resolved through the enforced policy."
+      },
+      {
+        "heading": "Change notification and autosave",
+        "id": "change-notification-and-autosave",
+        "level": 2,
+        "text": "Do not attach a DOM onInput handler to a wrapper element — it will never fire. Lexical stops propagation of the contenteditable's input event, so React's delegated synthetic onInput on an ancestor receives nothing, and an autosave driven that way silently saves nothing. Wire autosave to the editor's own onChange instead: tsx { if (source !== 'user') return; // ignore your own setMarkdown adopts if (!isDirty) return; scheduleAutosave(markdown); // your debounce; one call per commit arrives here }} / The payload is { markdown, source, isDirty } : - Fires for every mutation path — typing, toolbar formatting, slash commands, undo/redo, paste, drag-drop, and markdown source-view edits — with source: \"user\" , coalesced to one call per committed change (typing a character produces exactly one call). - The initial defaultContent load never fires. A host-initiated setMarkdown fires at most once with source: \"programmatic\" (only when it actually changes the content), so your autosave can ignore it. - isDirty compares against the editor's own serialization of the mounted (or last adopted) content — see the normalisation contract below."
+      },
+      {
+        "heading": "Ready timing and the normalisation contract",
+        "id": "ready-timing-and-the-normalisation-contract",
+        "level": 3,
+        "text": "onReady fires only after the editor is interactive and the initial content has been injected and reconciled, so getMarkdown() called synchronously inside the callback is already stable — no settle timers: tsx onReady={(editor) = { baselineRef.current = editor.getMarkdown(); // safe: no setTimeout needed }} Note that getMarkdown() is not byte-identical to the markdown you loaded: the editor re-normalises everything it imports (list markers, spacing, fence style), so getMarkdown(setMarkdown(x)) !== x in general. Always baseline your dirty checks against the editor's own output — the onReady snapshot or the markdown field of an onChange payload — never against your input string."
+      },
+      {
+        "heading": "The DOM is not the source of truth",
+        "id": "the-dom-is-not-the-source-of-truth",
+        "level": 2,
+        "text": "Serialization reads the Lexical model, never the DOM. Text written into the contenteditable behind the reconciler's back — document.execCommand , browser extensions, password managers, translation tools — can render on screen while being absent from getMarkdown() . Two consequences: - Never assert against innerText in tests ; use getMarkdown() . - Never mutate the contenteditable directly ; go through setMarkdown or the command surface. To be told instead of silently losing such writes, pass onDesync : an internal observer compares the visible text with the model after external mutations settle and reports { domText, modelText } when they disagree."
+      },
+      {
+        "heading": "Keyboard access: escaping Tab capture",
+        "id": "keyboard-access-escaping-tab-capture",
+        "level": 2,
+        "text": "Tab indents (and Shift+Tab outdents) inside the editor, which would otherwise trap keyboard-only users (WCAG 2.1.2). The standard escape is built in: press Escape, then Tab — the armed Tab performs the browser's native focus move out of the editor instead of indenting; any other key restores Tab-as-indent. Advertise \"Press Esc then Tab to move focus out of the editor\" in your help UI."
       },
       {
         "heading": "Imperative ref",
         "id": "imperative-ref",
         "level": 2,
-        "text": "PapyraEditorRef extends ExtensiveEditorRef with the markdown-first surface a host drives: setMarkdown(md) (host-driven adopt), focus() , getOutline() / scrollToHeading(key) for the table of contents, getBlocks() for trailing block anchors, and getMentions() for @username detection. The host calls these during its own orchestration (autosave, remount, TOC) — they never fire on keystrokes."
+        "text": "PapyraEditorRef extends ExtensiveEditorRef with the markdown-first surface a host drives: setMarkdown(md) (host-driven adopt), focus() , getOutline() / scrollToHeading(key) for the table of contents, getBlocks() for block anchors, ensureBlockAnchors() to stamp missing anchors and return the stamped body (the \"on-demand\" save-time flow), and getMentions() for @username detection. The host calls these during its own orchestration (autosave, remount, TOC) — they never fire on keystrokes. Each getBlocks() entry carries the anchor id plus the block's own text , line , and start / end character offsets in the markdown body, so a host can resolve a ^id reference without re-parsing the document."
       },
       {
         "heading": "The host adapter",
         "id": "the-host-adapter",
         "level": 2,
-        "text": "The adapter is the entire contract between the preset and the host. The editor declares it; the host implements it. ts interface PapyraEditorAdapter { resolveMediaUrl(filename: string): string; // ![[file]] → URL uploadMedia(file: File): Promise ; // drop/paste → store openNote(ref: { title?: string; id?: string }): void; // [[Note]] → navigate searchNotes(q: string): Promise ; resolveBlock?(ref: { note: string; blockId: string }): Promise ; resolveCard?(url: string): Promise ; // ![[card:url]] → metadata onMentions?(usernames: string[]): void; } The adapter's resolvers are where the host's server-side authorization lives. The editor's blur/lock is UX, never the boundary."
+        "text": "The adapter is the entire contract between the preset and the host. The editor declares it; the host implements it. ts interface PapyraEditorAdapter { resolveMediaUrl(filename: string): string; // ![[file]] → URL uploadMedia(file: File): Promise ; // drop/paste → store openNote(ref: { title?: string; id?: string }): void; // [[Note]] → navigate searchNotes(q: string): Promise ; searchUsers?(q: string): Promise ; resolveBlock?(ref: { note: string; blockId: string }): Promise ; resolveCard?(url: string): Promise ; // ![[card:url]] → metadata onMentions?(usernames: string[]): void; } The adapter's resolvers are where the host's server-side authorization lives. The editor's blur/lock is UX, never the boundary."
+      },
+      {
+        "heading": "Typeahead dropdowns",
+        "id": "typeahead-dropdowns",
+        "level": 3,
+        "text": "Two triggers open a caret-anchored dropdown, and both are fed by the adapter: Trigger Menu Fed by Inserts ------- ---------- ----------------------- -------------------------- [[ note links searchNotes(q) a [[Note]] wikilink @ mentions searchUsers(q) plain @username text Both are host-gated: with no adapter (or, for @ , no searchUsers ) the trigger is silent and no menu renders, so the editor never offers a suggestion it cannot honour. Keyboard-driven throughout — Escape closes, arrows move, Enter/Tab select, and a click outside dismisses. The @ trigger matches the mention rule byte-for-byte: an @ only opens the menu at the start of a block or after whitespace, ( , or [ , and the query is [A-Za-z0-9][A-Za-z0-9. -]{0,63} . bea@example.com never opens it. Mentions are written as plain text , not a node — nothing to serialize, nothing that can rewrite the body on save — and hosts detect them by scanning the markdown (see getMentions() )."
       },
       {
         "heading": "Usage",
         "id": "usage",
         "level": 2,
-        "text": "tsx import '@lyfie/luthor/styles.css'; import { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor'; import { useRef } from 'react'; export function NoteCanvas({ body }: { body: string }) { const ref = useRef (null); return ( /api/media/${name} , uploadMedia: async (file) = { const stored = await upload(file); return { filename: stored.name }; }, openNote: ({ title }) = router.push( /notes/${title} ), searchNotes: (q) = api.searchNotes(q), }} onReady={(editor) = { // Read the body imperatively — never a controlled value. console.log(editor.getMarkdown()); }} / ); } PapyraEditor is also available as a subpath export: ts import { PapyraEditor } from '@lyfie/luthor/presets/papyra';"
+        "text": "tsx import '@lyfie/luthor/styles.css'; import { PapyraEditor, type PapyraEditorRef } from '@lyfie/luthor'; import { useRef } from 'react'; export function NoteCanvas({ body }: { body: string }) { const ref = useRef (null); return ( /api/media/${name} , uploadMedia: async (file) = { const stored = await upload(file); return { filename: stored.name }; }, openNote: ({ title }) = router.push( /notes/${title} ), searchNotes: (q) = api.searchNotes(q), searchUsers: (q) = api.searchUsers(q), }} onReady={(editor) = { // Read the body imperatively — never a controlled value. console.log(editor.getMarkdown()); }} / ); } PapyraEditor is also available as a subpath export: ts import { PapyraEditor } from '@lyfie/luthor/presets/papyra';"
       },
       {
         "heading": "Embeds and lossless round-trips",
@@ -6404,6 +7159,26 @@ export const docsIndex = [
       },
       {
         "level": 2,
+        "text": "Change notification and autosave",
+        "id": "change-notification-and-autosave"
+      },
+      {
+        "level": 3,
+        "text": "Ready timing and the normalisation contract",
+        "id": "ready-timing-and-the-normalisation-contract"
+      },
+      {
+        "level": 2,
+        "text": "The DOM is not the source of truth",
+        "id": "the-dom-is-not-the-source-of-truth"
+      },
+      {
+        "level": 2,
+        "text": "Keyboard access: escaping Tab capture",
+        "id": "keyboard-access-escaping-tab-capture"
+      },
+      {
+        "level": 2,
         "text": "Imperative ref",
         "id": "imperative-ref"
       },
@@ -6411,6 +7186,11 @@ export const docsIndex = [
         "level": 2,
         "text": "The host adapter",
         "id": "the-host-adapter"
+      },
+      {
+        "level": 3,
+        "text": "Typeahead dropdowns",
+        "id": "typeahead-dropdowns"
       },
       {
         "level": 2,
@@ -6430,7 +7210,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/presets/papyra-editor/",
     "sourcePath": "apps/web/src/content/docs/luthor/presets/papyra-editor.md",
-    "updatedAt": "2026-06-18T13:34:47.563Z",
+    "updatedAt": "2026-08-12T11:57:10.383Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "preset",
@@ -6452,6 +7232,9 @@ export const docsIndex = [
       "variant",
       "locked",
       "toolbar",
+      "blockAnchors",
+      "onChange",
+      "onDesync",
       "onOutlineChange",
       "featureFlags"
     ],
@@ -6504,6 +7287,7 @@ export const docsIndex = [
       "block-anchor",
       "block.heading1",
       "blockanchor",
+      "blockanchors",
       "callout",
       "canvas",
       "card",
@@ -6534,6 +7318,8 @@ export const docsIndex = [
       "native,",
       "note",
       "obsidian",
+      "onchange",
+      "ondesync",
       "onoutlinechange",
       "papyra",
       "papyra editor",
@@ -6564,6 +7350,7 @@ export const docsIndex = [
     "searchTokenBuckets": {
       "keywords": [
         "adapter",
+        "blockanchors",
         "callout",
         "card",
         "colored",
@@ -6573,6 +7360,8 @@ export const docsIndex = [
         "file embed",
         "locked",
         "markdownsourceoftruth",
+        "onchange",
+        "ondesync",
         "onoutlinechange",
         "papyra",
         "papyra preset",
@@ -6591,9 +7380,12 @@ export const docsIndex = [
       ],
       "props": [
         "adapter",
+        "blockanchors",
         "colored",
         "featureflags",
         "locked",
+        "onchange",
+        "ondesync",
         "onoutlinechange",
         "readonly",
         "toolbar",
@@ -6653,8 +7445,8 @@ export const docsIndex = [
     "title": "Props Reference",
     "navTitle": "Props Reference",
     "description": "Reference index for ExtensiveEditorProps and common preset prop surfaces, including mode and bridge controls.",
-    "content": "\r\n# Props Reference\r\n\r\nUse this page for exact prop names and discovery tokens.\r\n\r\n## What this page answers\r\n\r\n- Which props control modes, source bridges, and feature gates?\r\n\r\n## High-signal props\r\n\r\n| Area | Props |\r\n| --- | --- |\r\n| Mode control | `initialMode`, `defaultEditorView`, `availableModes` |\r\n| Feature gating | `featureFlags`, `headingOptions`, `slashCommandVisibility` |\r\n| Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |\r\n| Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |\r\n| List depth | `maxListIndentation` |\r\n\r\n## Preset-level code intelligence toggle\r\n\r\n- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `PapyraEditor` use `featureFlags.codeIntelligence`.\r\n\r\n~~~tsx\r\n<ExtensiveEditor featureFlags={{ codeIntelligence: false }} />\r\n~~~\r\n\r\n## Full `ExtensiveEditorProps` index\r\n\r\n- `className`\r\n- `onReady`\r\n- `initialTheme`\r\n- `onThemeChange`\r\n- `theme`\r\n- `defaultContent`\r\n- `showDefaultContent`\r\n- `placeholder`\r\n- `defaultEditorView`\r\n- `initialMode`\r\n- `isEditorViewTabsVisible`\r\n- `isEditorViewsTabVisible`\r\n- `availableModes`\r\n- `variantClassName`\r\n- `toolbarLayout`\r\n- `toolbarVisibility`\r\n- `toolbarPosition`\r\n- `toolbarAlignment`\r\n- `toolbarClassName`\r\n- `toolbarStyleVars`\r\n- `quoteClassName`\r\n- `quoteStyleVars`\r\n- `defaultSettings`\r\n- `editorThemeOverrides`\r\n- `isToolbarEnabled`\r\n- `isToolbarPinned`\r\n- `imageUploadHandler`\r\n- `gifUploadHandler`\r\n- `fontFamilyOptions`\r\n- `fontSizeOptions`\r\n- `lineHeightOptions`\r\n- `minimumDefaultLineHeight`\r\n- `scaleByRatio`\r\n- `headingOptions`\r\n- `paragraphLabel`\r\n- `syncHeadingOptionsWithCommands`\r\n- `slashCommandVisibility`\r\n- `extraSlashCommands`\r\n- `shortcutConfig`\r\n- `commandPaletteShortcutOnly`\r\n- `isListStyleDropdownEnabled`\r\n- `editOnClick`\r\n- `isDraggableBoxEnabled`\r\n- `featureFlags`\r\n- `sourceMetadataMode`\r\n- `markdownBridgeFlavor`\r\n- `markdownSourceOfTruth`\r\n- `isSyntaxHighlightingEnabled`\r\n- `syntaxHighlightColorMode`\r\n- `syntaxHighlightColors`\r\n- `maxAutoDetectCodeLength`\r\n- `isCopyAllowed`\r\n- `languageOptions`\r\n- `showLineNumbers`\r\n- `maxListIndentation`\r\n\r\n\r\n",
-    "plainContent": "Props Reference Use this page for exact prop names and discovery tokens. What this page answers - Which props control modes, source bridges, and feature gates? High-signal props Area Props --- --- Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation Preset-level code intelligence toggle - ExtensiveEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and PapyraEditor use featureFlags.codeIntelligence . tsx Full ExtensiveEditorProps index - className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - extraSlashCommands - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation",
+    "content": "\r\n# Props Reference\r\n\r\nUse this page for exact prop names and discovery tokens.\r\n\r\n## What this page answers\r\n\r\n- Which props control modes, source bridges, and feature gates?\r\n\r\n## High-signal props\r\n\r\n| Area | Props |\r\n| --- | --- |\r\n| Lifecycle and change | `onReady`, `onChange`, `onDesync` |\r\n| Mode control | `initialMode`, `defaultEditorView`, `availableModes` |\r\n| Feature gating | `featureFlags`, `headingOptions`, `slashCommandVisibility` |\r\n| Bridge control | `sourceMetadataMode`, `markdownBridgeFlavor`, `markdownSourceOfTruth` |\r\n| Code intelligence | `isSyntaxHighlightingEnabled`, `syntaxHighlightColorMode`, `maxAutoDetectCodeLength`, `languageOptions`, `showLineNumbers` |\r\n| List depth | `maxListIndentation` |\r\n\r\n## Preset-level code intelligence toggle\r\n\r\n- `ExtensiveEditor`, `LegacyRichEditor`, `HTMLEditor`, `MarkDownEditor`, and `PapyraEditor` use `featureFlags.codeIntelligence`.\r\n\r\n~~~tsx\r\n<ExtensiveEditor featureFlags={{ codeIntelligence: false }} />\r\n~~~\r\n\r\n## Full `ExtensiveEditorProps` index\r\n\r\n- `className`\r\n- `onReady`\r\n- `onChange`\r\n- `onDesync`\r\n- `presetId`\r\n- `initialTheme`\r\n- `onThemeChange`\r\n- `theme`\r\n- `defaultContent`\r\n- `showDefaultContent`\r\n- `placeholder`\r\n- `defaultEditorView`\r\n- `initialMode`\r\n- `isEditorViewTabsVisible`\r\n- `isEditorViewsTabVisible`\r\n- `availableModes`\r\n- `variantClassName`\r\n- `toolbarLayout`\r\n- `toolbarVisibility`\r\n- `toolbarPosition`\r\n- `toolbarAlignment`\r\n- `toolbarClassName`\r\n- `toolbarStyleVars`\r\n- `quoteClassName`\r\n- `quoteStyleVars`\r\n- `defaultSettings`\r\n- `editorThemeOverrides`\r\n- `isToolbarEnabled`\r\n- `isToolbarPinned`\r\n- `imageUploadHandler`\r\n- `gifUploadHandler`\r\n- `fontFamilyOptions`\r\n- `fontSizeOptions`\r\n- `lineHeightOptions`\r\n- `minimumDefaultLineHeight`\r\n- `scaleByRatio`\r\n- `headingOptions`\r\n- `paragraphLabel`\r\n- `syncHeadingOptionsWithCommands`\r\n- `slashCommandVisibility`\r\n- `extraSlashCommands`\r\n- `shortcutConfig`\r\n- `commandPaletteShortcutOnly`\r\n- `isListStyleDropdownEnabled`\r\n- `editOnClick`\r\n- `isDraggableBoxEnabled`\r\n- `featureFlags`\r\n- `sourceMetadataMode`\r\n- `markdownBridgeFlavor`\r\n- `markdownSourceOfTruth`\r\n- `isSyntaxHighlightingEnabled`\r\n- `syntaxHighlightColorMode`\r\n- `syntaxHighlightColors`\r\n- `maxAutoDetectCodeLength`\r\n- `isCopyAllowed`\r\n- `languageOptions`\r\n- `showLineNumbers`\r\n- `maxListIndentation`\r\n\r\n\r\n",
+    "plainContent": "Props Reference Use this page for exact prop names and discovery tokens. What this page answers - Which props control modes, source bridges, and feature gates? High-signal props Area Props --- --- Lifecycle and change onReady , onChange , onDesync Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation Preset-level code intelligence toggle - ExtensiveEditor , LegacyRichEditor , HTMLEditor , MarkDownEditor , and PapyraEditor use featureFlags.codeIntelligence . tsx Full ExtensiveEditorProps index - className - onReady - onChange - onDesync - presetId - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - extraSlashCommands - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation",
     "sections": [
       {
         "heading": "Overview",
@@ -6672,7 +7464,7 @@ export const docsIndex = [
         "heading": "High-signal props",
         "id": "high-signal-props",
         "level": 2,
-        "text": "Area Props --- --- Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation"
+        "text": "Area Props --- --- Lifecycle and change onReady , onChange , onDesync Mode control initialMode , defaultEditorView , availableModes Feature gating featureFlags , headingOptions , slashCommandVisibility Bridge control sourceMetadataMode , markdownBridgeFlavor , markdownSourceOfTruth Code intelligence isSyntaxHighlightingEnabled , syntaxHighlightColorMode , maxAutoDetectCodeLength , languageOptions , showLineNumbers List depth maxListIndentation"
       },
       {
         "heading": "Preset-level code intelligence toggle",
@@ -6684,7 +7476,7 @@ export const docsIndex = [
         "heading": "Full `ExtensiveEditorProps` index",
         "id": "full-extensiveeditorprops-index",
         "level": 2,
-        "text": "- className - onReady - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - extraSlashCommands - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation"
+        "text": "- className - onReady - onChange - onDesync - presetId - initialTheme - onThemeChange - theme - defaultContent - showDefaultContent - placeholder - defaultEditorView - initialMode - isEditorViewTabsVisible - isEditorViewsTabVisible - availableModes - variantClassName - toolbarLayout - toolbarVisibility - toolbarPosition - toolbarAlignment - toolbarClassName - toolbarStyleVars - quoteClassName - quoteStyleVars - defaultSettings - editorThemeOverrides - isToolbarEnabled - isToolbarPinned - imageUploadHandler - gifUploadHandler - fontFamilyOptions - fontSizeOptions - lineHeightOptions - minimumDefaultLineHeight - scaleByRatio - headingOptions - paragraphLabel - syncHeadingOptionsWithCommands - slashCommandVisibility - extraSlashCommands - shortcutConfig - commandPaletteShortcutOnly - isListStyleDropdownEnabled - editOnClick - isDraggableBoxEnabled - featureFlags - sourceMetadataMode - markdownBridgeFlavor - markdownSourceOfTruth - isSyntaxHighlightingEnabled - syntaxHighlightColorMode - syntaxHighlightColors - maxAutoDetectCodeLength - isCopyAllowed - languageOptions - showLineNumbers - maxListIndentation"
       }
     ],
     "headings": [
@@ -6711,7 +7503,7 @@ export const docsIndex = [
     ],
     "urlPath": "/docs/luthor/props-reference/",
     "sourcePath": "apps/web/src/content/docs/luthor/props-reference.md",
-    "updatedAt": "2026-06-18T05:35:33.133Z",
+    "updatedAt": "2026-08-11T11:13:38.996Z",
     "package": "luthor",
     "docType": "reference",
     "surface": "prop",

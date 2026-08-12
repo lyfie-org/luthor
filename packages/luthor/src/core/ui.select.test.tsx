@@ -39,23 +39,21 @@ describe("Select overlay positioning", () => {
   });
 
   it("keeps dropdown within editor bounds while preserving content width", async () => {
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function mockRect() {
-      const element = this as HTMLElement;
-      if (element.classList.contains("luthor-editor-wrapper")) {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function mockRect(this: HTMLElement) {
+      if (this.classList.contains("luthor-editor-wrapper")) {
         return createRect({ left: 100, top: 100, width: 220, height: 260 });
       }
-      if (element.classList.contains("luthor-select-trigger")) {
+      if (this.classList.contains("luthor-select-trigger")) {
         return createRect({ left: 120, top: 120, width: 120, height: 36 });
       }
-      if (element.classList.contains("luthor-select-dropdown")) {
+      if (this.classList.contains("luthor-select-dropdown")) {
         return createRect({ left: 0, top: 0, width: 120, height: 160 });
       }
       return createRect({ left: 0, top: 0, width: 0, height: 0 });
     });
 
-    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockImplementation(function mockScrollWidth() {
-      const element = this as HTMLElement;
-      if (element.classList.contains("luthor-select-dropdown")) {
+    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockImplementation(function mockScrollWidth(this: HTMLElement) {
+      if (this.classList.contains("luthor-select-dropdown")) {
         return 260;
       }
       return 0;

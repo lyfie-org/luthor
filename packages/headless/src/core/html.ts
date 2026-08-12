@@ -15,11 +15,15 @@ import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import {
   createEditor,
   $getRoot,
+  $createParagraphNode,
+  $isDecoratorNode,
+  $isElementNode,
   ParagraphNode,
   TextNode,
   LineBreakNode,
   TabNode,
   type EditorState,
+  type LexicalNode,
 } from "lexical";
 import { ImageNode, IframeEmbedNode, YouTubeEmbedNode } from "@lyfie/luthor-headless/extensions/media";
 import {
@@ -35,10 +39,23 @@ import {
   extractHTMLMetadataPatch,
   HTML_SUPPORTED_NODE_TYPES,
 } from "./source-capability";
+import {
+  sanitizeHtmlImportDocument,
+  type HtmlImportSanitizeOptions,
+} from "./htmlImportSanitizer";
 import type { SourceMetadataMode } from "./markdown";
 
 export interface HtmlBridgeOptions {
   metadataMode?: SourceMetadataMode;
+  /**
+   * Sanitization policy applied to imported HTML before conversion.
+   * Defaults to the strict allowlist (see `sanitizeHtmlImportDocument`).
+   * Pass an options object to widen the policy for a trusted source, or
+   * `false` to skip sanitization entirely — only for markup the host
+   * fully controls. Ignored by `jsonToHTML`, which renders from the
+   * already-validated document model.
+   */
+  sanitize?: HtmlImportSanitizeOptions | false;
 }
 
 function collectHTMLPartialEnvelopes(input: unknown): MetadataEnvelope[] {
@@ -346,6 +363,42 @@ function shouldPreserveMetadata(metadataMode: SourceMetadataMode | undefined): b
   return metadataMode !== "none";
 }
 
+/**
+ * Malformed markup ("<<<>>>", stray text outside any block) makes
+ * `$generateNodesFromDOM` return bare inline nodes, which the root refuses
+ * to hold — it throws "Only element or decorator nodes can be inserted to
+ * the root node". Group runs of inline nodes into paragraphs so broken
+ * input degrades to plain text instead of crashing the caller.
+ */
+function wrapTopLevelInlineNodes(nodes: LexicalNode[]): LexicalNode[] {
+  const wrapped: LexicalNode[] = [];
+  let pendingInline: LexicalNode[] = [];
+
+  const flushInline = () => {
+    if (pendingInline.length === 0) {
+      return;
+    }
+    const paragraph = $createParagraphNode();
+    paragraph.append(...pendingInline);
+    wrapped.push(paragraph);
+    pendingInline = [];
+  };
+
+  for (const node of nodes) {
+    const isBlockLevel =
+      ($isElementNode(node) && !node.isInline()) || $isDecoratorNode(node);
+    if (isBlockLevel) {
+      flushInline();
+      wrapped.push(node);
+      continue;
+    }
+    pendingInline.push(node);
+  }
+
+  flushInline();
+  return wrapped;
+}
+
 export function htmlToJSON(
   html: string,
   options?: HtmlBridgeOptions,
@@ -366,13 +419,16 @@ export function htmlToJSON(
   editor.update(
     () => {
       const parsedDocument = new DOMParser().parseFromString(content, "text/html");
+      if (options?.sanitize !== false) {
+        sanitizeHtmlImportDocument(parsedDocument, options?.sanitize);
+      }
       flattenPictureElements(parsedDocument);
       normalizeAlignmentAttributes(parsedDocument);
       normalizeWhitespaceArtifacts(parsedDocument);
       const nodes = $generateNodesFromDOM(editor, parsedDocument);
       const root = $getRoot();
       root.clear();
-      root.append(...nodes);
+      root.append(...wrapTopLevelInlineNodes(nodes));
     },
     { discrete: true },
   );

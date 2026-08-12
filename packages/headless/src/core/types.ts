@@ -7,7 +7,7 @@
 
 import { LexicalEditor } from "lexical";
 import { ReactNode, CSSProperties } from "react";
-import { Extension } from "@lyfie/luthor-headless/extensions";
+import { AnyExtension, Extension } from "@lyfie/luthor-headless/extensions";
 import { LuthorTheme } from "./theme";
 
 export type { Extension, ExtensionCategory } from "../extensions";
@@ -48,7 +48,7 @@ export interface EditorConfig {
  *
  * @template Exts - Array of extension types
  */
-export interface EditorContextType<Exts extends readonly Extension[]> {
+export interface EditorContextType<Exts extends readonly AnyExtension[]> {
   /** The Lexical editor instance */
   editor: LexicalEditor | null;
   /** Editor configuration */

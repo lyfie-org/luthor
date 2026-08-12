@@ -242,6 +242,7 @@ interface PapyraEditorAdapter {
   uploadMedia(file: File): Promise<{ filename: string }>;    // drop/paste → store
   openNote(ref: { title?: string; id?: string }): void;      // [[Note]] → navigate
   searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;
+  searchUsers?(q: string): Promise<Array<{ username: string; name: string }>>;
   resolveBlock?(ref: { note: string; blockId: string }): Promise<string | null>;
   resolveCard?(url: string): Promise<{
     title?: string;
@@ -256,6 +257,27 @@ interface PapyraEditorAdapter {
 
 The adapter's resolvers are where the host's server-side authorization lives. The
 editor's blur/lock is UX, never the boundary.
+
+### Typeahead dropdowns
+
+Two triggers open a caret-anchored dropdown, and both are fed by the adapter:
+
+| Trigger | Menu       | Fed by                  | Inserts                    |
+| ------- | ---------- | ----------------------- | -------------------------- |
+| `[[`    | note links | `searchNotes(q)`        | a `[[Note]]` wikilink      |
+| `@`     | mentions   | `searchUsers(q)`        | plain `@username ` text    |
+
+Both are host-gated: with no adapter (or, for `@`, no `searchUsers`) the trigger
+is silent and no menu renders, so the editor never offers a suggestion it cannot
+honour. Keyboard-driven throughout — Escape closes, arrows move, Enter/Tab
+select, and a click outside dismisses.
+
+The `@` trigger matches the mention rule byte-for-byte: an `@` only opens the
+menu at the start of a block or after whitespace, `(`, or `[`, and the query is
+`[A-Za-z0-9][A-Za-z0-9._-]{0,63}`. `bea@example.com` never opens it. Mentions are
+written as **plain text**, not a node — nothing to serialize, nothing that can
+rewrite the body on save — and hosts detect them by scanning the markdown (see
+`getMentions()`).
 
 ## Usage
 
@@ -279,6 +301,7 @@ export function NoteCanvas({ body }: { body: string }) {
         },
         openNote: ({ title }) => router.push(`/notes/${title}`),
         searchNotes: (q) => api.searchNotes(q),
+        searchUsers: (q) => api.searchUsers(q),
       }}
       onReady={(editor) => {
         // Read the body imperatively — never a controlled value.

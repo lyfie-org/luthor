@@ -28,6 +28,10 @@ import type { ElementTransformer } from "@lexical/markdown";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { BaseExtension } from "../base/BaseExtension";
 import { BaseExtensionConfig, ExtensionCategory } from "../types";
+import {
+  EMBED_ALLOWED_URL_SCHEMES,
+  sanitizeUrlForAttribute,
+} from "../../utils/urlSafety";
 
 export type EmbedAlignment = "left" | "center" | "right";
 
@@ -153,6 +157,20 @@ const MIN_EMBED_HEIGHT = 140;
 const MAX_EMBED_WIDTH = 1600;
 const MAX_EMBED_HEIGHT = 1200;
 
+/**
+ * The payload's `src` is kept verbatim in the model (and in JSON/markdown
+ * round-trips) so loading a document never rewrites it, but anything that
+ * reaches a live iframe `src` attribute goes through this gate. A src that
+ * arrived via `importJSON`/`importDOM` — the two paths that skip the
+ * command-level URL validation — renders as an inert `about:blank` frame
+ * instead of executing.
+ */
+export function toRenderableEmbedSrc(src: string): string {
+  return sanitizeUrlForAttribute(src, {
+    allowedSchemes: EMBED_ALLOWED_URL_SCHEMES,
+  });
+}
+
 export class IframeEmbedNode extends DecoratorNode<ReactNode> {
   __payload: IframeEmbedPayload;
 
@@ -272,7 +290,7 @@ export class IframeEmbedNode extends DecoratorNode<ReactNode> {
     element.style.margin = "1rem 0";
 
     const iframe = document.createElement("iframe");
-    iframe.setAttribute("src", this.__payload.src);
+    iframe.setAttribute("src", toRenderableEmbedSrc(this.__payload.src));
     iframe.setAttribute("width", String(this.__payload.width));
     iframe.setAttribute("height", String(this.__payload.height));
     iframe.setAttribute("title", this.__payload.title ?? "Embedded content");
@@ -483,7 +501,7 @@ function IframeEmbedComponent({
       >
         <iframe
           ref={iframeRef}
-          src={payload.src}
+          src={toRenderableEmbedSrc(payload.src)}
           title={payload.title ?? "Embedded content"}
           loading="lazy"
           referrerPolicy="strict-origin-when-cross-origin"

@@ -143,6 +143,20 @@ export interface CoreEditorCommands {
   insertCustomNode?: (payload: Record<string, unknown>) => void;
   executeEmojiSuggestion?: (emoji: string) => boolean;
   closeEmojiSuggestions?: () => void;
+  /**
+   * Commit the `[[` typeahead with the chosen note, replacing the trigger text
+   * with a wikilink node. Present only when a preset registers the headless
+   * wikilink typeahead extension (Papyra does).
+   */
+  selectWikilink?: (target: string, alias?: string) => void;
+  closeWikilinkMenu?: () => void;
+  /**
+   * Commit the `@` typeahead with the chosen username, replacing the trigger
+   * text with plain `@username ` text. Present only when a preset registers the
+   * headless mention typeahead extension (Papyra does).
+   */
+  selectMention?: (username: string) => void;
+  closeMentionMenu?: () => void;
   getEmojiSuggestions?: (query?: string) => {
     emoji: string;
     label: string;

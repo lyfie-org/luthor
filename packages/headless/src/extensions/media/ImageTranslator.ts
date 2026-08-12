@@ -13,6 +13,7 @@ import {
   Spread,
 } from "lexical";
 import { ImageNode, $createImageNode } from "./index"; // Adjust path if needed
+import { sanitizeUrlForAttribute } from "../../utils/urlSafety";
 
 /**
  * Serialized ImageNode representation for persistence and exchange
@@ -313,7 +314,8 @@ export class ImageTranslator {
 
     if (node.__linkHref) {
       const anchor = document.createElement("a");
-      anchor.href = node.__linkHref;
+      // Model keeps the raw href; only exported DOM is scheme-gated.
+      anchor.href = sanitizeUrlForAttribute(node.__linkHref);
       if (node.__linkTitle) {
         anchor.title = node.__linkTitle;
       }

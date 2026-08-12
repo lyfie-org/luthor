@@ -8,6 +8,7 @@
     "allowImportingTsExtensions": true,
     "emitDeclarationOnly": true,
     "paths": {
+      "@lyfie/luthor-headless": ["./src/index.ts"],
       "@lyfie/luthor-headless/*": ["./src/*"]
     }
   },

@@ -200,8 +200,16 @@ export {
   type WikilinkTypeaheadConfig,
   type WikilinkTypeaheadCommands,
   type WikilinkTypeaheadStateQueries,
+  MentionTypeaheadExtension,
+  mentionTypeaheadExtension,
+  sanitizeMentionUsername,
+  type MentionTypeaheadMenuState,
+  type MentionTypeaheadConfig,
+  type MentionTypeaheadCommands,
+  type MentionTypeaheadStateQueries,
   FileDropUploadExtension,
   fileDropUploadExtension,
+  sanitizeEmbedTarget,
   type FileDropUploadConfig,
 } from "./embeds";
 

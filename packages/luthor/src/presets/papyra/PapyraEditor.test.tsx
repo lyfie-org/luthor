@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExtensiveEditorProps, ExtensiveEditorRef } from "../extensive";
 
 const { extensiveEditorMock } = vi.hoisted(() => ({
-  extensiveEditorMock: vi.fn((): React.ReactNode => null),
+  extensiveEditorMock: vi.fn<(props: Record<string, unknown>) => React.ReactNode>(() => null),
 }));
 
 vi.mock("../extensive", () => ({
@@ -419,7 +419,7 @@ describe("PapyraEditor", () => {
 
       expect(stubMethods.injectJSON).toHaveBeenCalledTimes(1);
       const payload = (stubMethods.injectJSON as ReturnType<typeof vi.fn>).mock
-        .calls[0][0] as string;
+        .calls[0]?.[0] as string;
       // injectJSON always receives a serialized JSON document, never raw markdown.
       expect(() => JSON.parse(payload)).not.toThrow();
     });
@@ -497,6 +497,25 @@ describe("PapyraEditor", () => {
       expect(ref.current?.getMentions()).toEqual(["alice", "bob"]);
     });
 
+    it("matches the host's mention rule on boundaries and username characters", () => {
+      const ref = createRef<PapyraEditorRef>();
+      const mentionMethods: ExtensiveEditorRef = {
+        ...stubMethods,
+        getMarkdown: vi.fn(
+          () =>
+            "@bea.smith opens the body.\n(@cara) and [@dev] count.\nmail me@example.com, dash-@nope, and code@1 skip.\nTrailing @bea.",
+        ),
+      };
+      renderWithReadyEditor(ref, { methods: mentionMethods });
+
+      expect(ref.current?.getMentions()).toEqual([
+        "bea.smith",
+        "cara",
+        "dev",
+        "bea",
+      ]);
+    });
+
     it("extracts trailing block anchors from the body", () => {
       const ref = createRef<PapyraEditorRef>();
       const anchorMethods: ExtensiveEditorRef = {
@@ -534,7 +553,7 @@ describe("PapyraEditor", () => {
       render(<PapyraEditor showDefaultContent={false} onReady={onReady} />);
 
       expect(onReady).toHaveBeenCalledTimes(1);
-      const handed = onReady.mock.calls[0][0] as PapyraEditorRef;
+      const handed = onReady.mock.calls[0]?.[0] as PapyraEditorRef;
       expect(typeof handed.setMarkdown).toBe("function");
       expect(typeof handed.focus).toBe("function");
       expect(typeof handed.getOutline).toBe("function");
@@ -560,7 +579,7 @@ describe("PapyraEditor", () => {
       );
 
       expect(onOutlineChange).toHaveBeenCalled();
-      const firstOutline = onOutlineChange.mock.calls[0][0] as Array<{
+      const firstOutline = onOutlineChange.mock.calls[0]?.[0] as Array<{
         level: number;
         text: string;
       }>;
@@ -865,5 +884,81 @@ describe("PapyraEditor", () => {
         createSpy.mockRestore();
       }
     });
+  });
+});
+
+describe("PapyraEditor typeahead seams", () => {
+  const baseAdapter: PapyraEditorAdapter = {
+    resolveMediaUrl: (filename) => `/media/${filename}`,
+    uploadMedia: (file) => Promise.resolve({ filename: file.name }),
+    openNote: vi.fn(),
+    searchNotes: vi.fn(() => Promise.resolve([{ id: "n1", title: "Roadmap" }])),
+  };
+
+  function extensionNames(): string[] {
+    return ((lastProps().extraExtensions ?? []) as Array<{ name: string }>).map(
+      (extension) => extension.name,
+    );
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("routes the [[ typeahead through the adapter's note search", async () => {
+    render(<PapyraEditor showDefaultContent={false} adapter={baseAdapter} />);
+
+    const provider = lastProps().wikilinkSuggestionProvider;
+    expect(provider).toBeTypeOf("function");
+    await expect(provider!("ro")).resolves.toEqual([{ id: "n1", title: "Roadmap" }]);
+    expect(baseAdapter.searchNotes).toHaveBeenCalledWith("ro");
+  });
+
+  it("registers the wikilink trigger even without a host", () => {
+    render(<PapyraEditor showDefaultContent={false} />);
+
+    expect(extensionNames()).toContain("wikilinkTypeahead");
+  });
+
+  it("offers no typeahead menus when the host injects no adapter", () => {
+    render(<PapyraEditor showDefaultContent={false} />);
+
+    expect(lastProps().wikilinkSuggestionProvider).toBeUndefined();
+    expect(lastProps().mentionSuggestionProvider).toBeUndefined();
+    expect(extensionNames()).not.toContain("mentionTypeahead");
+  });
+
+  it("keeps the @ trigger unregistered when the host cannot search people", () => {
+    render(<PapyraEditor showDefaultContent={false} adapter={baseAdapter} />);
+
+    expect(lastProps().mentionSuggestionProvider).toBeUndefined();
+    expect(extensionNames()).not.toContain("mentionTypeahead");
+  });
+
+  it("registers the @ trigger and routes it through searchUsers", async () => {
+    const searchUsers = vi.fn(() =>
+      Promise.resolve([{ username: "bea", name: "Bea Ito" }]),
+    );
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        adapter={{ ...baseAdapter, searchUsers }}
+      />,
+    );
+
+    expect(extensionNames()).toContain("mentionTypeahead");
+
+    const provider = lastProps().mentionSuggestionProvider;
+    expect(provider).toBeTypeOf("function");
+    await expect(provider!("be")).resolves.toEqual([
+      { username: "bea", name: "Bea Ito" },
+    ]);
+    expect(searchUsers).toHaveBeenCalledWith("be");
+  });
+
+  it("degrades the fallback adapter's people search to an empty result", async () => {
+    await expect(
+      createFallbackPapyraAdapter().searchUsers?.("anything"),
+    ).resolves.toEqual([]);
   });
 });

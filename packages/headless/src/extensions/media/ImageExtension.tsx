@@ -54,6 +54,8 @@ import {
 import {
   ImageTranslator,
 } from "./ImageTranslator";
+import { sanitizeUrlForAttribute } from "../../utils/urlSafety";
+import { reportError, warnOnce } from "../../utils/logger";
 
 /**
  * Command used to insert images into the editor
@@ -98,6 +100,13 @@ export function shouldShowImageResizeHandles(
  * @param props - Image component props
  * @returns React element for the image
  */
+/**
+ * Pending object-URL revocations, keyed by src. Module scope so a
+ * StrictMode remount of the *same* image can cancel the teardown its own
+ * throwaway mount scheduled.
+ */
+const revokeTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 function ImageComponent({
   src,
   alt,
@@ -130,12 +139,36 @@ function ImageComponent({
     height || "auto",
   );
 
-  // Clean up object URLs on unmount
+  /*
+   * Release object URLs, but not on a StrictMode teardown.
+   *
+   * React's development double-mount unmounts and immediately remounts
+   * this component with the same `src`. Revoking synchronously there kills
+   * the URL the surviving mount is about to render (ERR_FILE_NOT_FOUND) —
+   * which the extensive preset's default `uploadHandler`
+   * (`URL.createObjectURL`) walks straight into. Deferring by a task and
+   * cancelling if the same src mounts again distinguishes a real unmount
+   * from a StrictMode cycle; the delay is irrelevant for the real case.
+   */
   useEffect(() => {
+    if (!src || !src.startsWith("blob:")) {
+      return;
+    }
+
+    const pending = revokeTimers.get(src);
+    if (pending !== undefined) {
+      clearTimeout(pending);
+      revokeTimers.delete(src);
+    }
+
     return () => {
-      if (src && src.startsWith("blob:")) {
-        URL.revokeObjectURL(src);
-      }
+      revokeTimers.set(
+        src,
+        setTimeout(() => {
+          revokeTimers.delete(src);
+          URL.revokeObjectURL(src);
+        }, 0),
+      );
     };
   }, [src]);
 
@@ -359,7 +392,9 @@ function ImageComponent({
       >
         {linkHref ? (
           <a
-            href={linkHref}
+            // The model keeps linkHref verbatim for lossless markdown
+            // round-trips; only the live anchor is scheme-gated.
+            href={sanitizeUrlForAttribute(linkHref)}
             title={linkTitle}
             target="_blank"
             rel="noopener noreferrer"
@@ -557,7 +592,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
 
   setSrc(src: string): void {
     if (!src || src.length === 0) {
-      console.warn("Attempted to set empty src on ImageNode");
+      warnOnce("ImageNode.setSrc called with an empty src; ignoring");
       return;
     }
     const writable = this.getWritable();
@@ -627,7 +662,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
   decorate(): ReactNode {
     // Ensure we have a valid src
     if (!this.__src || this.__src.length === 0) {
-      console.error("❌ No src provided to ImageNode");
+      reportError("ImageNode created without a src");
       return (
         <div
           style={{
@@ -663,7 +698,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
         />
       );
     } catch (error) {
-      console.error("❌ Error rendering ImageNode:", error);
+      reportError("ImageNode failed to render", error);
       return (
         <div
           style={{
@@ -831,7 +866,7 @@ export class ImageExtension extends BaseExtension<
                   });
                 })
                 .catch((error) => {
-                  console.error("Upload failed:", error);
+                  reportError("Image upload handler rejected", error);
                   // Keep blob URL, set uploading to false
                   editor.update(() => {
                     const node = $getNodeByKey(imageNode.getKey());
@@ -866,7 +901,7 @@ export class ImageExtension extends BaseExtension<
               $getRoot().append(paragraph);
             }
           } catch (error) {
-            console.error("❌ Insertion error:", error);
+            reportError("Image insertion failed", error);
           }
         });
         return true;
@@ -941,7 +976,7 @@ export class ImageExtension extends BaseExtension<
               const getSrc =
                 this.config.uploadHandler && this.config.forceUpload
                   ? this.config.uploadHandler(file).catch((err) => {
-                      console.error("Upload failed:", err);
+                      reportError("Image upload handler rejected", err);
                       return URL.createObjectURL(file); // Fallback
                     })
                   : Promise.resolve(URL.createObjectURL(file));
@@ -979,7 +1014,7 @@ export class ImageExtension extends BaseExtension<
                       });
                     })
                     .catch((error) => {
-                      console.error("Upload failed:", error);
+                      reportError("Image upload handler rejected", error);
                       editor.update(() => {
                         const node = $getNodeByKey(imageNode.getKey());
                         if (node instanceof ImageNode) {

@@ -22,7 +22,7 @@ import {
   type LexicalEditor,
   type MarkdownBridgeFlavor,
   type MarkdownBridgeOptions,
-  type Extension,
+  type AnyExtension,
   type LuthorTheme,
   type SourceMetadataMode,
 } from "@lyfie/luthor-headless";
@@ -40,6 +40,8 @@ import {
   CommandPalette,
   SlashCommandMenu,
   EmojiSuggestionMenu,
+  MentionSuggestionMenu,
+  WikilinkSuggestionMenu,
   commandsToCommandPaletteItems,
   commandsToSlashCommandItems,
   formatHTMLSource,
@@ -68,6 +70,8 @@ import {
   type ToolbarPosition,
   type SlashCommandVisibility,
   type KeyboardShortcut,
+  type MentionSuggestionItem,
+  type WikilinkSuggestionItem,
   type ShortcutConfig as CommandShortcutConfig,
 } from "../../core";
 import {
@@ -89,6 +93,8 @@ import type {
   SlashCommandExtension,
   EmojiExtension,
   EmojiCatalogItem,
+  MentionTypeaheadExtension,
+  WikilinkTypeaheadExtension,
   CodeLanguageOptionsConfig,
   FontFamilyOption,
   FontSizeOption,
@@ -118,6 +124,44 @@ const DEFAULT_JSON_PLACEHOLDER = "Enter JSON document content...";
 const DEFAULT_MARKDOWN_PLACEHOLDER = "Enter Markdown content...";
 const DEFAULT_HTML_PLACEHOLDER = "Enter HTML content...";
 const NON_VISIBLE_OVERFLOW_VALUES = new Set(["auto", "scroll", "overlay"]);
+
+/**
+ * Resolves the notes offered by the `[[` typeahead. Supplied by the preset or
+ * host (Papyra routes it to its adapter's note search); when it is absent the
+ * `[[` menu never renders, even if the trigger extension is registered.
+ */
+export type WikilinkSuggestionProvider = (
+  query: string,
+) => Promise<readonly WikilinkSuggestionItem[]>;
+
+/**
+ * Resolves the people offered by the `@` typeahead. Same contract as
+ * {@link WikilinkSuggestionProvider}: no provider, no menu.
+ */
+export type MentionSuggestionProvider = (
+  query: string,
+) => Promise<readonly MentionSuggestionItem[]>;
+
+/** Trigger state mirrored from a headless typeahead extension. */
+type TypeaheadTriggerState = {
+  isOpen: boolean;
+  query: string;
+  position: { x: number; y: number } | null;
+};
+
+/**
+ * Debounce before a typeahead query reaches the host's search. Long enough to
+ * skip the intermediate queries of a fast typist, short enough that the list
+ * still feels live.
+ */
+const TYPEAHEAD_SEARCH_DEBOUNCE_MS = 120;
+
+/** Shared empty result, so a closed menu never allocates a new array. */
+const EMPTY_SUGGESTIONS: readonly never[] = [];
+
+function createClosedTypeaheadState(): TypeaheadTriggerState {
+  return { isOpen: false, query: "", position: null };
+}
 
 const SYNTAX_COLOR_TOKEN_TO_VAR: ReadonlyArray<
   readonly [keyof SyntaxHighlightColorTokens, keyof EditorThemeOverrides]
@@ -1010,6 +1054,8 @@ function ExtensiveEditorContent({
   markdownSourceOfTruth,
   showLineNumbers,
   markdownBridgeExtras,
+  mentionSuggestionProvider,
+  wikilinkSuggestionProvider,
 }: {
   isDark: boolean;
   toggleTheme: () => void;
@@ -1049,6 +1095,8 @@ function ExtensiveEditorContent({
   markdownSourceOfTruth: boolean;
   showLineNumbers: boolean;
   markdownBridgeExtras?: MarkdownBridgeExtras;
+  mentionSuggestionProvider?: MentionSuggestionProvider;
+  wikilinkSuggestionProvider?: WikilinkSuggestionProvider;
 }) {
   const {
     commands,
@@ -1083,6 +1131,21 @@ function ExtensiveEditorContent({
     position: null as { x: number; y: number } | null,
     suggestions: [] as EmojiCatalogItem[],
   });
+  // The `[[` and `@` typeaheads keep their trigger state (owned by the headless
+  // extension) apart from their suggestions (fetched from the host), since the
+  // search resolves asynchronously after the trigger has already opened.
+  const [wikilinkTypeaheadState, setWikilinkTypeaheadState] = useState(
+    createClosedTypeaheadState,
+  );
+  const [wikilinkSuggestions, setWikilinkSuggestions] = useState<
+    readonly WikilinkSuggestionItem[]
+  >(EMPTY_SUGGESTIONS);
+  const [mentionTypeaheadState, setMentionTypeaheadState] = useState(
+    createClosedTypeaheadState,
+  );
+  const [mentionSuggestions, setMentionSuggestions] = useState<
+    readonly MentionSuggestionItem[]
+  >(EMPTY_SUGGESTIONS);
   const readyRef = useRef(false);
   const resolvedHeadingOptions = useMemo(
     () => normalizeHeadingOptions(headingOptions),
@@ -1654,6 +1717,110 @@ function ExtensiveEditorContent({
   }, [extensions, mode]);
 
   useEffect(() => {
+    const wikilinkExtension = extensions.find(
+      (ext: any) => ext.name === "wikilinkTypeahead",
+    ) as WikilinkTypeaheadExtension | undefined;
+
+    if (!wikilinkExtension || !wikilinkExtension.subscribe) return;
+
+    return wikilinkExtension.subscribe((state) => {
+      setWikilinkTypeaheadState({
+        isOpen: isVisualEditorMode(mode) ? state.isOpen : false,
+        query: isVisualEditorMode(mode) ? state.query : "",
+        position: isVisualEditorMode(mode) ? state.position : null,
+      });
+    });
+  }, [extensions, mode]);
+
+  useEffect(() => {
+    const mentionExtension = extensions.find(
+      (ext: any) => ext.name === "mentionTypeahead",
+    ) as MentionTypeaheadExtension | undefined;
+
+    if (!mentionExtension || !mentionExtension.subscribe) return;
+
+    return mentionExtension.subscribe((state) => {
+      setMentionTypeaheadState({
+        isOpen: isVisualEditorMode(mode) ? state.isOpen : false,
+        query: isVisualEditorMode(mode) ? state.query : "",
+        position: isVisualEditorMode(mode) ? state.position : null,
+      });
+    });
+  }, [extensions, mode]);
+
+  // Run the host's note search while `[[` is open. Debounced, and the in-flight
+  // result is dropped when the query moves on, so a slow response can never
+  // repopulate the list behind a newer one.
+  useEffect(() => {
+    if (!wikilinkSuggestionProvider || !wikilinkTypeaheadState.isOpen) {
+      setWikilinkSuggestions((previous) =>
+        previous.length > 0 ? EMPTY_SUGGESTIONS : previous,
+      );
+      return;
+    }
+
+    let cancelled = false;
+    const query = wikilinkTypeaheadState.query;
+    const timer = setTimeout(() => {
+      Promise.resolve(wikilinkSuggestionProvider(query))
+        .then((results) => {
+          if (!cancelled) {
+            setWikilinkSuggestions(results);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setWikilinkSuggestions(EMPTY_SUGGESTIONS);
+          }
+        });
+    }, TYPEAHEAD_SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [
+    wikilinkSuggestionProvider,
+    wikilinkTypeaheadState.isOpen,
+    wikilinkTypeaheadState.query,
+  ]);
+
+  // Same contract for `@`: the host's people search, debounced and race-safe.
+  useEffect(() => {
+    if (!mentionSuggestionProvider || !mentionTypeaheadState.isOpen) {
+      setMentionSuggestions((previous) =>
+        previous.length > 0 ? EMPTY_SUGGESTIONS : previous,
+      );
+      return;
+    }
+
+    let cancelled = false;
+    const query = mentionTypeaheadState.query;
+    const timer = setTimeout(() => {
+      Promise.resolve(mentionSuggestionProvider(query))
+        .then((results) => {
+          if (!cancelled) {
+            setMentionSuggestions(results);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setMentionSuggestions(EMPTY_SUGGESTIONS);
+          }
+        });
+    }, TYPEAHEAD_SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [
+    mentionSuggestionProvider,
+    mentionTypeaheadState.isOpen,
+    mentionTypeaheadState.query,
+  ]);
+
+  useEffect(() => {
     if (isVisualEditorMode(mode)) {
       return;
     }
@@ -1687,9 +1854,22 @@ function ExtensiveEditorContent({
         : previous
     ));
 
+    setWikilinkTypeaheadState((previous) => (
+      previous.isOpen || previous.query.length > 0 || previous.position !== null
+        ? createClosedTypeaheadState()
+        : previous
+    ));
+    setMentionTypeaheadState((previous) => (
+      previous.isOpen || previous.query.length > 0 || previous.position !== null
+        ? createClosedTypeaheadState()
+        : previous
+    ));
+
     safeCommands.hideCommandPalette?.();
     safeCommands.closeSlashMenu?.();
     safeCommands.closeEmojiSuggestions?.();
+    safeCommands.closeWikilinkMenu?.();
+    safeCommands.closeMentionMenu?.();
   }, [mode, safeCommands]);
 
   useEffect(() => {
@@ -2198,6 +2378,32 @@ function ExtensiveEditorContent({
           }}
         />
       )}
+      {isVisualEditorMode(mode) && wikilinkSuggestionProvider && (
+        <WikilinkSuggestionMenu
+          isOpen={wikilinkTypeaheadState.isOpen}
+          query={wikilinkTypeaheadState.query}
+          position={wikilinkTypeaheadState.position}
+          portalContainer={overlayPortalContainer}
+          suggestions={wikilinkSuggestions}
+          onClose={() => safeCommands.closeWikilinkMenu?.()}
+          onExecute={(title) => {
+            safeCommands.selectWikilink?.(title);
+          }}
+        />
+      )}
+      {isVisualEditorMode(mode) && mentionSuggestionProvider && (
+        <MentionSuggestionMenu
+          isOpen={mentionTypeaheadState.isOpen}
+          query={mentionTypeaheadState.query}
+          position={mentionTypeaheadState.position}
+          portalContainer={overlayPortalContainer}
+          suggestions={mentionSuggestions}
+          onClose={() => safeCommands.closeMentionMenu?.()}
+          onExecute={(username) => {
+            safeCommands.selectMention?.(username);
+          }}
+        />
+      )}
     </>
   );
 }
@@ -2365,7 +2571,7 @@ export interface ExtensiveEditorProps {
    * extensions are appended after the built-in ones and own their nodes,
    * commands, and rendering.
    */
-  extraExtensions?: readonly Extension[];
+  extraExtensions?: readonly AnyExtension[];
   /**
    * Custom Lexical node classes the markdown bridge must understand to parse and
    * serialize a preset's extra nodes. Pair with {@link extraExtensions} (which
@@ -2380,6 +2586,18 @@ export interface ExtensiveEditorProps {
    * set so preset syntax is matched first on import.
    */
   markdownExtraTransformers?: MarkdownBridgeOptions["extraTransformers"];
+  /**
+   * Resolves the notes shown by the `[[` typeahead. Pair it with a preset that
+   * registers the headless wikilink typeahead extension (via
+   * {@link extraExtensions}); without the provider the trigger stays silent and
+   * no menu renders. Memoize it so the search is not re-run on every render.
+   */
+  wikilinkSuggestionProvider?: WikilinkSuggestionProvider;
+  /**
+   * Resolves the people shown by the `@` typeahead. Same pairing as
+   * {@link wikilinkSuggestionProvider}, with the mention typeahead extension.
+   */
+  mentionSuggestionProvider?: MentionSuggestionProvider;
 }
 
 /** Extra node/transformer set forwarded to the markdown bridge. */
@@ -2460,6 +2678,8 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     extraExtensions,
     markdownExtraNodes,
     markdownExtraTransformers,
+    wikilinkSuggestionProvider,
+    mentionSuggestionProvider,
   }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
     const markdownBridgeExtras = useMemo<MarkdownBridgeExtras>(() => {
@@ -2796,6 +3016,8 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             markdownSourceOfTruth={markdownSourceOfTruth}
             showLineNumbers={showLineNumbers}
             markdownBridgeExtras={markdownBridgeExtras}
+            wikilinkSuggestionProvider={wikilinkSuggestionProvider}
+            mentionSuggestionProvider={mentionSuggestionProvider}
           />
         </Provider>
       </div>
