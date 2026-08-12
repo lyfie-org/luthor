@@ -37,7 +37,27 @@ import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { $createFileEmbedNode } from "./FileEmbedNode";
 
 export interface FileDropUploadConfig extends BaseExtensionConfig {
+  /**
+   * Host upload callback. The returned filename is written into the body
+   * as `![[filename]]`, so it must be storage-safe AND wikilink-safe: the
+   * characters `[ ] # ^ |` and line breaks cannot round-trip through the
+   * `![[...]]` syntax. The extension strips them defensively before
+   * inserting (see {@link sanitizeEmbedTarget}); a host that stores the
+   * file under the unsanitized name will serve a broken reference, so
+   * sanitize on the server too.
+   */
   uploadFile?: (file: File) => Promise<{ filename: string }>;
+}
+
+/**
+ * Makes a filename safe to embed inside `![[...]]`. The wikilink syntax has
+ * no escape mechanism, so the reserved characters (`[ ] # ^ |`) and control
+ * characters are replaced with `-` — otherwise a file named `x]]y.png`
+ * injects markdown past the embed and corrupts the body on the next save.
+ */
+export function sanitizeEmbedTarget(filename: string): string {
+  // eslint-disable-next-line no-control-regex
+  return filename.replace(/[[\]#^|]|[\u0000-\u001f\u007f]/g, "-").trim();
 }
 
 /**
@@ -138,8 +158,12 @@ export class FileDropUploadExtension extends BaseExtension<
   ): void {
     uploadFile(file).then(
       ({ filename }) => {
+        const target = sanitizeEmbedTarget(filename);
+        if (!target) {
+          return;
+        }
         editor.update(() => {
-          const embedNode = $createFileEmbedNode(filename);
+          const embedNode = $createFileEmbedNode(target);
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
             const anchor = selection.anchor.getNode();

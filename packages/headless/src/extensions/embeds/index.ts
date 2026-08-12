@@ -83,5 +83,6 @@ export {
 export {
   FileDropUploadExtension,
   fileDropUploadExtension,
+  sanitizeEmbedTarget,
   type FileDropUploadConfig,
 } from "./FileDropUploadExtension";

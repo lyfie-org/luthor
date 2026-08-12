@@ -4424,8 +4424,8 @@ export const docsIndex = [
     "title": "URL and Content Safety",
     "navTitle": "URL and Content Safety",
     "description": "The default URL scheme allowlist for links and embeds, how to override it, and what the guarantee does and does not cover.",
-    "content": "\n# URL and Content Safety\n\n[Luthor](/demo/) treats every URL in a document as untrusted input. A document may\nhave been pasted from a hostile page, synced from another machine, or\nloaded from a store the host does not control — so \"the user typed it\"\nis never assumed.\n\n## What this page answers\n\n- Which URL schemes do links and embeds accept by default?\n- How do I allow a custom scheme like `obsidian://` deliberately?\n- What does the guarantee cover, and what stays the host's job?\n\n## Link URLs\n\nThe link extension validates every URL at each entry point — paste,\nauto-linking while typing, and the programmatic `insertLink` /\n`updateLink` / `updateLinkByKey` commands — with one default validator\nthat accepts:\n\n- `http:`, `https:`, `mailto:`, `tel:` absolute URLs\n- same-document references (`#section`)\n- protocol-relative references (`//example.com/path`)\n\nEverything else is rejected, including `javascript:`, `data:`, and\n`vbscript:` URLs in any casing or whitespace disguise (`JaVaScRiPt:`,\n`java\\tscript:`). Rejected URLs never enter the document model, so they\nalso never appear in markdown, JSON, or HTML output.\n\nAs a second layer, Lexical's own `LinkNode` renders any non-allowlisted\nscheme that reaches the model (for example from a pre-existing document)\nas an inert `about:blank` anchor. The raw URL still round-trips through\nJSON and markdown untouched — a host rendering exported markdown with\nits own pipeline must apply its own URL policy there.\n\n### Allowing a custom scheme\n\n`validateUrl` is a plain function, so hosts that need a custom protocol\nopt in explicitly. `isSafeUrl` is exported as a building block:\n\n```tsx\nimport { isSafeUrl, linkExtension } from \"@lyfie/luthor-headless\";\n\nlinkExtension.configure({\n  validateUrl: (url) =>\n    isSafeUrl(url, {\n      allowedSchemes: [\"http\", \"https\", \"mailto\", \"tel\", \"obsidian\"],\n    }),\n});\n```\n\n## Embed sources\n\nThe iframe and YouTube embed commands only ever accept `http(s)` URLs.\nDocuments, however, can carry an arbitrary `src` into the model through\n`importJSON` or pasted HTML (`importDOM`) — those paths deliberately do\nnot rewrite the value, so loading and saving a document never mutates\nit. Instead, the `src` is sanitized at the DOM boundary: anything that\nis not `http(s)` renders (and exports to HTML) as `about:blank`.\n\n`sanitizeUrlForAttribute(url, { allowedSchemes })` implements that gate\nand is exported for hosts building their own embed nodes.\n\n## Scope of the guarantee\n\n- [Luthor](/demo/) validates URLs it turns into anchors and iframe sources, and\n  sanitizes what it renders into the live DOM.\n- [Luthor](/demo/) does not sanitize markdown or JSON *output* — exports are\n  lossless by design, and a host rendering them outside [Luthor](/demo/) needs its\n  own final-render policy.\n- The blur/lock behavior of embeds is UX, not a security boundary;\n  server-side authorization for media URLs stays with the host.\n",
-    "plainContent": "URL and Content Safety Luthor treats every URL in a document as untrusted input. A document may have been pasted from a hostile page, synced from another machine, or loaded from a store the host does not control — so \"the user typed it\" is never assumed. What this page answers - Which URL schemes do links and embeds accept by default? - How do I allow a custom scheme like obsidian:// deliberately? - What does the guarantee cover, and what stays the host's job? Link URLs The link extension validates every URL at each entry point — paste, auto-linking while typing, and the programmatic insertLink / updateLink / updateLinkByKey commands — with one default validator that accepts: - http: , https: , mailto: , tel: absolute URLs - same-document references ( section ) - protocol-relative references ( //example.com/path ) Everything else is rejected, including javascript: , data: , and vbscript: URLs in any casing or whitespace disguise ( JaVaScRiPt: , java\\tscript: ). Rejected URLs never enter the document model, so they also never appear in markdown, JSON, or HTML output. As a second layer, Lexical's own LinkNode renders any non-allowlisted scheme that reaches the model (for example from a pre-existing document) as an inert about:blank anchor. The raw URL still round-trips through JSON and markdown untouched — a host rendering exported markdown with its own pipeline must apply its own URL policy there. Allowing a custom scheme validateUrl is a plain function, so hosts that need a custom protocol opt in explicitly. isSafeUrl is exported as a building block: import { isSafeUrl, linkExtension } from \"@lyfie/luthor-headless\"; linkExtension.configure({ validateUrl: (url) = isSafeUrl(url, { allowedSchemes: [\"http\", \"https\", \"mailto\", \"tel\", \"obsidian\"], }), }); Embed sources The iframe and YouTube embed commands only ever accept http(s) URLs. Documents, however, can carry an arbitrary src into the model through importJSON or pasted HTML ( importDOM ) — those paths deliberately do not rewrite the value, so loading and saving a document never mutates it. Instead, the src is sanitized at the DOM boundary: anything that is not http(s) renders (and exports to HTML) as about:blank . sanitizeUrlForAttribute(url, { allowedSchemes }) implements that gate and is exported for hosts building their own embed nodes. Scope of the guarantee - Luthor validates URLs it turns into anchors and iframe sources, and sanitizes what it renders into the live DOM. - Luthor does not sanitize markdown or JSON output — exports are lossless by design, and a host rendering them outside Luthor needs its own final-render policy. - The blur/lock behavior of embeds is UX, not a security boundary; server-side authorization for media URLs stays with the host.",
+    "content": "\n# URL and Content Safety\n\n[Luthor](/demo/) treats every URL in a document as untrusted input. A document may\nhave been pasted from a hostile page, synced from another machine, or\nloaded from a store the host does not control — so \"the user typed it\"\nis never assumed.\n\n## What this page answers\n\n- Which URL schemes do links and embeds accept by default?\n- How do I allow a custom scheme like `obsidian://` deliberately?\n- What does the guarantee cover, and what stays the host's job?\n\n## Link URLs\n\nThe link extension validates every URL at each entry point — paste,\nauto-linking while typing, and the programmatic `insertLink` /\n`updateLink` / `updateLinkByKey` commands — with one default validator\nthat accepts:\n\n- `http:`, `https:`, `mailto:`, `tel:` absolute URLs\n- same-document references (`#section`)\n- protocol-relative references (`//example.com/path`)\n\nEverything else is rejected, including `javascript:`, `data:`, and\n`vbscript:` URLs in any casing or whitespace disguise (`JaVaScRiPt:`,\n`java\\tscript:`). Rejected URLs never enter the document model, so they\nalso never appear in markdown, JSON, or HTML output.\n\nAs a second layer, Lexical's own `LinkNode` renders any non-allowlisted\nscheme that reaches the model (for example from a pre-existing document)\nas an inert `about:blank` anchor. The raw URL still round-trips through\nJSON and markdown untouched — a host rendering exported markdown with\nits own pipeline must apply its own URL policy there.\n\n### Allowing a custom scheme\n\n`validateUrl` is a plain function, so hosts that need a custom protocol\nopt in explicitly. `isSafeUrl` is exported as a building block:\n\n```tsx\nimport { isSafeUrl, linkExtension } from \"@lyfie/luthor-headless\";\n\nlinkExtension.configure({\n  validateUrl: (url) =>\n    isSafeUrl(url, {\n      allowedSchemes: [\"http\", \"https\", \"mailto\", \"tel\", \"obsidian\"],\n    }),\n});\n```\n\n## Embed sources\n\nThe iframe and YouTube embed commands only ever accept `http(s)` URLs.\nDocuments, however, can carry an arbitrary `src` into the model through\n`importJSON` or pasted HTML (`importDOM`) — those paths deliberately do\nnot rewrite the value, so loading and saving a document never mutates\nit. Instead, the `src` is sanitized at the DOM boundary: anything that\nis not `http(s)` renders (and exports to HTML) as `about:blank`.\n\n`sanitizeUrlForAttribute(url, { allowedSchemes })` implements that gate\nand is exported for hosts building their own embed nodes.\n\n## HTML import\n\n`htmlToJSON` sanitizes markup before converting it, using a hand-written\nallowlist pass (`sanitizeHtmlImportDocument`) applied to the parsed —\ninert — document:\n\n- **Dropped with their content:** `script`, `style`, `svg`, `math`,\n  `object`, `embed`, `template`, form controls, and other elements whose\n  payload is executable or meaningless as document text.\n- **Unwrapped:** unknown elements lose their tag but keep their children,\n  so a Word or Google Docs wrapper never costs the user their text.\n- **Attributes:** event handlers (`on*`) and `srcdoc` are always removed;\n  everything else outside a small allowlist (plus inert `data-*` /\n  `aria-*`) is removed; `style` values carrying `url(...)`,\n  `expression(...)`, or `@import` are dropped whole.\n- **URLs:** `a[href]` goes through the link scheme allowlist (a hostile\n  anchor is unwrapped to plain text); `iframe[src]` through the embed\n  allowlist; `img[src]` rejects script-capable absolute schemes while\n  keeping `data:image/*` and relative references, so pasted screenshots\n  survive.\n\nThe policy only widens, never narrows, through options:\n\n```tsx\nimport { htmlToJSON } from \"@lyfie/luthor-headless\";\n\n// Widen deliberately for a trusted source…\nhtmlToJSON(html, {\n  sanitize: { allowedLinkSchemes: [\"http\", \"https\", \"obsidian\"] },\n});\n\n// …or disable entirely for markup the host itself generated.\nhtmlToJSON(trustedCmsMarkup, { sanitize: false });\n```\n\n[Luthor](/demo/) sanitizes what it converts. It is **not** a general-purpose HTML\nsanitizer: markup that survives this pass still has to be understood by\nthe Lexical conversion to reach the document, and the pass makes no\npromises about HTML used outside `htmlToJSON`.\n\n## Other document-derived URLs\n\nThe same DOM-boundary rule covers every remaining place a document can\nsupply a URL:\n\n- **Linked images** (`[![alt](img)](url)` in markdown) — `linkHref` has\n  no Lexical-side sanitization, so the rendered and exported anchors are\n  scheme-gated while the model keeps the raw value.\n- **Saved cards** (`![[card:url]]`) — same treatment for the card anchor.\n- **Wikilinks** render as `href=\"#\"` and navigate through the host\n  adapter, so they never carry a document-supplied URL.\n\n## Upload filenames\n\n`FileDropUploadExtension` writes the host's returned filename into the\nbody as `![[filename]]`. The wikilink syntax has no escape mechanism, so\nthe reserved characters `[ ] # ^ |` and control characters are replaced\nwith `-` before insertion (`sanitizeEmbedTarget`) — a file named\n`x]]y.png` would otherwise close the embed early and corrupt the body on\nthe next save. Hosts should apply the same normalization server-side, or\nthe stored name and the body reference will disagree.\n\n## Metadata envelopes\n\nEnvelopes preserve unsupported nodes inside `<!-- luthor:meta -->`\ncomments. Payload `>` characters are written as their JSON `\\u003e`\nescape so document text containing `-->` cannot terminate the comment\nearly and spill markup into the host's page. `JSON.parse` restores the\nvalue exactly, so round-trips stay lossless.\n\n## Scope of the guarantee\n\n- [Luthor](/demo/) validates URLs it turns into anchors and iframe sources, and\n  sanitizes what it renders into the live DOM.\n- [Luthor](/demo/) does not sanitize markdown or JSON *output* — exports are\n  lossless by design, and a host rendering them outside [Luthor](/demo/) needs its\n  own final-render policy.\n- The blur/lock behavior of embeds is UX, not a security boundary;\n  server-side authorization for media URLs stays with the host.\n",
+    "plainContent": "URL and Content Safety Luthor treats every URL in a document as untrusted input. A document may have been pasted from a hostile page, synced from another machine, or loaded from a store the host does not control — so \"the user typed it\" is never assumed. What this page answers - Which URL schemes do links and embeds accept by default? - How do I allow a custom scheme like obsidian:// deliberately? - What does the guarantee cover, and what stays the host's job? Link URLs The link extension validates every URL at each entry point — paste, auto-linking while typing, and the programmatic insertLink / updateLink / updateLinkByKey commands — with one default validator that accepts: - http: , https: , mailto: , tel: absolute URLs - same-document references ( section ) - protocol-relative references ( //example.com/path ) Everything else is rejected, including javascript: , data: , and vbscript: URLs in any casing or whitespace disguise ( JaVaScRiPt: , java\\tscript: ). Rejected URLs never enter the document model, so they also never appear in markdown, JSON, or HTML output. As a second layer, Lexical's own LinkNode renders any non-allowlisted scheme that reaches the model (for example from a pre-existing document) as an inert about:blank anchor. The raw URL still round-trips through JSON and markdown untouched — a host rendering exported markdown with its own pipeline must apply its own URL policy there. Allowing a custom scheme validateUrl is a plain function, so hosts that need a custom protocol opt in explicitly. isSafeUrl is exported as a building block: import { isSafeUrl, linkExtension } from \"@lyfie/luthor-headless\"; linkExtension.configure({ validateUrl: (url) = isSafeUrl(url, { allowedSchemes: [\"http\", \"https\", \"mailto\", \"tel\", \"obsidian\"], }), }); Embed sources The iframe and YouTube embed commands only ever accept http(s) URLs. Documents, however, can carry an arbitrary src into the model through importJSON or pasted HTML ( importDOM ) — those paths deliberately do not rewrite the value, so loading and saving a document never mutates it. Instead, the src is sanitized at the DOM boundary: anything that is not http(s) renders (and exports to HTML) as about:blank . sanitizeUrlForAttribute(url, { allowedSchemes }) implements that gate and is exported for hosts building their own embed nodes. HTML import htmlToJSON sanitizes markup before converting it, using a hand-written allowlist pass ( sanitizeHtmlImportDocument ) applied to the parsed — inert — document: - Dropped with their content: script , style , svg , math , object , embed , template , form controls, and other elements whose payload is executable or meaningless as document text. - Unwrapped: unknown elements lose their tag but keep their children, so a Word or Google Docs wrapper never costs the user their text. - Attributes: event handlers ( on ) and srcdoc are always removed; everything else outside a small allowlist (plus inert data- / aria- ) is removed; style values carrying url(...) , expression(...) , or @import are dropped whole. - URLs: a[href] goes through the link scheme allowlist (a hostile anchor is unwrapped to plain text); iframe[src] through the embed allowlist; img[src] rejects script-capable absolute schemes while keeping data:image/ and relative references, so pasted screenshots survive. The policy only widens, never narrows, through options: import { htmlToJSON } from \"@lyfie/luthor-headless\"; // Widen deliberately for a trusted source… htmlToJSON(html, { sanitize: { allowedLinkSchemes: [\"http\", \"https\", \"obsidian\"] }, }); // …or disable entirely for markup the host itself generated. htmlToJSON(trustedCmsMarkup, { sanitize: false }); Luthor sanitizes what it converts. It is not a general-purpose HTML sanitizer: markup that survives this pass still has to be understood by the Lexical conversion to reach the document, and the pass makes no promises about HTML used outside htmlToJSON . Other document-derived URLs The same DOM-boundary rule covers every remaining place a document can supply a URL: - Linked images ( alt in markdown) — linkHref has no Lexical-side sanitization, so the rendered and exported anchors are scheme-gated while the model keeps the raw value. - Saved cards ( ![[card:url]] ) — same treatment for the card anchor. - Wikilinks render as href=\" \" and navigate through the host adapter, so they never carry a document-supplied URL. Upload filenames FileDropUploadExtension writes the host's returned filename into the body as ![[filename]] . The wikilink syntax has no escape mechanism, so the reserved characters [ ] ^ and control characters are replaced with - before insertion ( sanitizeEmbedTarget ) — a file named x]]y.png would otherwise close the embed early and corrupt the body on the next save. Hosts should apply the same normalization server-side, or the stored name and the body reference will disagree. Metadata envelopes Envelopes preserve unsupported nodes inside comments. Payload characters are written as their JSON \\u003e escape so document text containing -- cannot terminate the comment early and spill markup into the host's page. JSON.parse restores the value exactly, so round-trips stay lossless. Scope of the guarantee - Luthor validates URLs it turns into anchors and iframe sources, and sanitizes what it renders into the live DOM. - Luthor does not sanitize markdown or JSON output — exports are lossless by design, and a host rendering them outside Luthor needs its own final-render policy. - The blur/lock behavior of embeds is UX, not a security boundary; server-side authorization for media URLs stays with the host.",
     "sections": [
       {
         "heading": "Overview",
@@ -4458,6 +4458,30 @@ export const docsIndex = [
         "text": "The iframe and YouTube embed commands only ever accept http(s) URLs. Documents, however, can carry an arbitrary src into the model through importJSON or pasted HTML ( importDOM ) — those paths deliberately do not rewrite the value, so loading and saving a document never mutates it. Instead, the src is sanitized at the DOM boundary: anything that is not http(s) renders (and exports to HTML) as about:blank . sanitizeUrlForAttribute(url, { allowedSchemes }) implements that gate and is exported for hosts building their own embed nodes."
       },
       {
+        "heading": "HTML import",
+        "id": "html-import",
+        "level": 2,
+        "text": "htmlToJSON sanitizes markup before converting it, using a hand-written allowlist pass ( sanitizeHtmlImportDocument ) applied to the parsed — inert — document: - Dropped with their content: script , style , svg , math , object , embed , template , form controls, and other elements whose payload is executable or meaningless as document text. - Unwrapped: unknown elements lose their tag but keep their children, so a Word or Google Docs wrapper never costs the user their text. - Attributes: event handlers ( on ) and srcdoc are always removed; everything else outside a small allowlist (plus inert data- / aria- ) is removed; style values carrying url(...) , expression(...) , or @import are dropped whole. - URLs: a[href] goes through the link scheme allowlist (a hostile anchor is unwrapped to plain text); iframe[src] through the embed allowlist; img[src] rejects script-capable absolute schemes while keeping data:image/ and relative references, so pasted screenshots survive. The policy only widens, never narrows, through options: import { htmlToJSON } from \"@lyfie/luthor-headless\"; // Widen deliberately for a trusted source… htmlToJSON(html, { sanitize: { allowedLinkSchemes: [\"http\", \"https\", \"obsidian\"] }, }); // …or disable entirely for markup the host itself generated. htmlToJSON(trustedCmsMarkup, { sanitize: false }); Luthor sanitizes what it converts. It is not a general-purpose HTML sanitizer: markup that survives this pass still has to be understood by the Lexical conversion to reach the document, and the pass makes no promises about HTML used outside htmlToJSON ."
+      },
+      {
+        "heading": "Other document-derived URLs",
+        "id": "other-document-derived-urls",
+        "level": 2,
+        "text": "The same DOM-boundary rule covers every remaining place a document can supply a URL: - Linked images ( alt in markdown) — linkHref has no Lexical-side sanitization, so the rendered and exported anchors are scheme-gated while the model keeps the raw value. - Saved cards ( ![[card:url]] ) — same treatment for the card anchor. - Wikilinks render as href=\" \" and navigate through the host adapter, so they never carry a document-supplied URL."
+      },
+      {
+        "heading": "Upload filenames",
+        "id": "upload-filenames",
+        "level": 2,
+        "text": "FileDropUploadExtension writes the host's returned filename into the body as ![[filename]] . The wikilink syntax has no escape mechanism, so the reserved characters [ ] ^ and control characters are replaced with - before insertion ( sanitizeEmbedTarget ) — a file named x]]y.png would otherwise close the embed early and corrupt the body on the next save. Hosts should apply the same normalization server-side, or the stored name and the body reference will disagree."
+      },
+      {
+        "heading": "Metadata envelopes",
+        "id": "metadata-envelopes",
+        "level": 2,
+        "text": "Envelopes preserve unsupported nodes inside comments. Payload characters are written as their JSON \\u003e escape so document text containing -- cannot terminate the comment early and spill markup into the host's page. JSON.parse restores the value exactly, so round-trips stay lossless."
+      },
+      {
         "heading": "Scope of the guarantee",
         "id": "scope-of-the-guarantee",
         "level": 2,
@@ -4487,13 +4511,33 @@ export const docsIndex = [
       },
       {
         "level": 2,
+        "text": "HTML import",
+        "id": "html-import"
+      },
+      {
+        "level": 2,
+        "text": "Other document-derived URLs",
+        "id": "other-document-derived-urls"
+      },
+      {
+        "level": 2,
+        "text": "Upload filenames",
+        "id": "upload-filenames"
+      },
+      {
+        "level": 2,
+        "text": "Metadata envelopes",
+        "id": "metadata-envelopes"
+      },
+      {
+        "level": 2,
         "text": "Scope of the guarantee",
         "id": "scope-of-the-guarantee"
       }
     ],
     "urlPath": "/docs/luthor-headless/url-and-content-safety/",
     "sourcePath": "apps/web/src/content/docs/luthor-headless/url-and-content-safety.md",
-    "updatedAt": "2026-08-11T11:45:14.797Z",
+    "updatedAt": "2026-08-12T06:16:35.611Z",
     "package": "headless",
     "docType": "guide",
     "surface": "extension",
@@ -4504,16 +4548,22 @@ export const docsIndex = [
       "javascript: url",
       "isSafeUrl",
       "sanitizeUrlForAttribute",
-      "validateUrl"
+      "validateUrl",
+      "html sanitization",
+      "sanitizeHtmlImportDocument",
+      "xss"
     ],
     "props": [
-      "validateUrl"
+      "validateUrl",
+      "sanitize"
     ],
     "exports": [
       "isSafeUrl",
       "sanitizeUrlForAttribute",
       "DEFAULT_ALLOWED_URL_SCHEMES",
-      "EMBED_ALLOWED_URL_SCHEMES"
+      "EMBED_ALLOWED_URL_SCHEMES",
+      "sanitizeHtmlImportDocument",
+      "sanitizeEmbedTarget"
     ],
     "commands": [],
     "extensions": [
@@ -4529,7 +4579,11 @@ export const docsIndex = [
     "lastVerifiedFrom": [
       "packages/headless/src/utils/urlSafety.ts",
       "packages/headless/src/extensions/formatting/LinkExtension.tsx",
-      "packages/headless/src/extensions/media/IframeEmbedExtension.tsx"
+      "packages/headless/src/extensions/media/IframeEmbedExtension.tsx",
+      "packages/headless/src/core/htmlImportSanitizer.ts",
+      "packages/headless/src/core/html.ts",
+      "packages/headless/src/core/metadata-envelope.ts",
+      "packages/headless/src/extensions/embeds/FileDropUploadExtension.tsx"
     ],
     "navGroup": "luthor_headless",
     "navOrder": 45,
@@ -4549,6 +4603,8 @@ export const docsIndex = [
       "for",
       "guarantee",
       "how",
+      "html",
+      "html sanitization",
       "iframe",
       "iframe-embed",
       "iframeembedextension",
@@ -4561,6 +4617,10 @@ export const docsIndex = [
       "not",
       "override",
       "safety",
+      "sanitization",
+      "sanitize",
+      "sanitizeembedtarget",
+      "sanitizehtmlimportdocument",
       "sanitizeurlforattribute",
       "scheme",
       "scheme allowlist",
@@ -4575,6 +4635,7 @@ export const docsIndex = [
       "validateurl",
       "validation",
       "what",
+      "xss",
       "youtube",
       "youtube-embed",
       "youtubeembedextension"
@@ -4582,9 +4643,14 @@ export const docsIndex = [
     "searchTokenBuckets": {
       "keywords": [
         "allowlist",
+        "html",
+        "html sanitization",
         "issafeurl",
         "javascript",
         "javascript: url",
+        "sanitization",
+        "sanitize",
+        "sanitizehtmlimportdocument",
         "sanitizeurlforattribute",
         "scheme",
         "scheme allowlist",
@@ -4592,9 +4658,11 @@ export const docsIndex = [
         "url",
         "url validation",
         "validateurl",
-        "validation"
+        "validation",
+        "xss"
       ],
       "props": [
+        "sanitize",
         "validateurl"
       ],
       "exports": [
@@ -4604,6 +4672,8 @@ export const docsIndex = [
         "embed",
         "embed_allowed_url_schemes",
         "issafeurl",
+        "sanitizeembedtarget",
+        "sanitizehtmlimportdocument",
         "sanitizeurlforattribute",
         "schemes",
         "url"

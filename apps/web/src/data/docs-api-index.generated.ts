@@ -2051,9 +2051,14 @@ export const docsApiIndex = [
     "searchTokenBuckets": {
       "keywords": [
         "allowlist",
+        "html",
+        "html sanitization",
         "issafeurl",
         "javascript",
         "javascript: url",
+        "sanitization",
+        "sanitize",
+        "sanitizehtmlimportdocument",
         "sanitizeurlforattribute",
         "scheme",
         "scheme allowlist",
@@ -2061,9 +2066,11 @@ export const docsApiIndex = [
         "url",
         "url validation",
         "validateurl",
-        "validation"
+        "validation",
+        "xss"
       ],
       "props": [
+        "sanitize",
         "validateurl"
       ],
       "exports": [
@@ -2073,6 +2080,8 @@ export const docsApiIndex = [
         "embed",
         "embed_allowed_url_schemes",
         "issafeurl",
+        "sanitizeembedtarget",
+        "sanitizehtmlimportdocument",
         "sanitizeurlforattribute",
         "schemes",
         "url"
@@ -2107,6 +2116,8 @@ export const docsApiIndex = [
       "for",
       "guarantee",
       "how",
+      "html",
+      "html sanitization",
       "iframe",
       "iframe-embed",
       "iframeembedextension",
@@ -2119,6 +2130,10 @@ export const docsApiIndex = [
       "not",
       "override",
       "safety",
+      "sanitization",
+      "sanitize",
+      "sanitizeembedtarget",
+      "sanitizehtmlimportdocument",
       "sanitizeurlforattribute",
       "scheme",
       "scheme allowlist",
@@ -2133,6 +2148,7 @@ export const docsApiIndex = [
       "validateurl",
       "validation",
       "what",
+      "xss",
       "youtube",
       "youtube-embed",
       "youtubeembedextension"

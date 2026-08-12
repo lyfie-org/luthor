@@ -54,6 +54,7 @@ import {
 import {
   ImageTranslator,
 } from "./ImageTranslator";
+import { sanitizeUrlForAttribute } from "../../utils/urlSafety";
 
 /**
  * Command used to insert images into the editor
@@ -359,7 +360,9 @@ function ImageComponent({
       >
         {linkHref ? (
           <a
-            href={linkHref}
+            // The model keeps linkHref verbatim for lossless markdown
+            // round-trips; only the live anchor is scheme-gated.
+            href={sanitizeUrlForAttribute(linkHref)}
             title={linkTitle}
             target="_blank"
             rel="noopener noreferrer"

@@ -12,13 +12,19 @@ keywords:
   - "isSafeUrl"
   - "sanitizeUrlForAttribute"
   - "validateUrl"
+  - "html sanitization"
+  - "sanitizeHtmlImportDocument"
+  - "xss"
 props:
   - "validateUrl"
+  - "sanitize"
 exports:
   - "isSafeUrl"
   - "sanitizeUrlForAttribute"
   - "DEFAULT_ALLOWED_URL_SCHEMES"
   - "EMBED_ALLOWED_URL_SCHEMES"
+  - "sanitizeHtmlImportDocument"
+  - "sanitizeEmbedTarget"
 commands:
   []
 extensions:
@@ -34,6 +40,10 @@ lastVerifiedFrom:
   - "packages/headless/src/utils/urlSafety.ts"
   - "packages/headless/src/extensions/formatting/LinkExtension.tsx"
   - "packages/headless/src/extensions/media/IframeEmbedExtension.tsx"
+  - "packages/headless/src/core/htmlImportSanitizer.ts"
+  - "packages/headless/src/core/html.ts"
+  - "packages/headless/src/core/metadata-envelope.ts"
+  - "packages/headless/src/extensions/embeds/FileDropUploadExtension.tsx"
 navGroup: "luthor_headless"
 navOrder: 45
 ---
@@ -100,6 +110,76 @@ is not `http(s)` renders (and exports to HTML) as `about:blank`.
 
 `sanitizeUrlForAttribute(url, { allowedSchemes })` implements that gate
 and is exported for hosts building their own embed nodes.
+
+## HTML import
+
+`htmlToJSON` sanitizes markup before converting it, using a hand-written
+allowlist pass (`sanitizeHtmlImportDocument`) applied to the parsed —
+inert — document:
+
+- **Dropped with their content:** `script`, `style`, `svg`, `math`,
+  `object`, `embed`, `template`, form controls, and other elements whose
+  payload is executable or meaningless as document text.
+- **Unwrapped:** unknown elements lose their tag but keep their children,
+  so a Word or Google Docs wrapper never costs the user their text.
+- **Attributes:** event handlers (`on*`) and `srcdoc` are always removed;
+  everything else outside a small allowlist (plus inert `data-*` /
+  `aria-*`) is removed; `style` values carrying `url(...)`,
+  `expression(...)`, or `@import` are dropped whole.
+- **URLs:** `a[href]` goes through the link scheme allowlist (a hostile
+  anchor is unwrapped to plain text); `iframe[src]` through the embed
+  allowlist; `img[src]` rejects script-capable absolute schemes while
+  keeping `data:image/*` and relative references, so pasted screenshots
+  survive.
+
+The policy only widens, never narrows, through options:
+
+```tsx
+import { htmlToJSON } from "@lyfie/luthor-headless";
+
+// Widen deliberately for a trusted source…
+htmlToJSON(html, {
+  sanitize: { allowedLinkSchemes: ["http", "https", "obsidian"] },
+});
+
+// …or disable entirely for markup the host itself generated.
+htmlToJSON(trustedCmsMarkup, { sanitize: false });
+```
+
+Luthor sanitizes what it converts. It is **not** a general-purpose HTML
+sanitizer: markup that survives this pass still has to be understood by
+the Lexical conversion to reach the document, and the pass makes no
+promises about HTML used outside `htmlToJSON`.
+
+## Other document-derived URLs
+
+The same DOM-boundary rule covers every remaining place a document can
+supply a URL:
+
+- **Linked images** (`[![alt](img)](url)` in markdown) — `linkHref` has
+  no Lexical-side sanitization, so the rendered and exported anchors are
+  scheme-gated while the model keeps the raw value.
+- **Saved cards** (`![[card:url]]`) — same treatment for the card anchor.
+- **Wikilinks** render as `href="#"` and navigate through the host
+  adapter, so they never carry a document-supplied URL.
+
+## Upload filenames
+
+`FileDropUploadExtension` writes the host's returned filename into the
+body as `![[filename]]`. The wikilink syntax has no escape mechanism, so
+the reserved characters `[ ] # ^ |` and control characters are replaced
+with `-` before insertion (`sanitizeEmbedTarget`) — a file named
+`x]]y.png` would otherwise close the embed early and corrupt the body on
+the next save. Hosts should apply the same normalization server-side, or
+the stored name and the body reference will disagree.
+
+## Metadata envelopes
+
+Envelopes preserve unsupported nodes inside `<!-- luthor:meta -->`
+comments. Payload `>` characters are written as their JSON `\u003e`
+escape so document text containing `-->` cannot terminate the comment
+early and spill markup into the host's page. `JSON.parse` restores the
+value exactly, so round-trips stay lossless.
 
 ## Scope of the guarantee
 

@@ -35,10 +35,23 @@ import {
   extractHTMLMetadataPatch,
   HTML_SUPPORTED_NODE_TYPES,
 } from "./source-capability";
+import {
+  sanitizeHtmlImportDocument,
+  type HtmlImportSanitizeOptions,
+} from "./htmlImportSanitizer";
 import type { SourceMetadataMode } from "./markdown";
 
 export interface HtmlBridgeOptions {
   metadataMode?: SourceMetadataMode;
+  /**
+   * Sanitization policy applied to imported HTML before conversion.
+   * Defaults to the strict allowlist (see `sanitizeHtmlImportDocument`).
+   * Pass an options object to widen the policy for a trusted source, or
+   * `false` to skip sanitization entirely — only for markup the host
+   * fully controls. Ignored by `jsonToHTML`, which renders from the
+   * already-validated document model.
+   */
+  sanitize?: HtmlImportSanitizeOptions | false;
 }
 
 function collectHTMLPartialEnvelopes(input: unknown): MetadataEnvelope[] {
@@ -366,6 +379,9 @@ export function htmlToJSON(
   editor.update(
     () => {
       const parsedDocument = new DOMParser().parseFromString(content, "text/html");
+      if (options?.sanitize !== false) {
+        sanitizeHtmlImportDocument(parsedDocument, options?.sanitize);
+      }
       flattenPictureElements(parsedDocument);
       normalizeAlignmentAttributes(parsedDocument);
       normalizeWhitespaceArtifacts(parsedDocument);

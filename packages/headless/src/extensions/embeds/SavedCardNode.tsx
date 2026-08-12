@@ -20,6 +20,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { type SavedCardMetadata, useEmbedResolvers } from "./EmbedResolverContext";
+import { sanitizeUrlForAttribute } from "../../utils/urlSafety";
 
 /**
  * Serialized shape of a {@link SavedCardNode}. Only the verbatim `url` and the
@@ -86,7 +87,9 @@ function SavedCardComponent({
           ? "luthor-saved-card luthor-saved-card--loading"
           : "luthor-saved-card"
       }
-      href={url}
+      // The model keeps the URL verbatim for lossless `![[card:url]]`
+      // round-trips; only the live anchor is scheme-gated.
+      href={sanitizeUrlForAttribute(url)}
       target="_blank"
       rel="noopener noreferrer"
       data-luthor-saved-card-url={url}
@@ -184,7 +187,7 @@ export class SavedCardNode extends DecoratorNode<ReactNode> {
   exportDOM(): DOMExportOutput {
     const anchor = document.createElement("a");
     anchor.className = "luthor-saved-card";
-    anchor.href = this.__url;
+    anchor.href = sanitizeUrlForAttribute(this.__url);
     anchor.setAttribute("data-luthor-saved-card-url", this.__url);
     anchor.textContent = this.__title ?? this.__url;
     return { element: anchor };

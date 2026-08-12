@@ -327,7 +327,12 @@ export function appendMetadataEnvelopes(
   }
 
   const comments = envelopes.map((envelope) => {
-    const payload = JSON.stringify(envelope);
+    // In JSON, `>` can only occur inside string values, where the \u003e
+    // escape is equivalent — JSON.parse restores it losslessly. Without
+    // this, user content containing `-->` would terminate the HTML comment
+    // early and spill the rest of the payload into the host's markup as
+    // live HTML.
+    const payload = JSON.stringify(envelope).replace(/>/g, "\\u003e");
     return `<!-- ${ENVELOPE_PREFIX} v${ENVELOPE_VERSION} ${payload} -->`;
   });
   const suffix = comments.join("\n");

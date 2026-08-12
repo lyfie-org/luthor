@@ -78,6 +78,37 @@ describe("metadata envelopes", () => {
     expect(extracted.warnings).toHaveLength(0);
   });
 
+  it("escapes payload content that would close the comment early", () => {
+    // A node whose text contains `-->` would otherwise terminate the HTML
+    // comment mid-payload, spilling the remainder into the host's markup
+    // as live HTML on the next render.
+    const envelope: MetadataEnvelope = {
+      id: "featureCard:0:1",
+      type: "featureCard",
+      path: [0],
+      fallback: "[Unsupported featureCard preserved in html metadata]",
+      node: {
+        type: "featureCard",
+        version: 1,
+        payload: { note: "--><img src=x onerror=alert(1)>" },
+      },
+    };
+
+    const content = appendMetadataEnvelopes("Hello", [envelope]);
+    const commentBody = content.slice(content.indexOf("<!--"));
+
+    // The only `-->` is the terminator, and the payload carries no bare
+    // `>` at all — so no tag inside it can ever close.
+    expect(commentBody.indexOf("-->")).toBe(commentBody.length - 3);
+    const payload = commentBody.slice(0, -3);
+    expect(payload).not.toContain(">");
+
+    // The escape survives the round-trip untouched.
+    const extracted = extractMetadataEnvelopes(content);
+    expect(extracted.envelopes).toEqual([envelope]);
+    expect(extracted.warnings).toHaveLength(0);
+  });
+
   it("ignores malformed and unknown-version envelopes safely", () => {
     const source = [
       "Hello",
