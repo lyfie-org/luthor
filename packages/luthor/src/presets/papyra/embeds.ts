@@ -28,6 +28,7 @@ import {
   savedCardExtension,
   transclusionExtension,
   wikilinkExtension,
+  mentionTypeaheadExtension,
   wikilinkTypeaheadExtension,
   youTubeEmbedExtension,
   BlockAnchorNode,
@@ -86,6 +87,10 @@ export interface PapyraEmbedExtensionOptions {
  * adapter is provided. The upload extension is instantiated per-adapter since
  * the upload callback comes from the host; the block-anchor extension is
  * instantiated per-options when auto-stamping is requested.
+ *
+ * The `@` mention typeahead is host-gated the same way: without an adapter that
+ * can search people there is nothing to suggest, so the trigger is not
+ * registered at all rather than opening an empty menu.
  */
 export function buildPapyraEmbedExtensions(
   adapter?: PapyraEditorAdapter,
@@ -109,7 +114,9 @@ export function buildPapyraEmbedExtensions(
     uploadFile: (file) => adapter.uploadMedia(file),
   });
 
-  return [...extensions, uploadExtension];
+  return adapter.searchUsers
+    ? [...extensions, uploadExtension, mentionTypeaheadExtension]
+    : [...extensions, uploadExtension];
 }
 
 /**

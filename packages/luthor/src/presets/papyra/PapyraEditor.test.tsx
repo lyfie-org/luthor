@@ -867,3 +867,79 @@ describe("PapyraEditor", () => {
     });
   });
 });
+
+describe("PapyraEditor typeahead seams", () => {
+  const baseAdapter: PapyraEditorAdapter = {
+    resolveMediaUrl: (filename) => `/media/${filename}`,
+    uploadMedia: (file) => Promise.resolve({ filename: file.name }),
+    openNote: vi.fn(),
+    searchNotes: vi.fn(() => Promise.resolve([{ id: "n1", title: "Roadmap" }])),
+  };
+
+  function extensionNames(): string[] {
+    return ((lastProps().extraExtensions ?? []) as Array<{ name: string }>).map(
+      (extension) => extension.name,
+    );
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("routes the [[ typeahead through the adapter's note search", async () => {
+    render(<PapyraEditor showDefaultContent={false} adapter={baseAdapter} />);
+
+    const provider = lastProps().wikilinkSuggestionProvider;
+    expect(provider).toBeTypeOf("function");
+    await expect(provider!("ro")).resolves.toEqual([{ id: "n1", title: "Roadmap" }]);
+    expect(baseAdapter.searchNotes).toHaveBeenCalledWith("ro");
+  });
+
+  it("registers the wikilink trigger even without a host", () => {
+    render(<PapyraEditor showDefaultContent={false} />);
+
+    expect(extensionNames()).toContain("wikilinkTypeahead");
+  });
+
+  it("offers no typeahead menus when the host injects no adapter", () => {
+    render(<PapyraEditor showDefaultContent={false} />);
+
+    expect(lastProps().wikilinkSuggestionProvider).toBeUndefined();
+    expect(lastProps().mentionSuggestionProvider).toBeUndefined();
+    expect(extensionNames()).not.toContain("mentionTypeahead");
+  });
+
+  it("keeps the @ trigger unregistered when the host cannot search people", () => {
+    render(<PapyraEditor showDefaultContent={false} adapter={baseAdapter} />);
+
+    expect(lastProps().mentionSuggestionProvider).toBeUndefined();
+    expect(extensionNames()).not.toContain("mentionTypeahead");
+  });
+
+  it("registers the @ trigger and routes it through searchUsers", async () => {
+    const searchUsers = vi.fn(() =>
+      Promise.resolve([{ username: "bea", name: "Bea Ito" }]),
+    );
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        adapter={{ ...baseAdapter, searchUsers }}
+      />,
+    );
+
+    expect(extensionNames()).toContain("mentionTypeahead");
+
+    const provider = lastProps().mentionSuggestionProvider;
+    expect(provider).toBeTypeOf("function");
+    await expect(provider!("be")).resolves.toEqual([
+      { username: "bea", name: "Bea Ito" },
+    ]);
+    expect(searchUsers).toHaveBeenCalledWith("be");
+  });
+
+  it("degrades the fallback adapter's people search to an empty result", async () => {
+    await expect(
+      createFallbackPapyraAdapter().searchUsers?.("anything"),
+    ).resolves.toEqual([]);
+  });
+});

@@ -1,11 +1,11 @@
 export const homepageMetrics = {
-  "totalDownloads": 12300,
-  "lastMonthDownloads": 3396,
-  "latestVersion": "2.9.0",
-  "headlessVersion": "2.9.0",
-  "luthorPackageSize": 328339,
-  "headlessPackageSize": 391611,
-  "combinedPackageSize": 719950,
-  "releaseCount": 75,
-  "fetchedAtIso": "2026-06-28T05:14:40.028Z"
+  "totalDownloads": 19137,
+  "lastMonthDownloads": 4535,
+  "latestVersion": "2.9.1",
+  "headlessVersion": "2.9.1",
+  "luthorPackageSize": 338240,
+  "headlessPackageSize": 400532,
+  "combinedPackageSize": 738772,
+  "releaseCount": 77,
+  "fetchedAtIso": "2026-08-12T11:57:38.419Z"
 } as const;

@@ -25,6 +25,8 @@ import type {
   ExtensiveEditorProps,
   ExtensiveEditorRef,
   FeatureFlagOverrides,
+  MentionSuggestionProvider,
+  WikilinkSuggestionProvider,
 } from "../extensive";
 import { ExtensiveEditor } from "../extensive";
 import { joinClassNames } from "../_shared";
@@ -222,6 +224,8 @@ export type PapyraEditorProps = Omit<
   | "toolbarVisibility"
   | "onReady"
   | "presetId"
+  | "wikilinkSuggestionProvider"
+  | "mentionSuggestionProvider"
 > & {
   onReady?: (methods: PapyraEditorRef) => void;
   /**
@@ -482,6 +486,28 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       [resolvedAdapter],
     );
 
+    // The typeahead dropdowns are host-driven: the headless `[[` and `@`
+    // triggers own detection and insertion, the host owns the data. Both
+    // providers are gated on a real adapter (never the no-op fallback) so a
+    // hostless editor shows no menu instead of an empty one.
+    const wikilinkSuggestionProvider = useMemo<
+      WikilinkSuggestionProvider | undefined
+    >(() => {
+      if (!adapter) {
+        return undefined;
+      }
+      return (query) => adapter.searchNotes(query);
+    }, [adapter]);
+
+    const mentionSuggestionProvider = useMemo<
+      MentionSuggestionProvider | undefined
+    >(() => {
+      if (!adapter?.searchUsers) {
+        return undefined;
+      }
+      return (query) => adapter.searchUsers!(query);
+    }, [adapter]);
+
     // Build extra extensions including the upload pipeline (adapter-dependent)
     // and, in `blockAnchors: "auto"`, the auto-stamping anchor extension.
     const autoStampBlockAnchors = blockAnchors === "auto";
@@ -545,6 +571,8 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               extraExtensions={embedExtensions}
               markdownExtraNodes={PAPYRA_EMBED_NODES}
               markdownExtraTransformers={PAPYRA_EMBED_TRANSFORMERS}
+              wikilinkSuggestionProvider={wikilinkSuggestionProvider}
+              mentionSuggestionProvider={mentionSuggestionProvider}
               className={presetClassName}
               variantClassName={joinClassNames(
                 "luthor-preset-papyra__variant",
