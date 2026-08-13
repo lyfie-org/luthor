@@ -19,7 +19,14 @@
  * (`(?<=^|[\s(\[])@[A-Za-z0-9][A-Za-z0-9._-]{0,63}\b`): an `@` only opens the
  * menu at the start of a block or after whitespace, `(`, or `[`. Anything else —
  * most importantly the `@` inside `name@example.com` — is left alone, so the UI
- * never offers a suggestion the host would silently drop.
+ * never offers a suggestion the host would silently drop. How many characters
+ * must follow the trigger is the host's call
+ * ({@link MentionTypeaheadConfig.minQueryLength}, `0` by default so a bare `@`
+ * opens the menu); the character rule itself is not configurable.
+ *
+ * The trigger only opens in a block that can carry a `^id` anchor — the host
+ * resolves a mention to its block's anchor, so opening anywhere else would
+ * invite a mention that cannot be delivered.
  *
  * Like {@link WikilinkTypeaheadExtension}, this extension is search-agnostic: it
  * never fetches people. The UI layer subscribes, runs the host's search, renders
@@ -39,6 +46,7 @@ import {
   ExtensionCategory,
 } from "@lyfie/luthor-headless/extensions/types";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
+import { ANCHORABLE_BLOCK_TYPES } from "./anchorableBlocks";
 
 /** The subscribable state of the mention typeahead menu. */
 export type MentionTypeaheadMenuState = {
@@ -49,6 +57,19 @@ export type MentionTypeaheadMenuState = {
 
 export interface MentionTypeaheadConfig extends BaseExtensionConfig {
   offset?: { x: number; y: number };
+  /**
+   * How many characters must follow the `@` before the menu opens. Defaults to
+   * `0`, so a bare `@` opens it — which is what a person expects when the
+   * directory is small enough to browse, and what a host whose people endpoint
+   * answers an empty query with a first page wants.
+   *
+   * Raise it to `1` (or more) for the opposite trade: a large directory where
+   * an unfiltered dropdown is noise, or a body where a lone `@` is common
+   * prose. Only the *length* floor is configurable — the character rule is
+   * fixed, so the first character a username cannot contain still closes the
+   * menu at any setting. Values below `0` are clamped.
+   */
+  minQueryLength?: number;
 }
 
 export type MentionTypeaheadCommands = {
@@ -71,21 +92,25 @@ const TRIGGER = "@";
 
 /**
  * The typed query, mirroring the host's `name` group: starts alphanumeric, then
- * up to 63 more of `[A-Za-z0-9._-]`. A bare `@` (empty query) does not open the
- * menu — writing "@" mid-sentence is common enough that an empty dropdown would
- * be noise — and the first disallowed character closes it again.
+ * up to 63 more of `[A-Za-z0-9._-]`. The first disallowed character closes the
+ * menu again. An empty query is length-checked separately against
+ * {@link MentionTypeaheadConfig.minQueryLength} rather than by this pattern, so
+ * the character rule stays identical at every setting.
  */
 const QUERY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+
+/** A bare `@` opens the menu unless the host asks for a longer floor. */
+const DEFAULT_MIN_QUERY_LENGTH = 0;
 
 /** Characters an `@` may follow and still start a mention. */
 const BOUNDARY_PATTERN = /[\s([]/;
 
-const ALLOWED_CONTAINER_TYPES = new Set([
-  "paragraph",
-  "heading",
-  "quote",
-  "list",
-]);
+/**
+ * Where a mention may be typed. Shared with the block-anchor stamping pass:
+ * a mention is delivered through the anchor of the block it sits in, so the
+ * trigger must never open in a block that cannot carry one.
+ */
+const ALLOWED_CONTAINER_TYPES = ANCHORABLE_BLOCK_TYPES;
 
 /**
  * Strip everything a username cannot contain. Suggestions come from the host's
@@ -287,7 +312,11 @@ export class MentionTypeaheadExtension extends BaseExtension<
       }
 
       const query = textBeforeCursor.slice(triggerIndex + TRIGGER.length);
-      if (!QUERY_PATTERN.test(query)) {
+      if (query.length < this.getMinQueryLength()) {
+        this.closeIfNeeded();
+        return;
+      }
+      if (query.length > 0 && !QUERY_PATTERN.test(query)) {
         this.closeIfNeeded();
         return;
       }
@@ -304,6 +333,11 @@ export class MentionTypeaheadExtension extends BaseExtension<
       };
       this.notifyListeners();
     });
+  }
+
+  /** The host's query-length floor, never below zero. */
+  private getMinQueryLength(): number {
+    return Math.max(0, this.config.minQueryLength ?? DEFAULT_MIN_QUERY_LENGTH);
   }
 
   private closeMenu(): void {

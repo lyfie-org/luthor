@@ -8,10 +8,11 @@
 /*
  * `[[` typeahead trigger for wikilink insertion.
  *
- * Detects when the user types `[[` inside a paragraph or heading and exposes a
- * subscribable state (query, position, open/closed) so the preset can render a
- * note-search dropdown. When a result is selected, the extension replaces the
- * trigger text with a {@link WikilinkNode}.
+ * Detects when the user types `[[` inside an anchorable block (see
+ * `anchorableBlocks`) and exposes a subscribable state (query, position,
+ * open/closed) so the preset can render a note-search dropdown. When a result
+ * is selected, the extension replaces the trigger text with a
+ * {@link WikilinkNode}.
  *
  * The extension is deliberately search-agnostic: it does not call
  * `searchNotes()` — the UI layer (preset or host) subscribes, runs the search,
@@ -32,6 +33,7 @@ import {
 } from "@lyfie/luthor-headless/extensions/types";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { $createWikilinkNode } from "./WikilinkNode";
+import { ANCHORABLE_BLOCK_TYPES } from "./anchorableBlocks";
 
 /** The subscribable state of the wikilink typeahead menu. */
 export type WikilinkTypeaheadMenuState = {
@@ -42,6 +44,15 @@ export type WikilinkTypeaheadMenuState = {
 
 export interface WikilinkTypeaheadConfig extends BaseExtensionConfig {
   offset?: { x: number; y: number };
+  /**
+   * How many characters must follow `[[` before the menu opens. Defaults to
+   * `0`, so the menu opens as soon as the trigger is typed and the host can
+   * offer its recent notes. Raise it when the note search is expensive or the
+   * vault is large enough that an unfiltered list is noise. Values below `0`
+   * are clamped; the syntax rules (no `]`/`|`, never after `!`) are fixed and
+   * still close the menu at any setting.
+   */
+  minQueryLength?: number;
 }
 
 export type WikilinkTypeaheadCommands = {
@@ -61,7 +72,16 @@ type TypeaheadMatch = {
 };
 
 const TRIGGER = "[[";
-const ALLOWED_CONTAINER_TYPES = new Set(["paragraph", "heading"]);
+
+/** `[[` alone opens the menu unless the host asks for a longer floor. */
+const DEFAULT_MIN_QUERY_LENGTH = 0;
+
+/**
+ * Where a note link may be typed. The same shared set the mention trigger and
+ * the block-anchor stamping pass use, so all three agree on which blocks are
+ * addressable — quotes and list items included.
+ */
+const ALLOWED_CONTAINER_TYPES = ANCHORABLE_BLOCK_TYPES;
 
 /**
  * Headless extension providing the `[[` typeahead trigger for wikilink
@@ -255,6 +275,11 @@ export class WikilinkTypeaheadExtension extends BaseExtension<
         return;
       }
 
+      if (query.length < this.getMinQueryLength()) {
+        this.closeIfNeeded();
+        return;
+      }
+
       const position = this.getCaretPosition();
       this.isOpen = true;
       this.query = query;
@@ -267,6 +292,11 @@ export class WikilinkTypeaheadExtension extends BaseExtension<
       };
       this.notifyListeners();
     });
+  }
+
+  /** The host's query-length floor, never below zero. */
+  private getMinQueryLength(): number {
+    return Math.max(0, this.config.minQueryLength ?? DEFAULT_MIN_QUERY_LENGTH);
   }
 
   private closeMenu(): void {

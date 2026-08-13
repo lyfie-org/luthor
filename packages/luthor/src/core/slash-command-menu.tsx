@@ -9,7 +9,11 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { createPortal } from "react-dom";
 import type { SlashCommandItem } from "@lyfie/luthor-headless";
 import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
-import { computeAnchoredOverlayStyle, createPointRect } from "./overlay-position";
+import {
+  computeAnchoredOverlayStyle,
+  createPointRect,
+  scheduleOverlayReveal,
+} from "./overlay-position";
 
 export function SlashCommandMenu({
   isOpen,
@@ -131,11 +135,12 @@ export function SlashCommandMenu({
     });
   }, [portalContainer, position]);
 
+  // Measure hidden, then reveal — with a timeout backstop, so an environment
+  // that never runs rAF cannot leave the menu permanently invisible.
   useLayoutEffect(() => {
     if (!isOpen || !position) return;
     updateMenuPosition(false);
-    const frame = window.requestAnimationFrame(() => updateMenuPosition(true));
-    return () => window.cancelAnimationFrame(frame);
+    return scheduleOverlayReveal(() => updateMenuPosition(true));
   }, [isOpen, position, updateMenuPosition]);
 
   useEffect(() => {

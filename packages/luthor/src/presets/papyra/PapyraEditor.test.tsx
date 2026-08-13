@@ -960,3 +960,155 @@ describe("PapyraEditor typeahead seams", () => {
     ).resolves.toEqual([]);
   });
 });
+
+/*
+ * The point of the `typeahead` prop: a host retunes the triggers from its own
+ * release. Each knob is asserted where it actually lands — on the registered
+ * extension's config, or on the props the menu reads — not just on the prop
+ * being accepted.
+ */
+describe("PapyraEditor typeahead configuration", () => {
+  const adapter: PapyraEditorAdapter = {
+    resolveMediaUrl: (filename) => `/media/${filename}`,
+    uploadMedia: (file) => Promise.resolve({ filename: file.name }),
+    openNote: vi.fn(),
+    searchNotes: vi.fn(() => Promise.resolve([])),
+    searchUsers: vi.fn(() => Promise.resolve([])),
+  };
+
+  function extension(name: string) {
+    return (lastProps().extraExtensions ?? []).find(
+      (candidate) => candidate.name === name,
+    ) as { name: string; config?: Record<string, unknown> } | undefined;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("threads minQueryLength down to both trigger extensions", () => {
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        adapter={adapter}
+        typeahead={{
+          mention: { minQueryLength: 2 },
+          noteLink: { minQueryLength: 1 },
+        }}
+      />,
+    );
+
+    expect(extension("mentionTypeahead")?.config).toMatchObject({
+      minQueryLength: 2,
+    });
+    expect(extension("wikilinkTypeahead")?.config).toMatchObject({
+      minQueryLength: 1,
+    });
+  });
+
+  it("threads the caret offset down to the trigger extension", () => {
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        adapter={adapter}
+        typeahead={{ mention: { offset: { x: 4, y: 20 } } }}
+      />,
+    );
+
+    expect(extension("mentionTypeahead")?.config).toMatchObject({
+      offset: { x: 4, y: 20 },
+    });
+  });
+
+  it("keeps the shipped singletons when the host tunes nothing", () => {
+    render(<PapyraEditor showDefaultContent={false} adapter={adapter} />);
+
+    // Untouched triggers reuse the shared instances (no per-editor allocation)
+    // and carry the shipped defaults, so a bare trigger opens the menu.
+    expect(extension("mentionTypeahead")?.config).toMatchObject({
+      offset: { x: 0, y: 8 },
+    });
+    expect(extension("mentionTypeahead")?.config?.minQueryLength).toBeUndefined();
+    expect(extension("wikilinkTypeahead")?.config?.minQueryLength).toBeUndefined();
+  });
+
+  it("passes the menu copy through to the suggestion menus", () => {
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        adapter={adapter}
+        typeahead={{
+          mention: { title: "Teammate", emptyLabel: "Nobody here" },
+          noteLink: { title: "Note", emptyLabel: "No notes" },
+        }}
+      />,
+    );
+
+    expect(lastProps().mentionSuggestionLabels).toMatchObject({
+      title: "Teammate",
+      emptyLabel: "Nobody here",
+    });
+    expect(lastProps().wikilinkSuggestionLabels).toMatchObject({
+      title: "Note",
+      emptyLabel: "No notes",
+    });
+  });
+
+  it("passes the search debounce through", () => {
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        adapter={adapter}
+        typeahead={{ searchDebounceMs: 0 }}
+      />,
+    );
+
+    expect(lastProps().typeaheadSearchDebounceMs).toBe(0);
+  });
+
+  it("unregisters a disabled @ trigger and offers no people search", () => {
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        adapter={adapter}
+        typeahead={{ mention: { disabled: true } }}
+      />,
+    );
+
+    expect(extension("mentionTypeahead")).toBeUndefined();
+    expect(lastProps().mentionSuggestionProvider).toBeUndefined();
+    // The other trigger is untouched.
+    expect(extension("wikilinkTypeahead")).toBeDefined();
+    expect(lastProps().wikilinkSuggestionProvider).toBeTypeOf("function");
+  });
+
+  it("unregisters a disabled [[ trigger and offers no note search", () => {
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        adapter={adapter}
+        typeahead={{ noteLink: { disabled: true } }}
+      />,
+    );
+
+    expect(extension("wikilinkTypeahead")).toBeUndefined();
+    expect(lastProps().wikilinkSuggestionProvider).toBeUndefined();
+    expect(extension("mentionTypeahead")).toBeDefined();
+    expect(lastProps().mentionSuggestionProvider).toBeTypeOf("function");
+  });
+
+  it("leaves the embed nodes registered when both triggers are off", () => {
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        adapter={adapter}
+        typeahead={{ mention: { disabled: true }, noteLink: { disabled: true } }}
+      />,
+    );
+
+    const names = (lastProps().extraExtensions ?? []).map((item) => item.name);
+    expect(names).toContain("wikilink");
+    expect(names).toContain("fileEmbed");
+    expect(names).toContain("blockAnchor");
+  });
+});

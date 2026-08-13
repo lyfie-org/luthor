@@ -13,6 +13,11 @@ export {
   type SavedCardMetadata,
 } from "./EmbedResolverContext";
 export {
+  ANCHORABLE_BLOCK_TYPES,
+  isAnchorableBlockType,
+  $collectAnchorableBlocks,
+} from "./anchorableBlocks";
+export {
   WikilinkNode,
   WikilinkExtension,
   wikilinkExtension,
