@@ -48,10 +48,18 @@ import {
   WIKILINK_MARKDOWN_TRANSFORMER,
   YOUTUBE_EMBED_MARKDOWN_TRANSFORMER,
   FileDropUploadExtension,
+  MentionTypeaheadExtension,
+  WikilinkTypeaheadExtension,
   type EmbedResolvers,
+  type MentionTypeaheadConfig,
+  type WikilinkTypeaheadConfig,
 } from "@lyfie/luthor-headless";
 import type { ExtensiveEditorProps } from "../extensive";
 import type { PapyraEditorAdapter } from "./adapter";
+import type {
+  PapyraTypeaheadConfig,
+  PapyraTypeaheadTriggerConfig,
+} from "./typeahead";
 
 /**
  * Headless extensions that register Papyra's embed nodes with the live editor.
@@ -76,47 +84,99 @@ export const PAPYRA_EMBED_EXTENSIONS: NonNullable<
 export interface PapyraEmbedExtensionOptions {
   /**
    * When `true`, the block-anchor extension is instantiated with automatic
-   * stamping: every eligible top-level block gets a stable `^id` anchor on
-   * commit (the preset's `blockAnchors: "auto"` mode).
+   * stamping: every anchorable block gets a stable `^id` anchor on commit
+   * (the preset's `blockAnchors: "auto"` mode).
    */
   autoStampBlockAnchors?: boolean;
+  /**
+   * Host tuning for the `@` and `[[` triggers. A trigger with its own config
+   * is instantiated fresh (the shipped singletons are shared between editors,
+   * so they can never carry per-host settings); a `disabled` trigger is not
+   * registered at all. See {@link PapyraTypeaheadConfig}.
+   */
+  typeahead?: PapyraTypeaheadConfig;
+}
+
+/** Element type of the extensive editor's `extraExtensions` array. */
+type PapyraExtraExtension = NonNullable<
+  ExtensiveEditorProps["extraExtensions"]
+>[number];
+
+/**
+ * The subset of a trigger's host config the headless extension consumes, or
+ * `undefined` when the host tuned nothing and the shared singleton will do.
+ */
+function toExtensionConfig(
+  config: PapyraTypeaheadTriggerConfig | undefined,
+): (MentionTypeaheadConfig & WikilinkTypeaheadConfig) | undefined {
+  if (config?.minQueryLength === undefined && config?.offset === undefined) {
+    return undefined;
+  }
+  return {
+    ...(config.minQueryLength === undefined
+      ? {}
+      : { minQueryLength: config.minQueryLength }),
+    ...(config.offset === undefined ? {} : { offset: config.offset }),
+  };
 }
 
 /**
  * Build the full extra-extensions array, including the upload pipeline when an
  * adapter is provided. The upload extension is instantiated per-adapter since
- * the upload callback comes from the host; the block-anchor extension is
- * instantiated per-options when auto-stamping is requested.
+ * the upload callback comes from the host; the block-anchor and typeahead
+ * extensions are instantiated per-options when the host tunes them.
  *
- * The `@` mention typeahead is host-gated the same way: without an adapter that
+ * The `@` mention typeahead is host-gated twice over: without an adapter that
  * can search people there is nothing to suggest, so the trigger is not
- * registered at all rather than opening an empty menu.
+ * registered at all rather than opening an empty menu — and a host that wants
+ * the trigger gone regardless sets `typeahead.mention.disabled`.
  */
 export function buildPapyraEmbedExtensions(
   adapter?: PapyraEditorAdapter,
   options?: PapyraEmbedExtensionOptions,
 ): NonNullable<ExtensiveEditorProps["extraExtensions"]> {
-  let extensions = PAPYRA_EMBED_EXTENSIONS;
+  const noteLink = options?.typeahead?.noteLink;
+  const mention = options?.typeahead?.mention;
 
-  if (options?.autoStampBlockAnchors) {
-    extensions = extensions.map((extension) =>
-      extension === blockAnchorExtension
-        ? new BlockAnchorExtension({ autoStamp: true })
-        : extension,
-    );
+  const extensions: PapyraExtraExtension[] = [];
+  for (const extension of PAPYRA_EMBED_EXTENSIONS) {
+    if (extension === wikilinkTypeaheadExtension) {
+      if (noteLink?.disabled) {
+        continue;
+      }
+      const config = toExtensionConfig(noteLink);
+      extensions.push(
+        config ? new WikilinkTypeaheadExtension(config) : extension,
+      );
+      continue;
+    }
+
+    if (extension === blockAnchorExtension && options?.autoStampBlockAnchors) {
+      extensions.push(new BlockAnchorExtension({ autoStamp: true }));
+      continue;
+    }
+
+    extensions.push(extension);
   }
 
   if (!adapter) {
     return extensions;
   }
 
-  const uploadExtension = new FileDropUploadExtension({
-    uploadFile: (file) => adapter.uploadMedia(file),
-  });
+  extensions.push(
+    new FileDropUploadExtension({
+      uploadFile: (file) => adapter.uploadMedia(file),
+    }),
+  );
 
-  return adapter.searchUsers
-    ? [...extensions, uploadExtension, mentionTypeaheadExtension]
-    : [...extensions, uploadExtension];
+  if (adapter.searchUsers && !mention?.disabled) {
+    const config = toExtensionConfig(mention);
+    extensions.push(
+      config ? new MentionTypeaheadExtension(config) : mentionTypeaheadExtension,
+    );
+  }
+
+  return extensions;
 }
 
 /**

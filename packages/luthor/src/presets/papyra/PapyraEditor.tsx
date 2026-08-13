@@ -48,6 +48,7 @@ import {
   createPapyraSlashCommands,
 } from "./commands";
 import { papyraFeaturePolicy } from "./features";
+import type { PapyraTypeaheadConfig } from "./typeahead";
 import {
   PAPYRA_OUTLINE_DEBOUNCE_MS,
   extractBlockAnchors,
@@ -226,6 +227,9 @@ export type PapyraEditorProps = Omit<
   | "presetId"
   | "wikilinkSuggestionProvider"
   | "mentionSuggestionProvider"
+  | "wikilinkSuggestionLabels"
+  | "mentionSuggestionLabels"
+  | "typeaheadSearchDebounceMs"
 > & {
   onReady?: (methods: PapyraEditorRef) => void;
   /**
@@ -311,6 +315,21 @@ export type PapyraEditorProps = Omit<
    * never the security boundary.
    */
   adapter?: PapyraEditorAdapter;
+  /**
+   * Host tuning for the two trigger menus — the `@` people trigger and the
+   * `[[` note-link trigger. Covers how eagerly each opens
+   * (`minQueryLength`, `0` by default so a bare trigger opens the menu), where
+   * it sits relative to the caret (`offset`), its copy (`title`,
+   * `emptyLabel`), whether it exists at all (`disabled`), and the search
+   * debounce both share (`searchDebounceMs`).
+   *
+   * Every field is optional and defaults to today's behaviour, so omitting the
+   * prop changes nothing. See {@link PapyraTypeaheadConfig}.
+   *
+   * The `@` trigger additionally requires `adapter.searchUsers`: no people
+   * search, no menu, regardless of this config.
+   */
+  typeahead?: PapyraTypeaheadConfig;
 };
 
 function focusEditableWithin(host: HTMLElement | null): void {
@@ -351,6 +370,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       lockedPlaceholder,
       blockAnchors = "off",
       adapter,
+      typeahead,
       onReady,
       onOutlineChange,
       ...props
@@ -489,31 +509,40 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     // The typeahead dropdowns are host-driven: the headless `[[` and `@`
     // triggers own detection and insertion, the host owns the data. Both
     // providers are gated on a real adapter (never the no-op fallback) so a
-    // hostless editor shows no menu instead of an empty one.
+    // hostless editor shows no menu instead of an empty one — and on the host's
+    // own `disabled` switch, which drops the trigger extension too.
+    const isNoteLinkDisabled = typeahead?.noteLink?.disabled === true;
+    const isMentionDisabled = typeahead?.mention?.disabled === true;
+
     const wikilinkSuggestionProvider = useMemo<
       WikilinkSuggestionProvider | undefined
     >(() => {
-      if (!adapter) {
+      if (!adapter || isNoteLinkDisabled) {
         return undefined;
       }
       return (query) => adapter.searchNotes(query);
-    }, [adapter]);
+    }, [adapter, isNoteLinkDisabled]);
 
     const mentionSuggestionProvider = useMemo<
       MentionSuggestionProvider | undefined
     >(() => {
-      if (!adapter?.searchUsers) {
+      if (!adapter?.searchUsers || isMentionDisabled) {
         return undefined;
       }
       return (query) => adapter.searchUsers!(query);
-    }, [adapter]);
+    }, [adapter, isMentionDisabled]);
 
-    // Build extra extensions including the upload pipeline (adapter-dependent)
-    // and, in `blockAnchors: "auto"`, the auto-stamping anchor extension.
+    // Build extra extensions including the upload pipeline (adapter-dependent),
+    // the host-tuned typeahead triggers, and — in `blockAnchors: "auto"` — the
+    // auto-stamping anchor extension.
     const autoStampBlockAnchors = blockAnchors === "auto";
     const embedExtensions = useMemo(
-      () => buildPapyraEmbedExtensions(adapter, { autoStampBlockAnchors }),
-      [adapter, autoStampBlockAnchors],
+      () =>
+        buildPapyraEmbedExtensions(adapter, {
+          autoStampBlockAnchors,
+          typeahead,
+        }),
+      [adapter, autoStampBlockAnchors, typeahead],
     );
 
     // The preset class set is shared by the live editor and the locked
@@ -573,6 +602,9 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               markdownExtraTransformers={PAPYRA_EMBED_TRANSFORMERS}
               wikilinkSuggestionProvider={wikilinkSuggestionProvider}
               mentionSuggestionProvider={mentionSuggestionProvider}
+              wikilinkSuggestionLabels={typeahead?.noteLink}
+              mentionSuggestionLabels={typeahead?.mention}
+              typeaheadSearchDebounceMs={typeahead?.searchDebounceMs}
               className={presetClassName}
               variantClassName={joinClassNames(
                 "luthor-preset-papyra__variant",

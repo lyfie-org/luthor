@@ -20,7 +20,7 @@ import {
   type LexicalEditor,
 } from "lexical";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
-import { ListItemNode, ListNode } from "@lexical/list";
+import { $createListItemNode, ListItemNode, ListNode } from "@lexical/list";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { jsonToMarkdown, markdownToJSON } from "../../core/markdown";
 import {
@@ -255,13 +255,101 @@ describe("papyra embed transformers", () => {
     expect(markdown).toMatch(/^Body \^[a-z0-9]{8}$/m);
   });
 
-  it("leaves lists, tables, and code blocks unanchored", () => {
-    const editor = createStampEditor(
-      "- One\n- Two\n\n```js\nconst a = 1;\n```",
-    );
+  it("leaves tables and code blocks unanchored", () => {
+    const editor = createStampEditor("```js\nconst a = 1;\n```");
     ensureBlockAnchors(editor);
 
     expect(editorMarkdown(editor)).not.toMatch(/\^[a-z0-9]{8}/);
+  });
+
+  // ── List anchoring ─────────────────────────────────────────────────
+  //
+  // A mention typed in a list item is resolved through that line's anchor, so
+  // list items have to be stampable — otherwise the `@` menu invites a mention
+  // that can never be delivered. `- item ^id` is valid markdown and survives
+  // the bridge verbatim, which is what makes this safe.
+
+  it("stamps every list item, including a checklist", () => {
+    const editor = createStampEditor("- One\n- Two\n\n- [ ] Task\n- [x] Done");
+    ensureBlockAnchors(editor);
+
+    const markdown = editorMarkdown(editor);
+    expect(markdown).toMatch(/^- One \^[a-z0-9]{8}$/m);
+    expect(markdown).toMatch(/^- Two \^[a-z0-9]{8}$/m);
+    expect(markdown).toMatch(/^- \[ \] Task \^[a-z0-9]{8}$/m);
+    expect(markdown).toMatch(/^- \[x\] Done \^[a-z0-9]{8}$/m);
+  });
+
+  it("stamps an ordered list", () => {
+    const editor = createStampEditor("1. First\n2. Second");
+    ensureBlockAnchors(editor);
+
+    const markdown = editorMarkdown(editor);
+    expect(markdown).toMatch(/^1\. First \^[a-z0-9]{8}$/m);
+    expect(markdown).toMatch(/^2\. Second \^[a-z0-9]{8}$/m);
+  });
+
+  it("stamps nested list items on the item itself, not its wrapper", () => {
+    const editor = createStampEditor("- Parent\n    - Child");
+    ensureBlockAnchors(editor);
+
+    const markdown = editorMarkdown(editor);
+    expect(markdown).toMatch(/^- Parent \^[a-z0-9]{8}$/m);
+    expect(markdown).toMatch(/^ {4}- Child \^[a-z0-9]{8}$/m);
+
+    // One anchor per rendered line: the item that only wraps the nested list
+    // is walked through, never stamped.
+    const anchors = markdown.match(/\^[a-z0-9]{8}/g) ?? [];
+    expect(anchors).toHaveLength(2);
+    expect(new Set(anchors).size).toBe(2);
+  });
+
+  it("keeps list anchors stable and lossless across a round-trip", () => {
+    const editor = createStampEditor(
+      "- One\n- [ ] Task\n\n1. First\n\n- Parent\n    - Child",
+    );
+    ensureBlockAnchors(editor);
+    const stamped = editorMarkdown(editor);
+
+    expect(roundTrip(stamped)).toBe(stamped);
+
+    const remounted = createStampEditor(stamped);
+    ensureBlockAnchors(remounted);
+    expect(editorMarkdown(remounted)).toBe(stamped);
+  });
+
+  it("round-trips a list item whose own text ends in anchor-like markup", () => {
+    // Indistinguishable from a real anchor by design (same as a paragraph):
+    // what matters is that the text survives the round-trip byte for byte and
+    // a stamping pass does not add a second one.
+    const markdown = "- see ^v2";
+    expect(roundTrip(markdown)).toBe(markdown);
+
+    const editor = createStampEditor(markdown);
+    ensureBlockAnchors(editor);
+    expect(editorMarkdown(editor)).toBe(markdown);
+  });
+
+  it("gives an empty list item no anchor", () => {
+    // Built by hand: a trailing `- ` line does not survive the markdown bridge
+    // as an empty item, but pressing Enter in a list produces one.
+    const editor = createStampEditor("- One");
+    editor.update(
+      () => {
+        const list = $getRoot().getFirstChild();
+        if (!$isElementNode(list)) {
+          throw new Error("Expected a list");
+        }
+        list.append($createListItemNode());
+      },
+      { discrete: true },
+    );
+
+    ensureBlockAnchors(editor);
+
+    const markdown = editorMarkdown(editor);
+    expect(markdown).toMatch(/^- One \^[a-z0-9]{8}$/m);
+    expect(markdown.match(/\^[a-z0-9]{8}/g) ?? []).toHaveLength(1);
   });
 
   // ── Stranded anchors (id corruption regression) ─────────────────────

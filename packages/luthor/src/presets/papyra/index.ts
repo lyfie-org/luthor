@@ -18,6 +18,10 @@ export {
   type PapyraBlockAnchor,
   type PapyraBlockAnchorMode,
 } from "./PapyraEditor";
+export type {
+  PapyraTypeaheadConfig,
+  PapyraTypeaheadTriggerConfig,
+} from "./typeahead";
 export {
   papyraFeaturePolicy,
   PAPYRA_FEATURE_DEFAULTS,

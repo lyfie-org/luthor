@@ -28,7 +28,11 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
-import { computeAnchoredOverlayStyle, createPointRect } from "./overlay-position";
+import {
+  computeAnchoredOverlayStyle,
+  createPointRect,
+  scheduleOverlayReveal,
+} from "./overlay-position";
 
 /** Props shared by every trigger-driven suggestion menu. */
 export interface TypeaheadMenuProps<TItem> {
@@ -159,11 +163,12 @@ export function TypeaheadMenu<TItem>({
     });
   }, [portalContainer, position]);
 
+  // Measure hidden, then reveal. The reveal is scheduled with a timeout
+  // backstop so the menu can never stay stuck invisible where rAF never runs.
   useLayoutEffect(() => {
     if (!isOpen || !position) return;
     updateMenuPosition(false);
-    const frame = window.requestAnimationFrame(() => updateMenuPosition(true));
-    return () => window.cancelAnimationFrame(frame);
+    return scheduleOverlayReveal(() => updateMenuPosition(true));
   }, [isOpen, position, updateMenuPosition]);
 
   useEffect(() => {

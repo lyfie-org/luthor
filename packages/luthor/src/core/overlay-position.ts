@@ -194,6 +194,48 @@ export function computeAnchoredOverlayStyle({
   };
 }
 
+/**
+ * How long to wait for `requestAnimationFrame` before revealing an overlay
+ * anyway. Long enough that a normal frame wins the race, short enough that a
+ * user never perceives the delay if it does not.
+ */
+export const OVERLAY_REVEAL_FALLBACK_MS = 50;
+
+/**
+ * Reveal a caret-anchored overlay once it has been measured.
+ *
+ * The menus render hidden for one pass so they can measure themselves, then
+ * flip to visible. Doing that flip in `requestAnimationFrame` alone is a trap:
+ * environments that never run rAF — some embedded webviews, and the headless
+ * panes used for automated checks — leave the menu mounted, populated, and
+ * permanently invisible, which is indistinguishable from a broken dropdown. A
+ * timeout backstop guarantees the reveal happens; whichever fires first wins,
+ * and the other is cancelled.
+ *
+ * Returns the cleanup for both schedules.
+ */
+export function scheduleOverlayReveal(reveal: () => void): () => void {
+  let revealed = false;
+  const run = () => {
+    if (revealed) return;
+    revealed = true;
+    reveal();
+  };
+
+  const canAnimate =
+    typeof window !== "undefined" &&
+    typeof window.requestAnimationFrame === "function";
+  const frame = canAnimate ? window.requestAnimationFrame(run) : null;
+  const timer = setTimeout(run, OVERLAY_REVEAL_FALLBACK_MS);
+
+  return () => {
+    if (frame !== null) {
+      window.cancelAnimationFrame(frame);
+    }
+    clearTimeout(timer);
+  };
+}
+
 export function createPointRect(x: number, y: number): DOMRect {
   return {
     x,

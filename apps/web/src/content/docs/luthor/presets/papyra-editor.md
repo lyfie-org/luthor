@@ -132,8 +132,9 @@ round-trip back to that file.
 - `blockAnchors`: block-anchor assignment policy — `"off"` (default; anchors
   already in the text parse and round-trip, nothing creates one), `"on-demand"`
   (the host stamps at save time via `ensureBlockAnchors()`), or `"auto"` (every
-  eligible top-level block — paragraph, heading, quote — gets a stable `^id`
-  appended on commit). Anchors are invisible in the visual surface: no `^id`
+  anchorable block — paragraph, heading, quote, and **list item** — gets a
+  stable `^id` appended on commit; `- item ^abc12345` and `- [ ] task ^abc12345`
+  are valid markdown and round-trip verbatim). Anchors are invisible in the visual surface: no `^id`
   artefact, no caret stop, nothing selectable — while the trailing ` ^id`
   round-trips losslessly in the markdown. An anchor is always kept **last** in
   its block, in every mode: the caret snaps in front of it, and text that lands
@@ -147,6 +148,10 @@ round-trip back to that file.
 - `onOutlineChange`: fired (debounced) with the current document outline; drives
   a host's live table-of-contents scrollbar. Read-only observation — the caret
   is never touched.
+- `typeahead`: host tuning for the `@` and `[[` triggers — how eagerly each
+  opens, its caret offset, its copy, whether it is registered at all, and the
+  shared search debounce. See
+  [Tuning the typeahead](#tuning-the-typeahead).
 - `featureFlags`: per-feature overrides, resolved through the enforced policy.
 
 ## Change notification and autosave
@@ -282,6 +287,70 @@ menu at the start of a block or after whitespace, `(`, or `[`, and the query is
 written as **plain text**, not a node — nothing to serialize, nothing that can
 rewrite the body on save — and hosts detect them by scanning the markdown (see
 `getMentions()`).
+
+Both triggers open on the bare trigger by default (`minQueryLength: 0`), so
+typing `@` or `[[` shows the host's first page immediately. Raise the floor per
+trigger if an unfiltered list is noise — see
+[Tuning the typeahead](#tuning-the-typeahead).
+
+**Where they open.** Both triggers only open inside a block that can carry a
+`^id` block anchor — paragraph, heading, quote, and list item. That is not a
+style choice: a host resolves a mention to the anchor of the block it sits in,
+so a mention typed anywhere else could never be delivered. The trigger
+container set and the block-anchor stamping set are derived from one exported
+source of truth (`ANCHORABLE_BLOCK_TYPES` in `@lyfie/luthor-headless`), so they
+cannot drift apart. Code blocks and tables are excluded in both.
+
+### Tuning the typeahead
+
+The `typeahead` prop is the host's seam over both triggers. Every field is
+optional and defaults to the shipped behaviour, so omitting it changes nothing.
+
+~~~tsx
+<PapyraEditor
+  adapter={adapter}
+  typeahead={{
+    mention: {
+      minQueryLength: 0,             // 0 (default) → a bare `@` opens the menu
+      offset: { x: 0, y: 8 },        // menu offset from the caret
+      title: 'Mention',              // menu heading
+      emptyLabel: 'No matching users',
+      disabled: false,               // true → trigger not registered at all
+    },
+    noteLink: {
+      minQueryLength: 0,             // 0 (default) → `[[` opens the menu
+      offset: { x: 0, y: 8 },
+      title: 'Link note',
+      emptyLabel: 'No matching notes',
+      disabled: false,
+    },
+    searchDebounceMs: 120,           // shared by both triggers
+  }}
+/>
+~~~
+
+| Field                   | Default                | What it does                                                   |
+| ----------------------- | ---------------------- | -------------------------------------------------------------- |
+| `minQueryLength`        | `0`                    | Characters required after the trigger before the menu opens.     |
+| `offset`                | `{ x: 0, y: 8 }`       | Menu position relative to the caret.                             |
+| `title`                 | `Mention` / `Link note`| Menu heading (localisation, product vocabulary).                 |
+| `emptyLabel`            | see above              | Shown when the host's search returns nothing.                    |
+| `disabled`              | `false`                | Unregisters the trigger — the character stays ordinary text.     |
+| `searchDebounceMs`      | `120`                  | Debounce before a query reaches the adapter. Shared.             |
+
+Only the **length floor** is configurable. The syntax rules are fixed at every
+setting: a username's legal characters still close the `@` menu on the first
+character it cannot accept, and `[[` still never opens after `!` or once the
+link is closed or aliased.
+
+`disabled` is the switch for a surface that has no people directory, or a
+deployment that does not use note links — previously the only way to suppress a
+trigger was not to mount the editor. It drops the trigger extension *and* the
+matching suggestion provider; the embed nodes (wikilink rendering, media,
+anchors) stay registered, so existing `[[Note]]` links in the body keep working.
+
+Menu size is CSS, not a prop: override `--luthor-typeahead-menu-max-height` and
+`--luthor-typeahead-menu-width` on your own scope.
 
 ## Usage
 

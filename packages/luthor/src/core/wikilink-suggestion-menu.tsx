@@ -24,12 +24,20 @@ export interface WikilinkSuggestionItem {
   color?: string;
 }
 
+/** Default menu heading, used when the host passes no `title`. */
+export const WIKILINK_MENU_TITLE = "Link note";
+
+/** Default empty state, used when the host passes no `emptyLabel`. */
+export const WIKILINK_MENU_EMPTY_LABEL = "No matching notes";
+
 export function WikilinkSuggestionMenu({
   isOpen,
   query,
   position,
   portalContainer,
   suggestions,
+  title = WIKILINK_MENU_TITLE,
+  emptyLabel = WIKILINK_MENU_EMPTY_LABEL,
   onClose,
   onExecute,
 }: {
@@ -38,6 +46,10 @@ export function WikilinkSuggestionMenu({
   position: { x: number; y: number } | null;
   portalContainer?: HTMLElement | null;
   suggestions: readonly WikilinkSuggestionItem[];
+  /** Menu heading. Defaults to {@link WIKILINK_MENU_TITLE}. */
+  title?: string;
+  /** Shown when the host's search returns no note. */
+  emptyLabel?: string;
   onClose: () => void;
   onExecute: (title: string) => void;
 }) {
@@ -48,9 +60,9 @@ export function WikilinkSuggestionMenu({
       portalContainer={portalContainer}
       items={suggestions}
       menuClassName="luthor-wikilink-typeahead"
-      title="Link note"
+      title={title}
       queryLabel={`[[${query}`}
-      emptyLabel="No matching notes"
+      emptyLabel={emptyLabel}
       getItemKey={(item, index) => `${item.id}-${index}`}
       renderItem={(item) => (
         <>

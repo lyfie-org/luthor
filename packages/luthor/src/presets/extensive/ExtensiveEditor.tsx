@@ -142,6 +142,19 @@ export type MentionSuggestionProvider = (
   query: string,
 ) => Promise<readonly MentionSuggestionItem[]>;
 
+/**
+ * Copy overrides for a trigger-driven suggestion menu. Every field is optional
+ * and falls back to the menu's own default, so a host only names what it wants
+ * to reword (localisation, or vocabulary that matches its own product — "Person"
+ * instead of "Mention", "No teammates found" instead of "No matching users").
+ */
+export interface TypeaheadMenuLabels {
+  /** Menu heading. */
+  title?: string;
+  /** Shown instead of the list when the host's search returns nothing. */
+  emptyLabel?: string;
+}
+
 /** Trigger state mirrored from a headless typeahead extension. */
 type TypeaheadTriggerState = {
   isOpen: boolean;
@@ -150,11 +163,13 @@ type TypeaheadTriggerState = {
 };
 
 /**
- * Debounce before a typeahead query reaches the host's search. Long enough to
- * skip the intermediate queries of a fast typist, short enough that the list
- * still feels live.
+ * Default debounce before a typeahead query reaches the host's search. Long
+ * enough to skip the intermediate queries of a fast typist, short enough that
+ * the list still feels live. Overridable per editor through
+ * `typeaheadSearchDebounceMs` — a local, in-process search can afford `0`,
+ * a paginated remote one usually wants more.
  */
-const TYPEAHEAD_SEARCH_DEBOUNCE_MS = 120;
+export const TYPEAHEAD_SEARCH_DEBOUNCE_MS = 120;
 
 /** Shared empty result, so a closed menu never allocates a new array. */
 const EMPTY_SUGGESTIONS: readonly never[] = [];
@@ -1056,6 +1071,9 @@ function ExtensiveEditorContent({
   markdownBridgeExtras,
   mentionSuggestionProvider,
   wikilinkSuggestionProvider,
+  mentionSuggestionLabels,
+  wikilinkSuggestionLabels,
+  typeaheadSearchDebounceMs = TYPEAHEAD_SEARCH_DEBOUNCE_MS,
 }: {
   isDark: boolean;
   toggleTheme: () => void;
@@ -1097,6 +1115,9 @@ function ExtensiveEditorContent({
   markdownBridgeExtras?: MarkdownBridgeExtras;
   mentionSuggestionProvider?: MentionSuggestionProvider;
   wikilinkSuggestionProvider?: WikilinkSuggestionProvider;
+  mentionSuggestionLabels?: TypeaheadMenuLabels;
+  wikilinkSuggestionLabels?: TypeaheadMenuLabels;
+  typeaheadSearchDebounceMs?: number;
 }) {
   const {
     commands,
@@ -1773,13 +1794,14 @@ function ExtensiveEditorContent({
             setWikilinkSuggestions(EMPTY_SUGGESTIONS);
           }
         });
-    }, TYPEAHEAD_SEARCH_DEBOUNCE_MS);
+    }, typeaheadSearchDebounceMs);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
   }, [
+    typeaheadSearchDebounceMs,
     wikilinkSuggestionProvider,
     wikilinkTypeaheadState.isOpen,
     wikilinkTypeaheadState.query,
@@ -1808,13 +1830,14 @@ function ExtensiveEditorContent({
             setMentionSuggestions(EMPTY_SUGGESTIONS);
           }
         });
-    }, TYPEAHEAD_SEARCH_DEBOUNCE_MS);
+    }, typeaheadSearchDebounceMs);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
   }, [
+    typeaheadSearchDebounceMs,
     mentionSuggestionProvider,
     mentionTypeaheadState.isOpen,
     mentionTypeaheadState.query,
@@ -2385,6 +2408,8 @@ function ExtensiveEditorContent({
           position={wikilinkTypeaheadState.position}
           portalContainer={overlayPortalContainer}
           suggestions={wikilinkSuggestions}
+          title={wikilinkSuggestionLabels?.title}
+          emptyLabel={wikilinkSuggestionLabels?.emptyLabel}
           onClose={() => safeCommands.closeWikilinkMenu?.()}
           onExecute={(title) => {
             safeCommands.selectWikilink?.(title);
@@ -2398,6 +2423,8 @@ function ExtensiveEditorContent({
           position={mentionTypeaheadState.position}
           portalContainer={overlayPortalContainer}
           suggestions={mentionSuggestions}
+          title={mentionSuggestionLabels?.title}
+          emptyLabel={mentionSuggestionLabels?.emptyLabel}
           onClose={() => safeCommands.closeMentionMenu?.()}
           onExecute={(username) => {
             safeCommands.selectMention?.(username);
@@ -2598,6 +2625,20 @@ export interface ExtensiveEditorProps {
    * {@link wikilinkSuggestionProvider}, with the mention typeahead extension.
    */
   mentionSuggestionProvider?: MentionSuggestionProvider;
+  /**
+   * Copy overrides for the `[[` menu (heading and empty state). Omit any field
+   * to keep the default. See {@link TypeaheadMenuLabels}.
+   */
+  wikilinkSuggestionLabels?: TypeaheadMenuLabels;
+  /** Copy overrides for the `@` menu. See {@link TypeaheadMenuLabels}. */
+  mentionSuggestionLabels?: TypeaheadMenuLabels;
+  /**
+   * Debounce, in milliseconds, before a typeahead query reaches the host's
+   * search. Applies to both trigger menus. Defaults to
+   * {@link TYPEAHEAD_SEARCH_DEBOUNCE_MS} (120); a host searching an in-memory
+   * cache can drop it to `0`, a host hitting a paginated API may want more.
+   */
+  typeaheadSearchDebounceMs?: number;
 }
 
 /** Extra node/transformer set forwarded to the markdown bridge. */
@@ -2680,6 +2721,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     markdownExtraTransformers,
     wikilinkSuggestionProvider,
     mentionSuggestionProvider,
+    wikilinkSuggestionLabels,
+    mentionSuggestionLabels,
+    typeaheadSearchDebounceMs,
   }, ref) => {
     const [editorTheme, setEditorTheme] = useState<"light" | "dark">(initialTheme);
     const markdownBridgeExtras = useMemo<MarkdownBridgeExtras>(() => {
@@ -3018,6 +3062,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             markdownBridgeExtras={markdownBridgeExtras}
             wikilinkSuggestionProvider={wikilinkSuggestionProvider}
             mentionSuggestionProvider={mentionSuggestionProvider}
+            wikilinkSuggestionLabels={wikilinkSuggestionLabels}
+            mentionSuggestionLabels={mentionSuggestionLabels}
+            typeaheadSearchDebounceMs={typeaheadSearchDebounceMs}
           />
         </Provider>
       </div>

@@ -23,10 +23,21 @@ import {
   type LexicalEditor,
 } from "lexical";
 import { $createCodeNode, CodeNode } from "@lexical/code";
-import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import {
+  $createListItemNode,
+  $createListNode,
+  ListItemNode,
+  ListNode,
+} from "@lexical/list";
+import {
+  $createQuoteNode,
+  HeadingNode,
+  QuoteNode,
+} from "@lexical/rich-text";
 import { jsonToMarkdown, markdownToJSON } from "../../core/markdown";
 import {
   WikilinkTypeaheadExtension,
+  type WikilinkTypeaheadConfig,
   type WikilinkTypeaheadMenuState,
 } from "./WikilinkTypeaheadExtension";
 import { WikilinkNode, WIKILINK_MARKDOWN_TRANSFORMER } from "./WikilinkNode";
@@ -69,10 +80,17 @@ beforeAll(() => {
     }) as unknown as DOMRectList;
 });
 
-function createHarness(): Harness {
+function createHarness(config?: WikilinkTypeaheadConfig): Harness {
   const editor = createEditor({
     namespace: "wikilink-typeahead-test",
-    nodes: [HeadingNode, QuoteNode, CodeNode, WikilinkNode],
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      CodeNode,
+      ListNode,
+      ListItemNode,
+      WikilinkNode,
+    ],
     onError: (error) => {
       throw error;
     },
@@ -83,7 +101,7 @@ function createHarness(): Harness {
   window.document.body.appendChild(root);
   editor.setRootElement(root);
 
-  const extension = new WikilinkTypeaheadExtension();
+  const extension = new WikilinkTypeaheadExtension(config);
   const unregister = extension.register(editor);
 
   let latest: WikilinkTypeaheadMenuState = {
@@ -153,6 +171,60 @@ describe("wikilink typeahead trigger", () => {
     expect(state()).toMatchObject({ isOpen: true, query: "" });
 
     typeParagraph(editor, "see [[Road");
+    expect(state()).toMatchObject({ isOpen: true, query: "Road" });
+  });
+
+  it("holds the menu back until the host's minQueryLength is met", () => {
+    const { editor, state } = createHarness({ minQueryLength: 1 });
+
+    typeParagraph(editor, "see [[");
+    expect(state().isOpen).toBe(false);
+
+    typeParagraph(editor, "see [[R");
+    expect(state()).toMatchObject({ isOpen: true, query: "R" });
+  });
+
+  it("keeps the syntax rules at every floor", () => {
+    const { editor, state } = createHarness({ minQueryLength: 0 });
+
+    typeParagraph(editor, "![[diagram");
+    expect(state().isOpen).toBe(false);
+
+    typeParagraph(editor, "see [[Roadmap]]");
+    expect(state().isOpen).toBe(false);
+  });
+
+  it("opens in a quote and in a list item, like the mention trigger", () => {
+    const { editor, state } = createHarness();
+
+    editor.update(
+      () => {
+        const root = $getRoot();
+        root.clear();
+        const quote = $createQuoteNode();
+        const textNode = $createTextNode("see [[Road");
+        quote.append(textNode);
+        root.append(quote);
+        textNode.select(10, 10);
+      },
+      { discrete: true },
+    );
+    expect(state()).toMatchObject({ isOpen: true, query: "Road" });
+
+    editor.update(
+      () => {
+        const root = $getRoot();
+        root.clear();
+        const list = $createListNode("bullet");
+        const item = $createListItemNode();
+        const textNode = $createTextNode("see [[Road");
+        item.append(textNode);
+        list.append(item);
+        root.append(list);
+        textNode.select(10, 10);
+      },
+      { discrete: true },
+    );
     expect(state()).toMatchObject({ isOpen: true, query: "Road" });
   });
 

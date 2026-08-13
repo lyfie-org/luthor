@@ -7,7 +7,6 @@
 
 import {
   $addUpdateTag,
-  $getRoot,
   $getSelection,
   $isElementNode,
   $isRangeSelection,
@@ -29,6 +28,7 @@ import type { TextMatchTransformer } from "@lexical/markdown";
 import type { ReactNode } from "react";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
+import { $collectAnchorableBlocks } from "./anchorableBlocks";
 
 /**
  * Serialized shape of a {@link BlockAnchorNode}. Only the `blockId` (the part
@@ -186,13 +186,6 @@ export function createBlockAnchorId(): string {
 /** Update tag carried by stamping updates so listeners can recognise them. */
 export const BLOCK_ANCHOR_STAMP_TAG = "luthor-block-anchor-stamp";
 
-/**
- * Block types eligible for automatic anchoring. Lists, tables, and code
- * blocks are excluded: an inline anchor appended there either corrupts the
- * structure's markdown or lands inside literal code.
- */
-const STAMPABLE_BLOCK_TYPES = new Set(["paragraph", "heading", "quote"]);
-
 function $findBlockAnchor(block: ElementNode): BlockAnchorNode | null {
   const stack: LexicalNode[] = [...block.getChildren()];
   while (stack.length > 0) {
@@ -228,7 +221,7 @@ function $restoreTrailingAnchor(
 }
 
 /**
- * Ensure every eligible top-level block carries a `^id` block anchor. Must be
+ * Ensure every anchorable block carries a `^id` block anchor. Must be
  * called inside `editor.update()`. Blocks that already have an anchor keep
  * their id (stability across edits) and have it moved back to the end of the
  * block if an edit stranded it mid-block; duplicated ids — e.g. a pasted copy
@@ -237,6 +230,10 @@ function $restoreTrailingAnchor(
  *
  * Anchors are appended as the block's last inline child, which serializes to
  * the trailing ` ^id` the {@link BLOCK_ANCHOR_MARKDOWN_TRANSFORMER} owns.
+ *
+ * Which blocks are eligible comes from {@link $collectAnchorableBlocks} — the
+ * shared source of truth the typeahead triggers read too, so a mention can
+ * never be typed somewhere its block cannot be addressed.
  */
 export function $ensureBlockAnchors(
   createId: () => string = createBlockAnchorId,
@@ -244,11 +241,7 @@ export function $ensureBlockAnchors(
   const seen = new Set<string>();
   let changed = false;
 
-  for (const block of $getRoot().getChildren()) {
-    if (!$isElementNode(block) || !STAMPABLE_BLOCK_TYPES.has(block.getType())) {
-      continue;
-    }
-
+  for (const block of $collectAnchorableBlocks()) {
     const existing = $findBlockAnchor(block);
     if (existing) {
       const id = existing.getBlockId();

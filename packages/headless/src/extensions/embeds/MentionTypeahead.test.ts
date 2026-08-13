@@ -16,13 +16,26 @@ import {
   type LexicalEditor,
 } from "lexical";
 import { $createCodeNode, CodeNode } from "@lexical/code";
-import { $createHeadingNode, HeadingNode, QuoteNode } from "@lexical/rich-text";
+import {
+  $createHeadingNode,
+  $createQuoteNode,
+  HeadingNode,
+  QuoteNode,
+} from "@lexical/rich-text";
 import { jsonToMarkdown, markdownToJSON } from "../../core/markdown";
+import { $createListItemNode, $createListNode, ListItemNode, ListNode } from "@lexical/list";
 import {
   MentionTypeaheadExtension,
   sanitizeMentionUsername,
+  type MentionTypeaheadConfig,
   type MentionTypeaheadMenuState,
 } from "./MentionTypeaheadExtension";
+import { ANCHORABLE_BLOCK_TYPES } from "./anchorableBlocks";
+import {
+  BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
+  BlockAnchorNode,
+  ensureBlockAnchors,
+} from "./BlockAnchorNode";
 import { WikilinkNode, WIKILINK_MARKDOWN_TRANSFORMER } from "./WikilinkNode";
 
 const BRIDGE_OPTIONS = {
@@ -70,10 +83,18 @@ beforeAll(() => {
  * attached because a rootless editor never commits its pending updates, so the
  * update listener that drives the trigger would never run.
  */
-function createHarness(): Harness {
+function createHarness(config?: MentionTypeaheadConfig): Harness {
   const editor = createEditor({
     namespace: "mention-typeahead-test",
-    nodes: [HeadingNode, QuoteNode, CodeNode, WikilinkNode],
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      CodeNode,
+      ListNode,
+      ListItemNode,
+      BlockAnchorNode,
+      WikilinkNode,
+    ],
     onError: (error) => {
       throw error;
     },
@@ -84,7 +105,7 @@ function createHarness(): Harness {
   window.document.body.appendChild(root);
   editor.setRootElement(root);
 
-  const extension = new MentionTypeaheadExtension();
+  const extension = new MentionTypeaheadExtension(config);
   const unregister = extension.register(editor);
 
   let latest: MentionTypeaheadMenuState = {
@@ -196,10 +217,52 @@ describe("mention typeahead trigger", () => {
     expect(state().isOpen).toBe(false);
   });
 
-  it("stays closed on a bare @", () => {
+  it("opens on a bare @ by default", () => {
     const { editor, state } = createHarness();
 
     typeParagraph(editor, "hello @");
+    expect(state()).toMatchObject({ isOpen: true, query: "" });
+  });
+
+  it("holds the menu back until the host's minQueryLength is met", () => {
+    const { editor, state } = createHarness({ minQueryLength: 1 });
+
+    typeParagraph(editor, "hello @");
+    expect(state().isOpen).toBe(false);
+
+    typeParagraph(editor, "hello @b");
+    expect(state()).toMatchObject({ isOpen: true, query: "b" });
+  });
+
+  it("honours a floor longer than one character", () => {
+    const { editor, state } = createHarness({ minQueryLength: 3 });
+
+    typeParagraph(editor, "@be");
+    expect(state().isOpen).toBe(false);
+
+    typeParagraph(editor, "@bea");
+    expect(state().isOpen).toBe(true);
+  });
+
+  it("treats a negative floor as zero", () => {
+    const { editor, state } = createHarness({ minQueryLength: -5 });
+
+    typeParagraph(editor, "@");
+    expect(state().isOpen).toBe(true);
+  });
+
+  it("keeps the character rule at every floor", () => {
+    // The length floor is configurable; the character class is not. A
+    // disallowed character still closes the menu at minQueryLength 0.
+    const { editor, state } = createHarness({ minQueryLength: 0 });
+
+    typeParagraph(editor, "@bea");
+    expect(state().isOpen).toBe(true);
+
+    typeParagraph(editor, "@bea!");
+    expect(state().isOpen).toBe(false);
+
+    typeParagraph(editor, "@.bea");
     expect(state().isOpen).toBe(false);
   });
 
@@ -447,6 +510,108 @@ describe("mention selection", () => {
     selectMention(editor, extension, "bea");
 
     expect(paragraphText(editor)).toBe("no trigger here");
+  });
+});
+
+/*
+ * The invariant that makes a mention deliverable: the host resolves `@name` to
+ * the `^id` anchor of the block it sits in, so every container the trigger
+ * opens in must be able to carry one. Asserted end to end — type, select,
+ * stamp, read the markdown — rather than by comparing the two sets, which is
+ * exactly the comparison that silently drifted before.
+ */
+describe("mention deliverability invariant", () => {
+  const ANCHOR_BRIDGE_OPTIONS = {
+    metadataMode: "none" as const,
+    extraNodes: [WikilinkNode, BlockAnchorNode],
+    extraTransformers: [
+      BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
+      WIKILINK_MARKDOWN_TRANSFORMER,
+    ],
+  };
+
+  /** Replace the document with one block of `type` holding `text`. */
+  function typeInContainer(
+    editor: LexicalEditor,
+    type: string,
+    text: string,
+  ): void {
+    editor.update(
+      () => {
+        const root = $getRoot();
+        root.clear();
+        const textNode = $createTextNode(text);
+
+        if (type === "list") {
+          const list = $createListNode("bullet");
+          const item = $createListItemNode();
+          item.append(textNode);
+          list.append(item);
+          root.append(list);
+        } else if (type === "heading") {
+          const heading = $createHeadingNode("h2");
+          heading.append(textNode);
+          root.append(heading);
+        } else if (type === "quote") {
+          const quote = $createQuoteNode();
+          quote.append(textNode);
+          root.append(quote);
+        } else {
+          const paragraph = $createParagraphNode();
+          paragraph.append(textNode);
+          root.append(paragraph);
+        }
+
+        textNode.select(text.length, text.length);
+      },
+      { discrete: true },
+    );
+  }
+
+  for (const containerType of ANCHORABLE_BLOCK_TYPES) {
+    it(`delivers a mention typed in a ${containerType}`, () => {
+      const { editor, extension, state } = createHarness();
+
+      typeInContainer(editor, containerType, "ping @be");
+      expect(state().isOpen).toBe(true);
+
+      selectMention(editor, extension, "bea");
+      ensureBlockAnchors(editor);
+
+      const markdown = jsonToMarkdown(
+        editor.getEditorState().toJSON(),
+        ANCHOR_BRIDGE_OPTIONS,
+      ).trim();
+
+      const mentionLine = markdown
+        .split("\n")
+        .find((line) => line.includes("@bea"));
+
+      expect(mentionLine).toBeDefined();
+      // The mention's own line carries an anchor, so the host has an address
+      // to deliver it to.
+      expect(mentionLine).toMatch(/\^[a-z0-9]{8}$/);
+    });
+  }
+
+  it("never opens where a block cannot be anchored", () => {
+    const { editor, state } = createHarness();
+
+    editor.update(
+      () => {
+        const root = $getRoot();
+        root.clear();
+        const code = $createCodeNode();
+        const textNode = $createTextNode("@bea");
+        code.append(textNode);
+        root.append(code);
+        textNode.select(4, 4);
+      },
+      { discrete: true },
+    );
+
+    expect(ANCHORABLE_BLOCK_TYPES.has("code")).toBe(false);
+    expect(state().isOpen).toBe(false);
   });
 });
 

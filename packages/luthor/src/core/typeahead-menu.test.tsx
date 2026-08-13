@@ -5,8 +5,8 @@
  * Build freely. Credit kindly.
  */
 
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { MentionSuggestionMenu } from "./mention-suggestion-menu";
 import { WikilinkSuggestionMenu } from "./wikilink-suggestion-menu";
 
@@ -60,6 +60,67 @@ function renderWikilinkMenu(
   return { ...result, onClose, onExecute };
 }
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+/*
+ * The menus render hidden for one pass so they can measure themselves, then
+ * flip to visible. Doing that only inside requestAnimationFrame stranded the
+ * menu invisible in every environment that does not run rAF — embedded
+ * webviews, and the headless panes used for automated checks — which looks
+ * exactly like a broken dropdown.
+ */
+describe("TypeaheadMenu reveal", () => {
+  function menuElement(): HTMLElement {
+    const element = document.querySelector<HTMLElement>(
+      ".luthor-mention-typeahead",
+    );
+    if (!element) {
+      throw new Error("menu not rendered");
+    }
+    return element;
+  }
+
+  it("reveals itself where requestAnimationFrame never fires", () => {
+    vi.useFakeTimers();
+    // A frame is scheduled and never run, as in a throttled webview.
+    const frames = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation(() => 1);
+
+    try {
+      renderMentionMenu();
+      expect(menuElement().style.visibility).toBe("hidden");
+
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+
+      expect(menuElement().style.visibility).toBe("visible");
+    } finally {
+      frames.mockRestore();
+    }
+  });
+
+  it("reveals itself on the frame when one runs, without waiting for the backstop", () => {
+    vi.useFakeTimers();
+    const frames = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((callback: FrameRequestCallback) => {
+        callback(0);
+        return 1;
+      });
+
+    try {
+      renderMentionMenu();
+      expect(menuElement().style.visibility).toBe("visible");
+    } finally {
+      frames.mockRestore();
+    }
+  });
+});
+
 describe("MentionSuggestionMenu", () => {
   it("renders the handle and display name of every suggestion", () => {
     renderMentionMenu();
@@ -99,6 +160,20 @@ describe("MentionSuggestionMenu", () => {
     renderMentionMenu({ suggestions: [] });
 
     expect(screen.getByText("No matching users")).toBeInTheDocument();
+  });
+
+  it("takes the host's heading and empty-state copy", () => {
+    renderMentionMenu({
+      suggestions: [],
+      title: "Teammate",
+      emptyLabel: "Nobody here",
+    });
+
+    expect(screen.getByText("Teammate")).toBeInTheDocument();
+    expect(screen.getByText("Nobody here")).toBeInTheDocument();
+    expect(
+      document.querySelector(".luthor-mention-typeahead"),
+    ).toHaveAttribute("aria-label", "Teammate");
   });
 
   it("selects the first suggestion with Enter", () => {
@@ -209,6 +284,17 @@ describe("WikilinkSuggestionMenu", () => {
     renderWikilinkMenu({ suggestions: [] });
 
     expect(screen.getByText("No matching notes")).toBeInTheDocument();
+  });
+
+  it("takes the host's heading and empty-state copy", () => {
+    renderWikilinkMenu({
+      suggestions: [],
+      title: "Note",
+      emptyLabel: "No notes yet",
+    });
+
+    expect(screen.getByText("Note")).toBeInTheDocument();
+    expect(screen.getByText("No notes yet")).toBeInTheDocument();
   });
 
   it("commits the selected note title", () => {
