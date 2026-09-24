@@ -11,8 +11,10 @@ import {
   $isElementNode,
   $isRangeSelection,
   $isTextNode,
+  COMMAND_PRIORITY_CRITICAL,
   COMMAND_PRIORITY_LOW,
   DecoratorNode,
+  INSERT_PARAGRAPH_COMMAND,
   SELECTION_CHANGE_COMMAND,
   TextNode,
   type DOMConversionMap,
@@ -384,9 +386,89 @@ function $normalizeCaretAroundAnchor(): boolean {
   return true;
 }
 
+/** The nearest block-level element containing `node` (itself if it is one). */
+function $blockOf(node: LexicalNode): ElementNode | null {
+  let current: LexicalNode | null = node;
+  while (current && !($isElementNode(current) && !current.isInline())) {
+    current = current.getParent();
+  }
+  return current;
+}
+
+/**
+ * Prepare an Enter keypress in an anchored block. Must be called inside
+ * `editor.update()`; only adjusts the selection or drops an anchor, then lets
+ * the list/rich-text handlers perform the split. Returns whether it changed
+ * anything.
+ *
+ * The caret normalizer keeps the caret *in front of* the anchor, so at the
+ * visual end of an anchored line an unguarded split moves the anchor into the
+ * new block. The new list item then holds the anchor, is never empty, and the
+ * second Enter that should leave the list just adds another item; the original
+ * block loses its id and the moved anchor follows whatever is typed next
+ * (`^a ^b` pairs after the next stamp). So:
+ *
+ * - caret at the end of the text, only anchors after it → move the caret past
+ *   the anchors, so the split leaves them (and the id) on the original line;
+ * - a block whose only content is anchors reads as empty → make it empty for
+ *   real (an empty block is never stamped, so no id worth keeping is lost).
+ */
+function $prepareParagraphInsertAroundAnchor(): boolean {
+  const selection = $getSelection();
+  if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+    return false;
+  }
+
+  const point = selection.anchor;
+  const node = point.getNode();
+  const block = $blockOf(node);
+  if (!block) {
+    return false;
+  }
+  const children = block.getChildren();
+  if (!children.some($isBlockAnchorNode)) {
+    return false;
+  }
+
+  // An anchor's own text content is its ` ^id` markdown, so skip it.
+  const text = children
+    .filter((child) => !$isBlockAnchorNode(child))
+    .map((child) => child.getTextContent())
+    .join("");
+  if (text.trim().length === 0) {
+    for (const child of children) {
+      if ($isBlockAnchorNode(child)) {
+        child.remove();
+      }
+    }
+    block.select(0, 0);
+    return true;
+  }
+
+  let after: LexicalNode[];
+  if (point.type === "element" && node === block) {
+    after = children.slice(point.offset);
+  } else if (
+    $isTextNode(node) &&
+    node.getParent() === block &&
+    point.offset === node.getTextContentSize()
+  ) {
+    after = node.getNextSiblings();
+  } else {
+    return false;
+  }
+  if (after.length === 0 || !after.every($isBlockAnchorNode)) {
+    return false;
+  }
+
+  const end = block.getChildrenSize();
+  block.select(end, end);
+  return true;
+}
+
 /**
  * Keep block anchors where they belong: last in their block, with the caret
- * always on their content side. Two guards, both registered for every editor
+ * always on their content side. Three guards, all registered for every editor
  * that has the extension (they cost nothing when a document has no anchors):
  *
  * 1. A selection normalizer, so a caret placed after the invisible anchor snaps
@@ -394,6 +476,9 @@ function $normalizeCaretAroundAnchor(): boolean {
  * 2. A text transform that re-appends an anchor a text insertion has stranded
  *    mid-block. Re-parenting preserves the node — and therefore the id — so the
  *    block keeps its identity and its `![[Note#^id]]` references stay live.
+ * 3. An Enter guard ({@link $prepareParagraphInsertAroundAnchor}), so a split
+ *    at the end of an anchored line leaves the anchor behind and an emptied
+ *    anchored list item still exits the list.
  *
  * Returns an unregister function.
  */
@@ -426,9 +511,20 @@ export function registerBlockAnchorTrailingGuard(
     },
   );
 
+  const unregisterEnter = editor.registerCommand(
+    INSERT_PARAGRAPH_COMMAND,
+    () => {
+      $prepareParagraphInsertAroundAnchor();
+      // Never claim the command: the list/rich-text handlers do the split.
+      return false;
+    },
+    COMMAND_PRIORITY_CRITICAL,
+  );
+
   return () => {
     unregisterSelection();
     unregisterTransform();
+    unregisterEnter();
   };
 }
 

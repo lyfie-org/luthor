@@ -24,7 +24,8 @@ import type { EditorThemeOverrides } from "../../core";
  *
  * | Token | Drives |
  * | --- | --- |
- * | `--papyra-surface` | editor + floating-toolbar background |
+ * | `--papyra-surface` | editor background; floating-toolbar background unless overridden |
+ * | `--papyra-floating-surface` | floating-toolbar background — set it when `--papyra-surface` is transparent (a host-painted tinted note), or the toolbar floats bare over the text |
  * | `--papyra-surface-muted` | table header, muted fills |
  * | `--papyra-text` | body ink, bold, list markers, quote ink |
  * | `--papyra-text-muted` | placeholder, muted captions, comments |
@@ -126,7 +127,10 @@ export const PAPYRA_THEME_OVERRIDES: EditorThemeOverrides = {
     "var(--papyra-syntax-variable, var(--papyra-text, var(--luthor-preset-fg)))",
 
   // Floating toolbar (the only chrome Papyra keeps)
-  "--luthor-floating-bg": "var(--papyra-surface, var(--luthor-preset-bg))",
+  // Its own token first: a host that paints the paper itself (tinted notes)
+  // makes --papyra-surface transparent, and the toolbar must stay opaque.
+  "--luthor-floating-bg":
+    "var(--papyra-floating-surface, var(--papyra-surface, var(--luthor-preset-bg)))",
   "--luthor-floating-fg": "var(--papyra-text, var(--luthor-preset-fg))",
   "--luthor-floating-border": "var(--papyra-border, var(--luthor-preset-border))",
   "--luthor-floating-muted":

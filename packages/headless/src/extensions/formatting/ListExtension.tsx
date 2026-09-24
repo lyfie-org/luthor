@@ -840,10 +840,11 @@ export class ListExtension extends BaseExtension<
     const unregisterOrderedShortcut = editor.registerCommand<KeyboardEvent>(
       KEY_SPACE_COMMAND,
       (event) => {
-        let handled = false;
-        editor.update(() => {
-          handled = this.handleOrderedListShortcut(editor);
-        });
+        // Command listeners already run inside an update, so do the work
+        // directly: a nested `editor.update()` is deferred until this listener
+        // returns, which left `handled` false, the space uncancelled, and a
+        // stray leading space typed into every list started with "1. ".
+        const handled = this.handleOrderedListShortcut(editor);
 
         if (handled) {
           event.preventDefault();

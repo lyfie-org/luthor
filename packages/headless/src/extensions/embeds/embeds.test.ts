@@ -16,12 +16,18 @@ import {
   $isRangeSelection,
   $isTextNode,
   createEditor,
+  INSERT_PARAGRAPH_COMMAND,
   SELECTION_CHANGE_COMMAND,
   type LexicalEditor,
 } from "lexical";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
-import { $createListItemNode, ListItemNode, ListNode } from "@lexical/list";
-import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import {
+  $createListItemNode,
+  ListItemNode,
+  ListNode,
+  registerList,
+} from "@lexical/list";
+import { HeadingNode, QuoteNode, registerRichText } from "@lexical/rich-text";
 import { jsonToMarkdown, markdownToJSON } from "../../core/markdown";
 import {
   $isBlockAnchorNode,
@@ -515,6 +521,102 @@ describe("papyra embed transformers", () => {
     );
 
     expect(editorMarkdown(editor)).toBe("Shipcc ^sc36ih7s");
+  });
+
+  // ── Enter at the end of an anchored line ────────────────────────────
+
+  /** Guarded editor with list + rich-text Enter handling, as the presets have. */
+  function createEnterEditor(markdown: string): LexicalEditor {
+    const editor = createGuardedEditor(markdown);
+    registerRichText(editor);
+    registerList(editor);
+    return editor;
+  }
+
+  /** Caret after the text of a block (or of one of its list items), before the anchor. */
+  function selectEndOfText(editor: LexicalEditor, block: number, item?: number): void {
+    editor.update(
+      () => {
+        let target = $getRoot().getChildren()[block];
+        if (item !== undefined && $isElementNode(target)) {
+          target = target.getChildren()[item];
+        }
+        if (!$isElementNode(target)) {
+          throw new Error("Expected an element");
+        }
+        const text = target.getChildren().find($isTextNode);
+        if (!text) {
+          throw new Error("Expected a text node");
+        }
+        // Where the caret normalizer leaves it: after the text, before the anchor.
+        text.select(text.getTextContentSize(), text.getTextContentSize());
+      },
+      { discrete: true },
+    );
+  }
+
+  function pressEnter(editor: LexicalEditor): void {
+    editor.update(
+      () => {
+        editor.dispatchCommand(INSERT_PARAGRAPH_COMMAND, undefined);
+      },
+      { discrete: true },
+    );
+  }
+
+  function typeText(editor: LexicalEditor, text: string): void {
+    editor.update(
+      () => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          selection.insertText(text);
+        }
+      },
+      { discrete: true },
+    );
+  }
+
+  it("leaves the anchor on its line when Enter splits at the end", () => {
+    const editor = createEnterEditor("Ship ^sc36ih7s");
+    selectEndOfText(editor, 0);
+    pressEnter(editor);
+    typeText(editor, "Next");
+
+    expect(editorMarkdown(editor)).toBe("Ship ^sc36ih7s\n\nNext");
+  });
+
+  it("exits a list on Enter in the empty item after an anchored one", () => {
+    const editor = createEnterEditor("- One ^aaa11111");
+    selectEndOfText(editor, 0, 0);
+    pressEnter(editor);
+    pressEnter(editor);
+    typeText(editor, "After");
+
+    // Unguarded, the anchor rode into the new item, which was then never
+    // empty, so the second Enter just added another item.
+    expect(editorMarkdown(editor)).toBe("- One ^aaa11111\n\nAfter");
+    ensureBlockAnchors(editor);
+    expect(editorMarkdown(editor)).toMatch(/^- One \^aaa11111\n\nAfter \^[a-z0-9]{8}$/);
+  });
+
+  it("exits a list from an anchored item whose text was deleted", () => {
+    const editor = createEnterEditor("- One ^aaa11111\n- Two ^bbb22222");
+    editor.update(
+      () => {
+        const list = $getRoot().getFirstChild();
+        const item = $isElementNode(list) ? list.getChildren()[1] : null;
+        if (!$isElementNode(item)) {
+          throw new Error("Expected a list item");
+        }
+        item.getChildren().find($isTextNode)?.remove();
+        item.select(0, 0);
+      },
+      { discrete: true },
+    );
+    pressEnter(editor);
+    typeText(editor, "After");
+
+    expect(editorMarkdown(editor)).toBe("- One ^aaa11111\n\nAfter");
   });
 
   it("moves an anchor back to the end when text lands after it", () => {

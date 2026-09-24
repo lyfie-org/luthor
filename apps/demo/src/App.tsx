@@ -167,6 +167,13 @@ function App() {
             defaultContent={DEMO_PAPYRA_CONTENT}
             showDefaultContent={false}
             initialTheme={theme}
+            adapter={{
+              resolveMediaUrl: (filename) => filename,
+              uploadMedia: (file) => Promise.resolve({ filename: file.name }),
+              openNote: () => {},
+              searchNotes: () => Promise.resolve([{ id: "n1", title: "Roadmap" }]),
+              searchUsers: () => Promise.resolve([{ username: "bea", name: "Bea Ito" }]),
+            }}
             toolbar
           />
         );

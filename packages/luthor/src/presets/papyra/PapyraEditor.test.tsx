@@ -307,6 +307,10 @@ describe("PapyraEditor", () => {
       expect(overrides["--luthor-floating-bg"]).toContain(
         "var(--papyra-surface",
       );
+      // A host with a transparent surface can still give the toolbar a solid one.
+      expect(overrides["--luthor-floating-bg"]).toMatch(
+        /^var\(--papyra-floating-surface, /,
+      );
 
       // Invariant: zero hardcoded color in the preset's theme bridge.
       for (const value of Object.values(overrides)) {
