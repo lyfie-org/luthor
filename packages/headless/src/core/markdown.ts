@@ -9,6 +9,9 @@ import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
   CHECK_LIST,
+  HEADING,
+  ORDERED_LIST,
+  QUOTE,
   TRANSFORMERS,
   UNORDERED_LIST,
   type ElementTransformer,
@@ -17,7 +20,15 @@ import {
   type Transformer,
 } from "@lexical/markdown";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
-import { ListItemNode, ListNode } from "@lexical/list";
+import {
+  $createListItemNode,
+  $createListNode,
+  $isListItemNode,
+  $isListNode,
+  ListItemNode,
+  ListNode,
+  type ListType,
+} from "@lexical/list";
 import { QuoteNode, HeadingNode } from "@lexical/rich-text";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import {
@@ -579,6 +590,135 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
   type: "multiline-element" as const,
 };
 
+/*
+ * Block-marker transformers that also recognise an *empty* block.
+ *
+ * Lexical exports an empty list item as `2. `, an empty checklist item as
+ * `- [ ] `, a blank line inside a quote as `> `, and so on — the marker plus a
+ * separating space. But its importer `trimEnd()`s every line before matching,
+ * and its marker patterns demand whitespace *after* the marker (`^\d+\.\s`), so
+ * the bare `2.` it is left with no longer parses as a list item. It falls
+ * through as a plain line and gets glued onto the previous item behind a line
+ * break: the empty item disappears, the list's numbering shifts, following
+ * items split off into a new list, a quote's blank line reads back as a
+ * literal `>`. The document then "repairs" itself differently on every save.
+ *
+ * CommonMark treats a marker at end of line as a valid empty block (spec
+ * §5.2 "an empty list item", §4.2 "empty ATX heading", §5.1 block quote), so
+ * accepting `(?:\s|$)` after the marker is both standard and what makes the
+ * bridge's own output re-import losslessly. Capture groups are unchanged, so
+ * Lexical's own `replace` handlers are reused as-is.
+ */
+const MARKER_END = String.raw`(?:\s|$)`;
+
+// Lexical's markdown list indent unit (spaces per level; a tab is one level).
+const LIST_INDENT_SIZE = 4;
+
+function getListIndent(whitespace: string): number {
+  const tabs = whitespace.match(/\t/g)?.length ?? 0;
+  const spaces = whitespace.match(/ /g)?.length ?? 0;
+  return tabs + Math.floor(spaces / LIST_INDENT_SIZE);
+}
+
+/*
+ * Place an indented list line under the list above it, whatever its type.
+ *
+ * Lexical's own list import only attaches a line to a preceding list of the
+ * *same* type and then indents it, so a numbered list with bulleted (or
+ * checklist) sub-items — `1. Trip` / `    - passport` — imports as separate
+ * top-level lists: the next save writes them apart with blank lines, the
+ * numbering restarts, and Tab/Enter no longer treat them as one list. Even a
+ * same-type line is misplaced when a different-type level sits between
+ * (`1.` → `    -` → `        1.`), because indenting merges into whichever
+ * nested list happens to precede it.
+ *
+ * Lexical models a nested list as a list item whose only child is a list,
+ * placed after the item it belongs to — exactly what its exporter reads back.
+ * This walks that chain down from the list above to the target depth and
+ * appends there, opening a new nested list when the depth has none yet or
+ * holds a list of another type. Top-level lines and lines with no list above
+ * them keep Lexical's own handling (list merging, bullet-marker state).
+ */
+function withIndentAwareNesting(
+  base: ElementTransformer,
+  listType: ListType,
+): ElementTransformer["replace"] {
+  return (parentNode, children, match, isImport) => {
+    const indent = getListIndent(match[1] ?? "");
+    const previous = parentNode.getPreviousSibling();
+    if (!isImport || indent === 0 || !$isListNode(previous)) {
+      return base.replace(parentNode, children, match, isImport);
+    }
+
+    const start = listType === "number" ? Number(match[2]) : undefined;
+    let container: ListNode = previous;
+    for (let depth = 0; depth < indent; depth++) {
+      const last = container.getLastChild();
+      const nested =
+        $isListItemNode(last) && last.getChildrenSize() === 1
+          ? last.getFirstChild()
+          : null;
+      const isTargetDepth = depth === indent - 1;
+      if ($isListNode(nested) && (!isTargetDepth || nested.getListType() === listType)) {
+        container = nested;
+        continue;
+      }
+
+      // No list at this depth yet (or one of another type at the target
+      // depth): open one. A deeper jump than the list above supports lands
+      // here too, one level down — the nearest structure markdown allows.
+      const list = $createListNode(listType, start);
+      const wrapper = $createListItemNode();
+      wrapper.append(list);
+      container.append(wrapper);
+      container = list;
+      break;
+    }
+
+    const item = $createListItemNode(
+      listType === "check" ? (match[3] ?? "").toLowerCase() === "x" : undefined,
+    );
+    item.append(...children);
+    container.append(item);
+    parentNode.remove();
+  };
+}
+
+const EMPTY_AWARE_ORDERED_LIST: ElementTransformer = {
+  ...ORDERED_LIST,
+  regExp: new RegExp(String.raw`^(\s*)(\d{1,})\.` + MARKER_END),
+  replace: withIndentAwareNesting(ORDERED_LIST, "number"),
+};
+
+const EMPTY_AWARE_UNORDERED_LIST: ElementTransformer = {
+  ...UNORDERED_LIST,
+  regExp: new RegExp(String.raw`^(\s*)[-*+]` + MARKER_END),
+  replace: withIndentAwareNesting(UNORDERED_LIST, "bullet"),
+};
+
+const EMPTY_AWARE_CHECK_LIST: ElementTransformer = {
+  ...CHECK_LIST,
+  regExp: new RegExp(String.raw`^(\s*)(?:[-*+]\s)?\s?(\[(\s|x)?\])` + MARKER_END, "i"),
+  replace: withIndentAwareNesting(CHECK_LIST, "check"),
+};
+
+const EMPTY_AWARE_HEADING: ElementTransformer = {
+  ...HEADING,
+  regExp: new RegExp(String.raw`^(#{1,6})` + MARKER_END),
+};
+
+const EMPTY_AWARE_QUOTE: ElementTransformer = {
+  ...QUOTE,
+  regExp: new RegExp(String.raw`^>` + MARKER_END),
+};
+
+const EMPTY_AWARE_REPLACEMENTS = new Map<Transformer, Transformer>([
+  [ORDERED_LIST, EMPTY_AWARE_ORDERED_LIST],
+  [UNORDERED_LIST, EMPTY_AWARE_UNORDERED_LIST],
+  [HEADING, EMPTY_AWARE_HEADING],
+  [QUOTE, EMPTY_AWARE_QUOTE],
+]);
+
 function createChecklistAwareTransformers(base: readonly Transformer[]): Transformer[] {
   const normalized: Transformer[] = [];
   let insertedChecklist = false;
@@ -588,16 +728,18 @@ function createChecklistAwareTransformers(base: readonly Transformer[]): Transfo
       continue;
     }
 
+    // The checklist must be tried before the bullet list, which would
+    // otherwise claim `- [ ] task` as a bullet whose text is `[ ] task`.
     if (transformer === UNORDERED_LIST && !insertedChecklist) {
-      normalized.push(CHECK_LIST);
+      normalized.push(EMPTY_AWARE_CHECK_LIST);
       insertedChecklist = true;
     }
 
-    normalized.push(transformer);
+    normalized.push(EMPTY_AWARE_REPLACEMENTS.get(transformer) ?? transformer);
   }
 
   if (!insertedChecklist) {
-    normalized.push(CHECK_LIST);
+    normalized.push(EMPTY_AWARE_CHECK_LIST);
   }
 
   return normalized;
@@ -1962,9 +2104,159 @@ function extractLeadingFrontmatter(markdown: string): MarkdownFrontmatterExtract
   return { frontmatter, content };
 }
 
+/*
+ * Code-block whitespace protection.
+ *
+ * Lexical's importer `trimEnd()`s every line — code fences included — before it
+ * recognises the fence, so trailing whitespace inside a code block (and every
+ * whitespace-only line) is silently stripped on each load. Code is the one
+ * place where that whitespace is content. Private-use sentinels, which
+ * `trimEnd()` leaves alone, stand in for it through the import and are turned
+ * back into whitespace in the resulting document. Skipped entirely when the
+ * source already contains either sentinel, so real text is never rewritten.
+ */
+const PROTECTED_SPACE = "";
+const PROTECTED_TAB = "";
+
+/*
+ * `~~~` fences are CommonMark code blocks, but Lexical's importer only knows
+ * backtick fences: a tilde-fenced block from another editor imported as
+ * paragraphs, its `~` escaped to `\~` on the next save. Rewrite them as
+ * backtick fences — same block, same info string — unless the body itself
+ * contains a backtick fence line, which a ``` fence could not enclose.
+ */
+function normalizeTildeFences(markdown: string): string {
+  const lines = markdown.split("\n");
+  let changed = false;
+
+  for (let index = 0; index < lines.length; index++) {
+    const open = (lines[index] ?? "").match(/^(\s{0,3})(~{3,})(.*)$/);
+    if (!open) {
+      const fence = isFenceDelimiterLine(lines[index] ?? "");
+      if (fence) {
+        // Skip over a backtick block so a `~~~` inside it stays literal.
+        let close = index + 1;
+        while (close < lines.length) {
+          const inner = isFenceDelimiterLine(lines[close] ?? "");
+          if (inner && inner.marker === fence.marker && inner.length >= fence.length) {
+            break;
+          }
+          close++;
+        }
+        index = close;
+      }
+      continue;
+    }
+
+    const [, indent = "", tildes = "", info = ""] = open;
+    let close = index + 1;
+    while (close < lines.length) {
+      const candidate = (lines[close] ?? "").match(/^\s{0,3}(~{3,})\s*$/);
+      if (candidate && (candidate[1] ?? "").length >= tildes.length) {
+        break;
+      }
+      close++;
+    }
+    if (close >= lines.length) {
+      break; // unclosed: leave as-is rather than swallow the rest of the note
+    }
+
+    const body = lines.slice(index + 1, close);
+    if (info.includes("`") || body.some((line) => /^\s{0,3}`{3,}/.test(line))) {
+      index = close;
+      continue;
+    }
+
+    lines[index] = `${indent}\`\`\`${info.trim()}`;
+    lines[close] = `${indent}\`\`\``;
+    changed = true;
+    index = close;
+  }
+
+  return changed ? lines.join("\n") : markdown;
+}
+
+function protectFencedTrailingWhitespace(markdown: string): {
+  content: string;
+  protected: boolean;
+} {
+  if (markdown.includes(PROTECTED_SPACE) || markdown.includes(PROTECTED_TAB)) {
+    return { content: markdown, protected: false };
+  }
+
+  const lines = markdown.split("\n");
+  let activeFence: { marker: "`" | "~"; length: number } | null = null;
+  let changed = false;
+
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index] ?? "";
+    const fence = isFenceDelimiterLine(line);
+    if (fence) {
+      if (
+        activeFence &&
+        fence.marker === activeFence.marker &&
+        fence.length >= activeFence.length
+      ) {
+        activeFence = null;
+      } else if (!activeFence) {
+        activeFence = fence;
+      }
+      continue;
+    }
+
+    // Only backtick fences become code blocks (tilde ones were rewritten to
+    // backticks already); protecting anything else would leak whitespace
+    // into ordinary paragraphs.
+    if (!activeFence || activeFence.marker !== "`") {
+      continue;
+    }
+
+    const trailing = line.match(/[ \t]+$/);
+    if (!trailing) {
+      continue;
+    }
+
+    const protectedTail = trailing[0]
+      .replace(/ /g, PROTECTED_SPACE)
+      .replace(/\t/g, PROTECTED_TAB);
+    lines[index] = line.slice(0, line.length - trailing[0].length) + protectedTail;
+    changed = true;
+  }
+
+  return changed
+    ? { content: lines.join("\n"), protected: true }
+    : { content: markdown, protected: false };
+}
+
+function restoreProtectedWhitespace(node: unknown): void {
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      restoreProtectedWhitespace(child);
+    }
+    return;
+  }
+
+  if (!isJsonRecord(node)) {
+    return;
+  }
+
+  if (typeof node.text === "string") {
+    node.text = node.text
+      .replace(//g, " ")
+      .replace(//g, "\t");
+  }
+
+  for (const value of Object.values(node)) {
+    if (typeof value === "object" && value !== null) {
+      restoreProtectedWhitespace(value);
+    }
+  }
+}
+
 function preprocessMarkdownForBridgeImport(markdown: string): MarkdownFrontmatterExtraction {
   const extracted = extractLeadingFrontmatter(markdown);
-  const withNestedImageLinks = normalizeNestedImageLinks(extracted.content);
+  const withBacktickFences = normalizeTildeFences(normalizeMarkdownLineBreaks(extracted.content));
+  const withNestedImageLinks = normalizeNestedImageLinks(withBacktickFences);
   const withChecklistNormalization = normalizeChecklistMarkerCase(withNestedImageLinks);
   const withReferenceExpansion = normalizeReferenceStyleMarkdown(withChecklistNormalization);
   const withAlertNormalization = normalizeGitHubAlertBlocks(withReferenceExpansion);
@@ -2493,20 +2785,25 @@ export function markdownToJSON(
   }
 
   const preprocessed = preprocessMarkdownForBridgeImport(content);
-  const sourceContent = preserveMetadata
-    ? preprocessed.content
-    : preprocessMarkdownForMetadataFreeImport(preprocessed.content);
+  const sourceContent = protectFencedTrailingWhitespace(
+    preserveMetadata
+      ? preprocessed.content
+      : preprocessMarkdownForMetadataFreeImport(preprocessed.content),
+  );
 
   const editor = createMarkdownEditor(options?.extraNodes);
   const transformers = resolveMarkdownTransformers(options?.extraTransformers);
   editor.update(
     () => {
-      $convertFromMarkdownString(sourceContent, transformers);
+      $convertFromMarkdownString(sourceContent.content, transformers);
     },
     { discrete: true },
   );
 
   const baseDocument = editor.getEditorState().toJSON() as JsonDocument;
+  if (sourceContent.protected) {
+    restoreProtectedWhitespace(baseDocument);
+  }
   const normalizedDocument = preserveMetadata
     ? baseDocument
     : applyAlignmentMarkersToDocument(baseDocument);

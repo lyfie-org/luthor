@@ -600,13 +600,24 @@ export const BLOCK_ANCHOR_MARKDOWN_TRANSFORMER: TextMatchTransformer = {
     }
     return blockAnchorMarkdown(node);
   },
-  importRegExp: / \^([a-zA-Z0-9][a-zA-Z0-9_-]*)$/,
+  // ` ^id` at the end of a block's text, or `^id` as its *entire* text. The
+  // second form is a block whose content was all deleted after it was stamped
+  // (`2. ^id` once the list marker's own space has been consumed) — the same
+  // `(?<=^|\s)\^id$` rule Obsidian and server-side block resolvers apply.
+  // Without it the anchor surfaces as literal `^id` text in the item.
+  importRegExp: /(?:^| )\^([a-zA-Z0-9][a-zA-Z0-9_-]*)$/,
   // Live trigger disabled: non-printable sentinel + impossible regex.
   // eslint-disable-next-line no-control-regex
   regExp: /\x00\x01$/,
   replace: (textNode, match) => {
     const blockId = (match[1] ?? "").trim();
     if (!blockId) {
+      return;
+    }
+    // `^` in the pattern means "start of this text node", which is not the
+    // start of the block once inline formatting has been split off in front of
+    // it: `**bold**^id` must stay literal text, as it does on the server.
+    if (!match[0].startsWith(" ") && textNode.getPreviousSibling() !== null) {
       return;
     }
     textNode.replace($createBlockAnchorNode(blockId));
