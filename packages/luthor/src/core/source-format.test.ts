@@ -6,20 +6,31 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { htmlToJSON, jsonToHTML } from "@lyfie/luthor-headless";
+import { htmlToJSON, jsonToHTML, jsonToMarkdown } from "@lyfie/luthor-headless";
 import { formatHTMLSource, formatMarkdownSource } from "./source-format";
 
 describe("formatMarkdownSource", () => {
-  it("decodes lexical whitespace entities in markdown output", () => {
-    expect(formatMarkdownSource("This is a **bold&#32;**line")).toBe("This is a **bold** line");
+  // The bridge writes canonical markdown; the source view must show exactly
+  // that. Reformatting here dropped a note's leading/trailing blank lines and
+  // rewrote escaped stars in plain text on every read.
+  it("passes the bridge's markdown through, only normalising line breaks", () => {
+    expect(formatMarkdownSource("\n\nBody\r\n\r\n\r\n")).toBe("\n\nBody\n\n\n");
+    expect(formatMarkdownSource("a \\* b \\* c")).toBe("a \\* b \\* c");
   });
 
-  it("handles whitespace entities for multiple text formats", () => {
-    expect(formatMarkdownSource("*it&#32;*x ~~st&#32;~~y")).toBe("*it* x ~~st~~ y");
-  });
-
-  it("normalizes marker-contained spaces without entities", () => {
-    expect(formatMarkdownSource("Let's **test **this")).toBe("Let's **test** this");
+  it("gets tidy emphasis from the bridge itself: edge spaces sit outside markers", () => {
+    const text = (value: string, format: number) => ({
+      type: "text", version: 1, text: value, format, detail: 0, mode: "normal", style: "",
+    });
+    const doc = (...children: unknown[]) => ({
+      root: { type: "root", version: 1, format: "", indent: 0, direction: null, children: [{
+        type: "paragraph", version: 1, format: "", indent: 0, direction: null, children,
+      }] },
+    });
+    expect(jsonToMarkdown(doc(text("This is a ", 0), text("bold ", 1), text("line", 0)), { metadataMode: "none" }))
+      .toBe("This is a **bold** line");
+    expect(jsonToMarkdown(doc(text("it ", 2), text("x ", 0), text("st ", 4), text("y", 0)), { metadataMode: "none" }))
+      .toBe("*it* x ~~st~~ y");
   });
 });
 

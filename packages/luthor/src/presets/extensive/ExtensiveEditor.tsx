@@ -1365,11 +1365,17 @@ function ExtensiveEditorContent({
           sourceMetadataMode,
           markdownBridgeFlavor,
         );
+        // The bridge extras are what teach the serializer a preset's own nodes
+        // (block anchors, wikilinks, embeds). Without them every such node came
+        // out as `[Unsupported … preserved in markdown metadata]`, and that text
+        // was the canonical markdown — what getMarkdown() returned and what the
+        // change baseline compared against — until the next edit re-serialized.
         const nextMarkdown = serializeJSONToSource(
           "markdown",
           document,
           sourceMetadataMode,
           markdownBridgeFlavor,
+          markdownBridgeExtras,
         );
         const nextHTML = serializeJSONToSource(
           "html",
@@ -1425,6 +1431,7 @@ function ExtensiveEditorContent({
             exportApi.toJSON(),
             sourceMetadataMode,
             markdownBridgeFlavor,
+            markdownBridgeExtras,
           );
         }
 
@@ -1998,6 +2005,7 @@ function ExtensiveEditorContent({
       visualDocument,
       sourceMetadataMode,
       markdownBridgeFlavor,
+        markdownBridgeExtras,
     );
   };
 
@@ -2044,6 +2052,7 @@ function ExtensiveEditorContent({
       canonicalDocument,
       sourceMetadataMode,
       markdownBridgeFlavor,
+        markdownBridgeExtras,
     );
   };
 

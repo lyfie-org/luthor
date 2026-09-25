@@ -6,6 +6,12 @@
  */
 
 import {
+  encodeDocumentForMarkdownExport,
+  encodeMarkdownForImport,
+  finalizeExportedMarkdown,
+  restoreDocumentAfterMarkdownImport,
+} from "./markdown-fidelity";
+import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
   CHECK_LIST,
@@ -506,8 +512,10 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
     void isImport;
 
     const startLine = startMatch[0];
+    // Not a table after all: hand the lines back so they import as text
+    // (returning nothing here told Lexical they were handled, and they vanished).
     if (!startLine) {
-      return;
+      return false;
     }
 
     const allLines = [startLine, ...(linesInBetween ?? [])].filter(
@@ -519,7 +527,7 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
     });
 
     if (tableLines.length < 2) {
-      return;
+      return false;
     }
 
     const parsedRows = tableLines
@@ -527,7 +535,7 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
       .filter((row) => row.length > 0);
 
     if (parsedRows.length < 2 || !parsedRows[0]) {
-      return;
+      return false;
     }
 
     const headerRow = parsedRows[0];
@@ -538,7 +546,7 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
     const hasValidSeparator = separatorAlignments.length > 0 &&
       separatorAlignments.every((alignment) => alignment !== undefined);
     if (!hasValidSeparator) {
-      return;
+      return false;
     }
 
     const dataRows = [headerRow, ...parsedRows.slice(2)];
@@ -548,7 +556,7 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
       ...dataRows.map((row) => row.length),
     );
     if (!Number.isFinite(columnCount) || columnCount < 1) {
-      return;
+      return false;
     }
 
     const tableNode = $createTableNodeWithDimensions(
@@ -2323,10 +2331,29 @@ function prependFrontmatterToMarkdown(markdown: string, frontmatter: string | nu
 function preprocessMarkdownForMetadataFreeImport(markdown: string): string {
   const lines = normalizeMarkdownLineBreaks(markdown).split("\n");
   const output: string[] = [];
+  // Inside a code fence every line is content: HTML there is code to show, not
+  // markup to convert (a `<div>x</div>` line in a code block used to be
+  // rewritten into a paragraph's worth of markdown on every load).
+  let fence: { marker: "`" | "~"; length: number } | null = null;
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index] ?? "";
     const trimmed = line.trim();
+
+    const fenceLine = isFenceDelimiterLine(line);
+    if (fenceLine) {
+      if (!fence) {
+        fence = fenceLine;
+      } else if (fenceLine.marker === fence.marker && fenceLine.length >= fence.length) {
+        fence = null;
+      }
+      output.push(line);
+      continue;
+    }
+    if (fence) {
+      output.push(line);
+      continue;
+    }
 
     if (trimmed.length === 0) {
       output.push(line);
@@ -2786,9 +2813,11 @@ export function markdownToJSON(
 
   const preprocessed = preprocessMarkdownForBridgeImport(content);
   const sourceContent = protectFencedTrailingWhitespace(
-    preserveMetadata
-      ? preprocessed.content
-      : preprocessMarkdownForMetadataFreeImport(preprocessed.content),
+    encodeMarkdownForImport(
+      preserveMetadata
+        ? preprocessed.content
+        : preprocessMarkdownForMetadataFreeImport(preprocessed.content),
+    ),
   );
 
   const editor = createMarkdownEditor(options?.extraNodes);
@@ -2800,7 +2829,9 @@ export function markdownToJSON(
     { discrete: true },
   );
 
-  const baseDocument = editor.getEditorState().toJSON() as JsonDocument;
+  const baseDocument = restoreDocumentAfterMarkdownImport(
+    editor.getEditorState().toJSON() as JsonDocument,
+  );
   if (sourceContent.protected) {
     restoreProtectedWhitespace(baseDocument);
   }
@@ -2847,16 +2878,14 @@ export function jsonToMarkdown(
     : [];
   const editor = createMarkdownEditor(options?.extraNodes);
   const transformers = resolveMarkdownTransformers(options?.extraTransformers);
-  const editorState = toEditorState(editor, prepared.document);
+  const editorState = toEditorState(editor, encodeDocumentForMarkdownExport(prepared.document));
   editor.setEditorState(editorState, { tag: "history-merge" });
 
   const markdown = editorState.read(() => {
     return $convertToMarkdownString(transformers);
   });
-  const postprocessedMarkdown = postprocessMarkdownForBridgeExport(
-    markdown,
-    resolvedFlavor,
-    options?.metadataMode,
+  const postprocessedMarkdown = finalizeExportedMarkdown(
+    postprocessMarkdownForBridgeExport(markdown, resolvedFlavor, options?.metadataMode),
   );
 
   if (!preserveMetadata) {
