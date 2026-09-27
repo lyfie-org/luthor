@@ -136,6 +136,73 @@ describe("PapyraEditor", () => {
     expect(items).not.toContain("textHighlight");
     expect(items).not.toContain("alignLeft");
     expect(items).not.toContain("themeToggle");
+    // Undo/redo stay on the keyboard; the toolbar keeps to formatting + inserts.
+    expect(items).not.toContain("undo");
+    expect(items).not.toContain("redo");
+  });
+
+  it("adds Papyra's own inserts to the persistent toolbar", () => {
+    const adapter: PapyraEditorAdapter = {
+      ...createFallbackPapyraAdapter(),
+      searchUsers: async () => [],
+    };
+    render(<PapyraEditor showDefaultContent={false} toolbar adapter={adapter} />);
+
+    const props = lastProps();
+    expect(props.toolbarLayout?.sections.at(-1)?.items).toEqual(["customComponent"]);
+    expect(props.toolbarCustomItems?.map((item) => item.id)).toEqual([
+      "papyra.link-note",
+      "papyra.mention",
+      "papyra.attach",
+      "papyra.embed",
+      "papyra.insert-date",
+    ]);
+    const embed = props.toolbarCustomItems?.find((item) => item.id === "papyra.embed");
+    expect(embed?.items?.map((item) => item.id)).toEqual([
+      "papyra.embed-youtube",
+      "papyra.embed-web",
+    ]);
+  });
+
+  it("leaves out mention and attach when the host cannot back them", () => {
+    render(<PapyraEditor showDefaultContent={false} toolbar />);
+
+    expect(lastProps().toolbarCustomItems?.map((item) => item.id)).toEqual([
+      "papyra.link-note",
+      "papyra.embed",
+      "papyra.insert-date",
+    ]);
+  });
+
+  it("routes each Papyra insert to its trigger or command", async () => {
+    const adapter: PapyraEditorAdapter = {
+      ...createFallbackPapyraAdapter(),
+      searchUsers: async () => [],
+    };
+    render(<PapyraEditor showDefaultContent={false} toolbar adapter={adapter} />);
+    const items = lastProps().toolbarCustomItems ?? [];
+    const context = {
+      insertText: vi.fn(),
+      hasCommand: vi.fn(() => true),
+      runCommand: vi.fn(),
+    };
+    const byId = (id: string) =>
+      items.flatMap((item) => [item, ...(item.items ?? [])]).find((item) => item.id === id);
+
+    await byId("papyra.link-note")?.action?.(context);
+    expect(context.insertText).toHaveBeenLastCalledWith("[[");
+
+    await byId("papyra.mention")?.action?.(context);
+    expect(context.runCommand).toHaveBeenLastCalledWith("startMention");
+
+    await byId("papyra.embed-youtube")?.action?.(context, "https://youtu.be/abc");
+    expect(context.runCommand).toHaveBeenLastCalledWith("insertYouTubeEmbed", "https://youtu.be/abc");
+
+    await byId("papyra.embed-web")?.action?.(context, "https://example.com");
+    expect(context.runCommand).toHaveBeenLastCalledWith("insertIframeEmbed", "https://example.com");
+
+    await byId("papyra.insert-date")?.action?.(context);
+    expect(context.insertText).toHaveBeenLastCalledWith(expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
   });
 
   it("applies the markdown-safe feature policy", () => {

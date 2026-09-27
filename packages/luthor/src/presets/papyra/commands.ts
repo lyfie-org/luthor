@@ -84,13 +84,13 @@ export const PAPYRA_SHORTCUT_CONFIG: ShortcutConfig = {
 };
 
 /** File types the "Embed media" picker accepts. */
-const PAPYRA_MEDIA_PICKER_ACCEPT = "image/*,audio/*,video/*";
+export const PAPYRA_MEDIA_PICKER_ACCEPT = "image/*,audio/*,video/*";
 
 /**
  * Format a date as `YYYY-MM-DD` using the local calendar (not UTC), so the
  * inserted date matches the writer's day. Markdown-safe plain text.
  */
-function formatIsoDate(date: Date): string {
+export function formatIsoDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -102,7 +102,7 @@ function formatIsoDate(date: Date): string {
  * dialog is dismissed or there is no DOM). The input is detached from the
  * document once it settles. Used by the "Embed media" slash command.
  */
-function pickMediaFile(accept: string): Promise<File | null> {
+export function pickMediaFile(accept: string): Promise<File | null> {
   if (typeof document === "undefined") {
     return Promise.resolve(null);
   }

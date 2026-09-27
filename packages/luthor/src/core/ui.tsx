@@ -47,16 +47,18 @@ export function Button({
   variant = "primary",
   type = "button",
   className,
+  disabled,
 }: {
   children: ReactNode;
   onClick?: () => void;
   variant?: "primary" | "secondary";
   type?: "button" | "submit" | "reset";
   className?: string;
+  disabled?: boolean;
 }) {
   const baseClass = variant === "primary" ? "luthor-button-primary" : "luthor-button-secondary";
   return (
-    <button type={type} onClick={onClick} className={`${baseClass}${className ? ` ${className}` : ""}`}>
+    <button type={type} onClick={onClick} disabled={disabled} className={`${baseClass}${className ? ` ${className}` : ""}`}>
       {children}
     </button>
   );

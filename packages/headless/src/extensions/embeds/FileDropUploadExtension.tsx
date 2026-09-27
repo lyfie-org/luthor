@@ -65,9 +65,22 @@ export function sanitizeEmbedTarget(filename: string): string {
  * Pass `uploadFile` in the config to activate the pipeline; without it, the
  * extension is a no-op.
  */
+/** Commands contributed by {@link FileDropUploadExtension}. */
+export type FileDropUploadCommands = {
+  /**
+   * Upload `file` through the configured `uploadFile` callback and embed the
+   * result after the caret's block as `![[filename]]` — the same path a paste
+   * or drop takes, for a host's own "attach file" control. Resolves once the
+   * embed is inserted; rejects when no `uploadFile` is configured or the
+   * upload fails, so the caller can report it.
+   */
+  uploadAndEmbedFile: (file: File) => Promise<void>;
+};
+
 export class FileDropUploadExtension extends BaseExtension<
   "fileDropUpload",
-  FileDropUploadConfig
+  FileDropUploadConfig,
+  FileDropUploadCommands
 > {
   constructor(config: FileDropUploadConfig = {}) {
     super("fileDropUpload", [ExtensionCategory.Floating]);
@@ -151,37 +164,52 @@ export class FileDropUploadExtension extends BaseExtension<
     };
   }
 
+  getCommands(editor: LexicalEditor): FileDropUploadCommands {
+    return {
+      uploadAndEmbedFile: async (file: File) => {
+        const uploadFile = this.config.uploadFile;
+        if (typeof uploadFile !== "function") {
+          throw new Error("fileDropUpload: no uploadFile callback is configured");
+        }
+        const { filename } = await uploadFile(file);
+        this.insertEmbed(editor, filename);
+      },
+    };
+  }
+
   private handleFileUpload(
     editor: LexicalEditor,
     file: File,
     uploadFile: (file: File) => Promise<{ filename: string }>,
   ): void {
     uploadFile(file).then(
-      ({ filename }) => {
-        const target = sanitizeEmbedTarget(filename);
-        if (!target) {
-          return;
-        }
-        editor.update(() => {
-          const embedNode = $createFileEmbedNode(target);
-          const selection = $getSelection();
-          if ($isRangeSelection(selection)) {
-            const anchor = selection.anchor.getNode();
-            const topElement = anchor.getTopLevelElement();
-            if (topElement) {
-              topElement.insertAfter(embedNode);
-              return;
-            }
-          }
-
-          $getRoot().append(embedNode);
-        });
-      },
+      ({ filename }) => this.insertEmbed(editor, filename),
       () => {
         // Upload failed — swallow silently. The host adapter owns error
         // reporting through its own UI (toasts, banners, etc.).
       },
     );
+  }
+
+  private insertEmbed(editor: LexicalEditor, filename: string): void {
+    const target = sanitizeEmbedTarget(filename);
+    if (!target) {
+      return;
+    }
+    editor.update(() => {
+      const embedNode = $createFileEmbedNode(target);
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        const anchor = selection.anchor.getNode();
+        const topElement = anchor.getTopLevelElement();
+        if (topElement) {
+          topElement.insertAfter(embedNode);
+          return;
+        }
+      }
+
+      $getRoot().append(embedNode);
+    });
   }
 }
 

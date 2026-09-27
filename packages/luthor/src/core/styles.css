@@ -1735,6 +1735,17 @@
 	border-color: var(--luthor-accent-hover);
 }
 
+.luthor-button-primary:disabled,
+.luthor-button-secondary:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.luthor-button-primary:disabled:hover {
+	background-color: var(--luthor-accent);
+	border-color: var(--luthor-accent);
+}
+
 .luthor-button-secondary {
 	background-color: transparent;
 	border-color: var(--luthor-border);
