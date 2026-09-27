@@ -372,10 +372,13 @@ export function Dropdown({
       event.preventDefault();
       onOpenChange(false);
     }
-    document.addEventListener("mousedown", handleClickOutside);
+    // Capture phase: a host that stops mousedown from bubbling (a modal that
+    // keeps clicks inside it from reaching its backdrop, say) would otherwise
+    // hide every outside click from us and leave the menu stuck open.
+    document.addEventListener("mousedown", handleClickOutside, true);
     document.addEventListener("keydown", handleEscape);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside, true);
       document.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen, onOpenChange]);

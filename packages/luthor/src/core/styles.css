@@ -2088,6 +2088,9 @@
 .luthor-heading-h5 { font-size: 16px; }
 .luthor-heading-h6 { font-size: 14px; }
 
+/* Bullets, numbers and checkboxes share one marker column,
+   --luthor-list-gutter (24px by default), and item text starts right after it,
+   so every kind of list lines up. */
 .luthor-list-ul,
 .luthor-list-ol {
 	margin: 10px 0 10px 24px;
@@ -2114,7 +2117,8 @@
 }
 
 .luthor-list-ol > .luthor-list-li[style*="--luthor-ordered-marker-content"]:not(.luthor-list-item-unchecked):not(.luthor-list-item-checked) {
-	padding-left: 0;
+	position: relative;
+	padding-left: var(--luthor-list-gutter, 24px);
 }
 
 .luthor-list-ol > .luthor-list-li[style*="--luthor-ordered-marker-content"]:not(.luthor-list-item-unchecked):not(.luthor-list-item-checked)::marker {
@@ -2123,13 +2127,13 @@
 
 .luthor-list-ol > .luthor-list-li[style*="--luthor-ordered-marker-content"]:not(.luthor-list-item-unchecked):not(.luthor-list-item-checked)::before {
 	content: var(--luthor-ordered-marker-content);
-	display: inline-block;
+	/* Right-aligned against the gutter so "9." and "10." end at the same x and
+	   longer numbers grow into the list's margin instead of pushing the text. */
+	position: absolute;
+	top: 0;
+	right: calc(100% - var(--luthor-list-gutter, 24px) + 6px);
 	white-space: nowrap;
-	min-width: 2.4ch;
-	margin-right: 10px;
-	text-align: right;
 	line-height: inherit;
-	vertical-align: baseline;
 	font-variant-numeric: tabular-nums;
 	font-size: 14px;
 	font-weight: 500;
@@ -2148,7 +2152,7 @@
 
 .luthor-list-ul > .luthor-list-li[style*="--luthor-unordered-marker-kind"]:not(.luthor-list-item-unchecked):not(.luthor-list-item-checked) {
 	position: relative;
-	padding-left: 24px;
+	padding-left: var(--luthor-list-gutter, 24px);
 }
 
 .luthor-list-ul > .luthor-list-li[style*="--luthor-unordered-marker-kind"]:not(.luthor-list-item-unchecked):not(.luthor-list-item-checked)::marker {
@@ -2198,12 +2202,17 @@
 	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 2.6v6.8L9 6 3 2.6Z' fill='%23000'/%3E%3C/svg%3E");
 }
 
+.luthor-list-ul:has(> .luthor-list-item-unchecked, > .luthor-list-item-checked) {
+	list-style: none;
+	padding-left: 0;
+}
+
 .luthor-list-item-unchecked,
 .luthor-list-item-checked {
 	position: relative;
 	list-style: none;
 	margin-left: 0;
-	padding-left: 28px;
+	padding-left: var(--luthor-list-gutter, 24px);
 	min-height: 22px;
 	cursor: pointer;
 }
@@ -2992,6 +3001,16 @@
 
 .luthor-toolbar-group-chevron {
 	opacity: 0.6;
+}
+
+.luthor-dropdown-content:has(> .luthor-toolbar-group-menu) {
+	min-width: 0;
+	margin-top: 0;
+	padding: 0;
+	border-radius: 8px;
+	box-shadow:
+		0 10px 28px -8px var(--luthor-shadow, rgba(0, 0, 0, 0.18)),
+		0 2px 6px -2px var(--luthor-shadow, rgba(0, 0, 0, 0.12));
 }
 
 .luthor-toolbar-group-menu {
