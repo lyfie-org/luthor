@@ -85,7 +85,10 @@ describe("toolbar custom items", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Web page" }));
     expect(onSelect).not.toHaveBeenCalled();
-    expect(screen.getByText("Embed a web page")).toBeInTheDocument();
+    // A labelled modal dialog with a named close button.
+    const dialog = screen.getByRole("dialog", { name: "Embed a web page" });
+    expect(dialog.getAttribute("aria-modal")).toBe("true");
+    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
 
     const submit = screen.getByRole("button", { name: "Embed" }) as HTMLButtonElement;
     expect(submit.disabled).toBe(true);
