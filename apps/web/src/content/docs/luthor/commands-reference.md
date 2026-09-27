@@ -222,4 +222,63 @@ item can offer an insert whose built-in feature (and UI) stays switched off.
 
 > Memoize the array. Nothing renders at `"customComponent"` when it is empty.
 
+`"customComponent"` places every host item. To place one item on its own —
+inside a group, say — use `"custom:<id>"` with the item's `id`.
+
+An `input` can carry more fields under the first with `extraFields` (alt text
+under an image link, for instance). `action` then receives the first field's
+value and, as a third argument, every value by name:
+
+```tsx
+{
+  id: "app.image-link",
+  label: "Image from a link",
+  icon: <ImageIcon size={16} />,
+  input: {
+    title: "Insert an image from a link",
+    label: "Image link",
+    type: "url",
+    extraFields: [{ name: "alt", label: "Description (alt text)" }],
+  },
+  action: ({ runCommand }, src, values) => {
+    if (src) runCommand("insertImage", { src, alt: values?.alt ?? "" });
+  },
+}
+```
+
+## Toolbar groups
+
+A layout section with a `group` collapses behind one button; its items open in
+a small row under it, and the button shows as active while anything inside is
+(bold text under a "Text style" group, say). A group can hold any item — a
+dropdown, a dialog-opening button, host items — and a menu opened from inside a
+group keeps the group open while it is used.
+
+```ts
+const layout: ToolbarLayout = {
+  sections: [
+    { items: ["blockFormat"] },
+    { items: ["bold", "italic", "strikethrough", "code"], group: { id: "style", label: "Text style", icon: <BoldIcon size={16} /> } },
+    { items: ["unorderedList", "orderedList", "checkList"], group: { id: "lists", label: "Lists" } },
+  ],
+};
+```
+
+Without an `icon`, a group borrows its first item's icon when that item is a
+plain button. `isToolbarItemActive(item, activeStates)` is exported for hosts
+that draw their own controls.
+
+## Asking for a value
+
+Commands that need a value from the person — an image or embed link, a code
+language, an emoji — ask through `commands.requestInput(request)`, which the
+extensive editor (and every preset built on it) answers with one themed dialog
+and resolves to the values by field name, or `null` on cancel. The toolbar, the
+slash menu and the command palette all go through it; only a bare headless host
+with no dialog falls back to `window.prompt`. Custom slash commands and toolbar
+items can call it too.
+
+Dialogs render in a portal on `<body>`, carrying the editor's theme variables,
+so they sit above any chrome the host layers around the editor.
+
 

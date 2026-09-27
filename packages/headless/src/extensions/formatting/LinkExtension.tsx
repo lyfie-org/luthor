@@ -353,17 +353,25 @@ export class LinkExtension extends BaseExtension<
             return;
           }
 
-          // If text is provided, insert it first, then apply link
-          if (text) {
-            editor.update(() => {
-              const selection = $getSelection();
-              if (selection) {
-                selection.insertText(text);
-              }
-            });
+          // With text — or a bare caret, which has nothing to wrap — write a
+          // link node holding the text (the URL itself when none is given) in
+          // place of the selection. Inserting the text and then toggling a link
+          // on the (by then collapsed) selection linked nothing.
+          let handled = false;
+          editor.update(() => {
+            const selection = $getSelection();
+            if (!$isRangeSelection(selection)) return;
+            if (!text && !selection.isCollapsed()) return;
+            const link = $createLinkNode(normalizedUrl);
+            link.append($createTextNode(text || normalizedUrl));
+            selection.insertNodes([link]);
+            link.selectEnd();
+            handled = true;
+          });
+          if (!handled) {
+            // A selection with no text given: link the selected text.
+            editor.dispatchCommand(TOGGLE_LINK_COMMAND, normalizedUrl);
           }
-          // Apply link to current selection
-          editor.dispatchCommand(TOGGLE_LINK_COMMAND, normalizedUrl);
         } else {
           // Prompt for URL if not provided
           const linkUrl = prompt("Enter URL:");

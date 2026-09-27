@@ -98,7 +98,7 @@ describe("toolbar custom items", () => {
     });
     fireEvent.click(submit);
 
-    expect(onSelect).toHaveBeenCalledWith("https://example.com");
+    expect(onSelect).toHaveBeenCalledWith("https://example.com", { value: "https://example.com" });
     expect(screen.queryByText("Embed a web page")).toBeNull();
   });
 
@@ -119,5 +119,48 @@ describe("toolbar custom items", () => {
 
     expect(onSelect).not.toHaveBeenCalled();
     expect(screen.queryByText("Embed a web page")).toBeNull();
+  });
+
+  it("adds extra fields to the dialog and hands their values over by name", () => {
+    const onSelect = vi.fn();
+    renderToolbar([
+      {
+        id: "img",
+        label: "Image from link",
+        icon: <span />,
+        input: {
+          title: "Image from a link",
+          label: "Image link",
+          extraFields: [{ name: "alt", label: "Alt text" }],
+        },
+        onSelect,
+      },
+    ]);
+
+    fireEvent.click(screen.getByRole("button", { name: "Image from link" }));
+    fireEvent.change(screen.getByLabelText("Image link"), { target: { value: "https://x.test/a.png" } });
+    fireEvent.change(screen.getByLabelText("Alt text"), { target: { value: " A cat " } });
+    fireEvent.click(screen.getByRole("button", { name: "Insert" }));
+
+    expect(onSelect).toHaveBeenCalledWith("https://x.test/a.png", { value: "https://x.test/a.png", alt: "A cat" });
+  });
+
+  it("places a single custom item with custom:<id>", () => {
+    render(
+      <Toolbar
+        commands={{} as CoreEditorCommands}
+        hasExtension={() => true}
+        activeStates={{} as CoreEditorActiveStates}
+        isDark={false}
+        toggleTheme={() => {}}
+        layout={{ sections: [{ items: ["custom:b"] }] }}
+        customItems={[
+          { id: "a", label: "Item A", icon: <span />, onSelect: vi.fn() },
+          { id: "b", label: "Item B", icon: <span />, onSelect: vi.fn() },
+        ]}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "Item A" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Item B" })).toBeInTheDocument();
   });
 });

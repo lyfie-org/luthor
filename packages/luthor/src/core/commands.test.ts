@@ -390,3 +390,36 @@ describe("command heading configuration", () => {
     secondRoot.remove();
   });
 });
+
+describe("commands that ask for a value", () => {
+  it("ask through the editor's themed dialog when it is supplied", async () => {
+    const insertImage = vi.fn();
+    const requestInput = vi.fn(async () => ({ src: "https://x.test/a.png", alt: "A" }));
+    const command = generateCommands().find((c) => c.id === "insert.image");
+    await command?.action({ insertImage, requestInput } as unknown as CoreEditorCommands);
+
+    expect(requestInput).toHaveBeenCalledWith(expect.objectContaining({ title: "Insert image from a link" }));
+    expect(insertImage).toHaveBeenCalledWith({ src: "https://x.test/a.png", alt: "A" });
+  });
+
+  it("do nothing when the dialog is cancelled", async () => {
+    const insertYouTubeEmbed = vi.fn();
+    const command = generateCommands().find((c) => c.id === "insert.youtube");
+    await command?.action({ insertYouTubeEmbed, requestInput: async () => null } as unknown as CoreEditorCommands);
+    expect(insertYouTubeEmbed).not.toHaveBeenCalled();
+  });
+
+  it("fall back to window.prompt only when the host supplies no dialog", async () => {
+    const insertImage = vi.fn();
+    const prompt = vi.fn((label: string) => (label === "Image link" ? "https://x.test/b.png" : "B"));
+    vi.stubGlobal("prompt", prompt);
+    try {
+      const command = generateCommands().find((c) => c.id === "insert.image");
+      await command?.action({ insertImage } as unknown as CoreEditorCommands);
+      expect(insertImage).toHaveBeenCalledWith({ src: "https://x.test/b.png", alt: "B" });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+

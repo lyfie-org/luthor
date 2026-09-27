@@ -10,6 +10,7 @@ import {
   BLOCK_HEADING_LEVELS,
   type BlockHeadingLevel,
   type CoreEditorCommands,
+  type InputRequest,
   type SlashCommandVisibility,
 } from "./types";
 
@@ -67,7 +68,7 @@ export type CommandConfig = {
   label: string;
   description?: string;
   category: string;
-  action: (commands: CoreEditorCommands) => void;
+  action: (commands: CoreEditorCommands) => void | Promise<void>;
   shortcuts?: KeyboardShortcut[];
   keywords?: string[];
   condition?: (commands: CoreEditorCommands) => boolean;
@@ -154,6 +155,28 @@ function resolveAvailableCommands(
 ): CommandConfig[] {
   const resolvedCommands = applyShortcutConfig(generateCommands(options), options?.shortcutConfig);
   return resolvedCommands.filter((command) => !command.condition || command.condition(commands));
+}
+
+/**
+ * Ask for values through the editor's themed dialog, or `window.prompt` (one
+ * field at a time) when the host supplies none. Resolves `null` on cancel or a
+ * missing required field.
+ */
+async function askFor(
+  commands: CoreEditorCommands,
+  request: InputRequest,
+): Promise<Record<string, string> | null> {
+  if (commands.requestInput) {
+    return commands.requestInput(request);
+  }
+  if (typeof prompt !== "function") return null;
+  const values: Record<string, string> = {};
+  for (const field of request.fields) {
+    const answer = prompt(field.label)?.trim() ?? "";
+    if (field.required && !answer) return null;
+    values[field.name] = answer;
+  }
+  return values;
 }
 
 function isCommandAvailable(
@@ -465,11 +488,14 @@ export function generateCommands(options?: CommandGenerationOptions): CommandCon
       label: "Set Code Language",
       description: "Set language for selected code block",
       category: "Block",
-      action: (commands) => {
+      action: async (commands) => {
         if (!commands.setCodeLanguage) return;
-        const language = prompt("Code language (e.g. ts, css, python):")?.trim();
-        if (!language) return;
-        commands.setCodeLanguage(language);
+        const values = await askFor(commands, {
+          title: "Code language",
+          submitLabel: "Set",
+          fields: [{ name: "language", label: "Language (e.g. ts, css, python)", required: true }],
+        });
+        if (values?.language) commands.setCodeLanguage(values.language);
       },
       keywords: ["code", "language", "syntax"],
       condition: (commands) => isFeatureEnabled("codeIntelligence") && supportsCodeLanguageCommands(commands),
@@ -549,12 +575,16 @@ export function generateCommands(options?: CommandGenerationOptions): CommandCon
       label: "Insert Image",
       description: "Insert an image from URL",
       category: "Insert",
-      action: (commands) => {
-        const src = prompt("Enter image URL:");
-        if (src) {
-          const alt = prompt("Enter alt text:") || "";
-          commands.insertImage?.({ src, alt });
-        }
+      action: async (commands) => {
+        const values = await askFor(commands, {
+          title: "Insert image from a link",
+          submitLabel: "Insert",
+          fields: [
+            { name: "src", label: "Image link", placeholder: "https://…", type: "url", required: true },
+            { name: "alt", label: "Description (alt text)" },
+          ],
+        });
+        if (values?.src) commands.insertImage?.({ src: values.src, alt: values.alt ?? "" });
       },
       keywords: ["image", "photo"],
       condition: (commands) => isFeatureEnabled("image") && isCommandAvailable(commands, "insertImage"),
@@ -564,12 +594,16 @@ export function generateCommands(options?: CommandGenerationOptions): CommandCon
       label: "Insert GIF",
       description: "Insert an animated GIF from URL",
       category: "Insert",
-      action: (commands) => {
-        const src = prompt("Enter GIF URL:");
-        if (!src) {
-          return;
-        }
-        commands.insertImage?.({ src, alt: "GIF" });
+      action: async (commands) => {
+        const values = await askFor(commands, {
+          title: "Insert a GIF from a link",
+          submitLabel: "Insert",
+          fields: [
+            { name: "src", label: "GIF link", placeholder: "https://…/animation.gif", type: "url", required: true },
+            { name: "alt", label: "Description (alt text)" },
+          ],
+        });
+        if (values?.src) commands.insertImage?.({ src: values.src, alt: values.alt || "GIF" });
       },
       keywords: ["gif", "animated", "image"],
       condition: (commands) => isFeatureEnabled("image") && isCommandAvailable(commands, "insertImage"),
@@ -579,8 +613,14 @@ export function generateCommands(options?: CommandGenerationOptions): CommandCon
       label: "Insert Emoji",
       description: "Insert an emoji character",
       category: "Insert",
-      action: (commands) => {
-        const value = prompt("Enter emoji or shortcode (example :sparkles:):")?.trim();
+      action: async (commands) => {
+        if (typeof commands.insertEmoji !== "function") return;
+        const values = await askFor(commands, {
+          title: "Insert emoji",
+          submitLabel: "Insert",
+          fields: [{ name: "emoji", label: "Emoji or shortcode (e.g. :sparkles:)", required: true }],
+        });
+        const value = values?.emoji;
         if (!value || typeof commands.insertEmoji !== "function") {
           return;
         }
@@ -626,15 +666,16 @@ export function generateCommands(options?: CommandGenerationOptions): CommandCon
       label: "Insert iframe",
       description: "Insert an iframe embed from URL",
       category: "Insert",
-      action: (commands) => {
+      action: async (commands) => {
         if (typeof commands.insertIframeEmbed !== "function") {
           return;
         }
-
-        const inputUrl = prompt("Enter iframe URL:");
-        if (!inputUrl) return;
-
-        commands.insertIframeEmbed(inputUrl);
+        const values = await askFor(commands, {
+          title: "Embed a web page",
+          submitLabel: "Embed",
+          fields: [{ name: "url", label: "Page link", placeholder: "https://…", type: "url", required: true }],
+        });
+        if (values?.url) commands.insertIframeEmbed(values.url);
       },
       keywords: ["iframe", "embed", "url"],
       condition: (commands) => isFeatureEnabled("iframeEmbed") && supportsIframeEmbed(commands),
@@ -644,15 +685,18 @@ export function generateCommands(options?: CommandGenerationOptions): CommandCon
       label: "Insert YouTube Video",
       description: "Insert an embedded YouTube video",
       category: "Insert",
-      action: (commands) => {
+      action: async (commands) => {
         if (typeof commands.insertYouTubeEmbed !== "function") {
           return;
         }
-
-        const inputUrl = prompt("Enter YouTube URL:");
-        if (!inputUrl) return;
-
-        commands.insertYouTubeEmbed(inputUrl);
+        const values = await askFor(commands, {
+          title: "Embed a YouTube video",
+          submitLabel: "Embed",
+          fields: [
+            { name: "url", label: "Video link", placeholder: "https://www.youtube.com/watch?v=…", type: "url", required: true },
+          ],
+        });
+        if (values?.url) commands.insertYouTubeEmbed(values.url);
       },
       keywords: ["youtube", "video", "embed"],
       condition: (commands) => isFeatureEnabled("youTubeEmbed") && supportsYouTubeEmbed(commands),

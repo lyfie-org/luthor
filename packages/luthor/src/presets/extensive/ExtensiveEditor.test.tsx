@@ -213,6 +213,7 @@ vi.mock("../../core", () => ({
   ]),
   SourceView: sourceViewMock,
   LinkHoverBubble: linkHoverBubbleMock,
+  InputDialog: () => null,
   Toolbar: toolbarMock,
   TRADITIONAL_TOOLBAR_LAYOUT: { sections: [] },
   BLOCK_HEADING_LEVELS: ["h1", "h2", "h3", "h4", "h5", "h6"],

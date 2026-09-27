@@ -16,6 +16,7 @@ import React, {
   type ChangeEvent,
   type Dispatch,
   type ReactElement,
+  type ReactNode,
   type SetStateAction,
 } from "react";
 import { createPortal } from "react-dom";
@@ -56,10 +57,10 @@ import {
   StrikethroughIcon,
   ChevronDownIcon,
 } from "./icons";
-import { Button, Dialog, Dropdown, IconButton, Select } from "./ui";
+import { Button, Dialog, Dropdown, IconButton, InputDialog, Select } from "./ui";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
 import { computeAnchoredOverlayStyle, resolveEditorPortalContainer } from "./overlay-position";
-import { BLOCK_HEADING_LEVELS, type BlockHeadingLevel, type CoreEditorActiveStates, type CoreEditorCommands, type CoreToolbarClassNames, type InsertTableConfig, type ImageAlignment, type ToolbarCustomItem, type ToolbarLayout, type ToolbarItemType, type ToolbarStyleVars, type ToolbarVisibility } from "./types";
+import { BLOCK_HEADING_LEVELS, type BlockHeadingLevel, type CoreEditorActiveStates, type CoreEditorCommands, type CoreToolbarClassNames, type InsertTableConfig, type InputRequest, type ImageAlignment, type ToolbarCustomItem, type ToolbarLayout, type ToolbarItemType, type ToolbarStyleVars, type ToolbarVisibility } from "./types";
 import { TRADITIONAL_TOOLBAR_LAYOUT } from "./types";
 
 type SelectOption = {
@@ -777,8 +778,18 @@ function ColorPickerButton({
   );
 }
 
+/** Values the toolbar asks for, and what to do with them once given. */
+interface PromptRequest extends InputRequest {
+  onSubmit: (values: Record<string, string>) => void;
+}
+
+type AskFn = (request: PromptRequest) => void;
+type ReportFn = (title: string, message: string) => void;
+
 function useImageHandlers(
   commands: CoreEditorCommands,
+  ask: AskFn,
+  report: ReportFn,
   imageUploadHandler?: (file: File) => Promise<string>,
   gifUploadHandler?: (file: File) => Promise<string>,
 ) {
@@ -787,46 +798,57 @@ function useImageHandlers(
 
   const handlers = useMemo(
     () => ({
-      insertFromUrl: () => {
-        const src = prompt("Enter image URL:");
-        if (!src) return;
-        const alt = prompt("Enter alt text:") || "";
-        const caption = prompt("Enter caption (optional):") || undefined;
-        commands.insertImage({ src, alt, caption });
-      },
+      insertFromUrl: () =>
+        ask({
+          title: "Insert image from a link",
+          submitLabel: "Insert",
+          fields: [
+            { name: "src", label: "Image link", placeholder: "https://…", type: "url", required: true },
+            { name: "alt", label: "Description (alt text)" },
+            { name: "caption", label: "Caption (optional)" },
+          ],
+          onSubmit: ({ src, alt, caption }) =>
+            commands.insertImage({ src: src ?? "", alt: alt ?? "", caption: caption || undefined }),
+        }),
       insertFromFile: () => fileInputRef.current?.click(),
-      insertGifFromUrl: () => {
-        const src = prompt("Enter GIF URL:");
-        if (!src) return;
-        const alt = prompt("Enter alt text (optional):") || "GIF";
-        commands.insertImage({ src, alt });
-      },
+      insertGifFromUrl: () =>
+        ask({
+          title: "Insert a GIF from a link",
+          submitLabel: "Insert",
+          fields: [
+            { name: "src", label: "GIF link", placeholder: "https://…/animation.gif", type: "url", required: true },
+            { name: "alt", label: "Description (alt text)" },
+          ],
+          onSubmit: ({ src, alt }) => commands.insertImage({ src: src ?? "", alt: alt || "GIF" }),
+        }),
       insertGifFromFile: () => gifInputRef.current?.click(),
       handleUpload: async (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+        const input = event.target;
+        const file = input.files?.[0];
+        input.value = "";
         if (!file) return;
         let src: string;
         if (imageUploadHandler) {
           try {
             src = await imageUploadHandler(file);
           } catch {
-            alert("Failed to upload image");
+            report("Couldn’t upload the image", `“${file.name}” didn’t upload. Check your connection and try again.`);
             return;
           }
         } else {
           src = URL.createObjectURL(file);
         }
         commands.insertImage({ src, alt: file.name, file });
-        event.target.value = "";
       },
       handleGifUpload: async (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+        const input = event.target;
+        const file = input.files?.[0];
+        input.value = "";
         if (!file) return;
 
         const isGif = file.type === "image/gif" || file.name.toLowerCase().endsWith(".gif");
         if (!isGif) {
-          alert("Please select a GIF file.");
-          event.target.value = "";
+          report("That isn’t a GIF", `“${file.name}” isn’t a .gif file. Choose a GIF, or upload it as an image instead.`);
           return;
         }
 
@@ -836,7 +858,7 @@ function useImageHandlers(
           try {
             src = await effectiveGifUploadHandler(file);
           } catch {
-            alert("Failed to upload GIF");
+            report("Couldn’t upload the GIF", `“${file.name}” didn’t upload. Check your connection and try again.`);
             return;
           }
         } else {
@@ -844,47 +866,53 @@ function useImageHandlers(
         }
 
         commands.insertImage({ src, alt: file.name || "GIF", file });
-        event.target.value = "";
       },
       setAlignment: (alignment: ImageAlignment) => {
         commands.setImageAlignment(alignment);
       },
-      setCaption: () => {
-        const newCaption = prompt("Enter caption:") || "";
-        commands.setImageCaption(newCaption);
-      },
+      setCaption: () =>
+        ask({
+          title: "Image caption",
+          submitLabel: "Save",
+          fields: [{ name: "caption", label: "Caption" }],
+          onSubmit: ({ caption }) => commands.setImageCaption(caption ?? ""),
+        }),
     }),
-    [commands, imageUploadHandler, gifUploadHandler],
+    [commands, ask, report, imageUploadHandler, gifUploadHandler],
   );
 
   return { handlers, fileInputRef, gifInputRef };
 }
 
-function useEmbedHandlers(commands: CoreEditorCommands) {
+function useEmbedHandlers(commands: CoreEditorCommands, ask: AskFn) {
   return useMemo(
     () => ({
       insertIframe: () => {
-        const inputUrl = prompt("Enter iframe URL:");
-        if (!inputUrl) return;
-
-        if (typeof commands.insertIframeEmbed !== "function") {
-          return;
-        }
-
-        commands.insertIframeEmbed(inputUrl);
+        if (typeof commands.insertIframeEmbed !== "function") return;
+        ask({
+          title: "Embed a web page",
+          submitLabel: "Embed",
+          fields: [{ name: "url", label: "Page link", placeholder: "https://…", type: "url", required: true }],
+          onSubmit: ({ url }) => {
+            if (url) commands.insertIframeEmbed?.(url);
+          },
+        });
       },
       insertYouTube: () => {
-        const inputUrl = prompt("Enter YouTube URL:");
-        if (!inputUrl) return;
-
-        if (typeof commands.insertYouTubeEmbed !== "function") {
-          return;
-        }
-
-        commands.insertYouTubeEmbed(inputUrl);
+        if (typeof commands.insertYouTubeEmbed !== "function") return;
+        ask({
+          title: "Embed a YouTube video",
+          submitLabel: "Embed",
+          fields: [
+            { name: "url", label: "Video link", placeholder: "https://www.youtube.com/watch?v=…", type: "url", required: true },
+          ],
+          onSubmit: ({ url }) => {
+            if (url) commands.insertYouTubeEmbed?.(url);
+          },
+        });
       },
     }),
-    [commands],
+    [commands, ask],
   );
 }
 
@@ -934,6 +962,46 @@ export function isToolbarItemSupported(itemType: ToolbarItemType, hasExtension: 
       return hasExtension("history");
     default:
       return true;
+  }
+}
+
+/** A group without its own icon borrows its first item's — when that is a plain button. */
+function groupFallbackIcon(first: ReactElement | undefined): ReactNode {
+  if (first?.type !== IconButton) return null;
+  return (first.props as { children?: ReactNode }).children;
+}
+
+/**
+ * Whether a toolbar item's own button shows as active for `activeStates` —
+ * used to light up a group's button while something inside it is on.
+ */
+export function isToolbarItemActive(itemType: ToolbarItemType, activeStates: CoreEditorActiveStates): boolean {
+  switch (itemType) {
+    case "bold":
+    case "italic":
+    case "underline":
+    case "strikethrough":
+    case "code":
+    case "subscript":
+    case "superscript":
+    case "unorderedList":
+    case "orderedList":
+    case "checkList":
+      return activeStates[itemType] === true;
+    case "link":
+      return activeStates.isLink === true;
+    case "quote":
+      return activeStates.isQuote === true;
+    case "codeBlock":
+      return activeStates.isInCodeBlock === true;
+    case "image":
+      return activeStates.imageSelected === true;
+    case "textColor":
+      return activeStates.hasCustomTextColor === true;
+    case "textHighlight":
+      return activeStates.hasTextHighlight === true;
+    default:
+      return false;
   }
 }
 
@@ -1005,12 +1073,32 @@ export function Toolbar({
   isListStyleDropdownEnabled = true,
   customItems,
 }: ToolbarProps) {
+  // One themed dialog serves every value the toolbar asks for (image and embed
+  // links, captions, host items' inputs), and one for what it has to report —
+  // never window.prompt/alert, which ignore the editor's theme.
+  const [promptRequest, setPromptRequest] = useState<PromptRequest | null>(null);
+  const [notice, setNotice] = useState<{ title: string; message: string } | null>(null);
+  // Inside a preset the editor hosts one dialog for everything that asks
+  // (toolbar, slash menu, palette) via commands.requestInput; a Toolbar used on
+  // its own falls back to a dialog of its own.
+  const ask = useCallback<AskFn>((request) => {
+    if (commands.requestInput) {
+      void commands.requestInput(request).then((values) => {
+        if (values) request.onSubmit(values);
+      });
+      return;
+    }
+    setPromptRequest(request);
+  }, [commands]);
+  const report = useCallback<ReportFn>((title, message) => setNotice({ title, message }), []);
   const { handlers, fileInputRef, gifInputRef } = useImageHandlers(
     commands,
+    ask,
+    report,
     imageUploadHandler,
     gifUploadHandler,
   );
-  const embedHandlers = useEmbedHandlers(commands);
+  const embedHandlers = useEmbedHandlers(commands, ask);
   const hasAnyEmbedExtension = hasExtension("iframeEmbed") || hasExtension("youtubeEmbed");
   const isAnyEmbedSelected =
     activeStates.isIframeEmbedSelected ||
@@ -1024,8 +1112,7 @@ export function Toolbar({
   const [showCheckListDropdown, setShowCheckListDropdown] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
   const [openCustomMenu, setOpenCustomMenu] = useState<string | null>(null);
-  const [customInputItem, setCustomInputItem] = useState<ToolbarCustomItem | null>(null);
-  const [customInputValue, setCustomInputValue] = useState("");
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [fontFamilyValue, setFontFamilyValue] = useState("default");
   const [fontFamilyOptions, setFontFamilyOptions] = useState<SelectOption[]>([
     { value: "default", label: DEFAULT_FONT_FAMILY_FALLBACK_LABEL },
@@ -1502,23 +1589,23 @@ export function Toolbar({
 
   const selectCustomItem = (item: ToolbarCustomItem) => {
     setOpenCustomMenu(null);
-    if (item.input) {
-      setCustomInputValue("");
-      setCustomInputItem(item);
+    setOpenGroup(null);
+    const input = item.input;
+    if (input) {
+      ask({
+        title: input.title,
+        submitLabel: input.submitLabel,
+        fields: [
+          { name: "value", label: input.label, placeholder: input.placeholder, type: input.type, required: true },
+          ...(input.extraFields ?? []),
+        ],
+        onSubmit: (values) => void item.onSelect?.(values.value, values),
+      });
       return;
     }
     void item.onSelect?.();
   };
 
-  const closeCustomInput = () => setCustomInputItem(null);
-
-  const submitCustomInput = () => {
-    const item = customInputItem;
-    const value = customInputValue.trim();
-    if (!item || !value) return;
-    setCustomInputItem(null);
-    void item.onSelect?.(value);
-  };
 
   const renderCustomItem = (item: ToolbarCustomItem): ReactElement => {
     if (item.items && item.items.length > 0) {
@@ -1683,7 +1770,21 @@ export function Toolbar({
         return (
           <IconButton
             key="link"
-            onClick={() => (activeStates.isLink ? commands.removeLink() : commands.insertLink())}
+            onClick={() =>
+              activeStates.isLink
+                ? commands.removeLink()
+                : ask({
+                    title: "Insert link",
+                    submitLabel: "Link",
+                    fields: [
+                      { name: "url", label: "Link address", placeholder: "https://…", type: "url", required: true },
+                      { name: "text", label: "Text to show (optional — uses the selection)" },
+                    ],
+                    onSubmit: ({ url, text }) => {
+                      if (url) commands.insertLink(url, text || undefined);
+                    },
+                  })
+            }
             active={activeStates.isLink}
             title={activeStates.isLink ? "Remove Link" : "Insert Link"}
           >
@@ -2104,8 +2205,13 @@ export function Toolbar({
         if (!customItems || customItems.length === 0) return null;
         return customItems.map(renderCustomItem);
 
-      default:
+      default: {
+        if (itemType.startsWith("custom:")) {
+          const item = customItems?.find((candidate) => candidate.id === itemType.slice("custom:".length));
+          return item ? renderCustomItem(item) : null;
+        }
         return null;
+      }
     }
   };
 
@@ -2149,6 +2255,36 @@ export function Toolbar({
 
           // Only render section if it has at least one item
           if (renderedItems.length === 0) return null;
+
+          if (section.group) {
+            const group = section.group;
+            const active = section.items.some((itemType) => isToolbarItemActive(itemType, activeStates));
+            return (
+              <div key={sectionIndex} className={classNames?.section ?? "luthor-toolbar-section"}>
+                <Dropdown
+                  trigger={
+                    <button
+                      type="button"
+                      className={`luthor-toolbar-button luthor-toolbar-group-trigger${active ? " active" : ""}`}
+                      title={group.label}
+                      aria-label={group.label}
+                      aria-haspopup="true"
+                      aria-expanded={openGroup === group.id}
+                    >
+                      {group.icon ?? groupFallbackIcon(renderedItems[0])}
+                      <ChevronDownIcon size={12} className="luthor-toolbar-group-chevron" />
+                    </button>
+                  }
+                  isOpen={openGroup === group.id}
+                  onOpenChange={(open) => setOpenGroup(open ? group.id : null)}
+                >
+                  <div className="luthor-toolbar-group-menu" role="group" aria-label={group.label}>
+                    {renderedItems}
+                  </div>
+                </Dropdown>
+              </div>
+            );
+          }
 
           return (
             <div key={sectionIndex} className={classNames?.section ?? "luthor-toolbar-section"}>
@@ -2216,35 +2352,25 @@ export function Toolbar({
         </div>
       </Dialog>
 
-      <Dialog isOpen={customInputItem !== null} onClose={closeCustomInput} title={customInputItem?.input?.title ?? ""}>
-        <form
-          className="luthor-table-dialog"
-          onSubmit={(event) => {
-            event.preventDefault();
-            submitCustomInput();
-          }}
-        >
-          <div className="luthor-form-group">
-            <label htmlFor="luthor-custom-item-input">{customInputItem?.input?.label}</label>
-            <input
-              id="luthor-custom-item-input"
-              className="luthor-input"
-              type={customInputItem?.input?.type ?? "text"}
-              placeholder={customInputItem?.input?.placeholder}
-              value={customInputValue}
-              onChange={(event) => setCustomInputValue(event.target.value)}
-              autoFocus
-            />
-          </div>
+      <InputDialog
+        request={promptRequest}
+        onCancel={() => setPromptRequest(null)}
+        onSubmit={(values) => {
+          const request = promptRequest;
+          setPromptRequest(null);
+          request?.onSubmit(values);
+        }}
+      />
+
+      <Dialog isOpen={notice !== null} onClose={() => setNotice(null)} title={notice?.title ?? ""}>
+        <div className="luthor-table-dialog">
+          <p className="luthor-dialog-message">{notice?.message}</p>
           <div className="luthor-dialog-actions">
-            <Button variant="secondary" onClick={closeCustomInput}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" disabled={customInputValue.trim().length === 0}>
-              {customInputItem?.input?.submitLabel ?? "Insert"}
+            <Button variant="primary" onClick={() => setNotice(null)}>
+              OK
             </Button>
           </div>
-        </form>
+        </div>
       </Dialog>
     </>
   );
