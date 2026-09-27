@@ -416,6 +416,8 @@ export function Dialog({
   useLayoutEffect(() => {
     if (isOpen && anchorRef.current) {
       setThemeStyle(getOverlayThemeStyleFromElement(anchorRef.current));
+    } else if (!isOpen) {
+      setThemeStyle(undefined);
     }
   }, [isOpen]);
 
@@ -444,7 +446,10 @@ export function Dialog({
   }, [isOpen, onClose]);
 
   const anchor = <span ref={anchorRef} className="luthor-dialog-anchor" hidden />;
-  if (!isOpen || typeof document === "undefined") return anchor;
+  // Mount the portal only once the theme is read: a first paint without it had
+  // no background, and the theme transition then faded the panel in from
+  // transparent.
+  if (!isOpen || !themeStyle || typeof document === "undefined") return anchor;
 
   const overlay = (
     <div className="luthor-dialog-overlay luthor-dialog-overlay--portal" style={themeStyle}>
