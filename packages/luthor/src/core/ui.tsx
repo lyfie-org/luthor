@@ -5,7 +5,7 @@
  * Build freely. Credit kindly.
  */
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDownIcon, CloseIcon } from "./icons";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
@@ -353,6 +353,7 @@ export function Dialog({
   children: ReactNode;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -382,10 +383,10 @@ export function Dialog({
 
   return (
     <div className="luthor-dialog-overlay">
-      <div className="luthor-dialog" ref={dialogRef}>
+      <div className="luthor-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="luthor-dialog-header">
-          <h3 className="luthor-dialog-title">{title}</h3>
-          <button className="luthor-dialog-close" onClick={onClose} type="button">
+          <h3 className="luthor-dialog-title" id={titleId}>{title}</h3>
+          <button className="luthor-dialog-close" onClick={onClose} type="button" aria-label="Close">
             <CloseIcon size={16} />
           </button>
         </div>
