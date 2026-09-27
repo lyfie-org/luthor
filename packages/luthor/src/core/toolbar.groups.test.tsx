@@ -67,6 +67,22 @@ describe("toolbar groups", () => {
     expect(screen.queryByRole("button", { name: /Bold/ })).toBeNull();
   });
 
+  it("closes on an outside click even when the host stops it from bubbling", () => {
+    renderToolbar();
+    // A host modal that keeps clicks inside itself (stopPropagation on
+    // mousedown) must not leave the group stuck open.
+    const host = document.createElement("div");
+    host.addEventListener("mousedown", (event) => event.stopPropagation());
+    document.body.appendChild(host);
+    try {
+      fireEvent.click(screen.getByRole("button", { name: "Text style" }));
+      fireEvent.mouseDown(host);
+      expect(screen.queryByRole("button", { name: /Bold/ })).toBeNull();
+    } finally {
+      host.remove();
+    }
+  });
+
   it("lights the group button while an item inside is active", () => {
     renderToolbar({ italic: true });
     expect(screen.getByRole("button", { name: "Text style" }).className).toContain("active");

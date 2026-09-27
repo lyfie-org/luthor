@@ -73,6 +73,10 @@ Use `ExtensiveEditor` when you want full formatting, media, code, and command wo
 
 Tab indents and Shift+Tab outdents inside the editor. Keyboard-only users escape the capture with **Escape, then Tab** — the armed Tab performs the browser's native focus move out of the editor (WCAG 2.1.2); any other key restores Tab-as-indent.
 
+## List indentation
+
+Bulleted, numbered and checkbox lists share one marker column, so item text starts at the same place whatever the list type. Set `--luthor-list-gutter` (default `24px`) on the editor wrapper to widen or narrow it; long numbers like `10.` grow into the list margin instead of pushing the text.
+
 ## Custom upload hooks
 
 ~~~tsx
