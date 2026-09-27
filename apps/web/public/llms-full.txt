@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-09-27T05:29:49.156Z
+Generated at: 2026-09-27T10:34:30.489Z
 
 ## AI Agent Workflow
 
@@ -2812,6 +2812,65 @@ item can offer an insert whose built-in feature (and UI) stays switched off.
 
 > Memoize the array. Nothing renders at `"customComponent"` when it is empty.
 
+`"customComponent"` places every host item. To place one item on its own —
+inside a group, say — use `"custom:<id>"` with the item's `id`.
+
+An `input` can carry more fields under the first with `extraFields` (alt text
+under an image link, for instance). `action` then receives the first field's
+value and, as a third argument, every value by name:
+
+```tsx
+{
+  id: "app.image-link",
+  label: "Image from a link",
+  icon: <ImageIcon size={16} />,
+  input: {
+    title: "Insert an image from a link",
+    label: "Image link",
+    type: "url",
+    extraFields: [{ name: "alt", label: "Description (alt text)" }],
+  },
+  action: ({ runCommand }, src, values) => {
+    if (src) runCommand("insertImage", { src, alt: values?.alt ?? "" });
+  },
+}
+```
+
+## Toolbar groups
+
+A layout section with a `group` collapses behind one button; its items open in
+a small row under it, and the button shows as active while anything inside is
+(bold text under a "Text style" group, say). A group can hold any item — a
+dropdown, a dialog-opening button, host items — and a menu opened from inside a
+group keeps the group open while it is used.
+
+```ts
+const layout: ToolbarLayout = {
+  sections: [
+    { items: ["blockFormat"] },
+    { items: ["bold", "italic", "strikethrough", "code"], group: { id: "style", label: "Text style", icon: <BoldIcon size={16} /> } },
+    { items: ["unorderedList", "orderedList", "checkList"], group: { id: "lists", label: "Lists" } },
+  ],
+};
+```
+
+Without an `icon`, a group borrows its first item's icon when that item is a
+plain button. `isToolbarItemActive(item, activeStates)` is exported for hosts
+that draw their own controls.
+
+## Asking for a value
+
+Commands that need a value from the person — an image or embed link, a code
+language, an emoji — ask through `commands.requestInput(request)`, which the
+extensive editor (and every preset built on it) answers with one themed dialog
+and resolves to the values by field name, or `null` on cancel. The toolbar, the
+slash menu and the command palette all go through it; only a bare headless host
+with no dialog falls back to `window.prompt`. Custom slash commands and toolbar
+items can call it too.
+
+Dialogs render in a portal on `<body>`, carrying the editor's theme variables,
+so they sit above any chrome the host layers around the editor.
+
 ---
 ## FILE: luthor/feature-flags.md
 ## URL: https://www.luthor.fyi/docs/luthor/feature-flags/
@@ -3513,7 +3572,7 @@ round-trip back to that file.
   `"default"` is the standard editorial measure.
 - `toolbar`: opt into a persistent toolbar above the editor (default `false` —
   floating-on-selection only). It lists just Papyra's markdown-safe actions
-  (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,
+  (headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,
   lists + checklist, code block, horizontal rule, table, image); the restricted
   controls (typography pickers, color/highlight, sub/superscript, alignment, theme
   toggle) can never appear, and the toolbar is never pinned. After the built-ins
@@ -3525,6 +3584,18 @@ round-trip back to that file.
   The prop is live — toggling it shows or hides the toolbar without remounting
   the editor, so the caret and undo history survive. Only renders in the
   editable visual surface, so `readOnly`/`locked` never show it.
+- `toolbarLayout`: the persistent toolbar's layout — order, sections, and which
+  sections collapse behind one button (`group`). Defaults to
+  `PAPYRA_TOOLBAR_LAYOUT`. Restricted items stay stripped by the visibility
+  contract whatever the layout lists. Place host items with `"customComponent"`
+  (all) or `"custom:<id>"` (one).
+- `toolbarItems`: host controls for the toolbar, replacing the preset's own
+  inserts (`createPapyraToolbarItems`) — so a host can use its own icons,
+  grouping and behaviour. Items use `runCommand` to reach editor commands such as
+  `uploadAndEmbedFile`, `insertImage`, `insertYouTubeEmbed` or `startMention`.
+- `imageUploadHandler`: where the editor's own image paths (the toolbar image
+  menu, `/image`) store a picked file; return the URL to use. Without it they
+  fall back to a `blob:` URL, which does not survive a reload — set it.
 - `locked`: withholds the body entirely — renders a blurred placeholder and
   **never mounts the editor**, so there is no plaintext in the DOM. The lock is
   UX only; the server (`401`/`PathGuard`) is the security boundary.

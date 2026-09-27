@@ -34,8 +34,13 @@ import type { EditorThemeOverrides } from "../../core";
  * | `--papyra-accent` | links accent base, checkboxes, quote border |
  * | `--papyra-accent-text` | link text |
  * | `--papyra-accent-contrast` | text on an accent fill |
+ * | `--papyra-accent-hover` | an accent fill under the pointer (dialog confirm buttons) |
  * | `--papyra-accent-surface` | tinted fills: quote background, selection |
  * | `--papyra-code-surface` | code-block background |
+ * | `--papyra-toolbar-surface` | persistent toolbar background (default transparent) |
+ * | `--papyra-toolbar-hover-surface` | persistent toolbar button hover |
+ * | `--papyra-toolbar-active-surface` | an active toolbar control's fill (default the accent surface) |
+ * | `--papyra-toolbar-active-text` | an active toolbar control's icon (default the accent text) |
  * | `--papyra-font-body` | body type (Sora) |
  * | `--papyra-font-heading` | heading type (Marcellus) |
  * | `--papyra-font-mono` | inline + block code (Roboto Mono) |
@@ -58,6 +63,11 @@ export const PAPYRA_THEME_TOKEN_NAMES = [
   "--papyra-font-body",
   "--papyra-font-heading",
   "--papyra-font-mono",
+  "--papyra-accent-hover",
+  "--papyra-toolbar-surface",
+  "--papyra-toolbar-hover-surface",
+  "--papyra-toolbar-active-surface",
+  "--papyra-toolbar-active-text",
 ] as const;
 
 /** A documented Papyra design token name. */
@@ -90,6 +100,8 @@ export const PAPYRA_THEME_OVERRIDES: EditorThemeOverrides = {
 
   // Links, lists, accents
   "--luthor-accent": "var(--papyra-accent, var(--luthor-preset-accent))",
+  "--luthor-accent-hover":
+    "var(--papyra-accent-hover, var(--papyra-accent, var(--luthor-preset-accent)))",
   "--luthor-link-color": "var(--papyra-accent-text, var(--luthor-preset-accent))",
   "--luthor-list-marker-color": "var(--papyra-text, var(--luthor-preset-fg))",
   "--luthor-list-checkbox-color":
@@ -125,6 +137,26 @@ export const PAPYRA_THEME_OVERRIDES: EditorThemeOverrides = {
     "var(--papyra-syntax-function, var(--papyra-text, var(--luthor-preset-fg)))",
   "--luthor-syntax-variable":
     "var(--papyra-syntax-variable, var(--papyra-text, var(--luthor-preset-fg)))",
+
+  // Persistent toolbar (opt-in `toolbar`). Flat and quiet: no raised hover or
+  // gradient, and an active control is an accent wash with accent ink. The
+  // stock active style inks the icon with --luthor-bg — the paper — which is
+  // transparent on a host-painted (tinted) note, so the icon vanished into a
+  // solid accent block. Each value has its own --papyra-toolbar-* hook.
+  "--luthor-toolbar-bg": "var(--papyra-toolbar-surface, transparent)",
+  "--luthor-toolbar-button-hover-bg":
+    "var(--papyra-toolbar-hover-surface, var(--papyra-surface-muted, var(--luthor-preset-muted)))",
+  "--luthor-toolbar-button-hover-border": "transparent",
+  "--luthor-toolbar-button-hover-shadow": "none",
+  "--luthor-toolbar-button-press-shadow": "none",
+  "--luthor-toolbar-button-overlay": "none",
+  "--luthor-toolbar-button-active-bg":
+    "var(--papyra-toolbar-active-surface, var(--papyra-accent-surface, var(--luthor-preset-muted)))",
+  "--luthor-toolbar-button-active-border": "transparent",
+  "--luthor-toolbar-button-active-fg":
+    "var(--papyra-toolbar-active-text, var(--papyra-accent-text, var(--luthor-preset-fg)))",
+  "--luthor-toolbar-button-active-shadow": "none",
+  "--luthor-toolbar-button-active-overlay": "none",
 
   // Floating toolbar (the only chrome Papyra keeps)
   // Its own token first: a host that paints the paper itself (tinted notes)

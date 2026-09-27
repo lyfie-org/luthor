@@ -205,6 +205,23 @@ describe("PapyraEditor", () => {
     expect(context.insertText).toHaveBeenLastCalledWith(expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
   });
 
+  it("lets the host supply its own toolbar layout and items", () => {
+    const layout = {
+      sections: [
+        { items: ["bold", "italic"] as const, group: { id: "style", label: "Text style" } },
+        { items: ["custom:host.date"] as const },
+      ],
+    };
+    const items = [{ id: "host.date", label: "Date", icon: null, action: vi.fn() }];
+    render(<PapyraEditor showDefaultContent={false} toolbar toolbarLayout={layout} toolbarItems={items} />);
+
+    const props = lastProps();
+    expect(props.toolbarLayout).toBe(layout);
+    expect(props.toolbarCustomItems).toBe(items);
+    // The visibility contract still pins restricted items off.
+    expect(props.toolbarVisibility).toMatchObject({ fontFamily: false, textColor: false });
+  });
+
   it("applies the markdown-safe feature policy", () => {
     render(<PapyraEditor showDefaultContent={false} />);
 

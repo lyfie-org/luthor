@@ -21,9 +21,11 @@ import {
   markdownToJSON,
 } from "@lyfie/luthor-headless";
 import type { EmbedResolvers } from "@lyfie/luthor-headless";
+import type { ToolbarLayout } from "../../core";
 import type {
   ExtensiveEditorProps,
   ExtensiveEditorRef,
+  ExtensiveToolbarItem,
   FeatureFlagOverrides,
   MentionSuggestionProvider,
   WikilinkSuggestionProvider,
@@ -284,6 +286,22 @@ export type PapyraEditorProps = Omit<
    */
   toolbar?: boolean;
   /**
+   * The persistent toolbar's layout — order, sections, and which sections
+   * collapse behind one button (`group`). Defaults to
+   * {@link PAPYRA_TOOLBAR_LAYOUT}. Restricted items (typography pickers,
+   * colours, alignment, …) are still stripped by the toolbar visibility
+   * contract, so a host layout cannot bring them back. Place host controls
+   * with `"customComponent"` (all of them) or `"custom:<id>"` (one).
+   */
+  toolbarLayout?: ToolbarLayout;
+  /**
+   * Host controls for the persistent toolbar, rendered where the layout places
+   * them. Defaults to the preset's own inserts ({@link createPapyraToolbarItems});
+   * pass your own to replace them — with the host's icons, grouping and
+   * behaviour. Memoize the array.
+   */
+  toolbarItems?: readonly ExtensiveToolbarItem[];
+  /**
    * Withhold the body entirely. When `true`, the preset renders a blurred
    * placeholder and **never mounts the editor or the note's text** — there is no
    * plaintext in the DOM to scrape. This is the UX half of Papyra's secure
@@ -370,6 +388,8 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       readOnly = false,
       variant = "default",
       toolbar = false,
+      toolbarLayout,
+      toolbarItems: hostToolbarItems,
       locked = false,
       lockedPlaceholder,
       blockAnchors = "off",
@@ -514,10 +534,11 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     // when the host wired what they need — mirrors how buildPapyraEmbedExtensions
     // registers the `@` typeahead and the upload pipeline.
     const mentionEnabled = Boolean(adapter?.searchUsers) && !typeahead?.mention?.disabled;
-    const toolbarItems = useMemo(
+    const defaultToolbarItems = useMemo(
       () => createPapyraToolbarItems({ mention: mentionEnabled, attach: Boolean(adapter) }),
       [mentionEnabled, adapter],
     );
+    const toolbarItems = hostToolbarItems ?? defaultToolbarItems;
 
     // The typeahead dropdowns are host-driven: the headless `[[` and `@`
     // triggers own detection and insertion, the host owns the data. Both
@@ -628,7 +649,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               isEditorViewTabsVisible={false}
               isToolbarEnabled={toolbar}
               isToolbarPinned={false}
-              toolbarLayout={PAPYRA_TOOLBAR_LAYOUT}
+              toolbarLayout={toolbarLayout ?? PAPYRA_TOOLBAR_LAYOUT}
               isListStyleDropdownEnabled={false}
               toolbarVisibility={PAPYRA_TOOLBAR_VISIBILITY}
               headingOptions={PAPYRA_HEADING_OPTIONS}

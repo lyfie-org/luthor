@@ -133,6 +133,18 @@ round-trip back to that file.
   The prop is live — toggling it shows or hides the toolbar without remounting
   the editor, so the caret and undo history survive. Only renders in the
   editable visual surface, so `readOnly`/`locked` never show it.
+- `toolbarLayout`: the persistent toolbar's layout — order, sections, and which
+  sections collapse behind one button (`group`). Defaults to
+  `PAPYRA_TOOLBAR_LAYOUT`. Restricted items stay stripped by the visibility
+  contract whatever the layout lists. Place host items with `"customComponent"`
+  (all) or `"custom:<id>"` (one).
+- `toolbarItems`: host controls for the toolbar, replacing the preset's own
+  inserts (`createPapyraToolbarItems`) — so a host can use its own icons,
+  grouping and behaviour. Items use `runCommand` to reach editor commands such as
+  `uploadAndEmbedFile`, `insertImage`, `insertYouTubeEmbed` or `startMention`.
+- `imageUploadHandler`: where the editor's own image paths (the toolbar image
+  menu, `/image`) store a picked file; return the URL to use. Without it they
+  fall back to a `blob:` URL, which does not survive a reload — set it.
 - `locked`: withholds the body entirely — renders a blurred placeholder and
   **never mounts the editor**, so there is no plaintext in the DOM. The lock is
   UX only; the server (`401`/`PathGuard`) is the security boundary.

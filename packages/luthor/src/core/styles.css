@@ -1617,8 +1617,16 @@
 	padding: 12px;
 }
 
+/* Portalled to <body> (see Dialog): pinned to the viewport. */
+.luthor-dialog-overlay--portal {
+	position: fixed;
+}
+
 .luthor-dialog {
-	background-color: var(--luthor-bg);
+	/* The floating surface first: a host that paints the editor's paper itself
+	   leaves --luthor-bg transparent, and a dialog must stay opaque. */
+	background-color: var(--luthor-floating-bg, var(--luthor-bg));
+	color: var(--luthor-fg);
 	border-radius: 10px;
 	box-shadow: 0 20px 30px var(--luthor-shadow);
 	width: min(520px, calc(100% - 24px));
@@ -1643,6 +1651,12 @@
 }
 
 .luthor-dialog-close {
+	/* 28px: clear of the 24px minimum target size (WCAG 2.5.8). */
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 28px;
+	min-height: 28px;
 	background: none;
 	border: none;
 	color: var(--luthor-muted-fg);
@@ -1727,7 +1741,9 @@
 .luthor-button-primary {
 	background-color: var(--luthor-accent);
 	border-color: var(--luthor-accent);
-	color: var(--luthor-bg);
+	/* Ink on the accent. Not --luthor-bg: a host that paints the paper itself
+	   leaves that transparent, and the label vanished. */
+	color: var(--luthor-floating-accent-fg, var(--luthor-bg));
 }
 
 .luthor-button-primary:hover {
@@ -2964,4 +2980,30 @@
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
 	}
+}
+
+/* Toolbar groups: one button standing in for a section, its items in a row
+   under it. */
+.luthor-toolbar-group-trigger {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.luthor-toolbar-group-chevron {
+	opacity: 0.6;
+}
+
+.luthor-toolbar-group-menu {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	padding: 4px;
+}
+
+.luthor-dialog-message {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--luthor-fg);
 }

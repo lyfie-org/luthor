@@ -5,10 +5,11 @@
  * Build freely. Credit kindly.
  */
 
-import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDownIcon, CloseIcon } from "./icons";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
+import type { InputRequest } from "./types";
 import { computeAnchoredOverlayStyle, resolveEditorPortalContainer } from "./overlay-position";
 
 export function IconButton({
@@ -216,6 +217,15 @@ export function Select({
   );
 }
 
+/**
+ * Lets a dropdown opened from inside another dropdown's menu (a sub-menu, or a
+ * toolbar group holding a control that has its own menu) tell its ancestors
+ * about its portalled content, so a click there does not count as "outside"
+ * and close the parent — which would unmount the child with it.
+ */
+type DropdownNest = { register: (el: HTMLElement) => () => void };
+const DropdownNestContext = createContext<DropdownNest | null>(null);
+
 export function Dropdown({
   trigger,
   children,
@@ -232,6 +242,31 @@ export function Dropdown({
   const contentRef = useRef<HTMLDivElement>(null);
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties | undefined>(undefined);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const parentNest = useContext(DropdownNestContext);
+  const nested = useRef(new Set<HTMLElement>());
+  const nest = useMemo<DropdownNest>(
+    () => ({
+      register: (el) => {
+        nested.current.add(el);
+        const unregisterParent = parentNest?.register(el);
+        return () => {
+          nested.current.delete(el);
+          unregisterParent?.();
+        };
+      },
+    }),
+    [parentNest],
+  );
+  // Register this menu's own content with every ancestor while it is mounted.
+  const unregisterContent = useRef<(() => void) | null>(null);
+  const setContentRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      contentRef.current = el;
+      unregisterContent.current?.();
+      unregisterContent.current = el && parentNest ? parentNest.register(el) : null;
+    },
+    [parentNest],
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -320,21 +355,38 @@ export function Dropdown({
   }, [isOpen]);
 
   useEffect(() => {
+    if (!isOpen) return;
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
       if (dropdownRef.current?.contains(target)) return;
       if (contentRef.current?.contains(target)) return;
+      for (const el of nested.current) {
+        if (el.contains(target)) return;
+      }
+      onOpenChange(false);
+    }
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      // Claim the key so a host listening further up (a modal that closes on
+      // Escape) leaves itself open: this Escape was for the menu.
+      event.preventDefault();
       onOpenChange(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [onOpenChange]);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, onOpenChange]);
 
   return (
     <div className="luthor-dropdown" ref={dropdownRef}>
       <div ref={triggerRef} onClick={() => onOpenChange(!isOpen)}>{trigger}</div>
       {isOpen && typeof document !== "undefined" && createPortal(
-        <div ref={contentRef} className="luthor-dropdown-content" style={dropdownStyle}>{children}</div>,
+        <DropdownNestContext.Provider value={nest}>
+          <div ref={setContentRef} className="luthor-dropdown-content" style={dropdownStyle}>{children}</div>
+        </DropdownNestContext.Provider>,
         portalContainer ?? document.body,
       )}
     </div>
@@ -354,6 +406,18 @@ export function Dialog({
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  // The dialog is portalled to <body> so it is a true top-level modal: inside
+  // the editor it sat in the wrapper's own stacking context (the wrapper is
+  // isolated), under the host's page chrome and anything the host layers over
+  // the editor. It carries the editor's theme with it, read off a marker that
+  // stays in place.
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  const [themeStyle, setThemeStyle] = useState<CSSProperties | undefined>(undefined);
+  useLayoutEffect(() => {
+    if (isOpen && anchorRef.current) {
+      setThemeStyle(getOverlayThemeStyleFromElement(anchorRef.current));
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -379,10 +443,11 @@ export function Dialog({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  const anchor = <span ref={anchorRef} className="luthor-dialog-anchor" hidden />;
+  if (!isOpen || typeof document === "undefined") return anchor;
 
-  return (
-    <div className="luthor-dialog-overlay">
+  const overlay = (
+    <div className="luthor-dialog-overlay luthor-dialog-overlay--portal" style={themeStyle}>
       <div className="luthor-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="luthor-dialog-header">
           <h3 className="luthor-dialog-title" id={titleId}>{title}</h3>
@@ -393,5 +458,75 @@ export function Dialog({
         <div className="luthor-dialog-content">{children}</div>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {anchor}
+      {createPortal(overlay, document.body)}
+    </>
+  );
+}
+
+/**
+ * The editor's themed stand-in for `window.prompt`: asks for the fields in
+ * `request` and hands back their trimmed values by name. Open while `request`
+ * is non-null; required fields must be filled before it submits.
+ */
+export function InputDialog({
+  request,
+  onSubmit,
+  onCancel,
+}: {
+  request: InputRequest | null;
+  onSubmit: (values: Record<string, string>) => void;
+  onCancel: () => void;
+}) {
+  const [values, setValues] = useState<Record<string, string>>({});
+  // A new request starts empty.
+  useEffect(() => setValues({}), [request]);
+  const idPrefix = useId();
+
+  const trimmed = (name: string) => (values[name] ?? "").trim();
+  const incomplete = !request || request.fields.some((field) => field.required && !trimmed(field.name));
+
+  return (
+    <Dialog isOpen={request !== null} onClose={onCancel} title={request?.title ?? ""}>
+      <form
+        className="luthor-table-dialog"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!request || incomplete) return;
+          onSubmit(Object.fromEntries(request.fields.map((field) => [field.name, trimmed(field.name)])));
+        }}
+      >
+        {request?.fields.map((field, index) => (
+          <div className="luthor-form-group" key={field.name}>
+            <label htmlFor={`${idPrefix}-${field.name}`}>{field.label}</label>
+            <input
+              id={`${idPrefix}-${field.name}`}
+              className="luthor-input"
+              type={field.type ?? "text"}
+              placeholder={field.placeholder}
+              value={values[field.name] ?? ""}
+              onChange={(event) => {
+                const next = event.target.value;
+                setValues((current) => ({ ...current, [field.name]: next }));
+              }}
+              autoFocus={index === 0}
+              required={field.required}
+            />
+          </div>
+        ))}
+        <div className="luthor-dialog-actions">
+          <Button variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit" disabled={incomplete}>
+            {request?.submitLabel ?? "Insert"}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
   );
 }

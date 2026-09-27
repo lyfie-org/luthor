@@ -53,9 +53,11 @@ import {
   registerKeyboardShortcuts,
   SourceView,
   Toolbar,
+  InputDialog,
   TRADITIONAL_TOOLBAR_LAYOUT,
   BLOCK_HEADING_LEVELS,
   type CoreEditorCommands,
+  type InputRequest,
   type BlockHeadingLevel,
   type ToolbarAlignment,
   type ToolbarStyleVars,
@@ -1179,9 +1181,29 @@ function ExtensiveEditorContent({
   const commandHeadingOptions = syncHeadingOptionsWithCommands ? resolvedHeadingOptions : undefined;
   const commandParagraphLabel = syncHeadingOptionsWithCommands ? paragraphLabel : undefined;
   const isInCodeBlock = activeStates.isInCodeBlock === true;
+  // One themed dialog for everything that has to ask the person for a value —
+  // toolbar, slash menu, command palette — handed to them as
+  // commands.requestInput, so nothing falls back to window.prompt.
+  const [pendingInput, setPendingInput] = useState<{
+    request: InputRequest;
+    resolve: (values: Record<string, string> | null) => void;
+  } | null>(null);
+  const requestInput = useCallback(
+    (request: InputRequest) =>
+      new Promise<Record<string, string> | null>((resolve) => {
+        setPendingInput((previous) => {
+          previous?.resolve(null);
+          return { request, resolve };
+        });
+      }),
+    [],
+  );
   const safeCommands = useMemo(
-    () => createFeatureGuardedCommands(commands as CoreEditorCommands, featureFlags, isInCodeBlock),
-    [commands, featureFlags, isInCodeBlock],
+    () => ({
+      ...createFeatureGuardedCommands(commands as CoreEditorCommands, featureFlags, isInCodeBlock),
+      requestInput,
+    }),
+    [commands, featureFlags, isInCodeBlock, requestInput],
   );
   const isFeatureEnabled = useMemo(
     () => (feature: string) => {
@@ -2273,7 +2295,7 @@ function ExtensiveEditorContent({
       icon: item.icon,
       input: item.input,
       items: item.items?.map(bind),
-      onSelect: item.action ? (value) => item.action?.(context, value) : undefined,
+      onSelect: item.action ? (value, values) => item.action?.(context, value, values) : undefined,
     });
     return toolbarCustomItems.map(bind);
   }, [toolbarCustomItems, commands, editor]);
@@ -2328,6 +2350,17 @@ function ExtensiveEditorContent({
         className={`luthor-editor${shouldHideDraggableAffordances ? " luthor-editor--draggable-disabled" : ""}`}
         data-mode={mode}
       >
+        <InputDialog
+          request={pendingInput?.request ?? null}
+          onCancel={() => {
+            pendingInput?.resolve(null);
+            setPendingInput(null);
+          }}
+          onSubmit={(values) => {
+            pendingInput?.resolve(values);
+            setPendingInput(null);
+          }}
+        />
         {(shouldRenderModeTabs || shouldRenderTopToolbar) && (
           <div className={topRegionClassName}>
             {shouldRenderModeTabs && (
@@ -2555,8 +2588,15 @@ export interface ExtensiveToolbarItem {
   icon: ReactNode;
   input?: ToolbarCustomItemInput;
   items?: readonly ExtensiveToolbarItem[];
-  /** Runs when chosen; receives the dialog value when `input` is set. */
-  action?: (context: ExtensiveToolbarItemContext, value?: string) => void | Promise<void>;
+  /**
+   * Runs when chosen. With `input`, receives the first field's value and every
+   * field's value by name (`value` for the first, then each `extraFields` name).
+   */
+  action?: (
+    context: ExtensiveToolbarItemContext,
+    value?: string,
+    values?: Record<string, string>,
+  ) => void | Promise<void>;
 }
 
 export interface ExtensiveEditorProps {

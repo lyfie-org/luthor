@@ -205,6 +205,38 @@ describe("programmatic entry point", () => {
     });
   });
 
+  it("insertLink with text at a bare caret writes a link carrying that text", async () => {
+    const { editor } = createTestEditor();
+    const extension = new LinkExtension();
+    extension.register(editor);
+    const commands = extension.getCommands(editor);
+    seedParagraphWithCaret(editor, "See ");
+
+    commands.insertLink("https://example.com", "the docs");
+    await flush();
+
+    expect(await collectLinkUrls(editor)).toEqual(["https://example.com"]);
+    editor.getEditorState().read(() => {
+      expect($getRoot().getTextContent()).toBe("See the docs");
+    });
+  });
+
+  it("insertLink with no text at a bare caret shows the address itself", async () => {
+    const { editor } = createTestEditor();
+    const extension = new LinkExtension();
+    extension.register(editor);
+    const commands = extension.getCommands(editor);
+    seedParagraphWithCaret(editor);
+
+    commands.insertLink("https://example.com");
+    await flush();
+
+    expect(await collectLinkUrls(editor)).toEqual(["https://example.com"]);
+    editor.getEditorState().read(() => {
+      expect($getRoot().getTextContent()).toBe("https://example.com");
+    });
+  });
+
   it("updateLinkByKey rejects hostile URLs and keeps the existing href", async () => {
     const { editor } = createTestEditor();
     const extension = new LinkExtension();

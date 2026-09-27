@@ -41,7 +41,31 @@ export interface InsertImageConfig {
   file?: File;
 }
 
+/** One field in an {@link InputRequest}. */
+export interface InputField {
+  name: string;
+  label: string;
+  placeholder?: string;
+  type?: "text" | "url";
+  /** Required fields must be filled before the dialog submits. */
+  required?: boolean;
+}
+
+/** Values a command asks the person for, in the editor's themed dialog. */
+export interface InputRequest {
+  title: string;
+  submitLabel?: string;
+  fields: readonly InputField[];
+}
+
 export interface CoreEditorCommands {
+  /**
+   * Ask the person for values in the editor's own themed dialog (image and
+   * embed links, a code language, …). Resolves with the trimmed values by field
+   * name, or `null` when they cancel. Supplied by the preset shell; when it is
+   * absent (a bare headless host) commands fall back to `window.prompt`.
+   */
+  requestInput?: (request: InputRequest) => Promise<Record<string, string> | null>;
   toggleBold: () => void;
   toggleItalic: () => void;
   toggleUnderline: () => void;
@@ -90,7 +114,8 @@ export interface CoreEditorCommands {
   }[];
   toggleSubscript?: () => void;
   toggleSuperscript?: () => void;
-  insertLink: () => void;
+  /** Link the selection, or with `url` + `text` insert a new link; with no `url` the extension asks for one. */
+  insertLink: (url?: string, text?: string) => void;
   updateLink?: (url: string, rel?: string, target?: string) => boolean;
   removeLink: () => void;
   getCurrentLink?: () => Promise<{
@@ -435,7 +460,10 @@ export type ToolbarItemType =
   | "redo"
   // Utilities
   | "commandPalette"
-  | "themeToggle";
+  | "themeToggle"
+  // One host item from the toolbar's `customItems`, by id — place a single
+  // custom control anywhere in the layout ("customComponent" places them all).
+  | `custom:${string}`;
 
 export type ToolbarVisibility = Partial<Record<ToolbarItemType, boolean>>;
 
@@ -465,6 +493,20 @@ export interface ToolbarCustomItemInput {
   submitLabel?: string;
   /** Input type. Defaults to `"text"`. */
   type?: "text" | "url";
+  /**
+   * More fields shown under the first — alt text under an image link, say.
+   * Their values reach `onSelect` in its second argument, by name.
+   */
+  extraFields?: readonly ToolbarCustomItemField[];
+}
+
+/** An extra field on a {@link ToolbarCustomItemInput} dialog. */
+export interface ToolbarCustomItemField {
+  name: string;
+  label: string;
+  placeholder?: string;
+  type?: "text" | "url";
+  required?: boolean;
 }
 
 /**
@@ -490,11 +532,27 @@ export interface ToolbarCustomItem {
    * Runs when the item is chosen. Receives the dialog value when `input` is
    * set. May be async; the toolbar does not await it.
    */
-  onSelect?: (value?: string) => void | Promise<void>;
+  onSelect?: (value?: string, values?: Record<string, string>) => void | Promise<void>;
+}
+
+/**
+ * Collapses a toolbar section behind one button: the section's items open in a
+ * small menu under it, which keeps a long toolbar short. The button shows as
+ * active while any item inside is (bold text under a "Text style" group, say).
+ */
+export interface ToolbarGroup {
+  /** Stable id (unique within the layout). */
+  id: string;
+  /** Accessible name and tooltip for the group's button. */
+  label: string;
+  /** The button's icon. Defaults to the first item's icon. */
+  icon?: ReactNode;
 }
 
 export type ToolbarSection = {
   items: readonly ToolbarItemType[];
+  /** Show the items behind one button instead of inline. */
+  group?: ToolbarGroup;
 };
 
 export type ToolbarLayout = {
