@@ -61,6 +61,7 @@ import {
   createPapyraThemeOverrides,
 } from "./theme";
 import { PAPYRA_TOOLBAR_LAYOUT, PAPYRA_TOOLBAR_VISIBILITY } from "./toolbar";
+import { createPapyraToolbarItems } from "./toolbarItems";
 
 /**
  * Modes Papyra ever exposes: the visual canvas and a raw markdown source view.
@@ -268,10 +269,13 @@ export type PapyraEditorProps = Omit<
    * **chrome-light** — its only toolbar is the floating-on-selection one (plus
    * slash `/` and the command palette), per the preset's minimal-chrome
    * contract. Set this to opt into an always-visible toolbar restricted to
-   * Papyra's markdown-safe actions (see {@link PAPYRA_TOOLBAR_LAYOUT}): history,
+   * Papyra's markdown-safe actions (see {@link PAPYRA_TOOLBAR_LAYOUT}):
    * headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,
-   * lists + checklist, code block, horizontal rule, table, and image. The
-   * restricted controls (typography pickers, color/highlight, sub/superscript,
+   * lists + checklist, code block, horizontal rule, table, and image — then
+   * Papyra's own inserts (link a note, mention someone, attach file, YouTube /
+   * web page embed, today's date; see {@link createPapyraToolbarItems}). The
+   * prop is live: toggling it shows or hides the toolbar without remounting the
+   * editor, so the caret and undo history survive. The restricted controls (typography pickers, color/highlight, sub/superscript,
    * alignment, theme toggle) can never appear — they stay pinned off by the
    * toolbar visibility contract and the enforced feature policy. The toolbar is
    * not pinned/sticky (the pinned toolbar stays enforced off) and only renders
@@ -506,6 +510,15 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       [resolvedAdapter],
     );
 
+    // The persistent toolbar's Papyra inserts. Mention and attach only appear
+    // when the host wired what they need — mirrors how buildPapyraEmbedExtensions
+    // registers the `@` typeahead and the upload pipeline.
+    const mentionEnabled = Boolean(adapter?.searchUsers) && !typeahead?.mention?.disabled;
+    const toolbarItems = useMemo(
+      () => createPapyraToolbarItems({ mention: mentionEnabled, attach: Boolean(adapter) }),
+      [mentionEnabled, adapter],
+    );
+
     // The typeahead dropdowns are host-driven: the headless `[[` and `@`
     // triggers own detection and insertion, the host owns the data. Both
     // providers are gated on a real adapter (never the no-op fallback) so a
@@ -621,6 +634,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               headingOptions={PAPYRA_HEADING_OPTIONS}
               slashCommandVisibility={PAPYRA_SLASH_COMMAND_VISIBILITY}
               extraSlashCommands={slashCommands}
+              toolbarCustomItems={toolbarItems}
               shortcutConfig={PAPYRA_SHORTCUT_CONFIG}
               markdownSourceOfTruth
               sourceMetadataMode="none"

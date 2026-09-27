@@ -215,6 +215,7 @@ export {
   fileDropUploadExtension,
   sanitizeEmbedTarget,
   type FileDropUploadConfig,
+  type FileDropUploadCommands,
 } from "./embeds";
 
 // Core extensions

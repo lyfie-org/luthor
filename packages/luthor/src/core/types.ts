@@ -5,6 +5,7 @@
  * Build freely. Credit kindly.
  */
 
+import type { ReactNode } from "react";
 import type { LuthorEditorThemeOverrides } from "@lyfie/luthor-headless";
 
 export type CoreTheme = "light" | "dark";
@@ -448,6 +449,49 @@ export type SlashCommandVisibilitySelection = Readonly<Record<string, boolean>>;
 export type SlashCommandVisibility =
   | SlashCommandVisibilityFilters
   | readonly SlashCommandVisibilitySelection[];
+
+/**
+ * A value the toolbar asks for before running a {@link ToolbarCustomItem} — a URL
+ * to embed, say. The toolbar collects it in its own themed dialog, so hosts never
+ * fall back to `window.prompt`.
+ */
+export interface ToolbarCustomItemInput {
+  /** Dialog heading, e.g. `"Embed YouTube video"`. */
+  title: string;
+  /** Field label, e.g. `"Video URL"`. */
+  label: string;
+  placeholder?: string;
+  /** Confirm button text. Defaults to `"Insert"`. */
+  submitLabel?: string;
+  /** Input type. Defaults to `"text"`. */
+  type?: "text" | "url";
+}
+
+/**
+ * A host-contributed toolbar control, rendered wherever a layout places the
+ * `"customComponent"` item. An item is one of:
+ *
+ * - a **button** — `onSelect` runs on click;
+ * - a **prompting button** — with `input`, the toolbar first collects a value in
+ *   its dialog and passes it to `onSelect`;
+ * - a **menu** — with `items`, the button opens a dropdown of those items
+ *   (one level deep; nested `items` are ignored).
+ */
+export interface ToolbarCustomItem {
+  /** Stable, unique id (e.g. `"papyra.link-note"`). */
+  id: string;
+  /** Accessible name and tooltip. */
+  label: string;
+  /** Icon shown on the button (and beside the label inside a menu). */
+  icon: ReactNode;
+  input?: ToolbarCustomItemInput;
+  items?: readonly ToolbarCustomItem[];
+  /**
+   * Runs when the item is chosen. Receives the dialog value when `input` is
+   * set. May be async; the toolbar does not await it.
+   */
+  onSelect?: (value?: string) => void | Promise<void>;
+}
 
 export type ToolbarSection = {
   items: readonly ToolbarItemType[];

@@ -75,6 +75,12 @@ export interface MentionTypeaheadConfig extends BaseExtensionConfig {
 export type MentionTypeaheadCommands = {
   selectMention: (username: string) => void;
   closeMentionMenu: () => void;
+  /**
+   * Type the `@` trigger at the caret so the menu opens — for a host's
+   * "mention someone" control. When the caret sits right after a word, a space
+   * goes in first: the trigger only fires on a word boundary.
+   */
+  startMention: () => void;
 };
 
 export type MentionTypeaheadStateQueries = {
@@ -217,7 +223,26 @@ export class MentionTypeaheadExtension extends BaseExtension<
     return {
       selectMention: (username: string) => this.selectMention(editor, username),
       closeMentionMenu: () => this.closeMenu(),
+      startMention: () => this.startMention(editor),
     };
+  }
+
+  private startMention(editor: LexicalEditor): void {
+    editor.update(() => {
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) {
+        return;
+      }
+      if (!selection.isCollapsed()) {
+        selection.removeText();
+      }
+      const anchor = selection.anchor;
+      const node = anchor.getNode();
+      const before = $isTextNode(node) ? node.getTextContent().slice(0, anchor.offset) : "";
+      const preceding = before.slice(-1);
+      const needsSpace = preceding.length > 0 && !BOUNDARY_PATTERN.test(preceding);
+      selection.insertText(needsSpace ? ` ${TRIGGER}` : TRIGGER);
+    });
   }
 
   getStateQueries(): MentionTypeaheadStateQueries {

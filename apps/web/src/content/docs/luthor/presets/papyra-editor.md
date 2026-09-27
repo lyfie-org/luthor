@@ -121,10 +121,17 @@ round-trip back to that file.
   `"default"` is the standard editorial measure.
 - `toolbar`: opt into a persistent toolbar above the editor (default `false` —
   floating-on-selection only). It lists just Papyra's markdown-safe actions
-  (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,
+  (headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,
   lists + checklist, code block, horizontal rule, table, image); the restricted
   controls (typography pickers, color/highlight, sub/superscript, alignment, theme
-  toggle) can never appear, and the toolbar is never pinned. Only renders in the
+  toggle) can never appear, and the toolbar is never pinned. After the built-ins
+  come Papyra's own inserts: **Link a note** (types `[[`), **Mention someone**
+  (types `@`, adding a space first after a word — only when the adapter has
+  `searchUsers`), **Attach file** (uploads through the adapter and embeds
+  `![[name]]` — only with an adapter), **Embed** (a menu: YouTube video or web
+  page, each asking for the link in a themed dialog) and **Insert today's date**.
+  The prop is live — toggling it shows or hides the toolbar without remounting
+  the editor, so the caret and undo history survive. Only renders in the
   editable visual surface, so `readOnly`/`locked` never show it.
 - `locked`: withholds the body entirely — renders a blurred placeholder and
   **never mounts the editor**, so there is no plaintext in the DOM. The lock is

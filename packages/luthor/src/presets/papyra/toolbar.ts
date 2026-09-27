@@ -59,10 +59,11 @@ export const PAPYRA_TOOLBAR_VISIBILITY: ToolbarVisibility = Object.freeze(
  * The persistent-toolbar layout PapyraEditor uses when the opt-in
  * {@link PapyraEditorProps.toolbar | `toolbar`} prop is set.
  *
- * It lists only Papyra's markdown-safe actions: history, block format
+ * It lists only Papyra's markdown-safe actions: block format
  * (paragraph/headings) + quote, the inline marks Papyra keeps (bold, italic,
  * strikethrough, inline code, link), lists + checklist with indent controls,
- * and the block inserts (code block, horizontal rule, table, image). The
+ * and the block inserts (code block, horizontal rule, table, image). Undo and
+ * redo are left to Ctrl/Cmd+Z and Ctrl/Cmd+Y, as in any text field. The
  * typography pickers, text color/highlight, sub/superscript, alignment (no
  * lossless markdown form), the rich-embed inserter, and the theme toggle are
  * intentionally absent — they are also pinned off by
@@ -71,10 +72,12 @@ export const PAPYRA_TOOLBAR_VISIBILITY: ToolbarVisibility = Object.freeze(
  */
 export const PAPYRA_TOOLBAR_LAYOUT: ToolbarLayout = {
   sections: [
-    { items: ["undo", "redo"] },
     { items: ["blockFormat", "quote"] },
     { items: ["bold", "italic", "strikethrough", "code", "link"] },
     { items: ["unorderedList", "orderedList", "checkList", "indentList", "outdentList"] },
     { items: ["codeBlock", "horizontalRule", "table", "image"] },
+    // Papyra's own inserts (link a note, mention, attach, embed, date) — see
+    // createPapyraToolbarItems.
+    { items: ["customComponent"] },
   ],
 };

@@ -5,7 +5,7 @@
  * Build freely. Credit kindly.
  */
 
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   clearLexicalSelection,
   createEditorSystem,
@@ -68,6 +68,8 @@ import {
   type ToolbarLayout,
   type ToolbarVisibility,
   type ToolbarPosition,
+  type ToolbarCustomItem,
+  type ToolbarCustomItemInput,
   type SlashCommandVisibility,
   type KeyboardShortcut,
   type MentionSuggestionItem,
@@ -1059,6 +1061,7 @@ function ExtensiveEditorContent({
   syncHeadingOptionsWithCommands,
   slashCommandVisibility,
   extraSlashCommands,
+  toolbarCustomItems,
   shortcutConfig,
   commandPaletteShortcutOnly,
   isListStyleDropdownEnabled,
@@ -1103,6 +1106,7 @@ function ExtensiveEditorContent({
   syncHeadingOptionsWithCommands: boolean;
   slashCommandVisibility?: SlashCommandVisibility;
   extraSlashCommands?: readonly ExtensiveSlashCommand[];
+  toolbarCustomItems?: readonly ExtensiveToolbarItem[];
   shortcutConfig?: CommandShortcutConfig;
   commandPaletteShortcutOnly: boolean;
   isListStyleDropdownEnabled: boolean;
@@ -2241,6 +2245,39 @@ function ExtensiveEditorContent({
     };
   }, [editor, mode]);
 
+  // Host toolbar items, bound to a small editor surface. Built on the raw
+  // command map (not the feature-guarded one): the host curates these items, as
+  // it does its slash commands, so a preset can offer an insert (say, a YouTube
+  // embed) without switching on the matching built-in feature and its UI.
+  const boundToolbarCustomItems = useMemo<readonly ToolbarCustomItem[] | undefined>(() => {
+    if (!toolbarCustomItems || toolbarCustomItems.length === 0) {
+      return undefined;
+    }
+    const commandMap = commands as unknown as Record<string, unknown>;
+    const context: ExtensiveToolbarItemContext = {
+      insertText: (text) => (commands as CoreEditorCommands).insertText?.(text),
+      hasCommand: (name) => typeof commandMap[name] === "function",
+      runCommand: (name, ...args) => {
+        const command = commandMap[name];
+        if (typeof command !== "function") {
+          return undefined;
+        }
+        // Put the caret back first: a dialog or menu may have taken focus.
+        editor?.focus();
+        return (command as (...commandArgs: unknown[]) => unknown)(...args);
+      },
+    };
+    const bind = (item: ExtensiveToolbarItem): ToolbarCustomItem => ({
+      id: item.id,
+      label: item.label,
+      icon: item.icon,
+      input: item.input,
+      items: item.items?.map(bind),
+      onSelect: item.action ? (value) => item.action?.(context, value) : undefined,
+    });
+    return toolbarCustomItems.map(bind);
+  }, [toolbarCustomItems, commands, editor]);
+
   const toolbarNode = isToolbarEnabled ? (
     <Toolbar
       commands={safeCommands}
@@ -2261,6 +2298,7 @@ function ExtensiveEditorContent({
       headingOptions={resolvedHeadingOptions}
       paragraphLabel={paragraphLabel}
       isListStyleDropdownEnabled={isListStyleDropdownEnabled}
+      customItems={boundToolbarCustomItems}
       classNames={{
         toolbar: `luthor-toolbar luthor-toolbar--align-${toolbarAlignment}${toolbarClassName ? ` ${toolbarClassName}` : ""}`,
       }}
@@ -2486,6 +2524,41 @@ export interface ExtensiveSlashCommand {
   action: (context: ExtensiveSlashCommandContext) => void | Promise<void>;
 }
 
+/**
+ * The editor surface handed to a host toolbar item's `action`. Adds to the
+ * slash-command surface a way to run any registered extension command by name
+ * (`insertYouTubeEmbed`, `uploadAndEmbedFile`, …), so an item can insert a real
+ * node rather than markdown text.
+ */
+export interface ExtensiveToolbarItemContext extends ExtensiveSlashCommandContext {
+  /** Whether a registered extension provides the command `name`. */
+  hasCommand: (name: string) => boolean;
+  /**
+   * Refocus the editor (restoring its selection) and run the command `name`
+   * with `args`, returning its result — `undefined` when no extension provides
+   * it.
+   */
+  runCommand: (name: string, ...args: unknown[]) => unknown;
+}
+
+/**
+ * A host-contributed control on the persistent toolbar, rendered where the
+ * layout places the `"customComponent"` item. Give it `input` to have the
+ * toolbar collect a value (a URL, say) in its themed dialog first, or `items`
+ * to make it a dropdown menu.
+ */
+export interface ExtensiveToolbarItem {
+  /** Stable, unique id (e.g. `"papyra.embed"`). */
+  id: string;
+  /** Accessible name and tooltip. */
+  label: string;
+  icon: ReactNode;
+  input?: ToolbarCustomItemInput;
+  items?: readonly ExtensiveToolbarItem[];
+  /** Runs when chosen; receives the dialog value when `input` is set. */
+  action?: (context: ExtensiveToolbarItemContext, value?: string) => void | Promise<void>;
+}
+
 export interface ExtensiveEditorProps {
   className?: string;
   /**
@@ -2574,6 +2647,12 @@ export interface ExtensiveEditorProps {
    * {@link ExtensiveSlashCommand}.
    */
   extraSlashCommands?: readonly ExtensiveSlashCommand[];
+  /**
+   * Host controls for the persistent toolbar, rendered wherever
+   * {@link toolbarLayout} places the `"customComponent"` item. Memoize the
+   * array. See {@link ExtensiveToolbarItem}.
+   */
+  toolbarCustomItems?: readonly ExtensiveToolbarItem[];
   shortcutConfig?: CommandShortcutConfig;
   commandPaletteShortcutOnly?: boolean;
   isListStyleDropdownEnabled?: boolean;
@@ -2708,6 +2787,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     syncHeadingOptionsWithCommands = true,
     slashCommandVisibility,
     extraSlashCommands,
+    toolbarCustomItems,
     shortcutConfig,
     commandPaletteShortcutOnly = false,
     isListStyleDropdownEnabled = true,
@@ -3059,6 +3139,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             syncHeadingOptionsWithCommands={syncHeadingOptionsWithCommands}
             slashCommandVisibility={slashCommandVisibility}
             extraSlashCommands={extraSlashCommands}
+            toolbarCustomItems={toolbarCustomItems}
             shortcutConfig={shortcutConfig}
             commandPaletteShortcutOnly={commandPaletteShortcutOnly}
             isListStyleDropdownEnabled={isListStyleDropdownEnabled}

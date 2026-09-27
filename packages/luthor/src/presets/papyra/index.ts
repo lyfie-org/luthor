@@ -32,6 +32,10 @@ export {
   PAPYRA_TOOLBAR_VISIBILITY,
 } from "./toolbar";
 export {
+  createPapyraToolbarItems,
+  type PapyraToolbarItemOptions,
+} from "./toolbarItems";
+export {
   PAPYRA_THEME_TOKEN_NAMES,
   PAPYRA_THEME_OVERRIDES,
   PAPYRA_COLORED_VARIANT_CLASS,

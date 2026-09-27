@@ -203,6 +203,7 @@ Use this page for exact prop names and discovery tokens.
 - `syncHeadingOptionsWithCommands`
 - `slashCommandVisibility`
 - `extraSlashCommands`
+- `toolbarCustomItems`
 - `shortcutConfig`
 - `commandPaletteShortcutOnly`
 - `isListStyleDropdownEnabled`

@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-08-13T10:11:10.523Z
+Generated at: 2026-09-27T05:29:49.156Z
 
 ## AI Agent Workflow
 
@@ -2774,6 +2774,44 @@ The `papyra` preset uses this seam internally to contribute its note-taking
 commands — "Link note" (drops the `[[` wikilink trigger), "Embed media"
 (uploads through the adapter, inserts `![[name]]`), and "Insert date".
 
+## Host-contributed toolbar items
+
+The persistent toolbar takes host controls too. Put the `"customComponent"` item
+in your `toolbarLayout` where they should appear, and pass `toolbarCustomItems`
+to `<ExtensiveEditor>`. Each `ExtensiveToolbarItem` is one of:
+
+- a **button** — `action` runs on click;
+- a **prompting button** — with `input` (`title`, `label`, `placeholder`,
+  `submitLabel`, `type`), the toolbar first asks for a value in its own themed
+  dialog and passes it to `action` as the second argument;
+- a **menu** — with `items`, the button opens a dropdown of those items.
+
+`action` receives an `ExtensiveToolbarItemContext`: `insertText` (as for slash
+commands), plus `hasCommand(name)` and `runCommand(name, ...args)`, which
+refocuses the editor and runs any registered extension command — so an item can
+insert a real node (`insertYouTubeEmbed`, `uploadAndEmbedFile`, …) instead of
+markdown text. Items run on the raw command map: the host curates them, so an
+item can offer an insert whose built-in feature (and UI) stays switched off.
+
+```tsx
+<ExtensiveEditor
+  toolbarLayout={{ sections: [{ items: ["bold", "italic"] }, { items: ["customComponent"] }] }}
+  toolbarCustomItems={[
+    {
+      id: "app.embed-video",
+      label: "Embed a video",
+      icon: <VideoIcon size={16} />,
+      input: { title: "Embed a YouTube video", label: "Video link", type: "url" },
+      action: ({ runCommand }, url) => {
+        if (url) runCommand("insertYouTubeEmbed", url);
+      },
+    },
+  ]}
+/>
+```
+
+> Memoize the array. Nothing renders at `"customComponent"` when it is empty.
+
 ---
 ## FILE: luthor/feature-flags.md
 ## URL: https://www.luthor.fyi/docs/luthor/feature-flags/
@@ -3478,7 +3516,14 @@ round-trip back to that file.
   (history, headings/paragraph, quote, bold/italic/strikethrough/inline-code/link,
   lists + checklist, code block, horizontal rule, table, image); the restricted
   controls (typography pickers, color/highlight, sub/superscript, alignment, theme
-  toggle) can never appear, and the toolbar is never pinned. Only renders in the
+  toggle) can never appear, and the toolbar is never pinned. After the built-ins
+  come Papyra's own inserts: **Link a note** (types `[[`), **Mention someone**
+  (types `@`, adding a space first after a word — only when the adapter has
+  `searchUsers`), **Attach file** (uploads through the adapter and embeds
+  `![[name]]` — only with an adapter), **Embed** (a menu: YouTube video or web
+  page, each asking for the link in a themed dialog) and **Insert today's date**.
+  The prop is live — toggling it shows or hides the toolbar without remounting
+  the editor, so the caret and undo history survive. Only renders in the
   editable visual surface, so `readOnly`/`locked` never show it.
 - `locked`: withholds the body entirely — renders a blurred placeholder and
   **never mounts the editor**, so there is no plaintext in the DOM. The lock is
@@ -4019,6 +4064,7 @@ Use this page for exact prop names and discovery tokens.
 - `syncHeadingOptionsWithCommands`
 - `slashCommandVisibility`
 - `extraSlashCommands`
+- `toolbarCustomItems`
 - `shortcutConfig`
 - `commandPaletteShortcutOnly`
 - `isListStyleDropdownEnabled`

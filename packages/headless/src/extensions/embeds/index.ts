@@ -100,4 +100,5 @@ export {
   fileDropUploadExtension,
   sanitizeEmbedTarget,
   type FileDropUploadConfig,
+  type FileDropUploadCommands,
 } from "./FileDropUploadExtension";

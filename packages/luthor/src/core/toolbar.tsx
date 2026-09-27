@@ -59,7 +59,7 @@ import {
 import { Button, Dialog, Dropdown, IconButton, Select } from "./ui";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
 import { computeAnchoredOverlayStyle, resolveEditorPortalContainer } from "./overlay-position";
-import { BLOCK_HEADING_LEVELS, type BlockHeadingLevel, type CoreEditorActiveStates, type CoreEditorCommands, type CoreToolbarClassNames, type InsertTableConfig, type ImageAlignment, type ToolbarLayout, type ToolbarItemType, type ToolbarStyleVars, type ToolbarVisibility } from "./types";
+import { BLOCK_HEADING_LEVELS, type BlockHeadingLevel, type CoreEditorActiveStates, type CoreEditorCommands, type CoreToolbarClassNames, type InsertTableConfig, type ImageAlignment, type ToolbarCustomItem, type ToolbarLayout, type ToolbarItemType, type ToolbarStyleVars, type ToolbarVisibility } from "./types";
 import { TRADITIONAL_TOOLBAR_LAYOUT } from "./types";
 
 type SelectOption = {
@@ -980,6 +980,11 @@ export interface ToolbarProps {
   headingOptions?: readonly BlockHeadingLevel[];
   paragraphLabel?: string;
   isListStyleDropdownEnabled?: boolean;
+  /**
+   * Host controls rendered at the layout's `"customComponent"` item. Nothing
+   * renders there when this is empty.
+   */
+  customItems?: readonly ToolbarCustomItem[];
 }
 
 export function Toolbar({
@@ -998,6 +1003,7 @@ export function Toolbar({
   headingOptions,
   paragraphLabel,
   isListStyleDropdownEnabled = true,
+  customItems,
 }: ToolbarProps) {
   const { handlers, fileInputRef, gifInputRef } = useImageHandlers(
     commands,
@@ -1017,6 +1023,9 @@ export function Toolbar({
   const [showOrderedListDropdown, setShowOrderedListDropdown] = useState(false);
   const [showCheckListDropdown, setShowCheckListDropdown] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
+  const [openCustomMenu, setOpenCustomMenu] = useState<string | null>(null);
+  const [customInputItem, setCustomInputItem] = useState<ToolbarCustomItem | null>(null);
+  const [customInputValue, setCustomInputValue] = useState("");
   const [fontFamilyValue, setFontFamilyValue] = useState("default");
   const [fontFamilyOptions, setFontFamilyOptions] = useState<SelectOption[]>([
     { value: "default", label: DEFAULT_FONT_FAMILY_FALLBACK_LABEL },
@@ -1491,7 +1500,62 @@ export function Toolbar({
     commands.toggleCheckList();
   };
 
-  const renderToolbarItem = (itemType: ToolbarItemType): ReactElement | null => {
+  const selectCustomItem = (item: ToolbarCustomItem) => {
+    setOpenCustomMenu(null);
+    if (item.input) {
+      setCustomInputValue("");
+      setCustomInputItem(item);
+      return;
+    }
+    void item.onSelect?.();
+  };
+
+  const closeCustomInput = () => setCustomInputItem(null);
+
+  const submitCustomInput = () => {
+    const item = customInputItem;
+    const value = customInputValue.trim();
+    if (!item || !value) return;
+    setCustomInputItem(null);
+    void item.onSelect?.(value);
+  };
+
+  const renderCustomItem = (item: ToolbarCustomItem): ReactElement => {
+    if (item.items && item.items.length > 0) {
+      return (
+        <Dropdown
+          key={item.id}
+          trigger={
+            <button type="button" className="luthor-toolbar-button" title={item.label} aria-label={item.label}>
+              {item.icon}
+            </button>
+          }
+          isOpen={openCustomMenu === item.id}
+          onOpenChange={(open) => setOpenCustomMenu(open ? item.id : null)}
+        >
+          {item.items.map((child) => (
+            <button
+              key={child.id}
+              type="button"
+              className="luthor-dropdown-item"
+              onClick={() => selectCustomItem(child)}
+            >
+              {child.icon}
+              <span>{child.label}</span>
+            </button>
+          ))}
+        </Dropdown>
+      );
+    }
+
+    return (
+      <IconButton key={item.id} onClick={() => selectCustomItem(item)} title={item.label}>
+        {item.icon}
+      </IconButton>
+    );
+  };
+
+  const renderToolbarItem = (itemType: ToolbarItemType): ReactElement | ReactElement[] | null => {
     switch (itemType) {
       case "fontFamily":
         if (!hasExtension("fontFamily")) return null;
@@ -2036,6 +2100,10 @@ export function Toolbar({
           </IconButton>
         );
 
+      case "customComponent":
+        if (!customItems || customItems.length === 0) return null;
+        return customItems.map(renderCustomItem);
+
       default:
         return null;
     }
@@ -2146,6 +2214,37 @@ export function Toolbar({
             </Button>
           </div>
         </div>
+      </Dialog>
+
+      <Dialog isOpen={customInputItem !== null} onClose={closeCustomInput} title={customInputItem?.input?.title ?? ""}>
+        <form
+          className="luthor-table-dialog"
+          onSubmit={(event) => {
+            event.preventDefault();
+            submitCustomInput();
+          }}
+        >
+          <div className="luthor-form-group">
+            <label htmlFor="luthor-custom-item-input">{customInputItem?.input?.label}</label>
+            <input
+              id="luthor-custom-item-input"
+              className="luthor-input"
+              type={customInputItem?.input?.type ?? "text"}
+              placeholder={customInputItem?.input?.placeholder}
+              value={customInputValue}
+              onChange={(event) => setCustomInputValue(event.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="luthor-dialog-actions">
+            <Button variant="secondary" onClick={closeCustomInput}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit" disabled={customInputValue.trim().length === 0}>
+              {customInputItem?.input?.submitLabel ?? "Insert"}
+            </Button>
+          </div>
+        </form>
       </Dialog>
     </>
   );

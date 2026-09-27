@@ -342,3 +342,54 @@ export const CloseIcon = createIcon("CloseIcon", (
   <path d="m6 6 12 12" />
 </>
 ));
+
+export const BracketsIcon = createIcon("BracketsIcon", (
+<>
+  <path d="M16 3h3v18h-3" />
+  <path d="M8 21H5V3h3" />
+</>
+));
+
+export const AtSignIcon = createIcon("AtSignIcon", (
+<>
+  <circle cx="12" cy="12" r="4" />
+  <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+</>
+));
+
+export const PaperclipIcon = createIcon("PaperclipIcon", (
+  <path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" />
+));
+
+export const CalendarIcon = createIcon("CalendarIcon", (
+<>
+  <path d="M8 2v4" />
+  <path d="M16 2v4" />
+  <rect width="18" height="18" x="3" y="4" rx="2" />
+  <path d="M3 10h18" />
+</>
+));
+
+export const AppWindowIcon = createIcon("AppWindowIcon", (
+<>
+  <rect x="2" y="4" width="20" height="16" rx="2" />
+  <path d="M10 4v4" />
+  <path d="M2 8h20" />
+  <path d="M6 4v4" />
+</>
+));
+
+export const PlaySquareIcon = createIcon("PlaySquareIcon", (
+<>
+  <rect width="18" height="18" x="3" y="3" rx="2" />
+  <path d="m9 8 6 4-6 4Z" />
+</>
+));
+
+export const GlobeIcon = createIcon("GlobeIcon", (
+<>
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+  <path d="M2 12h20" />
+</>
+));

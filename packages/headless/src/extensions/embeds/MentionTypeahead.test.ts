@@ -634,3 +634,40 @@ describe("sanitizeMentionUsername", () => {
     expect(sanitizeMentionUsername("a".repeat(80))).toHaveLength(64);
   });
 });
+
+describe("startMention", () => {
+  function startMention(editor: LexicalEditor, extension: MentionTypeaheadExtension): void {
+    extension.getCommands(editor).startMention();
+    flush(editor);
+  }
+
+  it("types a bare @ at the start of a block and opens the menu", () => {
+    const { editor, extension, state } = createHarness();
+
+    typeParagraph(editor, "");
+    startMention(editor, extension);
+
+    expect(paragraphText(editor)).toBe("@");
+    expect(state().isOpen).toBe(true);
+  });
+
+  it("types a bare @ after whitespace", () => {
+    const { editor, extension, state } = createHarness();
+
+    typeParagraph(editor, "ping ");
+    startMention(editor, extension);
+
+    expect(paragraphText(editor)).toBe("ping @");
+    expect(state().isOpen).toBe(true);
+  });
+
+  it("puts a space before the @ when the caret follows a word", () => {
+    const { editor, extension, state } = createHarness();
+
+    typeParagraph(editor, "ping");
+    startMention(editor, extension);
+
+    expect(paragraphText(editor)).toBe("ping @");
+    expect(state().isOpen).toBe(true);
+  });
+});

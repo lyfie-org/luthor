@@ -21,6 +21,8 @@ export type {
   ExtensiveEditorMode,
   ExtensiveSlashCommand,
   ExtensiveSlashCommandContext,
+  ExtensiveToolbarItem,
+  ExtensiveToolbarItemContext,
   ImageUploadHandler,
   GifUploadHandler,
   MentionSuggestionProvider,

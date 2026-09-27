@@ -184,4 +184,42 @@ The `papyra` preset uses this seam internally to contribute its note-taking
 commands — "Link note" (drops the `[[` wikilink trigger), "Embed media"
 (uploads through the adapter, inserts `![[name]]`), and "Insert date".
 
+## Host-contributed toolbar items
+
+The persistent toolbar takes host controls too. Put the `"customComponent"` item
+in your `toolbarLayout` where they should appear, and pass `toolbarCustomItems`
+to `<ExtensiveEditor>`. Each `ExtensiveToolbarItem` is one of:
+
+- a **button** — `action` runs on click;
+- a **prompting button** — with `input` (`title`, `label`, `placeholder`,
+  `submitLabel`, `type`), the toolbar first asks for a value in its own themed
+  dialog and passes it to `action` as the second argument;
+- a **menu** — with `items`, the button opens a dropdown of those items.
+
+`action` receives an `ExtensiveToolbarItemContext`: `insertText` (as for slash
+commands), plus `hasCommand(name)` and `runCommand(name, ...args)`, which
+refocuses the editor and runs any registered extension command — so an item can
+insert a real node (`insertYouTubeEmbed`, `uploadAndEmbedFile`, …) instead of
+markdown text. Items run on the raw command map: the host curates them, so an
+item can offer an insert whose built-in feature (and UI) stays switched off.
+
+```tsx
+<ExtensiveEditor
+  toolbarLayout={{ sections: [{ items: ["bold", "italic"] }, { items: ["customComponent"] }] }}
+  toolbarCustomItems={[
+    {
+      id: "app.embed-video",
+      label: "Embed a video",
+      icon: <VideoIcon size={16} />,
+      input: { title: "Embed a YouTube video", label: "Video link", type: "url" },
+      action: ({ runCommand }, url) => {
+        if (url) runCommand("insertYouTubeEmbed", url);
+      },
+    },
+  ]}
+/>
+```
+
+> Memoize the array. Nothing renders at `"customComponent"` when it is empty.
+
 
