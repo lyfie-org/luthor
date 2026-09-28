@@ -21,6 +21,8 @@ import {
   markdownToJSON,
 } from "@lyfie/luthor-headless";
 import type { EmbedResolvers } from "@lyfie/luthor-headless";
+// Type-only: the preset never loads the Yjs stack unless the host passes one.
+import type { CollaborationExtension } from "@lyfie/luthor-headless/collab";
 import type { ToolbarLayout } from "../../core";
 import type {
   ExtensiveEditorProps,
@@ -79,6 +81,26 @@ export const PAPYRA_AVAILABLE_MODES = ["visual", "markdown"] as const;
  * what makes `readOnly` safe for time-machine scrubbing and revision previews.
  */
 export const PAPYRA_READONLY_MODES = ["visual-only", "markdown"] as const;
+
+/**
+ * Modes used while {@link PapyraEditorProps.collaboration | collaboration} is
+ * set. The markdown source view is withheld: it round-trips the whole document
+ * through a full replace, which would discard concurrent peer edits.
+ */
+export const PAPYRA_COLLAB_MODES = ["visual"] as const;
+export const PAPYRA_COLLAB_READONLY_MODES = ["visual-only"] as const;
+
+/**
+ * Live multi-user editing for {@link PapyraEditorProps.collaboration}: a
+ * `CollaborationExtension` from `@lyfie/luthor-headless/collab`. The shared Yjs
+ * document is the body: `defaultContent` is ignored, `setMarkdown` /
+ * `injectJSON` throw, block anchors are never stamped client-side (the server
+ * that persists the doc owns them), and undo only reverts this user's edits.
+ */
+export type PapyraCollaboration = CollaborationExtension;
+
+const COLLAB_ADOPT_ERROR =
+  "PapyraEditor: the body is owned by the collaboration document; setMarkdown/injectJSON are disabled while `collaboration` is set.";
 
 /** Marker class the wrapper carries for the wide-measure focus variant. */
 export const PAPYRA_FOCUS_VARIANT_CLASS = "luthor-preset-papyra--focus";
@@ -352,6 +374,15 @@ export type PapyraEditorProps = Omit<
    * search, no menu, regardless of this config.
    */
   typeahead?: PapyraTypeaheadConfig;
+  /**
+   * Bind the editor to a shared Yjs document for live multi-cursor editing —
+   * pass a `new CollaborationExtension({...})` from
+   * `@lyfie/luthor-headless/collab`, memoized per room (a new instance, or a
+   * different room, needs a remount via a new React `key`). See
+   * {@link PapyraCollaboration}. Omit for the classic uncontrolled,
+   * autosave-driven editor.
+   */
+  collaboration?: PapyraCollaboration;
 };
 
 function focusEditableWithin(host: HTMLElement | null): void {
@@ -395,6 +426,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       blockAnchors = "off",
       adapter,
       typeahead,
+      collaboration,
       onReady,
       onOutlineChange,
       ...props
@@ -404,15 +436,26 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     const innerRef = useRef<ExtensiveEditorRef | null>(null);
     const hostRef = useRef<HTMLDivElement | null>(null);
     const [isReady, setIsReady] = useState(false);
+    const isCollaborative = collaboration !== undefined;
+    const isCollaborativeRef = useRef(isCollaborative);
+    isCollaborativeRef.current = isCollaborative;
 
     const handle = useMemo<PapyraEditorRef>(
       () => ({
-        injectJSON: (content) => innerRef.current?.injectJSON(content),
+        injectJSON: (content) => {
+          if (isCollaborativeRef.current) {
+            throw new Error(COLLAB_ADOPT_ERROR);
+          }
+          innerRef.current?.injectJSON(content);
+        },
         getLexicalEditor: () => innerRef.current?.getLexicalEditor() ?? null,
         getJSON: () => innerRef.current?.getJSON() ?? "",
         getHTML: () => innerRef.current?.getHTML() ?? "",
         getMarkdown: () => innerRef.current?.getMarkdown() ?? "",
         setMarkdown: (markdown) => {
+          if (isCollaborativeRef.current) {
+            throw new Error(COLLAB_ADOPT_ERROR);
+          }
           const document = markdownToJSON(markdown, {
             metadataMode: "none",
             extraNodes: PAPYRA_EMBED_NODES,
@@ -428,7 +471,9 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
         getBlocks: () => extractBlockAnchors(innerRef.current?.getMarkdown() ?? ""),
         ensureBlockAnchors: () => {
           const editor = innerRef.current?.getLexicalEditor();
-          if (editor) {
+          // Collaborative docs are stamped by their single persisting authority;
+          // concurrent client stamping would give one block several ids.
+          if (editor && !isCollaborativeRef.current) {
             ensureBlockAnchors(editor);
           }
           return innerRef.current?.getMarkdown() ?? "";
@@ -569,15 +614,17 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     // Build extra extensions including the upload pipeline (adapter-dependent),
     // the host-tuned typeahead triggers, and — in `blockAnchors: "auto"` — the
     // auto-stamping anchor extension.
-    const autoStampBlockAnchors = blockAnchors === "auto";
-    const embedExtensions = useMemo(
-      () =>
-        buildPapyraEmbedExtensions(adapter, {
-          autoStampBlockAnchors,
-          typeahead,
-        }),
-      [adapter, autoStampBlockAnchors, typeahead],
-    );
+    const autoStampBlockAnchors = blockAnchors === "auto" && !isCollaborative;
+    const collaborationExtension = collaboration;
+    const embedExtensions = useMemo(() => {
+      const extensions = buildPapyraEmbedExtensions(adapter, {
+        autoStampBlockAnchors,
+        typeahead,
+      });
+      return collaborationExtension
+        ? [...extensions, collaborationExtension]
+        : extensions;
+    }, [adapter, autoStampBlockAnchors, typeahead, collaborationExtension]);
 
     // The preset class set is shared by the live editor and the locked
     // placeholder so theming (and the colored light-lock) applies to both.
@@ -617,11 +664,17 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     // These land after `{...props}` so they override any caller-supplied mode.
     const readStateProps = readOnly
       ? {
-          availableModes: PAPYRA_READONLY_MODES,
+          availableModes: isCollaborative
+            ? PAPYRA_COLLAB_READONLY_MODES
+            : PAPYRA_READONLY_MODES,
           defaultEditorView: "visual-only" as const,
           editOnClick: false,
         }
-      : { availableModes: PAPYRA_AVAILABLE_MODES };
+      : {
+          availableModes: isCollaborative
+            ? PAPYRA_COLLAB_MODES
+            : PAPYRA_AVAILABLE_MODES,
+        };
 
     return (
       <div ref={hostRef} style={{ display: "contents" }}>

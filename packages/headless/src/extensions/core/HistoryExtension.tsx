@@ -71,12 +71,19 @@ export class HistoryExtension extends BaseExtension<
 > {
   private canUndoState: boolean = false;
   private canRedoState: boolean = false;
+  private readonly mountPlugin: boolean;
 
   /**
    * Creates a new history extension.
+   *
+   * @param options.plugin - Mount Lexical's `HistoryPlugin` (default `true`).
+   *   Pass `false` when another undo manager owns history — e.g. the Yjs
+   *   UndoManager under collaboration. Commands and `canUndo`/`canRedo`
+   *   keep working because that manager dispatches the same commands.
    */
-  constructor() {
+  constructor(options: { plugin?: boolean } = {}) {
     super("history", [ExtensionCategory.Toolbar]);
+    this.mountPlugin = options.plugin !== false;
   }
 
   /**
@@ -117,7 +124,7 @@ export class HistoryExtension extends BaseExtension<
    * @returns Array containing the HistoryPlugin component
    */
   getPlugins(): ReactNode[] {
-    return [<HistoryPlugin key="history-plugin" />];
+    return this.mountPlugin ? [<HistoryPlugin key="history-plugin" />] : [];
   }
 
   /**

@@ -9,6 +9,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  $createParagraphNode,
   $createTextNode,
   $getRoot,
   $getSelection,
@@ -16,6 +17,7 @@ import {
   $isRangeSelection,
   $isTextNode,
   createEditor,
+  COLLABORATION_TAG,
   INSERT_PARAGRAPH_COMMAND,
   SELECTION_CHANGE_COMMAND,
   type LexicalEditor,
@@ -30,10 +32,12 @@ import {
 import { HeadingNode, QuoteNode, registerRichText } from "@lexical/rich-text";
 import { jsonToMarkdown, markdownToJSON } from "../../core/markdown";
 import {
+  $createBlockAnchorNode,
   $isBlockAnchorNode,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
   BlockAnchorNode,
   ensureBlockAnchors,
+  registerBlockAnchorAutoStamp,
   registerBlockAnchorTrailingGuard,
   CALLOUT_MARKDOWN_TRANSFORMER,
   CalloutNode,
@@ -876,5 +880,49 @@ describe("papyra embed transformers — property/fuzz round-trip", () => {
     const once = roundTrip("Heading\n\n[[Note]] body ^anchor1");
     expect(once.startsWith("---")).toBe(false);
     expect(once).not.toMatch(/^---\n[\s\S]*\n---/);
+  });
+});
+
+describe("block anchors under concurrent editors", () => {
+  it("collapses several anchors on one block to the lowest id", () => {
+    // Two replicas each stamped the same block; after merging, every replica
+    // must converge on the same single anchor without coordination.
+    const editor = createStampEditor("Shared paragraph");
+    editor.update(
+      () => {
+        const block = $getRoot().getFirstChild();
+        if ($isElementNode(block)) {
+          block.append($createBlockAnchorNode("zeta9999"));
+          block.append($createBlockAnchorNode("alpha111"));
+        }
+      },
+      { discrete: true },
+    );
+
+    ensureBlockAnchors(editor);
+
+    expect(editorMarkdown(editor)).toBe("Shared paragraph ^alpha111");
+  });
+
+  it("does not auto-stamp updates applied from a collaboration peer", () => {
+    const editor = createStampEditor("Existing ^keep0001");
+    let nextId = 0;
+    const unregister = registerBlockAnchorAutoStamp(
+      editor,
+      () => `peer${String(++nextId).padStart(4, "0")}`,
+    );
+
+    editor.update(
+      () => {
+        $getRoot().append(
+          $createParagraphNode().append($createTextNode("From a peer")),
+        );
+      },
+      { discrete: true, tag: COLLABORATION_TAG },
+    );
+
+    expect(editorMarkdown(editor)).toBe("Existing ^keep0001\n\nFrom a peer");
+    expect(nextId).toBe(0);
+    unregister();
   });
 });

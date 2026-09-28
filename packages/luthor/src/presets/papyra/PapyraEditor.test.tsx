@@ -22,6 +22,7 @@ import {
   BlockAnchorExtension,
   blockAnchorExtension,
 } from "@lyfie/luthor-headless";
+import { CollaborationExtension } from "@lyfie/luthor-headless/collab";
 import {
   PapyraEditor,
   PAPYRA_READONLY_MODES,
@@ -1198,5 +1199,85 @@ describe("PapyraEditor typeahead configuration", () => {
     expect(names).toContain("wikilink");
     expect(names).toContain("fileEmbed");
     expect(names).toContain("blockAnchor");
+  });
+});
+
+describe("collaboration", () => {
+  const makeCollaboration = () =>
+    new CollaborationExtension({
+      id: "7:note-a",
+      providerFactory: vi.fn() as never,
+      username: "Ada",
+      cursorColor: "#7aaa8a",
+    });
+
+  beforeEach(() => {
+    extensiveEditorMock.mockReset();
+    extensiveEditorMock.mockImplementation(() => null);
+  });
+
+  it("adds the host's collaboration extension and withholds the markdown source view", () => {
+    const collaboration = makeCollaboration();
+    render(<PapyraEditor showDefaultContent={false} collaboration={collaboration} />);
+
+    const props = lastProps();
+    expect(props.extraExtensions ?? []).toContain(collaboration);
+    expect(props.availableModes).toEqual(["visual"]);
+  });
+
+  it("keeps the collaboration surface read-only for viewers", () => {
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        collaboration={makeCollaboration()}
+        readOnly
+      />,
+    );
+
+    expect(lastProps().availableModes).toEqual(["visual-only"]);
+  });
+
+  it("never auto-stamps block anchors client-side in a shared room", () => {
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        collaboration={makeCollaboration()}
+        blockAnchors="auto"
+      />,
+    );
+
+    const anchor = (lastProps().extraExtensions ?? []).find(
+      (extension) => extension.name === "blockAnchor",
+    ) as unknown as { stampConfig: { autoStamp?: boolean } } | undefined;
+    expect(anchor).toBeDefined();
+    expect(anchor?.stampConfig.autoStamp ?? false).toBe(false);
+  });
+
+  it("refuses host adopts that would overwrite the shared document", () => {
+    const methods = {
+      injectJSON: vi.fn(),
+      getLexicalEditor: () => null,
+      getJSON: () => "",
+      getHTML: () => "",
+      getMarkdown: () => "",
+    } as unknown as ExtensiveEditorRef;
+    extensiveEditorMock.mockImplementation((props) => (
+      <ReadyEditorMockStandalone
+        props={props as ExtensiveEditorProps}
+        methods={methods}
+      />
+    ));
+    const ref = createRef<PapyraEditorRef>();
+    render(
+      <PapyraEditor
+        ref={ref}
+        showDefaultContent={false}
+        collaboration={makeCollaboration()}
+      />,
+    );
+
+    expect(() => ref.current?.setMarkdown("# clobber")).toThrow(/collaboration/);
+    expect(() => ref.current?.injectJSON("{}")).toThrow(/collaboration/);
+    expect(methods.injectJSON).not.toHaveBeenCalled();
   });
 });

@@ -9,6 +9,8 @@ export {
   PapyraEditor,
   PAPYRA_AVAILABLE_MODES,
   PAPYRA_READONLY_MODES,
+  PAPYRA_COLLAB_MODES,
+  PAPYRA_COLLAB_READONLY_MODES,
   PAPYRA_FOCUS_VARIANT_CLASS,
   PAPYRA_LOCKED_VARIANT_CLASS,
   type PapyraEditorProps,
@@ -17,6 +19,7 @@ export {
   type PapyraOutlineHeading,
   type PapyraBlockAnchor,
   type PapyraBlockAnchorMode,
+  type PapyraCollaboration,
 } from "./PapyraEditor";
 export type {
   PapyraTypeaheadConfig,
