@@ -8,9 +8,11 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   clearLexicalSelection,
+  COLLABORATION_UPDATE_TAG,
   createEditorSystem,
   createEditorThemeStyleVars,
   defaultLuthorTheme,
+  HistoryExtension,
   htmlToJSON,
   jsonToHTML,
   jsonToMarkdown,
@@ -414,9 +416,11 @@ export interface ExtensiveEditorChangePayload {
    * formatting, slash commands, undo/redo, paste, drag-drop, the markdown
    * source view). `"programmatic"` for host-initiated mutations (`injectJSON`
    * / the papyra preset's `setMarkdown`), so a host can avoid treating its own
-   * adopt as a user edit.
+   * adopt as a user edit. `"remote"` for changes a collaborator made that
+   * arrived through a {@link CollaborationExtension} binding — the shared
+   * document owns persistence, so hosts should not autosave these.
    */
-  source: "user" | "programmatic";
+  source: "user" | "programmatic" | "remote";
   /**
    * Whether the markdown differs from the content baseline — the editor's own
    * serialization of the initially mounted content (or of the last
@@ -1324,14 +1328,21 @@ function ExtensiveEditorContent({
    * tick serializes once, and a programmatic adopt that lands in between (see
    * `notifyProgrammaticAdopt`) cancels the stale emission entirely.
    */
-  const scheduleUserChange = useCallback(() => {
+  const pendingChangeSourceRef = useRef<"user" | "remote">("remote");
+  const scheduleUserChange = useCallback((source: "user" | "remote" = "user") => {
     if (!onChangeRef.current) {
       return;
     }
 
+    // A burst mixing local and remote commits reports as "user": the local
+    // edit is what the host must not lose.
+    if (pendingChangeTimerRef.current === null || source === "user") {
+      pendingChangeSourceRef.current = source;
+    }
     cancelPendingChange();
     pendingChangeTimerRef.current = setTimeout(() => {
       pendingChangeTimerRef.current = null;
+      const changeSource = pendingChangeSourceRef.current;
       const markdown = methodsRef.current?.getMarkdown();
       const previous =
         lastNotifiedMarkdownRef.current ?? changeBaselineRef.current;
@@ -1342,7 +1353,7 @@ function ExtensiveEditorContent({
       lastNotifiedMarkdownRef.current = markdown;
       onChangeRef.current?.({
         markdown,
-        source: "user",
+        source: changeSource,
         isDirty: markdown !== changeBaselineRef.current,
       });
     }, 0);
@@ -1934,9 +1945,11 @@ function ExtensiveEditorContent({
     const unsubscribe = editor.registerUpdateListener(({
       dirtyElements,
       dirtyLeaves,
+      tags,
     }: {
       dirtyElements: Map<unknown, unknown>;
       dirtyLeaves: Set<unknown>;
+      tags: Set<string>;
     }) => {
       const hasContentChanges =
         dirtyElements.size > 0 || dirtyLeaves.size > 0;
@@ -1947,7 +1960,14 @@ function ExtensiveEditorContent({
       // Every content commit — typing, toolbar formatting, slash commands,
       // undo/redo, paste, drag-drop — schedules a change notification. A
       // programmatic adopt cancels it and notifies through its own path.
-      scheduleUserChange();
+      // Peer edits applied by a collaboration binding report as "remote".
+      const isRemote = tags?.has(COLLABORATION_UPDATE_TAG) === true;
+      scheduleUserChange(isRemote ? "remote" : "user");
+      if (isRemote) {
+        // A peer edit always invalidates the canonical markdown, whatever mode
+        // this client is in — never let a stale snapshot overwrite it.
+        canonicalMarkdownStaleRef.current = true;
+      }
 
       // When visual editor changes, mark all cached formats as stale
       // This prevents stale cache but doesn't do any actual export work
@@ -2969,6 +2989,9 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     const extraExtensionsKey = (extraExtensions ?? [])
       .map((extension) => extension.name)
       .join(",");
+    const isCollaborative = (extraExtensions ?? []).some(
+      (extension) => extension.name === "collaboration",
+    );
     const extensionsKey = `${fontFamilyOptionsKey}::${fontSizeOptionsKey}::${lineHeightOptionsKey}::${minimumDefaultLineHeightKey}::${maxListIndentationKey}::${scaleByRatio ? "ratio-on" : "ratio-off"}::${syntaxHighlightKey}::${maxAutoDetectKey}::${copyAllowedKey}::${lineNumbersKey}::${languageOptionsKey}::${featureFlagsKey}::${extraExtensionsKey}`;
     const stableFontFamilyOptionsRef = useRef<readonly FontFamilyOption[] | undefined>(fontFamilyOptions);
     const stableFontSizeOptionsRef = useRef<readonly FontSizeOption[] | undefined>(fontSizeOptions);
@@ -3019,12 +3042,21 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       };
 
       const builtExtensions = createExtensiveExtensions(nextConfig);
+      // Under collaboration the Yjs UndoManager owns history (it only reverts
+      // this user's changes); Lexical's HistoryPlugin would fight it.
+      const baseExtensions = isCollaborative
+        ? builtExtensions.map((extension) =>
+            extension.name === "history"
+              ? new HistoryExtension({ plugin: false })
+              : extension,
+          )
+        : builtExtensions;
       memoizedExtensionsRef.current = {
         key: extensionsKey,
         value:
           extraExtensions && extraExtensions.length > 0
-            ? [...builtExtensions, ...extraExtensions]
-            : builtExtensions,
+            ? [...baseExtensions, ...extraExtensions]
+            : baseExtensions,
       };
     }
     const memoizedExtensions = memoizedExtensionsRef.current.value;
@@ -3134,7 +3166,11 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
 
     const handleReady = (m: ExtensiveEditorRef) => {
       setMethods(m);
-      if (defaultContent) {
+      // A collaborative document is populated by its shared Yjs doc; injecting
+      // defaultContent would replace (or duplicate) what peers already wrote.
+      if (isCollaborative) {
+        // no-op: the collaboration binding hydrates the editor.
+      } else if (defaultContent) {
         m.injectJSON(toJSONInput(defaultContent));
       } else if (showDefaultContent) {
         // Demo starter content is app-owned; package presets remain content-neutral by default.

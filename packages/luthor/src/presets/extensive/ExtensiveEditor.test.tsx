@@ -255,6 +255,7 @@ const mockEditorApi = {
 };
 
 vi.mock("@lyfie/luthor-headless", () => ({
+  COLLABORATION_UPDATE_TAG: "collaboration",
   createEditorSystem: () => ({
     Provider: ({ children, config }: { children: ReactNode; config?: unknown }) => {
       providerMock(config as Record<string, unknown>);

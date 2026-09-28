@@ -590,6 +590,14 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     return ImageTranslator.exportJSON(this);
   }
 
+  /**
+   * Mark the upload state through the writable clone so the change is part of
+   * the committed update (and therefore reaches collaboration peers).
+   */
+  setUploading(uploading: boolean): void {
+    this.getWritable().__uploading = uploading;
+  }
+
   setSrc(src: string): void {
     if (!src || src.length === 0) {
       warnOnce("ImageNode.setSrc called with an empty src; ignoring");
@@ -861,7 +869,7 @@ export class ImageExtension extends BaseExtension<
                     const node = $getNodeByKey(imageNode.getKey());
                     if (node instanceof ImageNode) {
                       node.setSrc(uploadedSrc);
-                      node.__uploading = false;
+                      node.setUploading(false);
                     }
                   });
                 })
@@ -871,7 +879,7 @@ export class ImageExtension extends BaseExtension<
                   editor.update(() => {
                     const node = $getNodeByKey(imageNode.getKey());
                     if (node instanceof ImageNode) {
-                      node.__uploading = false;
+                      node.setUploading(false);
                     }
                   });
                 });
@@ -1009,7 +1017,7 @@ export class ImageExtension extends BaseExtension<
                         const node = $getNodeByKey(imageNode.getKey());
                         if (node instanceof ImageNode) {
                           node.setSrc(uploadedSrc);
-                          node.__uploading = false;
+                          node.setUploading(false);
                         }
                       });
                     })
@@ -1018,7 +1026,7 @@ export class ImageExtension extends BaseExtension<
                       editor.update(() => {
                         const node = $getNodeByKey(imageNode.getKey());
                         if (node instanceof ImageNode) {
-                          node.__uploading = false;
+                          node.setUploading(false);
                         }
                       });
                     });
@@ -1039,7 +1047,7 @@ export class ImageExtension extends BaseExtension<
                     if (existingImageNode) {
                       debugLog("🔄 Replacing selected image src");
                       existingImageNode.setSrc(src);
-                      existingImageNode.__uploading = uploading;
+                      existingImageNode.setUploading(uploading);
                       handled = true;
                       return;
                     }

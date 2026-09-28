@@ -7,6 +7,7 @@
 
 import {
   $addUpdateTag,
+  COLLABORATION_TAG,
   $getSelection,
   $isElementNode,
   $isRangeSelection,
@@ -188,18 +189,39 @@ export function createBlockAnchorId(): string {
 /** Update tag carried by stamping updates so listeners can recognise them. */
 export const BLOCK_ANCHOR_STAMP_TAG = "luthor-block-anchor-stamp";
 
-function $findBlockAnchor(block: ElementNode): BlockAnchorNode | null {
+function $findBlockAnchors(block: ElementNode): BlockAnchorNode[] {
+  const found: BlockAnchorNode[] = [];
   const stack: LexicalNode[] = [...block.getChildren()];
   while (stack.length > 0) {
     const node = stack.pop();
     if ($isBlockAnchorNode(node)) {
-      return node;
-    }
-    if ($isElementNode(node)) {
+      found.push(node);
+    } else if ($isElementNode(node)) {
       stack.push(...node.getChildren());
     }
   }
-  return null;
+  return found;
+}
+
+/**
+ * Pick the one anchor a block keeps and remove the rest. A block can end up
+ * with several when concurrent editors (collaboration peers, merged offline
+ * copies) each stamped it; choosing the lexicographically lowest id makes
+ * every replica converge on the same survivor without coordination.
+ */
+function $findBlockAnchor(block: ElementNode): BlockAnchorNode | null {
+  const anchors = $findBlockAnchors(block);
+  if (anchors.length <= 1) {
+    return anchors[0] ?? null;
+  }
+  anchors.sort((a, b) =>
+    a.getBlockId() < b.getBlockId() ? -1 : a.getBlockId() > b.getBlockId() ? 1 : 0,
+  );
+  const [keep, ...extra] = anchors;
+  for (const anchor of extra) {
+    anchor.remove();
+  }
+  return keep ?? null;
 }
 
 /**
@@ -317,6 +339,11 @@ export function registerBlockAnchorAutoStamp(
       tags: Set<string>;
     }) => {
       if (tags.has(BLOCK_ANCHOR_STAMP_TAG)) {
+        return;
+      }
+      // Peer edits arrive already stamped (or are stamped by the peer that
+      // made them); stamping them here too would race every other replica.
+      if (tags.has(COLLABORATION_TAG)) {
         return;
       }
       if (dirtyElements.size === 0 && dirtyLeaves.size === 0) {

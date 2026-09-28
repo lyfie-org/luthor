@@ -66,6 +66,7 @@
     "@lexical/selection": "^0.40.0",
     "@lexical/table": "^0.40.0",
     "@lexical/utils": "^0.40.0",
+    "@lexical/yjs": "^0.40.0",
     "@lyfie/luthor-headless": "workspace:*",
     "lexical": "^0.40.0"
   },
@@ -85,6 +86,12 @@
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "yjs": ">=13.5.0"
+  },
+  "peerDependenciesMeta": {
+    "yjs": {
+      "optional": true
+    }
   }
 }

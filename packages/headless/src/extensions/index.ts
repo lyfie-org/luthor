@@ -107,6 +107,10 @@ export {
 // History and undo/redo
 export { HistoryExtension, historyExtension } from "./core/HistoryExtension";
 
+// Real-time collaboration lives in the `@lyfie/luthor-headless/collab` entry
+// (it pulls in yjs); only the dependency-free update tag is exported here.
+export { COLLABORATION_UPDATE_TAG } from "./core/collaborationTag";
+
 // Draggable extensions
 export {
   DraggableBlockExtension,

@@ -8,7 +8,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/collab.ts"],
   format: ["esm"],
   dts: true,
   clean: true,
@@ -27,6 +27,8 @@ export default defineConfig({
     "@lexical/selection",
     "@lexical/table",
     "@lexical/utils",
+    "@lexical/yjs",
+    "yjs",
   ],
   splitting: false,
   treeshake: true,

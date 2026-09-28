@@ -446,6 +446,12 @@ export function createEditorSystem<Exts extends readonly AnyExtension[]>() {
       return allNodes;
     }, [props.extensions]);
 
+    // A collaboration binding owns the document: LexicalComposer must not seed
+    // its default empty paragraph, or every joining client would insert one.
+    const collaborative = props.extensions.some(
+      (ext: AnyExtension) => ext.name === "collaboration",
+    );
+
     const initialConfig = useMemo(
       () => ({
         namespace: "modern-editor",
@@ -454,8 +460,9 @@ export function createEditorSystem<Exts extends readonly AnyExtension[]>() {
           console.error("Lexical error:", error);
         },
         nodes,
+        ...(collaborative ? { editorState: null } : {}),
       }),
-      [props.config?.theme, nodes],
+      [props.config?.theme, nodes, collaborative],
     );
 
     return (
