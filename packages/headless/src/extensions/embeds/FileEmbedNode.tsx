@@ -6,141 +6,205 @@
  */
 
 import {
+  $createNodeSelection,
+  $createParagraphNode,
+  $getNearestNodeFromDOMNode,
+  $getNodeByKey,
+  $getSelection,
+  $isNodeSelection,
+  $setSelection,
+  CLICK_COMMAND,
+  COMMAND_PRIORITY_LOW,
   DecoratorNode,
+  KEY_DOWN_COMMAND,
   type DOMConversionMap,
   type DOMExportOutput,
   type ElementNode,
+  type LexicalEditor,
   type LexicalNode,
   type NodeKey,
   type SerializedLexicalNode,
   type Spread,
 } from "lexical";
-import type { ElementTransformer } from "@lexical/markdown";
+import type { MediaEdit } from "./EmbedResolverContext";
+import { UploadPlaceholderNode } from "./UploadPlaceholderNode";
+import type { ElementTransformer, TextMatchTransformer } from "@lexical/markdown";
 import type { ReactNode } from "react";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
-import { useEmbedResolvers } from "./EmbedResolverContext";
+import { MediaFrame } from "../media/MediaFrame";
+import {
+  formatEmbedTarget,
+  formatMediaDirectives,
+  isFileTarget,
+  parseEmbedTarget,
+  parseMediaDirectives,
+  type MediaAlignment,
+} from "../media/mediaGrammar";
 
 /**
- * Serialized shape of a {@link FileEmbedNode}. Only the verbatim `target` (the
- * `file.ext` reference) is persisted; the resolved URL and the chosen media
- * element are derived at render time, so the stored data mirrors the markdown.
+ * Serialized shape of a {@link FileEmbedNode} (version 2).
+ *
+ * Version 1 stored only `target` — the whole text inside `![[…]]`, pipes and
+ * all. {@link FileEmbedNode.importJSON} still reads it (live collaboration rooms
+ * and saved editor states carry v1 nodes), parsing that text with the media
+ * grammar.
  */
 export type SerializedFileEmbedNode = Spread<
   {
+    /** The file reference, without fragment or pipe segments. */
     target: string;
+    fragment?: string;
+    alt?: string;
+    width?: number;
+    height?: number;
+    align?: MediaAlignment;
+    caption?: string;
+    /** Pipe segments the grammar doesn't own, verbatim. */
+    extra?: string[];
+    /** Trailing `<!-- … -->` directives the grammar doesn't own, verbatim. */
+    directives?: string[];
+    escapedPipes?: boolean;
+    inline?: boolean;
+    /** The exact markdown this embed was parsed from (byte-stable export). */
+    source?: string;
   },
   SerializedLexicalNode
 >;
 
-const IMAGE_EXTENSION = /\.(?:png|jpe?g|gif|webp|svg|avif|bmp|ico)$/i;
-const AUDIO_EXTENSION = /\.(?:mp3|wav|ogg|oga|m4a|flac|aac)$/i;
-const VIDEO_EXTENSION = /\.(?:mp4|webm|mov|m4v|ogv)$/i;
+/** The editable fields of an embed, as the markdown grammar sees them. */
+export interface FileEmbedFields {
+  target: string;
+  fragment?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  align?: MediaAlignment;
+  caption?: string;
+  extra?: string[];
+  directives?: string[];
+  escapedPipes?: boolean;
+  inline?: boolean;
+}
 
-type EmbedKind = "image" | "audio" | "video" | "file";
-
-function classifyEmbed(target: string): EmbedKind {
-  if (IMAGE_EXTENSION.test(target)) {
-    return "image";
-  }
-  if (AUDIO_EXTENSION.test(target)) {
-    return "audio";
-  }
-  if (VIDEO_EXTENSION.test(target)) {
-    return "video";
-  }
-  return "file";
+function formatFields(fields: FileEmbedFields): string {
+  const inner = formatEmbedTarget({
+    target: fields.target,
+    fragment: fields.fragment ?? "",
+    alt: fields.alt,
+    width: fields.width,
+    height: fields.height,
+    extra: fields.extra ?? [],
+    escapedPipes: fields.escapedPipes ?? false,
+  });
+  // Directives are a line-level syntax: an inline embed has none of its own.
+  const directives = fields.inline
+    ? ""
+    : formatMediaDirectives({
+        align: fields.align,
+        caption: fields.caption,
+        unknown: fields.directives ?? [],
+      });
+  return `![[${inner}]]${directives}`;
 }
 
 /**
- * React view for a file embed. Resolves the target to a URL through the host
- * {@link EmbedResolvers} and renders the matching media element; when no URL can
- * be resolved (no host wired, or a non-media file) it renders a reference chip
- * showing the raw target, so the embed is always visible and the markdown still
- * round-trips.
+ * Parse one embed's markdown (`![[inner]]` plus, for a block, any trailing
+ * directives). Null when it isn't one.
  */
-function FileEmbedComponent({ target }: { target: string }): ReactNode {
-  const { resolveMediaUrl } = useEmbedResolvers();
-  const url =
-    typeof resolveMediaUrl === "function" ? resolveMediaUrl(target) : "";
-  const kind = classifyEmbed(target);
-
-  if (url && kind === "image") {
-    return (
-      <img className="luthor-file-embed luthor-file-embed--image" src={url} alt={target} />
-    );
+export function parseFileEmbedMarkdown(
+  markdown: string,
+  inline = false,
+): FileEmbedFields | null {
+  const match = /^!\[\[([^\]\r\n]+)\]\]((?:\s*<!--[\s\S]*?-->)*)\s*$/.exec(markdown.trim());
+  if (!match) {
+    return null;
   }
-
-  if (url && kind === "audio") {
-    return (
-      <audio
-        className="luthor-file-embed luthor-file-embed--audio"
-        controls
-        src={url}
-        aria-label={target}
-      />
-    );
+  const inner = parseEmbedTarget(match[1] ?? "");
+  if (!inner.target) {
+    return null;
   }
-
-  if (url && kind === "video") {
-    return (
-      <video
-        className="luthor-file-embed luthor-file-embed--video"
-        controls
-        src={url}
-        aria-label={target}
-      />
-    );
+  const directives = parseMediaDirectives(match[2] ?? "");
+  if (!directives) {
+    return null;
   }
-
-  const chip = (
-    <span
-      className="luthor-file-embed luthor-file-embed--chip"
-      data-luthor-file-embed-target={target}
-      role="note"
-      aria-label={`Embedded file: ${target}`}
-    >
-      {target}
-    </span>
-  );
-
-  if (url) {
-    return (
-      <a
-        className="luthor-file-embed luthor-file-embed--link"
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-luthor-file-embed-target={target}
-      >
-        {target}
-      </a>
-    );
-  }
-
-  return chip;
+  return {
+    target: inner.target,
+    fragment: inner.fragment,
+    alt: inner.alt,
+    width: inner.width,
+    height: inner.height,
+    extra: inner.extra,
+    escapedPipes: inner.escapedPipes,
+    align: directives.align,
+    caption: directives.caption,
+    directives: directives.unknown,
+    inline,
+  };
 }
 
 /**
- * A block-level `![[file.ext]]` media embed. The node stores the file reference
- * verbatim and resolves media through the {@link EmbedResolvers} context, so it
- * is host-agnostic. The companion {@link FILE_EMBED_MARKDOWN_TRANSFORMER} gives
- * it a lossless round-trip.
+ * An embedded attachment: `![[file.ext]]`, optionally sized (`|480`,
+ * `|640x360`), aliased (`|Alt text`), fragment-addressed (`#page=3`), aligned and
+ * captioned (trailing `<!-- align:… -->` / `<!-- caption:… -->`). Block by
+ * default; inline when written mid-paragraph.
+ *
+ * **Byte-stable.** A node parsed from markdown remembers that exact text and
+ * exports it for as long as its fields still describe it. Once anything changes
+ * (a resize, a new caption, a peer's edit arriving over collaboration), it
+ * exports the canonical form instead. Opening and saving a note never rewrites
+ * an embed nobody touched.
+ *
+ * Rendering goes through {@link MediaFrame}; the host's {@link EmbedResolvers}
+ * supply URLs and metadata, so the node itself is host-agnostic.
  */
 export class FileEmbedNode extends DecoratorNode<ReactNode> {
-  /** The file reference as written inside `![[target]]`. */
+  /** The file reference, without fragment or pipe segments (`photo.png`). */
   __target: string;
+  __fragment: string;
+  __alt: string | undefined;
+  __width: number | undefined;
+  __height: number | undefined;
+  __align: MediaAlignment | undefined;
+  __caption: string | undefined;
+  __extra: string[];
+  __directives: string[];
+  __escapedPipes: boolean;
+  __inline: boolean;
+  /** The markdown this node was parsed from, if any. */
+  __source: string | undefined;
 
   static getType(): string {
     return "fileEmbed";
   }
 
   static clone(node: FileEmbedNode): FileEmbedNode {
-    return new FileEmbedNode(node.__target, node.__key);
+    return new FileEmbedNode(node.getFields(), node.__source, node.__key);
   }
 
   static importJSON(serialized: SerializedFileEmbedNode): FileEmbedNode {
-    return $createFileEmbedNode(serialized.target);
+    // v1: `target` was the whole `![[…]]` inner text.
+    if (!serialized.version || serialized.version < 2) {
+      const source = `![[${serialized.target}]]`;
+      const fields = parseFileEmbedMarkdown(source) ?? { target: serialized.target };
+      return new FileEmbedNode(fields, source);
+    }
+    return new FileEmbedNode(
+      {
+        target: serialized.target,
+        fragment: serialized.fragment,
+        alt: serialized.alt,
+        width: serialized.width,
+        height: serialized.height,
+        align: serialized.align,
+        caption: serialized.caption,
+        extra: serialized.extra,
+        directives: serialized.directives,
+        escapedPipes: serialized.escapedPipes,
+        inline: serialized.inline,
+      },
+      serialized.source,
+    );
   }
 
   // File embeds are authored through markdown, not pasted HTML; the explicit
@@ -149,39 +213,68 @@ export class FileEmbedNode extends DecoratorNode<ReactNode> {
     return null;
   }
 
-  constructor(target: string, key?: NodeKey) {
+  // Collaboration (@lexical/yjs) constructs nodes with no arguments and then
+  // copies every `__` property across, so every argument is optional.
+  constructor(fields?: FileEmbedFields | string, source?: string, key?: NodeKey) {
     super(key);
-    this.__target = target;
+    const f: FileEmbedFields =
+      typeof fields === "string" ? { target: fields } : (fields ?? { target: "" });
+    this.__target = f.target;
+    this.__fragment = f.fragment ?? "";
+    this.__alt = f.alt || undefined;
+    this.__width = f.width && f.width > 0 ? f.width : undefined;
+    this.__height = f.height && f.height > 0 ? f.height : undefined;
+    this.__align = f.align;
+    this.__caption = f.caption || undefined;
+    this.__extra = f.extra ? [...f.extra] : [];
+    this.__directives = f.directives ? [...f.directives] : [];
+    this.__escapedPipes = f.escapedPipes ?? false;
+    this.__inline = f.inline ?? false;
+    this.__source = source && source.length > 0 ? source : undefined;
   }
 
   exportJSON(): SerializedFileEmbedNode {
     return {
       type: "fileEmbed",
-      version: 1,
+      version: 2,
       target: this.__target,
+      ...(this.__fragment ? { fragment: this.__fragment } : {}),
+      ...(this.__alt ? { alt: this.__alt } : {}),
+      ...(this.__width ? { width: this.__width } : {}),
+      ...(this.__height ? { height: this.__height } : {}),
+      ...(this.__align ? { align: this.__align } : {}),
+      ...(this.__caption ? { caption: this.__caption } : {}),
+      ...(this.__extra.length > 0 ? { extra: [...this.__extra] } : {}),
+      ...(this.__directives.length > 0 ? { directives: [...this.__directives] } : {}),
+      ...(this.__escapedPipes ? { escapedPipes: true } : {}),
+      ...(this.__inline ? { inline: true } : {}),
+      ...(this.__source ? { source: this.__source } : {}),
     };
   }
 
   createDOM(): HTMLElement {
-    const div = document.createElement("div");
-    div.className = "luthor-file-embed-shell";
-    return div;
+    const element = document.createElement(this.__inline ? "span" : "div");
+    element.className = this.__inline
+      ? "luthor-file-embed-shell luthor-file-embed-shell--inline"
+      : "luthor-file-embed-shell";
+    return element;
   }
 
-  updateDOM(): boolean {
-    return false;
+  updateDOM(prevNode: FileEmbedNode): boolean {
+    // Block ↔ inline needs a different container element.
+    return prevNode.__inline !== this.__inline;
   }
 
   exportDOM(): DOMExportOutput {
-    const div = document.createElement("div");
-    div.className = "luthor-file-embed luthor-file-embed--chip";
-    div.setAttribute("data-luthor-file-embed-target", this.__target);
-    div.textContent = this.__target;
-    return { element: div };
+    const element = document.createElement(this.__inline ? "span" : "div");
+    element.className = "luthor-file-embed luthor-file-embed--chip";
+    element.setAttribute("data-luthor-file-embed-target", this.__target);
+    element.textContent = this.__alt ?? this.__target;
+    return { element };
   }
 
   isInline(): boolean {
-    return false;
+    return this.__inline;
   }
 
   canBeEmpty(): boolean {
@@ -193,17 +286,235 @@ export class FileEmbedNode extends DecoratorNode<ReactNode> {
   }
 
   getTarget(): string {
-    return this.__target;
+    return this.getLatest().__target;
+  }
+
+  /** A snapshot of the editable fields. */
+  getFields(): FileEmbedFields {
+    const self = this.getLatest();
+    return {
+      target: self.__target,
+      fragment: self.__fragment,
+      alt: self.__alt,
+      width: self.__width,
+      height: self.__height,
+      align: self.__align,
+      caption: self.__caption,
+      extra: [...self.__extra],
+      directives: [...self.__directives],
+      escapedPipes: self.__escapedPipes,
+      inline: self.__inline,
+    };
+  }
+
+  /**
+   * This embed's markdown: the exact source text while the fields still say
+   * what it said, otherwise the canonical form of the current fields.
+   */
+  getMarkdown(): string {
+    const self = this.getLatest();
+    const canonical = formatFields(self.getFields());
+    if (self.__source) {
+      const parsed = parseFileEmbedMarkdown(self.__source, self.__inline);
+      if (parsed && formatFields(parsed) === canonical) {
+        return self.__source;
+      }
+    }
+    return canonical;
+  }
+
+  /** Replace the file this embed points at (size, caption and alignment stay). */
+  setTarget(target: string): this {
+    const writable = this.getWritable();
+    writable.__target = target;
+    return writable;
+  }
+
+  /** Set (or clear, with `undefined`) the display size in CSS pixels. */
+  setSize(width: number | undefined, height?: number): this {
+    const writable = this.getWritable();
+    writable.__width = width && width > 0 ? Math.round(width) : undefined;
+    writable.__height = writable.__width && height && height > 0 ? Math.round(height) : undefined;
+    return writable;
+  }
+
+  setAlign(align: MediaAlignment | undefined): this {
+    const writable = this.getWritable();
+    writable.__align = align;
+    return writable;
+  }
+
+  setCaption(caption: string | undefined): this {
+    const writable = this.getWritable();
+    writable.__caption = caption && caption.trim() !== "" ? caption.trim() : undefined;
+    return writable;
+  }
+
+  setAlt(alt: string | undefined): this {
+    const writable = this.getWritable();
+    writable.__alt = alt && alt.trim() !== "" ? alt.trim() : undefined;
+    return writable;
+  }
+
+  /** Apply a toolbar/resize edit (see {@link MediaEdit}). */
+  applyEdit(edit: MediaEdit): this {
+    let node: this = this.getWritable();
+    if (edit.target !== undefined && edit.target.trim() !== "") node = node.setTarget(edit.target.trim());
+    if (edit.width !== undefined) {
+      node = node.setSize(edit.width ?? undefined, edit.height ?? (edit.width ? node.__height : undefined));
+    } else if (edit.height !== undefined && node.__width) {
+      node = node.setSize(node.__width, edit.height ?? undefined);
+    }
+    if (edit.align !== undefined) node = node.setAlign(edit.align ?? undefined);
+    if (edit.caption !== undefined) node = node.setCaption(edit.caption ?? undefined);
+    if (edit.alt !== undefined) node = node.setAlt(edit.alt ?? undefined);
+    return node;
   }
 
   decorate(): ReactNode {
-    return <FileEmbedComponent target={this.__target} />;
+    const key = this.__key;
+    return (
+      <MediaFrame
+        target={this.__target}
+        fragment={this.__fragment}
+        alt={this.__alt}
+        width={this.__width}
+        height={this.__height}
+        align={this.__align}
+        caption={this.__caption}
+        inline={this.__inline}
+        nodeKey={key}
+        onEdit={(editor, edit) => $editFileEmbed(editor, key, edit)}
+        onRemove={(editor) => $removeFileEmbed(editor, key)}
+      />
+    );
   }
 }
 
-/** Create a {@link FileEmbedNode}. */
-export function $createFileEmbedNode(target: string): FileEmbedNode {
-  return new FileEmbedNode(target);
+/** Edit the file embed with `key` in one update (one undo step, one sync). */
+export function $editFileEmbed(editor: LexicalEditor, key: NodeKey, edit: MediaEdit): void {
+  editor.update(() => {
+    const node = $getNodeByKey(key);
+    if ($isFileEmbedNode(node)) {
+      node.applyEdit(edit);
+    }
+  });
+}
+
+/**
+ * Remove the file embed with `key`. A block leaves the caret where it was (in a
+ * fresh paragraph when it was the only thing there), so typing just continues.
+ */
+export function $removeFileEmbed(editor: LexicalEditor, key: NodeKey): void {
+  editor.update(() => {
+    const node = $getNodeByKey(key);
+    if (!$isFileEmbedNode(node)) return;
+    if (node.isInline()) {
+      const previous = node.getPreviousSibling();
+      node.remove();
+      previous?.selectEnd();
+      return;
+    }
+    const next = node.getNextSibling();
+    const previous = node.getPreviousSibling();
+    if (next) {
+      node.remove();
+      next.selectStart();
+    } else if (previous) {
+      node.remove();
+      previous.selectEnd();
+    } else {
+      const paragraph = $createParagraphNode();
+      node.replace(paragraph);
+      paragraph.select();
+    }
+  });
+}
+
+// A click on an embed selects it. This has to be the click command itself, at a
+// higher priority than rich text's: that handler clears any node selection on
+// every click, so selecting from a React onClick raced it and the selection
+// (and its toolbar) flickered away.
+function registerFileEmbedClicks(editor: LexicalEditor): () => void {
+  return editor.registerCommand(
+    CLICK_COMMAND,
+    (event: MouseEvent) => {
+      if (!editor.isEditable()) return false;
+      const target = event.target;
+      const element = target instanceof Element ? target : target instanceof Node ? target.parentElement : null;
+      const frame = element?.closest(".luthor-media__frame, .luthor-media--inline");
+      if (!frame) return false;
+      const node = $getNearestNodeFromDOMNode(frame);
+      if (!$isFileEmbedNode(node)) return false;
+      const selection = $createNodeSelection();
+      selection.add(node.getKey());
+      $setSelection(selection);
+      return true;
+    },
+    COMMAND_PRIORITY_LOW,
+  );
+}
+
+// Keyboard for a selected embed: Shift+←/→ resizes by 10px (Alt: by 1px),
+// Enter opens a new line after it, Escape lets go of it.
+function registerFileEmbedKeys(editor: LexicalEditor): () => void {
+  return editor.registerCommand(
+    KEY_DOWN_COMMAND,
+    (event: KeyboardEvent) => {
+      if (!editor.isEditable()) return false;
+      const selection = $getSelection();
+      if (!$isNodeSelection(selection)) return false;
+      const nodes = selection.getNodes();
+      if (nodes.length !== 1) return false;
+      const node = nodes[0];
+      if (!$isFileEmbedNode(node)) return false;
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        $setSelection(null);
+        return true;
+      }
+
+      if (event.key === "Enter" && !node.isInline() && !event.shiftKey) {
+        event.preventDefault();
+        const paragraph = $createParagraphNode();
+        node.insertAfter(paragraph);
+        paragraph.select();
+        return true;
+      }
+
+      if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+        const element = editor.getElementByKey(node.getKey());
+        const frame = element?.querySelector<HTMLElement>(".luthor-media__frame, .luthor-media--inline");
+        const current = node.__width ?? Math.round(frame?.getBoundingClientRect().width ?? 0);
+        if (!current) return false;
+        const step = event.altKey ? 1 : 10;
+        const max = Math.round(element?.parentElement?.getBoundingClientRect().width || Number.POSITIVE_INFINITY);
+        const next = Math.min(max, Math.max(48, current + (event.key === "ArrowRight" ? step : -step)));
+        event.preventDefault();
+        if (next !== current) {
+          node.applyEdit({
+            width: next,
+            height: node.__width && node.__height ? Math.round((next * node.__height) / node.__width) : null,
+          });
+        }
+        return true;
+      }
+      return false;
+    },
+    COMMAND_PRIORITY_LOW,
+  );
+}
+
+/**
+ * Create a {@link FileEmbedNode} — from a bare file name (an upload), or from
+ * fields plus the markdown they were parsed from.
+ */
+export function $createFileEmbedNode(
+  fields: FileEmbedFields | string,
+  source?: string,
+): FileEmbedNode {
+  return new FileEmbedNode(fields, source);
 }
 
 /** Type guard for {@link FileEmbedNode}. */
@@ -216,49 +527,89 @@ export function $isFileEmbedNode(
 /**
  * Headless extension that registers {@link FileEmbedNode} with the editor. The
  * node is rendered by its decorator and parsed/serialized by
- * {@link FILE_EMBED_MARKDOWN_TRANSFORMER}; registration contributes only the node
- * class.
+ * {@link FILE_EMBED_MARKDOWN_TRANSFORMER} (a line of its own) and
+ * {@link FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER} (inside text); registration
+ * contributes only the node class.
  */
 export class FileEmbedExtension extends BaseExtension<"fileEmbed"> {
   constructor() {
     super("fileEmbed", [ExtensionCategory.Floating]);
   }
 
-  register(): () => void {
-    return () => {};
+  register(editor: LexicalEditor): () => void {
+    const unregisterKeys = registerFileEmbedKeys(editor);
+    const unregisterClicks = registerFileEmbedClicks(editor);
+    return () => {
+      unregisterKeys();
+      unregisterClicks();
+    };
   }
 
-  getNodes(): Array<typeof FileEmbedNode> {
-    return [FileEmbedNode];
+  // The upload placeholder travels with file embeds: every editor that can show
+  // an embed (and the collaboration server) must know the node a collaborator's
+  // upload inserts, even when it has no upload pipeline of its own.
+  getNodes(): Array<typeof FileEmbedNode | typeof UploadPlaceholderNode> {
+    return [FileEmbedNode, UploadPlaceholderNode];
   }
 }
 
 export const fileEmbedExtension = new FileEmbedExtension();
 
 /**
- * Lossless bidirectional markdown transformer for {@link FileEmbedNode}.
- *
- * Import: a line that is exactly `![[file.ext]]` becomes a file embed.
- * Export: a file embed serializes back to `![[file.ext]]`, so a body that
- * round-trips through the editor is byte-stable for these embeds.
+ * Lossless markdown transformer for a block {@link FileEmbedNode}: a line that is
+ * exactly `![[…]]`, optionally followed by `<!-- key:value -->` directives.
+ * Must run after the prefixed `![[card:…]]` / `![[youtube:…]]` /
+ * `![[iframe:…]]` and `![[Note#^id]]` transformers.
  */
 export const FILE_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
   dependencies: [FileEmbedNode],
   export: (node) => {
-    if (!$isFileEmbedNode(node)) {
+    if (!$isFileEmbedNode(node) || node.isInline()) {
       return null;
     }
-
-    return `![[${node.getTarget()}]]`;
+    return node.getMarkdown();
   },
-  regExp: /^!\[\[([^\]]+)\]\]\s*$/,
+  regExp: /^!\[\[([^\]\r\n]+)\]\]((?:\s*<!--[\s\S]*?-->)*)\s*$/,
   replace: (parentNode: ElementNode, _children, match) => {
-    const target = (match[1] ?? "").trim();
-    if (!target) {
-      return;
+    const source = (match[0] ?? "").trim();
+    const fields = parseFileEmbedMarkdown(source);
+    if (!fields) {
+      return false;
     }
-
-    parentNode.replace($createFileEmbedNode(target));
+    parentNode.replace($createFileEmbedNode(fields, source));
   },
   type: "element",
+};
+
+// A file target (`name.ext`, no `:` scheme), an optional `#fragment`, optional
+// pipe segments (`|` or a table cell's `\|`).
+const INLINE_EMBED =
+  "!\\[\\[([^\\]\\r\\n|#:\\\\]+?\\.[A-Za-z0-9]{1,8}(?:#[^\\]\\r\\n|\\\\]*)?(?:\\\\?\\|[^\\]\\r\\n]*)?)\\]\\]";
+
+/**
+ * Lossless markdown transformer for an inline {@link FileEmbedNode}: a
+ * `![[file.ext]]` in the middle of text. Only *file* targets (with an
+ * extension) are claimed — a mid-paragraph `![[Note]]` stays text. Must come
+ * before the wikilink transformer.
+ */
+export const FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER: TextMatchTransformer = {
+  dependencies: [FileEmbedNode],
+  export: (node) => {
+    if (!$isFileEmbedNode(node) || !node.isInline()) {
+      return null;
+    }
+    return node.getMarkdown();
+  },
+  importRegExp: new RegExp(INLINE_EMBED),
+  regExp: new RegExp(`${INLINE_EMBED}$`),
+  replace: (textNode, match) => {
+    const source = match[0] ?? "";
+    const fields = parseFileEmbedMarkdown(source, true);
+    if (!fields || !isFileTarget(fields.target)) {
+      return;
+    }
+    textNode.replace($createFileEmbedNode(fields, source));
+  },
+  trigger: "]",
+  type: "text-match",
 };

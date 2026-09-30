@@ -241,6 +241,13 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
   );
   const [selection, setSelection] = useState<RangeSelection | null>(null);
   const viewportRafIdRef = useRef<number | null>(null);
+  // The selection the person dismissed the bar for (an outside click). It stays
+  // dismissed for that selection — a collaborator's edit, a re-render, a scroll
+  // must not bring it back — until the selection itself changes.
+  const currentSignatureRef = useRef<string | null>(null);
+  const dismissedSignatureRef = useRef<string | null>(null);
+  // Which side of the selection the bar last sat on, for flip hysteresis.
+  const sideRef = useRef<"below" | "above">("below");
 
   const getSelectionAnchorRect = (element: HTMLElement): DOMRect => {
     const anchorElement = element.querySelector<HTMLElement>(
@@ -399,11 +406,21 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
       positionFromRight = false;
     }
 
-    /* Vertical bounds check */
-    if (y - toolbarHeight < scrollY) {
-      y = domRect.bottom + scrollY + offset.y;
-    } else if (y + toolbarHeight > scrollY + viewportHeight) {
-      y = domRect.top + scrollY - offset.y - toolbarHeight;
+    /* Vertical bounds check, with hysteresis */
+    const hysteresis = 8;
+    const belowY = domRect.bottom + scrollY + offset.y;
+    const aboveY = domRect.top + scrollY - offset.y - toolbarHeight;
+    const overflowBelow = belowY + toolbarHeight - (scrollY + viewportHeight);
+    const overflowAbove = scrollY - aboveY;
+    if (strategy !== "above") {
+      if (sideRef.current === "below" && overflowBelow > hysteresis && overflowAbove < 0) {
+        sideRef.current = "above";
+      } else if (sideRef.current === "above" && (overflowBelow < -hysteresis || overflowAbove > 0)) {
+        sideRef.current = "below";
+      }
+      y = sideRef.current === "above" ? aboveY : belowY;
+    } else if (y - toolbarHeight < scrollY) {
+      y = belowY;
     }
 
     return {
@@ -431,6 +448,19 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
         const sel = $getSelection();
         let newRect: DOMRect | null = null;
         let rangeSelection: RangeSelection | null = null;
+
+        const signature = $isRangeSelection(sel)
+          ? `r:${sel.anchor.key}:${sel.anchor.offset}:${sel.focus.key}:${sel.focus.offset}`
+          : $isNodeSelection(sel)
+            ? `n:${sel.getNodes().map((n) => n.getKey()).sort().join(",")}`
+            : null;
+        currentSignatureRef.current = signature;
+        if (signature !== dismissedSignatureRef.current) {
+          dismissedSignatureRef.current = null;
+        } else if (signature !== null) {
+          setIsVisible(false);
+          return;
+        }
 
         if ($isRangeSelection(sel) && !sel.isCollapsed()) {
           const domSelection = window.getSelection();
@@ -505,12 +535,13 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
     };
   }, [editor, config.debounceMs, createSelectionRect, extension]);
 
-  /* Hide callback */
-  const hide = () => {
+  /* Hide callback — sticks until the selection changes */
+  const hide = useCallback(() => {
+    dismissedSignatureRef.current = currentSignatureRef.current;
     setIsVisible(false);
     setSelectionRect(null);
     setSelection(null);
-  };
+  }, []);
 
   /* Require render function to be provided */
   if (!config.render) {

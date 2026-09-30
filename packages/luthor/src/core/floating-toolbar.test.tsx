@@ -244,4 +244,57 @@ describe("FloatingToolbar media editing", () => {
     expect(screen.queryByRole("button", { name: "Numbered List" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Checklist" })).not.toBeInTheDocument();
   });
+
+  it("shows no formatting bar for a node selection it doesn't own (an attachment)", () => {
+    const { container } = render(
+      <FloatingToolbar
+        isVisible
+        selectionRect={DEFAULT_RECT}
+        commands={createCommands()}
+        activeStates={{} as CoreEditorActiveStates}
+        selection={null}
+      />,
+    );
+    expect(container.querySelector(".luthor-floating-toolbar")).toBeNull();
+  });
+
+  it("shows no bar over a YouTube or iframe embed whose feature is off", () => {
+    for (const state of [{ isYouTubeEmbedSelected: true }, { isIframeEmbedSelected: true }]) {
+      const { container, unmount } = render(
+        <FloatingToolbar
+          isVisible
+          selectionRect={DEFAULT_RECT}
+          commands={createCommands()}
+          activeStates={state as CoreEditorActiveStates}
+          isFeatureEnabled={(feature) => feature !== "youTubeEmbed" && feature !== "iframeEmbed"}
+        />,
+      );
+      expect(container.querySelector(".luthor-floating-toolbar")).toBeNull();
+      unmount();
+    }
+  });
+
+  it("a mousedown inside the editor never dismisses the bar; one outside does", () => {
+    const root = document.createElement("div");
+    const outside = document.createElement("div");
+    document.body.append(root, outside);
+    const editor = { getRootElement: () => root };
+    const hide = vi.fn();
+    render(
+      <FloatingToolbar
+        isVisible
+        selectionRect={DEFAULT_RECT}
+        commands={createCommands()}
+        activeStates={{ imageSelected: true } as CoreEditorActiveStates}
+        editor={editor}
+        hide={hide}
+      />,
+    );
+    fireEvent.mouseDown(root);
+    expect(hide).not.toHaveBeenCalled();
+    fireEvent.mouseDown(outside);
+    expect(hide).toHaveBeenCalledTimes(1);
+    root.remove();
+    outside.remove();
+  });
 });

@@ -24,7 +24,15 @@
  * it should not show.
  */
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, type ReactNode } from "react";
+import type {
+  FileExpansionContext,
+  MediaMeta,
+  MediaToolbarContext,
+  MediaToolbarItem,
+  MediaUrlOptions,
+  UploadFileOptions,
+} from "@lyfie/luthor-headless";
 
 /** A reference to a note, by human title and/or stable id. */
 export interface PapyraNoteRef {
@@ -94,13 +102,39 @@ export interface PapyraEditorAdapter {
    * browser can load. Synchronous so embeds can render their first frame without
    * a loading flash; the host typically returns a stable CDN/API URL.
    */
-  resolveMediaUrl(filename: string): string;
+  resolveMediaUrl(filename: string, options?: MediaUrlOptions): string;
+  /**
+   * Cached metadata for a media file (size, intrinsic dimensions, whether a
+   * thumbnail/poster exists) so embeds reserve their box before loading. Return
+   * the same object for the same file until it changes; `undefined` while
+   * unknown (and start a lookup). Optional.
+   */
+  getMediaMeta?(filename: string): MediaMeta | null | undefined;
+  /** Notify embeds that metadata arrived. Returns an unsubscribe function. Optional. */
+  subscribeMediaMeta?(listener: () => void): () => void;
+  /**
+   * Extra content beneath a file card (e.g. an inline PDF viewer). Optional;
+   * return `null` for files the host has nothing to add to.
+   */
+  renderFileExpansion?(context: FileExpansionContext): ReactNode;
   /**
    * Persist a dropped or pasted file and resolve to the stored filename the
    * editor should reference as `![[filename]]`. The host owns the upload endpoint
    * and its authorization.
    */
-  uploadMedia(file: File): Promise<{ filename: string }>;
+  uploadMedia(file: File, options?: UploadFileOptions): Promise<{ filename: string }>;
+  /**
+   * Refuse a file before it is uploaded (too large, a kind the host won't
+   * take): return the message to show, or `null` to accept. Optional.
+   */
+  validateMedia?(file: File): string | null;
+  /** Report a failed or refused upload (a toast). Called once per failure. Optional. */
+  onUploadError?(error: unknown, file: File): void;
+  /**
+   * The host's own buttons on a selected attachment (replace, download, …),
+   * shown after the built-in ones. Optional.
+   */
+  mediaToolbarItems?(context: MediaToolbarContext): MediaToolbarItem[];
   /**
    * Navigate to a note. Invoked when the reader activates a `[[Note]]` wikilink.
    * The host owns routing; the editor only reports the intent.

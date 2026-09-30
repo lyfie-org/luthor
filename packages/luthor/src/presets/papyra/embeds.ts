@@ -42,9 +42,12 @@ import {
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
   CALLOUT_MARKDOWN_TRANSFORMER,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
+  FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER,
   IFRAME_EMBED_MARKDOWN_TRANSFORMER,
   SAVED_CARD_MARKDOWN_TRANSFORMER,
   TRANSCLUSION_MARKDOWN_TRANSFORMER,
+  UPLOAD_PLACEHOLDER_MARKDOWN_TRANSFORMER,
+  UploadPlaceholderNode,
   WIKILINK_MARKDOWN_TRANSFORMER,
   YOUTUBE_EMBED_MARKDOWN_TRANSFORMER,
   FileDropUploadExtension,
@@ -95,6 +98,12 @@ export interface PapyraEmbedExtensionOptions {
    * registered at all. See {@link PapyraTypeaheadConfig}.
    */
   typeahead?: PapyraTypeaheadConfig;
+  /**
+   * The adapter to use *at the moment of an upload*. The editor builds its
+   * extensions once; reading the adapter through this getter keeps uploads on
+   * the host's current adapter rather than the one the editor mounted with.
+   */
+  liveAdapter?: () => PapyraEditorAdapter | undefined;
 }
 
 /** Element type of the extensive editor's `extraExtensions` array. */
@@ -165,7 +174,10 @@ export function buildPapyraEmbedExtensions(
 
   extensions.push(
     new FileDropUploadExtension({
-      uploadFile: (file) => adapter.uploadMedia(file),
+      uploadFile: (file, uploadOptions) =>
+        (options?.liveAdapter?.() ?? adapter).uploadMedia(file, uploadOptions),
+      validateFile: (file) => (options?.liveAdapter?.() ?? adapter).validateMedia?.(file) ?? null,
+      onUploadError: (error, file) => (options?.liveAdapter?.() ?? adapter).onUploadError?.(error, file),
     }),
   );
 
@@ -187,6 +199,7 @@ export const PAPYRA_EMBED_NODES: NonNullable<
   ExtensiveEditorProps["markdownExtraNodes"]
 > = [
   FileEmbedNode,
+  UploadPlaceholderNode,
   SavedCardNode,
   CalloutNode,
   IframeEmbedNode,
@@ -206,9 +219,11 @@ export const PAPYRA_EMBED_NODES: NonNullable<
  * 2. **YouTube** (`![[youtube:url]]`) — the `youtube:` prefix, before file embed.
  * 3. **Iframe** (`![[iframe:url]]`) — the `iframe:` prefix, before file embed.
  * 4. **Transclusion** (`![[Note#^id]]`) — the `#^` pattern, also before file embed.
- * 5. **File embed** (`![[file.ext]]`) — block-level media.
+ * 5. **File embed** (`![[file.ext|480]] <!-- align:center -->`) — block-level media.
  * 6. **Block anchor** (`^uuid`) — trailing inline marker.
- * 7. **Wikilink** (`[[Note]]`) — inline link.
+ * 7. **Inline file embed** (`text ![[file.ext]] text`) — before the wikilink, whose
+ *    `[[…]]` would otherwise see the embed's brackets.
+ * 8. **Wikilink** (`[[Note]]`) — inline link.
  *
  * The **callout** (`> [!transcript]`) is a multiline-element transformer with a
  * distinct opening pattern, so it is independent of the ordering above; it is
@@ -226,7 +241,9 @@ export const PAPYRA_EMBED_TRANSFORMERS: NonNullable<
   CALLOUT_MARKDOWN_TRANSFORMER,
   TRANSCLUSION_MARKDOWN_TRANSFORMER,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
+  UPLOAD_PLACEHOLDER_MARKDOWN_TRANSFORMER,
   BLOCK_ANCHOR_MARKDOWN_TRANSFORMER,
+  FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER,
   WIKILINK_MARKDOWN_TRANSFORMER,
 ];
 
@@ -240,7 +257,17 @@ export function createPapyraEmbedResolvers(
   adapter: PapyraEditorAdapter,
 ): EmbedResolvers {
   return {
-    resolveMediaUrl: (target) => adapter.resolveMediaUrl(target),
+    resolveMediaUrl: (target, options) => adapter.resolveMediaUrl(target, options),
+    getMediaMeta: adapter.getMediaMeta ? (target) => adapter.getMediaMeta!(target) : undefined,
+    subscribeMediaMeta: adapter.subscribeMediaMeta
+      ? (listener) => adapter.subscribeMediaMeta!(listener)
+      : undefined,
+    renderFileExpansion: adapter.renderFileExpansion
+      ? (context) => adapter.renderFileExpansion!(context)
+      : undefined,
+    mediaToolbar: adapter.mediaToolbarItems
+      ? { items: (context) => adapter.mediaToolbarItems!(context) }
+      : undefined,
     openLink: (target) => adapter.openNote({ title: target }),
     resolveBlock: adapter.resolveBlock
       ? (note, blockId) => adapter.resolveBlock!({ note, blockId })

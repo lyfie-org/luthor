@@ -21,6 +21,7 @@ import {
   papyraMarkdownToJSON,
   type PapyraHeadlessCollab,
 } from "./index";
+import { UploadPlaceholderNode } from "@lyfie/luthor-headless";
 
 const FIXTURES = [
   "Plain paragraph.",
@@ -30,6 +31,8 @@ const FIXTURES = [
   "| a | b |\n| --- | --- |\n| 1 | 2 |",
   "See [[Project Plan]] and ![[Meeting#^abc123]].\n\nAnchored block ^keep0001",
   "![[diagram.png]]\n\nText after embed.",
+  // Sized, aliased, aligned, captioned and inline media (the media grammar).
+  "![[beach.jpg|Beach|640]] <!-- align:center --> <!-- caption:Dusk -->\n\nSee ![[ticket.pdf#page=2]] inline.\n\n![[youtube:https://www.youtube-nocookie.com/embed/xyz|Recap|800x450]]",
 ];
 
 /** Normalize once through the bridge — the stable form every replica must hit. */
@@ -100,6 +103,60 @@ describe("papyra headless collaboration", () => {
     expect(client.getMarkdown()).toBe(normalized(markdown));
     expect(server.getMarkdown()).toBe(normalized(markdown));
     expect(client.getMarkdown()).not.toContain("[Unsupported");
+  });
+
+  it("a peer's resize and caption reach every replica and the saved markdown", () => {
+    const server = replica();
+    server.setMarkdown("Intro\n\n![[beach.jpg]]\n\nOutro");
+    const alice = replica(server.doc);
+    const bob = replica(server.doc);
+
+    alice.editor.update(
+      () => {
+        const embed = $getRoot().getChildren().find((n) => n.getType() === "fileEmbed") as unknown as {
+          setSize(w: number): void;
+          setCaption(c: string): void;
+        };
+        embed.setSize(480);
+        embed.setCaption("Dusk");
+      },
+      { discrete: true },
+    );
+    connect(alice.doc, server.doc);
+    connect(server.doc, bob.doc);
+
+    const expected = "Intro\n\n![[beach.jpg|480]] <!-- caption:Dusk -->\n\nOutro";
+    expect(alice.getMarkdown()).toBe(expected);
+    expect(server.getMarkdown()).toBe(expected);
+    expect(bob.getMarkdown()).toBe(expected);
+  });
+
+  it("an upload in progress reaches peers as a placeholder but never the saved markdown", () => {
+    const server = replica();
+    server.setMarkdown("Intro\n\nOutro");
+    const alice = replica(server.doc);
+    const bob = replica(server.doc);
+
+    alice.editor.update(
+      () => {
+        const first = $getRoot().getFirstChild()!;
+        first.insertAfter(
+          new UploadPlaceholderNode({ uploadId: "up-x", name: "beach.png", size: 10, kind: "image", startedAt: 1 }),
+        );
+      },
+      { discrete: true },
+    );
+    connect(alice.doc, server.doc);
+    connect(server.doc, bob.doc);
+
+    expect(bob.editor.getEditorState().read(() => $getRoot().getChildren().map((n) => n.getType()))).toContain(
+      "uploadPlaceholder",
+    );
+    expect(JSON.stringify(bob.editor.getEditorState().toJSON())).not.toContain("blob:");
+    // The server persists markdown: nothing for the in-flight upload.
+    expect(server.getMarkdown()).not.toContain("beach.png");
+    expect(server.getMarkdown()).toContain("Intro");
+    expect(server.getMarkdown()).toContain("Outro");
   });
 
   it("reloads a persisted room state without changing the body", () => {

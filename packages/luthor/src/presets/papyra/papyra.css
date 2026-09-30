@@ -89,13 +89,26 @@
 .luthor-preset-papyra .luthor-file-embed--video {
   display: block;
   max-width: 100%;
+}
+
+.luthor-preset-papyra .luthor-media--block {
   margin: 1rem 0;
 }
 
 .luthor-preset-papyra .luthor-file-embed--audio {
   display: block;
   width: 100%;
-  margin: 1rem 0;
+}
+
+.luthor-preset-papyra .luthor-media__card,
+.luthor-preset-papyra .luthor-media__error {
+  border-color: var(--papyra-accent-border, var(--papyra-accent-surface, currentColor));
+  font-family: var(--papyra-font-body, "Sora", ui-sans-serif, system-ui, sans-serif);
+}
+
+.luthor-preset-papyra .luthor-media__caption {
+  font-family: var(--papyra-font-body, "Sora", ui-sans-serif, system-ui, sans-serif);
+  color: var(--papyra-text-muted, var(--papyra-text, inherit));
 }
 
 .luthor-preset-papyra .luthor-file-embed--chip,
@@ -233,7 +246,6 @@
  */
 .luthor-preset-papyra .luthor-media-embed-shell {
   border-radius: 0.5em;
-  overflow: hidden;
   border: 1px solid
     var(--papyra-accent-border, var(--papyra-accent-surface, transparent));
 }

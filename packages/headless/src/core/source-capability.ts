@@ -79,6 +79,9 @@ export const MARKDOWN_NATIVE_KEY_MAP: Readonly<Record<string, ReadonlySet<string
     "linkHref",
     "linkTitle",
     "alignment",
+    // Obsidian's `![alt|W](src)` / `|WxH` carries the size in markdown itself.
+    "width",
+    "height",
   ]),
   "iframe-embed": new Set(["type", "version", "src", "caption"]),
   "youtube-embed": new Set(["type", "version", "src", "caption"]),

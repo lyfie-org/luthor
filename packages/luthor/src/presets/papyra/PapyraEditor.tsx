@@ -616,10 +616,14 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     // auto-stamping anchor extension.
     const autoStampBlockAnchors = blockAnchors === "auto" && !isCollaborative;
     const collaborationExtension = collaboration;
+    // Uploads read the adapter live (see buildPapyraEmbedExtensions).
+    const adapterRef = useRef(adapter);
+    adapterRef.current = adapter;
     const embedExtensions = useMemo(() => {
       const extensions = buildPapyraEmbedExtensions(adapter, {
         autoStampBlockAnchors,
         typeahead,
+        liveAdapter: () => adapterRef.current,
       });
       return collaborationExtension
         ? [...extensions, collaborationExtension]

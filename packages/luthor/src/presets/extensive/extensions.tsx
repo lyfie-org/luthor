@@ -654,8 +654,6 @@ const youTubeEmbedExt = new YouTubeEmbedExtension();
   rel: 1,
 };
 
-const floatingToolbarExt = createFloatingToolbarExtension();
-
 const contextMenuExt = new ContextMenuExtension();
 (contextMenuExt as any).config = {
   ...(contextMenuExt as any).config,
@@ -801,7 +799,8 @@ function buildExtensiveExtensions({
   if (enabled("enterKeyBehavior")) extensions.push(enterKeyBehaviorExtension);
   if (enabled("iframeEmbed")) extensions.push(iframeEmbedExt);
   if (enabled("youTubeEmbed")) extensions.push(youTubeEmbedExt);
-  if (enabled("floatingToolbar")) extensions.push(floatingToolbarExt);
+  // One per editor: each carries its own context (commands, active states).
+  if (enabled("floatingToolbar")) extensions.push(createFloatingToolbarExtension());
   if (enabled("contextMenu")) extensions.push(contextMenuExt);
   if (enabled("commandPalette")) extensions.push(commandPaletteExt);
   if (enabled("slashCommand")) extensions.push(slashCommandExt);

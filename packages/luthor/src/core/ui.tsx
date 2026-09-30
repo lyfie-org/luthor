@@ -490,9 +490,11 @@ export function InputDialog({
   onSubmit: (values: Record<string, string>) => void;
   onCancel: () => void;
 }) {
-  const [values, setValues] = useState<Record<string, string>>({});
-  // A new request starts empty.
-  useEffect(() => setValues({}), [request]);
+  const initial = (next: InputRequest | null) =>
+    Object.fromEntries((next?.fields ?? []).filter((f) => f.value !== undefined).map((f) => [f.name, f.value ?? ""]));
+  const [values, setValues] = useState<Record<string, string>>(() => initial(request));
+  // A new request starts from its own starting values (empty unless given).
+  useEffect(() => setValues(initial(request)), [request]);
   const idPrefix = useId();
 
   const trimmed = (name: string) => (values[name] ?? "").trim();

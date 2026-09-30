@@ -170,9 +170,21 @@ export function createPapyraSlashCommands(
       description: "Upload and embed an image, audio, or video file",
       category: "Insert",
       keywords: ["embed", "media", "image", "audio", "video", "upload", "attach"],
-      action: async ({ insertText }) => {
+      action: async ({ insertText, hasCommand, runCommand }) => {
         const file = await pickMediaFile(PAPYRA_MEDIA_PICKER_ACCEPT);
         if (!file) {
+          return;
+        }
+        // The upload pipeline: a placeholder with progress at the caret, then
+        // a real embed node. (Typing the `![[name]]` text instead left it as
+        // literal text until the note was reopened.)
+        if (runCommand && hasCommand?.("uploadAndEmbedFile")) {
+          try {
+            await runCommand("uploadAndEmbedFile", file);
+          } catch {
+            // Reported through the adapter's onUploadError; the placeholder
+            // offers Retry/Remove.
+          }
           return;
         }
         const { filename } = await adapter.uploadMedia(file);

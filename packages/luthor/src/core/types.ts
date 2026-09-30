@@ -49,6 +49,8 @@ export interface InputField {
   type?: "text" | "url";
   /** Required fields must be filled before the dialog submits. */
   required?: boolean;
+  /** Starting value (editing an existing caption, alt text, …). */
+  value?: string;
 }
 
 /** Values a command asks the person for, in the editor's themed dialog. */

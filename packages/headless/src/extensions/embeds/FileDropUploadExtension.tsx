@@ -6,28 +6,43 @@
  */
 
 /*
- * Drop/paste → upload → `![[filename]]` pipeline.
+ * Drop / paste / pick → upload → `![[filename]]`.
  *
- * Intercepts file drops and clipboard pastes on the editor surface and
- * delegates them to a host-provided upload callback. On success the extension
- * inserts a {@link FileEmbedNode} referencing the stored filename, so the
- * body reads `![[filename]]` in markdown.
+ * The pipeline, and the promises it keeps:
  *
- * The paste handler is registered at HIGH priority so it runs before the
- * built-in ImageExtension paste handler — Papyra stores all media as named
- * files (`![[photo.png]]`), not inline base64 images.
+ * - **Where and in what order.** A drop lands where it was dropped; a paste or
+ *   a picked file at the caret. Every file gets a placeholder straight away, in
+ *   the order given, and each is replaced in place when its upload finishes —
+ *   so a batch always reads in the order it was dropped, whatever finishes
+ *   first.
+ * - **Honest progress.** At most three uploads run at once; each placeholder
+ *   shows progress, can be cancelled, and on failure offers Retry or Remove.
+ * - **Pastes do what the person meant.** Copying from Word, Excel or a web page
+ *   puts formatted text *and* a picture of it on the clipboard; the text wins.
+ *   Only a clipboard that is just files (a screenshot, a copied image) uploads.
+ * - **Never into a read-only note**, and never a `blob:` URL into the shared
+ *   document (the placeholder carries only a name and size).
+ * - **The host stays in charge.** The upload callback is read when a file is
+ *   uploaded, never captured at setup, so a host that swaps its callback is
+ *   honoured; errors go to `onUploadError`, once; nothing stops the drop event
+ *   from reaching the host's own handlers — a `luthor:media-drop` event says an
+ *   upload started.
  *
- * When no `uploadFile` callback is provided, the extension is inert and all
- * drop/paste events fall through to the next handler.
+ * Without an `uploadFile` callback the extension is inert.
  */
 
 import {
+  $createParagraphNode,
+  $getNearestNodeFromDOMNode,
   $getRoot,
   $getSelection,
+  $isElementNode,
   $isRangeSelection,
+  $isNodeSelection,
   COMMAND_PRIORITY_HIGH,
   PASTE_COMMAND,
   type LexicalEditor,
+  type LexicalNode,
 } from "lexical";
 import {
   type BaseExtensionConfig,
@@ -35,6 +50,38 @@ import {
 } from "@lyfie/luthor-headless/extensions/types";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { $createFileEmbedNode } from "./FileEmbedNode";
+import { $createUploadPlaceholderNode, $findUploadPlaceholder, $isUploadPlaceholderNode } from "./UploadPlaceholderNode";
+import { createUploadId, UploadQueue, uploadRegistry } from "./uploads";
+import { reportError } from "../../utils/logger";
+
+// Failures of the upload itself are reported through onUploadError as they
+// happen; anything else escaping the pipeline is a bug — say so, never swallow.
+const REPORTED = Symbol("luthor.uploadReported");
+
+function logUnexpected(error: unknown): void {
+  const reported = typeof error === "object" && error !== null && (error as Record<symbol, unknown>)[REPORTED];
+  const aborted = error instanceof DOMException && error.name === "AbortError";
+  if (!reported && !aborted) reportError("fileDropUpload: upload pipeline failed", error);
+}
+
+function markReported<T>(error: T): T {
+  if (typeof error === "object" && error !== null) {
+    try {
+      (error as Record<symbol, unknown>)[REPORTED] = true;
+    } catch {
+      // Frozen error objects: logged twice at worst.
+    }
+  }
+  return error;
+}
+
+/** What an upload callback is given besides the file. */
+export interface UploadFileOptions {
+  /** Aborted when the person cancels; pass it to `fetch` / XHR. */
+  signal: AbortSignal;
+  /** Report progress, 0–1. */
+  onProgress: (fraction: number) => void;
+}
 
 export interface FileDropUploadConfig extends BaseExtensionConfig {
   /**
@@ -46,7 +93,16 @@ export interface FileDropUploadConfig extends BaseExtensionConfig {
    * file under the unsanitized name will serve a broken reference, so
    * sanitize on the server too.
    */
-  uploadFile?: (file: File) => Promise<{ filename: string }>;
+  uploadFile?: (file: File, options: UploadFileOptions) => Promise<{ filename: string }>;
+  /**
+   * Refuse a file before uploading it (too big, a type the host won't take):
+   * return a message to show, or `null` to accept.
+   */
+  validateFile?: (file: File) => string | null;
+  /** Report a failed or refused upload (a toast). Called once per failure. */
+  onUploadError?: (error: unknown, file: File) => void;
+  /** Uploads that may run at once (default 3). */
+  concurrency?: number;
 }
 
 /**
@@ -61,156 +117,336 @@ export function sanitizeEmbedTarget(filename: string): string {
 }
 
 /**
- * Headless extension that wires drop/paste → upload → file embed insertion.
- * Pass `uploadFile` in the config to activate the pipeline; without it, the
- * extension is a no-op.
+ * Whether a paste is really rich content (keep it as text) rather than files.
+ * Word, Excel, Sheets and web pages put a rendered picture of the selection on
+ * the clipboard next to the HTML; that picture must not replace the text.
+ * A clipboard whose HTML is only an `<img>` (a copied image) or empty is files.
  */
+export function isRichTextPaste(data: DataTransfer | null): boolean {
+  if (!data) return false;
+  const html = data.getData("text/html");
+  if (html) {
+    const images = (html.match(/<img\b/gi) ?? []).length;
+    const text = html
+      .replace(/<(style|script)[\s\S]*?<\/\1>/gi, "")
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;|&#160;/gi, " ")
+      .trim();
+    if (text.length > 0 || images > 1) return true;
+    return false;
+  }
+  // RTF with text alongside (a desktop app that offers no HTML).
+  return !!data.getData("text/rtf") && data.getData("text/plain").trim().length > 0;
+}
+
 /** Commands contributed by {@link FileDropUploadExtension}. */
 export type FileDropUploadCommands = {
   /**
-   * Upload `file` through the configured `uploadFile` callback and embed the
-   * result after the caret's block as `![[filename]]` — the same path a paste
-   * or drop takes, for a host's own "attach file" control. Resolves once the
-   * embed is inserted; rejects when no `uploadFile` is configured or the
-   * upload fails, so the caller can report it.
+   * Upload `file` and embed it after the caret's block — the same pipeline a
+   * paste takes, for a host's own "attach file" control. Resolves once the
+   * embed is in the document; rejects when the upload fails, is cancelled or
+   * is refused (the placeholder then shows Retry/Remove, and `onUploadError`
+   * has already been told).
    */
   uploadAndEmbedFile: (file: File) => Promise<void>;
+  /** Several files at once, placed in order. */
+  uploadAndEmbedFiles: (files: File[]) => Promise<void>;
 };
+
+/** The event a drop with files dispatches on the editor root (bubbles). */
+export const MEDIA_DROP_EVENT = "luthor:media-drop";
 
 export class FileDropUploadExtension extends BaseExtension<
   "fileDropUpload",
   FileDropUploadConfig,
   FileDropUploadCommands
 > {
+  private queue: UploadQueue;
+
   constructor(config: FileDropUploadConfig = {}) {
     super("fileDropUpload", [ExtensionCategory.Floating]);
     this.config = config;
+    this.queue = new UploadQueue(config.concurrency ?? 3);
+  }
+
+  private get enabled(): boolean {
+    return typeof this.config.uploadFile === "function";
   }
 
   register(editor: LexicalEditor): () => void {
-    const uploadFile = this.config.uploadFile;
-    if (typeof uploadFile !== "function") {
-      return () => {};
-    }
-
     const removePaste = editor.registerCommand<ClipboardEvent>(
       PASTE_COMMAND,
       (event) => {
-        const items = event.clipboardData?.items;
-        if (!items) {
-          return false;
-        }
-
-        const files: File[] = [];
-        for (const item of Array.from(items)) {
-          if (item.kind === "file") {
-            const file = item.getAsFile();
-            if (file) {
-              files.push(file);
-            }
-          }
-        }
-
-        if (files.length === 0) {
-          return false;
-        }
-
+        if (!this.enabled || !editor.isEditable()) return false;
+        const data = event.clipboardData;
+        const files = data ? Array.from(data.files ?? []) : [];
+        if (files.length === 0 || isRichTextPaste(data)) return false;
         event.preventDefault();
-        for (const file of files) {
-          this.handleFileUpload(editor, file, uploadFile);
-        }
+        void this.uploadFiles(editor, files, "selection").catch(logUnexpected);
         return true;
       },
       COMMAND_PRIORITY_HIGH,
     );
 
-    const rootElement = editor.getRootElement();
-    let removeDrop: (() => void) | null = null;
-
-    if (rootElement) {
-      const handleDragOver = (event: DragEvent) => {
+    // Bound through the root listener so a remounted content-editable (a view
+    // switch) keeps its drop target.
+    let detach: (() => void) | null = null;
+    const removeRoot = editor.registerRootListener((root, previous) => {
+      detach?.();
+      detach = null;
+      void previous;
+      if (!root) return;
+      const onDragOver = (event: DragEvent) => {
+        if (!this.enabled || !editor.isEditable()) return;
         if (event.dataTransfer?.types.includes("Files")) {
           event.preventDefault();
           event.dataTransfer.dropEffect = "copy";
         }
       };
-
-      const handleDrop = (event: DragEvent) => {
-        const files = event.dataTransfer?.files;
-        if (!files || files.length === 0) {
-          return;
-        }
-
+      const onDrop = (event: DragEvent) => {
+        if (!this.enabled || !editor.isEditable()) return;
+        const files = Array.from(event.dataTransfer?.files ?? []);
+        if (files.length === 0) return;
+        // No stopPropagation: the host's own drop handling (an overlay that
+        // must reset) still sees the event.
         event.preventDefault();
-        event.stopPropagation();
-
-        for (const file of Array.from(files)) {
-          this.handleFileUpload(editor, file, uploadFile);
-        }
+        root.dispatchEvent(new CustomEvent(MEDIA_DROP_EVENT, { bubbles: true, detail: { count: files.length } }));
+        const at = { x: event.clientX, y: event.clientY };
+        void this.uploadFiles(editor, files, at).catch(logUnexpected);
       };
-
-      rootElement.addEventListener("dragover", handleDragOver);
-      rootElement.addEventListener("drop", handleDrop);
-
-      removeDrop = () => {
-        rootElement.removeEventListener("dragover", handleDragOver);
-        rootElement.removeEventListener("drop", handleDrop);
+      root.addEventListener("dragover", onDragOver);
+      root.addEventListener("drop", onDrop);
+      detach = () => {
+        root.removeEventListener("dragover", onDragOver);
+        root.removeEventListener("drop", onDrop);
       };
-    }
+    });
 
     return () => {
       removePaste();
-      removeDrop?.();
+      removeRoot();
+      detach?.();
     };
   }
 
   getCommands(editor: LexicalEditor): FileDropUploadCommands {
     return {
       uploadAndEmbedFile: async (file: File) => {
-        const uploadFile = this.config.uploadFile;
-        if (typeof uploadFile !== "function") {
-          throw new Error("fileDropUpload: no uploadFile callback is configured");
-        }
-        const { filename } = await uploadFile(file);
-        this.insertEmbed(editor, filename);
+        if (!this.enabled) throw new Error("fileDropUpload: no uploadFile callback is configured");
+        await this.uploadFiles(editor, [file], "selection");
+      },
+      uploadAndEmbedFiles: async (files: File[]) => {
+        if (!this.enabled) throw new Error("fileDropUpload: no uploadFile callback is configured");
+        await this.uploadFiles(editor, files, "selection");
       },
     };
   }
 
-  private handleFileUpload(
+  /**
+   * Validate, place a placeholder per file (in order), then upload each and
+   * swap its placeholder for the embed. Resolves when all are embedded;
+   * rejects with the first failure (every failure is still reported).
+   */
+  private async uploadFiles(
     editor: LexicalEditor,
-    file: File,
-    uploadFile: (file: File) => Promise<{ filename: string }>,
-  ): void {
-    uploadFile(file).then(
-      ({ filename }) => this.insertEmbed(editor, filename),
-      () => {
-        // Upload failed — swallow silently. The host adapter owns error
-        // reporting through its own UI (toasts, banners, etc.).
-      },
-    );
+    files: File[],
+    where: "selection" | { x: number; y: number },
+  ): Promise<void> {
+    if (!editor.isEditable()) throw new Error("fileDropUpload: the editor is read-only");
+
+    const accepted: File[] = [];
+    let refusal: Error | null = null;
+    for (const file of files) {
+      const message = this.config.validateFile?.(file) ?? null;
+      if (message) {
+        const error = markReported(new Error(message));
+        refusal ??= error;
+        this.config.onUploadError?.(error, file);
+      } else {
+        accepted.push(file);
+      }
+    }
+    if (accepted.length === 0) {
+      throw refusal ?? new Error("fileDropUpload: nothing to upload");
+    }
+
+    const ids = accepted.map(() => createUploadId());
+    const anchorBlock = where === "selection" ? null : blockAtPoint(editor, where.x, where.y);
+    editor.update(() => {
+      const placeholders = accepted.map((file, i) => $createUploadPlaceholderNode(file, ids[i]!));
+      $insertBlocks(placeholders, anchorBlock);
+    });
+
+    const results = await Promise.allSettled(accepted.map((file, i) => this.runUpload(editor, file, ids[i]!)));
+    const failure = results.find((r): r is PromiseRejectedResult => r.status === "rejected");
+    if (failure) throw failure.reason;
+    if (refusal) throw refusal;
   }
 
-  private insertEmbed(editor: LexicalEditor, filename: string): void {
-    const target = sanitizeEmbedTarget(filename);
-    if (!target) {
-      return;
-    }
-    editor.update(() => {
-      const embedNode = $createFileEmbedNode(target);
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        const anchor = selection.anchor.getNode();
-        const topElement = anchor.getTopLevelElement();
-        if (topElement) {
-          topElement.insertAfter(embedNode);
-          return;
-        }
-      }
+  /** Upload one file for an existing placeholder; retries reuse the placeholder. */
+  private runUpload(editor: LexicalEditor, file: File, id: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let controller = new AbortController();
+      let settled = false;
+      const previewUrl =
+        typeof URL !== "undefined" && typeof URL.createObjectURL === "function" && file.type.startsWith("image/")
+          ? URL.createObjectURL(file)
+          : null;
 
-      $getRoot().append(embedNode);
+      const finish = (error?: unknown) => {
+        if (settled) return;
+        settled = true;
+        if (error === undefined) resolve();
+        else reject(error);
+      };
+
+      const cancel = () => {
+        controller.abort();
+        uploadRegistry.delete(id);
+        finish(new DOMException("Upload cancelled", "AbortError"));
+      };
+
+      const attempt = () => {
+        controller = new AbortController();
+        uploadRegistry.update(id, { status: "queued", error: null, progress: null });
+        void this.queue
+          .run(async () => {
+            if (controller.signal.aborted) throw new DOMException("Upload cancelled", "AbortError");
+            uploadRegistry.update(id, { status: "uploading" });
+            const uploadFile = this.config.uploadFile;
+            if (typeof uploadFile !== "function") throw new Error("fileDropUpload: no uploadFile callback is configured");
+            return uploadFile(file, {
+              signal: controller.signal,
+              onProgress: (fraction) => {
+                if (Number.isFinite(fraction)) uploadRegistry.update(id, { progress: Math.max(0, Math.min(1, fraction)) });
+              },
+            });
+          })
+          .then(
+            ({ filename }) => {
+              const target = sanitizeEmbedTarget(filename);
+              let placed = false;
+              editor.update(
+                () => {
+                  const placeholder = $findUploadPlaceholder(id);
+                  if (!placeholder) return; // removed while uploading
+                  if (!target) {
+                    placeholder.remove();
+                    return;
+                  }
+                  placeholder.replace($createFileEmbedNode(target));
+                  placed = true;
+                },
+                // Part of the same undoable step as the drop, not a new one.
+                { tag: "history-merge" },
+              );
+              uploadRegistry.delete(id);
+              if (placed || !target) finish();
+              else finish(new DOMException("Upload removed", "AbortError"));
+            },
+            (error: unknown) => {
+              if (controller.signal.aborted || (error instanceof DOMException && error.name === "AbortError")) {
+                return; // cancel() already settled it
+              }
+              uploadRegistry.update(id, {
+                status: "error",
+                error: error instanceof Error && error.message ? error.message : "Upload failed",
+              });
+              this.config.onUploadError?.(error, file);
+              finish(markReported(error));
+            },
+          );
+      };
+
+      uploadRegistry.set({
+        id,
+        file,
+        status: "queued",
+        progress: null,
+        previewUrl,
+        error: null,
+        cancel,
+        // A retry is a fresh attempt for the same placeholder; the caller who
+        // awaited the first attempt has already been told it failed.
+        retry: () => {
+          settled = true;
+          attempt();
+        },
+      });
+      attempt();
     });
   }
 }
+
+/** The top-level block under a point in the editor, or null. */
+function blockAtPoint(editor: LexicalEditor, x: number, y: number): { key: string; before: boolean } | null {
+  const root = editor.getRootElement();
+  if (!root || typeof document === "undefined" || typeof document.elementFromPoint !== "function") return null;
+  let element = document.elementFromPoint(x, y);
+  if (!element || !root.contains(element)) return null;
+  // Walk up to a direct child of the root: a top-level block.
+  while (element && element.parentElement !== root) element = element.parentElement;
+  if (!element) return null;
+  const rect = element.getBoundingClientRect();
+  const before = y < rect.top + rect.height / 2;
+  let key: string | null = null;
+  editor.read(() => {
+    const node = $getNearestNodeFromDOMNode(element!);
+    key = node ? (node.getTopLevelElement()?.getKey() ?? node.getKey()) : null;
+  });
+  return key ? { key, before } : null;
+}
+
+/**
+ * Insert blocks, in order: before/after the block under a drop point, else
+ * after the caret's block, else at the end. An empty paragraph the caret sat
+ * in is replaced by the uploads. A paragraph follows the last one when nothing
+ * else does, so typing can continue after an upload at the end of a note.
+ */
+function $insertBlocks(blocks: LexicalNode[], at: { key: string; before: boolean } | null): void {
+  if (blocks.length === 0) return;
+  const root = $getRoot();
+  let anchor: LexicalNode | null = null;
+  let before = false;
+
+  if (at) {
+    anchor = root.getChildren().find((child) => child.getKey() === at.key) ?? null;
+    before = at.before;
+  }
+  if (!anchor) {
+    const selection = $getSelection();
+    if ($isRangeSelection(selection)) {
+      anchor = selection.anchor.getNode().getTopLevelElement();
+    } else if ($isNodeSelection(selection)) {
+      const node = selection.getNodes()[0];
+      anchor = node ? (node.getTopLevelElement() ?? node) : null;
+    }
+  }
+
+  const replaceEmpty =
+    !!anchor && !before && $isElementNode(anchor) && anchor.getType() === "paragraph" && anchor.isEmpty();
+  const [first, ...rest] = blocks;
+  if (!anchor) root.append(first!);
+  else if (before) anchor.insertBefore(first!);
+  else anchor.insertAfter(first!);
+  let last = first!;
+  for (const block of rest) {
+    last.insertAfter(block);
+    last = block;
+  }
+  if (replaceEmpty) anchor!.remove();
+
+  const next = last.getNextSibling();
+  if (!next) {
+    const paragraph = $createParagraphNode();
+    last.insertAfter(paragraph);
+    paragraph.select();
+  } else if ($isElementNode(next)) {
+    next.selectStart();
+  }
+}
+
+export { $isUploadPlaceholderNode };
 
 export const fileDropUploadExtension = new FileDropUploadExtension();

@@ -43,6 +43,97 @@ export interface SavedCardMetadata {
 }
 
 /**
+ * What a host knows about an attachment before it loads — enough to reserve its
+ * box (no layout shift), pick a thumbnail, and label a file card. Every field is
+ * optional; a host that knows nothing returns `undefined` and the embed measures
+ * itself on load instead.
+ */
+export interface MediaMeta {
+  /** `image`, `gif`, `video`, `audio`, `document` or `file`. */
+  kind?: string;
+  /** The type the file is served as (`image/png`, `application/pdf`). */
+  mime?: string;
+  /** Size in bytes. */
+  size?: number;
+  /** A content version; changes whenever the bytes do. */
+  version?: string;
+  /** Intrinsic width in CSS pixels, as displayed (EXIF rotation applied). */
+  width?: number | null;
+  /** Intrinsic height in CSS pixels, as displayed. */
+  height?: number | null;
+  /** Running time of audio/video, in milliseconds. */
+  durationMs?: number | null;
+  /** An animated image (GIF/WebP): never swap it for a still thumbnail. */
+  animated?: boolean;
+  /** A poster frame exists for this video (`variant: "poster"`). */
+  poster?: boolean;
+  /** Smaller renditions exist (`variant: "thumb"`). */
+  thumb?: boolean;
+}
+
+/** Which rendition of an attachment a URL should point at. */
+export interface MediaUrlOptions {
+  /**
+   * `original` (default) — the file itself. `thumb` — a smaller still, at least
+   * `width` wide when possible. `poster` — a video's poster frame.
+   */
+  variant?: "original" | "thumb" | "poster";
+  /** Desired width in CSS pixels for `thumb` / `poster`. */
+  width?: number;
+}
+
+/** What a host's file-card expansion renders from (see `renderFileExpansion`). */
+export interface FileExpansionContext {
+  target: string;
+  /** Text after `#` in the embed (`page=3`), or empty. */
+  fragment: string;
+  url: string;
+  kind: string;
+  meta: MediaMeta | null | undefined;
+}
+
+/** An edit to an embedded attachment; `null` clears a field. */
+export interface MediaEdit {
+  target?: string;
+  width?: number | null;
+  height?: number | null;
+  align?: "left" | "center" | "right" | null;
+  caption?: string | null;
+  alt?: string | null;
+}
+
+/** What a media toolbar item acts on (see `mediaToolbar`). */
+export interface MediaToolbarContext {
+  target: string;
+  fragment: string;
+  /** `image`, `video`, `audio`, `pdf` or `file`. */
+  kind: string;
+  url: string;
+  meta: MediaMeta | null | undefined;
+  width?: number;
+  height?: number;
+  align?: "left" | "center" | "right";
+  caption?: string;
+  alt?: string;
+  /** Apply an edit to this embed (one undo step, one collaboration update). */
+  update: (edit: MediaEdit) => void;
+  /** Remove this embed from the document. */
+  remove: () => void;
+}
+
+/** One button in the media toolbar. */
+export interface MediaToolbarItem {
+  id: string;
+  /** Accessible name, also the tooltip. */
+  label: string;
+  /** Icon; the label is shown as text when there is none. */
+  icon?: ReactNode;
+  active?: boolean;
+  disabled?: boolean;
+  onSelect: () => void;
+}
+
+/**
  * Callbacks an embed node uses to reach host services. Every member is optional
  * so the nodes degrade gracefully when a host wires only part of the surface (or
  * none of it). A preset adapts its own richer adapter onto this small contract.
@@ -54,7 +145,30 @@ export interface EmbedResolvers {
    * without a loading flash. When omitted, the file embed renders a reference
    * chip instead of loading media.
    */
-  resolveMediaUrl?: (target: string) => string;
+  resolveMediaUrl?: (target: string, options?: MediaUrlOptions) => string;
+  /**
+   * Synchronous, cached metadata for a media target — `undefined` while unknown.
+   * Must return the *same object* for the same target until it changes (it is
+   * read through `useSyncExternalStore`). Pair with {@link subscribeMediaMeta}
+   * to have embeds re-render when a lookup lands.
+   */
+  getMediaMeta?: (target: string) => MediaMeta | null | undefined;
+  /** Subscribe to metadata arriving/changing. Returns an unsubscribe function. */
+  subscribeMediaMeta?: (listener: () => void) => () => void;
+  /**
+   * Extra content under a non-image file card — e.g. an inline PDF viewer the
+   * host renders on demand. Return `null` for files it has nothing to add to.
+   */
+  renderFileExpansion?: (context: FileExpansionContext) => ReactNode;
+  /**
+   * The toolbar shown on a selected attachment. `items` adds the host's own
+   * buttons (replace, download, …) after the built-in ones; `builtIn: false`
+   * drops the built-ins (align, size, caption, alt, open, remove).
+   */
+  mediaToolbar?: {
+    builtIn?: boolean;
+    items?: (context: MediaToolbarContext) => MediaToolbarItem[];
+  };
   /**
    * Navigate to a link target (the `Target` inside `[[Target]]`). Invoked when a
    * reader activates a wikilink. When omitted, the wikilink renders as inert
