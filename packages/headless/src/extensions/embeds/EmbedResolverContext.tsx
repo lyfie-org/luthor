@@ -92,6 +92,47 @@ export interface FileExpansionContext {
   meta: MediaMeta | null | undefined;
 }
 
+/** An edit to an embedded attachment; `null` clears a field. */
+export interface MediaEdit {
+  target?: string;
+  width?: number | null;
+  height?: number | null;
+  align?: "left" | "center" | "right" | null;
+  caption?: string | null;
+  alt?: string | null;
+}
+
+/** What a media toolbar item acts on (see `mediaToolbar`). */
+export interface MediaToolbarContext {
+  target: string;
+  fragment: string;
+  /** `image`, `video`, `audio`, `pdf` or `file`. */
+  kind: string;
+  url: string;
+  meta: MediaMeta | null | undefined;
+  width?: number;
+  height?: number;
+  align?: "left" | "center" | "right";
+  caption?: string;
+  alt?: string;
+  /** Apply an edit to this embed (one undo step, one collaboration update). */
+  update: (edit: MediaEdit) => void;
+  /** Remove this embed from the document. */
+  remove: () => void;
+}
+
+/** One button in the media toolbar. */
+export interface MediaToolbarItem {
+  id: string;
+  /** Accessible name, also the tooltip. */
+  label: string;
+  /** Icon; the label is shown as text when there is none. */
+  icon?: ReactNode;
+  active?: boolean;
+  disabled?: boolean;
+  onSelect: () => void;
+}
+
 /**
  * Callbacks an embed node uses to reach host services. Every member is optional
  * so the nodes degrade gracefully when a host wires only part of the surface (or
@@ -119,6 +160,15 @@ export interface EmbedResolvers {
    * host renders on demand. Return `null` for files it has nothing to add to.
    */
   renderFileExpansion?: (context: FileExpansionContext) => ReactNode;
+  /**
+   * The toolbar shown on a selected attachment. `items` adds the host's own
+   * buttons (replace, download, …) after the built-in ones; `builtIn: false`
+   * drops the built-ins (align, size, caption, alt, open, remove).
+   */
+  mediaToolbar?: {
+    builtIn?: boolean;
+    items?: (context: MediaToolbarContext) => MediaToolbarItem[];
+  };
   /**
    * Navigate to a link target (the `Target` inside `[[Target]]`). Invoked when a
    * reader activates a wikilink. When omitted, the wikilink renders as inert

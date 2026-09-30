@@ -14,6 +14,9 @@ export {
   type MediaMeta,
   type MediaUrlOptions,
   type FileExpansionContext,
+  type MediaEdit,
+  type MediaToolbarContext,
+  type MediaToolbarItem,
 } from "./EmbedResolverContext";
 export {
   ANCHORABLE_BLOCK_TYPES,
@@ -38,6 +41,8 @@ export {
   FILE_EMBED_MARKDOWN_TRANSFORMER,
   FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER,
   parseFileEmbedMarkdown,
+  $editFileEmbed,
+  $removeFileEmbed,
   type FileEmbedFields,
   type SerializedFileEmbedNode,
 } from "./FileEmbedNode";
@@ -105,6 +110,19 @@ export {
   FileDropUploadExtension,
   fileDropUploadExtension,
   sanitizeEmbedTarget,
+  isRichTextPaste,
+  MEDIA_DROP_EVENT,
   type FileDropUploadConfig,
   type FileDropUploadCommands,
+  type UploadFileOptions,
 } from "./FileDropUploadExtension";
+export {
+  UploadPlaceholderNode,
+  $createUploadPlaceholderNode,
+  $isUploadPlaceholderNode,
+  $findUploadPlaceholder,
+  UPLOAD_PLACEHOLDER_MARKDOWN_TRANSFORMER,
+  UPLOAD_STALE_AFTER_MS,
+  type SerializedUploadPlaceholderNode,
+} from "./UploadPlaceholderNode";
+export { uploadRegistry, type UploadTask, type UploadStatus } from "./uploads";

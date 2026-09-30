@@ -5,7 +5,7 @@
  * Build freely. Credit kindly.
  */
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import {
   AlignCenterIcon,
   AlignLeftIcon,
@@ -23,7 +23,7 @@ import {
   UnlinkIcon,
 } from "./icons";
 import { IconButton } from "./ui";
-import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
+import { getOverlayThemeStyleFromElement } from "./overlay-theme";
 import type { CoreEditorActiveStates, CoreEditorCommands, CoreTheme } from "./types";
 
 type FloatingSelectionRect = {
@@ -40,6 +40,10 @@ export interface FloatingToolbarProps {
   editorTheme?: CoreTheme;
   hide?: () => void;
   isFeatureEnabled?: (feature: string) => boolean;
+  /** The editor the toolbar belongs to (clicks inside it never dismiss the bar). */
+  editor?: { getRootElement(): HTMLElement | null };
+  /** The text selection, when there is one; `null` for a node selection. */
+  selection?: object | null;
 }
 
 export function FloatingToolbar({
@@ -50,10 +54,16 @@ export function FloatingToolbar({
   editorTheme = "light",
   hide,
   isFeatureEnabled = () => true,
+  editor,
+  selection,
 }: FloatingToolbarProps) {
   const edgeInsetPx = 20;
 
   const toolbarRef = useRef<HTMLDivElement>(null);
+  // Horizontal correction measured from the rendered bar, so a wide bar near a
+  // viewport edge is pulled back in (no guessed widths).
+  const [shiftX, setShiftX] = useState(0);
+  const shiftRef = useRef(0);
   const [iframeUrlDraft, setIframeUrlDraft] = useState("");
   const [iframeCaptionDraft, setIframeCaptionDraft] = useState("");
   const [imageCaptionDraft, setImageCaptionDraft] = useState("");
@@ -79,6 +89,9 @@ export function FloatingToolbar({
       const target = event.target as Node | null;
       if (!target) return;
       if (toolbarRef.current?.contains(target)) return;
+      // Inside the editor, the selection it produces decides what shows —
+      // dismissing here and re-showing a moment later made the bar blink.
+      if (editor?.getRootElement()?.contains(target)) return;
       hide?.();
     };
 
@@ -89,7 +102,7 @@ export function FloatingToolbar({
       document.removeEventListener("mousedown", handlePointerDown, true);
       document.removeEventListener("touchstart", handlePointerDown, true);
     };
-  }, [isVisible, hide]);
+  }, [isVisible, hide, editor]);
 
   useEffect(() => {
     if (!isVisible || !iframeEmbedSelected) {
@@ -184,19 +197,47 @@ export function FloatingToolbar({
     };
   }, [activeStates.isLink, commands, isVisible]);
 
+  useLayoutEffect(() => {
+    const element = toolbarRef.current;
+    if (!element || typeof window === "undefined") return;
+    // Measure where the bar sits without our own correction applied, so the
+    // correction can never feed back into itself.
+    const applied = element.style.transform;
+    element.style.transform = "";
+    const rect = element.getBoundingClientRect();
+    element.style.transform = applied;
+    const naturalLeft = rect.left;
+    const naturalRight = rect.right;
+    const margin = 12;
+    let next = 0;
+    if (naturalRight > window.innerWidth - margin) next = window.innerWidth - margin - naturalRight;
+    if (naturalLeft + next < margin) next = margin - naturalLeft;
+    if (Math.abs(next - shiftRef.current) >= 1) {
+      shiftRef.current = next;
+      setShiftX(next);
+    }
+  }, [isVisible, selectionRect, activeStates]);
+
   if (!isVisible || !selectionRect) return null;
 
   const style: CSSProperties = {
-    ...getOverlayThemeStyleFromSelection(),
+    // Theme from the editor itself, not from wherever the DOM selection is
+    // (a node selection has none, which used to restyle the bar mid-use).
+    ...getOverlayThemeStyleFromElement(editor?.getRootElement() ?? null),
     position: "absolute",
     top: selectionRect.y,
     left: selectionRect.positionFromRight ? "auto" : selectionRect.x,
     right: selectionRect.positionFromRight ? edgeInsetPx : "auto",
+    transform: shiftX ? `translateX(${shiftX}px)` : undefined,
     maxWidth: `calc(100% - ${edgeInsetPx * 2}px)`,
     boxSizing: "border-box",
     zIndex: "var(--luthor-z-menu, 460)",
     pointerEvents: "auto",
   };
+
+  if ((iframeEmbedSelected && !iframeEmbedEnabled) || (youTubeEmbedSelected && !youTubeEmbedEnabled)) {
+    return null;
+  }
 
   if (embedSelected) {
     const setAlignment = (alignment: "left" | "center" | "right") => {
@@ -407,6 +448,12 @@ export function FloatingToolbar({
         ) : null}
       </div>
     );
+  }
+
+  // The formatting bar is for text. A selected node that none of the branches
+  // above owns (an attachment, a card) keeps its own controls.
+  if (selection === null) {
+    return null;
   }
 
   const canShowBold = isFeatureEnabled("bold");

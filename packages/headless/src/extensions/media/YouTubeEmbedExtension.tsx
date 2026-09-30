@@ -6,6 +6,7 @@
  */
 
 import { formatSize, splitCaptionAndSize } from "./mediaGrammar";
+import { registerClickToSelect } from "./mediaSelection";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   $createNodeSelection,
@@ -746,7 +747,7 @@ export class YouTubeEmbedExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
-    return editor.registerUpdateListener(({ editorState }) => {
+    const removeTracker = editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         const selection = $getSelection();
         if (!$isNodeSelection(selection)) {
@@ -759,6 +760,11 @@ export class YouTubeEmbedExtension extends BaseExtension<
         }
       });
     });
+    const removeClickSelect = registerClickToSelect(editor, (node) => node instanceof YouTubeEmbedNode);
+    return () => {
+      removeTracker();
+      removeClickSelect();
+    };
   }
 
   getNodes(): any[] {

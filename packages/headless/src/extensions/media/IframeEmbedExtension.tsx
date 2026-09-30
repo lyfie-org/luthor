@@ -6,6 +6,7 @@
  */
 
 import { formatSize, splitCaptionAndSize } from "./mediaGrammar";
+import { registerClickToSelect } from "./mediaSelection";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   $createNodeSelection,
@@ -570,8 +571,7 @@ export class IframeEmbedExtension extends BaseExtension<
   }
 
   register(editor: LexicalEditor): () => void {
-    void editor;
-    return () => {};
+    return registerClickToSelect(editor, (node) => node instanceof IframeEmbedNode);
   }
 
   getNodes(): any[] {

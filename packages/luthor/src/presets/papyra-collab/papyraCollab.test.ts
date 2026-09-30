@@ -21,6 +21,7 @@ import {
   papyraMarkdownToJSON,
   type PapyraHeadlessCollab,
 } from "./index";
+import { UploadPlaceholderNode } from "@lyfie/luthor-headless";
 
 const FIXTURES = [
   "Plain paragraph.",
@@ -128,6 +129,34 @@ describe("papyra headless collaboration", () => {
     expect(alice.getMarkdown()).toBe(expected);
     expect(server.getMarkdown()).toBe(expected);
     expect(bob.getMarkdown()).toBe(expected);
+  });
+
+  it("an upload in progress reaches peers as a placeholder but never the saved markdown", () => {
+    const server = replica();
+    server.setMarkdown("Intro\n\nOutro");
+    const alice = replica(server.doc);
+    const bob = replica(server.doc);
+
+    alice.editor.update(
+      () => {
+        const first = $getRoot().getFirstChild()!;
+        first.insertAfter(
+          new UploadPlaceholderNode({ uploadId: "up-x", name: "beach.png", size: 10, kind: "image", startedAt: 1 }),
+        );
+      },
+      { discrete: true },
+    );
+    connect(alice.doc, server.doc);
+    connect(server.doc, bob.doc);
+
+    expect(bob.editor.getEditorState().read(() => $getRoot().getChildren().map((n) => n.getType()))).toContain(
+      "uploadPlaceholder",
+    );
+    expect(JSON.stringify(bob.editor.getEditorState().toJSON())).not.toContain("blob:");
+    // The server persists markdown: nothing for the in-flight upload.
+    expect(server.getMarkdown()).not.toContain("beach.png");
+    expect(server.getMarkdown()).toContain("Intro");
+    expect(server.getMarkdown()).toContain("Outro");
   });
 
   it("reloads a persisted room state without changing the body", () => {

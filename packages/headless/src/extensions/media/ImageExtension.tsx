@@ -56,6 +56,8 @@ import {
 } from "./ImageTranslator";
 import { sanitizeUrlForAttribute } from "../../utils/urlSafety";
 import { formatSize, MEDIA_MAX_DIMENSION } from "./mediaGrammar";
+import { registerClickToSelect, useIsNodeSelected } from "./mediaSelection";
+import { usePointerResize } from "./usePointerResize";
 import { reportError, warnOnce } from "../../utils/logger";
 
 /**
@@ -71,13 +73,7 @@ let defaultImageResizable = true;
 let defaultScaleByRatio = false;
 
 const MIN_IMAGE_WIDTH = 50;
-const MIN_IMAGE_HEIGHT = 50;
 const MAX_IMAGE_WIDTH = 2400;
-const MAX_IMAGE_HEIGHT = 2400;
-
-function clampSize(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, Math.round(value)));
-}
 
 export function shouldShowImageResizeHandles(
   isEditorEditable: boolean,
@@ -121,17 +117,17 @@ function ImageComponent({
   width,
   height,
   resizable = true,
-  scaleByRatio = false,
+  // (`scaleByRatio` is accepted but no longer needed: resizing is always
+  // aspect-locked — width only, height follows.)
   uploading = false,
 }: ImageComponentProps): ReactNode {
   const [editor] = useLexicalComposerContext();
   const imageRef = useRef<HTMLImageElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
-  const resizeFrameRef = useRef<number | null>(null);
   const widthRef = useRef<number>(0);
   const heightRef = useRef<number>(0);
-  const [isSelected, setIsSelected] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
+  // One shared selection store per editor (not a listener per image).
+  const isSelected = useIsNodeSelected(editor, nodeKey);
   const [isEditorEditable, setIsEditorEditable] = useState(() => editor.isEditable());
   const [currentWidth, setCurrentWidth] = useState<number | "auto">(
     width || "auto",
@@ -182,38 +178,10 @@ function ImageComponent({
   }, [width, height]);
 
   useEffect(() => {
-    return () => {
-      if (resizeFrameRef.current != null) {
-        window.cancelAnimationFrame(resizeFrameRef.current);
-      }
-      document.body.style.userSelect = "";
-      document.body.style.cursor = "";
-    };
-  }, []);
-
-  useEffect(() => {
     return editor.registerEditableListener((editable) => {
       setIsEditorEditable(editable);
     });
   }, [editor]);
-
-  // Listen for selection changes
-  useEffect(() => {
-    if (!nodeKey) return;
-    return editor.registerUpdateListener(({ editorState }) => {
-      editorState.read(() => {
-        const selection = $getSelection();
-        if ($isNodeSelection(selection)) {
-          const selectedNodes = selection.getNodes();
-          setIsSelected(
-            selectedNodes.some((node) => node.getKey() === nodeKey),
-          );
-        } else {
-          setIsSelected(false);
-        }
-      });
-    });
-  }, [editor, nodeKey]);
 
   // Handle click to select
   const onClick = (event: React.MouseEvent) => {
@@ -231,116 +199,31 @@ function ImageComponent({
     });
   };
 
-  const startResize =
-    (axis: "width" | "height") =>
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!isEditorEditable || !imageRef.current || !nodeKey) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    setIsResizing(true);
-    document.body.style.userSelect = "none";
-    document.body.style.cursor = axis === "width" ? "ew-resize" : "ns-resize";
-
-    const startX = event.clientX;
-    const startY = event.clientY;
-    const startWidth =
-      imageRef.current.clientWidth ||
-      (typeof currentWidth === "number" ? currentWidth : 100);
-    const startHeight =
-      imageRef.current.clientHeight ||
-      (typeof currentHeight === "number" ? currentHeight : 100);
-    const hasRatioBaseline =
-      Number.isFinite(startWidth) &&
-      Number.isFinite(startHeight) &&
-      startWidth > 0 &&
-      startHeight > 0;
-    const aspectRatio = hasRatioBaseline ? startWidth / startHeight : null;
-
-    widthRef.current = startWidth;
-    heightRef.current = startHeight;
-
-    const applyPreviewSize = () => {
-      resizeFrameRef.current = null;
-      if (shellRef.current) {
-        shellRef.current.style.width = `${widthRef.current}px`;
-      }
-      if (imageRef.current) {
-        imageRef.current.style.height = `${heightRef.current}px`;
-      }
-    };
-
-    const onMove = (moveEvent: MouseEvent) => {
-      const useRatio =
-        !!aspectRatio &&
-        (scaleByRatio ? !moveEvent.shiftKey : moveEvent.shiftKey);
-      let nextWidth =
-        axis === "width"
-          ? clampSize(
-              startWidth + (moveEvent.clientX - startX),
-              MIN_IMAGE_WIDTH,
-              MAX_IMAGE_WIDTH,
-            )
-          : widthRef.current;
-      let nextHeight =
-        axis === "height"
-          ? clampSize(
-              startHeight + (moveEvent.clientY - startY),
-              MIN_IMAGE_HEIGHT,
-              MAX_IMAGE_HEIGHT,
-            )
-          : heightRef.current;
-
-      if (useRatio && aspectRatio) {
-        if (axis === "width") {
-          nextHeight = clampSize(
-            nextWidth / aspectRatio,
-            MIN_IMAGE_HEIGHT,
-            MAX_IMAGE_HEIGHT,
-          );
-        } else {
-          nextWidth = clampSize(
-            nextHeight * aspectRatio,
-            MIN_IMAGE_WIDTH,
-            MAX_IMAGE_WIDTH,
-          );
-        }
-      }
-
+  // Width-only, aspect-locked resize through pointer capture: the picture keeps
+  // its shape (height follows), the drag survives leaving the handle or the
+  // window, and the document changes once, on release.
+  const { onPointerDown: onResizePointerDown, resizing: isResizing } = usePointerResize({
+    frameRef: shellRef,
+    minWidth: MIN_IMAGE_WIDTH,
+    maxWidth: () =>
+      Math.min(
+        MAX_IMAGE_WIDTH,
+        shellRef.current?.parentElement?.getBoundingClientRect().width || MAX_IMAGE_WIDTH,
+      ),
+    centered: alignment === "center",
+    onCommit: (nextWidth) => {
+      if (!nodeKey) return;
       widthRef.current = nextWidth;
-      heightRef.current = nextHeight;
-
-      if (resizeFrameRef.current == null) {
-        resizeFrameRef.current = window.requestAnimationFrame(applyPreviewSize);
-      }
-    };
-
-    const onUp = () => {
-      if (resizeFrameRef.current != null) {
-        window.cancelAnimationFrame(resizeFrameRef.current);
-        resizeFrameRef.current = null;
-      }
-
-      setIsResizing(false);
-      setCurrentWidth(widthRef.current);
-      setCurrentHeight(heightRef.current);
+      setCurrentWidth(nextWidth);
+      setCurrentHeight("auto");
       editor.update(() => {
         const node = $getNodeByKey(nodeKey);
         if (node instanceof ImageNode) {
-          node.setWidthAndHeight(widthRef.current, heightRef.current);
+          node.setWidthAndHeight(nextWidth, undefined);
         }
       });
-      document.body.style.userSelect = "";
-      document.body.style.cursor = "";
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseup", onUp);
-    };
-
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
-  };
+    },
+  });
 
   const figureStyle: React.CSSProperties = {
     margin: 0,
@@ -366,10 +249,11 @@ function ImageComponent({
     textAlign: "center",
   };
 
+  // Handles stay up for the whole drag (hiding them mid-drag was disorienting).
   const showResizeHandles = shouldShowImageResizeHandles(
     isEditorEditable,
     isSelected,
-    isResizing,
+    false,
     resizable,
   );
 
@@ -415,20 +299,15 @@ function ImageComponent({
             <button
               type="button"
               className="luthor-media-embed-resize-handle-width"
-              aria-label="Resize image width"
+              aria-label="Resize image"
               aria-hidden={!showResizeHandles}
               tabIndex={showResizeHandles ? 0 : -1}
-              style={{ opacity: showResizeHandles ? 1 : 0, pointerEvents: showResizeHandles ? "auto" : "none" }}
-              onMouseDown={startResize("width")}
-            />
-            <button
-              type="button"
-              className="luthor-media-embed-resize-handle-height"
-              aria-label="Resize image height"
-              aria-hidden={!showResizeHandles}
-              tabIndex={showResizeHandles ? 0 : -1}
-              style={{ opacity: showResizeHandles ? 1 : 0, pointerEvents: showResizeHandles ? "auto" : "none" }}
-              onMouseDown={startResize("height")}
+              style={{
+                opacity: showResizeHandles ? 1 : 0,
+                pointerEvents: showResizeHandles ? "auto" : "none",
+                touchAction: "none",
+              }}
+              onPointerDown={onResizePointerDown("right")}
             />
           </>
         ) : null}
@@ -647,7 +526,7 @@ export class ImageNode extends DecoratorNode<ReactNode> {
     return this.__height;
   }
 
-  setWidthAndHeight(width: number, height: number): void {
+  setWidthAndHeight(width: number | undefined, height: number | undefined): void {
     const writable = this.getWritable();
     writable.__width = width;
     writable.__height = height;
@@ -1089,7 +968,10 @@ export class ImageExtension extends BaseExtension<
       );
     }
 
+    const removeClickSelect = registerClickToSelect(editor, (node) => node instanceof ImageNode);
+
     return () => {
+      removeClickSelect();
       removeSelectionTracker();
       removeCommand();
       removeDelete();

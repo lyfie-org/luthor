@@ -28,7 +28,10 @@ import { createContext, useContext, type ReactNode } from "react";
 import type {
   FileExpansionContext,
   MediaMeta,
+  MediaToolbarContext,
+  MediaToolbarItem,
   MediaUrlOptions,
+  UploadFileOptions,
 } from "@lyfie/luthor-headless";
 
 /** A reference to a note, by human title and/or stable id. */
@@ -119,7 +122,19 @@ export interface PapyraEditorAdapter {
    * editor should reference as `![[filename]]`. The host owns the upload endpoint
    * and its authorization.
    */
-  uploadMedia(file: File): Promise<{ filename: string }>;
+  uploadMedia(file: File, options?: UploadFileOptions): Promise<{ filename: string }>;
+  /**
+   * Refuse a file before it is uploaded (too large, a kind the host won't
+   * take): return the message to show, or `null` to accept. Optional.
+   */
+  validateMedia?(file: File): string | null;
+  /** Report a failed or refused upload (a toast). Called once per failure. Optional. */
+  onUploadError?(error: unknown, file: File): void;
+  /**
+   * The host's own buttons on a selected attachment (replace, download, …),
+   * shown after the built-in ones. Optional.
+   */
+  mediaToolbarItems?(context: MediaToolbarContext): MediaToolbarItem[];
   /**
    * Navigate to a note. Invoked when the reader activates a `[[Note]]` wikilink.
    * The host owns routing; the editor only reports the intent.

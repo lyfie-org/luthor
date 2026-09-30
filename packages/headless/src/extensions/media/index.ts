@@ -11,3 +11,6 @@ export * from "./IframeEmbedExtension";
 export * from "./YouTubeEmbedExtension";
 export * from "./mediaGrammar";
 export { MediaFrame, formatBytes, type MediaFrameProps } from "./MediaFrame";
+export * from "./EditorPromptContext";
+export * from "./mediaSelection";
+export * from "./usePointerResize";

@@ -6,15 +6,28 @@
  */
 
 import {
+  $createNodeSelection,
+  $createParagraphNode,
+  $getNearestNodeFromDOMNode,
+  $getNodeByKey,
+  $getSelection,
+  $isNodeSelection,
+  $setSelection,
+  CLICK_COMMAND,
+  COMMAND_PRIORITY_LOW,
   DecoratorNode,
+  KEY_DOWN_COMMAND,
   type DOMConversionMap,
   type DOMExportOutput,
   type ElementNode,
+  type LexicalEditor,
   type LexicalNode,
   type NodeKey,
   type SerializedLexicalNode,
   type Spread,
 } from "lexical";
+import type { MediaEdit } from "./EmbedResolverContext";
+import { UploadPlaceholderNode } from "./UploadPlaceholderNode";
 import type { ElementTransformer, TextMatchTransformer } from "@lexical/markdown";
 import type { ReactNode } from "react";
 import { ExtensionCategory } from "@lyfie/luthor-headless/extensions/types";
@@ -343,7 +356,23 @@ export class FileEmbedNode extends DecoratorNode<ReactNode> {
     return writable;
   }
 
+  /** Apply a toolbar/resize edit (see {@link MediaEdit}). */
+  applyEdit(edit: MediaEdit): this {
+    let node: this = this.getWritable();
+    if (edit.target !== undefined && edit.target.trim() !== "") node = node.setTarget(edit.target.trim());
+    if (edit.width !== undefined) {
+      node = node.setSize(edit.width ?? undefined, edit.height ?? (edit.width ? node.__height : undefined));
+    } else if (edit.height !== undefined && node.__width) {
+      node = node.setSize(node.__width, edit.height ?? undefined);
+    }
+    if (edit.align !== undefined) node = node.setAlign(edit.align ?? undefined);
+    if (edit.caption !== undefined) node = node.setCaption(edit.caption ?? undefined);
+    if (edit.alt !== undefined) node = node.setAlt(edit.alt ?? undefined);
+    return node;
+  }
+
   decorate(): ReactNode {
+    const key = this.__key;
     return (
       <MediaFrame
         target={this.__target}
@@ -354,9 +383,127 @@ export class FileEmbedNode extends DecoratorNode<ReactNode> {
         align={this.__align}
         caption={this.__caption}
         inline={this.__inline}
+        nodeKey={key}
+        onEdit={(editor, edit) => $editFileEmbed(editor, key, edit)}
+        onRemove={(editor) => $removeFileEmbed(editor, key)}
       />
     );
   }
+}
+
+/** Edit the file embed with `key` in one update (one undo step, one sync). */
+export function $editFileEmbed(editor: LexicalEditor, key: NodeKey, edit: MediaEdit): void {
+  editor.update(() => {
+    const node = $getNodeByKey(key);
+    if ($isFileEmbedNode(node)) {
+      node.applyEdit(edit);
+    }
+  });
+}
+
+/**
+ * Remove the file embed with `key`. A block leaves the caret where it was (in a
+ * fresh paragraph when it was the only thing there), so typing just continues.
+ */
+export function $removeFileEmbed(editor: LexicalEditor, key: NodeKey): void {
+  editor.update(() => {
+    const node = $getNodeByKey(key);
+    if (!$isFileEmbedNode(node)) return;
+    if (node.isInline()) {
+      const previous = node.getPreviousSibling();
+      node.remove();
+      previous?.selectEnd();
+      return;
+    }
+    const next = node.getNextSibling();
+    const previous = node.getPreviousSibling();
+    if (next) {
+      node.remove();
+      next.selectStart();
+    } else if (previous) {
+      node.remove();
+      previous.selectEnd();
+    } else {
+      const paragraph = $createParagraphNode();
+      node.replace(paragraph);
+      paragraph.select();
+    }
+  });
+}
+
+// A click on an embed selects it. This has to be the click command itself, at a
+// higher priority than rich text's: that handler clears any node selection on
+// every click, so selecting from a React onClick raced it and the selection
+// (and its toolbar) flickered away.
+function registerFileEmbedClicks(editor: LexicalEditor): () => void {
+  return editor.registerCommand(
+    CLICK_COMMAND,
+    (event: MouseEvent) => {
+      if (!editor.isEditable()) return false;
+      const target = event.target;
+      const element = target instanceof Element ? target : target instanceof Node ? target.parentElement : null;
+      const frame = element?.closest(".luthor-media__frame, .luthor-media--inline");
+      if (!frame) return false;
+      const node = $getNearestNodeFromDOMNode(frame);
+      if (!$isFileEmbedNode(node)) return false;
+      const selection = $createNodeSelection();
+      selection.add(node.getKey());
+      $setSelection(selection);
+      return true;
+    },
+    COMMAND_PRIORITY_LOW,
+  );
+}
+
+// Keyboard for a selected embed: Shift+←/→ resizes by 10px (Alt: by 1px),
+// Enter opens a new line after it, Escape lets go of it.
+function registerFileEmbedKeys(editor: LexicalEditor): () => void {
+  return editor.registerCommand(
+    KEY_DOWN_COMMAND,
+    (event: KeyboardEvent) => {
+      if (!editor.isEditable()) return false;
+      const selection = $getSelection();
+      if (!$isNodeSelection(selection)) return false;
+      const nodes = selection.getNodes();
+      if (nodes.length !== 1) return false;
+      const node = nodes[0];
+      if (!$isFileEmbedNode(node)) return false;
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        $setSelection(null);
+        return true;
+      }
+
+      if (event.key === "Enter" && !node.isInline() && !event.shiftKey) {
+        event.preventDefault();
+        const paragraph = $createParagraphNode();
+        node.insertAfter(paragraph);
+        paragraph.select();
+        return true;
+      }
+
+      if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+        const element = editor.getElementByKey(node.getKey());
+        const frame = element?.querySelector<HTMLElement>(".luthor-media__frame, .luthor-media--inline");
+        const current = node.__width ?? Math.round(frame?.getBoundingClientRect().width ?? 0);
+        if (!current) return false;
+        const step = event.altKey ? 1 : 10;
+        const max = Math.round(element?.parentElement?.getBoundingClientRect().width || Number.POSITIVE_INFINITY);
+        const next = Math.min(max, Math.max(48, current + (event.key === "ArrowRight" ? step : -step)));
+        event.preventDefault();
+        if (next !== current) {
+          node.applyEdit({
+            width: next,
+            height: node.__width && node.__height ? Math.round((next * node.__height) / node.__width) : null,
+          });
+        }
+        return true;
+      }
+      return false;
+    },
+    COMMAND_PRIORITY_LOW,
+  );
 }
 
 /**
@@ -389,12 +536,20 @@ export class FileEmbedExtension extends BaseExtension<"fileEmbed"> {
     super("fileEmbed", [ExtensionCategory.Floating]);
   }
 
-  register(): () => void {
-    return () => {};
+  register(editor: LexicalEditor): () => void {
+    const unregisterKeys = registerFileEmbedKeys(editor);
+    const unregisterClicks = registerFileEmbedClicks(editor);
+    return () => {
+      unregisterKeys();
+      unregisterClicks();
+    };
   }
 
-  getNodes(): Array<typeof FileEmbedNode> {
-    return [FileEmbedNode];
+  // The upload placeholder travels with file embeds: every editor that can show
+  // an embed (and the collaboration server) must know the node a collaborator's
+  // upload inserts, even when it has no upload pipeline of its own.
+  getNodes(): Array<typeof FileEmbedNode | typeof UploadPlaceholderNode> {
+    return [FileEmbedNode, UploadPlaceholderNode];
   }
 }
 

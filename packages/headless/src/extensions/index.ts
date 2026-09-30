@@ -154,6 +154,15 @@ export {
   type MediaKind,
 } from "./media/mediaGrammar";
 export { MediaFrame, formatBytes, type MediaFrameProps } from "./media/MediaFrame";
+export {
+  EditorPromptProvider,
+  useEditorPrompt,
+  type PromptField,
+  type PromptRequest,
+  type RequestPrompt,
+} from "./media/EditorPromptContext";
+export { useIsNodeSelected, useIsEditable, registerClickToSelect } from "./media/mediaSelection";
+export { usePointerResize, type PointerResizeOptions, type ResizeEdge } from "./media/usePointerResize";
 
 // Custom extensions
 export { createCustomNodeExtension } from "./custom/CustomNodeExtension";
@@ -169,6 +178,9 @@ export {
   type MediaMeta,
   type MediaUrlOptions,
   type FileExpansionContext,
+  type MediaEdit,
+  type MediaToolbarContext,
+  type MediaToolbarItem,
   ANCHORABLE_BLOCK_TYPES,
   isAnchorableBlockType,
   $collectAnchorableBlocks,
@@ -187,6 +199,8 @@ export {
   FILE_EMBED_MARKDOWN_TRANSFORMER,
   FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER,
   parseFileEmbedMarkdown,
+  $editFileEmbed,
+  $removeFileEmbed,
   type FileEmbedFields,
   type SerializedFileEmbedNode,
   TransclusionNode,
@@ -240,8 +254,21 @@ export {
   FileDropUploadExtension,
   fileDropUploadExtension,
   sanitizeEmbedTarget,
+  isRichTextPaste,
+  MEDIA_DROP_EVENT,
   type FileDropUploadConfig,
   type FileDropUploadCommands,
+  type UploadFileOptions,
+  UploadPlaceholderNode,
+  $createUploadPlaceholderNode,
+  $isUploadPlaceholderNode,
+  $findUploadPlaceholder,
+  UPLOAD_PLACEHOLDER_MARKDOWN_TRANSFORMER,
+  UPLOAD_STALE_AFTER_MS,
+  type SerializedUploadPlaceholderNode,
+  uploadRegistry,
+  type UploadTask,
+  type UploadStatus,
 } from "./embeds";
 
 // Core extensions

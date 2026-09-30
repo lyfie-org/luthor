@@ -7,17 +7,28 @@
 
 import {
   useCallback,
+  useContext,
+  useEffect,
+  useRef,
   useState,
   useSyncExternalStore,
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { LexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import type { LexicalEditor } from "lexical";
 import {
   useEmbedResolvers,
   type EmbedResolvers,
+  type MediaEdit,
   type MediaMeta,
+  type MediaToolbarContext,
+  type MediaToolbarItem,
 } from "../embeds/EmbedResolverContext";
+import { useEditorPrompt } from "./EditorPromptContext";
 import { classifyMedia, type MediaAlignment } from "./mediaGrammar";
+import { useIsEditable, useIsNodeSelected } from "./mediaSelection";
+import { usePointerResize } from "./usePointerResize";
 
 /** Everything a media frame needs to draw an attachment. */
 export interface MediaFrameProps {
@@ -35,10 +46,20 @@ export interface MediaFrameProps {
   caption?: string;
   /** Rendered inside a line of text rather than as its own block. */
   inline?: boolean;
+  /**
+   * The Lexical node this frame draws. With it (inside an editable editor) the
+   * frame becomes interactive: click to select, drag to resize, a toolbar.
+   */
+  nodeKey?: string;
+  /** Apply an edit to the node (one `editor.update`). */
+  onEdit?: (editor: LexicalEditor, edit: MediaEdit) => void;
+  /** Remove the node. */
+  onRemove?: (editor: LexicalEditor) => void;
 }
 
 const THUMB_WIDTHS = [320, 640, 1280];
 const NO_SUBSCRIPTION = () => () => {};
+const MIN_WIDTH = 48;
 
 function useMediaMeta(resolvers: EmbedResolvers, target: string): MediaMeta | null | undefined {
   const subscribe = resolvers.subscribeMediaMeta ?? NO_SUBSCRIPTION;
@@ -82,6 +103,29 @@ function withRetry(url: string, attempt: number): string {
   return `${url}${url.includes("?") ? "&" : "?"}retry=${attempt}`;
 }
 
+// ── Icons (inline, currentColor, 16px grid) ──────────────────────────────────
+
+function Icon({ d }: { d: string }): ReactNode {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <path d={d} />
+    </svg>
+  );
+}
+const ICONS = {
+  alignLeft: "M2.5 3.5h11M2.5 6.5h7M2.5 9.5h11M2.5 12.5h7",
+  alignCenter: "M2.5 3.5h11M4.5 6.5h7M2.5 9.5h11M4.5 12.5h7",
+  alignRight: "M2.5 3.5h11M6.5 6.5h7M2.5 9.5h11M6.5 12.5h7",
+  caption: "M2.5 3.5h11v6h-11zM4.5 12.5h7",
+  alt: "M3 12.5l2.5-9 2.5 9M3.8 9.5h3.4M10.5 3.5v9h3",
+  open: "M9 2.5h4.5V7M13.5 2.5L7.5 8.5M12 9.5v4H2.5V4h4",
+  remove: "M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 9h5.6l.7-9",
+  reset: "M3 8a5 5 0 1 0 1.5-3.5M3 2.5v3h3",
+};
+
+// ── The frame ────────────────────────────────────────────────────────────────
+
 /**
  * The shared view for an embedded attachment: pictures, video, audio, PDFs and
  * other files. It is built to never shift the page and never break:
@@ -94,14 +138,32 @@ function withRetry(url: string, attempt: number): string {
  *   Video loads only its metadata until played, behind its poster.
  * - **A failure is a card, not a broken-image glyph**, with Retry and a way to
  *   open the file. The markdown is never touched.
+ *
+ * Given a `nodeKey` inside an editable editor it is also interactive: a click
+ * selects it; a selected picture or video shows resize handles and a toolbar
+ * (alignment, size, caption, alt text, open, remove, plus the host's items).
+ * The toolbar lives inside the frame — anchored to the picture itself, mounted
+ * only while it is selected — so it can't drift on scroll or blink on a click.
  */
 export function MediaFrame(props: MediaFrameProps): ReactNode {
-  const { target, fragment = "", alt, width, height, align, caption, inline = false } = props;
+  const { target, fragment = "", alt, width, height, align, caption, inline = false, nodeKey, onEdit, onRemove } = props;
   const resolvers = useEmbedResolvers();
   const meta = useMediaMeta(resolvers, target);
+  const composer = useContext(LexicalComposerContext);
+  const editor: LexicalEditor | null = composer ? composer[0] : null;
+  const isEditable = useIsEditable(editor);
+  const isSelected = useIsNodeSelected(editor, nodeKey);
+  const requestPrompt = useEditorPrompt();
   const [attempt, setAttempt] = useState(0);
   // Keyed by URL: replacing the file (a new target) starts clean.
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const figureRef = useRef<HTMLElement | null>(null);
+  const frameRef = useRef<HTMLElement | null>(null);
+  const badgeRef = useRef<HTMLSpanElement | null>(null);
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
+  const actionsRef = useRef<Map<string, () => void>>(new Map());
+  // A small picture gets its toolbar underneath rather than covering it.
+  const [compact, setCompact] = useState(false);
 
   const resolve = resolvers.resolveMediaUrl;
   const url = typeof resolve === "function" ? resolve(target) : "";
@@ -109,6 +171,70 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
   const label = alt?.trim() || target;
   const failed = failedUrl !== null && failedUrl === url;
   const setFailed = (value: boolean) => setFailedUrl(value ? url : null);
+  const interactive = !!(editor && nodeKey && onEdit && isEditable);
+  const resizable = interactive && !inline && !failed && (kind === "image" || kind === "video");
+
+  const edit = useCallback(
+    (change: MediaEdit) => {
+      if (editor && onEdit) onEdit(editor, change);
+    },
+    [editor, onEdit],
+  );
+
+  const containerWidth = () =>
+    figureRef.current?.parentElement?.getBoundingClientRect().width ||
+    figureRef.current?.getBoundingClientRect().width ||
+    Number.POSITIVE_INFINITY;
+
+  const { onPointerDown, resizing } = usePointerResize({
+    frameRef,
+    minWidth: MIN_WIDTH,
+    maxWidth: containerWidth,
+    centered: align === "center",
+    onPreview: (w) => {
+      if (badgeRef.current) badgeRef.current.textContent = w === null ? "" : `${w} px`;
+    },
+    // Keep the box's shape when it has one of its own (`|WxH`); otherwise the
+    // file's own ratio follows the new width.
+    onCommit: (w) =>
+      edit({ width: w, height: positive(width) && positive(height) ? Math.round((w * height!) / width!) : null }),
+  });
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || !isSelected || inline || typeof ResizeObserver === "undefined") return;
+    const measure = () => setCompact(frame.getBoundingClientRect().width < 360);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [isSelected, inline]);
+
+  // Toolbar buttons are handled natively: a click inside a decorator reaches
+  // the editor's own root listeners before React sees it, and must neither
+  // move the selection nor steal focus from the editor.
+  useEffect(() => {
+    const toolbar = toolbarRef.current;
+    if (!toolbar) return;
+    const swallow = (event: Event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    const onClick = (event: MouseEvent) => {
+      swallow(event);
+      const button = (event.target as Element | null)?.closest?.("[data-media-action]");
+      const id = button?.getAttribute("data-media-action");
+      if (id && !button?.hasAttribute("disabled")) actionsRef.current.get(id)?.();
+    };
+    toolbar.addEventListener("mousedown", swallow);
+    toolbar.addEventListener("pointerdown", swallow);
+    toolbar.addEventListener("click", onClick);
+    return () => {
+      toolbar.removeEventListener("mousedown", swallow);
+      toolbar.removeEventListener("pointerdown", swallow);
+      toolbar.removeEventListener("click", onClick);
+    };
+  });
 
   // No host to resolve the file: a reference chip, so the embed stays visible.
   if (!url) {
@@ -137,11 +263,16 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
           ? "16 / 9"
           : undefined;
 
-  const frameStyle: CSSProperties = {
-    ...(displayWidth ? { width: `min(${Math.round(displayWidth)}px, 100%)` } : {}),
-  };
+  // A known width fills its (capped) box; an unknown one shows the file at its
+  // own size, never stretched past it.
+  const frameStyle: CSSProperties = displayWidth
+    ? { width: `min(${Math.round(displayWidth)}px, 100%)` }
+    : kind === "image"
+      ? { width: "fit-content", maxWidth: "100%" }
+      : {};
   const mediaStyle: CSSProperties = {
-    width: "100%",
+    width: displayWidth || kind !== "image" ? "100%" : "auto",
+    maxWidth: "100%",
     height: "auto",
     ...(ratio ? { aspectRatio: ratio } : {}),
     objectFit: "contain",
@@ -242,6 +373,11 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
           target="_blank"
           rel="noopener noreferrer"
           data-luthor-file-embed-target={target}
+          onClick={(event) => {
+            // In an editable note the first click selects the card; opening it
+            // is the toolbar's "Open" (or a modifier click).
+            if (interactive && !event.metaKey && !event.ctrlKey) event.preventDefault();
+          }}
         >
           <span className="luthor-media__card-icon" aria-hidden="true">
             {extensionLabel(target)}
@@ -256,28 +392,171 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
     );
   }
 
+  // ── Toolbar ──
+  let toolbar: ReactNode = null;
+  if (interactive && isSelected && !inline && !resizing) {
+    const context: MediaToolbarContext = {
+      target, fragment, kind, url, meta, width, height, align, caption, alt,
+      update: edit,
+      remove: () => editor && onRemove?.(editor),
+    };
+    const items: MediaToolbarItem[] = [];
+    if (resolvers.mediaToolbar?.builtIn !== false) {
+      const setAlign = (next: MediaAlignment) => edit({ align: align === next ? null : next });
+      items.push(
+        { id: "align-left", label: "Align left", icon: <Icon d={ICONS.alignLeft} />, active: align === "left", onSelect: () => setAlign("left") },
+        { id: "align-center", label: "Centre", icon: <Icon d={ICONS.alignCenter} />, active: align === "center", onSelect: () => setAlign("center") },
+        { id: "align-right", label: "Align right", icon: <Icon d={ICONS.alignRight} />, active: align === "right", onSelect: () => setAlign("right") },
+      );
+      if (kind === "image" || kind === "video") {
+        for (const [fraction, text] of [[0.25, "¼"], [0.5, "½"], [0.75, "¾"], [1, "Full"]] as const) {
+          items.push({
+            id: `size-${fraction}`,
+            label: fraction === 1 ? "Full width" : `${text} width`,
+            onSelect: () => {
+              const full = containerWidth();
+              if (Number.isFinite(full)) edit({ width: Math.max(MIN_WIDTH, Math.round(full * fraction)), height: null });
+            },
+          });
+        }
+        if (positive(width)) {
+          items.push({ id: "size-reset", label: "Original size", icon: <Icon d={ICONS.reset} />, onSelect: () => edit({ width: null, height: null }) });
+        }
+      }
+      items.push({
+        id: "caption",
+        label: caption ? "Edit caption" : "Add caption",
+        icon: <Icon d={ICONS.caption} />,
+        active: !!caption,
+        onSelect: () => {
+          void requestPrompt({
+            title: caption ? "Edit caption" : "Add caption",
+            submitLabel: "Save",
+            fields: [{ name: "caption", label: "Caption", value: caption ?? "", placeholder: "Shown under the file" }],
+          }).then((values) => {
+            if (values) edit({ caption: values.caption || null });
+          });
+        },
+      });
+      if (kind === "image") {
+        items.push({
+          id: "alt",
+          label: "Alt text",
+          icon: <Icon d={ICONS.alt} />,
+          active: !!alt,
+          onSelect: () => {
+            void requestPrompt({
+              title: "Alt text",
+              submitLabel: "Save",
+              fields: [{ name: "alt", label: "Describe the picture for screen readers", value: alt ?? "" }],
+            }).then((values) => {
+              if (values) edit({ alt: values.alt || null });
+            });
+          },
+        });
+      }
+      items.push({
+        id: "open",
+        label: "Open in new tab",
+        icon: <Icon d={ICONS.open} />,
+        onSelect: () => window.open(url, "_blank", "noopener,noreferrer"),
+      });
+    }
+    const hostItems = resolvers.mediaToolbar?.items?.(context) ?? [];
+    items.push(...hostItems);
+    if (resolvers.mediaToolbar?.builtIn !== false) {
+      items.push({ id: "remove", label: "Remove", icon: <Icon d={ICONS.remove} />, onSelect: () => context.remove() });
+    }
+
+    actionsRef.current = new Map(items.map((item) => [item.id, item.onSelect]));
+    toolbar = (
+      <div ref={toolbarRef} className={`luthor-media__toolbar${compact ? " is-compact" : ""}`} role="toolbar" aria-label="Attachment" contentEditable={false}>
+        {items.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={`luthor-media__tool${item.active ? " is-active" : ""}${item.icon ? "" : " luthor-media__tool--text"}`}
+            data-media-action={item.id}
+            aria-label={item.label}
+            aria-pressed={item.active === undefined ? undefined : item.active}
+            title={item.label}
+            disabled={item.disabled}
+          >
+            {item.icon ?? item.label.replace(/ width$/, "")}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  const handles = resizable && isSelected ? (
+    <>
+      <span
+        className="luthor-media__handle luthor-media__handle--left"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize"
+        onPointerDown={onPointerDown("left")}
+      />
+      <span
+        className="luthor-media__handle luthor-media__handle--right"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize"
+        onPointerDown={onPointerDown("right")}
+      />
+      <span ref={badgeRef} className="luthor-media__size-badge" aria-live="polite" />
+    </>
+  ) : null;
+
   const className = [
     "luthor-media",
     `luthor-media--${kind}`,
     inline ? "luthor-media--inline" : "luthor-media--block",
     align ? `luthor-media--align-${align}` : "",
     failed ? "luthor-media--failed" : "",
+    interactive ? "is-interactive" : "",
+    isSelected ? "is-selected" : "",
+    resizing ? "is-resizing" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   if (inline) {
     return (
-      <span className={className} data-luthor-media-kind={kind} style={frameStyle}>
+      <span
+        ref={(el) => {
+          figureRef.current = el;
+          frameRef.current = el;
+        }}
+        className={className}
+        data-luthor-media-kind={kind}
+        style={frameStyle}
+      >
         {body}
       </span>
     );
   }
 
   return (
-    <figure className={className} data-luthor-media-kind={kind} data-align={align ?? "none"}>
-      <div className="luthor-media__frame" style={frameStyle}>
+    <figure
+      ref={(el) => {
+        figureRef.current = el;
+      }}
+      className={className}
+      data-luthor-media-kind={kind}
+      data-align={align ?? "none"}
+    >
+      <div
+        ref={(el) => {
+          frameRef.current = el;
+        }}
+        className="luthor-media__frame"
+        style={frameStyle}
+      >
         {body}
+        {handles}
+        {toolbar}
       </div>
       {caption ? <figcaption className="luthor-media__caption">{caption}</figcaption> : null}
     </figure>

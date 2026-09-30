@@ -27,7 +27,9 @@ import {
   type AnyExtension,
   type LuthorTheme,
   type SourceMetadataMode,
+  EditorPromptProvider,
 } from "@lyfie/luthor-headless";
+import { getFloatingToolbarContextStore } from "../../core/extensions";
 import {
   createExtensiveExtensions,
   extensiveExtensions,
@@ -1384,14 +1386,25 @@ function ExtensiveEditorContent({
 
   useEffect(() => cancelPendingChange, [cancelPendingChange]);
 
+  // This editor's own floating-toolbar context (never another editor's). A
+  // host without the per-editor store still gets the legacy global one.
+  const floatingToolbarStore = useMemo(
+    () => (extensions as readonly unknown[]).map(getFloatingToolbarContextStore).find(Boolean) ?? null,
+    [extensions],
+  );
   useEffect(() => {
-    setFloatingToolbarContext(
-      safeCommands,
+    const next = {
+      commands: safeCommands,
       activeStates,
-      isDark ? "dark" : "light",
-      isMenuFeatureEnabled,
-    );
-  }, [safeCommands, activeStates, isDark, isMenuFeatureEnabled]);
+      editorTheme: (isDark ? "dark" : "light") as "dark" | "light",
+      isFeatureEnabled: isMenuFeatureEnabled,
+    };
+    if (floatingToolbarStore) {
+      floatingToolbarStore.set(next);
+    } else {
+      setFloatingToolbarContext(next.commands, next.activeStates, next.editorTheme, next.isFeatureEnabled);
+    }
+  }, [safeCommands, activeStates, isDark, isMenuFeatureEnabled, floatingToolbarStore]);
 
   const methods = useMemo<ExtensiveEditorRef>(
     () => {
@@ -1564,8 +1577,16 @@ function ExtensiveEditorContent({
     // Host-contributed slash commands, bound to a minimal insert API. Mapped
     // once so the same item objects flow into both the palette and the slash
     // menu, and back out on cleanup.
+    const slashCommandMap = commandApi as unknown as Record<string, unknown>;
     const slashCommandContext: ExtensiveSlashCommandContext = {
       insertText: (text) => commandApi.insertText?.(text),
+      hasCommand: (name) => typeof slashCommandMap[name] === "function",
+      runCommand: (name, ...args) => {
+        const command = slashCommandMap[name];
+        return typeof command === "function"
+          ? (command as (...commandArgs: unknown[]) => unknown)(...args)
+          : undefined;
+      },
     };
     const extraSlashItems = (extraSlashCommands ?? []).map((command) => ({
       id: command.id,
@@ -2365,7 +2386,9 @@ function ExtensiveEditorContent({
   const shouldHideDraggableAffordances = !isDraggableBoxEnabled || !isVisualEditorMode(mode);
 
   return (
-    <>
+    // Decorators (a media frame's caption and alt-text buttons) ask for values
+    // through this same themed dialog rather than window.prompt.
+    <EditorPromptProvider requestPrompt={requestInput}>
       <div
         className={`luthor-editor${shouldHideDraggableAffordances ? " luthor-editor--draggable-disabled" : ""}`}
         data-mode={mode}
@@ -2531,7 +2554,7 @@ function ExtensiveEditorContent({
           }}
         />
       )}
-    </>
+    </EditorPromptProvider>
   );
 }
 
@@ -2548,6 +2571,14 @@ export interface ExtensiveSlashCommandContext {
    * so the text lands exactly where the user typed the slash.
    */
   insertText: (text: string) => void;
+  /** Whether a registered extension provides the command `name`. */
+  hasCommand?: (name: string) => boolean;
+  /**
+   * Run the extension command `name` with `args` (e.g. `uploadAndEmbedFile`),
+   * returning its result — `undefined` when no extension provides it. Lets a
+   * command insert a real node rather than markdown text.
+   */
+  runCommand?: (name: string, ...args: unknown[]) => unknown;
 }
 
 /**
