@@ -11,6 +11,9 @@ export {
   useEmbedResolvers,
   type EmbedResolvers,
   type SavedCardMetadata,
+  type MediaMeta,
+  type MediaUrlOptions,
+  type FileExpansionContext,
 } from "./EmbedResolverContext";
 export {
   ANCHORABLE_BLOCK_TYPES,
@@ -33,6 +36,9 @@ export {
   $createFileEmbedNode,
   $isFileEmbedNode,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
+  FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER,
+  parseFileEmbedMarkdown,
+  type FileEmbedFields,
   type SerializedFileEmbedNode,
 } from "./FileEmbedNode";
 export {

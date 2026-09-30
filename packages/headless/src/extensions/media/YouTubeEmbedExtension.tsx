@@ -5,6 +5,7 @@
  * Build freely. Credit kindly.
  */
 
+import { formatSize, splitCaptionAndSize } from "./mediaGrammar";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   $createNodeSelection,
@@ -42,6 +43,11 @@ export type YouTubeEmbedPayload = {
   alignment: EmbedAlignment;
   caption?: string;
   start?: number;
+  /**
+   * The size was chosen (a resize, or `|WxH` in the markdown) rather than
+   * defaulted — only a chosen size is written back to markdown.
+   */
+  sized?: boolean;
 };
 
 export interface YouTubeEmbedConfig extends BaseExtensionConfig {
@@ -82,6 +88,7 @@ type SerializedYouTubeEmbedNode = Spread<
     alignment: EmbedAlignment;
     caption?: string;
     start?: number;
+    sized?: boolean;
   },
   SerializedLexicalNode
 >;
@@ -327,6 +334,7 @@ export class YouTubeEmbedNode extends DecoratorNode<ReactNode> {
       alignment: serialized.alignment,
       caption: serialized.caption ?? "",
       start: serialized.start,
+      sized: serialized.sized === true,
     });
   }
 
@@ -440,6 +448,7 @@ export class YouTubeEmbedNode extends DecoratorNode<ReactNode> {
       alignment: this.__payload.alignment,
       caption: this.__payload.caption,
       start: this.__payload.start,
+      ...(this.__payload.sized ? { sized: true } : {}),
     };
   }
 
@@ -487,6 +496,10 @@ export class YouTubeEmbedNode extends DecoratorNode<ReactNode> {
     writable.__payload = {
       ...writable.__payload,
       ...payload,
+      // Any new size is a chosen one, unless the caller says otherwise.
+      ...((payload.width !== undefined || payload.height !== undefined) && payload.sized === undefined
+        ? { sized: true }
+        : {}),
     };
   }
 
@@ -1039,10 +1052,12 @@ export const YOUTUBE_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
     if (!$isYouTubeEmbedNode(node)) {
       return null;
     }
-    const { src, caption } = node.getPayload();
-    return caption && caption.trim() !== ""
-      ? `![[youtube:${src}|${caption}]]`
-      : `![[youtube:${src}]]`;
+    const { src, caption, width, height, sized } = node.getPayload();
+    const segments = [
+      ...(caption && caption.trim() !== "" ? [caption] : []),
+      ...(sized ? [formatSize(width, height)] : []),
+    ];
+    return `![[youtube:${src}${segments.map((s) => `|${s}`).join("")}]]`;
   },
   regExp: /^!\[\[youtube:([^\]|]+)(?:\|([^\]]+))?\]\]\s*$/,
   replace: (parentNode: ElementNode, _children, match) => {
@@ -1051,18 +1066,16 @@ export const YOUTUBE_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
       return;
     }
     const embedUrl = toEmbedUrl(raw, YOUTUBE_MARKDOWN_EMBED_OPTIONS) ?? raw;
-    const rawCaption = match[2];
-    const caption =
-      rawCaption !== undefined && rawCaption.trim() !== ""
-        ? rawCaption.trim()
-        : "";
+    // `|caption`, `|640x360` or both: a trailing size is the chosen player size.
+    const { caption, width, height } = splitCaptionAndSize(match[2]);
     parentNode.replace(
       $createYouTubeEmbedNode({
         src: embedUrl,
-        width: 640,
-        height: 480,
+        width: width ?? 640,
+        height: height ?? (width ? Math.round((width * 9) / 16) : 480),
         alignment: "center",
         caption,
+        sized: width !== undefined,
       }),
     );
   },

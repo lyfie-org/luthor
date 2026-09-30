@@ -5,6 +5,7 @@
  * Build freely. Credit kindly.
  */
 
+import { formatSize, splitCaptionAndSize } from "./mediaGrammar";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   $createNodeSelection,
@@ -42,6 +43,11 @@ export type IframeEmbedPayload = {
   alignment: EmbedAlignment;
   title?: string;
   caption?: string;
+  /**
+   * The size was chosen (a resize, or `|WxH` in the markdown) rather than
+   * defaulted — only a chosen size is written back to markdown.
+   */
+  sized?: boolean;
 };
 
 export interface IframeEmbedConfig extends BaseExtensionConfig {
@@ -97,6 +103,7 @@ type SerializedIframeEmbedNode = Spread<
     alignment: EmbedAlignment;
     title?: string;
     caption?: string;
+    sized?: boolean;
   },
   SerializedLexicalNode
 >;
@@ -190,6 +197,7 @@ export class IframeEmbedNode extends DecoratorNode<ReactNode> {
       alignment: serialized.alignment,
       title: serialized.title,
       caption: serialized.caption ?? "",
+      sized: serialized.sized === true,
     });
   }
 
@@ -278,6 +286,7 @@ export class IframeEmbedNode extends DecoratorNode<ReactNode> {
       alignment: this.__payload.alignment,
       title: this.__payload.title,
       caption: this.__payload.caption,
+      ...(this.__payload.sized ? { sized: true } : {}),
     };
   }
 
@@ -319,6 +328,10 @@ export class IframeEmbedNode extends DecoratorNode<ReactNode> {
     writable.__payload = {
       ...writable.__payload,
       ...payload,
+      // Any new size is a chosen one, unless the caller says otherwise.
+      ...((payload.width !== undefined || payload.height !== undefined) && payload.sized === undefined
+        ? { sized: true }
+        : {}),
     };
   }
 
@@ -787,10 +800,12 @@ export const IFRAME_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
     if (!$isIframeEmbedNode(node)) {
       return null;
     }
-    const { src, caption } = node.getPayload();
-    return caption && caption.trim() !== ""
-      ? `![[iframe:${src}|${caption}]]`
-      : `![[iframe:${src}]]`;
+    const { src, caption, width, height, sized } = node.getPayload();
+    const segments = [
+      ...(caption && caption.trim() !== "" ? [caption] : []),
+      ...(sized ? [formatSize(width, height)] : []),
+    ];
+    return `![[iframe:${src}${segments.map((s) => `|${s}`).join("")}]]`;
   },
   regExp: /^!\[\[iframe:([^\]|]+)(?:\|([^\]]+))?\]\]\s*$/,
   replace: (parentNode: ElementNode, _children, match) => {
@@ -802,18 +817,16 @@ export const IFRAME_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
     if (!parsed) {
       return;
     }
-    const rawCaption = match[2];
-    const caption =
-      rawCaption !== undefined && rawCaption.trim() !== ""
-        ? rawCaption.trim()
-        : "";
+    // `|caption`, `|800x600` or both: a trailing size is the chosen frame size.
+    const { caption, width, height } = splitCaptionAndSize(match[2]);
     parentNode.replace(
       $createIframeEmbedNode({
         src: parsed.toString(),
-        width: 640,
-        height: 360,
+        width: width ?? 640,
+        height: height ?? (width ? Math.round((width * 9) / 16) : 360),
         alignment: "center",
         caption,
+        sized: width !== undefined,
       }),
     );
   },

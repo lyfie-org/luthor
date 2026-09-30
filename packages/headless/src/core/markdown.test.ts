@@ -1562,10 +1562,12 @@ describe("markdown bridge", () => {
     };
 
     const markdown = jsonToMarkdown(input);
-    expect(markdown).toContain("![Example](https://example.com/photo.jpg");
+    // Size is native markdown (Obsidian's alt-size); the rest rides in metadata.
+    expect(markdown).toContain("![Example|720x405](https://example.com/photo.jpg");
     expect(markdown).toContain("luthor:meta v1");
+    expect(markdown).not.toContain('"width":720');
 
-    const editedMarkdown = markdown.replace("![Example]", "![Updated]");
+    const editedMarkdown = markdown.replace("![Example|720x405]", "![Updated|720x405]");
     const roundTrip = markdownToJSON(editedMarkdown) as JsonDocument;
     const imageNode = findTopLevelNode(roundTrip, "image") as {
       src?: string;

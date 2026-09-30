@@ -55,6 +55,7 @@ import {
   ImageTranslator,
 } from "./ImageTranslator";
 import { sanitizeUrlForAttribute } from "../../utils/urlSafety";
+import { formatSize, MEDIA_MAX_DIMENSION } from "./mediaGrammar";
 import { reportError, warnOnce } from "../../utils/logger";
 
 /**
@@ -1293,6 +1294,28 @@ function unescapeMarkdownImageText(value: string): string {
   return value.replace(/\\(["\\\]])/g, "$1");
 }
 
+/**
+ * Obsidian's sized-image syntax: `![alt|300](url)` / `![alt|300x200](url)`.
+ * The size rides at the end of the alt text, so every other renderer still
+ * shows the picture (with a slightly odd alt) and Obsidian shows it sized.
+ */
+function splitAltSize(alt: string): { alt: string; width?: number; height?: number } {
+  const match = /^([\s\S]*?)\|(\d{1,5})(?:x(\d{1,5}))?$/.exec(alt);
+  if (!match) {
+    return { alt };
+  }
+  const width = Number(match[2]);
+  const height = match[3] === undefined ? undefined : Number(match[3]);
+  if (
+    width < 1 ||
+    width > MEDIA_MAX_DIMENSION ||
+    (height !== undefined && (height < 1 || height > MEDIA_MAX_DIMENSION))
+  ) {
+    return { alt };
+  }
+  return { alt: match[1] ?? "", width, ...(height === undefined ? {} : { height }) };
+}
+
 type MarkdownImageDirectives = {
   alignment: "left" | "center" | "right" | "none";
   linkHref?: string;
@@ -1404,7 +1427,8 @@ export const IMAGE_MARKDOWN_TRANSFORMER = {
       return null;
     }
 
-    let imageMarkdown = `![${escapeMarkdownImageText(alt)}](${src}`;
+    const size = formatSize(imageNode.__width, imageNode.__height);
+    let imageMarkdown = `![${escapeMarkdownImageText(alt)}${size ? `|${size}` : ""}](${src}`;
     
     // Add caption as title if present
     if (caption) {
@@ -1447,9 +1471,10 @@ export const IMAGE_MARKDOWN_TRANSFORMER = {
       return;
     }
 
+    const sized = splitAltSize(typeof alt === "string" ? unescapeMarkdownImageText(alt) : "");
     const imageNode = $createImageNode(
       src,
-      typeof alt === "string" ? unescapeMarkdownImageText(alt) : "",
+      sized.alt,
       typeof caption === "string" && caption.length > 0
         ? unescapeMarkdownImageText(caption)
         : undefined,
@@ -1458,8 +1483,8 @@ export const IMAGE_MARKDOWN_TRANSFORMER = {
       parsedDirectives.alignment,
       undefined,
       undefined,
-      undefined,
-      undefined,
+      sized.width,
+      sized.height,
       false,
     );
 

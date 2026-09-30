@@ -138,6 +138,22 @@ export {
   YOUTUBE_EMBED_MARKDOWN_TRANSFORMER,
   type YouTubeEmbedPayload,
 } from "./media/YouTubeEmbedExtension";
+// The shared media grammar (`![[x|480]]`, trailing directives) and view.
+export {
+  parseEmbedTarget,
+  formatEmbedTarget,
+  formatSize,
+  parseMediaDirectives,
+  formatMediaDirectives,
+  classifyMedia,
+  isFileTarget,
+  MEDIA_MAX_DIMENSION,
+  type EmbedTarget,
+  type MediaDirectives,
+  type MediaAlignment,
+  type MediaKind,
+} from "./media/mediaGrammar";
+export { MediaFrame, formatBytes, type MediaFrameProps } from "./media/MediaFrame";
 
 // Custom extensions
 export { createCustomNodeExtension } from "./custom/CustomNodeExtension";
@@ -150,6 +166,9 @@ export {
   useEmbedResolvers,
   type EmbedResolvers,
   type SavedCardMetadata,
+  type MediaMeta,
+  type MediaUrlOptions,
+  type FileExpansionContext,
   ANCHORABLE_BLOCK_TYPES,
   isAnchorableBlockType,
   $collectAnchorableBlocks,
@@ -166,6 +185,9 @@ export {
   $createFileEmbedNode,
   $isFileEmbedNode,
   FILE_EMBED_MARKDOWN_TRANSFORMER,
+  FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER,
+  parseFileEmbedMarkdown,
+  type FileEmbedFields,
   type SerializedFileEmbedNode,
   TransclusionNode,
   TransclusionExtension,
