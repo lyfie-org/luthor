@@ -26,6 +26,7 @@ props:
   - "onDesync"
   - "onOutlineChange"
   - "featureFlags"
+  - "collaboration"
 exports:
   - "PapyraEditor"
   - "papyraPreset"
@@ -56,6 +57,7 @@ lastVerifiedFrom:
   - "packages/luthor/src/presets/papyra/PapyraEditor.tsx"
   - "packages/luthor/src/presets/papyra/adapter.ts"
   - "packages/luthor/src/presets/papyra/embeds.ts"
+  - "packages/luthor/src/presets/papyra-collab/index.ts"
 navGroup: "luthor"
 navOrder: 110
 ---
@@ -172,6 +174,9 @@ round-trip back to that file.
   shared search debounce. See
   [Tuning the typeahead](#tuning-the-typeahead).
 - `featureFlags`: per-feature overrides, resolved through the enforced policy.
+- `collaboration`: a memoized `CollaborationExtension` from
+  `@lyfie/luthor-headless/collab` — live multi-cursor editing (see
+  [Live collaboration](#live-collaboration)).
 
 ## Change notification and autosave
 
@@ -266,8 +271,19 @@ declares it; the host implements it.
 
 ~~~ts
 interface PapyraEditorAdapter {
-  resolveMediaUrl(filename: string): string;                 // ![[file]] → URL
-  uploadMedia(file: File): Promise<{ filename: string }>;    // drop/paste → store
+  // ![[file]] → URL. `variant: "thumb" | "poster"` asks for a smaller rendition
+  // at least `width` px wide; return the original's URL if there is none.
+  resolveMediaUrl(filename: string, options?: { variant?: "original" | "thumb" | "poster"; width?: number }): string;
+  // Cached metadata (kind, size, width/height, version, thumb/poster/animated).
+  // `undefined` while unknown (start a lookup); the same object until it changes.
+  getMediaMeta?(filename: string): MediaMeta | null | undefined;
+  subscribeMediaMeta?(listener: () => void): () => void;
+  renderFileExpansion?(context: FileExpansionContext): ReactNode;  // e.g. a PDF viewer under a file card
+  // drop/paste/pick → store. Pass `signal` to fetch/XHR (Cancel) and report progress 0–1.
+  uploadMedia(file: File, options?: { signal: AbortSignal; onProgress: (fraction: number) => void }): Promise<{ filename: string }>;
+  validateMedia?(file: File): string | null;                 // refuse before uploading (a message), or null
+  onUploadError?(error: unknown, file: File): void;          // once per failure (a toast)
+  mediaToolbarItems?(context: MediaToolbarContext): MediaToolbarItem[];  // host buttons on a selected attachment
   openNote(ref: { title?: string; id?: string }): void;      // [[Note]] → navigate
   searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;
   searchUsers?(q: string): Promise<Array<{ username: string; name: string }>>;
@@ -386,9 +402,10 @@ export function NoteCanvas({ body }: { body: string }) {
       ref={ref}
       defaultContent={body}
       adapter={{
-        resolveMediaUrl: (name) => `/api/media/${name}`,
-        uploadMedia: async (file) => {
-          const stored = await upload(file);
+        resolveMediaUrl: (name, { variant, width } = {}) =>
+          variant === 'thumb' ? `/api/media/${name}/thumb?w=${width}` : `/api/media/${name}`,
+        uploadMedia: async (file, { signal, onProgress } = {}) => {
+          const stored = await upload(file, { signal, onProgress }); // Cancel + progress bar
           return { filename: stored.name };
         },
         openNote: ({ title }) => router.push(`/notes/${title}`),
@@ -417,7 +434,13 @@ Every custom embed ships a bidirectional markdown transformer, so the body that
 
 | Markdown            | Renders as                          |
 | ------------------- | ----------------------------------- |
-| `![[diagram.png]]`  | inline image (via `resolveMediaUrl`)|
+| `![[diagram.png]]`  | picture at its natural size (via `resolveMediaUrl`)|
+| `![[diagram.png\|480]]`, `\|480x320` | 480 px wide (and tall) — what resizing writes |
+| `![[diagram.png\|Alt text\|480]]` | with alt text |
+| `![[diagram.png]] <!-- align:center --> <!-- caption:… -->` | aligned / captioned (trailing directives) |
+| `![[report.pdf#page=3]]` | file card (+ `renderFileExpansion`, e.g. a PDF at page 3) |
+| `text ![[icon.png]] text` | inline attachment inside a paragraph |
+| `![alt\|300](https://…)` | web image, 300 px wide |
 | `[[Note]]`          | wikilink (click → `openNote`)       |
 | `[[Note\|alias]]`   | aliased wikilink                    |
 | `![[Note#^id]]`     | read-only transclusion              |
@@ -447,11 +470,93 @@ render-only and the markdown round-trips unchanged.
 
 The **YouTube** (`![[youtube:url]]`) and **iframe** (`![[iframe:url]]`) embeds
 reuse the shared media nodes from `@lyfie/luthor-headless` and carry an optional
-`|caption`. A YouTube `watch`/`youtu.be`/`shorts` link is normalized to the
-canonical `…/embed/<id>` player URL on the first pass and is byte-stable
-afterward; an iframe URL gains `https://` if it has none. Frame size and
-alignment are session-only presentation state with no markdown representation
-(like image dimensions), so the markdown text itself round-trips unchanged.
+`|caption` and size (`![[youtube:url|caption|640x360]]`). A YouTube
+`watch`/`youtu.be`/`shorts` link is normalized to the canonical `…/embed/<id>`
+player URL on the first pass and is byte-stable afterward; an iframe URL gains
+`https://` if it has none.
+
+### Attachments: size, alignment, captions
+
+Sizes use Obsidian's pipe syntax, so a vault opens unchanged in both apps:
+`|W` or `|WxH` as the last pipe segment, after an optional alt text. Alignment
+and captions are trailing HTML comments on the same line
+(`<!-- align:left|center|right -->`, `<!-- caption:… -->`); unknown directives
+and pipe segments are kept verbatim. An embed nobody edited exports the exact
+text it was read from — opening a note never rewrites it — and an edited one
+writes only the fields it has. In a table, the pipe is escaped: `![[a.png\|200]]`.
+
+Clicking an attachment selects it (one selection store per editor) and shows its
+toolbar *inside* the picture: align, ¼ ½ ¾ Full, original size, caption, alt
+text, open, the host's `mediaToolbarItems`, remove. Handles resize with
+mouse, touch or pen (one undo step, one collaboration update, written on
+release; Escape cancels); with the attachment selected, Shift+←/→ resizes by
+10 px (Alt+Shift by 1), Enter starts a line after it, Escape deselects.
+
+### Uploads
+
+Dropped, pasted and picked files each get a placeholder at once — in order, at
+the drop point or the caret — that shows progress and Cancel, and Retry/Remove if
+it fails; three upload at a time. Placeholders export nothing and carry no
+`blob:` URL, so a save mid-upload writes nothing for them and collaborators see
+only "Uploading…". A paste from Word, Excel or Google Docs keeps its text rather
+than uploading a picture of it. A drop with files dispatches a bubbling
+`luthor:media-drop` event on the editor root (for a host's drop overlay).
+
+### Host media wiring
+
+Optional adapter members, each degrading when absent:
+
+| Member | Without it | With it |
+| --- | --- | --- |
+| `getMediaMeta` + `subscribeMediaMeta` | frame measures itself on load | box reserved up front (no layout shift), file cards show size |
+| `resolveMediaUrl` `variant` | originals everywhere | `thumb` at 320/640/1280 px, video `poster` |
+| `renderFileExpansion` | plain file card | e.g. inline PDF under the card |
+| `validateMedia` / `onUploadError` | every file uploads, failures only on the placeholder | refuse early with a message, toast once per failure |
+| `mediaToolbarItems` | built-in toolbar | host buttons (copy link, download, replace…) |
+
+## Live collaboration
+
+Pass `collaboration` and the shared Yjs document becomes the body:
+
+~~~tsx
+import { LexicalCollaboration } from '@lexical/react/LexicalCollaborationContext';
+import { CollaborationExtension } from '@lyfie/luthor-headless/collab';
+
+const collaboration = useMemo(
+  () => new CollaborationExtension({ id: room, providerFactory, username, cursorColor }),
+  [room],
+);
+
+<LexicalCollaboration>
+  <PapyraEditor key={room} adapter={adapter} collaboration={collaboration} />
+</LexicalCollaboration>
+~~~
+
+- `defaultContent` is ignored; `setMarkdown` / `injectJSON` throw.
+- Modes are `visual` only — the markdown source view would replace the whole
+  document and drop concurrent peer edits.
+- Undo reverts only this user's edits. Block anchors are never stamped
+  client-side; the persisting server owns them.
+- Omit `onChange`: the server persists the room.
+- Media edits (resize, align, caption) are one update each; upload placeholders
+  reach peers as "Uploading…" and never as a `blob:` URL.
+
+The server half is `@lyfie/luthor/presets/papyra-collab` — Node-safe, no DOM:
+
+~~~ts
+import { createPapyraHeadlessCollab } from '@lyfie/luthor/presets/papyra-collab';
+
+const note = createPapyraHeadlessCollab(ydoc);
+if (note.isEmpty()) note.setMarkdown(bodyFromDisk); // seed a fresh room
+note.ensureBlockAnchors();
+await save(note.getMarkdown());                      // byte-identical to the browser getMarkdown()
+note.dispose();
+~~~
+
+`getPapyraCollabNodes()` returns the exact node classes the browser registers,
+so anything a client writes, the server can decode. Install `yjs` and
+`@lexical/yjs` (optional peers) only when you use either half. Protocol details:
+[Collaboration](/docs/luthor-headless/features/collaboration/).
 
 ## Command surface
 
@@ -466,7 +571,7 @@ slash commands through the editor's `extraSlashCommands` seam:
 | Command       | Inserts                                                        |
 | ------------- | ------------------------------------------------------------- |
 | `Link note`   | the `[[` trigger, which opens the wikilink typeahead          |
-| `Embed media` | a picked file → `adapter.uploadMedia` → `![[filename]]`       |
+| `Embed media` | a picked file → the upload pipeline (placeholder, progress) → `![[filename]]` |
 | `Insert date` | today's date as `YYYY-MM-DD`                                  |
 
 Each writes markdown-native syntax at the caret, so the body stays the source of

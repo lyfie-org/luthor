@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-09-28T18:53:35.014Z
+Generated at: 2026-10-01T05:23:19.547Z
 
 ## AI Agent Workflow
 
@@ -133,7 +133,8 @@ This page is a fast map of what the editor stack supports.
 | --- | --- | --- | --- |
 | Rich text formatting | Yes | Yes | [Commands Reference](/docs/luthor/commands-reference/) |
 | Lists, tables, structure | Yes | Yes | [Structure and Lists](/docs/luthor-headless/features/structure-and-lists/) |
-| Media embeds | Yes | Yes | [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/) |
+| Media embeds, resize, uploads | Yes | Yes | [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/) |
+| Live collaboration (Yjs) | `ExtensiveEditor`, `PapyraEditor` | `/collab` entry | [Collaboration](/docs/luthor-headless/features/collaboration/) |
 | Source modes (JSON/MD/HTML) | Yes | Bridge APIs | [Nodes and Bridges](/docs/luthor-headless/nodes-and-bridges-reference/) |
 | Preset-ready UI | Yes | No | [Preset Selector](/docs/reference/preset-selector/) |
 | Extension-level control | Limited | Yes | [Extensions Reference](/docs/luthor-headless/extensions-reference/) |
@@ -257,6 +258,7 @@ This page explains runtime contracts so installs stay predictable.
 ## Optional dependency behavior
 
 - `@lyfie/luthor-headless` keeps `@emoji-mart/data` optional.
+- `yjs` and `@lexical/yjs` are optional peers, needed only for real-time collaboration. They load from separate entries (`@lyfie/luthor-headless/collab`, `@lyfie/luthor/presets/papyra-collab`), so the main bundle never imports them.
 - Features continue to work when optional packages are absent, with graceful fallbacks.
 
 ---
@@ -1562,6 +1564,7 @@ Use this page as the entry index for runtime capability groups.
 - [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/)
 - [Code and Devtools](/docs/luthor-headless/features/code-and-devtools/)
 - [Interaction and Productivity](/docs/luthor-headless/features/interaction-and-productivity/)
+- [Collaboration](/docs/luthor-headless/features/collaboration/)
 - [Customization and Theming](/docs/luthor-headless/features/customization-and-theming/)
 
 ---
@@ -1631,6 +1634,133 @@ This group covers code authoring and source bridge workflows.
 
 - `markdownToJSON` / `jsonToMarkdown`
 - `htmlToJSON` / `jsonToHTML`
+
+---
+## FILE: luthor-headless/features/collaboration.md
+## URL: https://www.luthor.fyi/docs/luthor-headless/features/collaboration/
+---
+
+---
+title: "Collaboration"
+description: "Real-time multi-user editing over Yjs: the isolated /collab entry, CollaborationExtension, remote-change tagging, and a DOM-free server session."
+package: "headless"
+docType: "reference"
+surface: "extension"
+keywords:
+  - "collaboration"
+  - "yjs"
+  - "CollaborationExtension"
+  - "Hocuspocus"
+  - "y-websocket"
+  - "multi-cursor"
+  - "createHeadlessCollabSession"
+props:
+  []
+exports:
+  - "CollaborationExtension"
+  - "isCollaborationUpdate"
+  - "COLLABORATION_UPDATE_TAG"
+  - "createHeadlessCollabSession"
+  - "HistoryExtension"
+commands:
+  []
+extensions:
+  - "collaboration"
+nodes:
+  []
+frameworks:
+  - "react"
+lastVerifiedFrom:
+  - "packages/headless/src/collab.ts"
+  - "packages/headless/src/extensions/core/CollaborationExtension.tsx"
+  - "packages/headless/src/core/collaboration-headless.ts"
+navGroup: "luthor_headless"
+navOrder: 105
+---
+
+# Collaboration
+
+Live multi-cursor editing on a shared Yjs document, via Lexical's binding.
+
+## What this page answers
+
+- How do I make an editor collaborative?
+- What changes in history, content loading, and change events?
+- How does a server read and write the same document?
+
+## Install
+
+Separate entry: the main bundle never imports Yjs. Add the optional peers only when you use it.
+
+```bash
+pnpm add yjs @lexical/yjs @hocuspocus/provider   # or y-websocket
+```
+
+```ts
+import { CollaborationExtension } from "@lyfie/luthor-headless/collab";
+```
+
+## Client
+
+```tsx
+import * as Y from "yjs";
+import type { Provider } from "@lexical/yjs";
+import { LexicalCollaboration } from "@lexical/react/LexicalCollaborationContext";
+import { HocuspocusProvider } from "@hocuspocus/provider";
+import { CollaborationExtension } from "@lyfie/luthor-headless/collab";
+
+const collaboration = useMemo(
+  () =>
+    new CollaborationExtension({
+      id: `${ownerId}:${noteId}`, // globally unique room
+      providerFactory: (id, docs) => {
+        const doc = new Y.Doc();
+        docs.set(id, doc);
+        return new HocuspocusProvider({ url, name: id, document: doc }) as unknown as Provider;
+      },
+      username: me.name,
+      cursorColor: me.color,
+      cursorsContainerRef, // optional; defaults to document.body
+    }),
+  [ownerId, noteId],
+);
+
+<LexicalCollaboration>
+  <ExtensiveEditor extraExtensions={[collaboration]} />
+</LexicalCollaboration>;
+```
+
+| Option | Purpose |
+| --- | --- |
+| `id` | room / document id |
+| `providerFactory(id, yjsDocMap)` | network provider (Hocuspocus, y-websocket, …) |
+| `shouldBootstrap` | seed an empty doc from this client; keep `false` (default) when a server seeds it |
+| `username`, `cursorColor`, `awarenessData` | presence shown to peers |
+| `cursorsContainerRef` | element remote carets render into |
+
+Rules:
+
+- **Memoize per room.** A new instance or room needs a remount (new React `key`).
+- **Wrap in `<LexicalCollaboration>`** — Lexical's `CollaborationPlugin` requires its context provider.
+- **The doc is the content.** `defaultContent` is ignored; don't call `injectJSON`.
+- **History is per user.** `ExtensiveEditor` swaps in `new HistoryExtension({ plugin: false })` automatically, so the Yjs UndoManager undoes only your edits. Headless setups do the same by hand.
+- **The server persists, not the client.** Omit preset `onChange` on a collaborative editor — it baselines with `getMarkdown()` at mount, before the room has synced. Peer updates carry `COLLABORATION_UPDATE_TAG` (`isCollaborationUpdate(tags)` in an update listener; `source: "remote"` in change payloads).
+
+## Server
+
+`createHeadlessCollabSession(doc, { nodes })` binds a DOM-free Lexical editor to the same `Y.Doc` — same binding and root type as the browser, so both ends share one model. Use it in a Hocuspocus hook to persist, seed, or transform.
+
+```ts
+import { createHeadlessCollabSession } from "@lyfie/luthor-headless/collab";
+
+const session = createHeadlessCollabSession(doc, { nodes: EDITOR_NODES });
+session.flush();                 // apply queued remote changes
+const state = session.toJSON();  // persist
+session.replaceWithJSON(next);   // one local change → peers get a normal update
+session.dispose();
+```
+
+`nodes` must cover every type any client can write. `@lyfie/luthor/presets/papyra-collab` wraps this for the Papyra preset (markdown in/out, node list derived from the browser preset) — see [Papyra Editor](/docs/luthor/presets/papyra-editor/#live-collaboration).
 
 ---
 ## FILE: luthor-headless/features/customization-and-theming.md
@@ -1777,7 +1907,7 @@ This group covers workflow speed and command discovery.
 
 ---
 title: "Media and Embeds"
-description: "Image, iframe, and YouTube extension surfaces and associated node behavior."
+description: "Image, iframe, YouTube and file-embed extensions: sized markdown grammar, select/resize/toolbar frames, host media resolvers, and the upload pipeline."
 package: "headless"
 docType: "reference"
 surface: "extension"
@@ -1785,12 +1915,34 @@ keywords:
   - "imageExtension"
   - "iframeEmbedExtension"
   - "youTubeEmbedExtension"
+  - "fileEmbedExtension"
+  - "FileDropUploadExtension"
+  - "MediaFrame"
+  - "EmbedResolverProvider"
+  - "resize"
+  - "upload"
+  - "media grammar"
 props:
   []
 exports:
   - "imageExtension"
   - "iframeEmbedExtension"
   - "youTubeEmbedExtension"
+  - "fileEmbedExtension"
+  - "FileDropUploadExtension"
+  - "UploadPlaceholderNode"
+  - "MediaFrame"
+  - "EmbedResolverProvider"
+  - "EditorPromptProvider"
+  - "parseEmbedTarget"
+  - "formatEmbedTarget"
+  - "parseMediaDirectives"
+  - "formatMediaDirectives"
+  - "classifyMedia"
+  - "usePointerResize"
+  - "useIsNodeSelected"
+  - "sanitizeEmbedTarget"
+  - "MEDIA_DROP_EVENT"
 commands:
   - "insert.image"
   - "insert.iframe"
@@ -1799,31 +1951,130 @@ extensions:
   - "imageExtension"
   - "iframeEmbedExtension"
   - "youTubeEmbedExtension"
+  - "fileEmbedExtension"
+  - "fileDropUploadExtension"
 nodes:
   - "image"
   - "iframe-embed"
   - "youtube-embed"
+  - "fileEmbed"
+  - "uploadPlaceholder"
 frameworks:
   []
 lastVerifiedFrom:
   - "packages/headless/src/extensions/media/index.ts"
+  - "packages/headless/src/extensions/media/mediaGrammar.ts"
+  - "packages/headless/src/extensions/media/MediaFrame.tsx"
+  - "packages/headless/src/extensions/embeds/EmbedResolverContext.tsx"
+  - "packages/headless/src/extensions/embeds/FileDropUploadExtension.tsx"
 navGroup: "luthor_headless"
 navOrder: 80
 ---
 
 # Media and Embeds
 
-This group covers media insertion and embed node behavior.
+This group covers media insertion, attachment embeds, resizing, and uploads.
 
 ## What this page answers
 
-- Which extensions support image and embeds?
+- Which extensions support images, embeds, and attachments?
+- How are size, alignment, and captions written to markdown?
+- How does a host plug in media URLs, metadata, toolbar buttons, and uploads?
 
 ## Extension set
 
-- `imageExtension`
-- `iframeEmbedExtension`
-- `youTubeEmbedExtension`
+| Extension | Node | Markdown |
+| --- | --- | --- |
+| `imageExtension` | `image` | `![alt](url)`, `![alt\|300](url)` |
+| `youTubeEmbedExtension` | `youtube-embed` | `![[youtube:url\|caption\|640x360]]` |
+| `iframeEmbedExtension` | `iframe-embed` | `![[iframe:url\|caption]]` |
+| `fileEmbedExtension` | `fileEmbed` | `![[file.ext]]` (block or inline) |
+| `FileDropUploadExtension` | `uploadPlaceholder` | none — exports nothing |
+
+## Sized media grammar
+
+Obsidian-compatible, so a vault opens unchanged in both apps.
+
+| Markdown | Result |
+| --- | --- |
+| `![[photo.png]]` | natural size, capped to the column |
+| `![[photo.png\|480]]` / `\|480x320` | 480 px wide (and tall) |
+| `![[photo.png\|Alt text\|480]]` | alt text + size; size is always the last pipe segment |
+| `![[photo.png]] <!-- align:center --> <!-- caption:… -->` | trailing directives: `align:left\|center\|right`, `caption:` |
+| `![[report.pdf#page=3]]` | file card; fragment passed to the host |
+| `text ![[icon.png]] text` | inline attachment |
+
+Guarantees:
+
+- **Byte-stable.** An embed nobody edited exports the exact text it was read from; an edited one writes only the fields it has.
+- **Lossless.** Unknown pipe segments and directives are kept verbatim; inside a markdown table the escaped form `![[a.png\|200]]` is read and written as-is.
+- Sizes clamp to `MEDIA_MAX_DIMENSION` (16384). YouTube `watch`/`youtu.be`/`shorts` links normalize once to `…/embed/<id>`.
+
+Parse/format helpers for hosts: `parseEmbedTarget`, `formatEmbedTarget`, `parseMediaDirectives`, `formatMediaDirectives`, `splitCaptionAndSize`, `classifyMedia`.
+
+## Select, resize, toolbar
+
+All media nodes:
+
+- **Click** selects (one selection store per editor, `registerClickToSelect` / `useIsNodeSelected`).
+- **Handles** (images, attachments) resize with mouse, touch, or pen (`usePointerResize`): live preview, one undo step and one collaboration update on release; Escape cancels.
+
+`![[file]]` attachments draw through `MediaFrame`, which adds:
+
+- **Toolbar** inside the frame: align, ¼ ½ ¾ Full, original size, caption, alt text, open, host items, remove. Caption/alt prompts use the editor's themed dialog (`EditorPromptProvider`), never `window.prompt`.
+- **Keyboard** (selected): Shift+←/→ resizes 10 px (Alt+Shift 1 px), Enter adds a line after, Escape deselects.
+- **Stable layout**: box reserved from host metadata (no layout shift); thumbnails at 320/640/1280 px; animated images never swapped for a still; a broken file shows a labelled error.
+
+## Host resolvers
+
+Wrap the editor in `EmbedResolverProvider`. Every member is optional; absent ones degrade (file → reference chip, still round-trips).
+
+~~~tsx
+<EmbedResolverProvider
+  resolvers={{
+    resolveMediaUrl: (name, { variant, width } = {}) =>
+      variant === "thumb" ? `/media/${name}/thumb?w=${width}` : `/media/${name}`,
+    getMediaMeta: (name) => metaCache.get(name), // undefined while unknown; same object until it changes
+    subscribeMediaMeta: (listener) => metaCache.subscribe(listener),
+    renderFileExpansion: ({ kind, url }) => (kind === "pdf" ? <PdfViewer src={url} /> : null),
+    mediaToolbar: {
+      items: ({ target }) => [{ id: "download", label: "Download", onSelect: () => download(target) }],
+    },
+  }}
+>
+  {editor}
+</EmbedResolverProvider>
+~~~
+
+| Resolver | Purpose |
+| --- | --- |
+| `resolveMediaUrl(target, { variant, width })` | URL for `original`, `thumb`, or video `poster` |
+| `getMediaMeta` + `subscribeMediaMeta` | size, dimensions, `animated`, `thumb`/`poster` flags (`MediaMeta`) |
+| `renderFileExpansion` | extra content under a file card (e.g. inline PDF) |
+| `mediaToolbar.items` / `builtIn: false` | add host buttons / drop the built-ins |
+
+## Upload pipeline
+
+~~~ts
+new FileDropUploadExtension({
+  uploadFile: (file, { signal, onProgress }) => upload(file, { signal, onProgress }), // → { filename }
+  validateFile: (file) => (file.size > 50e6 ? "Too large" : null),
+  onUploadError: (error, file) => toast(`${file.name} failed`),
+  concurrency: 3, // default
+});
+~~~
+
+- Drop, paste, and pick each insert a placeholder at once — in order, at the drop point or caret — with progress, Cancel, and Retry/Remove on failure.
+- Placeholders export nothing and hold no `blob:` URL: a mid-upload save writes nothing, collaborators see "Uploading…". One left by a closed tab reads as interrupted after `UPLOAD_STALE_AFTER_MS` (15 min).
+- Rich pastes (Word, Excel, Sheets, web pages) keep their text instead of uploading a picture of it (`isRichTextPaste`).
+- Returned filenames pass `sanitizeEmbedTarget` before `![[…]]` is written.
+- A drop with files dispatches bubbling `MEDIA_DROP_EVENT` (`luthor:media-drop`) on the editor root, for a host drop overlay.
+- Commands: `uploadAndEmbedFile(file)`, `uploadAndEmbedFiles(files)` — the same pipeline for a host's own attach button.
+
+## Related
+
+- [URL and content safety](/docs/luthor-headless/url-and-content-safety/)
+- [Papyra Editor](/docs/luthor/presets/papyra-editor/) — the preset wiring all of this to a host adapter
 
 ---
 ## FILE: luthor-headless/features/structure-and-lists.md
@@ -2126,6 +2377,8 @@ This page documents what bridge conversions can represent natively.
 - `tablerow`
 - `tablecell`
 
+Embed nodes (`fileEmbed`, `wikilink`, `transclusion`, `blockAnchor`, `savedCard`, `callout`) join the markdown bridge through `MarkdownBridgeOptions.extraNodes` / `extraTransformers`; `PapyraEditor` passes them for you. `fileEmbed` round-trips the sized grammar byte-for-byte — see [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/).
+
 ## Metadata behavior
 
 - `metadataMode="preserve"` keeps envelope comments for non-native fields.
@@ -2364,6 +2617,10 @@ with `-` before insertion (`sanitizeEmbedTarget`) — a file named
 the next save. Hosts should apply the same normalization server-side, or
 the stored name and the body reference will disagree.
 
+Upload placeholders serialize to nothing and never carry a `blob:` URL
+in the document, so a save — or a collaborator — mid-upload never sees
+a local-only reference.
+
 ## Metadata envelopes
 
 Envelopes preserve unsupported nodes inside `<!-- luthor:meta -->`
@@ -2447,6 +2704,8 @@ that isn't true.
 | Emoji menu (`:`) | Same as the slash menu. |
 | Command palette | `Escape` to dismiss, `↑`/`↓` to move, `Enter` to run. Focus is in the search input. |
 | Link bubble | Reachable by `Tab`; `Escape` returns to the editor. |
+| Selected `![[file]]` attachment | `Shift`+`←`/`→` resizes 10 px (`Alt`+`Shift` 1 px), `Enter` starts a line after it, `Escape` deselects. Its toolbar is a labelled `role="toolbar"`; resize handles are labelled buttons. |
+| Resize drag | `Escape` cancels and restores the previous size. |
 
 ### The Tab trap, and how to escape it
 
@@ -2485,8 +2744,10 @@ Purely decorative chrome — menu headers, group titles that duplicate an
 Luthor honors `prefers-reduced-motion: reduce`. Most of its motion flows
 through the `--luthor-theme-transition` token, which the query sets to
 `0s`; animations and transitions that do not read the token are reduced
-to a negligible duration by the same block. Hosts overriding Luthor's
-CSS should keep that media query in place.
+to a negligible duration by the same block. The attachment toolbar skips
+its entrance animation, resize handles stop transitioning, and an
+indeterminate upload bar turns static. Hosts overriding Luthor's CSS should keep that
+media query in place.
 
 ## Verified by tests
 
@@ -2750,8 +3011,10 @@ appear in the command palette.
 
 Each command's `action` receives an `ExtensiveSlashCommandContext`. The slash
 trigger (`/query`) is removed and the caret restored before `action` runs, so
-`insertText` lands exactly where the slash was typed. The action may be async
-(e.g. to await an upload before inserting a reference).
+`insertText` lands exactly where the slash was typed. `hasCommand(name)` and
+`runCommand(name, ...args)` reach any registered extension command, so an action
+can insert a real node (`uploadAndEmbedFile(file)`) instead of text. The action
+may be async.
 
 ```tsx
 <ExtensiveEditor
@@ -2772,7 +3035,8 @@ trigger (`/query`) is removed and the caret restored before `action` runs, so
 
 The `papyra` preset uses this seam internally to contribute its note-taking
 commands — "Link note" (drops the `[[` wikilink trigger), "Embed media"
-(uploads through the adapter, inserts `![[name]]`), and "Insert date".
+(`runCommand("uploadAndEmbedFile", file)`: placeholder, progress, then
+`![[name]]`), and "Insert date".
 
 ## Host-contributed toolbar items
 
@@ -3177,7 +3441,7 @@ Use `ExtensiveEditor` when you want full formatting, media, code, and command wo
 - `maxListIndentation`: Caps nested list depth in visual editing.
 - `imageUploadHandler`: Intercepts local image file uploads from the toolbar.
 - `gifUploadHandler`: Intercepts local GIF uploads. Falls back to `imageUploadHandler` when omitted.
-- `onChange`: Change notification, coalesced to one call per committed change, with `{ markdown, source, isDirty }`. Fires for every mutation path (typing, toolbar, slash commands, undo/redo, paste, drag-drop, markdown source view) as `source: "user"`; host adopts (`injectJSON`) fire as `source: "programmatic"`; the initial `defaultContent` load never fires. Wire autosave here — a DOM `onInput` handler on a wrapper element does **not** work, because Lexical stops propagation of the contenteditable's `input` event.
+- `onChange`: Change notification, coalesced to one call per committed change, with `{ markdown, source, isDirty }`. Fires for every mutation path (typing, toolbar, slash commands, undo/redo, paste, drag-drop, markdown source view) as `source: "user"`; host adopts (`injectJSON`) fire as `source: "programmatic"`; peer edits from a collaboration binding fire as `source: "remote"`; the initial `defaultContent` load never fires. Wire autosave here — a DOM `onInput` handler on a wrapper element does **not** work, because Lexical stops propagation of the contenteditable's `input` event.
 - `onReady`: Fires after the editor is interactive **and** initial content has reconciled, so `getMarkdown()` inside the callback is immediately stable. The editor normalises imported markdown, so baseline dirty checks against its own output, never against your input string.
 - `onDesync`: Opt-in watchdog reporting model/DOM divergence — text painted into the contenteditable behind the reconciler's back (`document.execCommand`, extensions, password managers) that would silently miss from `getMarkdown()`.
 - `presetId`: Preset identity for the editable-surface class names (`luthor-preset-<id>__container` / `__content` / `__placeholder`). Wrapper presets set their own id so host CSS matches the rendered element.
@@ -3202,6 +3466,14 @@ Bulleted, numbered and checkbox lists share one marker column, so item text star
 If `gifUploadHandler` is not provided, GIF file uploads use `imageUploadHandler`.
 
 For production handlers, return a persistent URL from your storage service. Returning `blob:` URLs from handlers is fine for quick prototypes, but dev StrictMode remount cycles can revoke blob URLs and cause temporary `ERR_FILE_NOT_FOUND` preview errors.
+
+## Images
+
+Click selects an image, YouTube, or iframe embed. Selected images resize from their handles with mouse, touch, or pen — handles stay up for the whole drag, the width commits as one undo step on release, and Escape cancels. See [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/).
+
+## Live collaboration
+
+Add a `CollaborationExtension` (from `@lyfie/luthor-headless/collab`) to `extraExtensions`. The preset then skips `defaultContent` (the shared doc hydrates the editor) and swaps Lexical history for per-user Yjs undo. Setup: [Collaboration](/docs/luthor-headless/features/collaboration/).
 
 ## Code intelligence toggle
 
@@ -3481,6 +3753,7 @@ props:
   - "onDesync"
   - "onOutlineChange"
   - "featureFlags"
+  - "collaboration"
 exports:
   - "PapyraEditor"
   - "papyraPreset"
@@ -3511,6 +3784,7 @@ lastVerifiedFrom:
   - "packages/luthor/src/presets/papyra/PapyraEditor.tsx"
   - "packages/luthor/src/presets/papyra/adapter.ts"
   - "packages/luthor/src/presets/papyra/embeds.ts"
+  - "packages/luthor/src/presets/papyra-collab/index.ts"
 navGroup: "luthor"
 navOrder: 110
 ---
@@ -3627,6 +3901,9 @@ round-trip back to that file.
   shared search debounce. See
   [Tuning the typeahead](#tuning-the-typeahead).
 - `featureFlags`: per-feature overrides, resolved through the enforced policy.
+- `collaboration`: a memoized `CollaborationExtension` from
+  `@lyfie/luthor-headless/collab` — live multi-cursor editing (see
+  [Live collaboration](#live-collaboration)).
 
 ## Change notification and autosave
 
@@ -3721,8 +3998,19 @@ declares it; the host implements it.
 
 ~~~ts
 interface PapyraEditorAdapter {
-  resolveMediaUrl(filename: string): string;                 // ![[file]] → URL
-  uploadMedia(file: File): Promise<{ filename: string }>;    // drop/paste → store
+  // ![[file]] → URL. `variant: "thumb" | "poster"` asks for a smaller rendition
+  // at least `width` px wide; return the original's URL if there is none.
+  resolveMediaUrl(filename: string, options?: { variant?: "original" | "thumb" | "poster"; width?: number }): string;
+  // Cached metadata (kind, size, width/height, version, thumb/poster/animated).
+  // `undefined` while unknown (start a lookup); the same object until it changes.
+  getMediaMeta?(filename: string): MediaMeta | null | undefined;
+  subscribeMediaMeta?(listener: () => void): () => void;
+  renderFileExpansion?(context: FileExpansionContext): ReactNode;  // e.g. a PDF viewer under a file card
+  // drop/paste/pick → store. Pass `signal` to fetch/XHR (Cancel) and report progress 0–1.
+  uploadMedia(file: File, options?: { signal: AbortSignal; onProgress: (fraction: number) => void }): Promise<{ filename: string }>;
+  validateMedia?(file: File): string | null;                 // refuse before uploading (a message), or null
+  onUploadError?(error: unknown, file: File): void;          // once per failure (a toast)
+  mediaToolbarItems?(context: MediaToolbarContext): MediaToolbarItem[];  // host buttons on a selected attachment
   openNote(ref: { title?: string; id?: string }): void;      // [[Note]] → navigate
   searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;
   searchUsers?(q: string): Promise<Array<{ username: string; name: string }>>;
@@ -3841,9 +4129,10 @@ export function NoteCanvas({ body }: { body: string }) {
       ref={ref}
       defaultContent={body}
       adapter={{
-        resolveMediaUrl: (name) => `/api/media/${name}`,
-        uploadMedia: async (file) => {
-          const stored = await upload(file);
+        resolveMediaUrl: (name, { variant, width } = {}) =>
+          variant === 'thumb' ? `/api/media/${name}/thumb?w=${width}` : `/api/media/${name}`,
+        uploadMedia: async (file, { signal, onProgress } = {}) => {
+          const stored = await upload(file, { signal, onProgress }); // Cancel + progress bar
           return { filename: stored.name };
         },
         openNote: ({ title }) => router.push(`/notes/${title}`),
@@ -3872,7 +4161,13 @@ Every custom embed ships a bidirectional markdown transformer, so the body that
 
 | Markdown            | Renders as                          |
 | ------------------- | ----------------------------------- |
-| `![[diagram.png]]`  | inline image (via `resolveMediaUrl`)|
+| `![[diagram.png]]`  | picture at its natural size (via `resolveMediaUrl`)|
+| `![[diagram.png\|480]]`, `\|480x320` | 480 px wide (and tall) — what resizing writes |
+| `![[diagram.png\|Alt text\|480]]` | with alt text |
+| `![[diagram.png]] <!-- align:center --> <!-- caption:… -->` | aligned / captioned (trailing directives) |
+| `![[report.pdf#page=3]]` | file card (+ `renderFileExpansion`, e.g. a PDF at page 3) |
+| `text ![[icon.png]] text` | inline attachment inside a paragraph |
+| `![alt\|300](https://…)` | web image, 300 px wide |
 | `[[Note]]`          | wikilink (click → `openNote`)       |
 | `[[Note\|alias]]`   | aliased wikilink                    |
 | `![[Note#^id]]`     | read-only transclusion              |
@@ -3902,11 +4197,93 @@ render-only and the markdown round-trips unchanged.
 
 The **YouTube** (`![[youtube:url]]`) and **iframe** (`![[iframe:url]]`) embeds
 reuse the shared media nodes from `@lyfie/luthor-headless` and carry an optional
-`|caption`. A YouTube `watch`/`youtu.be`/`shorts` link is normalized to the
-canonical `…/embed/<id>` player URL on the first pass and is byte-stable
-afterward; an iframe URL gains `https://` if it has none. Frame size and
-alignment are session-only presentation state with no markdown representation
-(like image dimensions), so the markdown text itself round-trips unchanged.
+`|caption` and size (`![[youtube:url|caption|640x360]]`). A YouTube
+`watch`/`youtu.be`/`shorts` link is normalized to the canonical `…/embed/<id>`
+player URL on the first pass and is byte-stable afterward; an iframe URL gains
+`https://` if it has none.
+
+### Attachments: size, alignment, captions
+
+Sizes use Obsidian's pipe syntax, so a vault opens unchanged in both apps:
+`|W` or `|WxH` as the last pipe segment, after an optional alt text. Alignment
+and captions are trailing HTML comments on the same line
+(`<!-- align:left|center|right -->`, `<!-- caption:… -->`); unknown directives
+and pipe segments are kept verbatim. An embed nobody edited exports the exact
+text it was read from — opening a note never rewrites it — and an edited one
+writes only the fields it has. In a table, the pipe is escaped: `![[a.png\|200]]`.
+
+Clicking an attachment selects it (one selection store per editor) and shows its
+toolbar *inside* the picture: align, ¼ ½ ¾ Full, original size, caption, alt
+text, open, the host's `mediaToolbarItems`, remove. Handles resize with
+mouse, touch or pen (one undo step, one collaboration update, written on
+release; Escape cancels); with the attachment selected, Shift+←/→ resizes by
+10 px (Alt+Shift by 1), Enter starts a line after it, Escape deselects.
+
+### Uploads
+
+Dropped, pasted and picked files each get a placeholder at once — in order, at
+the drop point or the caret — that shows progress and Cancel, and Retry/Remove if
+it fails; three upload at a time. Placeholders export nothing and carry no
+`blob:` URL, so a save mid-upload writes nothing for them and collaborators see
+only "Uploading…". A paste from Word, Excel or Google Docs keeps its text rather
+than uploading a picture of it. A drop with files dispatches a bubbling
+`luthor:media-drop` event on the editor root (for a host's drop overlay).
+
+### Host media wiring
+
+Optional adapter members, each degrading when absent:
+
+| Member | Without it | With it |
+| --- | --- | --- |
+| `getMediaMeta` + `subscribeMediaMeta` | frame measures itself on load | box reserved up front (no layout shift), file cards show size |
+| `resolveMediaUrl` `variant` | originals everywhere | `thumb` at 320/640/1280 px, video `poster` |
+| `renderFileExpansion` | plain file card | e.g. inline PDF under the card |
+| `validateMedia` / `onUploadError` | every file uploads, failures only on the placeholder | refuse early with a message, toast once per failure |
+| `mediaToolbarItems` | built-in toolbar | host buttons (copy link, download, replace…) |
+
+## Live collaboration
+
+Pass `collaboration` and the shared Yjs document becomes the body:
+
+~~~tsx
+import { LexicalCollaboration } from '@lexical/react/LexicalCollaborationContext';
+import { CollaborationExtension } from '@lyfie/luthor-headless/collab';
+
+const collaboration = useMemo(
+  () => new CollaborationExtension({ id: room, providerFactory, username, cursorColor }),
+  [room],
+);
+
+<LexicalCollaboration>
+  <PapyraEditor key={room} adapter={adapter} collaboration={collaboration} />
+</LexicalCollaboration>
+~~~
+
+- `defaultContent` is ignored; `setMarkdown` / `injectJSON` throw.
+- Modes are `visual` only — the markdown source view would replace the whole
+  document and drop concurrent peer edits.
+- Undo reverts only this user's edits. Block anchors are never stamped
+  client-side; the persisting server owns them.
+- Omit `onChange`: the server persists the room.
+- Media edits (resize, align, caption) are one update each; upload placeholders
+  reach peers as "Uploading…" and never as a `blob:` URL.
+
+The server half is `@lyfie/luthor/presets/papyra-collab` — Node-safe, no DOM:
+
+~~~ts
+import { createPapyraHeadlessCollab } from '@lyfie/luthor/presets/papyra-collab';
+
+const note = createPapyraHeadlessCollab(ydoc);
+if (note.isEmpty()) note.setMarkdown(bodyFromDisk); // seed a fresh room
+note.ensureBlockAnchors();
+await save(note.getMarkdown());                      // byte-identical to the browser getMarkdown()
+note.dispose();
+~~~
+
+`getPapyraCollabNodes()` returns the exact node classes the browser registers,
+so anything a client writes, the server can decode. Install `yjs` and
+`@lexical/yjs` (optional peers) only when you use either half. Protocol details:
+[Collaboration](/docs/luthor-headless/features/collaboration/).
 
 ## Command surface
 
@@ -3921,7 +4298,7 @@ slash commands through the editor's `extraSlashCommands` seam:
 | Command       | Inserts                                                        |
 | ------------- | ------------------------------------------------------------- |
 | `Link note`   | the `[[` trigger, which opens the wikilink typeahead          |
-| `Embed media` | a picked file → `adapter.uploadMedia` → `![[filename]]`       |
+| `Embed media` | a picked file → the upload pipeline (placeholder, progress) → `![[filename]]` |
 | `Insert date` | today's date as `YYYY-MM-DD`                                  |
 
 Each writes markdown-native syntax at the caret, so the body stays the source of

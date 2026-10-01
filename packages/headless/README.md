@@ -28,7 +28,8 @@ pnpm add @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/lis
 Optional:
 
 ```bash
-pnpm add @emoji-mart/data
+pnpm add @emoji-mart/data      # emoji picker data
+pnpm add yjs @lexical/yjs      # live collaboration (@lyfie/luthor-headless/collab)
 ```
 
 ## Quick Usage
@@ -73,6 +74,8 @@ export function Editor() {
 - :building_construction: Compose only what your product needs
 - :floppy_disk: JSON-first import/export workflow
 - :art: Bring your own toolbar and design system
+- :framed_picture: Media primitives: sized `![[file|480]]` grammar, `MediaFrame` (select, pointer resize, in-frame toolbar), host resolvers for URLs/thumbnails/metadata, upload pipeline with placeholders
+- :busts_in_silhouette: `@lyfie/luthor-headless/collab`: `CollaborationExtension` + `createHeadlessCollabSession` for a DOM-free server
 
 ## Compatibility
 
@@ -83,11 +86,12 @@ export function Editor() {
 
 ## Documentation
 
-- Docs landing: [luthor.fyi/docs/getting-started/luthor-headless](https://www.luthor.fyi/docs/getting-started/luthor-headless)
-- Features docs: [luthor.fyi/docs/luthor-headless/features](https://www.luthor.fyi/docs/luthor-headless/features)
-- User guide (repo): [documentation/user/headless/getting-started.md](https://github.com/lyfie-org/luthor/blob/main/documentation/user/headless/getting-started.md)
-- Extensions/config: [documentation/user/headless/extensions-and-configuration.md](https://github.com/lyfie-org/luthor/blob/main/documentation/user/headless/extensions-and-configuration.md)
-- Import/export: [documentation/user/headless/import-export.md](https://github.com/lyfie-org/luthor/blob/main/documentation/user/headless/import-export.md)
+- Docs landing: [luthor.fyi/docs/luthor-headless/overview](https://www.luthor.fyi/docs/luthor-headless/overview/)
+- Quick start: [luthor.fyi/docs/getting-started/quickstart-headless](https://www.luthor.fyi/docs/getting-started/quickstart-headless/)
+- Features: [luthor.fyi/docs/luthor-headless/features](https://www.luthor.fyi/docs/luthor-headless/features/)
+- Media and embeds: [luthor.fyi/docs/luthor-headless/features/media-and-embeds](https://www.luthor.fyi/docs/luthor-headless/features/media-and-embeds/)
+- Collaboration: [luthor.fyi/docs/luthor-headless/features/collaboration](https://www.luthor.fyi/docs/luthor-headless/features/collaboration/)
+- Import/export bridges: [luthor.fyi/docs/luthor-headless/nodes-and-bridges-reference](https://www.luthor.fyi/docs/luthor-headless/nodes-and-bridges-reference/)
 
 ## Related Packages
 

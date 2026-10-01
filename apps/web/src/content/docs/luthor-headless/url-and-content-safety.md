@@ -173,6 +173,10 @@ with `-` before insertion (`sanitizeEmbedTarget`) — a file named
 the next save. Hosts should apply the same normalization server-side, or
 the stored name and the body reference will disagree.
 
+Upload placeholders serialize to nothing and never carry a `blob:` URL
+in the document, so a save — or a collaborator — mid-upload never sees
+a local-only reference.
+
 ## Metadata envelopes
 
 Envelopes preserve unsupported nodes inside `<!-- luthor:meta -->`

@@ -160,8 +160,10 @@ appear in the command palette.
 
 Each command's `action` receives an `ExtensiveSlashCommandContext`. The slash
 trigger (`/query`) is removed and the caret restored before `action` runs, so
-`insertText` lands exactly where the slash was typed. The action may be async
-(e.g. to await an upload before inserting a reference).
+`insertText` lands exactly where the slash was typed. `hasCommand(name)` and
+`runCommand(name, ...args)` reach any registered extension command, so an action
+can insert a real node (`uploadAndEmbedFile(file)`) instead of text. The action
+may be async.
 
 ```tsx
 <ExtensiveEditor
@@ -182,7 +184,8 @@ trigger (`/query`) is removed and the caret restored before `action` runs, so
 
 The `papyra` preset uses this seam internally to contribute its note-taking
 commands — "Link note" (drops the `[[` wikilink trigger), "Embed media"
-(uploads through the adapter, inserts `![[name]]`), and "Insert date".
+(`runCommand("uploadAndEmbedFile", file)`: placeholder, progress, then
+`![[name]]`), and "Insert date".
 
 ## Host-contributed toolbar items
 

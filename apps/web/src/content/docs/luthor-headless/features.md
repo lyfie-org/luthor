@@ -49,6 +49,7 @@ Use this page as the entry index for runtime capability groups.
 - [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/)
 - [Code and Devtools](/docs/luthor-headless/features/code-and-devtools/)
 - [Interaction and Productivity](/docs/luthor-headless/features/interaction-and-productivity/)
+- [Collaboration](/docs/luthor-headless/features/collaboration/)
 - [Customization and Theming](/docs/luthor-headless/features/customization-and-theming/)
 
 

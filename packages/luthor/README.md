@@ -65,7 +65,8 @@ imports, so always baseline against its own output, never your input string.
 
 - :sparkles: `ExtensiveEditor` with rich defaults and polished UX
 - :toolbox: Built-in toolbars, slash commands, floating actions, source mode
-- :framed_picture: Media and embed workflows (image, iframe, YouTube)
+- :framed_picture: Media and embeds (image, file, iframe, YouTube) with resize handles, an in-frame toolbar, and an upload pipeline (placeholders, progress, cancel, retry)
+- :busts_in_silhouette: Opt-in live collaboration (Yjs) for `ExtensiveEditor` and `PapyraEditor`
 - :shield: TypeScript-first APIs and reusable preset architecture
 - :twisted_rightwards_arrows: Headless escape hatch via `headless` re-export
 
@@ -75,7 +76,7 @@ imports, so always baseline against its own output, never your input string.
 - `MarkDownEditor`
 - `HTMLEditor`
 - `LegacyRichEditor`
-- `PapyraEditor`
+- `PapyraEditor` — markdown-native note canvas: `[[wikilinks]]`, `![[file|480]]` attachments, transclusion, block anchors, host adapter
 
 ## Compatibility
 
@@ -85,11 +86,12 @@ imports, so always baseline against its own output, never your input string.
 
 ## Documentation
 
-- Docs landing: [luthor.fyi/docs/getting-started/luthor](https://www.luthor.fyi/docs/getting-started/luthor)
-- Presets docs: [luthor.fyi/docs/luthor/presets](https://www.luthor.fyi/docs/luthor/presets)
-- User guide (repo): [documentation/user/luthor/getting-started.md](https://github.com/lyfie-org/luthor/blob/main/documentation/user/luthor/getting-started.md)
-- Presets/config: [documentation/user/luthor/presets-and-configuration.md](https://github.com/lyfie-org/luthor/blob/main/documentation/user/luthor/presets-and-configuration.md)
-- Extensive editor guide: [documentation/user/luthor/extensive-editor.md](https://github.com/lyfie-org/luthor/blob/main/documentation/user/luthor/extensive-editor.md)
+- Docs landing: [luthor.fyi/docs/luthor/overview](https://www.luthor.fyi/docs/luthor/overview/)
+- Quick start: [luthor.fyi/docs/getting-started/quickstart-luthor](https://www.luthor.fyi/docs/getting-started/quickstart-luthor/)
+- Presets: [luthor.fyi/docs/luthor/presets](https://www.luthor.fyi/docs/luthor/presets/)
+- Extensive editor: [luthor.fyi/docs/luthor/presets/extensive-editor](https://www.luthor.fyi/docs/luthor/presets/extensive-editor/)
+- Papyra editor: [luthor.fyi/docs/luthor/presets/papyra-editor](https://www.luthor.fyi/docs/luthor/presets/papyra-editor/)
+- Props: [luthor.fyi/docs/luthor/props-reference](https://www.luthor.fyi/docs/luthor/props-reference/)
 
 ## Need Headless Control?
 
