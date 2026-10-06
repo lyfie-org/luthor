@@ -5,6 +5,8 @@
  * Build freely. Credit kindly.
  */
 
+// @vitest-environment jsdom
+
 import { describe, expect, it } from "vitest";
 import {
   $createParagraphNode,
@@ -15,7 +17,7 @@ import {
   createEditor,
   type LexicalEditor,
 } from "lexical";
-import { registerDisabledFeatureContentGuards } from "./contentGuards";
+import { registerContentFormatGuard } from "./content-guards";
 
 function makeEditor(): LexicalEditor {
   const editor = createEditor({ onError: (error) => { throw error; } });
@@ -59,10 +61,10 @@ function readFirst(editor: LexicalEditor) {
   });
 }
 
-describe("registerDisabledFeatureContentGuards", () => {
-  it("strips a disabled feature's style from pasted text and paragraphs", () => {
+describe("registerContentFormatGuard", () => {
+  it("strips the given style properties from text and paragraphs", () => {
     const editor = makeEditor();
-    registerDisabledFeatureContentGuards(editor, { lineHeight: false });
+    registerContentFormatGuard(editor, { styleProperties: ["line-height"] });
 
     insertStyled(
       editor,
@@ -77,37 +79,32 @@ describe("registerDisabledFeatureContentGuards", () => {
     });
   });
 
-  it("strips every disabled style feature and the disabled script formats", () => {
+  it("clears the given text formats and keeps the rest", () => {
     const editor = makeEditor();
-    registerDisabledFeatureContentGuards(editor, {
-      fontFamily: false,
-      fontSize: false,
-      lineHeight: false,
-      textColor: false,
-      textHighlight: false,
-      subscript: false,
-      superscript: false,
-    });
+    registerContentFormatGuard(editor, { textFormats: ["subscript", "superscript"] });
 
-    insertStyled(editor, {
-      style: "font-family: Arial; font-size: 30px; line-height: 40px; color: red; background-color: yellow",
-      formats: ["superscript", "bold"],
-    });
+    insertStyled(editor, { formats: ["superscript", "bold"] });
 
-    expect(readFirst(editor)).toMatchObject({
-      textStyle: "",
-      sub: false,
-      sup: false,
-      bold: true,
-    });
+    expect(readFirst(editor)).toMatchObject({ sub: false, sup: false, bold: true });
   });
 
-  it("leaves enabled features alone", () => {
+  it("cleans content that was already in the editor when it registers", () => {
     const editor = makeEditor();
-    registerDisabledFeatureContentGuards(editor, { lineHeight: true, fontSize: false });
+    insertStyled(editor, { style: "line-height: 3" });
 
-    insertStyled(editor, { style: "line-height: 3; font-size: 30px", formats: ["subscript"] });
+    registerContentFormatGuard(editor, { styleProperties: ["line-height"] });
+    editor.update(() => {}, { discrete: true });
 
-    expect(readFirst(editor)).toMatchObject({ textStyle: "line-height: 3;", sub: true });
+    expect(readFirst(editor).textStyle).toBe("");
+  });
+
+  it("stops guarding once unregistered", () => {
+    const editor = makeEditor();
+    const unregister = registerContentFormatGuard(editor, { styleProperties: ["line-height"] });
+    unregister();
+
+    insertStyled(editor, { style: "line-height: 3" });
+
+    expect(readFirst(editor).textStyle).toBe("line-height: 3");
   });
 });
