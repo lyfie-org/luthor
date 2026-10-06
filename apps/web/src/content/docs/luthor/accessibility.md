@@ -58,6 +58,8 @@ that isn't true.
 | Emoji menu (`:`) | Same as the slash menu. |
 | Command palette | `Escape` to dismiss, `↑`/`↓` to move, `Enter` to run. Focus is in the search input. |
 | Link bubble | Reachable by `Tab`; `Escape` returns to the editor. |
+| Selected `![[file]]` attachment | `Shift`+`←`/`→` resizes 10 px (`Alt`+`Shift` 1 px), `Enter` starts a line after it, `Escape` deselects. Its toolbar is a labelled `role="toolbar"`; resize handles are labelled buttons. |
+| Resize drag | `Escape` cancels and restores the previous size. |
 
 ### The Tab trap, and how to escape it
 
@@ -96,8 +98,10 @@ Purely decorative chrome — menu headers, group titles that duplicate an
 Luthor honors `prefers-reduced-motion: reduce`. Most of its motion flows
 through the `--luthor-theme-transition` token, which the query sets to
 `0s`; animations and transitions that do not read the token are reduced
-to a negligible duration by the same block. Hosts overriding Luthor's
-CSS should keep that media query in place.
+to a negligible duration by the same block. The attachment toolbar skips
+its entrance animation, resize handles stop transitioning, and an
+indeterminate upload bar turns static. Hosts overriding Luthor's CSS should keep that
+media query in place.
 
 ## Verified by tests
 

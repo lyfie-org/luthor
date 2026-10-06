@@ -89,6 +89,8 @@ This page documents what bridge conversions can represent natively.
 - `tablerow`
 - `tablecell`
 
+Embed nodes (`fileEmbed`, `wikilink`, `transclusion`, `blockAnchor`, `savedCard`, `callout`) join the markdown bridge through `MarkdownBridgeOptions.extraNodes` / `extraTransformers`; `PapyraEditor` passes them for you. `fileEmbed` round-trips the sized grammar byte-for-byte — see [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/).
+
 ## Metadata behavior
 
 - `metadataMode="preserve"` keeps envelope comments for non-native fields.

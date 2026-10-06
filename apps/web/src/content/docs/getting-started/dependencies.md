@@ -49,6 +49,7 @@ This page explains runtime contracts so installs stay predictable.
 ## Optional dependency behavior
 
 - `@lyfie/luthor-headless` keeps `@emoji-mart/data` optional.
+- `yjs` and `@lexical/yjs` are optional peers, needed only for real-time collaboration. They load from separate entries (`@lyfie/luthor-headless/collab`, `@lyfie/luthor/presets/papyra-collab`), so the main bundle never imports them.
 - Features continue to work when optional packages are absent, with graceful fallbacks.
 
 

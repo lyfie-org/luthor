@@ -64,7 +64,7 @@ Use `ExtensiveEditor` when you want full formatting, media, code, and command wo
 - `maxListIndentation`: Caps nested list depth in visual editing.
 - `imageUploadHandler`: Intercepts local image file uploads from the toolbar.
 - `gifUploadHandler`: Intercepts local GIF uploads. Falls back to `imageUploadHandler` when omitted.
-- `onChange`: Change notification, coalesced to one call per committed change, with `{ markdown, source, isDirty }`. Fires for every mutation path (typing, toolbar, slash commands, undo/redo, paste, drag-drop, markdown source view) as `source: "user"`; host adopts (`injectJSON`) fire as `source: "programmatic"`; the initial `defaultContent` load never fires. Wire autosave here — a DOM `onInput` handler on a wrapper element does **not** work, because Lexical stops propagation of the contenteditable's `input` event.
+- `onChange`: Change notification, coalesced to one call per committed change, with `{ markdown, source, isDirty }`. Fires for every mutation path (typing, toolbar, slash commands, undo/redo, paste, drag-drop, markdown source view) as `source: "user"`; host adopts (`injectJSON`) fire as `source: "programmatic"`; peer edits from a collaboration binding fire as `source: "remote"`; the initial `defaultContent` load never fires. Wire autosave here — a DOM `onInput` handler on a wrapper element does **not** work, because Lexical stops propagation of the contenteditable's `input` event.
 - `onReady`: Fires after the editor is interactive **and** initial content has reconciled, so `getMarkdown()` inside the callback is immediately stable. The editor normalises imported markdown, so baseline dirty checks against its own output, never against your input string.
 - `onDesync`: Opt-in watchdog reporting model/DOM divergence — text painted into the contenteditable behind the reconciler's back (`document.execCommand`, extensions, password managers) that would silently miss from `getMarkdown()`.
 - `presetId`: Preset identity for the editable-surface class names (`luthor-preset-<id>__container` / `__content` / `__placeholder`). Wrapper presets set their own id so host CSS matches the rendered element.
@@ -89,6 +89,14 @@ Bulleted, numbered and checkbox lists share one marker column, so item text star
 If `gifUploadHandler` is not provided, GIF file uploads use `imageUploadHandler`.
 
 For production handlers, return a persistent URL from your storage service. Returning `blob:` URLs from handlers is fine for quick prototypes, but dev StrictMode remount cycles can revoke blob URLs and cause temporary `ERR_FILE_NOT_FOUND` preview errors.
+
+## Images
+
+Click selects an image, YouTube, or iframe embed. Selected images resize from their handles with mouse, touch, or pen — handles stay up for the whole drag, the width commits as one undo step on release, and Escape cancels. See [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/).
+
+## Live collaboration
+
+Add a `CollaborationExtension` (from `@lyfie/luthor-headless/collab`) to `extraExtensions`. The preset then skips `defaultContent` (the shared doc hydrates the editor) and swaps Lexical history for per-user Yjs undo. Setup: [Collaboration](/docs/luthor-headless/features/collaboration/).
 
 ## Code intelligence toggle
 

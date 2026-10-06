@@ -276,6 +276,7 @@ vi.mock("@lyfie/luthor-headless", () => ({
   jsonToMarkdown: jsonToMarkdownMock,
   markdownToJSON: markdownToJSONMock,
   clearLexicalSelection: vi.fn(),
+  registerContentFormatGuard: vi.fn(() => () => {}),
 }));
 
 import { ExtensiveEditor } from "./ExtensiveEditor";

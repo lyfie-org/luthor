@@ -35,6 +35,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 - [luthor-headless/extensions-reference.md](https://www.luthor.fyi/docs/luthor-headless/extensions-reference/) - Extensions Reference
 - [luthor-headless/features.md](https://www.luthor.fyi/docs/luthor-headless/features/) - Features
 - [luthor-headless/features/code-and-devtools.md](https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/) - Code and Devtools
+- [luthor-headless/features/collaboration.md](https://www.luthor.fyi/docs/luthor-headless/features/collaboration/) - Collaboration
 - [luthor-headless/features/customization-and-theming.md](https://www.luthor.fyi/docs/luthor-headless/features/customization-and-theming/) - Customization and Theming
 - [luthor-headless/features/interaction-and-productivity.md](https://www.luthor.fyi/docs/luthor-headless/features/interaction-and-productivity/) - Interaction and Productivity
 - [luthor-headless/features/media-and-embeds.md](https://www.luthor.fyi/docs/luthor-headless/features/media-and-embeds/) - Media and Embeds
@@ -164,6 +165,11 @@ This file helps AI agents discover and query Luthor docs quickly.
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/code-and-devtools/
 - Summary: title: "Code and Devtools" description: "Code block, code intelligence, and source bridge conversion surfaces for developer heavy workflows." package: "headless" docType: "reference" surface: "extension" keywords: "codeExtension" "codeIntelligenceExtension" "jsonToMarkdown" "markdownToJSON" props: [] exports: "codeExte...
 
+### Collaboration
+- File: luthor-headless/features/collaboration.md
+- URL: https://www.luthor.fyi/docs/luthor-headless/features/collaboration/
+- Summary: Collaboration Live multi cursor editing on a shared Yjs document, via Lexical's binding. What this page answers How do I make an editor collaborative? What changes in history, content loading, and change events? How does a server read and write the same document? Install Separate entry: the main bundle never imports Yj...
+
 ### Customization and Theming
 - File: luthor-headless/features/customization-and-theming.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/customization-and-theming/
@@ -177,7 +183,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Media and Embeds
 - File: luthor-headless/features/media-and-embeds.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/media-and-embeds/
-- Summary: title: "Media and Embeds" description: "Image, iframe, and YouTube extension surfaces and associated node behavior." package: "headless" docType: "reference" surface: "extension" keywords: "imageExtension" "iframeEmbedExtension" "youTubeEmbedExtension" props: [] exports: "imageExtension" "iframeEmbedExtension" "youTube...
+- Summary: Media and Embeds This group covers media insertion, attachment embeds, resizing, and uploads. What this page answers Which extensions support images, embeds, and attachments? How are size, alignment, and captions written to markdown? How does a host plug in media URLs, metadata, toolbar buttons, and uploads? Extension ...
 
 ### Structure and Lists
 - File: luthor-headless/features/structure-and-lists.md
@@ -207,12 +213,12 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### URL and Content Safety
 - File: luthor-headless/url-and-content-safety.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/url-and-content-safety/
-- Summary: URL and Content Safety Luthor treats every URL in a document as untrusted input. A document may have been pasted from a hostile page, synced from another machine, or loaded from a store the host does not control — so "the user typed it" is never assumed. What this page answers Which URL schemes do links and embeds acce...
+- Summary: title: "URL and Content Safety" description: "The default URL scheme allowlist for links and embeds, how to override it, and what the guarantee does and does not cover." package: "headless" docType: "guide" surface: "extension" keywords: "security" "url validation" "scheme allowlist" "javascript: url" "isSafeUrl" "sani...
 
 ### Accessibility
 - File: luthor/accessibility.md
 - URL: https://www.luthor.fyi/docs/luthor/accessibility/
-- Summary: Accessibility Luthor targets WCAG 2.1 Level AA . This page records what is implemented and verified, so hosts can cite it in their own accessibility statements — and what is not, so nobody cites something that isn't true. What this page answers Can every feature be operated from the keyboard? What do screen readers ann...
+- Summary: title: "Accessibility" description: "Luthor's WCAG 2.1 AA posture: keyboard operation, screen reader semantics, focus handling, reduced motion, and the gaps that remain." package: "luthor" docType: "reference" surface: "preset" keywords: "accessibility" "a11y" "WCAG" "keyboard navigation" "screen reader" "aria activede...
 
 ### @lyfie/luthor Architecture
 - File: luthor/architecture.md
@@ -242,7 +248,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Extensive Editor
 - File: luthor/presets/extensive-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/extensive-editor/
-- Summary: Extensive Editor This preset is the broadest out of box profile. When to use this Use ExtensiveEditor when you want full formatting, media, code, and command workflows in one preset. Mode profile Default modes: visual editor , visual only , json , markdown , html . Default initial mode: visual editor . Preset props fea...
+- Summary: title: "Extensive Editor" description: "Full preset profile with all core features enabled and broad mode support." package: "luthor" docType: "reference" surface: "preset" keywords: "ExtensiveEditor" "extensive preset" "full editor" "imageUploadHandler" "gifUploadHandler" props: "featureFlags" "availableModes" "maxLis...
 
 ### HTML Editor
 - File: luthor/presets/html-editor.md

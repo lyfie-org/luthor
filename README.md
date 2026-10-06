@@ -28,6 +28,8 @@ Luthor is an open-source rich text editor ecosystem designed for teams that want
 - :shield: **TypeScript-first APIs**: safe command/state integrations
 - :zap: **Lexical-powered**: modern performance and extensibility
 - :art: **UI freedom**: build custom editor experiences when product requirements evolve
+- :framed_picture: **Media that behaves**: resize handles (mouse/touch/pen), in-frame toolbar, sized Obsidian-style markdown, upload placeholders with progress/cancel/retry
+- :busts_in_silhouette: **Live collaboration**: opt-in Yjs binding with multi-cursor presence, per-user undo, and a DOM-free server session
 - :package: **ESM-first distribution**: optimized for modern React bundling
 
 ## :package: Packages
@@ -80,6 +82,25 @@ Syntax highlighting notes:
 - `@lyfie/luthor` presets use Lexical default language options and syntax tokens by default.
 - Disable per preset with `isSyntaxHighlightingEnabled={false}`.
 - Customize tokens with `syntaxHighlightColorMode="custom"` and `syntaxHighlightColors`.
+
+Real-time collaboration (optional peers, separate entry — the main bundle never imports Yjs):
+
+```bash
+pnpm add yjs @lexical/yjs
+```
+
+```tsx
+import { LexicalCollaboration } from "@lexical/react/LexicalCollaborationContext";
+import { CollaborationExtension } from "@lyfie/luthor-headless/collab";
+
+const collab = useMemo(() => new CollaborationExtension({ id: room, providerFactory }), [room]);
+
+<LexicalCollaboration>
+  <ExtensiveEditor key={room} extraExtensions={[collab]} />
+</LexicalCollaboration>
+```
+
+See [Collaboration](https://www.luthor.fyi/docs/luthor-headless/features/collaboration/) and [Media and Embeds](https://www.luthor.fyi/docs/luthor-headless/features/media-and-embeds/).
 
 Need full control?
 

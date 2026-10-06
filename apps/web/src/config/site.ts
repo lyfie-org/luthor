@@ -155,6 +155,11 @@ export const SEO_FAQS = [
       'Use JSON for reliable round trips and database-friendly storage. But you can also export HTML or Markdown if that suits your use case better.',
   },
   {
+    question: 'Does it support real-time collaboration?',
+    answer:
+      `Yes, opt-in. Add CollaborationExtension from ${HEADLESS_PACKAGE_NAME}/collab with any Yjs provider (Hocuspocus, y-websocket) for live multi-cursor editing with per-user undo. Yjs loads from that separate entry only, so editors without collaboration never ship it.`,
+  },
+  {
     question: 'Is TypeScript support first-class?',
     answer:
       'Yes. The API surface is TypeScript-first for safer integrations and extension work.',

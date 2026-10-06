@@ -10,3 +10,4 @@ export * from "./styleVars";
 export * from "./featureGuards";
 export * from "./modeCache";
 export * from "./presetPolicy";
+export * from "./contentGuards";

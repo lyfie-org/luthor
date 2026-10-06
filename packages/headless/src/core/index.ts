@@ -28,6 +28,11 @@ export type { LuthorTheme, LuthorEditorThemeToken, LuthorEditorThemeOverrides } 
 export { clearLexicalSelection, resolveLinkNodeKeyFromAnchor } from "./lexical-interop";
 export type { LexicalEditor } from "lexical";
 export {
+  registerContentFormatGuard,
+  type ContentFormatGuardOptions,
+  type TextFormatType,
+} from "./content-guards";
+export {
   markdownToJSON,
   jsonToMarkdown,
   type JsonDocument,

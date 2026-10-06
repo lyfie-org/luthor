@@ -54,7 +54,8 @@ This page is a fast map of what the editor stack supports.
 | --- | --- | --- | --- |
 | Rich text formatting | Yes | Yes | [Commands Reference](/docs/luthor/commands-reference/) |
 | Lists, tables, structure | Yes | Yes | [Structure and Lists](/docs/luthor-headless/features/structure-and-lists/) |
-| Media embeds | Yes | Yes | [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/) |
+| Media embeds, resize, uploads | Yes | Yes | [Media and Embeds](/docs/luthor-headless/features/media-and-embeds/) |
+| Live collaboration (Yjs) | `ExtensiveEditor`, `PapyraEditor` | `/collab` entry | [Collaboration](/docs/luthor-headless/features/collaboration/) |
 | Source modes (JSON/MD/HTML) | Yes | Bridge APIs | [Nodes and Bridges](/docs/luthor-headless/nodes-and-bridges-reference/) |
 | Preset-ready UI | Yes | No | [Preset Selector](/docs/reference/preset-selector/) |
 | Extension-level control | Limited | Yes | [Extensions Reference](/docs/luthor-headless/extensions-reference/) |
