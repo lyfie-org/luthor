@@ -93,6 +93,7 @@ import {
   markModeCached,
   mergeToolbarVisibilityWithFeatures as sharedMergeToolbarVisibilityWithFeatures,
   normalizeStyleVarsKey as sharedNormalizeStyleVarsKey,
+  registerDisabledFeatureContentGuards,
   type FeatureShortcutSpec,
   type ToolbarFeatureMap,
 } from "../_shared";
@@ -1703,6 +1704,13 @@ function ExtensiveEditorContent({
     return () => {
       document.removeEventListener("keydown", handleKeydown, true);
     };
+  }, [editor, featureFlags]);
+
+  useEffect(() => {
+    if (!editor) {
+      return;
+    }
+    return registerDisabledFeatureContentGuards(editor, featureFlags);
   }, [editor, featureFlags]);
 
   useEffect(() => {
