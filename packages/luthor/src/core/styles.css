@@ -2163,7 +2163,12 @@
 	content: "";
 	position: absolute;
 	left: 0;
-	top: 50%;
+	/* Centred on the item's first line, not the whole item: an item that wraps
+	   (or holds a soft line break) keeps its bullet beside its first words, the
+	   way numbers and checkboxes already sit. 0.5lh is half the line box; the
+	   line-height fallback covers browsers without the lh unit. */
+	top: calc(var(--luthor-default-line-height, 1.5) * 0.5em);
+	top: 0.5lh;
 	transform: translateY(-50%);
 	width: 18px;
 	height: 18px;
