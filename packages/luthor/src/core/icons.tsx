@@ -336,6 +336,28 @@ export const SuperscriptIcon = createIcon("SuperscriptIcon", (
 
 export const ChevronDownIcon = createIcon("ChevronDownIcon", <path d="m6 9 6 6 6-6" />);
 
+export const ArrowUpIcon = createIcon("ArrowUpIcon", (
+<>
+  <path d="m5 12 7-7 7 7" />
+  <path d="M12 19V5" />
+</>
+));
+
+export const ArrowDownIcon = createIcon("ArrowDownIcon", (
+<>
+  <path d="M12 5v14" />
+  <path d="m19 12-7 7-7-7" />
+</>
+));
+
+export const TrashIcon = createIcon("TrashIcon", (
+<>
+  <path d="M3 6h18" />
+  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+</>
+));
+
 export const CloseIcon = createIcon("CloseIcon", (
 <>
   <path d="M18 6 6 18" />

@@ -10,6 +10,8 @@ import {
   AlignCenterIcon,
   AlignLeftIcon,
   AlignRightIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
   BoldIcon,
   CodeIcon,
   ItalicIcon,
@@ -19,6 +21,7 @@ import {
   ListOrderedIcon,
   QuoteIcon,
   StrikethroughIcon,
+  TrashIcon,
   UnderlineIcon,
   UnlinkIcon,
 } from "./icons";
@@ -239,6 +242,33 @@ export function FloatingToolbar({
     return null;
   }
 
+  // Every embed (picture, video, web page) can be moved a block up or down and
+  // removed from its own bar, not only by keyboard or drag.
+  const blockTools = (
+    move: ((direction: "up" | "down") => void) | undefined,
+    remove: (() => void) | undefined,
+  ) =>
+    move || remove ? (
+      <>
+        <div className="luthor-floating-toolbar-separator" />
+        {move ? (
+          <>
+            <IconButton onClick={() => move("up")} title="Move Up">
+              <ArrowUpIcon size={14} />
+            </IconButton>
+            <IconButton onClick={() => move("down")} title="Move Down">
+              <ArrowDownIcon size={14} />
+            </IconButton>
+          </>
+        ) : null}
+        {remove ? (
+          <IconButton onClick={remove} title="Remove">
+            <TrashIcon size={14} />
+          </IconButton>
+        ) : null}
+      </>
+    ) : null;
+
   if (embedSelected) {
     const setAlignment = (alignment: "left" | "center" | "right") => {
       if (iframeEmbedSelected) {
@@ -328,6 +358,9 @@ export function FloatingToolbar({
         <IconButton onClick={() => setAlignment("right")} active={isRightAligned} title="Align Right">
           <AlignRightIcon size={14} />
         </IconButton>
+        {iframeEmbedSelected
+          ? blockTools(commands.moveIframeEmbed, commands.removeIframeEmbed)
+          : blockTools(commands.moveYouTubeEmbed, commands.removeYouTubeEmbed)}
         {hasEmbedFields ? (
           <>
             <div className="luthor-floating-toolbar-separator" />
@@ -417,6 +450,7 @@ export function FloatingToolbar({
         <IconButton onClick={() => commands.setImageAlignment("right")} active={activeStates.isImageAlignedRight} title="Align Right">
           <AlignRightIcon size={14} />
         </IconButton>
+        {blockTools(commands.moveImage, commands.removeImage)}
         {canEditImageCaption ? (
           <>
             <div className="luthor-floating-toolbar-separator" />

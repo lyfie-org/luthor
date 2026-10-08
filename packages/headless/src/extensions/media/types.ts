@@ -132,6 +132,10 @@ export type ImageCommands = {
   setImageClassName: (className: string) => void;
   /** Set inline styles on the selected image */
   setImageStyle: (style: CSSProperties) => void;
+  /** Move the selected image one block up or down */
+  moveImage: (direction: "up" | "down") => void;
+  /** Remove the selected image */
+  removeImage: () => void;
 };
 
 /**

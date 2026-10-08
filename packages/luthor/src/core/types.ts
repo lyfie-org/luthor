@@ -254,6 +254,8 @@ export interface CoreEditorCommands {
   setImageAlignment: (alignment: ImageAlignment) => void;
   setImageCaption: (caption: string) => void;
   getImageCaption?: () => Promise<string>;
+  moveImage?: (direction: "up" | "down") => void;
+  removeImage?: () => void;
   insertIframeEmbed?: (inputUrl: string, width?: number, height?: number, title?: string) => void;
   setIframeEmbedAlignment?: (alignment: ImageAlignment) => void;
   resizeIframeEmbed?: (width: number, height: number) => void;
@@ -261,6 +263,8 @@ export interface CoreEditorCommands {
   getIframeEmbedCaption?: () => Promise<string>;
   updateIframeEmbedUrl?: (inputUrl: string) => boolean;
   getIframeEmbedUrl?: () => Promise<string>;
+  moveIframeEmbed?: (direction: "up" | "down") => void;
+  removeIframeEmbed?: () => void;
   insertYouTubeEmbed?: (inputUrl: string, width?: number, height?: number, start?: number) => void;
   setYouTubeEmbedAlignment?: (alignment: ImageAlignment) => void;
   resizeYouTubeEmbed?: (width: number, height: number) => void;
@@ -268,6 +272,8 @@ export interface CoreEditorCommands {
   getYouTubeEmbedCaption?: () => Promise<string>;
   updateYouTubeEmbedUrl?: (inputUrl: string) => boolean;
   getYouTubeEmbedUrl?: () => Promise<string>;
+  moveYouTubeEmbed?: (direction: "up" | "down") => void;
+  removeYouTubeEmbed?: () => void;
   undo: () => void;
   redo: () => void;
   showCommandPalette: () => void;

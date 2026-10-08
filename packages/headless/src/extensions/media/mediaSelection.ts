@@ -144,3 +144,57 @@ export function registerClickToSelect(
     COMMAND_PRIORITY_LOW,
   );
 }
+
+/** Which way {@link moveSelectedNode} moves a block. */
+export type MoveDirection = "up" | "down";
+
+/*
+ * The one selected node `isNode` claims, and the block it moves with: itself
+ * when it is a block of its own, the paragraph around it when it sits in a line.
+ */
+function $selectedBlock(isNode: (node: LexicalNode | null) => boolean): {
+  node: LexicalNode;
+  block: LexicalNode;
+} | null {
+  const selection = $getSelection();
+  if (!$isNodeSelection(selection)) return null;
+  const nodes = selection.getNodes();
+  if (nodes.length !== 1) return null;
+  const node = nodes[0]!;
+  if (!isNode(node)) return null;
+  return { node, block: node.getTopLevelElement() ?? node };
+}
+
+/**
+ * Move the selected embed one block up or down, past its neighbour. It stays
+ * selected (same node), so its toolbar follows it and the next press keeps
+ * going; at the top or bottom of the document nothing happens.
+ */
+export function moveSelectedNode(
+  editor: LexicalEditor,
+  isNode: (node: LexicalNode | null) => boolean,
+  direction: MoveDirection,
+): void {
+  if (!editor.isEditable()) return;
+  editor.update(() => {
+    const selected = $selectedBlock(isNode);
+    if (!selected) return;
+    const { block } = selected;
+    if (direction === "up") block.getPreviousSibling()?.insertBefore(block);
+    else block.getNextSibling()?.insertAfter(block);
+  });
+}
+
+/** Remove the selected embed, leaving the caret where it stood. */
+export function removeSelectedNode(
+  editor: LexicalEditor,
+  isNode: (node: LexicalNode | null) => boolean,
+): void {
+  if (!editor.isEditable()) return;
+  editor.update(() => {
+    const selected = $selectedBlock(isNode);
+    if (!selected) return;
+    selected.node.selectPrevious();
+    selected.node.remove();
+  });
+}

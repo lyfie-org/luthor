@@ -140,7 +140,7 @@ const ICONS = {
  *   open the file. The markdown is never touched.
  *
  * Given a `nodeKey` inside an editable editor it is also interactive: a click
- * selects it; a selected picture or video shows resize handles and a toolbar
+ * selects it; a selected attachment shows resize handles and a toolbar
  * (alignment, size, caption, alt text, open, remove, plus the host's items).
  * The toolbar lives inside the frame — anchored to the picture itself, mounted
  * only while it is selected — so it can't drift on scroll or blink on a click.
@@ -172,7 +172,9 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
   const failed = failedUrl !== null && failedUrl === url;
   const setFailed = (value: boolean) => setFailedUrl(value ? url : null);
   const interactive = !!(editor && nodeKey && onEdit && isEditable);
-  const resizable = interactive && !inline && !failed && (kind === "image" || kind === "video");
+  // Every block attachment sizes by its width: a picture or video keeps its
+  // shape, a card (audio, a PDF, any other file) just gets narrower or wider.
+  const resizable = interactive && !inline && !failed;
 
   const edit = useCallback(
     (change: MediaEdit) => {
@@ -408,20 +410,18 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
         { id: "align-center", label: "Centre", icon: <Icon d={ICONS.alignCenter} />, active: align === "center", onSelect: () => setAlign("center") },
         { id: "align-right", label: "Align right", icon: <Icon d={ICONS.alignRight} />, active: align === "right", onSelect: () => setAlign("right") },
       );
-      if (kind === "image" || kind === "video") {
-        for (const [fraction, text] of [[0.25, "¼"], [0.5, "½"], [0.75, "¾"], [1, "Full"]] as const) {
-          items.push({
-            id: `size-${fraction}`,
-            label: fraction === 1 ? "Full width" : `${text} width`,
-            onSelect: () => {
-              const full = containerWidth();
-              if (Number.isFinite(full)) edit({ width: Math.max(MIN_WIDTH, Math.round(full * fraction)), height: null });
-            },
-          });
-        }
-        if (positive(width)) {
-          items.push({ id: "size-reset", label: "Original size", icon: <Icon d={ICONS.reset} />, onSelect: () => edit({ width: null, height: null }) });
-        }
+      for (const [fraction, text] of [[0.25, "¼"], [0.5, "½"], [0.75, "¾"], [1, "Full"]] as const) {
+        items.push({
+          id: `size-${fraction}`,
+          label: fraction === 1 ? "Full width" : `${text} width`,
+          onSelect: () => {
+            const full = containerWidth();
+            if (Number.isFinite(full)) edit({ width: Math.max(MIN_WIDTH, Math.round(full * fraction)), height: null });
+          },
+        });
+      }
+      if (positive(width)) {
+        items.push({ id: "size-reset", label: "Original size", icon: <Icon d={ICONS.reset} />, onSelect: () => edit({ width: null, height: null }) });
       }
       items.push({
         id: "caption",

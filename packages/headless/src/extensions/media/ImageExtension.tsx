@@ -56,7 +56,13 @@ import {
 } from "./ImageTranslator";
 import { sanitizeUrlForAttribute } from "../../utils/urlSafety";
 import { formatSize, MEDIA_MAX_DIMENSION } from "./mediaGrammar";
-import { registerClickToSelect, useIsNodeSelected } from "./mediaSelection";
+import {
+  moveSelectedNode,
+  registerClickToSelect,
+  removeSelectedNode,
+  useIsNodeSelected,
+  type MoveDirection,
+} from "./mediaSelection";
 import { usePointerResize } from "./usePointerResize";
 import { reportError, warnOnce } from "../../utils/logger";
 
@@ -985,7 +991,10 @@ export class ImageExtension extends BaseExtension<
   }
 
   getCommands(editor: LexicalEditor): ImageCommands {
+    const isImage = (node: LexicalNode | null) => node instanceof ImageNode;
     return {
+      moveImage: (direction: MoveDirection) => moveSelectedNode(editor, isImage, direction),
+      removeImage: () => removeSelectedNode(editor, isImage),
       insertImage: (payload: ImagePayload) => {
         editor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
       },
