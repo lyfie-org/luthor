@@ -758,6 +758,114 @@ describe("markdown bridge", () => {
     expect(exported).not.toContain("luthor:meta v1");
   });
 
+  describe("inline formatting in table cells", () => {
+    type CellRun = string;
+
+    /** Each cell's inline content as `text|format`, `[link](url)`, `<br>` and `[[wiki]]` runs. */
+    function cellRuns(document: JsonDocument): CellRun[][][] {
+      const table = findTopLevelNode(document, "table") as { children?: Array<{ children?: Array<{ children?: Array<Record<string, unknown>> }> }> };
+      const runsOf = (node: Record<string, unknown>): CellRun[] => {
+        if (node.type === "text") {
+          const format = Number(node.format ?? 0);
+          return [format ? `${String(node.text)}|${format}` : String(node.text)];
+        }
+        if (node.type === "linebreak") return ["<br>"];
+        if (node.type === "test-wikilink") return [`[[${String(node.target)}]]`];
+        const children = (node.children as Array<Record<string, unknown>> | undefined) ?? [];
+        if (node.type === "link") return [`[${children.flatMap(runsOf).join("")}](${String(node.url)})`];
+        return children.flatMap(runsOf);
+      };
+      return (table.children ?? []).map((row) => (row.children ?? []).map((cell) => (
+        (cell.children ?? []).map((block, index) => [
+          ...(index > 0 ? ["¶"] : []),
+          ...runsOf(block),
+        ]).flat()
+      )));
+    }
+
+    const roundTrip = (markdown: string, options?: Parameters<typeof markdownToJSON>[1]) => {
+      const parsed = markdownToJSON(markdown, options) as JsonDocument;
+      const exported = jsonToMarkdown(parsed as unknown, options);
+      const reparsed = markdownToJSON(exported, options) as JsonDocument;
+      return { parsed, exported, reparsed };
+    };
+
+    it("keeps bold, italic, strikethrough, code and links through save and reopen", () => {
+      const markdown = [
+        "| **Col** A | *B* |",
+        "| --- | --- |",
+        // GFM: a pipe inside a code span still needs escaping in a table.
+        "| ~~old~~ new | `x \\| y` and [docs](https://example.com) |",
+      ].join("\n");
+
+      const { parsed, exported, reparsed } = roundTrip(markdown, { metadataMode: "none" });
+
+      expect(cellRuns(parsed)).toEqual([
+        [["Col|1", " A"], ["B|2"]],
+        [["old|4", " new"], ["x | y|16", " and ", "[docs](https://example.com)"]],
+      ]);
+      expect(exported).toContain("| **Col** A | *B* |");
+      expect(exported).toContain("| ~~old~~ new | `x \\| y` and [docs](https://example.com) |");
+      expect(cellRuns(reparsed)).toEqual(cellRuns(parsed));
+    });
+
+    it("writes a formatted cell built in the editor, not just its text", () => {
+      const document = markdownToJSON("| a | b |\n| --- | --- |\n| c | d |", { metadataMode: "none" }) as JsonDocument;
+      const table = findTopLevelNode(document, "table") as { children: Array<{ children: Array<{ children: Array<{ children: Array<Record<string, unknown>> }> }> }> };
+      const firstCellText = table.children[0]!.children[0]!.children[0]!.children[0]!;
+      firstCellText.format = IS_BOLD;
+      firstCellText.text = "Col:";
+
+      const exported = jsonToMarkdown(document as unknown, { metadataMode: "none" });
+      expect(exported.split("\n")[0]).toBe("| **Col:** | b |");
+    });
+
+    it("keeps literal markdown characters, backslashes and pipes literal", () => {
+      const markdown = [
+        "| Path | Expr |",
+        "| --- | --- |",
+        "| C:\\\\temp\\\\x | 2\\*3 \\| a\\_b |",
+      ].join("\n");
+
+      const { parsed, exported, reparsed } = roundTrip(markdown, { metadataMode: "none" });
+
+      expect(cellRuns(parsed)[1]).toEqual([["C:\\temp\\x"], ["2*3 | a_b"]]);
+      expect(exported).toContain("| C:\\\\temp\\\\x | 2\\*3 \\| a\\_b |");
+      expect(cellRuns(reparsed)).toEqual(cellRuns(parsed));
+      // Saving twice must not keep doubling backslashes.
+      expect(jsonToMarkdown(reparsed as unknown, { metadataMode: "none" })).toBe(exported);
+    });
+
+    it("keeps line breaks in a cell", () => {
+      const markdown = "| a |\n| --- |\n| **one**<br>two |";
+      const { parsed, exported, reparsed } = roundTrip(markdown, { metadataMode: "none" });
+
+      expect(cellRuns(parsed)[1]).toEqual([["one|1", "¶", "two"]]);
+      expect(exported).toContain("| **one**<br>two |");
+      expect(cellRuns(reparsed)).toEqual(cellRuns(parsed));
+    });
+
+    it("reads a preset's inline syntax inside cells", () => {
+      const markdown = "| Link |\n| --- |\n| see [[Target]] **now** |";
+      const { parsed, exported, reparsed } = roundTrip(markdown, WIKILINK_BRIDGE_OPTIONS);
+
+      expect(cellRuns(parsed)[1]).toEqual([["see ", "[[Target]]", " ", "now|1"]]);
+      expect(exported).toContain("| see [[Target]] **now** |");
+      expect(cellRuns(reparsed)).toEqual(cellRuns(parsed));
+    });
+
+    it("keeps empty cells and block-looking text as plain cell text", () => {
+      const markdown = "| # not a heading | |\n| --- | --- |\n| - not a list | > nor a quote |";
+      const { parsed, reparsed } = roundTrip(markdown, { metadataMode: "none" });
+
+      expect(cellRuns(parsed)).toEqual([
+        [["# not a heading"], []],
+        [["- not a list"], ["> nor a quote"]],
+      ]);
+      expect(cellRuns(reparsed)).toEqual(cellRuns(parsed));
+    });
+  });
+
   it("supports lexical-native markdown bridge flavor without luthor extensions", () => {
     const markdown = [
       "## Heading",

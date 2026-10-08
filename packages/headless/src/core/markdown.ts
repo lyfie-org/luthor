@@ -53,7 +53,7 @@ import {
 } from "@lexical/react/LexicalHorizontalRuleNode";
 import {
   $createParagraphNode,
-  $createTextNode,
+  $isElementNode,
   createEditor,
   ParagraphNode,
   TextNode,
@@ -308,12 +308,30 @@ const YOUTUBE_MARKDOWN_TRANSFORMER: ElementTransformer = {
 
 type MarkdownTableAlignment = "left" | "center" | "right";
 
+/**
+ * Fits a cell's inline markdown onto one table row: pipes escaped, line breaks
+ * as `<br>`. Backslashes and emphasis characters are already escaped by the
+ * inline export, so they are left as they are.
+ */
 function escapeMarkdownTableCell(value: string): string {
   return value
-    .replace(/\\/g, "\\\\")
     .replace(/\|/g, "\\|")
     .replace(/\r\n?/g, "\n")
     .replace(/\n/g, "<br>");
+}
+
+/**
+ * The transformers of the markdown import in progress, so a table cell can be
+ * read with the same inline syntax as the rest of the document (including a
+ * preset's extra text-match transformers). Set around each import.
+ */
+let activeImportTransformers: readonly Transformer[] | null = null;
+
+/** Only the inline syntax: a cell holds formatted text, never blocks. */
+function inlineTransformers(transformers: readonly Transformer[]): Transformer[] {
+  return transformers.filter(
+    (transformer) => transformer.type === "text-format" || transformer.type === "text-match",
+  );
 }
 
 function unescapeMarkdownTableCell(value: string): string {
@@ -432,7 +450,7 @@ function getTableColumnAlignment(
 
 const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
   dependencies: [TableNode, TableRowNode, TableCellNode],
-  export: (node: LexicalNode) => {
+  export: (node: LexicalNode, traverseChildren: (node: ElementNode) => string) => {
     if (!$isTableNode(node)) {
       return null;
     }
@@ -469,11 +487,23 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
       return null;
     }
 
+    // Each block in a cell exports as inline markdown (bold, links, code…),
+    // one per line; a cell used to be written as its bare text, so any
+    // formatting in a table was dropped on save.
+    const cellMarkdown = (cell: TableCellNode | undefined): string => {
+      if (!cell) {
+        return "";
+      }
+      const blocks = cell.getChildren().map((child) => (
+        $isElementNode(child) ? traverseChildren(child) : child.getTextContent()
+      ));
+      return escapeMarkdownTableCell(blocks.join("\n").trim());
+    };
+
     const formatRow = (rowCells: readonly TableCellNode[]): string => {
-      const cells = Array.from({ length: columnCount }, (_, columnIndex) => {
-        const text = rowCells[columnIndex]?.getTextContent().trim() ?? "";
-        return escapeMarkdownTableCell(text);
-      });
+      const cells = Array.from({ length: columnCount }, (_, columnIndex) => (
+        cellMarkdown(rowCells[columnIndex])
+      ));
 
       return `| ${cells.join(" | ")} |`;
     };
@@ -565,6 +595,7 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
       true,
     );
 
+    const cellTransformers = inlineTransformers(activeImportTransformers ?? MARKDOWN_TRANSFORMERS);
     const tableRows = tableNode.getChildren();
     dataRows.forEach((rowData, rowIndex) => {
       const tableRow = tableRows[rowIndex];
@@ -579,12 +610,13 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
           return;
         }
 
-        cell.clear();
-        const paragraph = $createParagraphNode();
+        // The cell's inline markdown, one paragraph per `<br>`-separated line.
         if (cellText) {
-          paragraph.append($createTextNode(cellText));
+          $convertFromMarkdownString(cellText, cellTransformers, cell, true);
+        } else {
+          cell.clear();
+          cell.append($createParagraphNode());
         }
-        cell.append(paragraph);
 
         const alignment = separatorAlignments[cellIndex] ?? null;
         if (alignment === "left" || alignment === "center" || alignment === "right") {
@@ -2822,12 +2854,18 @@ export function markdownToJSON(
 
   const editor = createMarkdownEditor(options?.extraNodes);
   const transformers = resolveMarkdownTransformers(options?.extraTransformers);
-  editor.update(
-    () => {
-      $convertFromMarkdownString(sourceContent.content, transformers);
-    },
-    { discrete: true },
-  );
+  const outerTransformers = activeImportTransformers;
+  activeImportTransformers = transformers;
+  try {
+    editor.update(
+      () => {
+        $convertFromMarkdownString(sourceContent.content, transformers);
+      },
+      { discrete: true },
+    );
+  } finally {
+    activeImportTransformers = outerTransformers;
+  }
 
   const baseDocument = restoreDocumentAfterMarkdownImport(
     editor.getEditorState().toJSON() as JsonDocument,
