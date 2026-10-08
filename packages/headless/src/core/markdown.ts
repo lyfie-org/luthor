@@ -328,6 +328,36 @@ function escapeMarkdownTableCell(value: string): string {
  */
 let activeImportTransformers: readonly Transformer[] | null = null;
 
+/** The transformers of the markdown export in progress (see the table export). */
+let activeExportTransformers: readonly Transformer[] | null = null;
+
+/**
+ * A non-text block inside a table cell — an embedded picture or file — written
+ * with its own markdown, on one line: a cell can't hold line-level syntax, so
+ * trailing `<!-- … -->` directives (alignment, caption) are left out. Without
+ * this the cell wrote the embed's bare file name, and it reopened as text.
+ */
+function cellBlockMarkdown(
+  node: LexicalNode,
+  traverseChildren: (node: ElementNode) => string,
+): string {
+  for (const transformer of activeExportTransformers ?? MARKDOWN_TRANSFORMERS) {
+    if (transformer.type === "text-format" || transformer === TABLE_MARKDOWN_TRANSFORMER) {
+      continue;
+    }
+    const exported = transformer.type === "text-match"
+      ? transformer.export?.(node, traverseChildren, (_node, text) => text)
+      : transformer.export?.(node, traverseChildren);
+    if (typeof exported === "string") {
+      const line = exported.replace(/\s*<!--[\s\S]*?-->/g, "").trim();
+      if (line && !line.includes("\n")) {
+        return line;
+      }
+    }
+  }
+  return node.getTextContent();
+}
+
 /** Only the inline syntax: a cell holds formatted text, never blocks. */
 function inlineTransformers(transformers: readonly Transformer[]): Transformer[] {
   return transformers.filter(
@@ -496,7 +526,7 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
         return "";
       }
       const blocks = cell.getChildren().map((child) => (
-        $isElementNode(child) ? traverseChildren(child) : child.getTextContent()
+        $isElementNode(child) ? traverseChildren(child) : cellBlockMarkdown(child, traverseChildren)
       ));
       return escapeMarkdownTableCell(blocks.join("\n").trim());
     };
@@ -2950,9 +2980,16 @@ export function jsonToMarkdown(
   const editorState = toEditorState(editor, encodeDocumentForMarkdownExport(prepared.document));
   editor.setEditorState(editorState, { tag: "history-merge" });
 
-  const markdown = editorState.read(() => {
-    return $convertToMarkdownString(transformers);
-  });
+  const outerExportTransformers = activeExportTransformers;
+  activeExportTransformers = transformers;
+  let markdown: string;
+  try {
+    markdown = editorState.read(() => {
+      return $convertToMarkdownString(transformers);
+    });
+  } finally {
+    activeExportTransformers = outerExportTransformers;
+  }
   const postprocessedMarkdown = finalizeExportedMarkdown(
     postprocessMarkdownForBridgeExport(markdown, resolvedFlavor, options?.metadataMode),
   );

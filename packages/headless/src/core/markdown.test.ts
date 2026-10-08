@@ -17,6 +17,15 @@ import {
 } from "lexical";
 import type { TextMatchTransformer } from "@lexical/markdown";
 import { jsonToMarkdown, markdownToJSON } from "./markdown";
+import {
+  FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER,
+  FILE_EMBED_MARKDOWN_TRANSFORMER,
+  FileEmbedNode,
+} from "../extensions/embeds/FileEmbedNode";
+import {
+  UPLOAD_PLACEHOLDER_MARKDOWN_TRANSFORMER,
+  UploadPlaceholderNode,
+} from "../extensions/embeds/UploadPlaceholderNode";
 
 /*
  * A minimal preset-style custom node used to exercise the bridge's
@@ -863,6 +872,86 @@ describe("markdown bridge", () => {
         [["- not a list"], ["> nor a quote"]],
       ]);
       expect(cellRuns(reparsed)).toEqual(cellRuns(parsed));
+    });
+  });
+
+  describe("embeds in table cells", () => {
+    // How a preset with file embeds (Papyra) configures the bridge.
+    const EMBED_OPTIONS = {
+      metadataMode: "none" as const,
+      extraNodes: [FileEmbedNode, UploadPlaceholderNode],
+      extraTransformers: [
+        UPLOAD_PLACEHOLDER_MARKDOWN_TRANSFORMER,
+        FILE_EMBED_MARKDOWN_TRANSFORMER,
+        FILE_EMBED_INLINE_MARKDOWN_TRANSFORMER,
+      ],
+    };
+
+    type Json = Record<string, unknown> & { children?: Json[] };
+
+    /** A one-row table whose first cell holds `blocks` (as a paste or upload leaves them). */
+    function tableWithCell(blocks: Json[]): JsonDocument {
+      const document = markdownToJSON("| a | b |\n| --- | --- |\n| c | d |", EMBED_OPTIONS) as JsonDocument;
+      const table = findTopLevelNode(document, "table") as unknown as Json;
+      table.children![1]!.children![0]!.children = blocks;
+      return document;
+    }
+
+    const paragraph = (text: string): Json => ({
+      type: "paragraph", version: 1, format: "", indent: 0, direction: null, textFormat: 0, textStyle: "",
+      children: [{ type: "text", version: 1, text, format: 0, detail: 0, mode: "normal", style: "" }],
+    });
+    const fileEmbed = (fields: Json): Json => ({ type: "fileEmbed", version: 2, ...fields });
+
+    /** The embeds in the first cell of the second row, after reopening. */
+    function reopenedCellEmbeds(markdown: string): Json[] {
+      const document = markdownToJSON(markdown, EMBED_OPTIONS) as JsonDocument;
+      const table = findTopLevelNode(document, "table") as unknown as Json;
+      const found: Json[] = [];
+      const walk = (node: Json) => {
+        if (node.type === "fileEmbed") found.push(node);
+        node.children?.forEach(walk);
+      };
+      walk(table.children![1]!.children![0]!);
+      return found;
+    }
+
+    it("writes a picture placed in a cell as an embed, and it reopens as one", () => {
+      const document = tableWithCell([paragraph("Shot:"), fileEmbed({ target: "shot.png" }), paragraph("end")]);
+      const markdown = jsonToMarkdown(document as unknown, EMBED_OPTIONS);
+
+      expect(markdown).toContain("| Shot:<br>![[shot.png]]<br>end | d |");
+      expect(reopenedCellEmbeds(markdown)).toEqual([expect.objectContaining({ target: "shot.png", inline: true })]);
+      // Reopened, it is an inline embed, which saves back the same.
+      expect(jsonToMarkdown(markdownToJSON(markdown, EMBED_OPTIONS), EMBED_OPTIONS)).toBe(markdown);
+    });
+
+    it("keeps an embed's size, escaping its pipe, but not line-level directives a cell can't hold", () => {
+      const document = tableWithCell([fileEmbed({ target: "shot.png", width: 300, caption: "A caption", align: "center" })]);
+      const markdown = jsonToMarkdown(document as unknown, EMBED_OPTIONS);
+
+      expect(markdown).toContain("| ![[shot.png\\|300]] | d |");
+      expect(markdown).not.toContain("<!--");
+      expect(reopenedCellEmbeds(markdown)).toEqual([expect.objectContaining({ target: "shot.png", width: 300 })]);
+    });
+
+    it("writes a pasted <img> in a cell as its image markdown, not its alt text", () => {
+      const image = (markdownToJSON("![A chart](https://example.com/chart.png)", EMBED_OPTIONS) as JsonDocument)
+        .root.children[0] as Json;
+      expect(image.type).toBe("image");
+      const markdown = jsonToMarkdown(tableWithCell([image]) as unknown, EMBED_OPTIONS);
+      expect(markdown).toContain("| ![A chart](https://example.com/chart.png) | d |");
+      expect(jsonToMarkdown(markdownToJSON(markdown, EMBED_OPTIONS), EMBED_OPTIONS)).toBe(markdown);
+    });
+
+    it("writes an upload still in progress as nothing", () => {
+      const document = tableWithCell([
+        paragraph("x"),
+        { type: "uploadPlaceholder", version: 1, uploadId: "u", name: "a.png", size: 1, kind: "image", startedAt: 1 },
+      ]);
+      const markdown = jsonToMarkdown(document as unknown, EMBED_OPTIONS);
+      expect(markdown).toContain("| x | d |");
+      expect(markdown).not.toContain("a.png");
     });
   });
 
