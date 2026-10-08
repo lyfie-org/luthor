@@ -137,6 +137,32 @@ describe("FloatingToolbar media editing", () => {
     expect(setYouTubeEmbedCaption).toHaveBeenCalledWith("updated youtube caption");
   });
 
+  it("moves and removes the selected embed or image from its bar", () => {
+    const cases = [
+      { state: { isYouTubeEmbedSelected: true }, move: "moveYouTubeEmbed", remove: "removeYouTubeEmbed" },
+      { state: { isIframeEmbedSelected: true }, move: "moveIframeEmbed", remove: "removeIframeEmbed" },
+      { state: { imageSelected: true }, move: "moveImage", remove: "removeImage" },
+    ] as const;
+    for (const { state, move, remove } of cases) {
+      const moveFn = vi.fn();
+      const removeFn = vi.fn();
+      const { unmount } = render(
+        <FloatingToolbar
+          isVisible
+          selectionRect={DEFAULT_RECT}
+          commands={createCommands({ [move]: moveFn, [remove]: removeFn })}
+          activeStates={state as CoreEditorActiveStates}
+        />,
+      );
+      fireEvent.click(screen.getByTitle("Move Up"));
+      fireEvent.click(screen.getByTitle("Move Down"));
+      fireEvent.click(screen.getByTitle("Remove"));
+      expect(moveFn.mock.calls).toEqual([["up"], ["down"]]);
+      expect(removeFn).toHaveBeenCalledTimes(1);
+      unmount();
+    }
+  });
+
   it("loads and commits YouTube URL draft", async () => {
     const getYouTubeEmbedCaption = vi.fn().mockResolvedValue("existing youtube caption");
     const getYouTubeEmbedUrl = vi.fn().mockResolvedValue("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=30");

@@ -6,7 +6,12 @@
  */
 
 import { formatSize, splitCaptionAndSize } from "./mediaGrammar";
-import { registerClickToSelect } from "./mediaSelection";
+import {
+  moveSelectedNode,
+  registerClickToSelect,
+  removeSelectedNode,
+  type MoveDirection,
+} from "./mediaSelection";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   $createNodeSelection,
@@ -70,6 +75,10 @@ export type YouTubeEmbedCommands = {
   getYouTubeEmbedCaption: () => Promise<string>;
   updateYouTubeEmbedUrl: (inputUrl: string) => boolean;
   getYouTubeEmbedUrl: () => Promise<string>;
+  /** Move the selected video one block up or down. */
+  moveYouTubeEmbed: (direction: MoveDirection) => void;
+  /** Remove the selected video. */
+  removeYouTubeEmbed: () => void;
 };
 
 export type YouTubeEmbedQueries = {
@@ -619,10 +628,13 @@ function YouTubeEmbedComponent({
         shellRef.current.style.width = `${widthRef.current}px`;
       }
       if (iframeRef.current) {
-        iframeRef.current.style.height = `${heightRef.current}px`;
+        iframeRef.current.style.aspectRatio = `${widthRef.current} / ${heightRef.current}`;
       }
     };
 
+    // The side handle scales the embed and keeps its shape; the bottom handle
+    // is the one way to change the shape (a taller page, a portrait video).
+    const ratio = startHeight / startWidth;
     const onMove = (moveEvent: MouseEvent) => {
       const nextWidth =
         axis === "width"
@@ -631,7 +643,7 @@ function YouTubeEmbedComponent({
       const nextHeight =
         axis === "height"
           ? clampSize(startHeight + (moveEvent.clientY - startY), MIN_EMBED_HEIGHT, MAX_EMBED_HEIGHT)
-          : heightRef.current;
+          : clampSize(Math.round(nextWidth * ratio), MIN_EMBED_HEIGHT, MAX_EMBED_HEIGHT);
       widthRef.current = nextWidth;
       heightRef.current = nextHeight;
 
@@ -690,8 +702,11 @@ function YouTubeEmbedComponent({
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           style={{
+            // Shape, not a fixed height: when the column is narrower than the
+            // chosen width, the embed shrinks without being squashed.
             width: "100%",
-            height: `${localHeight}px`,
+            height: "auto",
+            aspectRatio: `${localWidth} / ${localHeight}`,
             border: "0",
             display: "block",
             pointerEvents: resolveEmbedPointerEvents(isEditorEditable, isSelected, isResizing),
@@ -776,7 +791,10 @@ export class YouTubeEmbedExtension extends BaseExtension<
   }
 
   getCommands(editor: LexicalEditor): YouTubeEmbedCommands {
+    const isEmbed = (node: LexicalNode | null) => node instanceof YouTubeEmbedNode;
     return {
+      moveYouTubeEmbed: (direction: MoveDirection) => moveSelectedNode(editor, isEmbed, direction),
+      removeYouTubeEmbed: () => removeSelectedNode(editor, isEmbed),
       insertYouTubeEmbed: (inputUrl: string, width?: number, height?: number, start?: number) => {
         const embedUrl = toEmbedUrl(inputUrl, {
           allowFullscreen: this.config.allowFullscreen ?? true,

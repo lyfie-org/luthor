@@ -161,7 +161,14 @@ export {
   type PromptRequest,
   type RequestPrompt,
 } from "./media/EditorPromptContext";
-export { useIsNodeSelected, useIsEditable, registerClickToSelect } from "./media/mediaSelection";
+export {
+  useIsNodeSelected,
+  useIsEditable,
+  registerClickToSelect,
+  moveSelectedNode,
+  removeSelectedNode,
+  type MoveDirection,
+} from "./media/mediaSelection";
 export { usePointerResize, type PointerResizeOptions, type ResizeEdge } from "./media/usePointerResize";
 
 // Custom extensions

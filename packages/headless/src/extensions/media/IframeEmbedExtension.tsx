@@ -6,7 +6,12 @@
  */
 
 import { formatSize, splitCaptionAndSize } from "./mediaGrammar";
-import { registerClickToSelect } from "./mediaSelection";
+import {
+  moveSelectedNode,
+  registerClickToSelect,
+  removeSelectedNode,
+  type MoveDirection,
+} from "./mediaSelection";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   $createNodeSelection,
@@ -65,6 +70,10 @@ export type IframeEmbedCommands = {
   getIframeEmbedCaption: () => Promise<string>;
   updateIframeEmbedUrl: (inputUrl: string) => boolean;
   getIframeEmbedUrl: () => Promise<string>;
+  /** Move the selected embed one block up or down. */
+  moveIframeEmbed: (direction: MoveDirection) => void;
+  /** Remove the selected embed. */
+  removeIframeEmbed: () => void;
 };
 
 export type IframeEmbedQueries = {
@@ -451,10 +460,13 @@ function IframeEmbedComponent({
         shellRef.current.style.width = `${widthRef.current}px`;
       }
       if (iframeRef.current) {
-        iframeRef.current.style.height = `${heightRef.current}px`;
+        iframeRef.current.style.aspectRatio = `${widthRef.current} / ${heightRef.current}`;
       }
     };
 
+    // The side handle scales the embed and keeps its shape; the bottom handle
+    // is the one way to change the shape (a taller page, a portrait video).
+    const ratio = startHeight / startWidth;
     const onMove = (moveEvent: MouseEvent) => {
       const nextWidth =
         axis === "width"
@@ -463,7 +475,7 @@ function IframeEmbedComponent({
       const nextHeight =
         axis === "height"
           ? clampSize(startHeight + (moveEvent.clientY - startY), MIN_EMBED_HEIGHT, MAX_EMBED_HEIGHT)
-          : heightRef.current;
+          : clampSize(Math.round(nextWidth * ratio), MIN_EMBED_HEIGHT, MAX_EMBED_HEIGHT);
       widthRef.current = nextWidth;
       heightRef.current = nextHeight;
 
@@ -521,8 +533,11 @@ function IframeEmbedComponent({
           referrerPolicy="strict-origin-when-cross-origin"
           allowFullScreen
           style={{
+            // Shape, not a fixed height: when the column is narrower than the
+            // chosen width, the embed shrinks without being squashed.
             width: "100%",
-            height: `${localHeight}px`,
+            height: "auto",
+            aspectRatio: `${localWidth} / ${localHeight}`,
             border: "0",
             display: "block",
             pointerEvents: resolveEmbedPointerEvents(isEditorEditable, isSelected, isResizing),
@@ -583,7 +598,10 @@ export class IframeEmbedExtension extends BaseExtension<
   }
 
   getCommands(editor: LexicalEditor): IframeEmbedCommands {
+    const isEmbed = (node: LexicalNode | null) => node instanceof IframeEmbedNode;
     return {
+      moveIframeEmbed: (direction: MoveDirection) => moveSelectedNode(editor, isEmbed, direction),
+      removeIframeEmbed: () => removeSelectedNode(editor, isEmbed),
       insertIframeEmbed: (inputUrl: string, width?: number, height?: number, title?: string) => {
         const parsedUrl = parseUrl(inputUrl);
         if (!parsedUrl) {

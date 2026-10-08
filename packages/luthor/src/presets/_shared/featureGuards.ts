@@ -166,6 +166,8 @@ export function createFeatureGuardedCommands<TFeature extends string>(
     guarded.setImageAlignment = () => {};
     guarded.setImageCaption = () => {};
     guarded.getImageCaption = async () => "";
+    guarded.moveImage = () => {};
+    guarded.removeImage = () => {};
   });
   disable("emoji" as TFeature, () => {
     guarded.insertEmoji = () => {};
@@ -190,6 +192,8 @@ export function createFeatureGuardedCommands<TFeature extends string>(
     guarded.getIframeEmbedCaption = async () => "";
     guarded.updateIframeEmbedUrl = () => false;
     guarded.getIframeEmbedUrl = async () => "";
+    guarded.moveIframeEmbed = () => {};
+    guarded.removeIframeEmbed = () => {};
   });
   disable("youTubeEmbed" as TFeature, () => {
     guarded.insertYouTubeEmbed = () => {};
@@ -199,6 +203,8 @@ export function createFeatureGuardedCommands<TFeature extends string>(
     guarded.getYouTubeEmbedCaption = async () => "";
     guarded.updateYouTubeEmbedUrl = () => false;
     guarded.getYouTubeEmbedUrl = async () => "";
+    guarded.moveYouTubeEmbed = () => {};
+    guarded.removeYouTubeEmbed = () => {};
   });
   disable("history" as TFeature, () => {
     guarded.undo = () => {};
