@@ -20,6 +20,10 @@
  * - **Pastes do what the person meant.** Copying from Word, Excel or a web page
  *   puts formatted text *and* a picture of it on the clipboard; the text wins.
  *   Only a clipboard that is just files (a screenshot, a copied image) uploads.
+ * - **No pictures inlined as text.** A pasted page can carry its pictures as
+ *   `data:` URLs (Google Docs, some chat apps, a canvas copy); each one is
+ *   uploaded like a pasted file instead of being written into the body as
+ *   base64. The data URL never reaches the document, even for a moment.
  * - **Never into a read-only note**, and never a `blob:` URL into the shared
  *   document (the placeholder carries only a name and size).
  * - **The host stays in charge.** The upload callback is read when a file is
@@ -36,21 +40,29 @@ import {
   $getNearestNodeFromDOMNode,
   $getRoot,
   $getSelection,
+  $hasUpdateTag,
   $isElementNode,
   $isRangeSelection,
   $isNodeSelection,
   COMMAND_PRIORITY_HIGH,
   PASTE_COMMAND,
+  PASTE_TAG,
   type LexicalEditor,
   type LexicalNode,
 } from "lexical";
+import { ImageNode } from "../media/ImageExtension";
 import {
   type BaseExtensionConfig,
   ExtensionCategory,
 } from "@lyfie/luthor-headless/extensions/types";
 import { BaseExtension } from "@lyfie/luthor-headless/extensions/base";
 import { $createFileEmbedNode } from "./FileEmbedNode";
-import { $createUploadPlaceholderNode, $findUploadPlaceholder, $isUploadPlaceholderNode } from "./UploadPlaceholderNode";
+import {
+  $createUploadPlaceholderNode,
+  $findUploadPlaceholder,
+  $isUploadPlaceholderNode,
+  UploadPlaceholderNode,
+} from "./UploadPlaceholderNode";
 import { createUploadId, UploadQueue, uploadRegistry } from "./uploads";
 import { reportError } from "../../utils/logger";
 
@@ -140,6 +152,68 @@ export function isRichTextPaste(data: DataTransfer | null): boolean {
   return !!data.getData("text/rtf") && data.getData("text/plain").trim().length > 0;
 }
 
+const DATA_IMAGE_EXTENSIONS: Readonly<Record<string, string>> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/gif": "gif",
+  "image/webp": "webp",
+  "image/avif": "avif",
+  "image/bmp": "bmp",
+  "image/svg+xml": "svg",
+};
+
+/**
+ * The picture a `data:image/...` URL holds, as a file to upload — or null for
+ * anything else (an http(s) or blob: URL, a malformed or empty data URL).
+ */
+export function fileFromDataUrl(url: string, name = "pasted-image"): File | null {
+  const match = /^data:(image\/[a-z0-9.+-]+)((?:;[^,;]*)*?)(;base64)?,(.*)$/is.exec(url.trim());
+  if (!match) return null;
+  const type = match[1]!.toLowerCase();
+  const extension = DATA_IMAGE_EXTENSIONS[type];
+  if (!extension) return null;
+  let bytes: Uint8Array;
+  try {
+    if (match[3]) {
+      const binary = atob(match[4]!.replace(/\s+/g, ""));
+      bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    } else {
+      bytes = new TextEncoder().encode(decodeURIComponent(match[4]!));
+    }
+  } catch {
+    return null;
+  }
+  if (bytes.length === 0) return null;
+  return new File([bytes as BlobPart], `${name}.${extension}`, { type });
+}
+
+/**
+ * Put a block where an inline node sat: in its place when it was a block of its
+ * own (alone in a top-level paragraph), else after its top-level block — after
+ * any placeholders already put there, so several pictures keep their order.
+ */
+function $placeBlockFor(node: LexicalNode, block: LexicalNode): void {
+  const parent = node.getParent();
+  if (parent && parent.getParent() === $getRoot() && parent.getType() === "paragraph"
+    && parent.getChildren().every((child) => child === node || child.getTextContent().trim() === "")) {
+    parent.replace(block);
+    return;
+  }
+  const top = node.getTopLevelElement();
+  if (!top || top === node) {
+    node.replace(block);
+    return;
+  }
+  let after: LexicalNode = top;
+  for (let next = after.getNextSibling(); $isUploadPlaceholderNode(next); next = after.getNextSibling()) {
+    after = next;
+  }
+  after.insertAfter(block);
+  node.remove();
+}
+
 /** Commands contributed by {@link FileDropUploadExtension}. */
 export type FileDropUploadCommands = {
   /**
@@ -223,9 +297,28 @@ export class FileDropUploadExtension extends BaseExtension<
       };
     });
 
+    // Pictures pasted as `data:` URLs upload like pasted files. Swapped for a
+    // placeholder inside the paste's own update, so the base64 never lands in
+    // the document (or a shared room); only pastes count — opening a note
+    // that already holds one leaves it alone.
+    const removeDataImages = editor.hasNodes([ImageNode, UploadPlaceholderNode])
+      ? editor.registerNodeTransform(ImageNode, (node) => {
+          if (!this.enabled || !$hasUpdateTag(PASTE_TAG)) return;
+          const file = fileFromDataUrl(node.getLatest().__src);
+          // Refused (too big, a type the host won't take): left as it was pasted.
+          if (!file || this.config.validateFile?.(file)) return;
+          const id = createUploadId();
+          $placeBlockFor(node, $createUploadPlaceholderNode(file, id));
+          queueMicrotask(() => {
+            void this.runUpload(editor, file, id).catch(logUnexpected);
+          });
+        })
+      : () => {};
+
     return () => {
       removePaste();
       removeRoot();
+      removeDataImages();
       detach?.();
     };
   }
