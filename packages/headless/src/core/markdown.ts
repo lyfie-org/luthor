@@ -11,6 +11,7 @@ import {
   finalizeExportedMarkdown,
   restoreDocumentAfterMarkdownImport,
 } from "./markdown-fidelity";
+import { normalizeFormatBoundaries, repairEmphasis } from "./markdown-safe-formats";
 import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
@@ -2154,9 +2155,15 @@ function extractLeadingFrontmatter(markdown: string): MarkdownFrontmatterExtract
  * `trimEnd()` leaves alone, stand in for it through the import and are turned
  * back into whitespace in the resulting document. Skipped entirely when the
  * source already contains either sentinel, so real text is never rewritten.
+ *
+ * Empty lines get the same treatment: Lexical drops a code block's leading and
+ * trailing empty lines, so code that began or ended with a newline lost it on
+ * every load. An empty line in a closed fence holds a sentinel that is removed
+ * again afterwards.
  */
-const PROTECTED_SPACE = "";
-const PROTECTED_TAB = "";
+const PROTECTED_SPACE = "\uE000";
+const PROTECTED_TAB = "\uE001";
+const PROTECTED_EMPTY = "\uE002";
 
 /*
  * `~~~` fences are CommonMark code blocks, but Lexical's importer only knows
@@ -2220,13 +2227,20 @@ function protectFencedTrailingWhitespace(markdown: string): {
   content: string;
   protected: boolean;
 } {
-  if (markdown.includes(PROTECTED_SPACE) || markdown.includes(PROTECTED_TAB)) {
+  if (
+    markdown.includes(PROTECTED_SPACE) ||
+    markdown.includes(PROTECTED_TAB) ||
+    markdown.includes(PROTECTED_EMPTY)
+  ) {
     return { content: markdown, protected: false };
   }
 
   const lines = markdown.split("\n");
   let activeFence: { marker: "`" | "~"; length: number } | null = null;
   let changed = false;
+  // Empty lines of the open fence: marked only once it closes (an unclosed
+  // fence is left exactly as Lexical reads it).
+  let emptyLines: number[] = [];
 
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index] ?? "";
@@ -2237,9 +2251,16 @@ function protectFencedTrailingWhitespace(markdown: string): {
         fence.marker === activeFence.marker &&
         fence.length >= activeFence.length
       ) {
+        if (activeFence.marker === "`" && emptyLines.length > 0) {
+          for (const empty of emptyLines) {
+            lines[empty] = PROTECTED_EMPTY;
+          }
+          changed = true;
+        }
         activeFence = null;
       } else if (!activeFence) {
         activeFence = fence;
+        emptyLines = [];
       }
       continue;
     }
@@ -2248,6 +2269,11 @@ function protectFencedTrailingWhitespace(markdown: string): {
     // backticks already); protecting anything else would leak whitespace
     // into ordinary paragraphs.
     if (!activeFence || activeFence.marker !== "`") {
+      continue;
+    }
+
+    if (line.length === 0) {
+      emptyLines.push(index);
       continue;
     }
 
@@ -2283,7 +2309,8 @@ function restoreProtectedWhitespace(node: unknown): void {
   if (typeof node.text === "string") {
     node.text = node.text
       .replace(//g, " ")
-      .replace(//g, "\t");
+      .replace(//g, "\t")
+      .replace(/\uE002/g, "");
   }
 
   for (const value of Object.values(node)) {
@@ -2843,7 +2870,9 @@ export function markdownToJSON(
     }
   }
 
-  const preprocessed = preprocessMarkdownForBridgeImport(content);
+  // Formatting an older export wrote unreadably (`**Mix:**60g`) reads as the
+  // formatting it meant (see markdown-safe-formats).
+  const preprocessed = preprocessMarkdownForBridgeImport(repairEmphasis(content));
   const sourceContent = protectFencedTrailingWhitespace(
     encodeMarkdownForImport(
       preserveMetadata
@@ -2894,7 +2923,9 @@ export function jsonToMarkdown(
     });
   }
 
-  const { document: inputWithoutFrontmatter, frontmatter } = stripFrontmatterFromDocument(input);
+  const { document: documentWithoutFrontmatter, frontmatter } = stripFrontmatterFromDocument(input);
+  // Every bold/italic/… boundary in a form the importer will read back.
+  const inputWithoutFrontmatter = normalizeFormatBoundaries(documentWithoutFrontmatter);
   const preserveMetadata = shouldPreserveMetadata(options?.metadataMode);
   const extraSupportedNodeTypes = collectExtraSupportedNodeTypes(
     options?.extraNodes,

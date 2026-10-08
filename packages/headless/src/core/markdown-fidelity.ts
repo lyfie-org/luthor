@@ -109,18 +109,21 @@ function isBlankParagraph(node: unknown): boolean {
 // ── Export: JSON ────────────────────────────────────────────────────────────
 
 // Line-start text that the importer would read as block syntax. Group 2 is
-// the character to neutralise, after the leading part in group 1.
+// the character to neutralise, after the leading part in group 1. Spacing is
+// matched as loosely as the importer's own patterns (`\s`, so NBSP too; `[]`
+// is a checkbox): Word's list numbering pasted as "1.&nbsp;Note" reopened as
+// a list.
 const PARAGRAPH_LINE_START: RegExp[] = [
-  /^( {0,3})(#)(?=#{0,5}(?:[ \t]|$))/, // heading
-  /^( {0,3}\d{1,9})([.)])(?=[ \t]|$)/, // ordered list
-  /^( {0,3})([-+])(?=[ \t]|$)/, // bullet list
-  /^( {0,3})(-)(?=(?:[ \t]*-){2,}[ \t]*$)/, // thematic break "---"
+  /^( {0,3})(#)(?=#{0,5}(?:\s|$))/, // heading
+  /^( {0,3}\d{1,9})([.)])(?=\s|$)/, // ordered list
+  /^( {0,3})([-+])(?=\s|$)/, // bullet list
+  /^( {0,3})(-)(?=(?:\s*-){2,}\s*$)/, // thematic break "---"
   /^( {0,3})(>)/, // quote
   /^( {0,3})(\|)/, // table row
-  /^( {0,3})(\[)(?=[ xX]\](?:[ \t]|$))/, // checklist "[ ] "
+  /^( {0,3})(\[)(?=[\sxX]?\](?:\s|$))/, // checklist "[ ] "
 ];
 // A list item's own text is only re-read as a checkbox.
-const LIST_ITEM_START: RegExp[] = [/^( {0,3})(\[)(?=[ xX]\](?:[ \t]|$))/];
+const LIST_ITEM_START: RegExp[] = [/^( {0,3})(\[)(?=[\sxX]?\](?:\s|$))/];
 
 function escapeLineStart(text: string, patterns: RegExp[]): string {
   for (const pattern of patterns) {

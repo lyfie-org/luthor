@@ -19,6 +19,7 @@ import {
   markdownToJSON,
   mergeThemes,
   registerEditorDomWatchdog,
+  registerMarkdownSafeFormats,
   RichText,
   type EditorDomDivergence,
   type LexicalEditor,
@@ -1723,6 +1724,15 @@ function ExtensiveEditorContent({
     }
     return registerDisabledFeatureContentGuards(editor, contentGuardFlags.current);
   }, [editor, contentGuardKey]);
+
+  // Markdown is the document: keep bold/italic/… boundaries in a form it can
+  // hold, so what is shown is exactly what is saved and reopened.
+  useEffect(() => {
+    if (!editor || !markdownSourceOfTruth) {
+      return;
+    }
+    return registerMarkdownSafeFormats(editor);
+  }, [editor, markdownSourceOfTruth]);
 
   useEffect(() => {
     const commandPaletteExtension = extensions.find(

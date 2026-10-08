@@ -105,6 +105,17 @@ describe("papyra headless collaboration", () => {
     expect(client.getMarkdown()).not.toContain("[Unsupported");
   });
 
+  it("seeds a note saved with unreadable formatting as the formatting it meant", () => {
+    // `**Mix:**60g` is what Lexical used to write for bold "Mix:" + "60g".
+    const server = replica();
+    server.setMarkdown("**1.Thursday 2:30 PM: The Initial Mix:**60g atta\nPut your jar on the scale.");
+
+    const client = replica(server.doc);
+    const expected = "**1.Thursday 2:30 PM: The Initial Mix**:60g atta\nPut your jar on the scale.";
+    expect(server.getMarkdown()).toBe(expected);
+    expect(client.getMarkdown()).toBe(expected);
+  });
+
   it("a peer's resize and caption reach every replica and the saved markdown", () => {
     const server = replica();
     server.setMarkdown("Intro\n\n![[beach.jpg]]\n\nOutro");

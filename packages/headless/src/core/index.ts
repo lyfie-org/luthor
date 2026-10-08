@@ -33,6 +33,15 @@ export {
   type TextFormatType,
 } from "./content-guards";
 export {
+  boundaryFix,
+  DELIMITED_FORMATS,
+  normalizeFormatBoundaries,
+  registerMarkdownSafeFormats,
+  repairEmphasis,
+  type BoundaryFix,
+  type FormattedRun,
+} from "./markdown-safe-formats";
+export {
   markdownToJSON,
   jsonToMarkdown,
   type JsonDocument,
