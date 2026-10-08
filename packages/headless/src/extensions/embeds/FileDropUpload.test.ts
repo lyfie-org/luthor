@@ -12,12 +12,18 @@ import {
   $createParagraphNode,
   $createTextNode,
   $getRoot,
+  $insertNodes,
+  $isElementNode,
   PASTE_COMMAND,
+  PASTE_TAG,
   createEditor,
   type LexicalEditor,
 } from "lexical";
+import { $generateNodesFromDOM } from "@lexical/html";
+import { $createImageNode, $isImageNode, ImageNode } from "../media/ImageExtension";
 import {
   FileDropUploadExtension,
+  fileFromDataUrl,
   isRichTextPaste,
   MEDIA_DROP_EVENT,
   type FileDropUploadConfig,
@@ -436,5 +442,144 @@ describe("placeholder in markdown", () => {
     expect(md.trim()).toBe("Intro");
     expect(md).not.toContain("a.png");
     expect(md).not.toContain("Unsupported");
+  });
+});
+
+describe("data: images in a paste", () => {
+  const PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVR4nGP8z8DwnwEJMDGgAcICACZsAgL4gF7mAAAAAElFTkSuQmCC";
+
+  function createImageHarness(config: FileDropUploadConfig = {}) {
+    const editor = createEditor({
+      namespace: "data-image-paste-test",
+      nodes: [FileEmbedNode, UploadPlaceholderNode, ImageNode],
+      onError: (error) => {
+        throw error;
+      },
+    });
+    const root = document.createElement("div");
+    root.contentEditable = "true";
+    document.body.appendChild(root);
+    editor.setRootElement(root);
+    const unregister = new FileDropUploadExtension(config).register(editor);
+    disposers.push(() => {
+      unregister();
+      root.remove();
+    });
+    editor.update(() => {
+      const text = $createTextNode("hello");
+      $getRoot().clear().append($createParagraphNode().append(text));
+      text.select(5, 5);
+    }, { discrete: true });
+    return editor;
+  }
+
+  /** Paste HTML the way Lexical's rich-text paste does: DOM → nodes, tagged `paste`. */
+  function pasteHtml(editor: LexicalEditor, html: string) {
+    editor.update(() => {
+      const dom = new DOMParser().parseFromString(html, "text/html");
+      $insertNodes($generateNodesFromDOM(editor, dom));
+    }, { discrete: true, tag: PASTE_TAG });
+  }
+
+  /** Every node as a label, depth-first: text, `img:src`, `embed:x`, `uploading:x`. */
+  function contents(editor: LexicalEditor): string[] {
+    return editor.getEditorState().read(() => {
+      const out: string[] = [];
+      for (const block of $getRoot().getChildren()) {
+        if ($isFileEmbedNode(block)) out.push(`embed:${block.getTarget()}`);
+        else if ($isUploadPlaceholderNode(block)) out.push(`uploading:${block.__name}`);
+        else if ($isImageNode(block)) out.push(`img:${block.__src.slice(0, 15)}`);
+        else {
+          const parts = ($isElementNode(block) ? block.getChildren() : []).map((n) => (
+            $isImageNode(n) ? `img:${n.__src.slice(0, 15)}` : n.getTextContent()
+          ));
+          out.push(parts.join(""));
+        }
+      }
+      return out;
+    });
+  }
+
+  it("uploads a pasted data: picture and embeds it, without the base64 ever reaching the document", async () => {
+    const upload = deferred<{ filename: string }>();
+    const uploadFile = vi.fn<Upload>(() => upload.promise);
+    const editor = createImageHarness({ uploadFile });
+    const seen: string[] = [];
+    disposers.push(editor.registerUpdateListener(({ editorState }) => {
+      seen.push(JSON.stringify(editorState.toJSON()));
+    }));
+
+    pasteHtml(editor, `<p>Look:</p><img src="${PNG}"><p>after</p>`);
+    await settle(editor);
+
+    expect(contents(editor)).toEqual(["helloLook:", "uploading:pasted-image.png", "after"]);
+    expect(uploadFile).toHaveBeenCalledTimes(1);
+    const sent = uploadFile.mock.calls[0]![0];
+    expect(sent.type).toBe("image/png");
+    expect(sent.size).toBe(78);
+
+    upload.resolve({ filename: "pasted-image-1a2b.png" });
+    await settle(editor);
+    expect(contents(editor)).toEqual(["helloLook:", "embed:pasted-image-1a2b.png", "after"]);
+    expect(seen.some((state) => state.includes("data:image"))).toBe(false);
+  });
+
+  it("moves a picture out of a line of text, keeping several in order", async () => {
+    let count = 0;
+    const uploadFile = vi.fn<Upload>(async (f) => ({ filename: `${++count}-${f.name}` }));
+    const editor = createImageHarness({ uploadFile });
+
+    pasteHtml(editor, `<p>one <img src="${PNG}"> two <img src="${PNG.replace("image/png", "image/jpeg")}"> three</p>`);
+    await settle(editor);
+    await settle(editor);
+
+    const [line, ...embeds] = contents(editor);
+    // (Lexical's HTML import collapses the spaces around an <img> on its own.)
+    expect(line!.replace(/\s+/g, "")).toBe("helloonetwothree");
+    expect(embeds).toEqual(["embed:1-pasted-image.png", "embed:2-pasted-image.jpg"]);
+  });
+
+  it("leaves http(s) pictures, refused files, and pictures that were not pasted alone", async () => {
+    const uploadFile = vi.fn<Upload>(async (f) => ({ filename: f.name }));
+    const editor = createImageHarness({ uploadFile, validateFile: (f) => (f.type === "image/gif" ? "No GIFs" : null) });
+
+    pasteHtml(editor, `<img src="https://example.com/a.png"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">`);
+    editor.update(() => {
+      $getRoot().append($createParagraphNode().append($createImageNode(PNG, "opened")));
+    }, { discrete: true });
+    await settle(editor);
+
+    expect(uploadFile).not.toHaveBeenCalled();
+    expect(contents(editor).join(" ")).toContain("img:https://exampl");
+    expect(contents(editor).join(" ")).toContain("img:data:image/gif");
+    expect(contents(editor).join(" ")).toContain("img:data:image/png");
+  });
+
+  it("does nothing without an upload callback", async () => {
+    const editor = createImageHarness();
+    pasteHtml(editor, `<img src="${PNG}">`);
+    await settle(editor);
+    expect(contents(editor).join(" ")).toContain("img:data:image/png");
+  });
+
+  it.each([
+    [PNG, "image/png", 78],
+    ["data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%2F%3E", "image/svg+xml", 41],
+    ["DATA:IMAGE/JPEG;BASE64,/9j/4A==", "image/jpeg", 4],
+  ])("fileFromDataUrl reads %s", (url, type, size) => {
+    const result = fileFromDataUrl(url);
+    expect(result?.type).toBe(type);
+    expect(result?.size).toBe(size);
+  });
+
+  it.each([
+    "https://example.com/a.png",
+    "blob:https://example.com/1",
+    "data:text/html;base64,PGI+",
+    "data:image/png;base64,",
+    "data:image/png;base64,***",
+    "data:image/x-unknown;base64,AAAA",
+  ])("fileFromDataUrl rejects %s", (url) => {
+    expect(fileFromDataUrl(url)).toBeNull();
   });
 });

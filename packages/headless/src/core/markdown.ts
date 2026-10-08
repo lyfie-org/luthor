@@ -11,6 +11,7 @@ import {
   finalizeExportedMarkdown,
   restoreDocumentAfterMarkdownImport,
 } from "./markdown-fidelity";
+import { normalizeFormatBoundaries, repairEmphasis } from "./markdown-safe-formats";
 import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
@@ -53,7 +54,7 @@ import {
 } from "@lexical/react/LexicalHorizontalRuleNode";
 import {
   $createParagraphNode,
-  $createTextNode,
+  $isElementNode,
   createEditor,
   ParagraphNode,
   TextNode,
@@ -308,12 +309,30 @@ const YOUTUBE_MARKDOWN_TRANSFORMER: ElementTransformer = {
 
 type MarkdownTableAlignment = "left" | "center" | "right";
 
+/**
+ * Fits a cell's inline markdown onto one table row: pipes escaped, line breaks
+ * as `<br>`. Backslashes and emphasis characters are already escaped by the
+ * inline export, so they are left as they are.
+ */
 function escapeMarkdownTableCell(value: string): string {
   return value
-    .replace(/\\/g, "\\\\")
     .replace(/\|/g, "\\|")
     .replace(/\r\n?/g, "\n")
     .replace(/\n/g, "<br>");
+}
+
+/**
+ * The transformers of the markdown import in progress, so a table cell can be
+ * read with the same inline syntax as the rest of the document (including a
+ * preset's extra text-match transformers). Set around each import.
+ */
+let activeImportTransformers: readonly Transformer[] | null = null;
+
+/** Only the inline syntax: a cell holds formatted text, never blocks. */
+function inlineTransformers(transformers: readonly Transformer[]): Transformer[] {
+  return transformers.filter(
+    (transformer) => transformer.type === "text-format" || transformer.type === "text-match",
+  );
 }
 
 function unescapeMarkdownTableCell(value: string): string {
@@ -432,7 +451,7 @@ function getTableColumnAlignment(
 
 const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
   dependencies: [TableNode, TableRowNode, TableCellNode],
-  export: (node: LexicalNode) => {
+  export: (node: LexicalNode, traverseChildren: (node: ElementNode) => string) => {
     if (!$isTableNode(node)) {
       return null;
     }
@@ -469,11 +488,23 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
       return null;
     }
 
+    // Each block in a cell exports as inline markdown (bold, links, code…),
+    // one per line; a cell used to be written as its bare text, so any
+    // formatting in a table was dropped on save.
+    const cellMarkdown = (cell: TableCellNode | undefined): string => {
+      if (!cell) {
+        return "";
+      }
+      const blocks = cell.getChildren().map((child) => (
+        $isElementNode(child) ? traverseChildren(child) : child.getTextContent()
+      ));
+      return escapeMarkdownTableCell(blocks.join("\n").trim());
+    };
+
     const formatRow = (rowCells: readonly TableCellNode[]): string => {
-      const cells = Array.from({ length: columnCount }, (_, columnIndex) => {
-        const text = rowCells[columnIndex]?.getTextContent().trim() ?? "";
-        return escapeMarkdownTableCell(text);
-      });
+      const cells = Array.from({ length: columnCount }, (_, columnIndex) => (
+        cellMarkdown(rowCells[columnIndex])
+      ));
 
       return `| ${cells.join(" | ")} |`;
     };
@@ -565,6 +596,7 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
       true,
     );
 
+    const cellTransformers = inlineTransformers(activeImportTransformers ?? MARKDOWN_TRANSFORMERS);
     const tableRows = tableNode.getChildren();
     dataRows.forEach((rowData, rowIndex) => {
       const tableRow = tableRows[rowIndex];
@@ -579,12 +611,13 @@ const TABLE_MARKDOWN_TRANSFORMER: MultilineElementTransformer = {
           return;
         }
 
-        cell.clear();
-        const paragraph = $createParagraphNode();
+        // The cell's inline markdown, one paragraph per `<br>`-separated line.
         if (cellText) {
-          paragraph.append($createTextNode(cellText));
+          $convertFromMarkdownString(cellText, cellTransformers, cell, true);
+        } else {
+          cell.clear();
+          cell.append($createParagraphNode());
         }
-        cell.append(paragraph);
 
         const alignment = separatorAlignments[cellIndex] ?? null;
         if (alignment === "left" || alignment === "center" || alignment === "right") {
@@ -2122,9 +2155,15 @@ function extractLeadingFrontmatter(markdown: string): MarkdownFrontmatterExtract
  * `trimEnd()` leaves alone, stand in for it through the import and are turned
  * back into whitespace in the resulting document. Skipped entirely when the
  * source already contains either sentinel, so real text is never rewritten.
+ *
+ * Empty lines get the same treatment: Lexical drops a code block's leading and
+ * trailing empty lines, so code that began or ended with a newline lost it on
+ * every load. An empty line in a closed fence holds a sentinel that is removed
+ * again afterwards.
  */
-const PROTECTED_SPACE = "";
-const PROTECTED_TAB = "";
+const PROTECTED_SPACE = "\uE000";
+const PROTECTED_TAB = "\uE001";
+const PROTECTED_EMPTY = "\uE002";
 
 /*
  * `~~~` fences are CommonMark code blocks, but Lexical's importer only knows
@@ -2188,13 +2227,20 @@ function protectFencedTrailingWhitespace(markdown: string): {
   content: string;
   protected: boolean;
 } {
-  if (markdown.includes(PROTECTED_SPACE) || markdown.includes(PROTECTED_TAB)) {
+  if (
+    markdown.includes(PROTECTED_SPACE) ||
+    markdown.includes(PROTECTED_TAB) ||
+    markdown.includes(PROTECTED_EMPTY)
+  ) {
     return { content: markdown, protected: false };
   }
 
   const lines = markdown.split("\n");
   let activeFence: { marker: "`" | "~"; length: number } | null = null;
   let changed = false;
+  // Empty lines of the open fence: marked only once it closes (an unclosed
+  // fence is left exactly as Lexical reads it).
+  let emptyLines: number[] = [];
 
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index] ?? "";
@@ -2205,9 +2251,16 @@ function protectFencedTrailingWhitespace(markdown: string): {
         fence.marker === activeFence.marker &&
         fence.length >= activeFence.length
       ) {
+        if (activeFence.marker === "`" && emptyLines.length > 0) {
+          for (const empty of emptyLines) {
+            lines[empty] = PROTECTED_EMPTY;
+          }
+          changed = true;
+        }
         activeFence = null;
       } else if (!activeFence) {
         activeFence = fence;
+        emptyLines = [];
       }
       continue;
     }
@@ -2216,6 +2269,11 @@ function protectFencedTrailingWhitespace(markdown: string): {
     // backticks already); protecting anything else would leak whitespace
     // into ordinary paragraphs.
     if (!activeFence || activeFence.marker !== "`") {
+      continue;
+    }
+
+    if (line.length === 0) {
+      emptyLines.push(index);
       continue;
     }
 
@@ -2251,7 +2309,8 @@ function restoreProtectedWhitespace(node: unknown): void {
   if (typeof node.text === "string") {
     node.text = node.text
       .replace(//g, " ")
-      .replace(//g, "\t");
+      .replace(//g, "\t")
+      .replace(/\uE002/g, "");
   }
 
   for (const value of Object.values(node)) {
@@ -2811,7 +2870,9 @@ export function markdownToJSON(
     }
   }
 
-  const preprocessed = preprocessMarkdownForBridgeImport(content);
+  // Formatting an older export wrote unreadably (`**Mix:**60g`) reads as the
+  // formatting it meant (see markdown-safe-formats).
+  const preprocessed = preprocessMarkdownForBridgeImport(repairEmphasis(content));
   const sourceContent = protectFencedTrailingWhitespace(
     encodeMarkdownForImport(
       preserveMetadata
@@ -2822,12 +2883,18 @@ export function markdownToJSON(
 
   const editor = createMarkdownEditor(options?.extraNodes);
   const transformers = resolveMarkdownTransformers(options?.extraTransformers);
-  editor.update(
-    () => {
-      $convertFromMarkdownString(sourceContent.content, transformers);
-    },
-    { discrete: true },
-  );
+  const outerTransformers = activeImportTransformers;
+  activeImportTransformers = transformers;
+  try {
+    editor.update(
+      () => {
+        $convertFromMarkdownString(sourceContent.content, transformers);
+      },
+      { discrete: true },
+    );
+  } finally {
+    activeImportTransformers = outerTransformers;
+  }
 
   const baseDocument = restoreDocumentAfterMarkdownImport(
     editor.getEditorState().toJSON() as JsonDocument,
@@ -2856,7 +2923,9 @@ export function jsonToMarkdown(
     });
   }
 
-  const { document: inputWithoutFrontmatter, frontmatter } = stripFrontmatterFromDocument(input);
+  const { document: documentWithoutFrontmatter, frontmatter } = stripFrontmatterFromDocument(input);
+  // Every bold/italic/… boundary in a form the importer will read back.
+  const inputWithoutFrontmatter = normalizeFormatBoundaries(documentWithoutFrontmatter);
   const preserveMetadata = shouldPreserveMetadata(options?.metadataMode);
   const extraSupportedNodeTypes = collectExtraSupportedNodeTypes(
     options?.extraNodes,

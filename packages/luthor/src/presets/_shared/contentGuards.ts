@@ -30,6 +30,12 @@ const FEATURE_TEXT_FORMATS: Readonly<Record<string, TextFormatType>> = {
   superscript: "superscript",
 };
 
+/** Every feature whose flag decides what the content guards strip. */
+export const CONTENT_GUARD_FEATURES: readonly string[] = [
+  ...Object.keys(FEATURE_STYLE_PROPERTIES),
+  ...Object.keys(FEATURE_TEXT_FORMATS),
+];
+
 /**
  * Keeps the content of disabled style features out of the document.
  *

@@ -19,6 +19,7 @@ import {
   markdownToJSON,
   mergeThemes,
   registerEditorDomWatchdog,
+  registerMarkdownSafeFormats,
   RichText,
   type EditorDomDivergence,
   type LexicalEditor,
@@ -93,6 +94,7 @@ import {
   markModeCached,
   mergeToolbarVisibilityWithFeatures as sharedMergeToolbarVisibilityWithFeatures,
   normalizeStyleVarsKey as sharedNormalizeStyleVarsKey,
+  CONTENT_GUARD_FEATURES,
   registerDisabledFeatureContentGuards,
   type FeatureShortcutSpec,
   type ToolbarFeatureMap,
@@ -1706,12 +1708,31 @@ function ExtensiveEditorContent({
     };
   }, [editor, featureFlags]);
 
+  // Keyed on the guarded flags' values, not the object: registering node
+  // transforms marks every text node dirty, and that update writes the editor's
+  // retained selection back to the DOM — which focuses the editor. A host that
+  // passed a fresh flags object each render had focus pulled out of its own
+  // inputs (a title field) on every re-render.
+  const contentGuardKey = CONTENT_GUARD_FEATURES
+    .map((feature) => (featureFlags[feature as FeatureFlag] === false ? "0" : "1"))
+    .join("");
+  const contentGuardFlags = useRef(featureFlags);
+  contentGuardFlags.current = featureFlags;
   useEffect(() => {
     if (!editor) {
       return;
     }
-    return registerDisabledFeatureContentGuards(editor, featureFlags);
-  }, [editor, featureFlags]);
+    return registerDisabledFeatureContentGuards(editor, contentGuardFlags.current);
+  }, [editor, contentGuardKey]);
+
+  // Markdown is the document: keep bold/italic/… boundaries in a form it can
+  // hold, so what is shown is exactly what is saved and reopened.
+  useEffect(() => {
+    if (!editor || !markdownSourceOfTruth) {
+      return;
+    }
+    return registerMarkdownSafeFormats(editor);
+  }, [editor, markdownSourceOfTruth]);
 
   useEffect(() => {
     const commandPaletteExtension = extensions.find(

@@ -223,6 +223,15 @@ describe("PapyraEditor", () => {
     expect(props.toolbarVisibility).toMatchObject({ fontFamily: false, textColor: false });
   });
 
+  it("keeps the resolved feature flags stable across re-renders", () => {
+    // A fresh object each render re-registered the content guards, and each
+    // registration pulled focus into the body from the host's title field.
+    const { rerender } = render(<PapyraEditor showDefaultContent={false} placeholder="a" />);
+    const first = lastProps().featureFlags;
+    rerender(<PapyraEditor showDefaultContent={false} placeholder="b" />);
+    expect(lastProps().featureFlags).toBe(first);
+  });
+
   it("applies the markdown-safe feature policy", () => {
     render(<PapyraEditor showDefaultContent={false} />);
 

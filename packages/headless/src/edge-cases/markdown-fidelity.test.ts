@@ -98,6 +98,10 @@ const TYPED = [
   "###### six", "####### seven", "> not a quote", ">no space", "| a | b |", "|", "||", "---", "***", "___",
   "- - -", "[ ] box", "[x] done", "[X] DONE", "- [ ] fake task", "```", "```js", "~~~", "    four spaces",
   "\ttab first", "=== ", "===", "--- ",
+  // …with the space after the marker not a plain space (Word's list numbering
+  // pastes "1.&nbsp;"); the importer reads any \s there
+  "1.\u00a0nbsp list", "-\u00a0nbsp dash", "+\u2003em space", "#\u00a0nbsp heading", "[ ]\u00a0nbsp box",
+  "[] empty box", "[\u00a0] nbsp inside", "[x]\u00a0done",
   // inline syntax typed literally
   "*stars*", "**double**", "_under_", "__dunder__", "~~strike~~", "`tick`", "a * b * c", "2*3*4",
   "snake_case_name", "[text](url)", "see [a](b) here", "![img](x)", "[just brackets]", "[a] (b)", "a](b",
@@ -263,6 +267,7 @@ describe("code blocks", () => {
     ["simple", "print(1)"], ["blank line inside", "a\n\nb"], ["several blank lines", "a\n\n\n\nb"],
     ["indented", "  indented\n\tTabbed"], ["markdown-looking", "# not\n- a\n> list\n1. x"],
     ["backtick fence inside", "```\ninner\n```"], ["html", "<div>x</div>"], ["unicode", "日本 🎌"],
+    ["trailing newline", "const a = 1;\n"], ["trailing blank lines", "a\n\n"], ["leading newline", "\na"],
   ] as const) {
     it(name, () => expectLossless(doc(p(text("before")), code(value, "python"), p(text("after")))));
   }
@@ -278,6 +283,29 @@ describe("formatting combinations", () => {
   ] as const) {
     it(name, () => expectLossless(doc(p(...(children as unknown as Node[])))));
   }
+});
+
+describe("formatting at punctuation reopens as formatting", () => {
+  // Lexical writes `<b>Mix:</b>60g` as `**Mix:**60g`, which no reader (its own
+  // included) sees as bold. One mark moves out of the run instead.
+  for (const [name, children, expected] of [
+    ["bold ending in a colon before a word", [text("Mix:", 1), text("60g")], [text("Mix", 1), text(":60g")]],
+    ["bold number before a word", [text("1.", 1), text("Thursday")], [text("1", 1), text(".Thursday")]],
+    ["bold in parentheses inside a word", [text("a"), text("(b)", 1), text("c")], [text("a("), text("b", 1), text(")c")]],
+    ["italic ending in a comma", [text("so,", 2), text("then")], [text("so", 2), text(",then")]],
+    ["strike ending in a full stop", [text("old.", 4), text("New")], [text("old", 4), text(".New")]],
+    ["bold ending in a space", [text("Mix ", 1), text("60g")], [text("Mix", 1), text(" 60g")]],
+  ] as const) {
+    it(name, () => expectLossless(
+      doc(p(...(children as unknown as Node[]))),
+      name,
+      doc(p(...(expected as unknown as Node[]))),
+    ));
+  }
+
+  it("opens a file already written that way as the formatting it meant", () => {
+    expect(shape(toJSON("**Mix:**60g"))).toBe(shape(doc(p(text("Mix", 1), text(":60g")))));
+  });
 });
 
 describe("never loses content on import", () => {

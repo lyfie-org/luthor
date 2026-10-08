@@ -31,7 +31,9 @@ const {
   mentionSuggestionMenuMock,
   wikilinkSuggestionMenuMock,
   linkHoverBubbleMock,
+  registerMarkdownSafeFormatsMock,
 } = vi.hoisted(() => ({
+  registerMarkdownSafeFormatsMock: vi.fn(() => () => {}),
   registerKeyboardShortcutsMock: vi.fn<(props: Record<string, unknown>) => ReturnType<typeof vi.fn>>(() => vi.fn()),
   commandsToCommandPaletteItemsMock: vi.fn(() => [{ id: "mock-command" }]),
   commandsToSlashCommandItemsMock: vi.fn(() => [{ id: "mock-slash-command" }]),
@@ -277,6 +279,7 @@ vi.mock("@lyfie/luthor-headless", () => ({
   markdownToJSON: markdownToJSONMock,
   clearLexicalSelection: vi.fn(),
   registerContentFormatGuard: vi.fn(() => () => {}),
+  registerMarkdownSafeFormats: registerMarkdownSafeFormatsMock,
 }));
 
 import { ExtensiveEditor } from "./ExtensiveEditor";
@@ -1567,6 +1570,19 @@ describe("ExtensiveEditor toolbar placement and alignment", () => {
     await waitFor(() => {
       expect(screen.getByTestId("source-view")).toHaveValue(JSON.stringify(exportedDocument));
     });
+  });
+
+  it("keeps formatting markdown-safe only when markdown is the source of truth", () => {
+    registerMarkdownSafeFormatsMock.mockClear();
+    const { rerender } = render(<ExtensiveEditor showDefaultContent={false} />);
+    expect(registerMarkdownSafeFormatsMock).not.toHaveBeenCalled();
+
+    rerender(<ExtensiveEditor showDefaultContent={false} markdownSourceOfTruth />);
+    expect(registerMarkdownSafeFormatsMock).toHaveBeenCalledTimes(1);
+
+    // Re-renders don't re-register (each registration is a whole-document update).
+    rerender(<ExtensiveEditor showDefaultContent={false} markdownSourceOfTruth placeholder="x" />);
+    expect(registerMarkdownSafeFormatsMock).toHaveBeenCalledTimes(1);
   });
 
   it("derives json output from markdown when markdownSourceOfTruth is enabled", async () => {
