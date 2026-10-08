@@ -541,8 +541,14 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       };
     }, [isReady, hasOutlineListener]);
 
-    const resolvedFeatureFlags: FeatureFlagOverrides =
-      papyraFeaturePolicy.resolve(featureFlags);
+    // Memoised: a fresh object every render re-registered the content guards
+    // (see ExtensiveEditor), and each registration is an editor update that
+    // writes the retained selection back to the DOM — pulling focus into the
+    // body while the host's title field was being typed in.
+    const resolvedFeatureFlags = useMemo<FeatureFlagOverrides>(
+      () => papyraFeaturePolicy.resolve(featureFlags),
+      [featureFlags],
+    );
 
     const {
       editorThemeOverrides: resolvedThemeOverrides,
