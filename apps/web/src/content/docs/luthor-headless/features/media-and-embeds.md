@@ -127,7 +127,8 @@ Parse/format helpers for hosts: `parseEmbedTarget`, `formatEmbedTarget`, `parseM
 `insertIframeEmbed(url)` takes the link people actually have. `toEmbeddableUrl(url)`
 (pure, no network, no API keys) turns well-known services into their embeddable form
 and player shape: Google Maps (place, search, `@lat,lng`, directions, `?q=`), Apple Maps
-share links (shown on the keyless Google embed), OpenStreetMap, YouTube, Vimeo, Spotify,
+share links (shown on the keyless Google embed), OpenStreetMap (a pin with no zoom of its
+own opens at street level, `z=15`, since 2.11.8), YouTube, Vimeo, Spotify,
 SoundCloud, Loom, Figma, CodePen, CodeSandbox, Google Docs/Sheets/Slides/Forms/Drive,
 Dailymotion, Twitch, TikTok, Instagram, X, Miro and Canva. Anything else goes to the
 host, if it configured one:
