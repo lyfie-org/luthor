@@ -37,6 +37,15 @@ describe("toEmbeddableUrl — maps", () => {
     expect(dir.searchParams.get("daddr")).toBe("Lyon");
   });
 
+  it("shows a pin with no zoom (a shared pin's landing link) at street level, not the whole world", () => {
+    const out = new URL(src("https://www.google.com/maps/place/30.956911,34.790920/data=!4m6!3m5!1s0!7e2!8m2!3d30.9569107!4d34.7909201!18m1!1e1")!);
+    expect(out.searchParams.get("ll")).toBe("30.9569107,34.7909201");
+    expect(out.searchParams.get("z")).toBe("15");
+    expect(new URL(src("https://maps.apple.com/place?coordinate=37.334859,-122.009040&name=Apple%20Park")!).searchParams.get("z")).toBe("15");
+    // A query with no point keeps Google's own framing.
+    expect(new URL(src("https://maps.google.com/?q=Eiffel+Tower")!).searchParams.get("z")).toBeNull();
+  });
+
   it("works on country Google domains", () => {
     expect(src("https://www.google.co.uk/maps/place/Big+Ben/@51.5,-0.12,17z")).toContain("output=embed");
   });
