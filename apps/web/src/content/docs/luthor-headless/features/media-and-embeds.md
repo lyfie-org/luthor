@@ -32,6 +32,9 @@ exports:
   - "parseMediaDirectives"
   - "formatMediaDirectives"
   - "classifyMedia"
+  - "toEmbeddableUrl"
+  - "formatFrameDirectives"
+  - "parseFrameDirectives"
   - "usePointerResize"
   - "useIsNodeSelected"
   - "sanitizeEmbedTarget"
@@ -57,6 +60,8 @@ frameworks:
 lastVerifiedFrom:
   - "packages/headless/src/extensions/media/index.ts"
   - "packages/headless/src/extensions/media/mediaGrammar.ts"
+  - "packages/headless/src/extensions/media/embedProviders.ts"
+  - "packages/headless/src/core/markdown.ts"
   - "packages/headless/src/extensions/media/MediaFrame.tsx"
   - "packages/headless/src/extensions/embeds/EmbedResolverContext.tsx"
   - "packages/headless/src/extensions/embeds/FileDropUploadExtension.tsx"
@@ -78,9 +83,9 @@ This group covers media insertion, attachment embeds, resizing, and uploads.
 
 | Extension | Node | Markdown |
 | --- | --- | --- |
-| `imageExtension` | `image` | `![alt](url)`, `![alt\|300](url)` |
-| `youTubeEmbedExtension` | `youtube-embed` | `![[youtube:url\|caption\|640x360]]` |
-| `iframeEmbedExtension` | `iframe-embed` | `![[iframe:url\|caption]]` |
+| `imageExtension` | `image` | `![alt](url)`, `![alt\|300](url)`, `… <!-- align:right -->` |
+| `youTubeEmbedExtension` | `youtube-embed` | `![[youtube:url\|caption\|640x360]] <!-- align:right -->` |
+| `iframeEmbedExtension` | `iframe-embed` | `![[iframe:url\|caption\|800x600]] <!-- align:left -->` |
 | `fileEmbedExtension` | `fileEmbed` | `![[file.ext]]` (block or inline) |
 | `FileDropUploadExtension` | `uploadPlaceholder` | none — exports nothing |
 
@@ -96,6 +101,18 @@ Obsidian-compatible, so a vault opens unchanged in both apps.
 | `![[photo.png]] <!-- align:center --> <!-- caption:… -->` | trailing directives: `align:left\|center\|right`, `caption:` |
 | `![[report.pdf#page=3]]` | file card; fragment passed to the host |
 | `text ![[icon.png]] text` | inline attachment |
+| `![[iframe:url]] <!-- align:right -->` | web/YouTube embeds take the same directives; centre is their default and isn't written |
+| `![](url) <!-- align:right -->` | a picture from a link: the same directive (with `imageAlignment: "comment"`) |
+
+### Aligned pictures from links on a metadata-free export
+
+`jsonToMarkdown(doc, { metadataMode: "none" })` writes an aligned `![](url)` as GitHub's
+`<p align="…">` wrapper by default (so GitHub renders it aligned). Pass
+`imageAlignment: "comment"` to keep the `<!-- align:… -->` directive instead — the
+Papyra preset does. Both read back. HTML alignment wrappers become internal markers
+during import that no transformer can claim (older `[[LUTHORALIGNSTART:…]]` lines,
+which a `[[wikilink]]` transformer used to swallow, are recognised and healed). A
+picture that ended up inside a paragraph is lifted out on export rather than dropped.
 
 Guarantees:
 
@@ -103,7 +120,33 @@ Guarantees:
 - **Lossless.** Unknown pipe segments and directives are kept verbatim; inside a markdown table the escaped form `![[a.png\|200]]` is read and written as-is.
 - Sizes clamp to `MEDIA_MAX_DIMENSION` (16384). YouTube `watch`/`youtu.be`/`shorts` links normalize once to `…/embed/<id>`.
 
-Parse/format helpers for hosts: `parseEmbedTarget`, `formatEmbedTarget`, `parseMediaDirectives`, `formatMediaDirectives`, `splitCaptionAndSize`, `classifyMedia`.
+Parse/format helpers for hosts: `parseEmbedTarget`, `formatEmbedTarget`, `parseMediaDirectives`, `formatMediaDirectives`, `formatFrameDirectives`, `parseFrameDirectives`, `splitCaptionAndSize`, `classifyMedia`.
+
+## Embedding any link
+
+`insertIframeEmbed(url)` takes the link people actually have. `toEmbeddableUrl(url)`
+(pure, no network, no API keys) turns well-known services into their embeddable form
+and player shape: Google Maps (place, search, `@lat,lng`, directions, `?q=`), Apple Maps
+share links (shown on the keyless Google embed), OpenStreetMap, YouTube, Vimeo, Spotify,
+SoundCloud, Loom, Figma, CodePen, CodeSandbox, Google Docs/Sheets/Slides/Forms/Drive,
+Dailymotion, Twitch, TikTok, Instagram, X, Miro and Canva. Anything else goes to the
+host, if it configured one:
+
+~~~ts
+new IframeEmbedExtension({
+  // After the embed is inserted (it shows a loading frame meanwhile).
+  resolveUrl: async (url) => {
+    const found = await myServer.resolve(url); // follow short links, oEmbed, X-Frame-Options…
+    if (!found) return null;                   // keep the link as given
+    return found.frameable
+      ? { kind: "iframe", src: found.src, title: found.title }
+      : { kind: "replace", createNode: () => $createSavedCardNode(url, found.title) };
+  },
+});
+~~~
+
+Embedded pages are sandboxed (`allow-scripts allow-same-origin allow-popups allow-forms
+allow-presentation`): an embed can never navigate the note away.
 
 ## Select, resize, toolbar
 
@@ -114,7 +157,9 @@ All media nodes:
 
 `![[file]]` attachments draw through `MediaFrame`, which adds:
 
-- **Toolbar** inside the frame: align, ¼ ½ ¾ Full, original size, caption, alt text, open, host items, remove. Caption/alt prompts use the editor's themed dialog (`EditorPromptProvider`), never `window.prompt`.
+- **Toolbar** inside the frame: align, ¼ ½ ¾ Full, original size, caption, alt text, open, host items, remove. Caption/alt prompts use the editor's themed dialog (`EditorPromptProvider`), never `window.prompt`; host items get the same dialog as `context.requestInput`, and can be plain text (`variant: "label"`, e.g. a file's size).
+- **Loading**: a picture or video shows a shimmer (and a thin progress line) in its reserved box until it draws; a file just uploaded shows its local preview meanwhile. Pictures from links and web/YouTube embeds do the same, and a picture that can't load shows a card with Retry.
+- **The floating toolbar** (web/YouTube embeds, pictures from links) is measured against what is actually visible — the window and every scrolling ancestor — so in a note that scrolls inside a panel it flips sides or pins inside the view instead of being cut off.
 - **Keyboard** (selected): Shift+←/→ resizes 10 px (Alt+Shift 1 px), Enter adds a line after, Escape deselects.
 - **Stable layout**: box reserved from host metadata (no layout shift); thumbnails at 320/640/1280 px; animated images never swapped for a still; a broken file shows a labelled error.
 
@@ -144,13 +189,14 @@ Wrap the editor in `EmbedResolverProvider`. Every member is optional; absent one
 | `resolveMediaUrl(target, { variant, width })` | URL for `original`, `thumb`, or video `poster` |
 | `getMediaMeta` + `subscribeMediaMeta` | size, dimensions, `animated`, `thumb`/`poster` flags (`MediaMeta`) |
 | `renderFileExpansion` | extra content under a file card (e.g. inline PDF) |
+| `renderFileCard` | the host's own look for a document (e.g. a desktop-style icon and name); not resized |
 | `mediaToolbar.items` / `builtIn: false` | add host buttons / drop the built-ins |
 
 ## Upload pipeline
 
 ~~~ts
 new FileDropUploadExtension({
-  uploadFile: (file, { signal, onProgress }) => upload(file, { signal, onProgress }), // → { filename }
+  uploadFile: (file, { signal, onProgress }) => upload(file, { signal, onProgress }), // → { filename, label? }
   validateFile: (file) => (file.size > 50e6 ? "Too large" : null),
   onUploadError: (error, file) => toast(`${file.name} failed`),
   concurrency: 3, // default
@@ -160,7 +206,8 @@ new FileDropUploadExtension({
 - Drop, paste, and pick each insert a placeholder at once — in order, at the drop point or caret — with progress, Cancel, and Retry/Remove on failure.
 - Placeholders export nothing and hold no `blob:` URL: a mid-upload save writes nothing, collaborators see "Uploading…". One left by a closed tab reads as interrupted after `UPLOAD_STALE_AFTER_MS` (15 min).
 - Rich pastes (Word, Excel, Sheets, web pages) keep their text instead of uploading a picture of it (`isRichTextPaste`).
-- Returned filenames pass `sanitizeEmbedTarget` before `![[…]]` is written.
+- Returned filenames pass `sanitizeEmbedTarget` before `![[…]]` is written. A returned `label` (e.g. the original name of a document stored under a suffixed one) becomes the embed's alias: `![[q3-411e00.pdf|q3.pdf]]`.
+- At 100% the placeholder says "Finishing up…" while the host stores the file; a picture's placeholder shows the picture itself, dimmed, under its progress bar.
 - A drop with files dispatches bubbling `MEDIA_DROP_EVENT` (`luthor:media-drop`) on the editor root, for a host drop overlay.
 - Commands: `uploadAndEmbedFile(file)`, `uploadAndEmbedFiles(files)` — the same pipeline for a host's own attach button.
 

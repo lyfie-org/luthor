@@ -51,6 +51,8 @@ import {
   WIKILINK_MARKDOWN_TRANSFORMER,
   YOUTUBE_EMBED_MARKDOWN_TRANSFORMER,
   FileDropUploadExtension,
+  IframeEmbedExtension,
+  $createSavedCardNode,
   MentionTypeaheadExtension,
   WikilinkTypeaheadExtension,
   type EmbedResolvers,
@@ -165,6 +167,25 @@ export function buildPapyraEmbedExtensions(
       continue;
     }
 
+    // A link luthor can't place itself is the host's to look into: a short
+    // link, a page's oEmbed, or a site that refuses framing (→ a link card).
+    if (extension === iframeEmbedExtension && adapter?.resolveEmbed) {
+      extensions.push(
+        new IframeEmbedExtension({
+          resolveUrl: async (url) => {
+            const resolve = (options?.liveAdapter?.() ?? adapter).resolveEmbed;
+            const found = resolve ? await resolve(url) : null;
+            if (!found) return null;
+            if (found.type === "card") {
+              return { kind: "replace", createNode: () => $createSavedCardNode(found.url, found.title) };
+            }
+            return { kind: "iframe", src: found.src, title: found.title, width: found.width, height: found.height };
+          },
+        }),
+      );
+      continue;
+    }
+
     extensions.push(extension);
   }
 
@@ -208,6 +229,13 @@ export const PAPYRA_EMBED_NODES: NonNullable<
   TransclusionNode,
   BlockAnchorNode,
 ];
+
+/**
+ * How an aligned picture from a link is written: `![](url) <!-- align:right -->`,
+ * the same trailing directive as `![[file]]` embeds — never GitHub's
+ * `<p align>` wrapper, which reads back through HTML conversion.
+ */
+export const PAPYRA_IMAGE_ALIGNMENT = "comment" as const;
 
 /**
  * Lossless bidirectional transformers giving Papyra's embeds a byte-stable
@@ -264,6 +292,9 @@ export function createPapyraEmbedResolvers(
       : undefined,
     renderFileExpansion: adapter.renderFileExpansion
       ? (context) => adapter.renderFileExpansion!(context)
+      : undefined,
+    renderFileCard: adapter.renderFileCard
+      ? (context) => adapter.renderFileCard!(context)
       : undefined,
     mediaToolbar: adapter.mediaToolbarItems
       ? { items: (context) => adapter.mediaToolbarItems!(context) }

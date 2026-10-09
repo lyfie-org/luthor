@@ -24,7 +24,7 @@ export type SlashCommandItem = {
 export type SlashCommandMenuState = {
   isOpen: boolean;
   query: string;
-  position: { x: number; y: number } | null;
+  position: { x: number; y: number; top?: number } | null;
   commands: SlashCommandItem[];
 };
 
@@ -77,7 +77,7 @@ export class SlashCommandExtension extends BaseExtension<
   private listeners: ((state: SlashCommandMenuState) => void)[] = [];
   private isOpen = false;
   private query = "";
-  private position: { x: number; y: number } | null = null;
+  private position: { x: number; y: number; top?: number } | null = null;
   private activeMatch: SlashMatch | null = null;
   private viewportRafId: number | null = null;
 
@@ -330,7 +330,7 @@ export class SlashCommandExtension extends BaseExtension<
     this.closeSlashMenu();
   }
 
-  private getCaretPosition(): { x: number; y: number } | null {
+  private getCaretPosition(): { x: number; y: number; top?: number } | null {
     if (typeof window === "undefined") {
       return null;
     }
@@ -352,6 +352,7 @@ export class SlashCommandExtension extends BaseExtension<
     return {
       x: safeRect.left + xOffset,
       y: safeRect.bottom + yOffset,
+      top: safeRect.top,
     };
   }
 

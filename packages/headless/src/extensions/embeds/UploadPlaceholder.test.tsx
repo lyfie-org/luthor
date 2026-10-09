@@ -92,6 +92,16 @@ describe("upload placeholder card", () => {
     editor.getEditorState().read(() => expect($getRoot().getChildren().some($isUploadPlaceholderNode)).toBe(false));
   });
 
+  it("once every byte is sent, says it is finishing rather than sitting at 100%", async () => {
+    uploadRegistry.set(task({ progress: 1 }));
+    const { container } = await mount();
+    expect(container.textContent).toContain("Finishing up…");
+    expect(container.textContent).not.toContain("100%");
+    const bar = container.querySelector('[role="progressbar"]')!;
+    expect(bar.classList.contains("is-indeterminate")).toBe(true);
+    expect(bar.getAttribute("aria-valuenow")).toBeNull();
+  });
+
   it("a failed upload offers Retry", async () => {
     const t = task({ status: "error", error: "offline", progress: null });
     uploadRegistry.set(t);

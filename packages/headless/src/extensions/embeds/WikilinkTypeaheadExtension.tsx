@@ -39,7 +39,7 @@ import { ANCHORABLE_BLOCK_TYPES } from "./anchorableBlocks";
 export type WikilinkTypeaheadMenuState = {
   isOpen: boolean;
   query: string;
-  position: { x: number; y: number } | null;
+  position: { x: number; y: number; top?: number } | null;
 };
 
 export interface WikilinkTypeaheadConfig extends BaseExtensionConfig {
@@ -97,7 +97,7 @@ export class WikilinkTypeaheadExtension extends BaseExtension<
   private listeners: ((state: WikilinkTypeaheadMenuState) => void)[] = [];
   private isOpen = false;
   private query = "";
-  private position: { x: number; y: number } | null = null;
+  private position: { x: number; y: number; top?: number } | null = null;
   private activeMatch: TypeaheadMatch | null = null;
   private editor: LexicalEditor | null = null;
   private viewportRafId: number | null = null;
@@ -314,7 +314,7 @@ export class WikilinkTypeaheadExtension extends BaseExtension<
     this.closeMenu();
   }
 
-  private getCaretPosition(): { x: number; y: number } | null {
+  private getCaretPosition(): { x: number; y: number; top?: number } | null {
     if (typeof window === "undefined") {
       return null;
     }
@@ -336,6 +336,7 @@ export class WikilinkTypeaheadExtension extends BaseExtension<
     return {
       x: safeRect.left + xOffset,
       y: safeRect.bottom + yOffset,
+      top: safeRect.top,
     };
   }
 

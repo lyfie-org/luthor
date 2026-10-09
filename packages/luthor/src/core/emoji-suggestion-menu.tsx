@@ -11,7 +11,9 @@ import type { EmojiCatalogItem } from "@lyfie/luthor-headless";
 import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
 import {
   computeAnchoredOverlayStyle,
-  createPointRect,
+  scrollActiveOptionIntoView,
+  withOverlayHeightCap,
+  createCaretAnchorRect,
   scheduleOverlayReveal,
 } from "./overlay-position";
 
@@ -26,7 +28,7 @@ export function EmojiSuggestionMenu({
 }: {
   isOpen: boolean;
   query: string;
-  position: { x: number; y: number } | null;
+  position: { x: number; y: number; top?: number } | null;
   portalContainer?: HTMLElement | null;
   suggestions: EmojiCatalogItem[];
   onClose: () => void;
@@ -82,11 +84,15 @@ export function EmojiSuggestionMenu({
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [isOpen, onClose, onExecute, selectedIndex, suggestions]);
 
+  useEffect(() => {
+    if (isOpen) scrollActiveOptionIntoView(menuRef.current);
+  }, [isOpen, selectedIndex]);
+
   const updateMenuPosition = useCallback((isVisible: boolean) => {
     if (!position) return;
     const measuredRect = menuRef.current?.getBoundingClientRect();
     const placement = computeAnchoredOverlayStyle({
-      anchorRect: createPointRect(position.x, position.y),
+      anchorRect: createCaretAnchorRect(position),
       overlay: {
         width: measuredRect?.width ?? 320,
         height: measuredRect?.height ?? 280,
@@ -101,7 +107,7 @@ export function EmojiSuggestionMenu({
     });
 
     setMenuStyle({
-      ...placement,
+      ...withOverlayHeightCap(placement, "min(45vh, 320px)"),
       visibility: isVisible ? "visible" : "hidden",
       ...getOverlayThemeStyleFromSelection(),
     });

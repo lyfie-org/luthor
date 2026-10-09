@@ -63,7 +63,7 @@ import {
   $isUploadPlaceholderNode,
   UploadPlaceholderNode,
 } from "./UploadPlaceholderNode";
-import { createUploadId, UploadQueue, uploadRegistry } from "./uploads";
+import { createUploadId, UploadQueue, uploadRegistry, uploadPreviews } from "./uploads";
 import { reportError } from "../../utils/logger";
 
 // Failures of the upload itself are reported through onUploadError as they
@@ -104,8 +104,12 @@ export interface FileDropUploadConfig extends BaseExtensionConfig {
    * inserting (see {@link sanitizeEmbedTarget}); a host that stores the
    * file under the unsanitized name will serve a broken reference, so
    * sanitize on the server too.
+   *
+   * `label`, when given, becomes the embed's alias (`![[q3-4f1a.pdf|q3.pdf]]`):
+   * the name shown for a document stored under a different (deduplicated,
+   * suffixed) file name.
    */
-  uploadFile?: (file: File, options: UploadFileOptions) => Promise<{ filename: string }>;
+  uploadFile?: (file: File, options: UploadFileOptions) => Promise<{ filename: string; label?: string }>;
   /**
    * Refuse a file before uploading it (too big, a type the host won't take):
    * return a message to show, or `null` to accept.
@@ -417,8 +421,9 @@ export class FileDropUploadExtension extends BaseExtension<
             });
           })
           .then(
-            ({ filename }) => {
+            ({ filename, label }) => {
               const target = sanitizeEmbedTarget(filename);
+              const alias = embedAlias(label, target);
               let placed = false;
               editor.update(
                 () => {
@@ -428,12 +433,19 @@ export class FileDropUploadExtension extends BaseExtension<
                     placeholder.remove();
                     return;
                   }
-                  placeholder.replace($createFileEmbedNode(target));
+                  placeholder.replace($createFileEmbedNode(alias ? { target, alt: alias } : target));
                   placed = true;
                 },
                 // Part of the same undoable step as the drop, not a new one.
                 { tag: "history-merge" },
               );
+              // The picture's local preview carries over to the embed (shown
+              // until the stored copy loads) instead of being released here.
+              const preview = uploadRegistry.get(id)?.previewUrl;
+              if (placed && target && preview) {
+                uploadPreviews.remember(target, preview);
+                uploadRegistry.update(id, { previewUrl: null });
+              }
               uploadRegistry.delete(id);
               if (placed || !target) finish();
               else finish(new DOMException("Upload removed", "AbortError"));
@@ -470,6 +482,21 @@ export class FileDropUploadExtension extends BaseExtension<
       attempt();
     });
   }
+}
+
+/**
+ * A host's display name for an upload, made safe as an alias segment: no
+ * characters that end the segment or the embed, nothing a size (`|300`) could
+ * be mistaken for, and nothing at all when it just repeats the file name.
+ */
+function embedAlias(label: string | undefined, target: string): string | undefined {
+  const clean = (label ?? "")
+    .replace(/[[\]]+/g, "")
+    .replace(/[|#^\r\n]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!clean || clean === target || /^\d{1,5}(x\d{1,5})?$/.test(clean)) return undefined;
+  return clean;
 }
 
 /** The top-level block under a point in the editor, or null. */

@@ -42,6 +42,7 @@ import {
 import {
   PAPYRA_EMBED_NODES,
   PAPYRA_EMBED_TRANSFORMERS,
+  PAPYRA_IMAGE_ALIGNMENT,
   buildPapyraEmbedExtensions,
   createPapyraEmbedResolvers,
 } from "./embeds";
@@ -243,6 +244,7 @@ export type PapyraEditorProps = Omit<
   | "extraExtensions"
   | "markdownExtraNodes"
   | "markdownExtraTransformers"
+  | "markdownImageAlignment"
   | "headingOptions"
   | "slashCommandVisibility"
   | "extraSlashCommands"
@@ -697,6 +699,7 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               extraExtensions={embedExtensions}
               markdownExtraNodes={PAPYRA_EMBED_NODES}
               markdownExtraTransformers={PAPYRA_EMBED_TRANSFORMERS}
+              markdownImageAlignment={PAPYRA_IMAGE_ALIGNMENT}
               wikilinkSuggestionProvider={wikilinkSuggestionProvider}
               mentionSuggestionProvider={mentionSuggestionProvider}
               wikilinkSuggestionLabels={typeahead?.noteLink}

@@ -30,7 +30,9 @@ import { createPortal } from "react-dom";
 import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
 import {
   computeAnchoredOverlayStyle,
-  createPointRect,
+  scrollActiveOptionIntoView,
+  withOverlayHeightCap,
+  createCaretAnchorRect,
   scheduleOverlayReveal,
 } from "./overlay-position";
 
@@ -39,7 +41,7 @@ export interface TypeaheadMenuProps<TItem> {
   /** Whether the trigger extension currently has an open match. */
   isOpen: boolean;
   /** The caret position the menu anchors to, in viewport coordinates. */
-  position: { x: number; y: number } | null;
+  position: { x: number; y: number; top?: number } | null;
   /** Portal target; defaults to `document.body`. */
   portalContainer?: HTMLElement | null;
   /** The suggestions to render, already filtered by the host's search. */
@@ -138,11 +140,15 @@ export function TypeaheadMenu<TItem>({
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [isOpen, items, onClose, onSelect, selectedIndex]);
 
+  useEffect(() => {
+    if (isOpen) scrollActiveOptionIntoView(menuRef.current);
+  }, [isOpen, selectedIndex]);
+
   const updateMenuPosition = useCallback((isVisible: boolean) => {
     if (!position) return;
     const measuredRect = menuRef.current?.getBoundingClientRect();
     const placement = computeAnchoredOverlayStyle({
-      anchorRect: createPointRect(position.x, position.y),
+      anchorRect: createCaretAnchorRect(position),
       overlay: {
         width: measuredRect?.width ?? 320,
         height: measuredRect?.height ?? 280,
@@ -157,7 +163,7 @@ export function TypeaheadMenu<TItem>({
     });
 
     setMenuStyle({
-      ...placement,
+      ...withOverlayHeightCap(placement, "var(--luthor-typeahead-menu-max-height, min(45vh, 320px))"),
       visibility: isVisible ? "visible" : "hidden",
       ...getOverlayThemeStyleFromSelection(),
     });

@@ -206,6 +206,9 @@ function UploadPlaceholderCard(props: {
   const stale = !task && Date.now() - startedAt > UPLOAD_STALE_AFTER_MS;
   const failed = task?.status === "error";
   const percent = task?.progress != null ? Math.round(task.progress * 100) : null;
+  // Every byte sent, the server still storing it (thumbnails, metadata): say
+  // so, rather than sitting at a frozen 100%.
+  const processing = !failed && !stale && percent !== null && percent >= 100;
 
   const remove = () => {
     task?.cancel();
@@ -253,7 +256,7 @@ function UploadPlaceholderCard(props: {
 
   return (
     <div
-      className={`luthor-upload luthor-upload--${kind}${failed ? " is-error" : ""}${stale ? " is-stale" : ""}`}
+      className={`luthor-upload luthor-upload--${kind}${failed ? " is-error" : ""}${stale ? " is-stale" : ""}${task?.previewUrl ? " has-preview" : ""}${processing ? " is-processing" : ""}`}
       role="status"
       aria-live="polite"
       aria-label={label}
@@ -263,17 +266,24 @@ function UploadPlaceholderCard(props: {
       <div className="luthor-upload__body">
         <span className="luthor-upload__name">{name}</span>
         <span className="luthor-upload__detail">
-          {failed ? task?.error || "Upload failed" : stale ? "Upload didn't finish" : [formatBytes(size), percent !== null ? `${percent}%` : null].filter(Boolean).join(" · ")}
+          {failed
+            ? task?.error || "Upload failed"
+            : stale
+              ? "Upload didn't finish"
+              : [
+                  formatBytes(size),
+                  processing ? "Finishing up…" : percent !== null ? `${percent}%` : task?.status === "queued" ? "Waiting…" : null,
+                ].filter(Boolean).join(" · ")}
         </span>
         {!failed && !stale ? (
           <span
-            className={`luthor-upload__bar${percent === null ? " is-indeterminate" : ""}`}
+            className={`luthor-upload__bar${percent === null || processing ? " is-indeterminate" : ""}`}
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={percent ?? undefined}
+            aria-valuenow={processing ? undefined : (percent ?? undefined)}
           >
-            <span style={{ width: percent === null ? undefined : `${percent}%` }} />
+            <span style={{ width: percent === null || processing ? undefined : `${percent}%` }} />
           </span>
         ) : null}
       </div>

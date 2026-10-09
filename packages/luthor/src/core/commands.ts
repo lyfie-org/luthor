@@ -663,27 +663,29 @@ export function generateCommands(options?: CommandGenerationOptions): CommandCon
     },
     {
       id: "insert.iframe",
-      label: "Insert iframe",
-      description: "Insert an iframe embed from URL",
+      label: "Embed a link",
+      description: "A map, video, song, document or web page",
       category: "Insert",
       action: async (commands) => {
         if (typeof commands.insertIframeEmbed !== "function") {
           return;
         }
+        // Any link people have works: maps, players and documents are turned
+        // into their embeddable form (see toEmbeddableUrl).
         const values = await askFor(commands, {
-          title: "Embed a web page",
+          title: "Embed a link",
           submitLabel: "Embed",
-          fields: [{ name: "url", label: "Page link", placeholder: "https://…", type: "url", required: true }],
+          fields: [{ name: "url", label: "Paste any link — a map, a song, a video, a document or a page", placeholder: "https://…", type: "url", required: true }],
         });
         if (values?.url) commands.insertIframeEmbed(values.url);
       },
-      keywords: ["iframe", "embed", "url"],
+      keywords: ["iframe", "embed", "url", "link", "map", "maps", "google", "apple", "location", "web", "page", "website", "spotify", "vimeo", "figma", "document"],
       condition: (commands) => isFeatureEnabled("iframeEmbed") && supportsIframeEmbed(commands),
     },
     {
       id: "insert.youtube",
-      label: "Insert YouTube Video",
-      description: "Insert an embedded YouTube video",
+      label: "YouTube video",
+      description: "Play a YouTube video in the note",
       category: "Insert",
       action: async (commands) => {
         if (typeof commands.insertYouTubeEmbed !== "function") {

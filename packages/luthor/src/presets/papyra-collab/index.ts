@@ -37,6 +37,7 @@ import {
   buildPapyraEmbedExtensions,
   PAPYRA_EMBED_NODES,
   PAPYRA_EMBED_TRANSFORMERS,
+  PAPYRA_IMAGE_ALIGNMENT,
 } from "../papyra/embeds";
 import { papyraFeaturePolicy } from "../papyra/features";
 
@@ -47,6 +48,7 @@ export const PAPYRA_MARKDOWN_OPTIONS: MarkdownBridgeOptions = {
   metadataMode: "none",
   extraNodes: PAPYRA_EMBED_NODES,
   extraTransformers: PAPYRA_EMBED_TRANSFORMERS,
+  imageAlignment: PAPYRA_IMAGE_ALIGNMENT,
 };
 
 let cachedNodes: CollabNodes | null = null;

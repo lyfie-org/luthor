@@ -38,7 +38,7 @@ export type EmojiCatalogAdapter = {
 export type EmojiSuggestionState = {
   isOpen: boolean;
   query: string;
-  position: { x: number; y: number } | null;
+  position: { x: number; y: number; top?: number } | null;
   suggestions: EmojiCatalogItem[];
 };
 
@@ -297,7 +297,7 @@ export class EmojiExtension extends BaseExtension<
   private listeners: ((state: EmojiSuggestionState) => void)[] = [];
   private isOpen = false;
   private query = "";
-  private position: { x: number; y: number } | null = null;
+  private position: { x: number; y: number; top?: number } | null = null;
   private suggestions: EmojiCatalogItem[] = [];
   private activeMatch: EmojiMatch | null = null;
   private viewportRafId: number | null = null;
@@ -816,7 +816,7 @@ export class EmojiExtension extends BaseExtension<
     this.closeEmojiSuggestions();
   }
 
-  private getCaretPosition(): { x: number; y: number } | null {
+  private getCaretPosition(): { x: number; y: number; top?: number } | null {
     if (typeof window === "undefined") {
       return null;
     }
@@ -835,6 +835,7 @@ export class EmojiExtension extends BaseExtension<
     return {
       x: safeRect.left + (this.config.offset?.x ?? 0),
       y: safeRect.bottom + (this.config.offset?.y ?? 8),
+      top: safeRect.top,
     };
   }
 

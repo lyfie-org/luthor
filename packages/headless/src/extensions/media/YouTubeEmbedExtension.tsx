@@ -5,7 +5,12 @@
  * Build freely. Credit kindly.
  */
 
-import { formatSize, splitCaptionAndSize } from "./mediaGrammar";
+import {
+  formatFrameDirectives,
+  formatSize,
+  parseFrameDirectives,
+  splitCaptionAndSize,
+} from "./mediaGrammar";
 import {
   moveSelectedNode,
   registerClickToSelect,
@@ -54,6 +59,8 @@ export type YouTubeEmbedPayload = {
    * defaulted — only a chosen size is written back to markdown.
    */
   sized?: boolean;
+  /** Trailing `<!-- k:v -->` directives this embed doesn't own, kept verbatim. */
+  directives?: string[];
 };
 
 export interface YouTubeEmbedConfig extends BaseExtensionConfig {
@@ -99,6 +106,7 @@ type SerializedYouTubeEmbedNode = Spread<
     caption?: string;
     start?: number;
     sized?: boolean;
+    directives?: string[];
   },
   SerializedLexicalNode
 >;
@@ -345,6 +353,7 @@ export class YouTubeEmbedNode extends DecoratorNode<ReactNode> {
       caption: serialized.caption ?? "",
       start: serialized.start,
       sized: serialized.sized === true,
+      ...(serialized.directives?.length ? { directives: [...serialized.directives] } : {}),
     });
   }
 
@@ -459,6 +468,7 @@ export class YouTubeEmbedNode extends DecoratorNode<ReactNode> {
       caption: this.__payload.caption,
       start: this.__payload.start,
       ...(this.__payload.sized ? { sized: true } : {}),
+      ...(this.__payload.directives?.length ? { directives: this.__payload.directives } : {}),
     };
   }
 
@@ -537,6 +547,8 @@ function YouTubeEmbedComponent({
   const [isEditorEditable, setIsEditorEditable] = useState(() => editor.isEditable());
   const [isSelected, setIsSelected] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  // The video whose player has loaded; until then a shimmer stands in.
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
   const [localWidth, setLocalWidth] = useState(payload.width);
   const [localHeight, setLocalHeight] = useState(payload.height);
   const widthRef = useRef(payload.width);
@@ -688,7 +700,7 @@ function YouTubeEmbedComponent({
     <div style={wrapperStyle}>
       <div
         ref={shellRef}
-        className={`luthor-media-embed-shell${isSelected ? " is-selected" : ""}${isResizing ? " is-resizing" : ""}`}
+        className={`luthor-media-embed-shell${isSelected ? " is-selected" : ""}${isResizing ? " is-resizing" : ""}${loadedSrc !== payload.src ? " is-loading" : ""}`}
         data-luthor-selection-anchor="true"
         style={{ width: localWidth, maxWidth: "100%" }}
         onClick={isEditorEditable ? selectNode : undefined}
@@ -698,6 +710,7 @@ function YouTubeEmbedComponent({
           src={toRenderableEmbedSrc(payload.src)}
           title="YouTube video player"
           loading="lazy"
+          onLoad={() => setLoadedSrc(payload.src)}
           referrerPolicy="strict-origin-when-cross-origin"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
@@ -1076,14 +1089,14 @@ export const YOUTUBE_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
     if (!$isYouTubeEmbedNode(node)) {
       return null;
     }
-    const { src, caption, width, height, sized } = node.getPayload();
+    const { src, caption, width, height, sized, alignment, directives } = node.getPayload();
     const segments = [
       ...(caption && caption.trim() !== "" ? [caption] : []),
       ...(sized ? [formatSize(width, height)] : []),
     ];
-    return `![[youtube:${src}${segments.map((s) => `|${s}`).join("")}]]`;
+    return `![[youtube:${src}${segments.map((s) => `|${s}`).join("")}]]${formatFrameDirectives(alignment, directives)}`;
   },
-  regExp: /^!\[\[youtube:([^\]|]+)(?:\|([^\]]+))?\]\]\s*$/,
+  regExp: /^!\[\[youtube:([^\]|]+)(?:\|([^\]]+))?\]\]((?:\s*<!--[\s\S]*?-->)*)\s*$/,
   replace: (parentNode: ElementNode, _children, match) => {
     const raw = (match[1] ?? "").trim();
     if (!raw) {
@@ -1092,14 +1105,16 @@ export const YOUTUBE_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
     const embedUrl = toEmbedUrl(raw, YOUTUBE_MARKDOWN_EMBED_OPTIONS) ?? raw;
     // `|caption`, `|640x360` or both: a trailing size is the chosen player size.
     const { caption, width, height } = splitCaptionAndSize(match[2]);
+    const directives = parseFrameDirectives(match[3]);
     parentNode.replace(
       $createYouTubeEmbedNode({
         src: embedUrl,
         width: width ?? 640,
         height: height ?? (width ? Math.round((width * 9) / 16) : 480),
-        alignment: "center",
-        caption,
+        alignment: directives.align,
+        caption: caption || directives.caption || "",
         sized: width !== undefined,
+        ...(directives.extra.length ? { directives: directives.extra } : {}),
       }),
     );
   },

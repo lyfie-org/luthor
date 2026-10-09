@@ -3125,6 +3125,147 @@
 	flex: none;
 }
 
+/* ── Loading: a picture, video or embedded page that hasn't drawn yet ──────
+   A soft shimmer fills its reserved box and a thin bar runs along the top,
+   so an embed reads as "on its way" instead of an empty hole. */
+.luthor-media__frame.is-loading,
+.luthor-media-embed-shell.is-loading {
+	background-color: var(--luthor-muted);
+	background-image: linear-gradient(
+		100deg,
+		transparent 20%,
+		color-mix(in srgb, var(--luthor-bg) 55%, transparent) 50%,
+		transparent 80%
+	);
+	background-size: 200% 100%;
+	background-repeat: no-repeat;
+	border-radius: 10px;
+}
+
+.luthor-media__frame.is-loading::after,
+.luthor-media-embed-shell.is-loading::after {
+	content: "";
+	position: absolute;
+	inset: 0 auto auto 0;
+	width: 30%;
+	height: 3px;
+	border-radius: 999px;
+	background: var(--luthor-accent);
+	pointer-events: none;
+	z-index: 1;
+}
+
+/* Nothing known about its size yet: a modest box to shimmer in. */
+.luthor-media__frame.is-unsized .luthor-media__element {
+	min-width: min(240px, 100%);
+	min-height: 140px;
+}
+
+/* A picture just uploaded shows its local copy until the stored one loads. */
+.luthor-media__frame.has-preview {
+	background-image: none;
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.luthor-media-embed-shell.is-loading > :is(img, iframe) {
+	min-height: 120px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.luthor-media__frame.is-loading:not(.has-preview),
+	.luthor-media-embed-shell.is-loading {
+		animation: luthor-media-shimmer 1.4s ease-in-out infinite;
+	}
+
+	.luthor-media__frame.is-loading::after,
+	.luthor-media-embed-shell.is-loading::after {
+		animation: luthor-media-loading-bar 1.1s ease-in-out infinite;
+	}
+}
+
+@keyframes luthor-media-shimmer {
+	from {
+		background-position: 150% 0;
+	}
+	to {
+		background-position: -50% 0;
+	}
+}
+
+@keyframes luthor-media-loading-bar {
+	from {
+		left: -30%;
+	}
+	to {
+		left: 100%;
+	}
+}
+
+/* A picture from a link that couldn't load. */
+.luthor-image-error {
+	min-width: min(260px, 100%);
+}
+
+/* Plain text in a media toolbar (a file's size), not a button. */
+.luthor-media__tool-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 0 8px;
+	height: 28px;
+	/* Full foreground: muted text missed 4.5:1 on a dark bar. */
+	color: var(--luthor-fg);
+	font-size: 12px;
+	font-weight: 500;
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+	user-select: none;
+}
+
+/* A host's own document card: no card chrome of luthor's around it. */
+.luthor-media__card--host {
+	display: block;
+	padding: 0;
+	border: 0;
+	background: none;
+}
+
+/* An upload with a picture: the picture itself, dimmed, with the progress over it. */
+.luthor-upload.has-preview {
+	position: relative;
+	flex-direction: column;
+	align-items: stretch;
+	width: fit-content;
+	max-width: min(100%, 420px);
+	padding: 0;
+	overflow: hidden;
+	border-style: solid;
+	border-color: var(--luthor-border);
+}
+
+.luthor-upload.has-preview .luthor-upload__preview {
+	width: 100%;
+	height: auto;
+	max-height: 260px;
+	min-width: 180px;
+	min-height: 96px;
+	border-radius: 0;
+	opacity: 0.55;
+}
+
+.luthor-upload.has-preview .luthor-upload__body {
+	padding: 0.5rem 0.75rem 0.6rem;
+}
+
+.luthor-upload.has-preview .luthor-upload__actions {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+}
+
+
 @media (prefers-reduced-motion: no-preference) {
 	.luthor-media__toolbar {
 		animation: luthor-media-toolbar-in 0.12s ease-out;

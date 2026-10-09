@@ -14,6 +14,7 @@ export {
   type MediaMeta,
   type MediaUrlOptions,
   type FileExpansionContext,
+  type FileCardContext,
   type MediaEdit,
   type MediaToolbarContext,
   type MediaToolbarItem,

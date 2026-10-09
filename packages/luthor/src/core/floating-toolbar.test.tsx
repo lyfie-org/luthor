@@ -7,7 +7,7 @@
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { FloatingToolbar } from "./floating-toolbar";
+import { FloatingToolbar, resolveFloatingToolbarTop } from "./floating-toolbar";
 import type { CoreEditorActiveStates, CoreEditorCommands } from "./types";
 
 function createCommands(overrides: Partial<CoreEditorCommands> = {}): CoreEditorCommands {
@@ -322,5 +322,34 @@ describe("FloatingToolbar media editing", () => {
     expect(hide).toHaveBeenCalledTimes(1);
     root.remove();
     outside.remove();
+  });
+});
+
+describe("resolveFloatingToolbarTop", () => {
+  // A note panel showing 100–600; a 120px-tall bar (a web page's URL and caption fields).
+  const view = { visibleTop: 100, visibleBottom: 600, height: 120 };
+
+  it("stays put when it is fully visible", () => {
+    expect(resolveFloatingToolbarTop({ ...view, naturalTop: 200, anchorTop: 330, anchorBottom: 500 })).toBe(200);
+  });
+
+  it("moves above its embed when below would be cut off by the panel's edge", () => {
+    // Map at 300–560: below (568) runs past 600, above (172) fits.
+    expect(resolveFloatingToolbarTop({ ...view, naturalTop: 568, anchorTop: 300, anchorBottom: 560 })).toBe(172);
+  });
+
+  it("lifts a bar placed 'above' with a guessed height off the embed it covers", () => {
+    // Placed at 480 for a 40px bar over a map starting at 528; really 120px tall.
+    expect(resolveFloatingToolbarTop({ ...view, naturalTop: 480, anchorTop: 528, anchorBottom: 900 })).toBe(400);
+  });
+
+  it("moves below when above would be cut off", () => {
+    expect(resolveFloatingToolbarTop({ ...view, naturalTop: 0, anchorTop: 128, anchorBottom: 200 })).toBe(208);
+  });
+
+  it("pins inside the visible area over a tall embed that leaves no room on either side", () => {
+    // Map 50–700 covers the whole view: neither side fits.
+    expect(resolveFloatingToolbarTop({ ...view, naturalTop: 708, anchorTop: 50, anchorBottom: 700 })).toBe(468);
+    expect(resolveFloatingToolbarTop({ ...view, naturalTop: -78, anchorTop: 50, anchorBottom: 700 })).toBe(112);
   });
 });

@@ -93,6 +93,17 @@ const UNCHANGED: [string, string][] = [
   ["iframe", "![[iframe:https://example.com/page]]"],
   ["iframe caption + size", "![[iframe:https://example.com/page|Docs|800x600]]"],
   ["saved card", "![[card:https://example.com/]]"],
+  // Alignment on every kind of embed survives a save and reopen.
+  ["iframe aligned right", "![[iframe:https://example.com/page]] <!-- align:right -->"],
+  ["iframe aligned left, captioned and sized", "![[iframe:https://example.com/page|Map|800x450]] <!-- align:left -->"],
+  ["iframe keeps a directive it doesn't own", "![[iframe:https://example.com/page]] <!-- align:right --> <!-- foo:bar -->"],
+  ["youtube aligned right", "![[youtube:https://www.youtube-nocookie.com/embed/abc123]] <!-- align:right -->"],
+  ["youtube aligned left + caption", "![[youtube:https://www.youtube-nocookie.com/embed/abc123|Talk]] <!-- align:left -->"],
+  ["pdf aligned right", "![[a.pdf]] <!-- align:right -->"],
+  ["video aligned left", "![[clip.mp4|640x360]] <!-- align:left -->"],
+  ["link image aligned centre", "![](https://media.example.com/party.gif) <!-- align:center -->"],
+  ["link image aligned right", "![alt|240](https://media.example.com/party.gif) <!-- align:right -->"],
+  ["link image aligned left + caption", "![alt](https://example.com/a.png \"caption\") <!-- align:left -->"],
   // ── Markdown images ──
   ["api image", "![alt](/api/media/x.png)"],
   ["api image no alt", "![](/api/media/x.png)"],
@@ -247,6 +258,36 @@ describe("media golden corpus — edits produce the canonical form", () => {
     ).toBe("![alt|300](https://example.com/a.png)");
   });
 
+  it("an iframe's alignment is written as a directive, and centre (its default) is not", () => {
+    const iframe = (node: LexicalNode) => node.getType() === "iframe-embed";
+    const setAlign = (align: string) => (n: LexicalNode) =>
+      (n as unknown as { setPayload(p: object): void }).setPayload({ alignment: align });
+    expect(editFirst("![[iframe:https://example.com/page]]", iframe, setAlign("right"))).toBe(
+      "![[iframe:https://example.com/page]] <!-- align:right -->",
+    );
+    expect(editFirst("![[iframe:https://example.com/page]] <!-- align:right -->", iframe, setAlign("center"))).toBe(
+      "![[iframe:https://example.com/page]]",
+    );
+  });
+
+  it("a YouTube embed's alignment is written as a directive", () => {
+    expect(
+      editFirst(
+        "![[youtube:https://www.youtube-nocookie.com/embed/abc123]]",
+        $isYouTubeEmbedNode,
+        (n) => (n as unknown as { setPayload(p: object): void }).setPayload({ alignment: "left" }),
+      ),
+    ).toBe("![[youtube:https://www.youtube-nocookie.com/embed/abc123]] <!-- align:left -->");
+  });
+
+  it("an aligned picture from a link keeps luthor's directive, never GitHub's <p align> wrapper", () => {
+    const out = editFirst("![](https://example.com/a.gif)", $isImageNode, (n) =>
+      (n as unknown as { setAlignment(a: string): void }).setAlignment("right"),
+    );
+    expect(out).toBe("![](https://example.com/a.gif) <!-- align:right -->");
+    expect(out).not.toContain("<p");
+  });
+
   it("reads version-1 JSON (a live room from before sizes existed)", () => {
     const editor = createEditor({ nodes: getPapyraCollabNodes(), onError: (e) => { throw e; } });
     editor.update(
@@ -298,5 +339,95 @@ describe("media golden corpus — browser editor", () => {
       .map(([e]) => e as { source: string; markdown: string })
       .filter((e) => e.source === "user" && e.markdown !== baseline);
     expect(edits).toEqual([]);
+  });
+});
+
+// ── Notes saved by the old alignment export ───────────────────────────────────
+//
+// Before 2.11.7 an aligned picture from a link was written as GitHub's
+// `<p align>` wrapper. Reading that back turned it into internal
+// `[[LUTHORALIGNSTART:…]]` lines that Papyra's `[[wikilink]]` transformer
+// claimed first — "LUTHORALIGNSTART:center" showed up in the note as a link, and
+// a save could write that text into the file. Every such form must read back
+// as the aligned picture, with no marker text anywhere.
+
+const HEALS: [string, string, string][] = [
+  [
+    "GitHub <p align> wrapper",
+    "<p align=\"center\">\n![](https://media.example.com/party.gif)\n</p>",
+    "![](https://media.example.com/party.gif) <!-- align:center -->",
+  ],
+  [
+    "<div align> wrapper",
+    "<div align=\"right\">\n![](https://media.example.com/party.gif)\n</div>",
+    "![](https://media.example.com/party.gif) <!-- align:right -->",
+  ],
+  [
+    "leaked marker lines",
+    "[[LUTHORALIGNSTART:center]]\n\n![](https://media.example.com/party.gif)\n\n[[LUTHORALIGNEND]]",
+    "![](https://media.example.com/party.gif) <!-- align:center -->",
+  ],
+  [
+    "leaked marker lines, escaped",
+    "[[LUTHOR\\_ALIGN\\_START:right]]\n\n![](https://media.example.com/party.gif)\n\n[[LUTHOR\\_ALIGN\\_END]]",
+    "![](https://media.example.com/party.gif) <!-- align:right -->",
+  ],
+  [
+    "wrapper between paragraphs",
+    "Before\n\n<p align=\"center\">\n![](https://media.example.com/party.gif)\n</p>\n\nAfter",
+    "Before\n\n![](https://media.example.com/party.gif) <!-- align:center -->\n\nAfter",
+  ],
+];
+
+function allText(node: unknown): string[] {
+  if (!node || typeof node !== "object") return [];
+  const record = node as Record<string, unknown>;
+  const own = typeof record.text === "string" ? [record.text] : [];
+  const target = typeof record.target === "string" ? [record.target] : [];
+  const children = Array.isArray(record.children) ? record.children.flatMap(allText) : [];
+  return [...own, ...target, ...children];
+}
+
+describe("alignment written by older versions reads back as alignment", () => {
+  it.each(HEALS)("%s (server pipeline)", (_name, source, healed) => {
+    const doc = papyraMarkdownToJSON(source);
+    expect(allText(doc.root).some((t) => /LUTHOR/i.test(t))).toBe(false);
+    expect(papyraJSONToMarkdown(doc)).toBe(healed);
+    expect(serverRoundTrip(healed)).toBe(healed);
+  });
+
+  it.each(HEALS)("%s (browser editor)", async (_name, source, healed) => {
+    const { handle } = await mount();
+    handle.setMarkdown(source);
+    const root = handle.getLexicalEditor()?.getRootElement();
+    expect(root?.textContent ?? "").not.toMatch(/LUTHOR/i);
+    expect(handle.getMarkdown()).toBe(healed);
+  });
+});
+
+describe("a picture from a link is never lost on save", () => {
+  it("inside a paragraph (no caret when it was inserted) it is lifted out, not dropped", async () => {
+    const { handle } = await mount();
+    const editor = handle.getLexicalEditor()!;
+    const { $createImageNode } = await import("@lyfie/luthor-headless/extensions/media/ImageExtension");
+    const { $createParagraphNode, $createTextNode } = await import("lexical");
+    editor.update(
+      () => {
+        const paragraph = $createParagraphNode();
+        paragraph.append(
+          $createTextNode("Hi "),
+          $createImageNode("https://media.example.com/party.gif", "party", undefined, undefined, undefined, "right"),
+          $createTextNode(" there"),
+        );
+        $getRoot().clear().append(paragraph);
+      },
+      { discrete: true },
+    );
+    const saved = handle.getMarkdown();
+    expect(saved).toContain("![party](https://media.example.com/party.gif) <!-- align:right -->");
+    expect(saved).toContain("Hi");
+    expect(saved).toContain("there");
+    handle.setMarkdown(saved);
+    expect(handle.getMarkdown()).toBe(saved);
   });
 });

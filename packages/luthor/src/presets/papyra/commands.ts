@@ -46,7 +46,9 @@ export const PAPYRA_HEADING_OPTIONS: readonly BlockHeadingLevel[] = [
 /**
  * The curated slash-menu command ids. These map to the extensive editor's
  * built-in commands and cover Papyra's note-taking primitives: headings,
- * lists/checklist, quote, code block, table, horizontal rule, and image.
+ * lists/checklist, quote, code block, table, horizontal rule, image, and —
+ * where the host enables them — an embedded link (map, video, page) and a
+ * YouTube video.
  */
 export const PAPYRA_SLASH_COMMAND_IDS = [
   "block.heading1",
@@ -60,6 +62,9 @@ export const PAPYRA_SLASH_COMMAND_IDS = [
   "insert.table",
   "insert.horizontal-rule",
   "insert.image",
+  // Shown only where the host turns the embeds on (Papyra does).
+  "insert.iframe",
+  "insert.youtube",
 ] as const;
 
 /**
