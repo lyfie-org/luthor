@@ -218,7 +218,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Accessibility
 - File: luthor/accessibility.md
 - URL: https://www.luthor.fyi/docs/luthor/accessibility/
-- Summary: title: "Accessibility" description: "Luthor's WCAG 2.1 AA posture: keyboard operation, screen reader semantics, focus handling, reduced motion, and the gaps that remain." package: "luthor" docType: "reference" surface: "preset" keywords: "accessibility" "a11y" "WCAG" "keyboard navigation" "screen reader" "aria activede...
+- Summary: Accessibility Luthor targets WCAG 2.1 Level AA . This page records what is implemented and verified, so hosts can cite it in their own accessibility statements — and what is not, so nobody cites something that isn't true. What this page answers Can every feature be operated from the keyboard? What do screen readers ann...
 
 ### @lyfie/luthor Architecture
 - File: luthor/architecture.md
@@ -268,7 +268,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Papyra Editor
 - File: luthor/presets/papyra-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/papyra-editor/
-- Summary: title: "Papyra Editor" description: "Markdown native, frontmatter agnostic, token themed note canvas preset with Obsidian style embeds and a host adapter seam." package: "luthor" docType: "reference" surface: "preset" keywords: "PapyraEditor" "papyra preset" "markdownSourceOfTruth" "wikilink" "file embed" "transclusion...
+- Summary: Papyra Editor PapyraEditor is a markdown native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse ...
 
 ### Props Reference
 - File: luthor/props-reference.md

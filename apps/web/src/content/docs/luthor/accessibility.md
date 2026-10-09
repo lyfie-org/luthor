@@ -54,12 +54,13 @@ that isn't true.
 |---|---|
 | Editor | Standard text editing. `Tab` inserts indentation inside lists and code; press `Escape` first to move focus out of the editor instead. |
 | Toolbar | `Tab` to reach it, arrow keys within grouped controls, `Enter`/`Space` to activate. |
-| Slash menu (`/`) | `↑`/`↓` to move, `Enter` to insert, `Escape` to dismiss. Focus stays in the editor. |
+| Slash menu (`/`) | `↑`/`↓` to move (the highlighted command scrolls into view), `Enter` to insert, `Escape` to dismiss. Focus stays in the editor. The menu stays inside what is visible — near the foot of a scrolling note it opens above the caret, never over the line being typed — and shrinks to the room it has. |
 | Emoji menu (`:`) | Same as the slash menu. |
 | Command palette | `Escape` to dismiss, `↑`/`↓` to move, `Enter` to run. Focus is in the search input. |
 | Link bubble | Reachable by `Tab`; `Escape` returns to the editor. |
 | Selected `![[file]]` attachment | `Shift`+`←`/`→` resizes 10 px (`Alt`+`Shift` 1 px), `Enter` starts a line after it, `Escape` deselects. Its toolbar is a labelled `role="toolbar"`; resize handles are labelled buttons. |
 | Resize drag | `Escape` cancels and restores the previous size. |
+| Web/YouTube embed, picture from a link | Click to select; the floating toolbar is placed inside the visible area (flipping sides, or pinned in view over a tall embed), so it is never cut off by a scrolling container. |
 
 ### The Tab trap, and how to escape it
 
