@@ -68,10 +68,16 @@ function decodeSegment(value: string): string {
 }
 
 /** The keyless Google Maps embed: a query (a place, an address, coordinates). */
+/** Street level: where a pin dropped without a zoom of its own is shown. */
+const DEFAULT_PIN_ZOOM = 15;
+
 function googleMapsEmbed(query: string, near?: string | null, zoom?: string | null): string {
   const params = new URLSearchParams({ q: query });
   if (near) params.set("ll", near);
   if (zoom && /^\d{1,2}(\.\d+)?$/.test(zoom)) params.set("z", String(Math.round(Number(zoom))));
+  // A pin with no zoom (a shared pin, an Apple Maps place) opened on the whole
+  // world: show the street it is on instead.
+  else if (near) params.set("z", String(DEFAULT_PIN_ZOOM));
   params.set("output", "embed");
   return `https://www.google.com/maps?${params.toString()}`;
 }
