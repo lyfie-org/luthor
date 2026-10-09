@@ -1896,3 +1896,25 @@ describe("preset node/transformer bridge seam", () => {
     expect(markdownWithoutSeam).not.toContain("[[Project Plan]]");
   });
 });
+
+describe("aligned image syntax on a metadata-free export", () => {
+  const source = "![Logo](https://example.com/logo.png) <!-- align:center -->";
+
+  it("defaults to GitHub's <p align> wrapper", () => {
+    const doc = markdownToJSON(source, { metadataMode: "none" });
+    expect(jsonToMarkdown(doc, { metadataMode: "none" })).toContain('<p align="center">');
+  });
+
+  it("keeps the directive with imageAlignment: comment, and reads it back", () => {
+    const doc = markdownToJSON(source, { metadataMode: "none" });
+    const out = jsonToMarkdown(doc, { metadataMode: "none", imageAlignment: "comment" });
+    expect(out).toBe(source);
+    expect(jsonToMarkdown(markdownToJSON(out, { metadataMode: "none" }), { metadataMode: "none", imageAlignment: "comment" })).toBe(source);
+  });
+
+  it("never lets an internal marker reach a link transformer", () => {
+    // A `[[…]]` transformer (a wikilink) used to claim the old markers first.
+    const doc = markdownToJSON('<p align="right">\n![](https://example.com/a.gif)\n</p>', { metadataMode: "none" });
+    expect(JSON.stringify(doc)).not.toMatch(/LUTHORALIGN/);
+  });
+});

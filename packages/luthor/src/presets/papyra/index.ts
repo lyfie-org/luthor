@@ -52,6 +52,7 @@ export {
   createFallbackPapyraAdapter,
   usePapyraAdapter,
   type PapyraEditorAdapter,
+  type PapyraEmbedResolution,
   type PapyraNoteRef,
   type PapyraNoteSearchResult,
   type PapyraUserSuggestion,

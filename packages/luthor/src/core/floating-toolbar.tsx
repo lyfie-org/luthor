@@ -27,13 +27,65 @@ import {
 } from "./icons";
 import { IconButton } from "./ui";
 import { getOverlayThemeStyleFromElement } from "./overlay-theme";
+import { resolveVisibleBounds } from "./overlay-position";
 import type { CoreEditorActiveStates, CoreEditorCommands, CoreTheme } from "./types";
 
 type FloatingSelectionRect = {
   y: number;
   x: number;
+  /** The selection's (or selected node's) top/bottom, in the bar's own coordinate space. */
+  top?: number;
+  bottom?: number;
   positionFromRight?: boolean;
 };
+
+/** Space kept between the bar and the edge of what can be seen. */
+const VISIBLE_MARGIN_PX = 12;
+/** Space between the bar and the thing it belongs to. */
+const ANCHOR_GAP_PX = 8;
+
+/**
+ * Where the bar should sit, given where it was placed and what can be seen.
+ * The placement only guesses the bar's height and only knows the window, so a
+ * tall bar (a web page's URL and caption fields) under a map at the foot of a
+ * scrolling note was cut off by the note's own edge. Measured here instead:
+ * keep it where it is if it is fully visible, else try the other side of its
+ * anchor, else pin it inside the visible area (over the media) — never hidden.
+ */
+export function resolveFloatingToolbarTop({
+  naturalTop,
+  height,
+  anchorTop,
+  anchorBottom,
+  visibleTop,
+  visibleBottom,
+}: {
+  naturalTop: number;
+  height: number;
+  anchorTop?: number;
+  anchorBottom?: number;
+  visibleTop: number;
+  visibleBottom: number;
+}): number {
+  const min = visibleTop + VISIBLE_MARGIN_PX;
+  const max = visibleBottom - VISIBLE_MARGIN_PX - height;
+  const fits = (top: number) => top >= min - 0.5 && top <= max + 0.5;
+  const hasAnchor = anchorTop !== undefined && anchorBottom !== undefined;
+  // The placement guessed the bar's height, so "above" can still reach down
+  // over the very thing it belongs to.
+  const covers = (top: number) => hasAnchor && top + height > anchorTop! + 1 && top < anchorBottom! - 1;
+  if (fits(naturalTop) && !covers(naturalTop)) return naturalTop;
+  if (hasAnchor) {
+    const above = anchorTop! - ANCHOR_GAP_PX - height;
+    const below = anchorBottom! + ANCHOR_GAP_PX;
+    const wasAbove = naturalTop < anchorTop!;
+    for (const candidate of wasAbove ? [above, below] : [below, above]) {
+      if (fits(candidate)) return candidate;
+    }
+  }
+  // Taller than the room on either side: overlap the media, inside the view.
+  return max < min ? min : Math.min(Math.max(naturalTop, min), max);
+}
 
 export interface FloatingToolbarProps {
   isVisible: boolean;
@@ -67,6 +119,11 @@ export function FloatingToolbar({
   // viewport edge is pulled back in (no guessed widths).
   const [shiftX, setShiftX] = useState(0);
   const shiftRef = useRef(0);
+  // …and vertically, against what can actually be seen (see resolveFloatingToolbarTop).
+  const [shiftY, setShiftY] = useState(0);
+  const shiftYRef = useRef(0);
+  // Bumped on scroll/resize so the bar is re-measured where it now is.
+  const [viewportTick, setViewportTick] = useState(0);
   const [iframeUrlDraft, setIframeUrlDraft] = useState("");
   const [iframeCaptionDraft, setIframeCaptionDraft] = useState("");
   const [imageCaptionDraft, setImageCaptionDraft] = useState("");
@@ -209,17 +266,59 @@ export function FloatingToolbar({
     element.style.transform = "";
     const rect = element.getBoundingClientRect();
     element.style.transform = applied;
+    const visible = resolveVisibleBounds(element.parentElement) ?? {
+      left: 0,
+      top: 0,
+      right: window.innerWidth,
+      bottom: window.innerHeight,
+    };
     const naturalLeft = rect.left;
     const naturalRight = rect.right;
-    const margin = 12;
+    const margin = VISIBLE_MARGIN_PX;
     let next = 0;
-    if (naturalRight > window.innerWidth - margin) next = window.innerWidth - margin - naturalRight;
-    if (naturalLeft + next < margin) next = margin - naturalLeft;
+    if (naturalRight > visible.right - margin) next = visible.right - margin - naturalRight;
+    if (naturalLeft + next < visible.left + margin) next = visible.left + margin - naturalLeft;
     if (Math.abs(next - shiftRef.current) >= 1) {
       shiftRef.current = next;
       setShiftX(next);
     }
-  }, [isVisible, selectionRect, activeStates]);
+
+    // The bar's `top` is selectionRect.y in its containing block, so the
+    // block's own viewport offset turns the anchor's coordinates into viewport ones.
+    const origin = rect.top - (selectionRect?.y ?? rect.top);
+    const top = resolveFloatingToolbarTop({
+      naturalTop: rect.top,
+      height: rect.height,
+      anchorTop: typeof selectionRect?.top === "number" ? origin + selectionRect.top : undefined,
+      anchorBottom: typeof selectionRect?.bottom === "number" ? origin + selectionRect.bottom : undefined,
+      visibleTop: visible.top,
+      visibleBottom: visible.bottom,
+    });
+    const nextY = Math.round(top - rect.top);
+    if (Math.abs(nextY - shiftYRef.current) >= 1) {
+      shiftYRef.current = nextY;
+      setShiftY(nextY);
+    }
+  }, [isVisible, selectionRect, activeStates, viewportTick]);
+
+  useEffect(() => {
+    if (!isVisible || typeof window === "undefined") return;
+    let frame = 0;
+    const onChange = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        setViewportTick((n) => n + 1);
+      });
+    };
+    window.addEventListener("scroll", onChange, true);
+    window.addEventListener("resize", onChange);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onChange, true);
+      window.removeEventListener("resize", onChange);
+    };
+  }, [isVisible]);
 
   if (!isVisible || !selectionRect) return null;
 
@@ -231,7 +330,7 @@ export function FloatingToolbar({
     top: selectionRect.y,
     left: selectionRect.positionFromRight ? "auto" : selectionRect.x,
     right: selectionRect.positionFromRight ? edgeInsetPx : "auto",
-    transform: shiftX ? `translateX(${shiftX}px)` : undefined,
+    transform: shiftX || shiftY ? `translate(${shiftX}px, ${shiftY}px)` : undefined,
     maxWidth: `calc(100% - ${edgeInsetPx * 2}px)`,
     boxSizing: "border-box",
     zIndex: "var(--luthor-z-menu, 460)",

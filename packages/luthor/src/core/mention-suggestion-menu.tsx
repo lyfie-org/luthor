@@ -42,7 +42,7 @@ export function MentionSuggestionMenu({
 }: {
   isOpen: boolean;
   query: string;
-  position: { x: number; y: number } | null;
+  position: { x: number; y: number; top?: number } | null;
   portalContainer?: HTMLElement | null;
   suggestions: readonly MentionSuggestionItem[];
   /** Menu heading. Defaults to {@link MENTION_MENU_TITLE}. */

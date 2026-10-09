@@ -271,6 +271,32 @@ function decodeDirectiveValue(value: string): string {
     .trim();
 }
 
+/**
+ * The directives a framed embed (`![[iframe:…]]`, `![[youtube:…]]`) carries
+ * after its `]]`: its alignment when it isn't the default centre, then any
+ * directive it doesn't own, verbatim. Leading space included, or empty.
+ */
+export function formatFrameDirectives(align: MediaAlignment | undefined, extra: readonly string[] = []): string {
+  return formatMediaDirectives({
+    align: align && align !== "center" ? align : undefined,
+    unknown: [...extra],
+  });
+}
+
+/** Read a framed embed's trailing directives (see {@link formatFrameDirectives}). */
+export function parseFrameDirectives(trailing: string | undefined): {
+  align: MediaAlignment;
+  caption?: string;
+  extra: string[];
+} {
+  const parsed = parseMediaDirectives(trailing ?? "") ?? { unknown: [] };
+  return {
+    align: parsed.align ?? "center",
+    ...(parsed.caption ? { caption: parsed.caption } : {}),
+    extra: parsed.unknown,
+  };
+}
+
 /** Coarse media family of a target, by extension. */
 export type MediaKind = "image" | "video" | "audio" | "pdf" | "file";
 

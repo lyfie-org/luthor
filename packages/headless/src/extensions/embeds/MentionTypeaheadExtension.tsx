@@ -52,7 +52,7 @@ import { ANCHORABLE_BLOCK_TYPES } from "./anchorableBlocks";
 export type MentionTypeaheadMenuState = {
   isOpen: boolean;
   query: string;
-  position: { x: number; y: number } | null;
+  position: { x: number; y: number; top?: number } | null;
 };
 
 export interface MentionTypeaheadConfig extends BaseExtensionConfig {
@@ -142,7 +142,7 @@ export class MentionTypeaheadExtension extends BaseExtension<
   private listeners: ((state: MentionTypeaheadMenuState) => void)[] = [];
   private isOpen = false;
   private query = "";
-  private position: { x: number; y: number } | null = null;
+  private position: { x: number; y: number; top?: number } | null = null;
   private activeMatch: TypeaheadMatch | null = null;
   private editor: LexicalEditor | null = null;
   private viewportRafId: number | null = null;
@@ -380,7 +380,7 @@ export class MentionTypeaheadExtension extends BaseExtension<
     this.closeMenu();
   }
 
-  private getCaretPosition(): { x: number; y: number } | null {
+  private getCaretPosition(): { x: number; y: number; top?: number } | null {
     if (typeof window === "undefined") {
       return null;
     }
@@ -402,6 +402,7 @@ export class MentionTypeaheadExtension extends BaseExtension<
     return {
       x: safeRect.left + xOffset,
       y: safeRect.bottom + yOffset,
+      top: safeRect.top,
     };
   }
 

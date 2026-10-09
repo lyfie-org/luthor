@@ -26,6 +26,7 @@ import {
   type MediaToolbarItem,
 } from "../embeds/EmbedResolverContext";
 import { useEditorPrompt } from "./EditorPromptContext";
+import { uploadPreviews } from "../embeds/uploads";
 import { classifyMedia, type MediaAlignment } from "./mediaGrammar";
 import { useIsEditable, useIsNodeSelected } from "./mediaSelection";
 import { usePointerResize } from "./usePointerResize";
@@ -157,6 +158,9 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
   const [attempt, setAttempt] = useState(0);
   // Keyed by URL: replacing the file (a new target) starts clean.
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  // The URL whose picture/video has drawn — until then the frame shows a
+  // loading shimmer (or the local preview of a file just uploaded).
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const figureRef = useRef<HTMLElement | null>(null);
   const frameRef = useRef<HTMLElement | null>(null);
   const badgeRef = useRef<HTMLSpanElement | null>(null);
@@ -172,9 +176,22 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
   const failed = failedUrl !== null && failedUrl === url;
   const setFailed = (value: boolean) => setFailedUrl(value ? url : null);
   const interactive = !!(editor && nodeKey && onEdit && isEditable);
+  const isDocument = kind !== "image" && kind !== "video" && kind !== "audio";
+  // The host's own look for a document (a file icon and its name), if it has one.
+  const hostCard =
+    url && isDocument && !failed && resolvers.renderFileCard
+      ? resolvers.renderFileCard({
+          target, fragment, url, kind, meta,
+          label, alt: alt?.trim() || undefined, interactive, selected: isSelected,
+        })
+      : null;
+  const hasHostCard = hostCard !== null && hostCard !== undefined;
   // Every block attachment sizes by its width: a picture or video keeps its
-  // shape, a card (audio, a PDF, any other file) just gets narrower or wider.
-  const resizable = interactive && !inline && !failed;
+  // shape, a card (audio, a PDF, any other file) just gets narrower or wider —
+  // except a host's card, which has a size of its own.
+  const resizable = interactive && !inline && !failed && !hasHostCard;
+  const loading = (kind === "image" || kind === "video") && !failed && !!url && loadedUrl !== url;
+  const localPreview = loading && kind === "image" ? uploadPreviews.get(target) : undefined;
 
   const edit = useCallback(
     (change: MediaEdit) => {
@@ -267,11 +284,17 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
 
   // A known width fills its (capped) box; an unknown one shows the file at its
   // own size, never stretched past it.
-  const frameStyle: CSSProperties = displayWidth
-    ? { width: `min(${Math.round(displayWidth)}px, 100%)` }
-    : kind === "image"
-      ? { width: "fit-content", maxWidth: "100%" }
-      : {};
+  const frameStyle: CSSProperties = hasHostCard
+    ? { width: "fit-content", maxWidth: "100%" }
+    : displayWidth
+      ? { width: `min(${Math.round(displayWidth)}px, 100%)` }
+      : kind === "image"
+        ? { width: "fit-content", maxWidth: "100%" }
+        : {};
+  if (localPreview) {
+    frameStyle.backgroundImage = `url("${localPreview}")`;
+  }
+  const markLoaded = () => setLoadedUrl(url);
   const mediaStyle: CSSProperties = {
     width: displayWidth || kind !== "image" ? "100%" : "auto",
     maxWidth: "100%",
@@ -327,7 +350,12 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
         height={naturalHeight}
         style={mediaStyle}
         draggable={false}
+        onLoad={markLoaded}
         onError={() => setFailed(true)}
+        ref={(el) => {
+          // Already in the cache: no load event will come.
+          if (el?.complete && el.naturalWidth > 0 && loadedUrl !== url) markLoaded();
+        }}
       />
     );
   } else if (kind === "video") {
@@ -343,6 +371,7 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
         playsInline
         aria-label={label}
         style={mediaStyle}
+        onLoadedMetadata={markLoaded}
         onError={() => setFailed(true)}
       />
     );
@@ -362,6 +391,14 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
           aria-label={label}
           onError={() => setFailed(true)}
         />
+      </span>
+    );
+  } else if (hasHostCard) {
+    const expansion = resolvers.renderFileExpansion?.({ target, fragment, url, kind, meta }) ?? null;
+    body = (
+      <span className="luthor-media__card luthor-media__card--host" data-luthor-file-embed-target={target}>
+        {hostCard}
+        {expansion}
       </span>
     );
   } else {
@@ -401,6 +438,7 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
       target, fragment, kind, url, meta, width, height, align, caption, alt,
       update: edit,
       remove: () => editor && onRemove?.(editor),
+      requestInput: requestPrompt,
     };
     const items: MediaToolbarItem[] = [];
     if (resolvers.mediaToolbar?.builtIn !== false) {
@@ -468,10 +506,17 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
       items.push({ id: "remove", label: "Remove", icon: <Icon d={ICONS.remove} />, onSelect: () => context.remove() });
     }
 
-    actionsRef.current = new Map(items.map((item) => [item.id, item.onSelect]));
+    actionsRef.current = new Map(
+      items.filter((item) => item.variant !== "label").map((item) => [item.id, item.onSelect]),
+    );
     toolbar = (
       <div ref={toolbarRef} className={`luthor-media__toolbar${compact ? " is-compact" : ""}`} role="toolbar" aria-label="Attachment" contentEditable={false}>
-        {items.map((item) => (
+        {items.map((item) => item.variant === "label" ? (
+          <span key={item.id} className="luthor-media__tool-label" data-media-label={item.id} title={item.label}>
+            {item.icon}
+            {item.label}
+          </span>
+        ) : (
           <button
             key={item.id}
             type="button"
@@ -515,6 +560,7 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
     inline ? "luthor-media--inline" : "luthor-media--block",
     align ? `luthor-media--align-${align}` : "",
     failed ? "luthor-media--failed" : "",
+    hasHostCard ? "luthor-media--host-card" : "",
     interactive ? "is-interactive" : "",
     isSelected ? "is-selected" : "",
     resizing ? "is-resizing" : "",
@@ -551,8 +597,9 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
         ref={(el) => {
           frameRef.current = el;
         }}
-        className="luthor-media__frame"
+        className={`luthor-media__frame${loading ? " is-loading" : ""}${loading && !ratio ? " is-unsized" : ""}${localPreview ? " has-preview" : ""}`}
         style={frameStyle}
+        aria-busy={loading || undefined}
       >
         {body}
         {handles}

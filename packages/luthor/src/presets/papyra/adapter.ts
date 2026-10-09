@@ -26,6 +26,7 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 import type {
+  FileCardContext,
   FileExpansionContext,
   MediaMeta,
   MediaToolbarContext,
@@ -51,6 +52,15 @@ export interface PapyraNoteSearchResult {
   /** Optional per-note tint, used to color the typeahead entry. */
   color?: string;
 }
+
+/**
+ * What an embedded link turned out to be (see
+ * {@link PapyraEditorAdapter.resolveEmbed}): a URL to frame, or — for a page
+ * that refuses to be framed — a saved link card in its place.
+ */
+export type PapyraEmbedResolution =
+  | { type: "iframe"; src: string; title?: string; width?: number; height?: number }
+  | { type: "card"; url: string; title?: string };
 
 /** A single person returned by {@link PapyraEditorAdapter.searchUsers}. */
 export interface PapyraUserSuggestion {
@@ -118,11 +128,23 @@ export interface PapyraEditorAdapter {
    */
   renderFileExpansion?(context: FileExpansionContext): ReactNode;
   /**
+   * The host's own look for a document attachment (an icon and its name, say).
+   * Return `null` to keep the built-in card. Optional.
+   */
+  renderFileCard?(context: FileCardContext): ReactNode;
+  /**
+   * Look into a link being embedded that luthor's providers don't recognise
+   * (`toEmbeddableUrl`): follow a short link, find the page's embeddable form,
+   * or learn that the site refuses to be framed (then return a card). The
+   * embed is already in the note, loading, while this runs. Optional.
+   */
+  resolveEmbed?(url: string): Promise<PapyraEmbedResolution | null>;
+  /**
    * Persist a dropped or pasted file and resolve to the stored filename the
    * editor should reference as `![[filename]]`. The host owns the upload endpoint
    * and its authorization.
    */
-  uploadMedia(file: File, options?: UploadFileOptions): Promise<{ filename: string }>;
+  uploadMedia(file: File, options?: UploadFileOptions): Promise<{ filename: string; label?: string }>;
   /**
    * Refuse a file before it is uploaded (too large, a kind the host won't
    * take): return the message to show, or `null` to accept. Optional.

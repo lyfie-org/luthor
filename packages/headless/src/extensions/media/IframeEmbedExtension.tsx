@@ -5,14 +5,20 @@
  * Build freely. Credit kindly.
  */
 
-import { formatSize, splitCaptionAndSize } from "./mediaGrammar";
+import {
+  formatFrameDirectives,
+  formatSize,
+  parseFrameDirectives,
+  splitCaptionAndSize,
+} from "./mediaGrammar";
+import { toEmbeddableUrl } from "./embedProviders";
 import {
   moveSelectedNode,
   registerClickToSelect,
   removeSelectedNode,
   type MoveDirection,
 } from "./mediaSelection";
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
   $createNodeSelection,
   $getNodeByKey,
@@ -54,13 +60,52 @@ export type IframeEmbedPayload = {
    * defaulted — only a chosen size is written back to markdown.
    */
   sized?: boolean;
+  /** Trailing `<!-- k:v -->` directives this embed doesn't own, kept verbatim. */
+  directives?: string[];
 };
+
+/**
+ * What a host found out about a link (see {@link IframeEmbedConfig.resolveUrl}):
+ * frame this URL instead, or put the host's own node in the embed's place (a
+ * video player, a link card for a site that refuses to be framed).
+ */
+export type IframeUrlResolution =
+  | { kind: "iframe"; src: string; title?: string; width?: number; height?: number }
+  | { kind: "replace"; createNode: () => LexicalNode };
 
 export interface IframeEmbedConfig extends BaseExtensionConfig {
   defaultWidth?: number;
   defaultHeight?: number;
   defaultAlignment?: EmbedAlignment;
+  /**
+   * Look into a link the built-in providers don't recognise — follow a short
+   * link, read the page's oEmbed, learn whether the site allows framing at
+   * all. Called after the embed is inserted (it shows as loading meanwhile);
+   * resolve `null` to keep the link as it is.
+   */
+  resolveUrl?: (url: string) => Promise<IframeUrlResolution | null>;
 }
+
+/*
+ * Embeds waiting on `resolveUrl`, by node key. Local to this tab (never in the
+ * document): the embed shows a loading frame instead of a page that may be
+ * about to refuse it.
+ */
+const pendingEmbeds = new Set<NodeKey>();
+const pendingListeners = new Set<() => void>();
+const pendingStore = {
+  subscribe(listener: () => void) {
+    pendingListeners.add(listener);
+    return () => {
+      pendingListeners.delete(listener);
+    };
+  },
+  set(key: NodeKey, pending: boolean) {
+    if (pending) pendingEmbeds.add(key);
+    else pendingEmbeds.delete(key);
+    pendingListeners.forEach((listener) => listener());
+  },
+};
 
 export type IframeEmbedCommands = {
   insertIframeEmbed: (inputUrl: string, width?: number, height?: number, title?: string) => void;
@@ -114,6 +159,7 @@ type SerializedIframeEmbedNode = Spread<
     title?: string;
     caption?: string;
     sized?: boolean;
+    directives?: string[];
   },
   SerializedLexicalNode
 >;
@@ -208,6 +254,7 @@ export class IframeEmbedNode extends DecoratorNode<ReactNode> {
       title: serialized.title,
       caption: serialized.caption ?? "",
       sized: serialized.sized === true,
+      ...(serialized.directives?.length ? { directives: [...serialized.directives] } : {}),
     });
   }
 
@@ -297,6 +344,7 @@ export class IframeEmbedNode extends DecoratorNode<ReactNode> {
       title: this.__payload.title,
       caption: this.__payload.caption,
       ...(this.__payload.sized ? { sized: true } : {}),
+      ...(this.__payload.directives?.length ? { directives: this.__payload.directives } : {}),
     };
   }
 
@@ -369,6 +417,13 @@ function IframeEmbedComponent({
   const [isEditorEditable, setIsEditorEditable] = useState(() => editor.isEditable());
   const [isSelected, setIsSelected] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  // The page whose frame has loaded; until then a shimmer stands in.
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const resolving = useSyncExternalStore(
+    pendingStore.subscribe,
+    () => pendingEmbeds.has(nodeKey),
+    () => false,
+  );
   const [localWidth, setLocalWidth] = useState(payload.width);
   const [localHeight, setLocalHeight] = useState(payload.height);
   const widthRef = useRef(payload.width);
@@ -520,17 +575,32 @@ function IframeEmbedComponent({
     <div style={wrapperStyle}>
       <div
         ref={shellRef}
-        className={`luthor-media-embed-shell${isSelected ? " is-selected" : ""}${isResizing ? " is-resizing" : ""}`}
+        className={`luthor-media-embed-shell${isSelected ? " is-selected" : ""}${isResizing ? " is-resizing" : ""}${resolving || loadedSrc !== payload.src ? " is-loading" : ""}`}
         data-luthor-selection-anchor="true"
+        aria-busy={resolving || loadedSrc !== payload.src || undefined}
         style={{ width: localWidth, maxWidth: "100%" }}
         onClick={isEditorEditable ? selectNode : undefined}
       >
+        {resolving ? (
+          <div
+            className="luthor-iframe-embed__resolving"
+            role="status"
+            aria-label="Preparing the embed"
+            style={{ width: "100%", aspectRatio: `${localWidth} / ${localHeight}` }}
+          />
+        ) : (
         <iframe
           ref={iframeRef}
           src={toRenderableEmbedSrc(payload.src)}
           title={payload.title ?? "Embedded content"}
           loading="lazy"
           referrerPolicy="strict-origin-when-cross-origin"
+          // Any page can be embedded, so none may navigate the note away or
+          // reach into it: scripts and its own origin (maps, players need
+          // them), popups, forms — nothing else.
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-presentation"
+          allow="fullscreen; clipboard-write; encrypted-media; picture-in-picture"
+          onLoad={() => setLoadedSrc(payload.src)}
           allowFullScreen
           style={{
             // Shape, not a fixed height: when the column is narrower than the
@@ -543,6 +613,7 @@ function IframeEmbedComponent({
             pointerEvents: resolveEmbedPointerEvents(isEditorEditable, isSelected, isResizing),
           }}
         />
+        )}
 
         <button
           type="button"
@@ -607,15 +678,21 @@ export class IframeEmbedExtension extends BaseExtension<
         if (!parsedUrl) {
           return;
         }
+        // A map, a song, a design… pasted as the link people actually have:
+        // framed through its embeddable form, at its player's own shape.
+        const known = toEmbeddableUrl(parsedUrl.toString());
+        const resolveUrl = this.config.resolveUrl;
 
+        let key: NodeKey | null = null;
         editor.update(() => {
           const node = new IframeEmbedNode({
-            src: parsedUrl.toString(),
-            width: clampSize(width ?? this.config.defaultWidth ?? 640, MIN_EMBED_WIDTH, MAX_EMBED_WIDTH),
-            height: clampSize(height ?? this.config.defaultHeight ?? 360, MIN_EMBED_HEIGHT, MAX_EMBED_HEIGHT),
+            src: known?.src ?? parsedUrl.toString(),
+            width: clampSize(width ?? known?.width ?? this.config.defaultWidth ?? 640, MIN_EMBED_WIDTH, MAX_EMBED_WIDTH),
+            height: clampSize(height ?? known?.height ?? this.config.defaultHeight ?? 360, MIN_EMBED_HEIGHT, MAX_EMBED_HEIGHT),
             alignment: this.config.defaultAlignment ?? "center",
-            title,
+            title: title ?? known?.title,
             caption: "",
+            ...(known?.width && known.height && width === undefined ? { sized: true } : {}),
           });
 
           const selection = $getSelection();
@@ -624,7 +701,46 @@ export class IframeEmbedExtension extends BaseExtension<
           } else {
             $getRoot().append(node);
           }
+          key = node.getKey();
         });
+
+        const insertedKey = key as NodeKey | null;
+        if (known || !resolveUrl || !insertedKey) {
+          return;
+        }
+        // Anything else is the host's to look into (a short link, a page that
+        // may refuse to be framed); the embed waits in a loading state.
+        pendingStore.set(insertedKey, true);
+        void resolveUrl(parsedUrl.toString())
+          .catch(() => null)
+          .then((resolution) => {
+            if (!resolution) return;
+            editor.update(
+              () => {
+                const node = $getNodeByKey(insertedKey);
+                if (!(node instanceof IframeEmbedNode)) return;
+                if (resolution.kind === "replace") {
+                  node.replace(resolution.createNode());
+                  return;
+                }
+                const sized = resolution.width !== undefined && resolution.height !== undefined;
+                node.setPayload({
+                  src: resolution.src,
+                  ...(resolution.title ? { title: resolution.title } : {}),
+                  ...(sized
+                    ? {
+                        width: clampSize(resolution.width!, MIN_EMBED_WIDTH, MAX_EMBED_WIDTH),
+                        height: clampSize(resolution.height!, MIN_EMBED_HEIGHT, MAX_EMBED_HEIGHT),
+                        sized: true,
+                      }
+                    : {}),
+                });
+              },
+              // Part of the insert, not a separate undo step.
+              { tag: "history-merge" },
+            );
+          })
+          .finally(() => pendingStore.set(insertedKey, false));
       },
       setIframeEmbedAlignment: (alignment: EmbedAlignment) => {
         editor.update(() => {
@@ -690,6 +806,7 @@ export class IframeEmbedExtension extends BaseExtension<
           return false;
         }
 
+        const known = toEmbeddableUrl(parsedUrl.toString());
         let updated = false;
         editor.update(() => {
           const selection = $getSelection();
@@ -699,7 +816,7 @@ export class IframeEmbedExtension extends BaseExtension<
 
           selection.getNodes().forEach((node) => {
             if (node instanceof IframeEmbedNode) {
-              node.setPayload({ src: parsedUrl.toString() });
+              node.setPayload({ src: known?.src ?? parsedUrl.toString() });
               updated = true;
             }
           });
@@ -799,14 +916,17 @@ export function $isIframeEmbedNode(
  * Lossless bidirectional markdown transformer for {@link IframeEmbedNode}.
  *
  * Import: a line that is exactly `![[iframe:url]]` (optionally
- * `![[iframe:url|caption]]`) becomes an iframe embed. Export: an iframe embed
- * serializes back to the same syntax using its stored URL.
+ * `![[iframe:url|caption|WxH]]`, then trailing `<!-- align:right -->`-style
+ * directives) becomes an iframe embed. Export: an iframe embed serializes back
+ * to the same syntax using its stored URL.
  *
  * The URL is normalised through {@link parseUrl} on import (a missing protocol
  * gains `https://`), so a fully-qualified URL round-trips verbatim and a
  * shorthand one normalises on the first pass then stays byte-stable.
- * Width/height/alignment are session-only presentation state with no markdown
- * representation and default on parse, so the markdown text round-trips cleanly.
+ * A chosen size is a `|WxH` segment; an alignment other than the default
+ * centre is an `<!-- align:… -->` directive (it used to be session-only, so a
+ * right-aligned map came back centred on the next open). Directives it doesn't
+ * own are kept verbatim.
  *
  * **Ordering:** this transformer **must** be tried ahead of the general
  * `![[…]]` file-embed transformer, whose `[^\]]+` target would otherwise claim
@@ -818,14 +938,14 @@ export const IFRAME_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
     if (!$isIframeEmbedNode(node)) {
       return null;
     }
-    const { src, caption, width, height, sized } = node.getPayload();
+    const { src, caption, width, height, sized, alignment, directives } = node.getPayload();
     const segments = [
       ...(caption && caption.trim() !== "" ? [caption] : []),
       ...(sized ? [formatSize(width, height)] : []),
     ];
-    return `![[iframe:${src}${segments.map((s) => `|${s}`).join("")}]]`;
+    return `![[iframe:${src}${segments.map((s) => `|${s}`).join("")}]]${formatFrameDirectives(alignment, directives)}`;
   },
-  regExp: /^!\[\[iframe:([^\]|]+)(?:\|([^\]]+))?\]\]\s*$/,
+  regExp: /^!\[\[iframe:([^\]|]+)(?:\|([^\]]+))?\]\]((?:\s*<!--[\s\S]*?-->)*)\s*$/,
   replace: (parentNode: ElementNode, _children, match) => {
     const raw = (match[1] ?? "").trim();
     if (!raw) {
@@ -837,14 +957,16 @@ export const IFRAME_EMBED_MARKDOWN_TRANSFORMER: ElementTransformer = {
     }
     // `|caption`, `|800x600` or both: a trailing size is the chosen frame size.
     const { caption, width, height } = splitCaptionAndSize(match[2]);
+    const directives = parseFrameDirectives(match[3]);
     parentNode.replace(
       $createIframeEmbedNode({
         src: parsed.toString(),
         width: width ?? 640,
         height: height ?? (width ? Math.round((width * 9) / 16) : 360),
-        alignment: "center",
-        caption,
+        alignment: directives.align,
+        caption: caption || directives.caption || "",
         sized: width !== undefined,
+        ...(directives.extra.length ? { directives: directives.extra } : {}),
       }),
     );
   },

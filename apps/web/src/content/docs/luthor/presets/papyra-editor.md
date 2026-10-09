@@ -279,8 +279,13 @@ interface PapyraEditorAdapter {
   getMediaMeta?(filename: string): MediaMeta | null | undefined;
   subscribeMediaMeta?(listener: () => void): () => void;
   renderFileExpansion?(context: FileExpansionContext): ReactNode;  // e.g. a PDF viewer under a file card
+  renderFileCard?(context: FileCardContext): ReactNode;             // your own look for a document (icon + name)
+  resolveEmbed?(url: string): Promise<                               // a link toEmbeddableUrl doesn't know
+    | { type: "iframe"; src: string; title?: string; width?: number; height?: number }
+    | { type: "card"; url: string; title?: string }                  // a site that refuses framing
+    | null>;
   // drop/paste/pick → store. Pass `signal` to fetch/XHR (Cancel) and report progress 0–1.
-  uploadMedia(file: File, options?: { signal: AbortSignal; onProgress: (fraction: number) => void }): Promise<{ filename: string }>;
+  uploadMedia(file: File, options?: { signal: AbortSignal; onProgress: (fraction: number) => void }): Promise<{ filename: string; label?: string }>;
   validateMedia?(file: File): string | null;                 // refuse before uploading (a message), or null
   onUploadError?(error: unknown, file: File): void;          // once per failure (a toast)
   mediaToolbarItems?(context: MediaToolbarContext): MediaToolbarItem[];  // host buttons on a selected attachment
@@ -511,6 +516,8 @@ Optional adapter members, each degrading when absent:
 | `getMediaMeta` + `subscribeMediaMeta` | frame measures itself on load | box reserved up front (no layout shift), file cards show size |
 | `resolveMediaUrl` `variant` | originals everywhere | `thumb` at 320/640/1280 px, video `poster` |
 | `renderFileExpansion` | plain file card | e.g. inline PDF under the card |
+| `renderFileCard` | built-in file card | your own document look (icon + name) |
+| `resolveEmbed` | links framed as given | short links followed, oEmbed players, link cards for sites that refuse framing |
 | `validateMedia` / `onUploadError` | every file uploads, failures only on the placeholder | refuse early with a message, toast once per failure |
 | `mediaToolbarItems` | built-in toolbar | host buttons (copy link, download, replace…) |
 
@@ -562,8 +569,13 @@ so anything a client writes, the server can decode. Install `yjs` and
 
 The slash menu and command palette are curated down to note-taking primitives:
 headings (H1–H3), lists and checklist, quote, code block, table, horizontal
-rule, and image. The typography pickers, view tabs, and pinned toolbar are
-enforced off.
+rule, and image — plus **Embed a link** and **YouTube video** when the host
+turns those embeds on (`features: { iframeEmbed: true, youTubeEmbed: true }`).
+The typography pickers, view tabs, and pinned toolbar are enforced off.
+
+The menu (like every caret menu) stays inside what can be seen: in a note that
+scrolls inside a panel it opens above the caret near the panel's foot, never
+over the line being typed, and its list scrolls when it is taller than the room.
 
 On top of the curated built-ins, PapyraEditor contributes three note-specific
 slash commands through the editor's `extraSlashCommands` seam:

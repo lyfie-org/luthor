@@ -149,6 +149,28 @@ describe("upload pipeline", () => {
     expect(blocks(editor)).toContain("embed:a-b--c.png");
   });
 
+  it("shows a document under the name the host gives it (its alias), cleaned and only when it differs", async () => {
+    const markdownOf = (editor: LexicalEditor) =>
+      editor.getEditorState().read(() =>
+        $getRoot().getChildren().filter($isFileEmbedNode).map((n) => n.getMarkdown()),
+      );
+    const labelled = createHarness({ uploadFile: async () => ({ filename: "q3-411e00.pdf", label: "Q3 | report [final].pdf" }) });
+    await labelled.commands.uploadAndEmbedFile(file("Q3 | report [final].pdf"));
+    await settle(labelled.editor);
+    expect(markdownOf(labelled.editor)).toEqual(["![[q3-411e00.pdf|Q3 report final.pdf]]"]);
+
+    const same = createHarness({ uploadFile: async () => ({ filename: "notes.txt", label: "notes.txt" }) });
+    await same.commands.uploadAndEmbedFile(file("notes.txt"));
+    await settle(same.editor);
+    expect(markdownOf(same.editor)).toEqual(["![[notes.txt]]"]);
+
+    // A bare number would read back as a size (`|300`): no alias then.
+    const numeric = createHarness({ uploadFile: async () => ({ filename: "300-ab12.pdf", label: "300" }) });
+    await numeric.commands.uploadAndEmbedFile(file("300"));
+    await settle(numeric.editor);
+    expect(markdownOf(numeric.editor)).toEqual(["![[300-ab12.pdf]]"]);
+  });
+
   it("places a batch in the order given, whatever order the uploads finish in", async () => {
     const pending = new Map<string, ReturnType<typeof deferred<{ filename: string }>>>();
     const uploadFile: Upload = (f) => {

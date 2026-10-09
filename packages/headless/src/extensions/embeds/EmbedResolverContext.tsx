@@ -23,6 +23,7 @@
  */
 
 import { createContext, useContext, type ReactNode } from "react";
+import type { RequestPrompt } from "../media/EditorPromptContext";
 
 /**
  * Open-graph-style metadata for a saved web card (`![[card:url]]`). Every field
@@ -92,6 +93,18 @@ export interface FileExpansionContext {
   meta: MediaMeta | null | undefined;
 }
 
+/** What a host's own file card renders from (see `renderFileCard`). */
+export interface FileCardContext extends FileExpansionContext {
+  /** The name to show: the embed's alias (`![[a.pdf|Name]]`) or the file name. */
+  label: string;
+  /** The alias itself, when the embed has one. */
+  alt?: string;
+  /** Inside an editable note (a click selects; opening is the toolbar's job). */
+  interactive: boolean;
+  /** Currently selected (its toolbar is showing). */
+  selected: boolean;
+}
+
 /** An edit to an embedded attachment; `null` clears a field. */
 export interface MediaEdit {
   target?: string;
@@ -119,6 +132,11 @@ export interface MediaToolbarContext {
   update: (edit: MediaEdit) => void;
   /** Remove this embed from the document. */
   remove: () => void;
+  /**
+   * Ask for values in the editor's own (themed) dialog — a rename, a caption.
+   * Resolves `null` when cancelled.
+   */
+  requestInput?: RequestPrompt;
 }
 
 /** One button in the media toolbar. */
@@ -130,6 +148,11 @@ export interface MediaToolbarItem {
   icon?: ReactNode;
   active?: boolean;
   disabled?: boolean;
+  /**
+   * `button` (default) or `label`: plain text in the bar (a file's size), not
+   * a control. A label's `onSelect` is never called.
+   */
+  variant?: "button" | "label";
   onSelect: () => void;
 }
 
@@ -160,6 +183,13 @@ export interface EmbedResolvers {
    * host renders on demand. Return `null` for files it has nothing to add to.
    */
   renderFileExpansion?: (context: FileExpansionContext) => ReactNode;
+  /**
+   * The host's own look for a document card (a PDF, a spreadsheet, any file
+   * that isn't a picture, video or recording) — e.g. a desktop-style file icon
+   * and its name. Return `null` to keep the built-in card. A host card is
+   * selected by a click like any attachment, and isn't resized.
+   */
+  renderFileCard?: (context: FileCardContext) => ReactNode;
   /**
    * The toolbar shown on a selected attachment. `items` adds the host's own
    * buttons (replace, download, …) after the built-in ones; `builtIn: false`

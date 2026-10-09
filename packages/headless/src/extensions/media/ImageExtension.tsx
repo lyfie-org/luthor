@@ -141,6 +141,21 @@ function ImageComponent({
   const [currentHeight, setCurrentHeight] = useState<number | "auto">(
     height || "auto",
   );
+  // Which src has drawn / failed: a picture from a link shows a shimmer while
+  // it downloads and a small card (not a broken-image glyph) if it can't.
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const loading = !!src && loadedSrc !== src && failedSrc !== src;
+  const failed = !!src && failedSrc === src;
+  const imageEvents = {
+    onLoad: () => setLoadedSrc(src ?? null),
+    onError: () => setFailedSrc(src ?? null),
+    ref: (element: HTMLImageElement | null) => {
+      imageRef.current = element;
+      // Already in the cache: no load event will come.
+      if (element?.complete && element.naturalWidth > 0 && loadedSrc !== src) setLoadedSrc(src ?? null);
+    },
+  };
 
   /*
    * Release object URLs, but not on a StrictMode teardown.
@@ -270,8 +285,9 @@ function ImageComponent({
     >
       <div
         ref={shellRef}
-        className={`luthor-media-embed-shell${isSelected ? " is-selected" : ""}${isResizing ? " is-resizing" : ""}`}
+        className={`luthor-media-embed-shell${isSelected ? " is-selected" : ""}${isResizing ? " is-resizing" : ""}${loading ? " is-loading" : ""}`}
         data-luthor-selection-anchor="true"
+        aria-busy={loading || undefined}
         style={{
           position: "relative",
           display: "inline-block",
@@ -295,11 +311,39 @@ function ImageComponent({
               }
             }}
           >
-            <img ref={imageRef} src={src} alt={alt} style={imgStyle} />
+            <img src={src} alt={alt} style={failed ? { ...imgStyle, display: "none" } : imgStyle} {...imageEvents} />
           </a>
         ) : (
-          <img ref={imageRef} src={src} alt={alt} style={imgStyle} />
+          <img src={src} alt={alt} style={failed ? { ...imgStyle, display: "none" } : imgStyle} {...imageEvents} />
         )}
+        {failed ? (
+          <span className="luthor-media__error luthor-image-error" role="group" aria-label={`Couldn't load ${alt || "picture"}`}>
+            <span className="luthor-media__error-text">Couldn&rsquo;t load this picture</span>
+            <span className="luthor-media__error-actions">
+              <button
+                type="button"
+                className="luthor-media__button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setFailedSrc(null);
+                  setLoadedSrc(null);
+                }}
+              >
+                Retry
+              </button>
+              <a
+                className="luthor-media__button"
+                href={sanitizeUrlForAttribute(src)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => event.stopPropagation()}
+              >
+                Open link
+              </a>
+            </span>
+          </span>
+        ) : null}
         {resizable ? (
           <>
             <button
@@ -789,10 +833,11 @@ export class ImageExtension extends BaseExtension<
             if ($isRangeSelection(selection)) {
               selection.insertNodes([imageNode]);
             } else {
-              // Fallback: append to root in new paragraph
+              // No caret: append at the end. A picture is a block of its own —
+              // inside a paragraph it had no markdown form and was lost on save.
               const paragraph = $createParagraphNode();
-              paragraph.append(imageNode);
-              $getRoot().append(paragraph);
+              $getRoot().append(imageNode, paragraph);
+              paragraph.select();
             }
           } catch (error) {
             reportError("Image insertion failed", error);

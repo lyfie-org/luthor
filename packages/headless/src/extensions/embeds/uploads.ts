@@ -72,6 +72,32 @@ export const uploadRegistry = {
   },
 };
 
+/*
+ * The local preview of a picture that just finished uploading, by the name it
+ * was stored under. The embed that replaces the placeholder shows it while the
+ * stored copy downloads, so the picture never blinks out between "uploaded" and
+ * "loaded". Each lasts a couple of minutes, then its object URL is released.
+ */
+const PREVIEW_TTL_MS = 2 * 60 * 1000;
+const recentPreviews = new Map<string, string>();
+
+export const uploadPreviews = {
+  /** Keep `url` (an object URL this module now owns) as `target`'s preview. */
+  remember(target: string, url: string): void {
+    const previous = recentPreviews.get(target);
+    if (previous && previous !== url) URL.revokeObjectURL(previous);
+    recentPreviews.set(target, url);
+    setTimeout(() => {
+      if (recentPreviews.get(target) !== url) return;
+      recentPreviews.delete(target);
+      URL.revokeObjectURL(url);
+    }, PREVIEW_TTL_MS);
+  },
+  get(target: string): string | undefined {
+    return recentPreviews.get(target);
+  },
+};
+
 export function createUploadId(): string {
   const random =
     typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"

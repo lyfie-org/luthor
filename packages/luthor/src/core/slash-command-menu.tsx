@@ -11,7 +11,9 @@ import type { SlashCommandItem } from "@lyfie/luthor-headless";
 import { getOverlayThemeStyleFromSelection } from "./overlay-theme";
 import {
   computeAnchoredOverlayStyle,
-  createPointRect,
+  scrollActiveOptionIntoView,
+  withOverlayHeightCap,
+  createCaretAnchorRect,
   scheduleOverlayReveal,
 } from "./overlay-position";
 
@@ -26,7 +28,7 @@ export function SlashCommandMenu({
 }: {
   isOpen: boolean;
   query: string;
-  position: { x: number; y: number } | null;
+  position: { x: number; y: number; top?: number } | null;
   portalContainer?: HTMLElement | null;
   commands: SlashCommandItem[];
   onClose: () => void;
@@ -110,11 +112,15 @@ export function SlashCommandMenu({
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [filteredCommands, isOpen, onClose, onExecute, selectedIndex]);
 
+  useEffect(() => {
+    if (isOpen) scrollActiveOptionIntoView(menuRef.current);
+  }, [isOpen, selectedIndex]);
+
   const updateMenuPosition = useCallback((isVisible: boolean) => {
     if (!position) return;
     const measuredRect = menuRef.current?.getBoundingClientRect();
     const placement = computeAnchoredOverlayStyle({
-      anchorRect: createPointRect(position.x, position.y),
+      anchorRect: createCaretAnchorRect(position),
       overlay: {
         width: measuredRect?.width ?? 420,
         height: measuredRect?.height ?? 360,
@@ -129,7 +135,7 @@ export function SlashCommandMenu({
     });
 
     setMenuStyle({
-      ...placement,
+      ...withOverlayHeightCap(placement, "min(55vh, 420px)"),
       visibility: isVisible ? "visible" : "hidden",
       ...getOverlayThemeStyleFromSelection(),
     });

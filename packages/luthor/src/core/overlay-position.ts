@@ -35,6 +35,42 @@ function clamp(value: number, min: number, max: number): number {
   return value;
 }
 
+const CLIPPING_OVERFLOW = /(auto|scroll|hidden|clip)/;
+
+function toBounds(left: number, top: number, right: number, bottom: number): OverlayBounds {
+  return { left, top, right, bottom, width: Math.max(0, right - left), height: Math.max(0, bottom - top) };
+}
+
+/**
+ * The part of the window `element` can actually be seen in: the viewport cut
+ * down by every scrolling or clipping ancestor (and the element itself, when it
+ * clips). An editor inside a scrolling panel — a note in a dialog — is far
+ * taller than what shows; an overlay placed against the editor's own box could
+ * land below the panel's fold and be cut off. Returns null outside a browser.
+ */
+export function resolveVisibleBounds(element: Element | null): OverlayBounds | null {
+  if (typeof window === "undefined" || typeof document === "undefined") return null;
+  let left = 0;
+  let top = 0;
+  let right = window.innerWidth;
+  let bottom = window.innerHeight;
+  for (let node: Element | null = element; node && node !== document.body && node !== document.documentElement; node = node.parentElement) {
+    const style = window.getComputedStyle(node);
+    if (!CLIPPING_OVERFLOW.test(`${style.overflowX} ${style.overflowY}`)) continue;
+    const rect = node.getBoundingClientRect();
+    // The padding box, without a scrollbar (clientWidth/Height exclude it).
+    const innerLeft = rect.left + node.clientLeft;
+    const innerTop = rect.top + node.clientTop;
+    const innerRight = node.clientWidth > 0 ? innerLeft + node.clientWidth : rect.right;
+    const innerBottom = node.clientHeight > 0 ? innerTop + node.clientHeight : rect.bottom;
+    left = Math.max(left, innerLeft);
+    top = Math.max(top, innerTop);
+    right = Math.min(right, innerRight);
+    bottom = Math.min(bottom, innerBottom);
+  }
+  return toBounds(left, top, right, bottom);
+}
+
 function resolveOverlayBounds(portalContainer: HTMLElement | null): OverlayBounds {
   if (!portalContainer || typeof window === "undefined") {
     const width = typeof window === "undefined" ? 0 : window.innerWidth;
@@ -50,14 +86,19 @@ function resolveOverlayBounds(portalContainer: HTMLElement | null): OverlayBound
   }
 
   const rect = portalContainer.getBoundingClientRect();
-  return {
-    left: rect.left,
-    top: rect.top,
-    right: rect.right,
-    bottom: rect.bottom,
-    width: rect.width,
-    height: rect.height,
-  };
+  const own = toBounds(rect.left, rect.top, rect.right, rect.bottom);
+  // Only the visible part of the container: a long note scrolls inside its
+  // panel, and an overlay must stay where it can be seen.
+  const visible = resolveVisibleBounds(portalContainer);
+  if (!visible) return own;
+  const clipped = toBounds(
+    Math.max(own.left, visible.left),
+    Math.max(own.top, visible.top),
+    Math.min(own.right, visible.right),
+    Math.min(own.bottom, visible.bottom),
+  );
+  // Scrolled entirely out of view: nothing sensible to clip to.
+  return clipped.width > 0 && clipped.height > 0 ? clipped : own;
 }
 
 function resolveHorizontalPosition(
@@ -97,6 +138,12 @@ function resolveHorizontalPosition(
   return clamp(left, minLeft, maxLeft);
 }
 
+/**
+ * Smallest room worth shrinking an overlay into (it scrolls) rather than
+ * letting it cover its anchor.
+ */
+const MIN_SHRUNK_HEIGHT = 160;
+
 function resolveVerticalPosition(
   anchorRect: DOMRect,
   overlayHeight: number,
@@ -105,7 +152,7 @@ function resolveVerticalPosition(
   margin: number,
   preferredY: OverlayVerticalAlign,
   flipY: boolean,
-): number {
+): { top: number; maxHeight?: number } {
   const primaryTop =
     preferredY === "top"
       ? anchorRect.top - overlayHeight - gap
@@ -115,19 +162,36 @@ function resolveVerticalPosition(
       ? anchorRect.bottom + gap
       : anchorRect.top - overlayHeight - gap;
 
-  let top = primaryTop;
   const minTop = bounds.top + margin;
   const maxTop = Math.max(minTop, bounds.bottom - overlayHeight - margin);
+  const fits = (value: number) => value >= minTop && value <= maxTop;
+  const roomBelow = bounds.bottom - margin - (anchorRect.bottom + gap);
+  const roomAbove = anchorRect.top - gap - (bounds.top + margin);
+  const roomFor = (side: OverlayVerticalAlign) => (side === "top" ? roomAbove : roomBelow);
+  const alternateSide: OverlayVerticalAlign = preferredY === "top" ? "bottom" : "top";
 
+  // Placed on a side, it may grow only as far as that side has room — so a
+  // menu measured while shrunk settles there instead of growing back over
+  // the fold on the next pass.
+  if (fits(primaryTop)) {
+    return { top: primaryTop, maxHeight: roomFor(preferredY) };
+  }
   if (flipY) {
-    const primaryOverflows = top < minTop || top > maxTop;
-    const alternateFits = alternateTop >= minTop && alternateTop <= maxTop;
-    if (primaryOverflows && alternateFits) {
-      top = alternateTop;
+    if (fits(alternateTop)) {
+      return { top: alternateTop, maxHeight: roomFor(alternateSide) };
+    }
+    // Fits neither side whole: take the roomier side and shrink to it (a
+    // menu scrolls), so it never covers the caret — unless that room is too
+    // small to be useful, then overlap as before.
+    const room = Math.max(roomBelow, roomAbove);
+    if (room > 0 && room >= Math.min(overlayHeight, MIN_SHRUNK_HEIGHT)) {
+      return roomBelow >= roomAbove
+        ? { top: anchorRect.bottom + gap, maxHeight: roomBelow }
+        : { top: anchorRect.top - gap - Math.min(overlayHeight, roomAbove), maxHeight: roomAbove };
     }
   }
 
-  return clamp(top, minTop, maxTop);
+  return { top: clamp(primaryTop, minTop, maxTop) };
 }
 
 export function computeAnchoredOverlayStyle({
@@ -164,7 +228,7 @@ export function computeAnchoredOverlayStyle({
     preferredX,
     flipX,
   );
-  const viewportTop = resolveVerticalPosition(
+  const vertical = resolveVerticalPosition(
     anchorRect,
     overlayHeight,
     bounds,
@@ -173,6 +237,8 @@ export function computeAnchoredOverlayStyle({
     preferredY,
     flipY,
   );
+  const viewportTop = vertical.top;
+  const maxHeight = vertical.maxHeight ?? (maxOverlayHeight > 0 ? maxOverlayHeight : undefined);
 
   if (portalContainer) {
     const containerRect = portalContainer.getBoundingClientRect();
@@ -181,7 +247,7 @@ export function computeAnchoredOverlayStyle({
       left: viewportLeft - containerRect.left + portalContainer.scrollLeft,
       top: viewportTop - containerRect.top + portalContainer.scrollTop,
       maxWidth: maxOverlayWidth > 0 ? maxOverlayWidth : undefined,
-      maxHeight: maxOverlayHeight > 0 ? maxOverlayHeight : undefined,
+      maxHeight,
     };
   }
 
@@ -190,8 +256,27 @@ export function computeAnchoredOverlayStyle({
     left: viewportLeft,
     top: viewportTop,
     maxWidth: maxOverlayWidth > 0 ? maxOverlayWidth : undefined,
-    maxHeight: maxOverlayHeight > 0 ? maxOverlayHeight : undefined,
+    maxHeight,
   };
+}
+
+/**
+ * A menu's placement with its height capped twice: by the room the placement
+ * found (so it never runs past the visible area) and by the menu's own
+ * stylesheet cap (an inline `max-height` replaces the stylesheet's, and the
+ * room alone let a long list grow to the whole editor's height).
+ */
+export function withOverlayHeightCap(style: CSSProperties, cap: string): CSSProperties {
+  const room = typeof style.maxHeight === "number" ? Math.max(0, Math.floor(style.maxHeight)) : null;
+  return { ...style, maxHeight: room === null ? cap : `min(${room}px, ${cap})` };
+}
+
+/** Keep the highlighted option of a listbox in view as the arrow keys move it. */
+export function scrollActiveOptionIntoView(menu: HTMLElement | null): void {
+  const active = menu?.querySelector<HTMLElement>('[aria-selected="true"]');
+  if (active && typeof active.scrollIntoView === "function") {
+    active.scrollIntoView({ block: "nearest" });
+  }
 }
 
 /**
@@ -234,6 +319,18 @@ export function scheduleOverlayReveal(reveal: () => void): () => void {
     }
     clearTimeout(timer);
   };
+}
+
+/**
+ * The rect a caret menu hangs from: from the caret line's top (when the menu
+ * was told it) down to the point under the caret it opens at. Placed below,
+ * it opens at that point as before; flipped above, it clears the line instead
+ * of covering what is being typed.
+ */
+export function createCaretAnchorRect(position: { x: number; y: number; top?: number }): DOMRect {
+  const top = typeof position.top === "number" && position.top < position.y ? position.top : position.y;
+  const point = createPointRect(position.x, position.y);
+  return { ...point, y: top, top, height: point.bottom - top, toJSON: () => ({}) } as DOMRect;
 }
 
 export function createPointRect(x: number, y: number): DOMRect {

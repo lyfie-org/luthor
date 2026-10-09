@@ -128,7 +128,10 @@ export {
   $isIframeEmbedNode,
   IFRAME_EMBED_MARKDOWN_TRANSFORMER,
   type IframeEmbedPayload,
+  type IframeEmbedConfig,
+  type IframeUrlResolution,
 } from "./media/IframeEmbedExtension";
+export { toEmbeddableUrl, type EmbeddableUrl } from "./media/embedProviders";
 export {
   YouTubeEmbedExtension,
   youTubeEmbedExtension,
@@ -145,6 +148,8 @@ export {
   formatSize,
   parseMediaDirectives,
   formatMediaDirectives,
+  formatFrameDirectives,
+  parseFrameDirectives,
   classifyMedia,
   isFileTarget,
   MEDIA_MAX_DIMENSION,
@@ -185,6 +190,7 @@ export {
   type MediaMeta,
   type MediaUrlOptions,
   type FileExpansionContext,
+  type FileCardContext,
   type MediaEdit,
   type MediaToolbarContext,
   type MediaToolbarItem,

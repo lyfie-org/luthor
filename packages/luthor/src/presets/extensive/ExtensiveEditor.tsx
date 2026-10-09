@@ -2822,6 +2822,11 @@ export interface ExtensiveEditorProps {
    */
   markdownExtraTransformers?: MarkdownBridgeOptions["extraTransformers"];
   /**
+   * How an aligned standalone image is written when the markdown has no
+   * metadata (see {@link MarkdownBridgeOptions.imageAlignment}).
+   */
+  markdownImageAlignment?: MarkdownBridgeOptions["imageAlignment"];
+  /**
    * Resolves the notes shown by the `[[` typeahead. Pair it with a preset that
    * registers the headless wikilink typeahead extension (via
    * {@link extraExtensions}); without the provider the trigger stays silent and
@@ -2852,7 +2857,7 @@ export interface ExtensiveEditorProps {
 /** Extra node/transformer set forwarded to the markdown bridge. */
 type MarkdownBridgeExtras = Pick<
   MarkdownBridgeOptions,
-  "extraNodes" | "extraTransformers"
+  "extraNodes" | "extraTransformers" | "imageAlignment"
 >;
 
 /** Whether a bridge-extras object actually carries nodes or transformers. */
@@ -2860,7 +2865,8 @@ function hasBridgeExtras(extras?: MarkdownBridgeExtras): boolean {
   return (
     !!extras &&
     ((extras.extraNodes?.length ?? 0) > 0 ||
-      (extras.extraTransformers?.length ?? 0) > 0)
+      (extras.extraTransformers?.length ?? 0) > 0 ||
+      extras.imageAlignment !== undefined)
   );
 }
 
@@ -2928,6 +2934,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     extraExtensions,
     markdownExtraNodes,
     markdownExtraTransformers,
+    markdownImageAlignment,
     wikilinkSuggestionProvider,
     mentionSuggestionProvider,
     wikilinkSuggestionLabels,
@@ -2943,8 +2950,11 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
       if (markdownExtraTransformers && markdownExtraTransformers.length > 0) {
         extras.extraTransformers = markdownExtraTransformers;
       }
+      if (markdownImageAlignment) {
+        extras.imageAlignment = markdownImageAlignment;
+      }
       return extras;
-    }, [markdownExtraNodes, markdownExtraTransformers]);
+    }, [markdownExtraNodes, markdownExtraTransformers, markdownImageAlignment]);
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     const isDark = editorTheme === "dark";
     const requestedInitialMode = toCanonicalExtensiveMode(defaultEditorView ?? initialMode);

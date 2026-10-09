@@ -107,6 +107,14 @@ export interface MarkdownBridgeOptions {
    * they survive export sanitization. Ignored by the `lexical-native` flavor.
    */
   extraTransformers?: ReadonlyArray<Transformer>;
+  /**
+   * How a standalone aligned image is written on a metadata-free GitHub
+   * export. `"html"` (the default) wraps it in `<p align="…">` so GitHub
+   * renders it aligned; `"comment"` keeps luthor's own trailing
+   * `<!-- align:… -->` directive on the image line — the form every other
+   * embed uses, which reads back with no HTML conversion. Both import.
+   */
+  imageAlignment?: "html" | "comment";
 }
 
 const HORIZONTAL_RULE_MARKDOWN_TRANSFORMER: ElementTransformer = {
@@ -959,9 +967,21 @@ type AlignmentMarker =
   | { type: "start"; alignment: BlockAlignment }
   | { type: "end" };
 
-const ALIGNMENT_START_MARKER_PREFIX = "[[LUTHORALIGNSTART:";
-const ALIGNMENT_START_MARKER_SUFFIX = "]]";
-const ALIGNMENT_END_MARKER = "[[LUTHORALIGNEND]]";
+/*
+ * Alignment markers are internal: HTML alignment wrappers (`<p align>`,
+ * `<div align>`) become marker lines before Lexical parses the markdown, and
+ * the parsed document is re-aligned from them afterwards. They sit between
+ * private-use brackets, not `[[…]]`, so no markdown transformer can claim them
+ * first — a host's `[[wikilink]]` transformer turned the old
+ * `[[LUTHORALIGNSTART:center]]` into a link, the marker was never consumed and
+ * "LUTHORALIGNSTART:center" showed up in the note. The `[[…]]` spellings are
+ * still recognised (and re-spelled on import), so text saved by that bug heals.
+ */
+const MARKER_OPEN = "";
+const MARKER_CLOSE = "";
+const ALIGNMENT_START_MARKER_PREFIX = `${MARKER_OPEN}LUTHORALIGNSTART:`;
+const ALIGNMENT_START_MARKER_SUFFIX = MARKER_CLOSE;
+const ALIGNMENT_END_MARKER = `${MARKER_OPEN}LUTHORALIGNEND${MARKER_CLOSE}`;
 
 let cachedEmojiShortcodeLookup: ReadonlyMap<string, string> | null = null;
 let cachedEmojiShortcodeLookupSource: "global" | "module" | null = null;
@@ -2129,11 +2149,12 @@ function postprocessMarkdownForBridgeExport(
   markdown: string,
   flavor: MarkdownBridgeFlavor,
   metadataMode: SourceMetadataMode | undefined,
+  imageAlignment: MarkdownBridgeOptions["imageAlignment"] = "html",
 ): string {
   const withAlertSyntax = restoreGitHubAlertSyntax(markdown);
   const withFootnoteSyntax = restoreFootnoteSyntax(withAlertSyntax);
   const withoutInternalMarkers = stripInternalAlignmentMarkers(withFootnoteSyntax);
-  if (flavor === "github" && metadataMode === "none") {
+  if (flavor === "github" && metadataMode === "none" && imageAlignment !== "comment") {
     return convertImageAlignmentCommentsToGitHubWrappers(withoutInternalMarkers);
   }
 
@@ -2403,6 +2424,55 @@ function stripFrontmatterFromDocument(input: unknown): {
   };
 }
 
+function isBlankInlineChild(node: unknown): boolean {
+  if (!isJsonRecord(node)) return true;
+  if (node.type === "linebreak") return true;
+  return node.type === "text" && (typeof node.text !== "string" || node.text.trim().length === 0);
+}
+
+/**
+ * A picture from a link (`ImageNode`) is a block, but one can still end up
+ * inside a paragraph (an insert with no caret, a paste). Markdown export only
+ * writes a picture as its own block, so inside a paragraph it vanished on save
+ * — silently, taking the link with it. Lift every such picture out to the top
+ * level, splitting the paragraph around it, before exporting. Mutates the
+ * (already cloned) document.
+ */
+function hoistBlockImagesOutOfParagraphs(document: unknown): void {
+  if (!isJsonRecord(document) || !isJsonRecord(document.root) || !Array.isArray(document.root.children)) {
+    return;
+  }
+  const children: unknown[] = [];
+  let changed = false;
+  for (const child of document.root.children) {
+    if (
+      !isJsonRecord(child) ||
+      child.type !== "paragraph" ||
+      !Array.isArray(child.children) ||
+      !child.children.some((inner) => isJsonRecord(inner) && inner.type === "image")
+    ) {
+      children.push(child);
+      continue;
+    }
+    changed = true;
+    let run: unknown[] = [];
+    const flush = () => {
+      if (!run.every(isBlankInlineChild)) children.push({ ...child, children: run });
+      run = [];
+    };
+    for (const inner of child.children) {
+      if (isJsonRecord(inner) && inner.type === "image") {
+        flush();
+        children.push(inner);
+      } else {
+        run.push(inner);
+      }
+    }
+    flush();
+  }
+  if (changed) document.root.children = children;
+}
+
 function prependFrontmatterToMarkdown(markdown: string, frontmatter: string | null): string {
   if (!frontmatter) {
     return markdown;
@@ -2446,6 +2516,18 @@ function preprocessMarkdownForMetadataFreeImport(markdown: string): string {
 
     if (trimmed.length === 0) {
       output.push(line);
+      continue;
+    }
+
+    // A marker written out as text (by an older export, or by hand) is
+    // re-spelled as an internal marker, so nothing parses it as a link.
+    const markerAlignment = parseAlignmentStartMarker(trimmed);
+    if (markerAlignment) {
+      output.push(createAlignmentStartMarker(markerAlignment));
+      continue;
+    }
+    if (isAlignmentEndMarker(trimmed)) {
+      output.push(ALIGNMENT_END_MARKER);
       continue;
     }
 
@@ -2674,7 +2756,11 @@ function normalizeAlignmentMarkerText(value: string): string {
   return value
     .trim()
     .replace(/\\+/g, "")
-    .replace(/\s+/g, "");
+    .replace(/\s+/g, "")
+    .split(MARKER_OPEN)
+    .join("[[")
+    .split(MARKER_CLOSE)
+    .join("]]");
 }
 
 function parseAlignmentStartMarker(value: string): BlockAlignment | null {
@@ -2954,6 +3040,7 @@ export function jsonToMarkdown(
   }
 
   const { document: documentWithoutFrontmatter, frontmatter } = stripFrontmatterFromDocument(input);
+  hoistBlockImagesOutOfParagraphs(documentWithoutFrontmatter);
   // Every bold/italic/… boundary in a form the importer will read back.
   const inputWithoutFrontmatter = normalizeFormatBoundaries(documentWithoutFrontmatter);
   const preserveMetadata = shouldPreserveMetadata(options?.metadataMode);
@@ -2991,7 +3078,12 @@ export function jsonToMarkdown(
     activeExportTransformers = outerExportTransformers;
   }
   const postprocessedMarkdown = finalizeExportedMarkdown(
-    postprocessMarkdownForBridgeExport(markdown, resolvedFlavor, options?.metadataMode),
+    postprocessMarkdownForBridgeExport(
+      markdown,
+      resolvedFlavor,
+      options?.metadataMode,
+      options?.imageAlignment,
+    ),
   );
 
   if (!preserveMetadata) {
