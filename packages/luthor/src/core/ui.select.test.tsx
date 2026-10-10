@@ -38,7 +38,7 @@ describe("Select overlay positioning", () => {
     vi.restoreAllMocks();
   });
 
-  it("keeps dropdown within editor bounds while preserving content width", async () => {
+  it("keeps dropdown within editor bounds while fitting its content", async () => {
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function mockRect(this: HTMLElement) {
       if (this.classList.contains("luthor-editor-wrapper")) {
         return createRect({ left: 100, top: 100, width: 220, height: 260 });
@@ -79,10 +79,31 @@ describe("Select overlay positioning", () => {
     await waitFor(() => {
       const dropdown = document.querySelector(".luthor-select-dropdown") as HTMLElement | null;
       expect(dropdown).not.toBeNull();
-      expect(dropdown?.style.width).toBe("260px");
+      // Sized by its content (CSS max-content), never narrower than the
+      // trigger, never wider than the editor allows — so a long option is
+      // never cut off by a short trigger.
+      expect(dropdown?.style.width).toBe("");
+      expect(dropdown?.style.minWidth).toBe("120px");
       expect(dropdown?.style.maxWidth).toBe("204px");
       expect(dropdown?.style.left).toBe("8px");
       expect(dropdown?.style.top).toBe("60px");
     });
+  });
+
+  it("closes on Escape without letting the key reach the host", () => {
+    const hostKey = vi.fn();
+    window.addEventListener("keydown", hostKey);
+    const { container } = render(
+      <Select value="one" onValueChange={() => {}} options={[{ value: "one", label: "One" }, { value: "two", label: "Two" }]} />,
+    );
+    const trigger = container.querySelector(".luthor-select-trigger") as HTMLElement;
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(document.querySelector(".luthor-select-dropdown")).not.toBeNull();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+    expect(document.querySelector(".luthor-select-dropdown")).toBeNull();
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(hostKey).not.toHaveBeenCalled();
+    window.removeEventListener("keydown", hostKey);
   });
 });

@@ -88,7 +88,10 @@ describe("toolbar block format options", () => {
     expect(trigger.getAttribute("aria-label")).toBe("Format: Heading 2");
     expect(trigger.getAttribute("title")).toBe("Heading 2");
     fireEvent.click(trigger);
-    const list = within(document.querySelector(".luthor-select-dropdown") as HTMLElement);
+    const dropdown = document.querySelector(".luthor-select-dropdown") as HTMLElement;
+    // Never pinned to the short trigger's width (that cut "Paragraph" to "Paragr…").
+    expect(dropdown.style.width).toBe("");
+    const list = within(dropdown);
     for (const name of ["Paragraph", "Heading 1", "Heading 2", "Heading 3"]) {
       expect(list.getByRole("button", { name })).toBeInTheDocument();
     }

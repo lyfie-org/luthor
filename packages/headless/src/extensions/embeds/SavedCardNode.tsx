@@ -40,7 +40,7 @@ import {
   type MoveDirection,
 } from "../media/mediaSelection";
 import { usePointerResize } from "../media/usePointerResize";
-import { BlockDragGrip, EmbedOpenLink, useBlockDrag } from "../media/embedChrome";
+import { BlockDragGrip, useBlockDrag } from "../media/embedChrome";
 
 /** Narrowest a card can be resized to (CSS px). */
 const MIN_CARD_WIDTH = 240;
@@ -229,6 +229,9 @@ function SavedCardComponent({
         ref={boxRef}
         className="luthor-saved-card-box"
         data-luthor-selection-anchor="true"
+        // The page, for a host's hover preview (the way to open it from an
+        // editable note, where a click selects the card).
+        data-luthor-embed-url={url}
         style={{ position: "relative" }}
         onPointerDown={drag.onPointerDown}
         onDragStart={drag.onDragStart}
@@ -262,7 +265,6 @@ function SavedCardComponent({
             {content}
           </a>
         )}
-        {isEditable ? <EmbedOpenLink url={url} /> : null}
         {isEditable ? <BlockDragGrip onPointerDown={drag.onGripPointerDown} /> : null}
         {isEditable ? (
           <>

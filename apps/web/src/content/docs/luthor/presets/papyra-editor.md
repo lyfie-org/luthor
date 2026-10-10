@@ -476,8 +476,8 @@ the verbatim `url` (and optional `|title`) is serialized, so the metadata is
 render-only and the markdown round-trips unchanged.
 
 Since 2.11.9 a card is laid out like any other embed: click it to select it (in
-an editable note it is no longer followed on click — the "↗ Visit" link in its
-corner, or Ctrl/⌘-click, opens the page), then align it, caption it, move it or
+an editable note it is no longer followed on click — the host's hover preview
+of its page, or Ctrl/⌘-click, opens it), then align it, caption it, move it or
 remove it from the floating toolbar, and resize it by its edge. Its width is a
 second `|` segment (`![[card:url|title|480]]`, or `![[card:url||480]]` with no
 title — a lone `|480` stays a title, as it always was); alignment other than

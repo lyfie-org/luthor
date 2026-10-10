@@ -297,7 +297,6 @@ function ImageComponent({
           display: "inline-block",
           width: currentWidth,
           maxWidth: "100%",
-          cursor: isEditorEditable ? "pointer" : "default",
         }}
         onClick={isEditorEditable ? onClick : undefined}
         onPointerDown={drag.onPointerDown}

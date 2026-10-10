@@ -133,7 +133,7 @@ export {
 } from "./media/IframeEmbedExtension";
 export { toEmbeddableUrl, toPageUrl, displayHost, type EmbeddableUrl } from "./media/embedProviders";
 export {
-  EmbedOpenLink,
+  EMBED_URL_ATTRIBUTE,
   BlockDragGrip,
   useBlockDrag,
   moveBlockTo,

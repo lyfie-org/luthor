@@ -113,7 +113,7 @@ export function Select({
 
       setDropdownStyle({
         ...placement,
-        width,
+        minWidth: rect.width,
         ...getOverlayThemeStyleFromElement(triggerEl),
       });
     };
@@ -148,7 +148,7 @@ export function Select({
     });
     setDropdownStyle({
       ...initial,
-      width: rect.width,
+      minWidth: rect.width,
       ...getOverlayThemeStyleFromElement(triggerEl),
     });
 
@@ -168,7 +168,7 @@ export function Select({
       });
       setDropdownStyle({
         ...next,
-        width,
+        minWidth: rect.width,
         ...getOverlayThemeStyleFromElement(triggerEl),
       });
     });
@@ -187,6 +187,21 @@ export function Select({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Escape closes the list — and only the list: a host that closes its whole
+  // view on Escape (a note's dialog) never sees it.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      setIsOpen(false);
+      (selectRef.current?.querySelector(".luthor-select-trigger") as HTMLElement | null)?.focus();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [isOpen]);
+
   const selectedOption = options.find((opt) => opt.value === value);
 
   return (
@@ -195,6 +210,8 @@ export function Select({
         className={`luthor-select-trigger${isOpen ? " open" : ""}${selectedOption?.triggerLabel ? " is-short" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
         type="button"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
         // A short trigger ("H2") still says in full what is chosen.
         aria-label={selectedOption?.triggerLabel ? `${placeholder}: ${selectedOption.label}` : undefined}
         title={selectedOption?.triggerLabel ? selectedOption.label : undefined}

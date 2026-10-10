@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-10-10T06:13:58.883Z
+Generated at: 2026-10-10T11:12:50.220Z
 
 ## AI Agent Workflow
 
@@ -2062,8 +2062,9 @@ All media nodes:
 
 - **Click** selects (one selection store per editor, `registerClickToSelect` / `useIsNodeSelected`).
 - **Handles** (images, attachments, link cards) resize with mouse, touch, or pen (`usePointerResize`): live preview, one undo step and one collaboration update on release; Escape cancels.
-- **Drag to move** (since 2.11.9): press on any block of media — a picture, an attachment, a document card, a link card, a web or YouTube embed — and drag it up or down; a line shows where it will land, the note scrolls near its edges, Escape cancels, and the move is one undo step. Video, audio and a selected (live) frame move by their grip (shown on hover and when selected; the grip also works on touch). Text blocks are not dragged. `useBlockDrag`, `BlockDragGrip`, `moveBlockTo` and the pure `resolveBlockDropTarget` are exported for custom nodes.
-- **Open the page**: web and YouTube embeds and link cards show a small "↗ Visit" link in their corner on hover (and when selected, or always on touch screens; no URL tooltip — the site's name is its accessible label, and as a plain `a[href]` a host can show its own link preview on hover). It opens the page behind the embed — the watch page, the place on the map — via `toPageUrl`, not the bare player. In an editable note a click on a link card selects it; the open link (or Ctrl/⌘-click) follows it.
+- **Drag to move** (since 2.11.9): press on any block of media — a picture, an attachment, a document card, a link card, a web or YouTube embed — and drag it up or down; a line shows where it will land, the note scrolls near its edges, Escape cancels, and the move is one undo step. Video, audio and a selected (live) frame move by their grip — a small tab just outside the media's left edge, level with its top (shown on hover and when selected, always on touch). Text blocks are not dragged. `useBlockDrag`, `BlockDragGrip`, `moveBlockTo` and the pure `resolveBlockDropTarget` are exported for custom nodes.
+- **The page behind it**: web and YouTube embeds and link cards carry `data-luthor-embed-url` (`EMBED_URL_ATTRIBUTE`) on their box — the page a person would open (`toPageUrl`: the watch page, the place on the map, not the bare player). No button, no URL tooltip: a host previews or opens it on hover (Papyra shows a link preview of the whole embed; clicking it opens the page). In an editable note a click on a link card selects it; Ctrl/⌘-click follows it.
+- **One pointer**: in an editable document every piece of media shows the arrow (an object to select and move, not text); the grip shows the grab hand and the edges their resize arrows.
 
 `![[file]]` attachments draw through `MediaFrame`, which adds:
 
@@ -4254,8 +4255,8 @@ the verbatim `url` (and optional `|title`) is serialized, so the metadata is
 render-only and the markdown round-trips unchanged.
 
 Since 2.11.9 a card is laid out like any other embed: click it to select it (in
-an editable note it is no longer followed on click — the "↗ Visit" link in its
-corner, or Ctrl/⌘-click, opens the page), then align it, caption it, move it or
+an editable note it is no longer followed on click — the host's hover preview
+of its page, or Ctrl/⌘-click, opens it), then align it, caption it, move it or
 remove it from the floating toolbar, and resize it by its edge. Its width is a
 second `|` segment (`![[card:url|title|480]]`, or `![[card:url||480]]` with no
 title — a lone `|480` stays a title, as it always was); alignment other than

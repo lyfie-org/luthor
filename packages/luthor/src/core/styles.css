@@ -609,6 +609,10 @@
 
 .luthor-select-dropdown {
 	position: fixed;
+	/* As wide as its longest option (never narrower than the trigger, which can
+	   be a short "H2"), so no option is cut off. */
+	width: max-content;
+	max-width: calc(100vw - 16px);
 	z-index: var(--luthor-z-dropdown, 420);
 	background-color: var(--luthor-bg, #ffffff);
 	border: 1px solid var(--luthor-border, #e2e8f0);
@@ -3381,95 +3385,88 @@
 }
 
 /*
- * Embed chrome — the "open" link and the drag grip every block of media gets.
- * Both stay out of the way until the media is hovered or selected (always
- * shown where there is no hover, on touch screens).
+ * Embed chrome — the drag grip every block of media gets. It sits just
+ * outside the media's left edge, level with its top (clear of the resize
+ * handles, which are mid-height), and shows while the media is hovered or
+ * selected — always on touch screens, where there is no hover. Its hit area
+ * runs right up to the edge, so the pointer never crosses a gap to reach it.
  */
-.luthor-embed-open {
-	position: absolute;
-	top: 8px;
-	right: 8px;
-	z-index: 3;
-	display: inline-flex;
-	align-items: center;
-	gap: 5px;
-	max-width: calc(100% - 64px);
-	padding: 3px 9px;
-	border: 1px solid var(--luthor-border);
-	border-radius: 999px;
-	background: color-mix(in srgb, var(--luthor-bg) 94%, transparent);
-	box-shadow: 0 1px 3px color-mix(in srgb, var(--luthor-fg) 14%, transparent);
-	color: var(--luthor-fg);
-	font: 500 12px/1.4 var(--luthor-font-family, inherit);
-	text-decoration: none;
-	white-space: nowrap;
-	opacity: 0;
-	pointer-events: none;
-	transition: opacity 0.12s ease, border-color var(--luthor-theme-transition);
-}
-
-.luthor-embed-open__label {
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-.luthor-embed-open:hover {
-	border-color: var(--luthor-border-active, var(--luthor-accent));
-	text-decoration: underline;
-}
-
 .luthor-block-drag-grip {
 	position: absolute;
-	top: 8px;
-	left: 8px;
+	top: 0;
+	left: -22px;
 	z-index: 3;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 24px;
-	height: 28px;
+	width: 18px;
+	height: 24px;
+	box-sizing: border-box;
+	/* The media's own surface: a small tab of the same border and fill. */
 	border: 1px solid var(--luthor-border);
 	border-radius: 6px;
-	background: color-mix(in srgb, var(--luthor-bg) 94%, transparent);
-	box-shadow: 0 1px 3px color-mix(in srgb, var(--luthor-fg) 14%, transparent);
-	color: var(--luthor-fg);
+	background: var(--luthor-muted);
+	color: color-mix(in srgb, var(--luthor-fg) 72%, transparent);
 	cursor: grab;
 	touch-action: none;
 	opacity: 0;
 	pointer-events: none;
-	transition: opacity 0.12s ease;
+	transition: opacity 0.12s ease, background-color 0.12s ease, color 0.12s ease;
 }
 
-:is(.luthor-media-embed-shell, .luthor-saved-card-box, .luthor-media__frame):is(:hover, :focus-within) > :is(.luthor-embed-open, .luthor-block-drag-grip),
-:is(.luthor-media-embed-shell, .luthor-media__frame).is-selected > :is(.luthor-embed-open, .luthor-block-drag-grip),
+.luthor-block-drag-grip::after {
+	/* Bridge the gap to the edge: hovering from the media onto the grip never leaves it. */
+	content: "";
+	position: absolute;
+	inset: -1px -6px -1px -1px;
+}
+
+.luthor-block-drag-grip:hover {
+	border-color: var(--luthor-border-hover, var(--luthor-border));
+	color: var(--luthor-fg);
+}
+
+.luthor-block-drag-grip:active {
+	cursor: grabbing;
+}
+
+:is(.luthor-media-embed-shell, .luthor-saved-card-box, .luthor-media__frame):hover > .luthor-block-drag-grip,
+:is(.luthor-media-embed-shell, .luthor-media__frame).is-selected > .luthor-block-drag-grip,
 .luthor-media.is-selected > .luthor-media__frame > .luthor-block-drag-grip,
-.luthor-saved-card-figure.is-selected > .luthor-saved-card-box > :is(.luthor-embed-open, .luthor-block-drag-grip),
-.luthor-embed-open:focus-visible {
+.luthor-saved-card-figure.is-selected > .luthor-saved-card-box > .luthor-block-drag-grip {
 	opacity: 1;
 	pointer-events: auto;
 }
 
-/* A host's document card is a small tile: its grip sits beside it, not over its icon. */
-.luthor-media--host-card .luthor-block-drag-grip {
-	top: 50%;
-	left: -30px;
-	transform: translateY(-50%);
-}
-
-/* No hover on touch screens: a frame's open link is always there (a card's
-   shows once it is tapped, so it never sits over the card's title). */
 @media (hover: none) {
-	.luthor-media-embed-shell > .luthor-embed-open {
+	.luthor-block-drag-grip {
 		opacity: 1;
 		pointer-events: auto;
 	}
 }
 
 /* Mid-resize, mid-drag: no chrome over the media. */
-:is(.is-resizing, .is-block-dragging) > :is(.luthor-embed-open, .luthor-block-drag-grip),
-.luthor-is-block-dragging :is(.luthor-embed-open, .luthor-block-drag-grip) {
+:is(.is-resizing, .is-block-dragging) > .luthor-block-drag-grip,
+.luthor-is-block-dragging .luthor-block-drag-grip {
 	opacity: 0 !important;
 	pointer-events: none !important;
+}
+
+/*
+ * One pointer for every piece of media in an editable note: the arrow — it is
+ * an object to select and move, not text to type into (an unselected map used
+ * to show the text cursor, a card the hand, a picture the arrow). The grip
+ * shows the grab hand, the edges their resize arrows, and a link (a hover
+ * preview, a read-only card) the pointing hand.
+ */
+.luthor-content-editable[contenteditable="true"] :is(
+	.luthor-media-embed-shell,
+	.luthor-saved-card-box,
+	.luthor-media.is-interactive .luthor-media__frame
+),
+.luthor-content-editable[contenteditable="true"] :is(.luthor-media-embed-shell, .luthor-saved-card-box, .luthor-media.is-interactive .luthor-media__frame)
+	:where(a, img, span, svg, figure, div):not(.luthor-block-drag-grip, .luthor-block-drag-grip *, .luthor-media__handle, .luthor-media-embed-resize-handle-width, .luthor-media-embed-resize-handle-height) {
+	cursor: default;
 }
 
 /* The media being moved, and where it will land. */
@@ -3497,10 +3494,6 @@
 .luthor-saved-card-figure {
 	position: relative;
 	container: luthor-card / inline-size;
-}
-
-.luthor-saved-card-figure.is-interactive .luthor-saved-card {
-	cursor: pointer;
 }
 
 .luthor-saved-card-figure.is-selected .luthor-saved-card {
