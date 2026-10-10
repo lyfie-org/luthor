@@ -239,7 +239,6 @@ function SavedCardComponent({
           <div
             className={cardClass}
             data-luthor-saved-card-url={url}
-            title={url}
             onClick={(event) => {
               if (event.metaKey || event.ctrlKey) {
                 window.open(sanitizeUrlForAttribute(url), "_blank", "noopener,noreferrer");

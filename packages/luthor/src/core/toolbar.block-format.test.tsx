@@ -67,4 +67,48 @@ describe("toolbar block format options", () => {
 
     expect(screen.getByRole("button", { name: /Normal/i })).toBeInTheDocument();
   });
+
+  it("shows the short form when closed and the full names in the list", () => {
+    const commands = createCommands();
+    const { container } = render(
+      <Toolbar
+        commands={commands}
+        hasExtension={(name) => name === "blockFormat"}
+        activeStates={{ isH2: true } as CoreEditorActiveStates}
+        isDark={false}
+        toggleTheme={() => {}}
+        layout={BLOCK_FORMAT_LAYOUT}
+        headingOptions={["h1", "h2", "h3"]}
+        blockFormatTriggerLabel="short"
+      />,
+    );
+
+    const trigger = container.querySelector(".luthor-select-trigger") as HTMLElement;
+    expect(trigger.textContent).toBe("H2");
+    expect(trigger.getAttribute("aria-label")).toBe("Format: Heading 2");
+    expect(trigger.getAttribute("title")).toBe("Heading 2");
+    fireEvent.click(trigger);
+    const list = within(document.querySelector(".luthor-select-dropdown") as HTMLElement);
+    for (const name of ["Paragraph", "Heading 1", "Heading 2", "Heading 3"]) {
+      expect(list.getByRole("button", { name })).toBeInTheDocument();
+    }
+    fireEvent.click(list.getByRole("button", { name: "Paragraph" }));
+    expect(commands.toggleParagraph).toHaveBeenCalled();
+  });
+
+  it("keeps the full name on the closed picker by default", () => {
+    const { container } = render(
+      <Toolbar
+        commands={createCommands()}
+        hasExtension={(name) => name === "blockFormat"}
+        activeStates={{} as CoreEditorActiveStates}
+        isDark={false}
+        toggleTheme={() => {}}
+        layout={BLOCK_FORMAT_LAYOUT}
+      />,
+    );
+    const trigger = container.querySelector(".luthor-select-trigger") as HTMLElement;
+    expect(trigger.textContent).toBe("Paragraph");
+    expect(trigger.hasAttribute("aria-label")).toBe(false);
+  });
 });

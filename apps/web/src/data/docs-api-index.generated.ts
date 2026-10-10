@@ -3637,6 +3637,7 @@ export const docsApiIndex = [
     "searchTokenBuckets": {
       "keywords": [
         "availablemodes",
+        "blockformattriggerlabel",
         "classname",
         "commandpaletteshortcutonly",
         "defaultcontent",
@@ -3697,6 +3698,7 @@ export const docsApiIndex = [
       ],
       "props": [
         "availablemodes",
+        "blockformattriggerlabel",
         "classname",
         "commandpaletteshortcutonly",
         "defaultcontent",
@@ -3765,6 +3767,7 @@ export const docsApiIndex = [
     "searchTokens": [
       "and",
       "availablemodes",
+      "blockformattriggerlabel",
       "bridge",
       "classname",
       "commandpaletteshortcutonly",
@@ -3850,6 +3853,7 @@ export const docsApiIndex = [
         "@lyfie/luthor exports",
         "@lyfie/luthor-headless exports",
         "availablemodes",
+        "blockformattriggerlabel",
         "classname",
         "commandpaletteshortcutonly",
         "defaultcontent",
@@ -3909,6 +3913,7 @@ export const docsApiIndex = [
       ],
       "props": [
         "availablemodes",
+        "blockformattriggerlabel",
         "classname",
         "commandpaletteshortcutonly",
         "defaultcontent",
@@ -4471,6 +4476,7 @@ export const docsApiIndex = [
       "block.quote",
       "blockformat",
       "blockformatextension",
+      "blockformattriggerlabel",
       "blockheadinglevel",
       "bold",
       "boldextension",

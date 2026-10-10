@@ -183,6 +183,51 @@
   font-size: 0.9em;
 }
 
+/* Never a wall of text: the title keeps to two lines and the summary to two,
+   ending in an ellipsis. Narrower, the card gives up space in steps — a
+   smaller picture, then a one-line summary, then no summary — so it reads
+   cleanly at any width it is resized to. */
+.luthor-preset-papyra :is(.luthor-saved-card__title, .luthor-saved-card__description) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+@container luthor-card (max-width: 480px) {
+  .luthor-preset-papyra .luthor-saved-card {
+    gap: 0.7rem;
+    padding: 0.6rem 0.7rem;
+  }
+
+  .luthor-preset-papyra .luthor-saved-card__image {
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+
+  .luthor-preset-papyra .luthor-saved-card__description {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+}
+
+@container luthor-card (max-width: 340px) {
+  .luthor-preset-papyra .luthor-saved-card__image {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .luthor-preset-papyra .luthor-saved-card__description {
+    display: none;
+  }
+
+  .luthor-preset-papyra .luthor-saved-card__title {
+    font-size: 0.95em;
+  }
+}
+
 .luthor-preset-papyra .luthor-saved-card__source {
   display: flex;
   align-items: center;

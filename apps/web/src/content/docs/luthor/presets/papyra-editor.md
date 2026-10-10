@@ -476,13 +476,15 @@ the verbatim `url` (and optional `|title`) is serialized, so the metadata is
 render-only and the markdown round-trips unchanged.
 
 Since 2.11.9 a card is laid out like any other embed: click it to select it (in
-an editable note it is no longer followed on click — the "↗ site" link in its
+an editable note it is no longer followed on click — the "↗ Visit" link in its
 corner, or Ctrl/⌘-click, opens the page), then align it, caption it, move it or
 remove it from the floating toolbar, and resize it by its edge. Its width is a
 second `|` segment (`![[card:url|title|480]]`, or `![[card:url||480]]` with no
 title — a lone `|480` stays a title, as it always was); alignment other than
 centre and the caption are trailing directives. A card that fills the column
-narrows to two thirds when aligned, so the alignment shows.
+narrows to two thirds when aligned, so the alignment shows. It trims itself as it
+narrows (a container query on the card): title and summary keep to two lines,
+then the summary to one line and a smaller picture, then no summary.
 
 The **YouTube** (`![[youtube:url]]`) and **iframe** (`![[iframe:url]]`) embeds
 reuse the shared media nodes from `@lyfie/luthor-headless` and carry an optional

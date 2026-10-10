@@ -719,6 +719,8 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
               isListStyleDropdownEnabled={false}
               toolbarVisibility={PAPYRA_TOOLBAR_VISIBILITY}
               headingOptions={PAPYRA_HEADING_OPTIONS}
+              // A note's toolbar is one short row: "H2" when closed, "Heading 2" in the list.
+              blockFormatTriggerLabel={props.blockFormatTriggerLabel ?? "short"}
               slashCommandVisibility={PAPYRA_SLASH_COMMAND_VISIBILITY}
               extraSlashCommands={slashCommands}
               toolbarCustomItems={toolbarItems}

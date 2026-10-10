@@ -36,13 +36,15 @@ import { displayHost } from "./embedProviders";
 // ── Open the page ────────────────────────────────────────────────────────────
 
 /**
- * A small "↗ site.com" link in the corner of an embed, shown on hover (and while
+ * A small "↗ Visit" link in the corner of an embed, shown on hover (and while
  * it is selected, for touch). A click on the embed itself selects it in an
- * editable document; this is the one-click way to the page instead.
+ * editable document; this is the one-click way to the page instead. It names
+ * the site to assistive tech only — no URL tooltip; a host can show its own
+ * preview of the link on hover (it is a plain `a[href]`).
  */
-export function EmbedOpenLink({ url, label }: { url: string; label?: string }): ReactNode {
+export function EmbedOpenLink({ url, label = "Visit" }: { url: string; label?: string }): ReactNode {
   const ref = useRef<HTMLAnchorElement>(null);
-  const host = label ?? displayHost(url);
+  const host = displayHost(url);
   // Native, not React: the editor's own root listeners see a click inside a
   // decorator first, and must not select the embed (or move the caret) for it.
   useEffect(() => {
@@ -69,14 +71,13 @@ export function EmbedOpenLink({ url, label }: { url: string; label?: string }): 
       rel="noopener noreferrer"
       contentEditable={false}
       draggable={false}
-      title={url}
       aria-label={`Open ${host} in a new tab`}
     >
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75"
         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
         <path d="M9 2.5h4.5V7M13.5 2.5L7.5 8.5M12 9.5v4H2.5V4h4" />
       </svg>
-      <span className="luthor-embed-open__host">{host}</span>
+      <span className="luthor-embed-open__label">{label}</span>
     </a>
   );
 }

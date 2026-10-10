@@ -8,7 +8,7 @@ Concatenated markdown corpus for AI ingestion.
 - Rahul Anand is the creator and BDFL of Lyfie.org: [https://www.rahulnsanand.com](https://www.rahulnsanand.com)
 
 Source root: C:\Users\rahul\Documents\GitHub\luthor\apps\web\src\content\docs
-Generated at: 2026-10-09T19:57:23.400Z
+Generated at: 2026-10-10T06:13:58.883Z
 
 ## AI Agent Workflow
 
@@ -2063,7 +2063,7 @@ All media nodes:
 - **Click** selects (one selection store per editor, `registerClickToSelect` / `useIsNodeSelected`).
 - **Handles** (images, attachments, link cards) resize with mouse, touch, or pen (`usePointerResize`): live preview, one undo step and one collaboration update on release; Escape cancels.
 - **Drag to move** (since 2.11.9): press on any block of media — a picture, an attachment, a document card, a link card, a web or YouTube embed — and drag it up or down; a line shows where it will land, the note scrolls near its edges, Escape cancels, and the move is one undo step. Video, audio and a selected (live) frame move by their grip (shown on hover and when selected; the grip also works on touch). Text blocks are not dragged. `useBlockDrag`, `BlockDragGrip`, `moveBlockTo` and the pure `resolveBlockDropTarget` are exported for custom nodes.
-- **Open the page**: web and YouTube embeds and link cards show a small "↗ site" link in their corner on hover (and when selected, or always on touch screens). It opens the page behind the embed — the watch page, the place on the map — via `toPageUrl`, not the bare player. In an editable note a click on a link card selects it; the open link (or Ctrl/⌘-click) follows it.
+- **Open the page**: web and YouTube embeds and link cards show a small "↗ Visit" link in their corner on hover (and when selected, or always on touch screens; no URL tooltip — the site's name is its accessible label, and as a plain `a[href]` a host can show its own link preview on hover). It opens the page behind the embed — the watch page, the place on the map — via `toPageUrl`, not the bare player. In an editable note a click on a link card selects it; the open link (or Ctrl/⌘-click) follows it.
 
 `![[file]]` attachments draw through `MediaFrame`, which adds:
 
@@ -4254,13 +4254,15 @@ the verbatim `url` (and optional `|title`) is serialized, so the metadata is
 render-only and the markdown round-trips unchanged.
 
 Since 2.11.9 a card is laid out like any other embed: click it to select it (in
-an editable note it is no longer followed on click — the "↗ site" link in its
+an editable note it is no longer followed on click — the "↗ Visit" link in its
 corner, or Ctrl/⌘-click, opens the page), then align it, caption it, move it or
 remove it from the floating toolbar, and resize it by its edge. Its width is a
 second `|` segment (`![[card:url|title|480]]`, or `![[card:url||480]]` with no
 title — a lone `|480` stays a title, as it always was); alignment other than
 centre and the caption are trailing directives. A card that fills the column
-narrows to two thirds when aligned, so the alignment shows.
+narrows to two thirds when aligned, so the alignment shows. It trims itself as it
+narrows (a container query on the card): title and summary keep to two lines,
+then the summary to one line and a smaller picture, then no summary.
 
 The **YouTube** (`![[youtube:url]]`) and **iframe** (`![[iframe:url]]`) embeds
 reuse the shared media nodes from `@lyfie/luthor-headless` and carry an optional
@@ -4429,6 +4431,7 @@ keywords:
   - "scaleByRatio"
   - "headingOptions"
   - "paragraphLabel"
+  - "blockFormatTriggerLabel"
   - "syncHeadingOptionsWithCommands"
   - "slashCommandVisibility"
   - "shortcutConfig"
@@ -4484,6 +4487,7 @@ props:
   - "scaleByRatio"
   - "headingOptions"
   - "paragraphLabel"
+  - "blockFormatTriggerLabel"
   - "syncHeadingOptionsWithCommands"
   - "slashCommandVisibility"
   - "shortcutConfig"
@@ -4587,6 +4591,7 @@ Use this page for exact prop names and discovery tokens.
 - `scaleByRatio`
 - `headingOptions`
 - `paragraphLabel`
+- `blockFormatTriggerLabel` — `"full"` (default) shows "Heading 2" on the closed block-format picker; `"short"` shows "H2"/"P" (the list always shows full names; the papyra preset uses `"short"`)
 - `syncHeadingOptionsWithCommands`
 - `slashCommandVisibility`
 - `extraSlashCommands`
@@ -4658,6 +4663,7 @@ props:
   - "scaleByRatio"
   - "headingOptions"
   - "paragraphLabel"
+  - "blockFormatTriggerLabel"
   - "syncHeadingOptionsWithCommands"
   - "slashCommandVisibility"
   - "shortcutConfig"

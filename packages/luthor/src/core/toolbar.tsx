@@ -1047,6 +1047,12 @@ export interface ToolbarProps {
   toolbarVisibility?: ToolbarVisibility;
   headingOptions?: readonly BlockHeadingLevel[];
   paragraphLabel?: string;
+  /**
+   * How the block-format picker shows the current style when closed: `"full"`
+   * ("Heading 2", the default) or `"short"` ("H2", "P") for a compact toolbar.
+   * The open list always shows the full names.
+   */
+  blockFormatTriggerLabel?: "full" | "short";
   isListStyleDropdownEnabled?: boolean;
   /**
    * Host controls rendered at the layout's `"customComponent"` item. Nothing
@@ -1070,6 +1076,7 @@ export function Toolbar({
   toolbarVisibility,
   headingOptions,
   paragraphLabel,
+  blockFormatTriggerLabel = "full",
   isListStyleDropdownEnabled = true,
   customItems,
 }: ToolbarProps) {
@@ -1467,16 +1474,18 @@ export function Toolbar({
 
   const resolvedParagraphLabel = (paragraphLabel?.trim() || "Paragraph");
   const blockFormatOptions = useMemo(() => {
+    const short = blockFormatTriggerLabel === "short";
     const headingSelectOptions = availableHeadingOptions.map((heading) => ({
       value: heading,
       label: `Heading ${heading.slice(1)}`,
+      ...(short ? { triggerLabel: heading.toUpperCase() } : {}),
     }));
 
     return [
-      { value: "p", label: resolvedParagraphLabel },
+      { value: "p", label: resolvedParagraphLabel, ...(short ? { triggerLabel: "P" } : {}) },
       ...headingSelectOptions,
     ];
-  }, [availableHeadingOptions, resolvedParagraphLabel]);
+  }, [availableHeadingOptions, resolvedParagraphLabel, blockFormatTriggerLabel]);
 
   const computedCurrentBlockFormat =
     activeStates.isH1 ? "h1" :

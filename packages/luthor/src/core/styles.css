@@ -583,6 +583,12 @@
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* A short trigger ("H2", "P") is only as wide as it needs to be. */
+.luthor-select-trigger.is-short {
+	min-width: 56px;
+	padding: 8px 10px;
+}
+
 .luthor-select-trigger span {
 	flex: 1;
 	overflow: hidden;
@@ -3402,7 +3408,7 @@
 	transition: opacity 0.12s ease, border-color var(--luthor-theme-transition);
 }
 
-.luthor-embed-open__host {
+.luthor-embed-open__label {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
@@ -3486,9 +3492,11 @@
 	z-index: var(--luthor-z-menu, 460);
 }
 
-/* Link card (`![[card:url]]`): sized, aligned and captioned like an embed. */
+/* Link card (`![[card:url]]`): sized, aligned and captioned like an embed.
+   Its width is a container, so the card trims itself as it narrows. */
 .luthor-saved-card-figure {
 	position: relative;
+	container: luthor-card / inline-size;
 }
 
 .luthor-saved-card-figure.is-interactive .luthor-saved-card {
