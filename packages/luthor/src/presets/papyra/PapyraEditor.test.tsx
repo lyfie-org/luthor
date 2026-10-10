@@ -81,6 +81,7 @@ describe("PapyraEditor", () => {
 
     const props = lastProps();
     expect(props.headingOptions).toEqual(["h1", "h2", "h3"]);
+    expect(props.blockFormatTriggerLabel).toBe("short");
     expect(props.slashCommandVisibility).toEqual({
       allowlist: expect.arrayContaining([
         "block.heading1",

@@ -1069,6 +1069,7 @@ function ExtensiveEditorContent({
   isEditorViewTabsVisible,
   headingOptions,
   paragraphLabel,
+  blockFormatTriggerLabel,
   syncHeadingOptionsWithCommands,
   slashCommandVisibility,
   extraSlashCommands,
@@ -1114,6 +1115,7 @@ function ExtensiveEditorContent({
   isEditorViewTabsVisible: boolean;
   headingOptions?: readonly BlockHeadingLevel[];
   paragraphLabel?: string;
+  blockFormatTriggerLabel?: "full" | "short";
   syncHeadingOptionsWithCommands: boolean;
   slashCommandVisibility?: SlashCommandVisibility;
   extraSlashCommands?: readonly ExtensiveSlashCommand[];
@@ -2389,6 +2391,7 @@ function ExtensiveEditorContent({
       toolbarStyleVars={toolbarStyleVars}
       headingOptions={resolvedHeadingOptions}
       paragraphLabel={paragraphLabel}
+      blockFormatTriggerLabel={blockFormatTriggerLabel}
       isListStyleDropdownEnabled={isListStyleDropdownEnabled}
       customItems={boundToolbarCustomItems}
       classNames={{
@@ -2757,6 +2760,8 @@ export interface ExtensiveEditorProps {
   scaleByRatio?: boolean;
   headingOptions?: readonly BlockHeadingLevel[];
   paragraphLabel?: string;
+  /** Show the closed block-format picker as "H2"/"P" (`"short"`) or "Heading 2" (`"full"`, default). */
+  blockFormatTriggerLabel?: "full" | "short";
   syncHeadingOptionsWithCommands?: boolean;
   slashCommandVisibility?: SlashCommandVisibility;
   /**
@@ -2910,6 +2915,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
     scaleByRatio = false,
     headingOptions,
     paragraphLabel,
+    blockFormatTriggerLabel,
     syncHeadingOptionsWithCommands = true,
     slashCommandVisibility,
     extraSlashCommands,
@@ -3282,6 +3288,7 @@ export const ExtensiveEditor = forwardRef<ExtensiveEditorRef, ExtensiveEditorPro
             isEditorViewTabsVisible={resolvedIsEditorViewTabsVisible}
             headingOptions={headingOptions}
             paragraphLabel={paragraphLabel}
+            blockFormatTriggerLabel={blockFormatTriggerLabel}
             syncHeadingOptionsWithCommands={syncHeadingOptionsWithCommands}
             slashCommandVisibility={slashCommandVisibility}
             extraSlashCommands={extraSlashCommands}

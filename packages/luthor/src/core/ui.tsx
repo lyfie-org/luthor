@@ -73,7 +73,7 @@ export function Select({
 }: {
   value: string;
   onValueChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
+  options: Array<{ value: string; label: string; triggerLabel?: string }>;
   placeholder?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -191,8 +191,15 @@ export function Select({
 
   return (
     <div className="luthor-select" ref={selectRef}>
-      <button className={`luthor-select-trigger ${isOpen ? "open" : ""}`} onClick={() => setIsOpen(!isOpen)} type="button">
-        <span>{selectedOption?.label || placeholder}</span>
+      <button
+        className={`luthor-select-trigger${isOpen ? " open" : ""}${selectedOption?.triggerLabel ? " is-short" : ""}`}
+        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+        // A short trigger ("H2") still says in full what is chosen.
+        aria-label={selectedOption?.triggerLabel ? `${placeholder}: ${selectedOption.label}` : undefined}
+        title={selectedOption?.triggerLabel ? selectedOption.label : undefined}
+      >
+        <span>{selectedOption?.triggerLabel || selectedOption?.label || placeholder}</span>
         <ChevronDownIcon size={14} />
       </button>
       {isOpen && typeof document !== "undefined" && createPortal(

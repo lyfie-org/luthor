@@ -42,6 +42,7 @@ keywords:
   - "scaleByRatio"
   - "headingOptions"
   - "paragraphLabel"
+  - "blockFormatTriggerLabel"
   - "syncHeadingOptionsWithCommands"
   - "slashCommandVisibility"
   - "shortcutConfig"
@@ -97,6 +98,7 @@ props:
   - "scaleByRatio"
   - "headingOptions"
   - "paragraphLabel"
+  - "blockFormatTriggerLabel"
   - "syncHeadingOptionsWithCommands"
   - "slashCommandVisibility"
   - "shortcutConfig"
@@ -200,6 +202,7 @@ Use this page for exact prop names and discovery tokens.
 - `scaleByRatio`
 - `headingOptions`
 - `paragraphLabel`
+- `blockFormatTriggerLabel` — `"full"` (default) shows "Heading 2" on the closed block-format picker; `"short"` shows "H2"/"P" (the list always shows full names; the papyra preset uses `"short"`)
 - `syncHeadingOptionsWithCommands`
 - `slashCommandVisibility`
 - `extraSlashCommands`

@@ -42,6 +42,7 @@ props:
   - "scaleByRatio"
   - "headingOptions"
   - "paragraphLabel"
+  - "blockFormatTriggerLabel"
   - "syncHeadingOptionsWithCommands"
   - "slashCommandVisibility"
   - "shortcutConfig"
