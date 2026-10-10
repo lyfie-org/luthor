@@ -154,13 +154,15 @@ allow-presentation`): an embed can never navigate the note away.
 All media nodes:
 
 - **Click** selects (one selection store per editor, `registerClickToSelect` / `useIsNodeSelected`).
-- **Handles** (images, attachments) resize with mouse, touch, or pen (`usePointerResize`): live preview, one undo step and one collaboration update on release; Escape cancels.
+- **Handles** (images, attachments, link cards) resize with mouse, touch, or pen (`usePointerResize`): live preview, one undo step and one collaboration update on release; Escape cancels.
+- **Drag to move** (since 2.11.9): press on any block of media — a picture, an attachment, a document card, a link card, a web or YouTube embed — and drag it up or down; a line shows where it will land, the note scrolls near its edges, Escape cancels, and the move is one undo step. Video, audio and a selected (live) frame move by their grip (shown on hover and when selected; the grip also works on touch). Text blocks are not dragged. `useBlockDrag`, `BlockDragGrip`, `moveBlockTo` and the pure `resolveBlockDropTarget` are exported for custom nodes.
+- **Open the page**: web and YouTube embeds and link cards show a small "↗ site" link in their corner on hover (and when selected, or always on touch screens). It opens the page behind the embed — the watch page, the place on the map — via `toPageUrl`, not the bare player. In an editable note a click on a link card selects it; the open link (or Ctrl/⌘-click) follows it.
 
 `![[file]]` attachments draw through `MediaFrame`, which adds:
 
 - **Toolbar** inside the frame: align, ¼ ½ ¾ Full, original size, caption, alt text, open, host items, remove. Caption/alt prompts use the editor's themed dialog (`EditorPromptProvider`), never `window.prompt`; host items get the same dialog as `context.requestInput`, and can be plain text (`variant: "label"`, e.g. a file's size).
 - **Loading**: a picture or video shows a shimmer (and a thin progress line) in its reserved box until it draws; a file just uploaded shows its local preview meanwhile. Pictures from links and web/YouTube embeds do the same, and a picture that can't load shows a card with Retry.
-- **The floating toolbar** (web/YouTube embeds, pictures from links) is measured against what is actually visible — the window and every scrolling ancestor — so in a note that scrolls inside a panel it flips sides or pins inside the view instead of being cut off.
+- **The floating toolbar** (web/YouTube embeds, link cards, pictures from links) is measured against what is actually visible — the window and every scrolling ancestor — so in a note that scrolls inside a panel it flips sides or pins inside the view instead of being cut off.
 - **Keyboard** (selected): Shift+←/→ resizes 10 px (Alt+Shift 1 px), Enter adds a line after, Escape deselects.
 - **Stable layout**: box reserved from host metadata (no layout shift); thumbnails at 320/640/1280 px; animated images never swapped for a still; a broken file shows a labelled error.
 

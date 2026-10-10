@@ -80,6 +80,9 @@ export {
   $isSavedCardNode,
   SAVED_CARD_MARKDOWN_TRANSFORMER,
   type SerializedSavedCardNode,
+  type SavedCardLayout,
+  type SavedCardCommands,
+  type SavedCardQueries,
 } from "./SavedCardNode";
 export {
   CalloutNode,

@@ -131,7 +131,16 @@ export {
   type IframeEmbedConfig,
   type IframeUrlResolution,
 } from "./media/IframeEmbedExtension";
-export { toEmbeddableUrl, type EmbeddableUrl } from "./media/embedProviders";
+export { toEmbeddableUrl, toPageUrl, displayHost, type EmbeddableUrl } from "./media/embedProviders";
+export {
+  EmbedOpenLink,
+  BlockDragGrip,
+  useBlockDrag,
+  moveBlockTo,
+  resolveBlockDropTarget,
+  type BlockDropTarget,
+  type BlockDragOptions,
+} from "./media/embedChrome";
 export {
   YouTubeEmbedExtension,
   youTubeEmbedExtension,
@@ -244,6 +253,9 @@ export {
   $isSavedCardNode,
   SAVED_CARD_MARKDOWN_TRANSFORMER,
   type SerializedSavedCardNode,
+  type SavedCardLayout,
+  type SavedCardCommands,
+  type SavedCardQueries,
   CalloutNode,
   CalloutExtension,
   calloutExtension,

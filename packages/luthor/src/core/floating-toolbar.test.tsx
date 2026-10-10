@@ -142,6 +142,7 @@ describe("FloatingToolbar media editing", () => {
       { state: { isYouTubeEmbedSelected: true }, move: "moveYouTubeEmbed", remove: "removeYouTubeEmbed" },
       { state: { isIframeEmbedSelected: true }, move: "moveIframeEmbed", remove: "removeIframeEmbed" },
       { state: { imageSelected: true }, move: "moveImage", remove: "removeImage" },
+      { state: { isSavedCardSelected: true }, move: "moveSavedCard", remove: "removeSavedCard" },
     ] as const;
     for (const { state, move, remove } of cases) {
       const moveFn = vi.fn();
@@ -161,6 +162,28 @@ describe("FloatingToolbar media editing", () => {
       expect(removeFn).toHaveBeenCalledTimes(1);
       unmount();
     }
+  });
+
+  it("aligns and captions a selected link card", async () => {
+    const setSavedCardAlignment = vi.fn();
+    const setSavedCardCaption = vi.fn();
+    const getSavedCardCaption = vi.fn().mockResolvedValue("old caption");
+    render(
+      <FloatingToolbar
+        isVisible
+        selectionRect={DEFAULT_RECT}
+        commands={createCommands({ setSavedCardAlignment, setSavedCardCaption, getSavedCardCaption })}
+        activeStates={{ isSavedCardSelected: true, isSavedCardAlignedCenter: true } as CoreEditorActiveStates}
+      />,
+    );
+    expect(screen.getByTitle("Align Center").className).toContain("active");
+    fireEvent.click(screen.getByTitle("Align Right"));
+    expect(setSavedCardAlignment).toHaveBeenCalledWith("right");
+    const input = (await screen.findByDisplayValue("old caption")) as HTMLInputElement;
+    expect(input.getAttribute("aria-label")).toBe("Card caption");
+    fireEvent.change(input, { target: { value: "New caption" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(setSavedCardCaption).toHaveBeenCalledWith("New caption");
   });
 
   it("loads and commits YouTube URL draft", async () => {
