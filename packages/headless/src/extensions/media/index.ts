@@ -15,3 +15,4 @@ export { MediaFrame, formatBytes, type MediaFrameProps } from "./MediaFrame";
 export * from "./EditorPromptContext";
 export * from "./mediaSelection";
 export * from "./usePointerResize";
+export * from "./embedChrome";

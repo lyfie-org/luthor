@@ -129,6 +129,7 @@ export function FloatingToolbar({
   const [imageCaptionDraft, setImageCaptionDraft] = useState("");
   const [youTubeCaptionDraft, setYouTubeCaptionDraft] = useState("");
   const [youTubeUrlDraft, setYouTubeUrlDraft] = useState("");
+  const [cardCaptionDraft, setCardCaptionDraft] = useState("");
   const [linkUrlDraft, setLinkUrlDraft] = useState("");
   const [iframeUrlError, setIframeUrlError] = useState<string | null>(null);
   const [youTubeUrlError, setYouTubeUrlError] = useState<string | null>(null);
@@ -138,6 +139,7 @@ export function FloatingToolbar({
   const iframeEmbedEnabled = isFeatureEnabled("iframeEmbed");
   const youTubeEmbedEnabled = isFeatureEnabled("youTubeEmbed");
   const imageEnabled = isFeatureEnabled("image");
+  const savedCardSelected = !!activeStates.isSavedCardSelected;
   const embedSelected =
     (iframeEmbedEnabled && iframeEmbedSelected) ||
     (youTubeEmbedEnabled && youTubeEmbedSelected);
@@ -190,6 +192,21 @@ export function FloatingToolbar({
       disposed = true;
     };
   }, [commands, iframeEmbedSelected, isVisible]);
+
+  useEffect(() => {
+    if (!isVisible || !savedCardSelected || typeof commands.getSavedCardCaption !== "function") {
+      return;
+    }
+    let disposed = false;
+    void commands.getSavedCardCaption().then((caption) => {
+      if (!disposed) {
+        setCardCaptionDraft(caption ?? "");
+      }
+    });
+    return () => {
+      disposed = true;
+    };
+  }, [commands, isVisible, savedCardSelected]);
 
   useEffect(() => {
     if (!isVisible || !activeStates.imageSelected) {
@@ -367,6 +384,63 @@ export function FloatingToolbar({
         ) : null}
       </>
     ) : null;
+
+  // A link card (a page shown by its title, summary and picture): aligned,
+  // moved, captioned and removed like any other embed.
+  if (savedCardSelected && !embedSelected) {
+    const canEditCaption = typeof commands.setSavedCardCaption === "function";
+    const commitCardCaption = () => {
+      if (canEditCaption) commands.setSavedCardCaption?.(cardCaptionDraft);
+    };
+    const align = commands.setSavedCardAlignment;
+    return (
+      <div className="luthor-floating-toolbar" data-theme={editorTheme} ref={toolbarRef} style={style}>
+        {align ? (
+          <>
+            <IconButton onClick={() => align("left")} active={activeStates.isSavedCardAlignedLeft} title="Align Left">
+              <AlignLeftIcon size={14} />
+            </IconButton>
+            <IconButton onClick={() => align("center")} active={activeStates.isSavedCardAlignedCenter} title="Align Center">
+              <AlignCenterIcon size={14} />
+            </IconButton>
+            <IconButton onClick={() => align("right")} active={activeStates.isSavedCardAlignedRight} title="Align Right">
+              <AlignRightIcon size={14} />
+            </IconButton>
+          </>
+        ) : null}
+        {blockTools(commands.moveSavedCard, commands.removeSavedCard)}
+        {canEditCaption ? (
+          <>
+            <div className="luthor-floating-toolbar-separator" />
+            <div className="luthor-floating-toolbar-field-row">
+              <input
+                type="text"
+                value={cardCaptionDraft}
+                className="luthor-floating-toolbar-input"
+                placeholder="Add caption"
+                aria-label="Card caption"
+                onChange={(event) => setCardCaptionDraft(event.target.value)}
+                onBlur={commitCardCaption}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    commitCardCaption();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="luthor-toolbar-button luthor-floating-toolbar-action"
+                onClick={commitCardCaption}
+              >
+                Update Caption
+              </button>
+            </div>
+          </>
+        ) : null}
+      </div>
+    );
+  }
 
   if (embedSelected) {
     const setAlignment = (alignment: "left" | "center" | "right") => {

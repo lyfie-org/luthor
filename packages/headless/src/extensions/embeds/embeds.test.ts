@@ -680,6 +680,39 @@ describe("papyra embed transformers", () => {
     expect(roundTrip(once)).toBe(once);
   });
 
+  it("round-trips a card's width, alignment and caption", () => {
+    for (const source of [
+      "![[card:https://example.com|Docs|480]]",
+      "![[card:https://example.com||480]]",
+      "![[card:https://example.com||480]] <!-- align:right -->",
+      "![[card:https://example.com|Docs]] <!-- caption:Read this first -->",
+      "![[card:https://example.com|Docs|360]] <!-- align:left --> <!-- caption:A &lt;b&gt; caption -->",
+    ]) {
+      expect(roundTrip(source)).toBe(source);
+    }
+  });
+
+  it("keeps a lone numeric segment as the title, as it always was", () => {
+    expect(roundTrip("![[card:https://example.com|2024]]")).toBe("![[card:https://example.com|2024]]");
+    const serialized = JSON.stringify(markdownToJSON("![[card:https://example.com|2024]]", BRIDGE_OPTIONS));
+    expect(serialized).toContain('"title":"2024"');
+    expect(serialized).not.toContain('"width"');
+  });
+
+  it("drops the default centre alignment and keeps directives it doesn't own", () => {
+    expect(roundTrip("![[card:https://example.com]] <!-- align:center -->")).toBe("![[card:https://example.com]]");
+    expect(roundTrip("![[card:https://example.com]] <!-- foo:bar -->")).toBe("![[card:https://example.com]] <!-- foo:bar -->");
+  });
+
+  it("persists a card's layout in its JSON", () => {
+    const serialized = JSON.stringify(
+      markdownToJSON("![[card:https://example.com||480]] <!-- align:left --> <!-- caption:Hi -->", BRIDGE_OPTIONS),
+    );
+    expect(serialized).toContain('"width":480');
+    expect(serialized).toContain('"align":"left"');
+    expect(serialized).toContain('"caption":"Hi"');
+  });
+
   // ── Transcription callouts ──────────────────────────────────────────
 
   it("round-trips a transcription callout losslessly", () => {

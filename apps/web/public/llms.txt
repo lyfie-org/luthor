@@ -183,7 +183,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Media and Embeds
 - File: luthor-headless/features/media-and-embeds.md
 - URL: https://www.luthor.fyi/docs/luthor-headless/features/media-and-embeds/
-- Summary: Media and Embeds This group covers media insertion, attachment embeds, resizing, and uploads. What this page answers Which extensions support images, embeds, and attachments? How are size, alignment, and captions written to markdown? How does a host plug in media URLs, metadata, toolbar buttons, and uploads? Extension ...
+- Summary: title: "Media and Embeds" description: "Image, iframe, YouTube and file embed extensions: sized markdown grammar, select/resize/toolbar frames, host media resolvers, and the upload pipeline." package: "headless" docType: "reference" surface: "extension" keywords: "imageExtension" "iframeEmbedExtension" "youTubeEmbedExt...
 
 ### Structure and Lists
 - File: luthor-headless/features/structure-and-lists.md
@@ -268,7 +268,7 @@ This file helps AI agents discover and query Luthor docs quickly.
 ### Papyra Editor
 - File: luthor/presets/papyra-editor.md
 - URL: https://www.luthor.fyi/docs/luthor/presets/papyra-editor/
-- Summary: Papyra Editor PapyraEditor is a markdown native note canvas composed on top of the extensive preset. It is the editor the Papyra note app ships, but it is host agnostic: every external capability (media, uploads, note search and navigation, block resolution) flows through an injected adapter, so any note app can reuse ...
+- Summary: title: "Papyra Editor" description: "Markdown native, frontmatter agnostic, token themed note canvas preset with Obsidian style embeds and a host adapter seam." package: "luthor" docType: "reference" surface: "preset" keywords: "PapyraEditor" "papyra preset" "markdownSourceOfTruth" "wikilink" "file embed" "transclusion...
 
 ### Props Reference
 - File: luthor/props-reference.md

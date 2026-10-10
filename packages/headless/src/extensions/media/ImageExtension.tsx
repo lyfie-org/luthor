@@ -64,6 +64,7 @@ import {
   type MoveDirection,
 } from "./mediaSelection";
 import { usePointerResize } from "./usePointerResize";
+import { BlockDragGrip, useBlockDrag } from "./embedChrome";
 import { reportError, warnOnce } from "../../utils/logger";
 
 /**
@@ -270,6 +271,9 @@ function ImageComponent({
     textAlign: "center",
   };
 
+  // Press-and-drag moves the picture to another place in the document.
+  const drag = useBlockDrag({ editor, nodeKey, elementRef: shellRef, enabled: isEditorEditable && !isResizing && !uploading });
+
   // Handles stay up for the whole drag (hiding them mid-drag was disorienting).
   const showResizeHandles = shouldShowImageResizeHandles(
     isEditorEditable,
@@ -296,7 +300,10 @@ function ImageComponent({
           cursor: isEditorEditable ? "pointer" : "default",
         }}
         onClick={isEditorEditable ? onClick : undefined}
+        onPointerDown={drag.onPointerDown}
+        onDragStart={drag.onDragStart}
       >
+        {isEditorEditable && !uploading ? <BlockDragGrip onPointerDown={drag.onGripPointerDown} /> : null}
         {linkHref ? (
           <a
             // The model keeps linkHref verbatim for lossless markdown

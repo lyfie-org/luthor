@@ -452,6 +452,8 @@ Every custom embed ships a bidirectional markdown transformer, so the body that
 | `text ^id`          | trailing block anchor (non-rendering)|
 | `![[card:url]]`     | saved web card (via `resolveCard`)  |
 | `![[card:url\|title]]` | saved web card with author title |
+| `![[card:url\|title\|480]]`, `![[card:url\|\|480]]` | a card 480 px wide (what resizing writes) |
+| `![[card:url]] <!-- align:right --> <!-- caption:… -->` | aligned / captioned card |
 | `![[youtube:url]]`  | YouTube player (optional `\|caption`)|
 | `![[iframe:url]]`   | iframe embed (optional `\|caption`) |
 | `> [!transcript]`   | transcription callout (display-only)|
@@ -472,6 +474,15 @@ metadata (title, description, preview image, favicon, site name); without a
 resolver the card degrades to a titled link to the URL. As with every embed, only
 the verbatim `url` (and optional `|title`) is serialized, so the metadata is
 render-only and the markdown round-trips unchanged.
+
+Since 2.11.9 a card is laid out like any other embed: click it to select it (in
+an editable note it is no longer followed on click — the "↗ site" link in its
+corner, or Ctrl/⌘-click, opens the page), then align it, caption it, move it or
+remove it from the floating toolbar, and resize it by its edge. Its width is a
+second `|` segment (`![[card:url|title|480]]`, or `![[card:url||480]]` with no
+title — a lone `|480` stays a title, as it always was); alignment other than
+centre and the caption are trailing directives. A card that fills the column
+narrows to two thirds when aligned, so the alignment shows.
 
 The **YouTube** (`![[youtube:url]]`) and **iframe** (`![[iframe:url]]`) embeds
 reuse the shared media nodes from `@lyfie/luthor-headless` and carry an optional

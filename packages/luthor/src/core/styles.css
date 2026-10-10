@@ -3374,6 +3374,144 @@
 	border: 1px solid var(--luthor-accent);
 }
 
+/*
+ * Embed chrome — the "open" link and the drag grip every block of media gets.
+ * Both stay out of the way until the media is hovered or selected (always
+ * shown where there is no hover, on touch screens).
+ */
+.luthor-embed-open {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	z-index: 3;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	max-width: calc(100% - 64px);
+	padding: 3px 9px;
+	border: 1px solid var(--luthor-border);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--luthor-bg) 94%, transparent);
+	box-shadow: 0 1px 3px color-mix(in srgb, var(--luthor-fg) 14%, transparent);
+	color: var(--luthor-fg);
+	font: 500 12px/1.4 var(--luthor-font-family, inherit);
+	text-decoration: none;
+	white-space: nowrap;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.12s ease, border-color var(--luthor-theme-transition);
+}
+
+.luthor-embed-open__host {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.luthor-embed-open:hover {
+	border-color: var(--luthor-border-active, var(--luthor-accent));
+	text-decoration: underline;
+}
+
+.luthor-block-drag-grip {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	z-index: 3;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 28px;
+	border: 1px solid var(--luthor-border);
+	border-radius: 6px;
+	background: color-mix(in srgb, var(--luthor-bg) 94%, transparent);
+	box-shadow: 0 1px 3px color-mix(in srgb, var(--luthor-fg) 14%, transparent);
+	color: var(--luthor-fg);
+	cursor: grab;
+	touch-action: none;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.12s ease;
+}
+
+:is(.luthor-media-embed-shell, .luthor-saved-card-box, .luthor-media__frame):is(:hover, :focus-within) > :is(.luthor-embed-open, .luthor-block-drag-grip),
+:is(.luthor-media-embed-shell, .luthor-media__frame).is-selected > :is(.luthor-embed-open, .luthor-block-drag-grip),
+.luthor-media.is-selected > .luthor-media__frame > .luthor-block-drag-grip,
+.luthor-saved-card-figure.is-selected > .luthor-saved-card-box > :is(.luthor-embed-open, .luthor-block-drag-grip),
+.luthor-embed-open:focus-visible {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+/* A host's document card is a small tile: its grip sits beside it, not over its icon. */
+.luthor-media--host-card .luthor-block-drag-grip {
+	top: 50%;
+	left: -30px;
+	transform: translateY(-50%);
+}
+
+/* No hover on touch screens: a frame's open link is always there (a card's
+   shows once it is tapped, so it never sits over the card's title). */
+@media (hover: none) {
+	.luthor-media-embed-shell > .luthor-embed-open {
+		opacity: 1;
+		pointer-events: auto;
+	}
+}
+
+/* Mid-resize, mid-drag: no chrome over the media. */
+:is(.is-resizing, .is-block-dragging) > :is(.luthor-embed-open, .luthor-block-drag-grip),
+.luthor-is-block-dragging :is(.luthor-embed-open, .luthor-block-drag-grip) {
+	opacity: 0 !important;
+	pointer-events: none !important;
+}
+
+/* The media being moved, and where it will land. */
+.is-block-dragging {
+	opacity: 0.45;
+}
+
+.luthor-is-block-dragging,
+.luthor-is-block-dragging * {
+	cursor: grabbing !important;
+}
+
+.luthor-block-drop-indicator {
+	height: 3px;
+	margin-top: -1.5px;
+	border-radius: 999px;
+	background: var(--luthor-accent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--luthor-accent) 22%, transparent);
+	pointer-events: none;
+	z-index: var(--luthor-z-menu, 460);
+}
+
+/* Link card (`![[card:url]]`): sized, aligned and captioned like an embed. */
+.luthor-saved-card-figure {
+	position: relative;
+}
+
+.luthor-saved-card-figure.is-interactive .luthor-saved-card {
+	cursor: pointer;
+}
+
+.luthor-saved-card-figure.is-selected .luthor-saved-card {
+	border-color: var(--luthor-accent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--luthor-accent) 28%, transparent);
+}
+
+.luthor-saved-card-figure.is-resizing {
+	user-select: none;
+}
+
+.luthor-saved-card__caption {
+	margin-top: 0.5rem;
+	text-align: center;
+	font-size: 0.9em;
+	font-style: italic;
+	color: var(--luthor-muted-fg, var(--luthor-fg));
+}
+
 .luthor-draggable-handle,
 .luthor-draggable-add-button {
 	width: 24px;

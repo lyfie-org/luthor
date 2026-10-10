@@ -11,7 +11,8 @@ import {
   parseFrameDirectives,
   splitCaptionAndSize,
 } from "./mediaGrammar";
-import { toEmbeddableUrl } from "./embedProviders";
+import { toEmbeddableUrl, toPageUrl } from "./embedProviders";
+import { BlockDragGrip, EmbedOpenLink, useBlockDrag } from "./embedChrome";
 import {
   moveSelectedNode,
   registerClickToSelect,
@@ -570,6 +571,7 @@ function IframeEmbedComponent({
     [],
   );
   const showResizeHandles = shouldShowEmbedResizeHandles(isEditorEditable, isSelected, isResizing);
+  const drag = useBlockDrag({ editor, nodeKey, elementRef: shellRef, enabled: isEditorEditable && !isResizing });
 
   return (
     <div style={wrapperStyle}>
@@ -580,6 +582,8 @@ function IframeEmbedComponent({
         aria-busy={resolving || loadedSrc !== payload.src || undefined}
         style={{ width: localWidth, maxWidth: "100%" }}
         onClick={isEditorEditable ? selectNode : undefined}
+        onPointerDown={drag.onPointerDown}
+        onDragStart={drag.onDragStart}
       >
         {resolving ? (
           <div
@@ -615,6 +619,8 @@ function IframeEmbedComponent({
         />
         )}
 
+        <EmbedOpenLink url={toPageUrl(payload.src)} />
+        {isEditorEditable ? <BlockDragGrip onPointerDown={drag.onGripPointerDown} /> : null}
         <button
           type="button"
           className="luthor-media-embed-resize-handle-width"

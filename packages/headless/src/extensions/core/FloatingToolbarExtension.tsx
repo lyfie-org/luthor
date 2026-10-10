@@ -355,11 +355,13 @@ function FloatingToolbarPlugin<TCommands = any, TStates = any>({
       | {
           isIframeEmbedSelected?: boolean;
           isYouTubeEmbedSelected?: boolean;
+          isSavedCardSelected?: boolean;
         }
       | undefined;
     const isEmbedSelection =
       !!activeStates?.isIframeEmbedSelected ||
-      !!activeStates?.isYouTubeEmbedSelected;
+      !!activeStates?.isYouTubeEmbedSelected ||
+      !!activeStates?.isSavedCardSelected;
 
     /* Toolbar dimensions (configurable with defaults) */
     const toolbarWidth = config.toolbarDimensions?.width || (isEmbedSelection ? 132 : 420);

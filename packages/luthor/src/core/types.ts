@@ -274,6 +274,13 @@ export interface CoreEditorCommands {
   getYouTubeEmbedUrl?: () => Promise<string>;
   moveYouTubeEmbed?: (direction: "up" | "down") => void;
   removeYouTubeEmbed?: () => void;
+  setSavedCardAlignment?: (alignment: ImageAlignment) => void;
+  setSavedCardCaption?: (caption: string) => void;
+  getSavedCardCaption?: () => Promise<string>;
+  getSavedCardUrl?: () => Promise<string>;
+  resizeSavedCard?: (width: number | null) => void;
+  moveSavedCard?: (direction: "up" | "down") => void;
+  removeSavedCard?: () => void;
   undo: () => void;
   redo: () => void;
   showCommandPalette: () => void;
@@ -335,6 +342,10 @@ export interface CoreEditorActiveStates {
   isYouTubeEmbedAlignedLeft?: boolean;
   isYouTubeEmbedAlignedCenter?: boolean;
   isYouTubeEmbedAlignedRight?: boolean;
+  isSavedCardSelected?: boolean;
+  isSavedCardAlignedLeft?: boolean;
+  isSavedCardAlignedCenter?: boolean;
+  isSavedCardAlignedRight?: boolean;
   canUndo?: boolean;
   canRedo?: boolean;
 }

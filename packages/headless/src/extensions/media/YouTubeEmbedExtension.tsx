@@ -17,6 +17,8 @@ import {
   removeSelectedNode,
   type MoveDirection,
 } from "./mediaSelection";
+import { toPageUrl } from "./embedProviders";
+import { BlockDragGrip, EmbedOpenLink, useBlockDrag } from "./embedChrome";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   $createNodeSelection,
@@ -685,6 +687,7 @@ function YouTubeEmbedComponent({
 
   const wrapperStyle = useMemo(() => getAlignmentStyles(payload.alignment), [payload.alignment]);
   const showResizeHandles = shouldShowEmbedResizeHandles(isEditorEditable, isSelected, isResizing);
+  const drag = useBlockDrag({ editor, nodeKey, elementRef: shellRef, enabled: isEditorEditable && !isResizing });
   const captionStyle: React.CSSProperties = useMemo(
     () => ({
       fontSize: "0.9em",
@@ -704,6 +707,8 @@ function YouTubeEmbedComponent({
         data-luthor-selection-anchor="true"
         style={{ width: localWidth, maxWidth: "100%" }}
         onClick={isEditorEditable ? selectNode : undefined}
+        onPointerDown={drag.onPointerDown}
+        onDragStart={drag.onDragStart}
       >
         <iframe
           ref={iframeRef}
@@ -726,6 +731,8 @@ function YouTubeEmbedComponent({
           }}
         />
 
+        <EmbedOpenLink url={toPageUrl(payload.src)} />
+        {isEditorEditable ? <BlockDragGrip onPointerDown={drag.onGripPointerDown} /> : null}
         <button
           type="button"
           className="luthor-media-embed-resize-handle-width"

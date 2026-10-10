@@ -30,6 +30,7 @@ import { uploadPreviews } from "../embeds/uploads";
 import { classifyMedia, type MediaAlignment } from "./mediaGrammar";
 import { useIsEditable, useIsNodeSelected } from "./mediaSelection";
 import { usePointerResize } from "./usePointerResize";
+import { BlockDragGrip, useBlockDrag } from "./embedChrome";
 
 /** Everything a media frame needs to draw an attachment. */
 export interface MediaFrameProps {
@@ -218,6 +219,9 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
     onCommit: (w) =>
       edit({ width: w, height: positive(width) && positive(height) ? Math.round((w * height!) / width!) : null }),
   });
+
+  // Press-and-drag (or its grip) moves the attachment to another place.
+  const drag = useBlockDrag({ editor, nodeKey, elementRef: frameRef, enabled: interactive && !inline && !resizing });
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -600,8 +604,11 @@ export function MediaFrame(props: MediaFrameProps): ReactNode {
         className={`luthor-media__frame${loading ? " is-loading" : ""}${loading && !ratio ? " is-unsized" : ""}${localPreview ? " has-preview" : ""}`}
         style={frameStyle}
         aria-busy={loading || undefined}
+        onPointerDown={interactive && !inline ? drag.onPointerDown : undefined}
+        onDragStart={interactive && !inline ? drag.onDragStart : undefined}
       >
         {body}
+        {interactive ? <BlockDragGrip onPointerDown={drag.onGripPointerDown} /> : null}
         {handles}
         {toolbar}
       </div>

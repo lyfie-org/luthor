@@ -313,3 +313,66 @@ export function toEmbeddableUrl(input: string): EmbeddableUrl | null {
   }
   return null;
 }
+
+/**
+ * The page behind an embed: what a reader should land on when they choose to
+ * open it — the video's watch page, the place on the map, the song — rather
+ * than the bare player the frame shows. The reverse of {@link toEmbeddableUrl}
+ * for the services it knows; any other URL is returned as it is.
+ */
+export function toPageUrl(input: string): string {
+  const url = parse(input);
+  if (!url) return input;
+  const path = url.pathname;
+  const parts = path.split("/").filter(Boolean);
+  const p = url.searchParams;
+
+  if ((isGoogleHost(url) || /^maps\.google\./i.test(url.hostname)) && p.get("output") === "embed") {
+    p.delete("output");
+    return url.toString();
+  }
+  if (hostIs(url, "openstreetmap.org") && path.startsWith("/export/embed")) {
+    const marker = p.get("marker");
+    const point = marker ? coordinates(...(marker.split(",") as [string, string])) : null;
+    if (point) {
+      const [lat, lng] = point.split(",");
+      return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`;
+    }
+    return "https://www.openstreetmap.org/";
+  }
+  if (hostIs(url, "youtube.com", "youtube-nocookie.com") && parts[0] === "embed" && parts[1]) {
+    const start = p.get("start");
+    return `https://www.youtube.com/watch?v=${parts[1]}${start ? `&t=${start}s` : ""}`;
+  }
+  if (hostIs(url, "open.spotify.com") && parts[0] === "embed") return `https://open.spotify.com/${parts.slice(1).join("/")}`;
+  if (hostIs(url, "player.vimeo.com") && parts[0] === "video" && parts[1]) return `https://vimeo.com/${parts[1]}`;
+  if (hostIs(url, "w.soundcloud.com") && p.get("url")) return p.get("url")!;
+  if (hostIs(url, "loom.com") && parts[0] === "embed" && parts[1]) return `https://www.loom.com/share/${parts[1]}`;
+  if (hostIs(url, "figma.com") && parts[0] === "embed" && p.get("url")) return p.get("url")!;
+  if (hostIs(url, "codepen.io") && parts[1] === "embed" && parts[2]) return `https://codepen.io/${parts[0]}/pen/${parts[2]}`;
+  if (hostIs(url, "codesandbox.io") && parts[0] === "embed" && parts[1]) return `https://codesandbox.io/s/${parts[1]}`;
+  if (hostIs(url, "docs.google.com")) {
+    const m = /^(\/(?:document|spreadsheets|presentation|forms)\/d\/(?:e\/)?[\w-]+)\/(?:preview|embed|pubhtml|viewform)$/.exec(path);
+    if (m) return `https://docs.google.com${m[1]}${path.endsWith("/viewform") ? "/viewform" : ""}`;
+  }
+  if (hostIs(url, "drive.google.com") && parts[0] === "file" && parts[3] === "preview") return `https://drive.google.com/file/d/${parts[2]}/view`;
+  if (hostIs(url, "dailymotion.com") && parts[0] === "embed" && parts[2]) return `https://www.dailymotion.com/video/${parts[2]}`;
+  if (hostIs(url, "player.twitch.tv")) {
+    if (p.get("video")) return `https://www.twitch.tv/videos/${p.get("video")}`;
+    if (p.get("channel")) return `https://www.twitch.tv/${p.get("channel")}`;
+  }
+  if (hostIs(url, "instagram.com") && parts[2] === "embed") return `https://www.instagram.com/${parts[0]}/${parts[1]}/`;
+  if (hostIs(url, "platform.twitter.com") && p.get("id")) return `https://x.com/i/status/${p.get("id")}`;
+  if (hostIs(url, "miro.com") && parts[1] === "live-embed" && parts[2]) return `https://miro.com/app/board/${parts[2]}/`;
+  if (hostIs(url, "canva.com") && p.has("embed")) {
+    p.delete("embed");
+    return url.toString();
+  }
+  return url.toString();
+}
+
+/** `maps.google.com` → `google.com`: the short site name shown on an embed's open link. */
+export function displayHost(input: string): string {
+  const url = parse(input);
+  return url ? url.hostname.replace(/^www\./i, "") : input;
+}

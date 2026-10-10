@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { toEmbeddableUrl } from "./embedProviders";
+import { displayHost, toEmbeddableUrl, toPageUrl } from "./embedProviders";
 
 const src = (input: string) => toEmbeddableUrl(input)?.src ?? null;
 
@@ -114,5 +114,48 @@ describe("toEmbeddableUrl — media and documents", () => {
     expect(toEmbeddableUrl("javascript:alert(1)")).toBeNull();
     expect(toEmbeddableUrl("")).toBeNull();
     expect(toEmbeddableUrl("https://www.youtube.com/@channel")).toBeNull();
+  });
+});
+
+describe("toPageUrl — the page behind an embed", () => {
+  it("opens a map, video or song on its own page, not the bare player", () => {
+    expect(toPageUrl("https://www.google.com/maps?q=Nikkawahama+Beach&ll=26.1,127.6&z=15&output=embed")).toBe(
+      "https://www.google.com/maps?q=Nikkawahama+Beach&ll=26.1%2C127.6&z=15",
+    );
+    expect(toPageUrl("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=42")).toBe(
+      "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s",
+    );
+    expect(toPageUrl("https://open.spotify.com/embed/track/abc123")).toBe("https://open.spotify.com/track/abc123");
+    expect(toPageUrl("https://player.vimeo.com/video/76979871")).toBe("https://vimeo.com/76979871");
+    expect(toPageUrl("https://www.loom.com/embed/abc")).toBe("https://www.loom.com/share/abc");
+    expect(toPageUrl("https://codepen.io/team/embed/xyz?default-tab=result")).toBe("https://codepen.io/team/pen/xyz");
+    expect(toPageUrl("https://docs.google.com/document/d/abc_123/preview")).toBe("https://docs.google.com/document/d/abc_123");
+    expect(toPageUrl("https://drive.google.com/file/d/abc/preview")).toBe("https://drive.google.com/file/d/abc/view");
+    expect(toPageUrl("https://platform.twitter.com/embed/Tweet.html?id=123")).toBe("https://x.com/i/status/123");
+    expect(toPageUrl("https://www.openstreetmap.org/export/embed.html?bbox=1,2,3,4&marker=51.5,-0.1")).toBe(
+      "https://www.openstreetmap.org/?mlat=51.5&mlon=-0.1#map=15/51.5/-0.1",
+    );
+  });
+
+  it("round-trips what toEmbeddableUrl produced for the common services", () => {
+    for (const link of [
+      "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "https://open.spotify.com/album/1DFixLWuPkv3KT3TnV35m3",
+      "https://vimeo.com/76979871",
+      "https://www.loom.com/share/abc",
+    ]) {
+      expect(toPageUrl(src(link)!)).toBe(link);
+    }
+  });
+
+  it("leaves any other page as it is", () => {
+    expect(toPageUrl("https://example.com/a?b=1")).toBe("https://example.com/a?b=1");
+    expect(toPageUrl("")).toBe("");
+    expect(toPageUrl("javascript:alert(1)")).toBe("javascript:alert(1)");
+  });
+
+  it("names the site in short", () => {
+    expect(displayHost("https://www.google.com/maps?q=x")).toBe("google.com");
+    expect(displayHost("https://gemini.google.com/app")).toBe("gemini.google.com");
   });
 });
