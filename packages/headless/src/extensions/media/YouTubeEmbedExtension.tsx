@@ -18,7 +18,7 @@ import {
   type MoveDirection,
 } from "./mediaSelection";
 import { toPageUrl } from "./embedProviders";
-import { BlockDragGrip, EmbedOpenLink, useBlockDrag } from "./embedChrome";
+import { BlockDragGrip, useBlockDrag } from "./embedChrome";
 import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   $createNodeSelection,
@@ -705,6 +705,8 @@ function YouTubeEmbedComponent({
         ref={shellRef}
         className={`luthor-media-embed-shell${isSelected ? " is-selected" : ""}${isResizing ? " is-resizing" : ""}${loadedSrc !== payload.src ? " is-loading" : ""}`}
         data-luthor-selection-anchor="true"
+        // The page this embed shows, for a host's hover preview.
+        data-luthor-embed-url={toPageUrl(payload.src)}
         style={{ width: localWidth, maxWidth: "100%" }}
         onClick={isEditorEditable ? selectNode : undefined}
         onPointerDown={drag.onPointerDown}
@@ -731,7 +733,6 @@ function YouTubeEmbedComponent({
           }}
         />
 
-        <EmbedOpenLink url={toPageUrl(payload.src)} />
         {isEditorEditable ? <BlockDragGrip onPointerDown={drag.onGripPointerDown} /> : null}
         <button
           type="button"

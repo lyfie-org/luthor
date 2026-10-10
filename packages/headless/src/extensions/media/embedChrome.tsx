@@ -24,63 +24,20 @@ import {
   type LexicalNode,
   type NodeKey,
 } from "lexical";
-import { sanitizeUrlForAttribute } from "../../utils/urlSafety";
-import { displayHost } from "./embedProviders";
 
 /*
- * What every block of media shares, whatever it shows: a way out to the page it
- * came from (an "open" link on hover), and a way to move it by dragging it to
- * another place in the document.
+ * What every block of media shares, whatever it shows: a way to move it by
+ * dragging it to another place in the document. (The page an embed shows is
+ * named on its box as `data-luthor-embed-url` — see EMBED_URL_ATTRIBUTE — so a
+ * host can preview or open it on hover.)
  */
-
-// ── Open the page ────────────────────────────────────────────────────────────
 
 /**
- * A small "↗ Visit" link in the corner of an embed, shown on hover (and while
- * it is selected, for touch). A click on the embed itself selects it in an
- * editable document; this is the one-click way to the page instead. It names
- * the site to assistive tech only — no URL tooltip; a host can show its own
- * preview of the link on hover (it is a plain `a[href]`).
+ * The attribute every embed (web page, YouTube, link card) carries on its box:
+ * the page it shows, as a person would open it ({@link toPageUrl}). Hosts read
+ * it to preview the page on hover or offer a way to open it.
  */
-export function EmbedOpenLink({ url, label = "Visit" }: { url: string; label?: string }): ReactNode {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const host = displayHost(url);
-  // Native, not React: the editor's own root listeners see a click inside a
-  // decorator first, and must not select the embed (or move the caret) for it.
-  useEffect(() => {
-    const link = ref.current;
-    if (!link) return;
-    const stop = (event: Event) => event.stopPropagation();
-    link.addEventListener("mousedown", stop);
-    link.addEventListener("pointerdown", stop);
-    link.addEventListener("click", stop);
-    return () => {
-      link.removeEventListener("mousedown", stop);
-      link.removeEventListener("pointerdown", stop);
-      link.removeEventListener("click", stop);
-    };
-  }, []);
-  const href = sanitizeUrlForAttribute(url);
-  if (!href || href === "about:blank") return null;
-  return (
-    <a
-      ref={ref}
-      className="luthor-embed-open"
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      contentEditable={false}
-      draggable={false}
-      aria-label={`Open ${host} in a new tab`}
-    >
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75"
-        strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-        <path d="M9 2.5h4.5V7M13.5 2.5L7.5 8.5M12 9.5v4H2.5V4h4" />
-      </svg>
-      <span className="luthor-embed-open__label">{label}</span>
-    </a>
-  );
-}
+export const EMBED_URL_ATTRIBUTE = "data-luthor-embed-url";
 
 // ── Drag to move ─────────────────────────────────────────────────────────────
 
@@ -111,7 +68,6 @@ const NO_DRAG = [
   ".luthor-media__error",
   ".luthor-media-embed-resize-handle-width",
   ".luthor-media-embed-resize-handle-height",
-  ".luthor-embed-open",
   "[data-luthor-no-drag]",
 ].join(",");
 

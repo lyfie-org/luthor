@@ -12,7 +12,7 @@ import {
   splitCaptionAndSize,
 } from "./mediaGrammar";
 import { toEmbeddableUrl, toPageUrl } from "./embedProviders";
-import { BlockDragGrip, EmbedOpenLink, useBlockDrag } from "./embedChrome";
+import { BlockDragGrip, useBlockDrag } from "./embedChrome";
 import {
   moveSelectedNode,
   registerClickToSelect,
@@ -579,6 +579,8 @@ function IframeEmbedComponent({
         ref={shellRef}
         className={`luthor-media-embed-shell${isSelected ? " is-selected" : ""}${isResizing ? " is-resizing" : ""}${resolving || loadedSrc !== payload.src ? " is-loading" : ""}`}
         data-luthor-selection-anchor="true"
+        // The page this embed shows, for a host's hover preview.
+        data-luthor-embed-url={toPageUrl(payload.src)}
         aria-busy={resolving || loadedSrc !== payload.src || undefined}
         style={{ width: localWidth, maxWidth: "100%" }}
         onClick={isEditorEditable ? selectNode : undefined}
@@ -619,7 +621,6 @@ function IframeEmbedComponent({
         />
         )}
 
-        <EmbedOpenLink url={toPageUrl(payload.src)} />
         {isEditorEditable ? <BlockDragGrip onPointerDown={drag.onGripPointerDown} /> : null}
         <button
           type="button"
