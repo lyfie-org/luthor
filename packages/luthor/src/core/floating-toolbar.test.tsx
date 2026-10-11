@@ -92,7 +92,7 @@ describe("FloatingToolbar media editing", () => {
     expect(setImageCaption).toHaveBeenCalledWith("updated image caption");
   });
 
-  it("commits image caption via update button", async () => {
+  it("commits image caption via its save button", async () => {
     const getImageCaption = vi.fn().mockResolvedValue("existing image caption");
     const setImageCaption = vi.fn();
     const commands = createCommands({ getImageCaption, setImageCaption });
@@ -108,7 +108,7 @@ describe("FloatingToolbar media editing", () => {
 
     const input = await screen.findByLabelText("Image caption");
     fireEvent.change(input, { target: { value: "updated via button" } });
-    fireEvent.click(screen.getByRole("button", { name: "Update Caption" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save caption" }));
 
     expect(setImageCaption).toHaveBeenCalledWith("updated via button");
   });

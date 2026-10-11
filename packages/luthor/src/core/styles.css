@@ -2676,6 +2676,145 @@
 	border-color: #dc2626;
 }
 
+/*
+ * An embed's bar (picture, video, web page, link card): one column — a row of
+ * tools (placement at the start, move/remove at the end) over its fields.
+ */
+.luthor-floating-toolbar--media {
+	flex-direction: column;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	gap: 0;
+	padding: 4px;
+	width: max-content;
+}
+
+.luthor-floating-toolbar--media:has(.luthor-floating-toolbar-fields) {
+	width: 300px;
+}
+
+.luthor-floating-toolbar-tools {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.luthor-floating-toolbar-group {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.luthor-floating-toolbar-group--end {
+	margin-inline-start: auto;
+	padding-inline-start: 12px;
+}
+
+.luthor-floating-toolbar--media .luthor-floating-toolbar-fields {
+	flex: none;
+	min-width: 0;
+	gap: 4px;
+	margin-top: 4px;
+	padding-top: 4px;
+	border-top: 1px solid var(--luthor-floating-border);
+}
+
+/* A field: a quiet mark, the input, a ✓ — one box, like a search field. */
+.luthor-floating-toolbar-field {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	height: 30px;
+	padding: 0 2px 0 8px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background: var(--luthor-floating-muted);
+	transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.luthor-floating-toolbar-field:hover {
+	border-color: var(--luthor-floating-border);
+}
+
+.luthor-floating-toolbar-field:focus-within {
+	border-color: var(--luthor-floating-border-active);
+	background: var(--luthor-floating-bg);
+}
+
+.luthor-floating-toolbar-field.is-error {
+	border-color: #dc2626;
+}
+
+.luthor-floating-toolbar-field-icon {
+	display: inline-flex;
+	flex: none;
+	color: var(--luthor-floating-fg);
+	opacity: 0.55;
+}
+
+.luthor-floating-toolbar-field .luthor-floating-toolbar-input,
+.luthor-floating-toolbar-field .luthor-floating-toolbar-input:focus,
+.luthor-floating-toolbar-field .luthor-floating-toolbar-input.is-error {
+	flex: 1 1 auto;
+	min-width: 0;
+	height: 100%;
+	padding: 0 4px;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+	text-overflow: ellipsis;
+}
+
+.luthor-floating-toolbar-commit {
+	display: inline-grid;
+	place-items: center;
+	flex: none;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 0;
+	border-radius: 5px;
+	background: transparent;
+	color: var(--luthor-floating-fg);
+	opacity: 0.5;
+	cursor: pointer;
+	transition: opacity 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+}
+
+.luthor-floating-toolbar-commit:hover {
+	opacity: 1;
+	background: var(--luthor-floating-bg);
+}
+
+/* Editing: the ✓ is the way out — say so. */
+.luthor-floating-toolbar-field:focus-within .luthor-floating-toolbar-commit {
+	opacity: 1;
+	background: var(--luthor-floating-accent);
+	color: var(--luthor-floating-accent-fg);
+}
+
+.luthor-floating-toolbar-commit:focus-visible {
+	opacity: 1;
+	outline: 2px solid var(--luthor-floating-accent);
+	outline-offset: 1px;
+}
+
+/* Under 16px a phone zooms the page to the field it focuses. */
+@media (pointer: coarse) {
+	.luthor-floating-toolbar-field .luthor-floating-toolbar-input {
+		font-size: 16px;
+	}
+
+	.luthor-floating-toolbar-field {
+		height: 36px;
+	}
+
+	.luthor-floating-toolbar-commit {
+		width: 30px;
+		height: 30px;
+	}
+}
+
 .luthor-link-hover-bubble {
 	gap: 6px;
 	max-width: min(680px, calc(100vw - 20px));

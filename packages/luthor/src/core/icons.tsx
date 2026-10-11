@@ -358,6 +358,8 @@ export const TrashIcon = createIcon("TrashIcon", (
 </>
 ));
 
+export const CheckIcon = createIcon("CheckIcon", <path d="M20 6 9 17l-5-5" />);
+
 export const CloseIcon = createIcon("CloseIcon", (
 <>
   <path d="M18 6 6 18" />

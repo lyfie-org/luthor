@@ -5,7 +5,7 @@
  * Build freely. Credit kindly.
  */
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   AlignCenterIcon,
   AlignLeftIcon,
@@ -13,6 +13,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   BoldIcon,
+  CheckIcon,
   CodeIcon,
   ItalicIcon,
   LinkIcon,
@@ -22,6 +23,7 @@ import {
   QuoteIcon,
   StrikethroughIcon,
   TrashIcon,
+  TypeIcon,
   UnderlineIcon,
   UnlinkIcon,
 } from "./icons";
@@ -99,6 +101,68 @@ export interface FloatingToolbarProps {
   editor?: { getRootElement(): HTMLElement | null };
   /** The text selection, when there is one; `null` for a node selection. */
   selection?: object | null;
+}
+
+/**
+ * A text field on an embed's bar (its link, its caption): a quiet mark for what
+ * it holds, the input, and a small ✓ that saves it — as Enter and leaving the
+ * field do. An icon rather than "Update Caption", so the bar keeps one shape
+ * from a phone to a desktop.
+ */
+function MediaBarField({
+  kind,
+  value,
+  onChange,
+  onCommit,
+  placeholder,
+  label,
+  commitLabel,
+  error,
+}: {
+  kind: "url" | "caption";
+  value: string;
+  onChange: (value: string) => void;
+  onCommit: () => void;
+  placeholder: string;
+  label: string;
+  commitLabel: string;
+  error?: string | null;
+}) {
+  return (
+    <div className={`luthor-floating-toolbar-field${error ? " is-error" : ""}`} data-field={kind}>
+      <span className="luthor-floating-toolbar-field-icon" aria-hidden="true">
+        {kind === "url" ? <LinkIcon size={13} /> : <TypeIcon size={13} />}
+      </span>
+      <input
+        type={kind === "url" ? "url" : "text"}
+        value={value}
+        className={`luthor-floating-toolbar-input${error ? " is-error" : ""}`}
+        placeholder={placeholder}
+        aria-label={label}
+        aria-invalid={error ? true : undefined}
+        title={error ?? undefined}
+        onChange={(event) => onChange(event.target.value)}
+        onBlur={onCommit}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            onCommit();
+          }
+        }}
+      />
+      <button
+        type="button"
+        className="luthor-floating-toolbar-commit"
+        aria-label={commitLabel}
+        title={commitLabel}
+        // Keep the field focused, so the click saves once (not blur + click).
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={onCommit}
+      >
+        <CheckIcon size={14} />
+      </button>
+    </div>
+  );
 }
 
 export function FloatingToolbar({
@@ -366,7 +430,6 @@ export function FloatingToolbar({
   ) =>
     move || remove ? (
       <>
-        <div className="luthor-floating-toolbar-separator" />
         {move ? (
           <>
             <IconButton onClick={() => move("up")} title="Move Up">
@@ -385,6 +448,35 @@ export function FloatingToolbar({
       </>
     ) : null;
 
+  const alignTools = (
+    align: (alignment: "left" | "center" | "right") => void,
+    active: { left?: boolean; center?: boolean; right?: boolean },
+  ) => (
+    <>
+      <IconButton onClick={() => align("left")} active={active.left} title="Align Left">
+        <AlignLeftIcon size={14} />
+      </IconButton>
+      <IconButton onClick={() => align("center")} active={active.center} title="Align Center">
+        <AlignCenterIcon size={14} />
+      </IconButton>
+      <IconButton onClick={() => align("right")} active={active.right} title="Align Right">
+        <AlignRightIcon size={14} />
+      </IconButton>
+    </>
+  );
+
+  // One shape for every embed's bar: a row of tools — placement at the start,
+  // move and remove at the end — over its text fields, full width.
+  const mediaBar = (placement: ReactNode, block: ReactNode, fields: ReactNode) => (
+    <div className="luthor-floating-toolbar luthor-floating-toolbar--media" data-theme={editorTheme} ref={toolbarRef} style={style}>
+      <div className="luthor-floating-toolbar-tools">
+        {placement ? <div className="luthor-floating-toolbar-group">{placement}</div> : null}
+        {block ? <div className="luthor-floating-toolbar-group luthor-floating-toolbar-group--end">{block}</div> : null}
+      </div>
+      {fields ? <div className="luthor-floating-toolbar-fields">{fields}</div> : null}
+    </div>
+  );
+
   // A link card (a page shown by its title, summary and picture): aligned,
   // moved, captioned and removed like any other embed.
   if (savedCardSelected && !embedSelected) {
@@ -393,52 +485,26 @@ export function FloatingToolbar({
       if (canEditCaption) commands.setSavedCardCaption?.(cardCaptionDraft);
     };
     const align = commands.setSavedCardAlignment;
-    return (
-      <div className="luthor-floating-toolbar" data-theme={editorTheme} ref={toolbarRef} style={style}>
-        {align ? (
-          <>
-            <IconButton onClick={() => align("left")} active={activeStates.isSavedCardAlignedLeft} title="Align Left">
-              <AlignLeftIcon size={14} />
-            </IconButton>
-            <IconButton onClick={() => align("center")} active={activeStates.isSavedCardAlignedCenter} title="Align Center">
-              <AlignCenterIcon size={14} />
-            </IconButton>
-            <IconButton onClick={() => align("right")} active={activeStates.isSavedCardAlignedRight} title="Align Right">
-              <AlignRightIcon size={14} />
-            </IconButton>
-          </>
-        ) : null}
-        {blockTools(commands.moveSavedCard, commands.removeSavedCard)}
-        {canEditCaption ? (
-          <>
-            <div className="luthor-floating-toolbar-separator" />
-            <div className="luthor-floating-toolbar-field-row">
-              <input
-                type="text"
-                value={cardCaptionDraft}
-                className="luthor-floating-toolbar-input"
-                placeholder="Add caption"
-                aria-label="Card caption"
-                onChange={(event) => setCardCaptionDraft(event.target.value)}
-                onBlur={commitCardCaption}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    commitCardCaption();
-                  }
-                }}
-              />
-              <button
-                type="button"
-                className="luthor-toolbar-button luthor-floating-toolbar-action"
-                onClick={commitCardCaption}
-              >
-                Update Caption
-              </button>
-            </div>
-          </>
-        ) : null}
-      </div>
+    return mediaBar(
+      align
+        ? alignTools(align, {
+            left: activeStates.isSavedCardAlignedLeft,
+            center: activeStates.isSavedCardAlignedCenter,
+            right: activeStates.isSavedCardAlignedRight,
+          })
+        : null,
+      blockTools(commands.moveSavedCard, commands.removeSavedCard),
+      canEditCaption ? (
+        <MediaBarField
+          kind="caption"
+          value={cardCaptionDraft}
+          onChange={setCardCaptionDraft}
+          onCommit={commitCardCaption}
+          placeholder="Add caption"
+          label="Card caption"
+          commitLabel="Save caption"
+        />
+      ) : null,
     );
   }
 
@@ -518,88 +584,43 @@ export function FloatingToolbar({
       }
       setEmbedUrlError(null);
     };
-    const hasEmbedFields = canEditCaption || canEditEmbedUrl;
-
-    return (
-      <div className="luthor-floating-toolbar" data-theme={editorTheme} ref={toolbarRef} style={style}>
-        <IconButton onClick={() => setAlignment("left")} active={isLeftAligned} title="Align Left">
-          <AlignLeftIcon size={14} />
-        </IconButton>
-        <IconButton onClick={() => setAlignment("center")} active={isCenterAligned} title="Align Center">
-          <AlignCenterIcon size={14} />
-        </IconButton>
-        <IconButton onClick={() => setAlignment("right")} active={isRightAligned} title="Align Right">
-          <AlignRightIcon size={14} />
-        </IconButton>
-        {iframeEmbedSelected
-          ? blockTools(commands.moveIframeEmbed, commands.removeIframeEmbed)
-          : blockTools(commands.moveYouTubeEmbed, commands.removeYouTubeEmbed)}
-        {hasEmbedFields ? (
-          <>
-            <div className="luthor-floating-toolbar-separator" />
-            <div className="luthor-floating-toolbar-fields">
-              {canEditEmbedUrl ? (
-                <div className="luthor-floating-toolbar-field-row">
-                  <input
-                    type="url"
-                    value={urlDraft}
-                    className={`luthor-floating-toolbar-input${urlError ? " is-error" : ""}`}
-                    placeholder={iframeEmbedSelected ? "https://example.com/embed" : "https://youtube.com/watch?v=..."}
-                    aria-label={iframeEmbedSelected ? "Iframe URL" : "YouTube URL"}
-                    aria-invalid={urlError ? true : undefined}
-                    onChange={(event) => {
-                      setEmbedUrlDraft(event.target.value);
-                      if (urlError) {
-                        setEmbedUrlError(null);
-                      }
-                    }}
-                    onBlur={commitEmbedUrl}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        commitEmbedUrl();
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="luthor-toolbar-button luthor-floating-toolbar-action luthor-floating-toolbar-action-primary"
-                    onClick={commitEmbedUrl}
-                  >
-                    Update URL
-                  </button>
-                </div>
-              ) : null}
-              {canEditCaption ? (
-                <div className="luthor-floating-toolbar-field-row">
-                  <input
-                    type="text"
-                    value={captionDraft}
-                    className="luthor-floating-toolbar-input"
-                    placeholder="Add caption"
-                    aria-label={iframeEmbedSelected ? "Iframe caption" : "YouTube caption"}
-                    onChange={(event) => setCaptionDraft(event.target.value)}
-                    onBlur={commitEmbedCaption}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        commitEmbedCaption();
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="luthor-toolbar-button luthor-floating-toolbar-action"
-                    onClick={commitEmbedCaption}
-                  >
-                    Update Caption
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          </>
-        ) : null}
-      </div>
+    return mediaBar(
+      alignTools(setAlignment, { left: isLeftAligned, center: isCenterAligned, right: isRightAligned }),
+      iframeEmbedSelected
+        ? blockTools(commands.moveIframeEmbed, commands.removeIframeEmbed)
+        : blockTools(commands.moveYouTubeEmbed, commands.removeYouTubeEmbed),
+      canEditCaption || canEditEmbedUrl ? (
+        <>
+          {canEditEmbedUrl ? (
+            <MediaBarField
+              kind="url"
+              value={urlDraft}
+              onChange={(value) => {
+                setEmbedUrlDraft(value);
+                if (urlError) {
+                  setEmbedUrlError(null);
+                }
+              }}
+              onCommit={commitEmbedUrl}
+              placeholder={iframeEmbedSelected ? "https://example.com/embed" : "https://youtube.com/watch?v=..."}
+              label={iframeEmbedSelected ? "Iframe URL" : "YouTube URL"}
+              commitLabel="Save link"
+              error={urlError}
+            />
+          ) : null}
+          {canEditCaption ? (
+            <MediaBarField
+              kind="caption"
+              value={captionDraft}
+              onChange={setCaptionDraft}
+              onCommit={commitEmbedCaption}
+              placeholder="Add caption"
+              label={iframeEmbedSelected ? "Iframe caption" : "YouTube caption"}
+              commitLabel="Save caption"
+            />
+          ) : null}
+        </>
+      ) : null,
     );
   }
 
@@ -612,48 +633,24 @@ export function FloatingToolbar({
       commands.setImageCaption(imageCaptionDraft);
     };
 
-    return (
-      <div className="luthor-floating-toolbar" data-theme={editorTheme} ref={toolbarRef} style={style}>
-        <IconButton onClick={() => commands.setImageAlignment("left")} active={activeStates.isImageAlignedLeft} title="Align Left">
-          <AlignLeftIcon size={14} />
-        </IconButton>
-        <IconButton onClick={() => commands.setImageAlignment("center")} active={activeStates.isImageAlignedCenter} title="Align Center">
-          <AlignCenterIcon size={14} />
-        </IconButton>
-        <IconButton onClick={() => commands.setImageAlignment("right")} active={activeStates.isImageAlignedRight} title="Align Right">
-          <AlignRightIcon size={14} />
-        </IconButton>
-        {blockTools(commands.moveImage, commands.removeImage)}
-        {canEditImageCaption ? (
-          <>
-            <div className="luthor-floating-toolbar-separator" />
-            <div className="luthor-floating-toolbar-field-row">
-              <input
-                type="text"
-                value={imageCaptionDraft}
-                className="luthor-floating-toolbar-input"
-                placeholder="Add caption"
-                aria-label="Image caption"
-                onChange={(event) => setImageCaptionDraft(event.target.value)}
-                onBlur={commitImageCaption}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    commitImageCaption();
-                  }
-                }}
-              />
-              <button
-                type="button"
-                className="luthor-toolbar-button luthor-floating-toolbar-action"
-                onClick={commitImageCaption}
-              >
-                Update Caption
-              </button>
-            </div>
-          </>
-        ) : null}
-      </div>
+    return mediaBar(
+      alignTools((alignment) => commands.setImageAlignment(alignment), {
+        left: activeStates.isImageAlignedLeft,
+        center: activeStates.isImageAlignedCenter,
+        right: activeStates.isImageAlignedRight,
+      }),
+      blockTools(commands.moveImage, commands.removeImage),
+      canEditImageCaption ? (
+        <MediaBarField
+          kind="caption"
+          value={imageCaptionDraft}
+          onChange={setImageCaptionDraft}
+          onCommit={commitImageCaption}
+          placeholder="Add caption"
+          label="Image caption"
+          commitLabel="Save caption"
+        />
+      ) : null,
     );
   }
 
