@@ -5,10 +5,11 @@
  * Build freely. Credit kindly.
  */
 
-import { BookOpenText, Coffee, Cube, GithubLogo, Package, PlayCircle, RocketLaunch } from '@phosphor-icons/react/dist/ssr';
+import { BookOpenText, Coffee, Cube, DiscordLogo, GithubLogo, Package, PlayCircle, RocketLaunch } from '@phosphor-icons/react/dist/ssr';
 import Link from 'next/link';
 import {
   DEVTO_ARTICLE_URL,
+  DISCORD_URL,
   GITHUB_URL,
   MAINTAINER_ORG_NAME,
   MAINTAINER_ORG_URL,
@@ -72,6 +73,10 @@ export function SiteFooter() {
             <GithubLogo size={14} weight="duotone" aria-hidden="true" />
             <span>GitHub</span>
           </a>
+          <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer">
+            <DiscordLogo size={14} weight="duotone" aria-hidden="true" />
+            <span>Discord</span>
+          </a>
           <a href={LYFIE_NPM_URL} target="_blank" rel="noopener noreferrer">
             <Package size={14} weight="duotone" aria-hidden="true" />
             <span>luthor @ npm</span>
@@ -91,6 +96,10 @@ export function SiteFooter() {
           <a className="footer-cta footer-cta-secondary" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
             <GithubLogo size={16} weight="duotone" aria-hidden="true" />
             <span>Star on GitHub</span>
+          </a>
+          <a className="footer-cta footer-cta-secondary" href={DISCORD_URL} target="_blank" rel="noopener noreferrer">
+            <DiscordLogo size={16} weight="duotone" aria-hidden="true" />
+            <span>Join the Discord</span>
           </a>
         </section>
       </div>
@@ -112,6 +121,9 @@ export function SiteFooter() {
           </a>
           <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
             GitHub
+          </a>
+          <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer">
+            Discord
           </a>
           <a href="/llms.txt">llms.txt</a>
           <a href="/llms-full.txt">llms-full.txt</a>
