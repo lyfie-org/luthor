@@ -97,7 +97,7 @@ export function SiteFooter() {
 
       <div className="container footer-bottom">
         <p>
-          Built with ❤️ by <a href={MAINTAINER_ORG_URL} target="_blank" rel="noopener noreferrer">{MAINTAINER_ORG_NAME}</a>
+          Built with ❤️ by <a href={MAINTAINER_ORG_URL} target="_blank" rel="noopener noreferrer">{MAINTAINER_ORG_NAME}</a> · Claude is my copilot.
         </p>
         <div className="footer-bottom-links">
           <Link href="/">Home</Link>
