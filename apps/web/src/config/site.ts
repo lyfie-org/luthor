@@ -102,6 +102,8 @@ export const GITHUB_URL = 'https://github.com/lyfie-org/luthor';
 export const LYFIE_NPM_URL = 'https://www.npmjs.com/package/@lyfie/luthor';
 export const LYFIE_HEADLESS_NPM_URL = 'https://www.npmjs.com/package/@lyfie/luthor-headless';
 export const SPONSORS_URL = 'https://github.com/sponsors/lyfie-org';
+/** lyfie.org community Discord: luthor has its own help, ideas and issues channels there. */
+export const DISCORD_URL = 'https://discord.gg/KQNsjGAUUz';
 export const REACT_PLAYGROUND_URL = 'https://stackblitz.com/edit/luthor-playground';
 export const DEVTO_ARTICLE_URL = 'https://dev.to/rahulnsanand/luthor-a-wysiwyg-react-text-editor-for-performance-and-control-1m22';
 export const MEDIUM_ARTICLE_URL = 'https://rahulnsanand.medium.com/luthor-a-wysiwyg-react-text-editor-for-performance-and-control-d585848ca63e';

@@ -13,6 +13,7 @@
 [![NPM - @lyfie/luthor](https://img.shields.io/npm/v/@lyfie/luthor?style=for-the-badge&label=@lyfie/luthor)](https://www.npmjs.com/package/@lyfie/luthor)
 [![NPM - @lyfie/luthor-headless](https://img.shields.io/npm/v/@lyfie/luthor-headless?style=for-the-badge&label=@lyfie/luthor-headless)](https://www.npmjs.com/package/@lyfie/luthor-headless)
 [![Quality Gates](https://img.shields.io/github/actions/workflow/status/lyfie-org/luthor/quality-gates.yml?branch=main&label=QA&style=for-the-badge)](https://github.com/lyfie-org/luthor/actions/workflows/publish-packages.yml)
+[![Discord](https://img.shields.io/badge/Discord-join%20us-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/KQNsjGAUUz)
 
 </div>
 
@@ -114,6 +115,7 @@ pnpm add @lyfie/luthor-headless lexical @lexical/code @lexical/link @lexical/lis
 - Docs home: [luthor.fyi/docs/getting-started](https://www.luthor.fyi/docs/getting-started)
 - Live demo: [luthor.fyi/demo](https://www.luthor.fyi/demo)
 - GitHub: [lyfie-org/luthor](https://github.com/lyfie-org/luthor)
+- Discord: [discord.gg/KQNsjGAUUz](https://discord.gg/KQNsjGAUUz) (help, ideas and release news in the luthor channels)
 - Sponsor: [github.com/sponsors/lyfie-org](https://github.com/sponsors/lyfie-org)
 
 ## :computer: Monorepo Development
@@ -155,6 +157,8 @@ pnpm run web:deploy:wsl
 4. Open a PR with a clear scope and screenshots/GIFs for UI changes.
 
 Issue tracker: [github.com/lyfie-org/luthor/issues](https://github.com/lyfie-org/luthor/issues)
+
+Questions or ideas first? Ask in `#luthor-help` or `#luthor-ideas` on [Discord](https://discord.gg/KQNsjGAUUz).
 
 ## :chart_with_upwards_trend: Community
 
