@@ -34,7 +34,7 @@ const THEME_INIT_SCRIPT = `
     const stored = window.localStorage.getItem('${THEME_STORAGE_KEY}');
     const theme = stored === 'dark' || stored === 'light'
       ? stored
-      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      : (function () { const h = new Date().getHours(); return h >= 18 || h < 6 ? 'dark' : 'light'; })();
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
   } catch {

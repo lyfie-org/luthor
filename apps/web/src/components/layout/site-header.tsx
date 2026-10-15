@@ -21,7 +21,9 @@ function readInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'light';
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
   if (stored === 'dark' || stored === 'light') return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  // No saved choice yet: follow the visitor's local clock (dark 18:00–05:59).
+  const hour = new Date().getHours();
+  return hour >= 18 || hour < 6 ? 'dark' : 'light';
 }
 
 export function SiteHeader() {
