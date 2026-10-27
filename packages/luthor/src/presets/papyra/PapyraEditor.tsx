@@ -27,6 +27,7 @@ import type { ToolbarLayout } from "../../core";
 import type {
   ExtensiveEditorProps,
   ExtensiveEditorRef,
+  ExtensiveSlashCommand,
   ExtensiveToolbarItem,
   FeatureFlagOverrides,
   MentionSuggestionProvider,
@@ -247,7 +248,6 @@ export type PapyraEditorProps = Omit<
   | "markdownImageAlignment"
   | "headingOptions"
   | "slashCommandVisibility"
-  | "extraSlashCommands"
   | "shortcutConfig"
   | "toolbarVisibility"
   | "onReady"
@@ -258,6 +258,22 @@ export type PapyraEditorProps = Omit<
   | "mentionSuggestionLabels"
   | "typeaheadSearchDebounceMs"
 > & {
+  /**
+   * The host's own slash commands, appended after Papyra's curated ones (Link
+   * note, Embed media, Insert date) — "Embed a to-do", "Mood: Good", whatever
+   * the host's page needs. Each writes through the slash context as the
+   * built-ins do. They are not subject to the curated-id allowlist (that only
+   * filters the built-in catalogue). Give each a stable `id`.
+   */
+  extraSlashCommands?: ExtensiveSlashCommand[];
+  /**
+   * Show the drag handle on every block (headings, paragraphs, lists, code,
+   * embeds), so a block can be picked up and moved. Opt-in, default off: a note
+   * is not a layout, and the handle is chrome some hosts don't want. It cannot
+   * be switched on through `featureFlags` — only this prop does — and moving a
+   * block only reorders markdown the editor already round-trips.
+   */
+  draggableBlocks?: boolean;
   onReady?: (methods: PapyraEditorRef) => void;
   /**
    * Fired (debounced) whenever the document outline changes, with the current
@@ -429,6 +445,8 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
       adapter,
       typeahead,
       collaboration,
+      extraSlashCommands: hostSlashCommands,
+      draggableBlocks = false,
       onReady,
       onOutlineChange,
       ...props
@@ -548,8 +566,10 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     // writes the retained selection back to the DOM — pulling focus into the
     // body while the host's title field was being typed in.
     const resolvedFeatureFlags = useMemo<FeatureFlagOverrides>(
-      () => papyraFeaturePolicy.resolve(featureFlags),
-      [featureFlags],
+      // The enforced set switches draggable blocks off whatever a caller flag says; only the
+      // dedicated opt-in prop turns them on, so a stray `featureFlags` can't.
+      () => ({ ...papyraFeaturePolicy.resolve(featureFlags), draggableBlock: draggableBlocks }),
+      [featureFlags, draggableBlocks],
     );
 
     const {
@@ -579,8 +599,8 @@ export const PapyraEditor = forwardRef<PapyraEditorRef, PapyraEditorProps>(
     // Insert date), bound to the active adapter. Appended to the built-in
     // catalogue through the extensive editor's extraSlashCommands seam.
     const slashCommands = useMemo(
-      () => createPapyraSlashCommands(resolvedAdapter),
-      [resolvedAdapter],
+      () => [...createPapyraSlashCommands(resolvedAdapter), ...(hostSlashCommands ?? [])],
+      [resolvedAdapter, hostSlashCommands],
     );
 
     // The persistent toolbar's Papyra inserts. Mention and attach only appear

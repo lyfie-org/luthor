@@ -118,3 +118,32 @@ describe("PapyraEditor save → reopen keeps what was typed", () => {
     });
   }
 });
+
+describe("PapyraEditor draggableBlocks (real editor)", () => {
+  async function mountWith(props: { draggableBlocks?: boolean }) {
+    let handle: PapyraEditorRef | null = null;
+    const { container } = render(
+      <PapyraEditor defaultEditorView="visual" {...props} onReady={(m) => { handle = m; }} />,
+    );
+    await waitFor(() => expect(handle).not.toBeNull());
+    return { container, handle: handle as unknown as PapyraEditorRef };
+  }
+
+  it("has no drag handle by default", async () => {
+    const { container } = await mountWith({});
+    expect(container.querySelector(".luthor-editor")).toHaveClass("luthor-editor--draggable-disabled");
+  });
+
+  it("turns the drag handle on when the host opts in — and the body still round-trips", async () => {
+    const { container, handle } = await mountWith({ draggableBlocks: true });
+    await waitFor(() => expect(container.querySelector(".luthor-editor")).not.toHaveClass("luthor-editor--draggable-disabled"));
+    const doc = ["# Heading", "", "- [ ] a todo", "- [x] done", "", "Paragraph with [[Garden log]].", "", "```js", "const x = 1;", "```"].join("\n");
+    handle.setMarkdown(doc);
+    const md = handle.getMarkdown();
+    expect(md).not.toContain("Unsupported");
+    expect(md).toContain("# Heading");
+    expect(md).toContain("- [ ] a todo");
+    expect(md).toContain("[[Garden log]]");
+    expect(md).toContain("const x = 1;");
+  });
+});

@@ -48,7 +48,7 @@ function TransclusionComponent({
   note: string;
   blockId: string;
 }): ReactNode {
-  const { resolveBlock } = useEmbedResolvers();
+  const { resolveBlock, renderBlock } = useEmbedResolvers();
   const [content, setContent] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
@@ -72,6 +72,24 @@ function TransclusionComponent({
   }, [resolveBlock, note, blockId]);
 
   const ref = `${note}#^${blockId}`;
+
+  // A host that draws this block itself (an interactive checklist, a notice).
+  const custom = renderBlock?.({
+    note,
+    blockId,
+    status: content === undefined ? "loading" : content === null ? "unresolved" : "resolved",
+    content: content ?? null,
+  });
+  if (custom !== null && custom !== undefined && custom !== false) {
+    return (
+      <div
+        className="luthor-transclusion luthor-transclusion--custom"
+        data-luthor-transclusion-ref={ref}
+      >
+        {custom}
+      </div>
+    );
+  }
 
   if (content === undefined) {
     return (

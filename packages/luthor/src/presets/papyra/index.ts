@@ -57,6 +57,7 @@ export {
   type PapyraNoteSearchResult,
   type PapyraUserSuggestion,
   type PapyraBlockRef,
+  type PapyraBlockRenderContext,
   type PapyraSavedCard,
 } from "./adapter";
 export {

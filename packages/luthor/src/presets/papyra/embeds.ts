@@ -303,6 +303,9 @@ export function createPapyraEmbedResolvers(
     resolveBlock: adapter.resolveBlock
       ? (note, blockId) => adapter.resolveBlock!({ note, blockId })
       : undefined,
+    renderBlock: adapter.renderBlock
+      ? (context) => adapter.renderBlock!(context)
+      : undefined,
     resolveCard: adapter.resolveCard
       ? (url) => adapter.resolveCard!(url)
       : undefined,

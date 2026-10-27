@@ -27,6 +27,8 @@ props:
   - "onOutlineChange"
   - "featureFlags"
   - "collaboration"
+  - "draggableBlocks"
+  - "extraSlashCommands"
 exports:
   - "PapyraEditor"
   - "papyraPreset"
@@ -107,7 +109,8 @@ round-trip back to that file.
 - `featureFlags` are routed through `papyraFeaturePolicy`, whose **enforced** set
   keeps markdown-breaking features off — font/size/line-height pickers, arbitrary
   text color and highlight, sub/superscript, the in-editor theme toggle, and
-  draggable blocks **cannot be switched back on** by a caller flag.
+  draggable blocks **cannot be switched back on** by a caller flag. (Draggable
+  blocks have their own opt-in, the `draggableBlocks` prop.)
 
 ## Preset props
 
@@ -162,6 +165,13 @@ round-trip back to that file.
   behind it moves it back to the end. That is what keeps a block's id stable
   when you type at the end of an anchored line — an id is an address, and
   `![[Note#^id]]` references to it must not change under the writer.
+- `draggableBlocks`: show the drag handle on every block so it can be picked up
+  and moved (default `false`). Only this prop turns it on — a `featureFlags`
+  entry can't — and moving a block just reorders markdown the editor already
+  round-trips.
+- `extraSlashCommands`: the host's own slash commands, appended after Papyra's
+  three (see [Command surface](#command-surface)). They are not subject to the
+  curated-id allowlist, which only filters the built-in catalogue.
 - `onChange`: first-class change notification (see
   [Change notification and autosave](#change-notification-and-autosave)).
 - `onDesync`: opt-in model/DOM divergence watchdog (see
@@ -293,6 +303,8 @@ interface PapyraEditorAdapter {
   searchNotes(q: string): Promise<Array<{ id: string; title: string; color?: string }>>;
   searchUsers?(q: string): Promise<Array<{ username: string; name: string }>>;
   resolveBlock?(ref: { note: string; blockId: string }): Promise<string | null>;
+  // draw a transcluded block your own way (a live checklist, an "unavailable" card); null keeps the default
+  renderBlock?(ctx: { note: string; blockId: string; status: "loading" | "resolved" | "unresolved"; content: string | null }): ReactNode;
   resolveCard?(url: string): Promise<{
     title?: string;
     description?: string;

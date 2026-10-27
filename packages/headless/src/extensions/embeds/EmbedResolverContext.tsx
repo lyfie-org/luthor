@@ -157,6 +157,21 @@ export interface MediaToolbarItem {
 }
 
 /**
+ * What a host sees of a transcluded block (`![[Note#^blockId]]`) when it draws
+ * the block itself (see {@link EmbedResolvers.renderBlock}).
+ */
+export interface BlockRenderContext {
+  /** The target note, as written before `#^`. */
+  note: string;
+  /** The block id, as written after `#^`. */
+  blockId: string;
+  /** `loading` while the host resolves it, then `resolved` or `unresolved` (missing, or denied). */
+  status: "loading" | "resolved" | "unresolved";
+  /** What {@link EmbedResolvers.resolveBlock} returned; `null` until resolved and when unresolved. */
+  content: string | null;
+}
+
+/**
  * Callbacks an embed node uses to reach host services. Every member is optional
  * so the nodes degrade gracefully when a host wires only part of the surface (or
  * none of it). A preset adapts its own richer adapter onto this small contract.
@@ -211,6 +226,14 @@ export interface EmbedResolvers {
    * When omitted, transclusion embeds render an unresolved chip.
    */
   resolveBlock?: (note: string, blockId: string) => Promise<string | null>;
+  /**
+   * Draw a transcluded block the host's own way — an interactive checklist, a
+   * card, a "not available" notice — in place of the default text. Called on
+   * every render of the embed with its current state; return `null` (or
+   * `undefined`) to keep the default rendering for that block. The embed's
+   * markdown (`![[Note#^blockId]]`) is unaffected either way.
+   */
+  renderBlock?: (context: BlockRenderContext) => ReactNode;
   /**
    * Resolve a saved web card (`![[card:url]]`) to its archived metadata, or
    * `null` when the host has none. When omitted, the card renders as a bare link
