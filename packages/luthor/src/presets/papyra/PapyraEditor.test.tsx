@@ -9,6 +9,7 @@ import { createRef, useEffect, useRef } from "react";
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExtensiveEditorProps, ExtensiveEditorRef } from "../extensive";
+import { PAPYRA_SLASH_COMMAND_VISIBILITY } from "./commands";
 
 const { extensiveEditorMock } = vi.hoisted(() => ({
   extensiveEditorMock: vi.fn<(props: Record<string, unknown>) => React.ReactNode>(() => null),
@@ -294,6 +295,35 @@ describe("PapyraEditor", () => {
     expect(flags?.draggableBlock).toBe(false);
     expect(flags?.subscript).toBe(false);
     expect(flags?.table).toBe(false);
+  });
+
+  it("keeps blocks undraggable unless the host opts in with draggableBlocks — and only that prop does", () => {
+    render(<PapyraEditor showDefaultContent={false} />);
+    expect(lastProps().featureFlags?.draggableBlock).toBe(false);
+
+    render(<PapyraEditor showDefaultContent={false} draggableBlocks />);
+    expect(lastProps().featureFlags?.draggableBlock).toBe(true);
+
+    // The opt-in doesn't loosen anything else that is enforced.
+    expect(lastProps().featureFlags?.fontFamily).toBe(false);
+    expect(lastProps().featureFlags?.themeToggle).toBe(false);
+  });
+
+  it("appends a host's own slash commands after Papyra's, and keeps the curated allowlist for built-ins", () => {
+    const action = vi.fn();
+    render(
+      <PapyraEditor
+        showDefaultContent={false}
+        extraSlashCommands={[
+          { id: "journal.mood-4", label: "Mood: Good", description: "How the day felt", category: "Journal", keywords: ["mood"], action },
+        ]}
+      />,
+    );
+    const ids = (lastProps().extraSlashCommands ?? []).map((c) => c.id);
+    expect(ids).toEqual(["papyra.link-note", "papyra.embed-media", "papyra.insert-date", "journal.mood-4"]);
+    // The allowlist still describes the built-in catalogue only: the host's command isn't added to it.
+    expect(lastProps().slashCommandVisibility).toEqual(PAPYRA_SLASH_COMMAND_VISIBILITY);
+    expect(JSON.stringify(lastProps().slashCommandVisibility)).not.toContain("journal.mood-4");
   });
 
   it("passes the papyra preset identity so the editable surface gets papyra classes", () => {

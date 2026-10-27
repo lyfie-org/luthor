@@ -78,6 +78,14 @@ export interface PapyraBlockRef {
   blockId: string;
 }
 
+/** A transcluded block as the host sees it while drawing it (see {@link PapyraEditorAdapter.renderBlock}). */
+export interface PapyraBlockRenderContext extends PapyraBlockRef {
+  /** `loading` while resolving, then `resolved` or `unresolved` (missing, or denied). */
+  status: "loading" | "resolved" | "unresolved";
+  /** What `resolveBlock` returned; `null` until resolved and when unresolved. */
+  content: string | null;
+}
+
 /**
  * Archived metadata for a saved web card (`![[card:url]]`). The host returns
  * whatever it captured when it archived the page; every field is optional and
@@ -182,6 +190,13 @@ export interface PapyraEditorAdapter {
    * unresolved chip.
    */
   resolveBlock?(ref: PapyraBlockRef): Promise<string | null>;
+  /**
+   * Draw a transcluded block the host's own way — an interactive checklist, a
+   * card, an "unavailable" notice — in place of the default text. Called on every
+   * render of the embed with its current state; return `null` to keep the
+   * default for that block. Optional; the `![[Note#^id]]` markdown is unchanged.
+   */
+  renderBlock?(context: PapyraBlockRenderContext): ReactNode;
   /**
    * Resolve a saved web card (`![[card:url]]`) to its archived metadata, or
    * `null` when the host has no record. Optional: hosts without a web archiver

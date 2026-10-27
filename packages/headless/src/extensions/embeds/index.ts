@@ -9,6 +9,7 @@ export {
   EmbedResolverContext,
   EmbedResolverProvider,
   useEmbedResolvers,
+  type BlockRenderContext,
   type EmbedResolvers,
   type SavedCardMetadata,
   type MediaMeta,
