@@ -21,6 +21,7 @@
 
 import { render, waitFor } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import { $getRoot } from "lexical";
 
 vi.hoisted(() => {
   const win = globalThis as {
@@ -176,6 +177,17 @@ describe("PapyraEditor pasted markdown", () => {
     expect(container.querySelectorAll("li")).toHaveLength(2);
     expect(container.querySelector("li strong")?.textContent).toBe("two");
     expect(handle.getMarkdown()).toContain("[[Garden log]]");
+  });
+
+  it("puts a pasted heading on its own line after existing text", async () => {
+    const { container, handle } = await mountEmpty();
+    handle.setMarkdown("Hello");
+    const editor = handle.getLexicalEditor();
+    editor?.update(() => {
+      $getRoot().selectEnd();
+    }, { discrete: true });
+    await pasteInto(container, "## Title");
+    expect(handle.getMarkdown().trim()).toBe("Hello\n\n## Title");
   });
 
   it("leaves formatted web content to the editor", async () => {
