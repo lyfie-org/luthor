@@ -242,6 +242,56 @@ describe("MarkdownPasteExtension", () => {
   });
 });
 
+describe("MarkdownPasteExtension: blocks pasted into existing text", () => {
+  function mountWithText(text: string, caret: number) {
+    const mounted = mount();
+    mounted.editor.update(
+      () => {
+        const paragraph = $createParagraphNode();
+        const node = $createTextNode(text);
+        paragraph.append(node);
+        $getRoot().clear().append(paragraph);
+        node.select(caret, caret);
+      },
+      { discrete: true },
+    );
+    return mounted;
+  }
+
+  it("puts a heading after the paragraph when pasted at its end", () => {
+    const { editor, cleanup } = mountWithText("Hello", 5);
+    paste(editor, { text: "## Title" });
+    expect(outline(editor)).toEqual(["paragraph|Hello", "heading:h2|Title"]);
+    cleanup();
+  });
+
+  it("splits the paragraph when pasted in the middle", () => {
+    const { editor, cleanup } = mountWithText("Hello", 2);
+    paste(editor, { text: "## Title" });
+    expect(outline(editor)).toEqual(["paragraph|He", "heading:h2|Title", "paragraph|llo"]);
+    cleanup();
+  });
+
+  it("puts a heading before the paragraph when pasted at its start", () => {
+    const { editor, cleanup } = mountWithText("Hello", 0);
+    paste(editor, { text: "## Title" });
+    expect(outline(editor)).toEqual(["heading:h2|Title", "paragraph|Hello"]);
+    cleanup();
+  });
+
+  it("keeps several pasted blocks in order", () => {
+    const { editor, cleanup } = mountWithText("Hello", 5);
+    paste(editor, { text: "## Title\n\n> quote\n\n- a\n- b" });
+    expect(outline(editor).map((line) => line.split("|")[0])).toEqual([
+      "paragraph",
+      "heading:h2",
+      "quote",
+      "list:ul",
+    ]);
+    cleanup();
+  });
+});
+
 describe("pasted text and the link extension", () => {
   it("links a lone address, but never a heading, a tag or a sentence", () => {
     const { editor, cleanup } = mount();

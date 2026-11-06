@@ -7,14 +7,22 @@
 
 import {
   $getSelection,
+  $isElementNode,
+  $isParagraphNode,
   $isRangeSelection,
+  $isRootNode,
   $parseSerializedNode,
   COMMAND_PRIORITY_NORMAL,
   PASTE_COMMAND,
+  type ElementNode,
   type LexicalEditor,
+  type LexicalNode,
+  type RangeSelection,
   type SerializedLexicalNode,
 } from "lexical";
 import { $isCodeNode } from "@lexical/code";
+import { $isHeadingNode } from "@lexical/rich-text";
+import { $findMatchingParent } from "@lexical/utils";
 import { $findCellNode } from "@lexical/table";
 import { markdownToJSON, type MarkdownBridgeOptions } from "../../core/markdown";
 import { BaseExtension } from "../base/BaseExtension";
@@ -165,8 +173,8 @@ export class MarkdownPasteExtension extends BaseExtension<
       return false;
     }
 
-    const nodes = this.convert(text);
-    if (!nodes || nodes.length === 0) {
+    const converted = this.convert(text);
+    if (!converted || converted.nodes.length === 0) {
       return false;
     }
 
@@ -186,7 +194,12 @@ export class MarkdownPasteExtension extends BaseExtension<
     ) {
       return false;
     }
-    selection.insertNodes(nodes.map((node) => $parseSerializedNode(node)));
+    const nodes = converted.nodes.map((node) => $parseSerializedNode(node));
+    if (converted.inline) {
+      selection.insertNodes(nodes);
+    } else {
+      $insertBlocks(selection, nodes);
+    }
 
     (event as ClipboardEvent).preventDefault();
     return true;
@@ -197,7 +210,9 @@ export class MarkdownPasteExtension extends BaseExtension<
    * paragraph is inserted as its inline content so a pasted `**word**` joins the
    * sentence being written instead of splitting it into a new block.
    */
-  private convert(markdown: string): SerializedLexicalNode[] | null {
+  private convert(
+    markdown: string,
+  ): { nodes: SerializedLexicalNode[]; inline: boolean } | null {
     try {
       const document = markdownToJSON(markdown, {
         metadataMode: "none",
@@ -206,12 +221,84 @@ export class MarkdownPasteExtension extends BaseExtension<
       const blocks = (document.root.children ?? []) as SerializedLexicalNode[];
       const only = blocks.length === 1 ? (blocks[0] as unknown as { type: string; children?: SerializedLexicalNode[] }) : null;
       if (only && only.type === "paragraph" && Array.isArray(only.children)) {
-        return only.children;
+        return { nodes: only.children, inline: true };
       }
-      return blocks;
+      return { nodes: blocks, inline: false };
     } catch {
       return null;
     }
+  }
+}
+
+/** The top-level paragraph or heading the caret is in, or null in any other container. */
+function $plainBlockAt(selection: RangeSelection): ElementNode | null {
+  const block = $findMatchingParent(
+    selection.anchor.getNode(),
+    (node): node is ElementNode => $isElementNode(node) && !node.isInline(),
+  );
+  if (
+    block &&
+    ($isParagraphNode(block) || $isHeadingNode(block)) &&
+    $isRootNode(block.getParent())
+  ) {
+    return block;
+  }
+  return null;
+}
+
+function $isAtBlockStart(selection: RangeSelection, block: ElementNode): boolean {
+  const { anchor } = selection;
+  const node = anchor.getNode();
+  if (anchor.offset !== 0) {
+    return false;
+  }
+  return anchor.type === "element" ? node.is(block) : block.getFirstDescendant()?.is(node) === true;
+}
+
+/**
+ * Insert whole blocks (headings, lists, quotes…) at a collapsed caret so each
+ * lands as its own block. Dropped straight into text, Lexical folds the first
+ * block into the paragraph being written, which would leave a pasted `## Title`
+ * glued to the words before it. The caret ends up after the pasted content.
+ */
+function $insertBlocks(selection: RangeSelection, nodes: LexicalNode[]): void {
+  if (!selection.isCollapsed()) {
+    selection.removeText();
+  }
+  let block = $plainBlockAt(selection);
+  if (!block) {
+    // A list item, a quote… let the editor place it the way it places any paste.
+    selection.insertNodes(nodes);
+    return;
+  }
+
+  const insertBefore = (target: ElementNode): void => {
+    for (const node of nodes) {
+      target.insertBefore(node);
+    }
+  };
+
+  if (block.getTextContentSize() === 0) {
+    selection.insertNodes(nodes);
+    return;
+  }
+  if ($isAtBlockStart(selection, block)) {
+    insertBefore(block);
+    return;
+  }
+
+  // At the end this opens an empty block after; in the middle it splits the text
+  // and leaves the caret at the start of the tail.
+  selection.insertParagraph();
+  block = $plainBlockAt(selection);
+  if (!block) {
+    selection.insertNodes(nodes);
+    return;
+  }
+  if (block.getTextContentSize() === 0) {
+    selection.insertNodes(nodes);
+  } else {
+    insertBefore(block);
   }
 }
 
