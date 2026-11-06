@@ -309,6 +309,13 @@ export {
   tabIndentExtension,
 } from "./core/TabIndentExtension";
 export {
+  MarkdownPasteExtension,
+  markdownPasteExtension,
+  looksLikeMarkdown,
+  hasSemanticHtml,
+  type MarkdownPasteConfig,
+} from "./core/MarkdownPasteExtension";
+export {
   EmojiExtension,
   emojiExtension,
   LIGHTWEIGHT_EMOJI_CATALOG,

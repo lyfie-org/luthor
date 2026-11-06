@@ -20,7 +20,7 @@
  */
 
 import { render, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.hoisted(() => {
   const win = globalThis as {
@@ -117,6 +117,74 @@ describe("PapyraEditor save → reopen keeps what was typed", () => {
       expect(handle.getMarkdown()).toBe(saved);
     });
   }
+});
+
+/*
+ * Pasting markdown formats it as if it had been typed: `## Text` arrives as a
+ * heading, not as the literal characters. Through the real preset, so the
+ * extension is proven to be wired in and to read the preset's own syntax.
+ */
+describe("PapyraEditor pasted markdown", () => {
+  // jsdom has no layout; Lexical measures the caret after a paste to scroll it into view.
+  beforeAll(() => {
+    const rect = () => ({ top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) });
+    const targets = [Range.prototype, Text.prototype] as { getBoundingClientRect?: () => unknown }[];
+    for (const target of targets) {
+      if (!target.getBoundingClientRect) target.getBoundingClientRect = rect;
+    }
+  });
+
+  async function pasteInto(container: HTMLElement, text: string, html = "") {
+    const root = container.querySelector<HTMLElement>("[contenteditable='true']");
+    expect(root).not.toBeNull();
+    const event = new Event("paste", { bubbles: true, cancelable: true });
+    const data: Record<string, string> = { "text/plain": text, "text/html": html };
+    Object.defineProperty(event, "clipboardData", {
+      value: {
+        types: Object.keys(data).filter((type) => data[type]),
+        files: [],
+        getData: (type: string) => data[type] ?? "",
+      },
+    });
+    root!.dispatchEvent(event);
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    return event;
+  }
+
+  async function mountEmpty() {
+    let handle: PapyraEditorRef | null = null;
+    const { container } = render(
+      <PapyraEditor defaultEditorView="visual" onReady={(m) => { handle = m; }} />,
+    );
+    await waitFor(() => expect(handle).not.toBeNull());
+    const editor = (handle as unknown as PapyraEditorRef).getLexicalEditor();
+    editor?.focus();
+    return { container, handle: handle as unknown as PapyraEditorRef };
+  }
+
+  it("turns a pasted ## heading into a heading", async () => {
+    const { container, handle } = await mountEmpty();
+    const event = await pasteInto(container, "## Text");
+    expect(event.defaultPrevented).toBe(true);
+    expect(handle.getMarkdown().trim()).toBe("## Text");
+    expect(container.querySelector("h2")?.textContent).toBe("Text");
+  });
+
+  it("formats lists, bold and the preset's own [[wikilinks]]", async () => {
+    const { container, handle } = await mountEmpty();
+    await pasteInto(container, "- one\n- **two** and [[Garden log]]");
+    expect(container.querySelectorAll("li")).toHaveLength(2);
+    expect(container.querySelector("li strong")?.textContent).toBe("two");
+    expect(handle.getMarkdown()).toContain("[[Garden log]]");
+  });
+
+  it("leaves formatted web content to the editor", async () => {
+    // The clipboard's own formatting wins over markdown-looking plain text.
+    const rich = await mountEmpty();
+    await pasteInto(rich.container, "## Plain", "<h3>Rich</h3>");
+    expect(rich.container.querySelector("h2")).toBeNull();
+    expect(rich.handle.getMarkdown()).not.toContain("## Plain");
+  });
 });
 
 describe("PapyraEditor draggableBlocks (real editor)", () => {
