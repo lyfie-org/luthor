@@ -52,6 +52,7 @@ import {
   YOUTUBE_EMBED_MARKDOWN_TRANSFORMER,
   FileDropUploadExtension,
   IframeEmbedExtension,
+  MarkdownPasteExtension,
   $createSavedCardNode,
   MentionTypeaheadExtension,
   WikilinkTypeaheadExtension,
@@ -100,6 +101,12 @@ export interface PapyraEmbedExtensionOptions {
    * registered at all. See {@link PapyraTypeaheadConfig}.
    */
   typeahead?: PapyraTypeaheadConfig;
+  /**
+   * Format pasted markdown as if it had been typed (a pasted `## Title` becomes
+   * a heading). On by default; `false` leaves every paste to the editor's own
+   * handling.
+   */
+  markdownPaste?: boolean;
   /**
    * The adapter to use *at the moment of an upload*. The editor builds its
    * extensions once; reading the adapter through this getter keeps uploads on
@@ -187,6 +194,14 @@ export function buildPapyraEmbedExtensions(
     }
 
     extensions.push(extension);
+  }
+
+  if (options?.markdownPaste !== false) {
+    extensions.push(
+      new MarkdownPasteExtension({
+        bridge: { extraNodes: PAPYRA_EMBED_NODES, extraTransformers: PAPYRA_EMBED_TRANSFORMERS },
+      }),
+    );
   }
 
   if (!adapter) {

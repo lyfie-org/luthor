@@ -176,5 +176,6 @@ apps/web/.vscode
 tmp-*
 .blogs/Pub*
 .blogs/Readme*
+.blogs/
 apps/web/docs-rewrite-qa-report.md
 CLAUDE.md

@@ -211,6 +211,12 @@ export class LinkExtension extends BaseExtension<
         const pastedText = clipboardData.getData("text/plain");
         if (!pastedText) return false;
 
+        // Only a lone address is a link to make. Text with spaces is a sentence
+        // or markdown (`## Title`), and a bare `#...` is a heading or a tag, not
+        // a page anchor — all of them are the paste handlers' to deal with.
+        const candidate = pastedText.trim();
+        if (/\s/.test(candidate) || candidate.startsWith("#")) return false;
+
         // Check if pasted text is a valid URL
         if (this.config.validateUrl!(pastedText)) {
           // If autoLinkUrls is false, don't handle the paste
